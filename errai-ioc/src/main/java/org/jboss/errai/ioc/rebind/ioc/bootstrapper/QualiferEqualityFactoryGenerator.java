@@ -18,7 +18,6 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.util.Arith;
@@ -160,11 +159,10 @@ public class QualiferEqualityFactoryGenerator extends Generator {
                     .finish()).finish();
 
 
-    String out = builder.toJavaString();
+    printWriter.append(builder.toJavaString());
 
-    System.out.println(out);
 
-    printWriter.append(out);
+
     generatorContext.commit(logger, printWriter);
   }
 

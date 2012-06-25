@@ -16,9 +16,15 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 
+import javax.enterprise.util.TypeLiteral;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -31,15 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.util.TypeLiteral;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private Annotation[] _annotationsCache;
@@ -377,6 +376,16 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public boolean isStatic() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.STATIC) != 0;
+  }
+
+  @Override
+  public boolean isSynthetic() {
+    return getEnclosedMetaObject().isSynthetic();
+  }
+
+  @Override
+  public boolean isAnonymousClass() {
+    return getEnclosedMetaObject().isAnonymousClass();
   }
 
   private final Map<Integer, MetaClass> _arrayTypeCache = new HashMap<Integer, MetaClass>();

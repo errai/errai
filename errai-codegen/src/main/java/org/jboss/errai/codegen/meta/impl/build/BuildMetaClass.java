@@ -328,6 +328,16 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   @Override
+  public boolean isSynthetic() {
+    return false;
+  }
+
+  @Override
+  public boolean isAnonymousClass() {
+    return false;
+  }
+
+  @Override
   public Annotation[] getAnnotations() {
     return annotations.toArray(new Annotation[annotations.size()]);
   }

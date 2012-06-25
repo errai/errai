@@ -29,18 +29,18 @@ public class InvalidProducerIntegrationTest {
   @Test
   public void testInvalidProducerWithMissingQualifier() throws InstantiationException, IllegalAccessException {
     try {
-      Set<String> packages = new HashSet<String>();
+      final Set<String> packages = new HashSet<String>();
       packages.add("org.jboss.errai.cdi.invalid.producer");
       packages.add("org.jboss.errai.cdi.invalid.producer.client");
 
-      MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
+      final MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
       mockIOCGenerator.generate().newInstance().bootstrapContainer();
       fail("Expected an UnsatisfiedDependenciesException");
     }
     catch (UnsatisfiedDependenciesException e) {
       assertEquals("Expected to find excatly 1 unsatisfied dependency", 1, e.getUnsatisfiedDependencies().size());
 
-      UnsatisfiedDependency dependency = e.getUnsatisfiedDependencies().get(0);
+      final UnsatisfiedDependency dependency = e.getUnsatisfiedDependencies().get(0);
       assertTrue("Should be an unsatisfied field", dependency instanceof UnsatisfiedField);
       assertEquals("Wrong field name", ((UnsatisfiedField) dependency).getField().getName(), "abInteger");
       assertEquals("Wrong enclosing type", dependency.getEnclosingType().getName(), "InvalidProducerDependentTestBean");

@@ -51,13 +51,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public final class MetaClassFactory {
-  private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
-  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
+  private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
+  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
   static {
     DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
       @Override

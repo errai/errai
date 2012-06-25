@@ -22,11 +22,9 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.util.ClassScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.EnvUtil;
 
-import javax.enterprise.context.ApplicationScoped;
 import java.io.PrintWriter;
 
 /**
@@ -61,10 +59,6 @@ public class IOCGenerator extends Generator {
 
       GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
 
-      ClassScanner.getTypesAnnotatedWith(ApplicationScoped.class);
-
-
-
       // Generate class source code
       generateIOCBootstrapClass(logger, context);
     }
@@ -86,7 +80,7 @@ public class IOCGenerator extends Generator {
    * @param context
    *         Generator context
    */
-  private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
+  private void generateIOCBootstrapClass(final TreeLogger logger, final GeneratorContext context) {
     // get print writer that receives the source code
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
 

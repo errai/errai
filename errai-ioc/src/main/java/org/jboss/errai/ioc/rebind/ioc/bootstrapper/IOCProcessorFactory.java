@@ -269,7 +269,7 @@ public class IOCProcessorFactory {
 
                   for (final MetaParameter parm : instance.getMethod().getParameters()) {
                     control.notifyDependency(injectedType);
-                    control.notifyDependencies(fillInInterface(parm.getType().asClass()));
+                    control.notifyDependencies(fillInInterface(parm.getType()));
                   }
 
                   break;

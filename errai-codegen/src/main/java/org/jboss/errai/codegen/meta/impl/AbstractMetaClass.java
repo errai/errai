@@ -16,17 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl;
 
-import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
-import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -36,6 +25,17 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
+import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -519,7 +519,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     Class<?> cls = MetaClassFactory.PRIMITIVE_LOOKUP.get(getFullyQualifiedName());
     if (cls == null) {
       cls = NullType.class;
-
     }
 
     if (enclosedMetaObject instanceof Class) {
