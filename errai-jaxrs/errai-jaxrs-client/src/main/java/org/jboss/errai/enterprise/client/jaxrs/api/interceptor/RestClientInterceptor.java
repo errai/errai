@@ -19,7 +19,7 @@ package org.jboss.errai.enterprise.client.jaxrs.api.interceptor;
 import org.jboss.errai.bus.client.api.interceptor.CallInterceptor;
 
 /**
- * Represents a client-side interceptor of JAX-RS (REST) remote calls.
+ * Represents a client-side interceptor for JAX-RS (REST) remote calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.api.interceptor;
 
 /**
- * Represents a client-side interceptor of remote procedure calls.
+ * Represents a client-side interceptor for remote procedure calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

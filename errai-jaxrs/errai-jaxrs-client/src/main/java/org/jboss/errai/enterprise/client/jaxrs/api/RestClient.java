@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
 
 /**
@@ -35,10 +36,13 @@ public class RestClient {
 
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
-   *
-   * @param remoteService  the JAX-RS resource interface
-   * @param callback  the asynchronous callback to use
-   * @param successCodes  optional HTTP status codes used to determine if the request was successful
+   * 
+   * @param remoteService
+   *          the JAX-RS resource interface
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param successCodes
+   *          optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
@@ -49,47 +53,61 @@ public class RestClient {
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the JAX-RS resource interface
-   * @param baseUrl  the base URL overriding the default application root path
-   * @param callback  the asynchronous callback to use
-   * @param successCodes  optional HTTP status codes used to determine if the request was successful
+   * @param remoteService
+   *          the JAX-RS resource interface
+   * @param baseUrl
+   *          the base URL overriding the default application root path
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param successCodes
+   *          optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback, 
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
       int... successCodes) {
     return create(remoteService, baseUrl, callback, null, successCodes);
   }
-  
+
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the JAX-RS resource interface
-   * @param callback  the asynchronous callback to use 
-   * @param errorCallback  the error callback to use
-   * @param successCodes  optional HTTP status codes used to determine if the request was successful
+   * @param remoteService
+   *          the JAX-RS resource interface
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param errorCallback
+   *          the error callback to use
+   * @param successCodes
+   *          optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
       final ErrorCallback errorCallback, int... successCodes) {
     return create(remoteService, null, callback, errorCallback, successCodes);
   }
-  
+
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the JAX-RS resource interface
-   * @param baseUrl  the base URL overriding the default application root path
-   * @param callback  the asynchronous callback to use
-   * @param errorCallback  the error callback to use
-   * @param successCodes  optional HTTP status codes used to determine if the request was successful
+   * @param remoteService
+   *          the JAX-RS resource interface
+   * @param baseUrl
+   *          the base URL overriding the default application root path
+   * @param callback
+   *          the asynchronous callback to use. Must not be null.
+   * @param errorCallback
+   *          the error callback to use
+   * @param successCodes
+   *          optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback, 
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
       final ErrorCallback errorCallback, int... successCodes) {
 
-    if (baseUrl != null && !baseUrl.endsWith("/")) 
+    Assert.notNull(callback);
+    if (baseUrl != null && !baseUrl.endsWith("/"))
       baseUrl += "/";
-    
+
     T proxy = proxyProvider.getRemoteProxy(remoteService);
 
     // Can't use ArrayUtils (class has to be translatable).
@@ -100,13 +118,13 @@ public class RestClient {
       }
       ((JaxrsProxy) proxy).setSuccessCodes(codes);
     }
-    
+
     ((JaxrsProxy) proxy).setRemoteCallback(callback);
     ((JaxrsProxy) proxy).setErrorCallback(errorCallback);
     ((JaxrsProxy) proxy).setBaseUrl(baseUrl);
     return proxy;
   }
-  
+
   /**
    * Returns the configured JAX-RS default application root path.
    * 
@@ -115,19 +133,20 @@ public class RestClient {
   public static native String getApplicationRoot() /*-{
     if ($wnd.erraiJaxRsApplicationRoot === undefined || $wnd.erraiJaxRsApplicationRoot.length === 0) {
       return ""; 
-    } 
-    else {
-      if ($wnd.erraiJaxRsApplicationRoot.substr(-1) !== "/") {
-        return $wnd.erraiJaxRsApplicationRoot + "/";
-      }
-      return $wnd.erraiJaxRsApplicationRoot;
-    }
-  }-*/;
-  
+     } 
+     else {
+       if ($wnd.erraiJaxRsApplicationRoot.substr(-1) !== "/") {
+         return $wnd.erraiJaxRsApplicationRoot + "/";
+       }
+       return $wnd.erraiJaxRsApplicationRoot;
+     }  
+   }-*/;
+
   /**
    * Configures the JAX-RS default application root path.
    * 
-   * @param root path to use when sending requests to the JAX-RS endpoint
+   * @param root
+   *          path to use when sending requests to the JAX-RS endpoint
    */
   public static native void setApplicationRoot(String path) /*-{
     if (path == null) {
@@ -137,7 +156,7 @@ public class RestClient {
       $wnd.erraiJaxRsApplicationRoot = path;
     }
   }-*/;
-  
+
   /**
    * Checks if a jackson compatible JSON format should be used instead of Errai JSON.
    * 
@@ -151,11 +170,12 @@ public class RestClient {
       return $wnd.erraiJaxRsJacksonMarshallingActive;
     }
   }-*/;
-  
+
   /**
    * Activates/Deactivates jackson conform JSON marshalling.
    * 
-   * @param active  true if jackson marshalling should be activated, otherwise false.
+   * @param active
+   *          true if jackson marshalling should be activated, otherwise false.
    */
   public static native void setJacksonMarshallingActive(boolean active) /*-{
     $wnd.erraiJaxRsJacksonMarshallingActive = active;

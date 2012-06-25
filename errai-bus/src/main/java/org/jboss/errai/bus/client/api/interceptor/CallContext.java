@@ -19,32 +19,12 @@ package org.jboss.errai.bus.client.api.interceptor;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 
 /**
- * Represents the context of a call to an intercepted method.
+ * Represents the context of an intercepted method call.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class CallContext {
-  private Object result;
   private Object[] parameters;
-
-  /**
-   * Returns the result of the intercepted method.
-   * 
-   * @return intercepted method result
-   */
-  public Object getResult() {
-    return result;
-  }
-
-  /**
-   * Sets the result of the intercepted method.
-   * 
-   * @param result
-   *          The result to return to the caller of the intercepted method.
-   */
-  public void setResult(Object result) {
-    this.result = result;
-  }
 
   /**
    * Provides access to the intercepted method's parameters.

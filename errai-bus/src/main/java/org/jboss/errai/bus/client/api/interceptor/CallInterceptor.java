@@ -30,7 +30,7 @@ public interface CallInterceptor<T extends CallContext> {
    * Interposes on the execution of methods that should be intercepted.
    * 
    * @param context
-   *          the call context of the intercepted method, must not be null.
+   *          the call context of the intercepted method, not null.
    */
   public void aroundInvoke(T context);
 }

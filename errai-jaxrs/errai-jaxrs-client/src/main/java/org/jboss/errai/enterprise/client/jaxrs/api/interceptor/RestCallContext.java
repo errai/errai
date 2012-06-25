@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
 import com.google.gwt.http.client.RequestBuilder;
 
 /**
- * Represents the context of a call to an intercepted JAX-RS (REST) remote call.
+ * Represents the context of an intercepted JAX-RS (REST) remote call.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -38,7 +38,7 @@ public abstract class RestCallContext extends RemoteCallContext {
   }
 
   /**
-   * Changes the {@link RequestBuilder} instance used to executed the call to the REST endpoints.
+   * Changes the {@link RequestBuilder} instance used to executed the call to the REST endpoint.
    * 
    * @param requestBuilder
    *          the {@link RequestBuilder} instance to use when proceeding with the request
