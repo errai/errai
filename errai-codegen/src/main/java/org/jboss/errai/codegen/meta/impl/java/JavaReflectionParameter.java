@@ -16,12 +16,12 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
+
+import java.lang.annotation.Annotation;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -34,7 +34,9 @@ public class JavaReflectionParameter extends MetaParameter {
   private final Annotation[] annotations;
   private final MetaClassMember declaredBy;
 
-  public JavaReflectionParameter(MetaClass type, Annotation[] annotations, MetaClassMember declaredBy) {
+  public JavaReflectionParameter(final MetaClass type,
+                                 final Annotation[] annotations,
+                                 final MetaClassMember declaredBy) {
     
     // Java Reflection doesn't provide parameter names, so we have to make one up to satisfy the Parameter interface.
     this.name = "jp" + paramNameCounter.getAndIncrement();
@@ -60,15 +62,15 @@ public class JavaReflectionParameter extends MetaParameter {
   }
 
   @Override
-  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
+  public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+    for (final Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
     }
     return null;
   }
 
   @Override
-  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+  public final boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 

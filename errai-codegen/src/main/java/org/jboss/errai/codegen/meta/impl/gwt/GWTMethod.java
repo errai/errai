@@ -16,13 +16,10 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -30,18 +27,19 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
 
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTMethod extends MetaMethod {
-  private JMethod method;
-  private Annotation[] annotations;
-  private TypeOracle oracle;
+  private final JMethod method;
+  private final Annotation[] annotations;
+  private final TypeOracle oracle;
 
-  GWTMethod(TypeOracle oracle, JMethod method) {
+  GWTMethod(final TypeOracle oracle, final JMethod method) {
     this.method = method;
     annotations = method.getAnnotations();
     this.oracle = oracle;
@@ -60,9 +58,9 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaParameter[] getParameters() {
-    List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+    final List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
 
-    for (JParameter jParameter : method.getParameters()) {
+    for (final JParameter jParameter : method.getParameters()) {
       parameterList.add(new GWTParameter(oracle, jParameter, this));
     }
 
@@ -81,7 +79,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaType getGenericReturnType() {
-    JTypeParameter type = method.getReturnType().isTypeParameter();
+    final JTypeParameter type = method.getReturnType().isTypeParameter();
     if (type != null) {
       return new GWTTypeVariable(oracle, type);
     }
@@ -90,8 +88,8 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaType[] getGenericParameterTypes() {
-    List<MetaType> typeList = new ArrayList<MetaType>();
-    for (JParameter parm : method.getParameters()) {
+    final List<MetaType> typeList = new ArrayList<MetaType>();
+    for (final JParameter parm : method.getParameters()) {
       typeList.add(GWTUtil.fromType(oracle, parm.getType()));
     }
 
@@ -164,7 +162,7 @@ public class GWTMethod extends MetaMethod {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
 

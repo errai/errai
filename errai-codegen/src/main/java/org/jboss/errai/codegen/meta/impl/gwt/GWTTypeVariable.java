@@ -28,10 +28,10 @@ import com.google.gwt.core.ext.typeinfo.JTypeParameter;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTTypeVariable implements MetaTypeVariable {
-  private JTypeParameter typeParameter;
-  private TypeOracle oracle;
+  private final JTypeParameter typeParameter;
+  private final TypeOracle oracle;
 
-  public GWTTypeVariable(TypeOracle oracle, JTypeParameter typeParameter) {
+  public GWTTypeVariable(final TypeOracle oracle, final JTypeParameter typeParameter) {
     this.typeParameter = typeParameter;
     this.oracle = oracle;
   }

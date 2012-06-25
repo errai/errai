@@ -16,15 +16,6 @@
 
 package org.jboss.errai.codegen.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Modifier;
@@ -46,13 +37,16 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.DataConversion;
 import org.mvel2.util.NullType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -62,40 +56,38 @@ public class GenUtil {
   private static boolean PERMISSIVE_MODE;
 
   static {
-    if (System.getProperty("errai.codegen.permissive") != null) {
-      PERMISSIVE_MODE = Boolean.getBoolean("errai.codegen.permissive");
-    }
-    else {
-      PERMISSIVE_MODE = false;
-    }
+    PERMISSIVE_MODE = System.getProperty("errai.codegen.permissive") != null
+            && Boolean.getBoolean("errai.codegen.permissive");
   }
 
   public static boolean isPermissiveMode() {
     return PERMISSIVE_MODE;
   }
 
-  public static void setPermissiveMode(boolean permissiveMode) {
+  public static void setPermissiveMode(final boolean permissiveMode) {
     PERMISSIVE_MODE = permissiveMode;
   }
 
-  public static Statement[] generateCallParameters(Context context, Object... parameters) {
-    Statement[] statements = new Statement[parameters.length];
+  public static Statement[] generateCallParameters(final Context context, final Object... parameters) {
+    final Statement[] statements = new Statement[parameters.length];
 
     int i = 0;
-    for (Object parameter : parameters) {
+    for (final Object parameter : parameters) {
       statements[i++] = generate(context, parameter);
     }
     return statements;
   }
 
-  public static Statement[] generateCallParameters(MetaMethod method, Context context, Object... parameters) {
+  public static Statement[] generateCallParameters(final MetaMethod method,
+                                                   final Context context,
+                                                   final Object... parameters) {
     if (parameters.length != method.getParameters().length && !method.isVarArgs()) {
       throw new UndefinedMethodException("Wrong number of parameters");
     }
 
-    MetaParameter[] methParms = method.getParameters();
+    final MetaParameter[] methParms = method.getParameters();
 
-    Statement[] statements = new Statement[parameters.length];
+    final Statement[] statements = new Statement[parameters.length];
     int i = 0;
     for (Object parameter : parameters) {
       if (parameter instanceof Statement) {
@@ -116,12 +108,12 @@ public class GenUtil {
     return statements;
   }
 
-  public static Statement generate(Context context, Object o) {
+  public static Statement generate(final Context context, final Object o) {
     if (o instanceof VariableReference) {
       return context.getVariable(((VariableReference) o).getName());
     }
     else if (o instanceof Variable) {
-      Variable v = (Variable) o;
+      final Variable v = (Variable) o;
       if (context.isScoped(v)) {
         return v.getReference();
       }
@@ -143,8 +135,8 @@ public class GenUtil {
     }
   }
 
-  public static void assertIsIterable(Statement statement) {
-    Class<?> cls = statement.getType().asClass();
+  public static void assertIsIterable(final Statement statement) {
+    final Class<?> cls = statement.getType().asClass();
 
     if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
       throw new TypeNotIterableException(statement.generate(Context.create()));
@@ -157,15 +149,15 @@ public class GenUtil {
     }
   };
 
-  public static void addClassAlias(Class cls) {
+  public static void addClassAlias(final Class cls) {
     classAliases.add(cls.getName());
   }
 
-  public static void assertAssignableTypes(MetaClass from, MetaClass to) {
+  public static void assertAssignableTypes(final MetaClass from, final MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
       if (!isPermissiveMode()) {
         if (classAliases.contains(from.getFullyQualifiedName()) && classAliases.contains(to.getFullyQualifiedName())) {
-          // handle convertability between MetaClass API and java Class reference.
+          // handle convertibility between MetaClass API and java Class reference.
           return;
         }
 
@@ -175,7 +167,7 @@ public class GenUtil {
     }
   }
 
-  public static Statement convert(Context context, Object input, MetaClass targetType) {
+  public static Statement convert(final Context context, Object input, final MetaClass targetType) {
     try {
       if (input instanceof Statement) {
         if (input instanceof LiteralValue<?>) {
@@ -205,7 +197,7 @@ public class GenUtil {
         inputClass = Class.class;
       }
 
-      Class<?> targetClass = targetType.asBoxed().asClass();
+      final Class<?> targetClass = targetType.asBoxed().asClass();
       if (NullType.class.getName().equals(targetClass.getName())) {
         return generate(context, input);
       }
@@ -222,8 +214,8 @@ public class GenUtil {
     }
   }
 
-  public static String classesAsStrings(MetaClass... stmt) {
-    StringBuilder buf = new StringBuilder(128);
+  public static String classesAsStrings(final MetaClass... stmt) {
+    final StringBuilder buf = new StringBuilder(128);
     for (int i = 0; i < stmt.length; i++) {
       buf.append(stmt[i].getFullyQualifiedName());
       if (i + 1 < stmt.length) {
@@ -233,67 +225,23 @@ public class GenUtil {
     return buf.toString();
   }
 
-  public static MetaClass[] fromParameters(MetaParameter... parms) {
-    List<MetaClass> parameters = new ArrayList<MetaClass>();
-    for (MetaParameter metaParameter : parms) {
+  public static MetaClass[] fromParameters(final MetaParameter... parms) {
+    final List<MetaClass> parameters = new ArrayList<MetaClass>();
+    for (final MetaParameter metaParameter : parms) {
       parameters.add(metaParameter.getType());
     }
     return parameters.toArray(new MetaClass[parameters.size()]);
   }
 
-  public static MetaClass[] classToMeta(Class<?>[] types) {
-    MetaClass[] metaClasses = new MetaClass[types.length];
+  public static MetaClass[] classToMeta(final Class<?>[] types) {
+    final MetaClass[] metaClasses = new MetaClass[types.length];
     for (int i = 0; i < types.length; i++) {
       metaClasses[i] = MetaClassFactory.get(types[i]);
     }
     return metaClasses;
   }
 
-
-  public static Map<String, MetaClass> determineTypeVariables(MetaMethod method) {
-    HashMap<String, MetaClass> typeVariables = new HashMap<String, MetaClass>();
-
-    int methodParmIndex = 0;
-    for (MetaType methodParmType : method.getGenericParameterTypes()) {
-      MetaParameter parm = method.getParameters()[methodParmIndex];
-      resolveTypeVariable(typeVariables, methodParmType, parm.getType());
-      methodParmIndex++;
-    }
-
-    return typeVariables;
-  }
-
-
-  private static void resolveTypeVariable(Map<String, MetaClass> typeVariables,
-                                          MetaType methodParmType, MetaType callParmType) {
-    if (methodParmType instanceof MetaTypeVariable) {
-      MetaTypeVariable typeVar = (MetaTypeVariable) methodParmType;
-      typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
-    }
-    else if (methodParmType instanceof MetaParameterizedType) {
-      MetaType parameterizedCallParmType;
-      if (callParmType instanceof MetaParameterizedType) {
-        parameterizedCallParmType = callParmType;
-      }
-      else {
-        parameterizedCallParmType = ((MetaClass) callParmType).getParameterizedType();
-      }
-
-      MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
-      int typeParmIndex = 0;
-      for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
-        if (parameterizedCallParmType != null) {
-          resolveTypeVariable(typeVariables, typeParm,
-                  ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
-        }
-        else {
-          resolveTypeVariable(typeVariables, typeParm, callParmType);
-        }
-      }
-    }
-  }
-
-  public static Scope scopeOf(MetaClass clazz) {
+  public static Scope scopeOf(final MetaClass clazz) {
     if (clazz.isPublic()) {
       return Scope.Public;
     }
@@ -308,7 +256,7 @@ public class GenUtil {
     }
   }
 
-  public static Scope scopeOf(MetaClassMember member) {
+  public static Scope scopeOf(final MetaClassMember member) {
     if (member.isPublic()) {
       return Scope.Public;
     }
@@ -323,8 +271,8 @@ public class GenUtil {
     }
   }
 
-  public static DefModifiers modifiersOf(MetaClassMember member) {
-    DefModifiers defModifiers = new DefModifiers();
+  public static DefModifiers modifiersOf(final MetaClassMember member) {
+    final DefModifiers defModifiers = new DefModifiers();
     if (member.isAbstract()) {
       defModifiers.addModifiers(Modifier.Abstract);
     }
@@ -346,12 +294,12 @@ public class GenUtil {
     return defModifiers;
   }
 
-  public static boolean equals(MetaField a, MetaField b) {
+  public static boolean equals(final MetaField a, final MetaField b) {
     return a.getName().equals(b.getName()) && !a.getType().equals(b.getType())
             && !a.getDeclaringClass().equals(b.getDeclaringClass());
   }
 
-  public static boolean equals(MetaConstructor a, MetaConstructor b) {
+  public static boolean equals(final MetaConstructor a, final MetaConstructor b) {
     if (a.getParameters().length != b.getParameters().length) {
       return false;
     }
@@ -362,14 +310,10 @@ public class GenUtil {
       }
     }
 
-    if (!a.getDeclaringClass().equals(b.getDeclaringClass())) {
-      return false;
-    }
-
-    return true;
+    return a.getDeclaringClass().equals(b.getDeclaringClass());
   }
 
-  public static boolean equals(MetaMethod a, MetaMethod b) {
+  public static boolean equals(final MetaMethod a, final MetaMethod b) {
     if (!a.getName().equals(b.getName())) return false;
     if (a.getParameters().length != b.getParameters().length) return false;
     if (!a.getDeclaringClass().equals(b.getDeclaringClass())) return false;
@@ -380,15 +324,15 @@ public class GenUtil {
     return true;
   }
 
-  public static boolean equals(MetaParameter a, MetaParameter b) {
+  public static boolean equals(final MetaParameter a, final MetaParameter b) {
     return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());
   }
 
-  public static String getMethodString(MetaMethod method) {
+  public static String getMethodString(final MetaMethod method) {
     return method.getName() + "(" + Arrays.toString(method.getParameters()) + ")";
   }
 
-  public static MetaClass getPrimitiveWrapper(MetaClass clazz) {
+  public static MetaClass getPrimitiveWrapper(final MetaClass clazz) {
     if (clazz.isPrimitive()) {
       if ("int".equals(clazz.getCanonicalName())) {
         return MetaClassFactory.get(Integer.class);
@@ -418,7 +362,7 @@ public class GenUtil {
     return clazz;
   }
 
-  public static boolean isPrimitiveWrapper(MetaClass clazz) {
+  public static boolean isPrimitiveWrapper(final MetaClass clazz) {
     return Integer.class.getName().equals(clazz.getFullyQualifiedName())
             || Boolean.class.getName().equals(clazz.getFullyQualifiedName())
             || Long.class.getName().equals(clazz.getFullyQualifiedName())
@@ -429,7 +373,7 @@ public class GenUtil {
             || Byte.class.getName().equals(clazz.getFullyQualifiedName());
   }
 
-  public static MetaClass getUnboxedFromWrapper(MetaClass clazz) {
+  public static MetaClass getUnboxedFromWrapper(final MetaClass clazz) {
     if (Integer.class.getName().equals(clazz.getFullyQualifiedName())) {
       return MetaClassFactory.get(int.class);
     }
@@ -457,26 +401,29 @@ public class GenUtil {
     return clazz;
   }
 
-  public static int getArrayDimensions(MetaClass type) {
+  public static int getArrayDimensions(final MetaClass type) {
     if (!type.isArray()) return 0;
 
-    String internalName = type.getInternalName();
+    final String internalName = type.getInternalName();
     for (int i = 0; i < internalName.length(); i++) {
       if (internalName.charAt(i) != '[') return i;
     }
     return 0;
   }
 
-  public static MetaMethod findCaseInsensitiveMatch(MetaClass retType, MetaClass clazz, String name, MetaClass... parms) {
+  public static MetaMethod findCaseInsensitiveMatch(final MetaClass retType,
+                                                    final MetaClass clazz,
+                                                    final String name,
+                                                    final MetaClass... parms) {
     MetaClass c = clazz;
 
     do {
       Outer:
-      for (MetaMethod method : c.getDeclaredMethods()) {
+      for (final MetaMethod method : c.getDeclaredMethods()) {
         if (name.equalsIgnoreCase(method.getName())) {
           if (parms.length != method.getParameters().length) continue;
 
-          MetaParameter[] mps = method.getParameters();
+          final MetaParameter[] mps = method.getParameters();
           for (int i = 0; i < parms.length; i++) {
             if (!parms[i].getFullyQualifiedName().equals(mps[i].getType().getFullyQualifiedName())) {
               continue Outer;
@@ -497,7 +444,7 @@ public class GenUtil {
     return null;
   }
 
-  public static void throwIfUnhandled(String error, Throwable t) {
+  public static void throwIfUnhandled(final String error, final Throwable t) {
     try {
       throw t;
     }
@@ -509,8 +456,11 @@ public class GenUtil {
     }
   }
 
-  public static MetaMethod getBestCandidate(MetaClass[] arguments, String method, MetaClass decl, MetaMethod[] methods,
-                                            boolean classTarget) {
+  public static MetaMethod getBestCandidate(final MetaClass[] arguments,
+                                            final String method,
+                                            final MetaClass decl,
+                                            MetaMethod[] methods,
+                                            final boolean classTarget) {
     if (methods.length == 0) {
       return null;
     }
@@ -522,11 +472,11 @@ public class GenUtil {
     boolean retry = false;
 
     do {
-      for (MetaMethod meth : methods) {
+      for (final MetaMethod meth : methods) {
         if (classTarget && (meth.isStatic())) continue;
 
         if (method.equals(meth.getName())) {
-          boolean isVarArgs = meth.isVarArgs();
+          final boolean isVarArgs = meth.isVarArgs();
           if ((parmTypes = meth.getParameters()).length != arguments.length && !isVarArgs) {
             continue;
           }
@@ -545,15 +495,10 @@ public class GenUtil {
       }
 
       if (!retry && bestCandidate == null && decl.isInterface()) {
-        MetaMethod[] objMethods = Object_MetaClass.getMethods();
-        MetaMethod[] nMethods = new MetaMethod[methods.length + objMethods.length];
-        for (int i = 0; i < methods.length; i++) {
-          nMethods[i] = methods[i];
-        }
-
-        for (int i = 0; i < objMethods.length; i++) {
-          nMethods[i + methods.length] = objMethods[i];
-        }
+        final MetaMethod[] objMethods = Object_MetaClass.getMethods();
+        final MetaMethod[] nMethods = new MetaMethod[methods.length + objMethods.length];
+        System.arraycopy(methods, 0, nMethods, 0, methods.length);
+        System.arraycopy(objMethods, 0, nMethods, methods.length, objMethods.length);
         methods = nMethods;
 
         retry = true;
@@ -570,7 +515,7 @@ public class GenUtil {
   public static int scoreMethods(final MetaClass[] arguments, final MetaParameter[] parmTypes, final boolean isVarArgs) {
     int score = 0;
     for (int i = 0; i != arguments.length; i++) {
-      MetaClass actualParamType;
+      final MetaClass actualParamType;
       if (isVarArgs && !arguments[arguments.length - 1].isArray() && i >= parmTypes.length - 1)
         actualParamType = parmTypes[parmTypes.length - 1].getType().getComponentType();
       else
@@ -621,9 +566,10 @@ public class GenUtil {
     return score;
   }
 
-  public static MetaConstructor getBestConstructorCandidate(MetaClass[] arguments, MetaClass decl,
+  public static MetaConstructor getBestConstructorCandidate(final MetaClass[] arguments,
+                                                            final MetaClass decl,
                                                             MetaConstructor[] constructors,
-                                                            boolean classTarget) {
+                                                            final boolean classTarget) {
     if (constructors.length == 0) {
       return null;
     }
@@ -631,14 +577,14 @@ public class GenUtil {
     MetaParameter[] parmTypes;
     MetaConstructor bestCandidate = null;
     int bestScore = 0;
-    int score = 0;
+    int score;
     boolean retry = false;
 
     do {
-      for (MetaConstructor meth : constructors) {
+      for (final MetaConstructor meth : constructors) {
         if (classTarget && (meth.isStatic())) continue;
 
-        boolean isVarArgs = meth.isVarArgs();
+        final boolean isVarArgs = meth.isVarArgs();
         if ((parmTypes = meth.getParameters()).length != arguments.length && !isVarArgs) {
           continue;
         }
@@ -656,15 +602,10 @@ public class GenUtil {
       }
 
       if (!retry && bestCandidate == null && decl.isInterface()) {
-        MetaConstructor[] objMethods = Object_MetaClass.getConstructors();
-        MetaConstructor[] nMethods = new MetaConstructor[constructors.length + objMethods.length];
-        for (int i = 0; i < constructors.length; i++) {
-          nMethods[i] = constructors[i];
-        }
-
-        for (int i = 0; i < objMethods.length; i++) {
-          nMethods[i + constructors.length] = objMethods[i];
-        }
+        final MetaConstructor[] objMethods = Object_MetaClass.getConstructors();
+        final MetaConstructor[] nMethods = new MetaConstructor[constructors.length + objMethods.length];
+        System.arraycopy(constructors, 0, nMethods, 0, constructors.length);
+        System.arraycopy(objMethods, 0, nMethods, constructors.length, objMethods.length);
         constructors = nMethods;
 
         retry = true;
@@ -684,10 +625,10 @@ public class GenUtil {
   private static final MetaClass char_MetaClass = MetaClassFactory.get(char.class);
   private static final MetaClass String_MetaClass = MetaClassFactory.get(String.class);
 
-  public static boolean canConvert(MetaClass to, MetaClass from) {
+  public static boolean canConvert(final MetaClass to, final MetaClass from) {
     try {
-      Class<?> fromClazz = from.asClass();
-      Class<?> toClass = to.asClass();
+      final Class<?> fromClazz = from.asClass();
+      final Class<?> toClass = to.asClass();
 
       return DataConversion.canConvert(toClass, fromClazz);
     }
@@ -696,7 +637,7 @@ public class GenUtil {
     }
   }
 
-  public static boolean isNumericallyCoercible(MetaClass target, MetaClass parm) {
+  public static boolean isNumericallyCoercible(final MetaClass target, final MetaClass parm) {
     MetaClass boxedTarget = target.isPrimitive() ? target.asBoxed() : target;
 
     if (boxedTarget != null && Number_MetaClass.isAssignableFrom(target)) {
@@ -707,11 +648,11 @@ public class GenUtil {
     return false;
   }
 
-  public static int scoreInterface(MetaClass parm, MetaClass arg) {
+  public static int scoreInterface(final MetaClass parm, final MetaClass arg) {
     if (parm.isInterface()) {
-      MetaClass[] iface = arg.getInterfaces();
+      final MetaClass[] iface = arg.getInterfaces();
       if (iface != null) {
-        for (MetaClass c : iface) {
+        for (final MetaClass c : iface) {
           if (c == parm) return 1;
           else if (parm.isAssignableFrom(c)) return scoreInterface(parm, arg.getSuperClass());
         }
@@ -720,12 +661,12 @@ public class GenUtil {
     return 0;
   }
 
-  public static void rewriteBlameStackTrace(Throwable innerBlame) {
-    StackTraceElement[] stackTrace = innerBlame.getStackTrace();
+  public static void rewriteBlameStackTrace(final Throwable innerBlame) {
+    final StackTraceElement[] stackTrace = innerBlame.getStackTrace();
 
-    List<StackTraceElement> innerStackTrace = new ArrayList<StackTraceElement>(10);
-    List<StackTraceElement> outerStackTrace = new ArrayList<StackTraceElement>(10);
-    for (StackTraceElement el : stackTrace) {
+    final List<StackTraceElement> innerStackTrace = new ArrayList<StackTraceElement>(10);
+    final List<StackTraceElement> outerStackTrace = new ArrayList<StackTraceElement>(10);
+    for (final StackTraceElement el : stackTrace) {
       if (el.getClassName().startsWith("org.jboss.errai.codegen.")) {
         innerStackTrace.add(el);
       }
@@ -736,7 +677,7 @@ public class GenUtil {
 
     innerBlame.setStackTrace(innerStackTrace.toArray(new StackTraceElement[innerStackTrace.size()]));
 
-    RuntimeException outerBlame = new RuntimeException("External call to API");
+    final RuntimeException outerBlame = new RuntimeException("External call to API");
     outerBlame.setStackTrace(outerStackTrace.toArray(new StackTraceElement[outerStackTrace.size()]));
     innerBlame.initCause(outerBlame);
   }

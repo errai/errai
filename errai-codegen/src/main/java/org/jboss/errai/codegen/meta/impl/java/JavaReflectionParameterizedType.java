@@ -16,12 +16,12 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -29,7 +29,7 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
 public class JavaReflectionParameterizedType extends AbstractMetaParameterizedType {
   ParameterizedType parameterizedType;
 
-  public JavaReflectionParameterizedType(ParameterizedType parameterizedType) {
+  public JavaReflectionParameterizedType(final ParameterizedType parameterizedType) {
     this.parameterizedType = parameterizedType;
   }
 
@@ -49,8 +49,8 @@ public class JavaReflectionParameterizedType extends AbstractMetaParameterizedTy
   }
 
   public String toString() {
-    StringBuilder buf = new StringBuilder("<");
-    Type[] parms = parameterizedType.getActualTypeArguments();
+    final StringBuilder buf = new StringBuilder("<");
+    final Type[] parms = parameterizedType.getActualTypeArguments();
     for (int i = 0; i < parms.length; i++) {
       if (parms[i] instanceof Class) {
         buf.append(MetaClassFactory.get((Class) parms[i]).getFullyQualifiedName());

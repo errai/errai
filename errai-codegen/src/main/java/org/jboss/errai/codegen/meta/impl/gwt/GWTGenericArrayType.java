@@ -27,10 +27,10 @@ import com.google.gwt.core.ext.typeinfo.JGenericType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTGenericArrayType implements MetaGenericArrayType {
-  private JGenericType genericType;
-  private TypeOracle oracle;
+  private final JGenericType genericType;
+  private final TypeOracle oracle;
 
-  public GWTGenericArrayType(TypeOracle oracle, JGenericType genericType) {
+  public GWTGenericArrayType(final TypeOracle oracle, final JGenericType genericType) {
     this.genericType = genericType;
     this.oracle = oracle;
   }

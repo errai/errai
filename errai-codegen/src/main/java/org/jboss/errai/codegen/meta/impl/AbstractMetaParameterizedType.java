@@ -25,9 +25,9 @@ import org.jboss.errai.codegen.meta.MetaType;
  */
 public abstract class AbstractMetaParameterizedType implements MetaParameterizedType {
   @Override
-  public boolean isAssignableFrom(MetaParameterizedType type) {
-    MetaType[] compareFrom = getTypeParameters();
-    MetaType[] compareTo;
+  public boolean isAssignableFrom(final MetaParameterizedType type) {
+    final MetaType[] compareFrom = getTypeParameters();
+    final MetaType[] compareTo;
 
     if (type == null) {
       compareTo = new MetaType[compareFrom.length];

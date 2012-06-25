@@ -16,19 +16,19 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 public class JavaReflectionField extends MetaField {
   private Field field;
 
-  JavaReflectionField(Field field) {
+  JavaReflectionField(final Field field) {
     this.field = field;
   }
 
@@ -52,16 +52,17 @@ public class JavaReflectionField extends MetaField {
     return _annotationsCache = field.getAnnotations();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
+  public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+    for (final Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
     }
     return null;
   }
 
   @Override
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+  public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 

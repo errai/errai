@@ -16,10 +16,9 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -27,9 +26,9 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
 
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -40,7 +39,7 @@ public class GWTConstructor extends MetaConstructor {
   private final Annotation[] annotations;
   private final TypeOracle oracle;
 
-  public GWTConstructor(TypeOracle oracle, JConstructor c) {
+  public GWTConstructor(final TypeOracle oracle, final JConstructor c) {
     this.constructor = c;
     this.declaringClass = GWTClass.newInstance(oracle, c.getEnclosingType());
     this.annotations = constructor.getAnnotations();
@@ -49,9 +48,9 @@ public class GWTConstructor extends MetaConstructor {
 
   @Override
   public MetaParameter[] getParameters() {
-    List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+    final List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
 
-    for (JParameter jParameter : constructor.getParameters()) {
+    for (final JParameter jParameter : constructor.getParameters()) {
       parameterList.add(new GWTParameter(oracle, jParameter, this));
     }
 
@@ -154,7 +153,7 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof MetaConstructor && GenUtil.equals(this, (MetaConstructor) o);
   }
 }

@@ -16,34 +16,32 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.core.ext.typeinfo.JGenericType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaGenericDeclaration;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 
-import com.google.gwt.core.ext.typeinfo.JGenericType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTGenericDeclaration implements MetaGenericDeclaration {
-  private JGenericType genericType;
-  private TypeOracle oracle;
+  private final JGenericType genericType;
+  private final TypeOracle oracle;
 
-  public GWTGenericDeclaration(TypeOracle oracle, JGenericType genericType) {
+  public GWTGenericDeclaration(final TypeOracle oracle, final JGenericType genericType) {
     this.oracle = oracle;
     this.genericType = genericType;
   }
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
-    List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
+    final List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
 
-    for (JTypeParameter typeParameter : genericType.getTypeParameters()) {
+    for (final JTypeParameter typeParameter : genericType.getTypeParameters()) {
       typeVariables.add(new GWTTypeVariable(oracle, typeParameter));
     }
 

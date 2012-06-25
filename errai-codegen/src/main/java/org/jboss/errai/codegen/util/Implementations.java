@@ -32,21 +32,24 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class Implementations {
-  public static ClassStructureBuilder<?> implement(Class<?> clazz) {
+  public static ClassStructureBuilder<?> implement(final Class<?> clazz) {
     return ClassBuilder.define(clazz.getPackage().getName() + "." + clazz.getSimpleName() + "Impl")
             .publicScope()
             .implementsInterface(clazz)
             .body();
   }
 
-  public static ClassStructureBuilder<?> implement(Class<?> clazz, String implClassName) {
+  public static ClassStructureBuilder<?> implement(final Class<?> clazz,
+                                                   final String implClassName) {
     return ClassBuilder.define(clazz.getPackage().getName() + "." + implClassName)
             .publicScope()
             .implementsInterface(clazz)
             .body();
   }
 
-  public static ClassStructureBuilder<?> implement(Class<?> clazz, String implPackageName, String implClassName) {
+  public static ClassStructureBuilder<?> implement(final Class<?> clazz,
+                                                   final String implPackageName,
+                                                   final String implClassName) {
     return ClassBuilder.define(implPackageName + "." + implClassName)
             .publicScope()
             .implementsInterface(clazz)
@@ -58,25 +61,31 @@ public class Implementations {
    * new class being built will be in the same package as the given superclass.
    *
    * @param superclass
-   *          The class that the class being built extends.
+   *         The class that the class being built extends.
    * @param implClassName
-   *          The simple name (no package prefix) of the new class to be built.
-   * @return
+   *         The simple name (no package prefix) of the new class to be built.
+   *
+   * @return an instance of the {@link ClassStructureBuilder} for building the
+   *         extended class
    */
-  public static ClassStructureBuilder<?> extend(Class<?> superclass, String implClassName) {
+  public static ClassStructureBuilder<?> extend(final Class<?> superclass, final String implClassName) {
     return ClassBuilder.define(superclass.getPackage().getName() + "." + implClassName, superclass)
             .publicScope()
             .body();
   }
 
-  public static void autoInitializedField(ClassStructureBuilder<?> builder, MetaClass type,
-                                          String name, Class<?> implementation) {
+  public static void autoInitializedField(final ClassStructureBuilder<?> builder,
+                                          final MetaClass type,
+                                          final String name,
+                                          final Class<?> implementation) {
 
     autoInitializedField(builder, type, name, MetaClassFactory.get(implementation));
   }
 
-  public static void autoInitializedField(ClassStructureBuilder<?> builder, MetaClass type,
-                                          String name, MetaClass implementation) {
+  public static void autoInitializedField(final ClassStructureBuilder<?> builder,
+                                          final MetaClass type,
+                                          final String name,
+                                          MetaClass implementation) {
 
     implementation = MetaClassFactory.parameterizedAs(implementation, type.getParameterizedType());
 
@@ -88,14 +97,14 @@ public class Implementations {
     return newStringBuilder(64);
   }
 
-  public static StringBuilderBuilder newStringBuilder(int length) {
+  public static StringBuilderBuilder newStringBuilder(final int length) {
     final ContextualStatementBuilder statementBuilder
             = Stmt.nestedCall(Stmt.newObject(StringBuilder.class).withParameters(length));
 
     return new StringBuilderBuilder() {
 
       @Override
-      public StringBuilderBuilder append(Object statement) {
+      public StringBuilderBuilder append(final Object statement) {
         statementBuilder.invoke("append", statement);
         return this;
       }
@@ -103,7 +112,7 @@ public class Implementations {
       String generatedCache;
 
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         if (generatedCache != null) return generatedCache;
         return generatedCache = statementBuilder.generate(context);
       }
@@ -120,7 +129,7 @@ public class Implementations {
     public StringBuilderBuilder append(Object statement);
   }
 
-  public static BlockBuilder<StatementEnd> autoForLoop(String varName, Statement value) {
+  public static BlockBuilder<StatementEnd> autoForLoop(final String varName, final Statement value) {
     return Stmt.for_(Stmt.declareVariable(int.class).named("i").initializeWith(0),
             Bool.lessThan(Variable.get("i"), value),
             new StringStatement(varName + "++", null));

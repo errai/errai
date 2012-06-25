@@ -16,29 +16,29 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
+import org.jboss.errai.codegen.meta.MetaGenericDeclaration;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.meta.MetaGenericDeclaration;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionGenericDeclaration implements MetaGenericDeclaration {
-  private GenericDeclaration genericDeclaration;
+  private final GenericDeclaration genericDeclaration;
 
-  public JavaReflectionGenericDeclaration(GenericDeclaration genericDeclaration) {
+  public JavaReflectionGenericDeclaration(final GenericDeclaration genericDeclaration) {
     this.genericDeclaration = genericDeclaration;
   }
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
-    List<MetaTypeVariable> metaTypeVariableList = new ArrayList<MetaTypeVariable>();
+    final List<MetaTypeVariable> metaTypeVariableList = new ArrayList<MetaTypeVariable>();
 
-    for (TypeVariable<?> typeVariable : genericDeclaration.getTypeParameters()) {
+    for (final TypeVariable<?> typeVariable : genericDeclaration.getTypeParameters()) {
       metaTypeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
     }
 

@@ -58,11 +58,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
     GenUtil.addClassAlias(GWTClass.class);
   }
 
-  protected GWTClass(TypeOracle oracle, JType classType, boolean erased) {
+  protected GWTClass(final TypeOracle oracle, final JType classType, final boolean erased) {
     super(classType);
     this.oracle = oracle;
 
-    JParameterizedType parameterizedType = classType.isParameterized();
+    final JParameterizedType parameterizedType = classType.isParameterized();
     if (!erased) {
       if (parameterizedType != null) {
         super.parameterizedType = new GWTParameterizedType(oracle, parameterizedType);
@@ -70,11 +70,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
   }
 
-  public static MetaClass newInstance(TypeOracle oracle, JType type) {
+  public static MetaClass newInstance(final TypeOracle oracle, final JType type) {
     return newUncachedInstance(oracle, type);
   }
 
-  public static MetaClass newInstance(TypeOracle oracle, String type) {
+  public static MetaClass newInstance(final TypeOracle oracle, final String type) {
     try {
       return newUncachedInstance(oracle, oracle.getType(type));
     }
@@ -83,39 +83,38 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
   }
 
-  public static MetaClass newUncachedInstance(TypeOracle oracle, JType type) {
+  public static MetaClass newUncachedInstance(final TypeOracle oracle, final JType type) {
 
 
     return new GWTClass(oracle, type, false);
   }
 
-  public static MetaClass newUncachedInstance(TypeOracle oracle, JType type, boolean erased) {
+  public static MetaClass newUncachedInstance(final TypeOracle oracle, final JType type, final boolean erased) {
     return new GWTClass(oracle, type, erased);
   }
 
-
-  public static MetaClass[] fromClassArray(TypeOracle oracle, JClassType[] classes) {
-    MetaClass[] newClasses = new MetaClass[classes.length];
+  public static MetaClass[] fromClassArray(final TypeOracle oracle, final JClassType[] classes) {
+    final MetaClass[] newClasses = new MetaClass[classes.length];
     for (int i = 0; i < classes.length; i++) {
       newClasses[i] = newInstance(oracle, classes[i]);
     }
     return newClasses;
   }
 
-  public static Class<?>[] jParmToClass(JParameter[] parms) throws ClassNotFoundException {
-    Class<?>[] classes = new Class<?>[parms.length];
+  public static Class<?>[] jParmToClass(final JParameter[] parms) throws ClassNotFoundException {
+    final Class<?>[] classes = new Class<?>[parms.length];
     for (int i = 0; i < parms.length; i++) {
       classes[i] = getPrimitiveOrClass(parms[i]);
     }
     return classes;
   }
 
-  public static Class<?> getPrimitiveOrClass(JParameter parm) throws ClassNotFoundException {
-    JType type = parm.getType();
-    String name = type.isArray() != null ? type.getJNISignature().replace("/", ".") : type.getQualifiedSourceName();
+  public static Class<?> getPrimitiveOrClass(final JParameter parm) throws ClassNotFoundException {
+    final JType type = parm.getType();
+    final String name = type.isArray() != null ? type.getJNISignature().replace("/", ".") : type.getQualifiedSourceName();
 
     if (parm.getType().isPrimitive() != null) {
-      char sig = parm.getType().isPrimitive().getJNISignature().charAt(0);
+      final char sig = parm.getType().isPrimitive().getJNISignature().charAt(0);
 
       switch (sig) {
         case 'Z':
@@ -177,18 +176,18 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public String getPackageName() {
-    String className = getEnclosedMetaObject().getQualifiedSourceName();
-    int idx = className.lastIndexOf(".");
+    final String className = getEnclosedMetaObject().getQualifiedSourceName();
+    final int idx = className.lastIndexOf(".");
     if (idx != -1) {
       return className.substring(0, idx);
     }
     return "";
   }
 
-  private static MetaMethod[] fromMethodArray(TypeOracle oracle, JMethod[] methods) {
-    List<MetaMethod> methodList = new ArrayList<MetaMethod>();
+  private static MetaMethod[] fromMethodArray(final TypeOracle oracle, final JMethod[] methods) {
+    final List<MetaMethod> methodList = new ArrayList<MetaMethod>();
 
-    for (JMethod m : methods) {
+    for (final JMethod m : methods) {
       methodList.add(new GWTMethod(oracle, m));
     }
 
@@ -196,8 +195,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   private List<MetaMethod> getSpecialTypeMethods() {
-    List<MetaMethod> meths = new ArrayList<MetaMethod>();
-    JEnumType type = getEnclosedMetaObject().isEnum();
+    final List<MetaMethod> meths = new ArrayList<MetaMethod>();
+    final JEnumType type = getEnclosedMetaObject().isEnum();
 
     if (type != null) {
 
@@ -212,7 +211,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaMethod[] getMethods() {
-    Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
+    final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
     meths.addAll(getSpecialTypeMethods());
 
     JClassType type = getEnclosedMetaObject().isClassOrInterface();
@@ -221,14 +220,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     do {
-      for (JMethod jMethod : type.getMethods()) {
+      for (final JMethod jMethod : type.getMethods()) {
         if (!jMethod.isPrivate()) {
           meths.add(new GWTMethod(oracle, jMethod));
         }
       }
 
-      for (JClassType iface : type.getImplementedInterfaces()) {
-        meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, iface).getMethods()));
+      for (final JClassType interfaceType : type.getImplementedInterfaces()) {
+        meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, interfaceType).getMethods()));
       }
     }
     while ((type = type.getSuperclass()) != null);
@@ -238,7 +237,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaMethod[] getDeclaredMethods() {
-    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    final JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
       return null;
     }
@@ -246,10 +245,10 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return fromMethodArray(oracle, type.getMethods());
   }
 
-  private static MetaField[] fromFieldArray(TypeOracle oracle, JField[] methods) {
-    List<MetaField> methodList = new ArrayList<MetaField>();
+  private static MetaField[] fromFieldArray(final TypeOracle oracle, final JField[] methods) {
+    final List<MetaField> methodList = new ArrayList<MetaField>();
 
-    for (JField f : methods) {
+    for (final JField f : methods) {
       methodList.add(new GWTField(oracle, f));
     }
 
@@ -258,7 +257,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaField[] getFields() {
-    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    final JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
       return null;
     }
@@ -271,8 +270,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   @Override
-  public MetaField getField(String name) {
-    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+  public MetaField getField(final String name) {
+    final JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
       if ("length".equals(name) && getEnclosedMetaObject().isArray() != null) {
         return new MetaField.ArrayLengthMetaField(this);
@@ -281,7 +280,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
 
-    JField field = type.getField(name);
+    final JField field = type.getField(name);
 
     if (field == null) {
       throw new RuntimeException("no such field: " + name + " in class: " + this);
@@ -291,14 +290,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   @Override
-  public MetaField getDeclaredField(String name) {
+  public MetaField getDeclaredField(final String name) {
     return getField(name);
   }
 
-  private static MetaConstructor[] fromMethodArray(TypeOracle oracle, JConstructor[] constructors) {
-    List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
+  private static MetaConstructor[] fromMethodArray(final TypeOracle oracle, final JConstructor[] constructors) {
+    final List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
 
-    for (JConstructor c : constructors) {
+    for (final JConstructor c : constructors) {
       constructorList.add(new GWTConstructor(oracle, c));
     }
 
@@ -307,7 +306,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaConstructor[] getConstructors() {
-    JClassType type = getEnclosedMetaObject().isClassOrInterface();
+    final JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
       return null;
     }
@@ -322,11 +321,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaClass[] getInterfaces() {
-    JClassType jClassType = getEnclosedMetaObject().isClassOrInterface();
+    final JClassType jClassType = getEnclosedMetaObject().isClassOrInterface();
     if (jClassType == null) return new MetaClass[0];
 
-    List<MetaClass> metaClassList = new ArrayList<MetaClass>();
-    for (JClassType type : jClassType.getImplementedInterfaces()) {
+    final List<MetaClass> metaClassList = new ArrayList<MetaClass>();
+    for (final JClassType type : jClassType.getImplementedInterfaces()) {
 
       metaClassList.add(new GWTClass(oracle, type, false));
     }
@@ -357,7 +356,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaClass getComponentType() {
-    JArrayType type = getEnclosedMetaObject().isArray();
+    final JArrayType type = getEnclosedMetaObject().isArray();
     if (type == null) {
       return null;
     }
@@ -367,7 +366,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
-      JClassType classOrInterface = getEnclosedMetaObject().isClassOrInterface();
+      final JClassType classOrInterface = getEnclosedMetaObject().isClassOrInterface();
 
       if (classOrInterface != null) {
         annotationsCache = classOrInterface.getAnnotations();
@@ -383,11 +382,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
-    List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
-    JGenericType genericType = getEnclosedMetaObject().isGenericType();
+    final List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
+    final JGenericType genericType = getEnclosedMetaObject().isGenericType();
 
     if (genericType != null) {
-      for (JTypeParameter typeParameter : genericType.getTypeParameters()) {
+      for (final JTypeParameter typeParameter : genericType.getTypeParameters()) {
         typeVariables.add(new GWTTypeVariable(oracle, typeParameter));
       }
     }
@@ -468,7 +467,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   @Override
-  public MetaClass asArrayOf(int dimensions) {
+  public MetaClass asArrayOf(final int dimensions) {
     JType type = getEnclosedMetaObject();
     for (int i = 0; i < dimensions; i++) {
       type = oracle.getArrayType(type);

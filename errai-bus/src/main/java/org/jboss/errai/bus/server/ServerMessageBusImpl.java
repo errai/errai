@@ -147,10 +147,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       webSocketPort = WebSocketServer.getWebSocketPort(config);
     }
 
-    Integer bufferSize = ErraiConfigAttribs.BUS_BUFFER_SIZE.getInt(config);
+    final Integer bufferSize = ErraiConfigAttribs.BUS_BUFFER_SIZE.getInt(config);
     Integer segmentSize = ErraiConfigAttribs.BUS_BUFFER_SEGMENT_SIZE.getInt(config);
     Integer segmentCount = ErraiConfigAttribs.BUS_BUFFER_SEGMENT_COUNT.getInt(config);
-    String allocMode = ErraiConfigAttribs.BUS_BUFFER_ALLOCATION_MODE.get(config);
+    final String allocMode = ErraiConfigAttribs.BUS_BUFFER_ALLOCATION_MODE.get(config);
 
     if (segmentSize == null) {
       segmentSize = 8 * 1024;
@@ -166,7 +166,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       segmentCount = 4096;
     }
 
-    boolean directAlloc;
+    final boolean directAlloc;
     if (allocMode != null) {
       if ("direct".equals(allocMode)) {
         directAlloc = true;
@@ -222,7 +222,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               if (queue == null) return;
 
               if (message.hasPart(MessageParts.SubjectsList)) {
-                for (String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
+                for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
                   remoteSubscribe(session, queue, subject);
                 }
               }
@@ -264,7 +264,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               List<Message> deferred = null;
               synchronized (messageQueues) {
                 if (messageQueues.containsKey(session)) {
-                  MessageQueue q = messageQueues.get(session);
+                  final MessageQueue q = messageQueues.get(session);
                   synchronized (q) {
                     if (deferredQueue.containsKey(q)) {
                       deferred = deferredQueue.remove(q);
@@ -302,7 +302,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
               final StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
-              boolean first;
+              final boolean first;
               if (ErraiServiceConfigurator.LONG_POLLING) {
                 capabilitiesBuffer.append(Capabilities.LongPollAvailable.name());
                 first = false;
@@ -324,7 +324,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                 final String webSocketURL;
 
-                HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
+                final HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
 
                 if (webSocketServlet) {
                   webSocketURL = "ws://" + request.getHeader("Host") + webSocketPath;
@@ -353,7 +353,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               if (message.hasPart(MessageParts.WebSocketToken)) {
                 if (verifyOneTimeToken(session, message.get(String.class, MessageParts.WebSocketToken))) {
 
-                  LocalContext localContext = LocalContext.get(session);
+                  final LocalContext localContext = LocalContext.get(session);
 
                   localContext.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS,
                           WebSocketServerHandler.WEBSOCKET_ACTIVE);
@@ -377,7 +377,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     addSubscribeListener(new SubscribeListener() {
       @Override
-      public void onSubscribe(SubscriptionEvent event) {
+      public void onSubscribe(final SubscriptionEvent event) {
         if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
 
         MessageBuilder.createMessage()
@@ -391,7 +391,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     addUnsubscribeListener(new UnsubscribeListener() {
       @Override
-      public void onUnsubscribe(SubscriptionEvent event) {
+      public void onUnsubscribe(final SubscriptionEvent event) {
         if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
         if (messageQueues.isEmpty()) return;
 
@@ -411,7 +411,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       public void run() {
         runCount++;
         boolean houseKeepingPerformed = false;
-        List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
+        final List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
 
         int paged = 0, killed = 0;
 
@@ -443,8 +443,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           log.debug("[bus] killed " + killed + " sessions and paged out " + paged + " queues");
         }
 
-        for (MessageQueue ref : endSessions) {
-          for (String subject : new HashSet<String>(ServerMessageBusImpl.this.remoteSubscriptions.keySet())) {
+        for (final MessageQueue ref : endSessions) {
+          for (final String subject : new HashSet<String>(ServerMessageBusImpl.this.remoteSubscriptions.keySet())) {
             ServerMessageBusImpl.this.remoteUnsubscribe(ref.getSession(), ref, subject);
           }
 
@@ -515,21 +515,21 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private BufferStatus bufferStatus() {
-    int headBytes = transmissionbuffer.getHeadPositionBytes();
-    int bufSize = transmissionbuffer.getBufferSize();
+    final int headBytes = transmissionbuffer.getHeadPositionBytes();
+    final int bufSize = transmissionbuffer.getBufferSize();
 
     long lowTail = -1;
     long highTail = -1;
     int activeTails = 0;
 
-    int free;
+    final int free;
     long lowSegBytes = 0;
     long highSegBytes = 0;
 
 
-    for (MessageQueue q : messageQueues.values()) {
+    for (final MessageQueue q : messageQueues.values()) {
       activeTails++;
-      long seq = q.getCurrentBufferSequenceNumber();
+      final long seq = q.getCurrentBufferSequenceNumber();
       if (lowTail == -1) {
         lowTail = highTail = seq;
       }
@@ -570,7 +570,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    * Presently there are no configurable parameters.
    */
   @Override
-  public void configure(ErraiServiceConfigurator config) {
+  public void configure(final ErraiServiceConfigurator config) {
     // no configuration in current implementation
   }
 
@@ -601,7 +601,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
          * Inform the sender that we did not dispatchGlobal the message.
          */
 
-        Map<String, Object> rawMsg = new HashMap<String, Object>();
+        final Map<String, Object> rawMsg = new HashMap<String, Object>();
         rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
 
         try {
@@ -638,7 +638,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private void delayOrFail(final Message message, final Runnable deliveryTaskRunnable) {
     if (message.isFlagSet(RoutingFlag.RetryDelivery)
             && message.getResource(Integer.class, Resources.RetryAttempts.name()) > 3) {
-      NoSubscribersToDeliverTo ntdt = new NoSubscribersToDeliverTo(message.getSubject());
+      final NoSubscribersToDeliverTo ntdt = new NoSubscribersToDeliverTo(message.getSubject());
       if (message.getErrorCallback() != null) {
         message.getErrorCallback().error(message, ntdt);
       }
@@ -708,7 +708,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     try {
       if (fireListeners && !fireGlobalMessageListeners(message)) {
         if (message.hasPart(ReplyTo)) {
-          Map<String, Object> rawMsg = new HashMap<String, Object>();
+          final Map<String, Object> rawMsg = new HashMap<String, Object>();
           rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
           enqueueForDelivery(queue, CommandMessage.createWithParts(rawMsg));
         }
@@ -767,8 +767,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     try {
       synchronized (queue) {
         if (deferredQueue.containsKey(queue)) {
-          List<Message> deferredMessages = deferredQueue.get(queue);
-          Iterator<Message> dmIter = deferredMessages.iterator();
+          final List<Message> deferredMessages = deferredQueue.get(queue);
+          final Iterator<Message> dmIter = deferredMessages.iterator();
 
           Message m;
           while (dmIter.hasNext()) {
@@ -778,7 +778,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             }
           }
 
-          for (Message message : deferredQueue.get(queue)) {
+          for (final Message message : deferredQueue.get(queue)) {
             queue.offer(message);
           }
 
@@ -842,7 +842,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    */
   @Override
   public void addRule(final String subject, final BooleanRoutingRule rule) {
-    DeliveryPlan plan = subscriptions.get(subject);
+    final DeliveryPlan plan = subscriptions.get(subject);
     if (plan == null) {
       throw new RuntimeException("no such subject: " + subject);
     }
@@ -876,7 +876,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
         else {
           boolean nonRemote = true;
-          for (MessageCallback callback : plan.getDeliverTo()) {
+          for (final MessageCallback callback : plan.getDeliverTo()) {
             if (!(callback instanceof RemoteMessageCallback)) {
               nonRemote = false;
               break;
@@ -985,7 +985,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final boolean broadcastable;
     private final AtomicInteger totalBroadcasted = new AtomicInteger();
 
-    public RemoteMessageCallback(boolean broadcastable, String svc) {
+    public RemoteMessageCallback(final boolean broadcastable, final String svc) {
       this.broadcastable = broadcastable;
       this.svc = svc;
     }
@@ -1001,7 +1001,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
           BufferHelper.encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
 
-          for (MessageQueue q : queues) {
+          for (final MessageQueue q : queues) {
             q.wake();
           }
 
@@ -1014,7 +1014,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
       }
       else {
-        for (MessageQueue q : queues) {
+        for (final MessageQueue q : queues) {
           send(q, message, true);
         }
       }
@@ -1053,7 +1053,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       return;
     }
 
-    RemoteMessageCallback rmc = remoteSubscriptions.get(subject);
+    final RemoteMessageCallback rmc = remoteSubscriptions.get(subject);
     rmc.removeQueue(queue);
 
     try {
@@ -1112,7 +1112,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private boolean fireGlobalMessageListeners(final Message message) {
     boolean allowContinue = true;
 
-    for (MessageListener listener : listeners) {
+    for (final MessageListener listener : listeners) {
       if (!listener.handleMessage(message)) {
         allowContinue = false;
       }
@@ -1217,7 +1217,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private MessageQueue getQueueByMessage(final Message message) {
-    MessageQueue queue = getQueue(getSession(message));
+    final MessageQueue queue = getQueue(getSession(message));
     if (queue == null) {
       System.out.println("***WARN***");
       throw new QueueUnavailableException("no queue available to send. (queue or session may have expired): " +
@@ -1293,15 +1293,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     this.busMonitor = monitor;
 
 
-    for (Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
+    for (final Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
       busMonitor.notifyQueueAttached(entry.getKey().getSessionId(), entry.getValue());
     }
 
-    for (String subject : subscriptions.keySet()) {
+    for (final String subject : subscriptions.keySet()) {
       busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(false, "None", 1, false, subject));
     }
-    for (Map.Entry<String, RemoteMessageCallback> entry : remoteSubscriptions.entrySet()) {
-      for (MessageQueue queue : entry.getValue().getQueues()) {
+    for (final Map.Entry<String, RemoteMessageCallback> entry : remoteSubscriptions.entrySet()) {
+      for (final MessageQueue queue : entry.getValue().getQueues()) {
         busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), 1, false, entry.getKey()));
       }
     }
@@ -1311,7 +1311,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   @Override
   public void stop() {
-    for (MessageQueue queue : messageQueues.values()) {
+    for (final MessageQueue queue : messageQueues.values()) {
       queue.stopQueue();
     }
 

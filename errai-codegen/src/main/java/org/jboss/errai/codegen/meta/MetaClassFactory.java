@@ -62,7 +62,7 @@ public final class MetaClassFactory {
   static {
     DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
       @Override
-      public Object convertFrom(Object in) {
+      public Object convertFrom(final Object in) {
         if (MetaClass.class.isAssignableFrom(in.getClass())) {
           return ((MetaClass) in).asClass();
         }
@@ -72,7 +72,7 @@ public final class MetaClassFactory {
       }
 
       @Override
-      public boolean canConvertFrom(Class cls) {
+      public boolean canConvertFrom(final Class cls) {
         return MetaType.class.isAssignableFrom(cls);
       }
     });
@@ -113,21 +113,21 @@ public final class MetaClassFactory {
     PRIMARY_CLASS_CACHE.put(clazz.getFullyQualifiedName(), clazz);
   }
 
-  public static MetaClass get(String fullyQualifiedClassName, boolean erased) {
+  public static MetaClass get(final String fullyQualifiedClassName, final boolean erased) {
     return createOrGet(fullyQualifiedClassName, erased);
   }
 
-  public static MetaClass get(String fullyQualifiedClassName) {
+  public static MetaClass get(final String fullyQualifiedClassName) {
     return createOrGet(fullyQualifiedClassName);
   }
 
-  public static MetaClass get(Class<?> clazz) {
+  public static MetaClass get(final Class<?> clazz) {
     if (clazz == null) return null;
     return createOrGet(clazz.getName(), false);
   }
 
-  public static MetaClass getArrayOf(Class<?> clazz, int dims) {
-    int[] da = new int[dims];
+  public static MetaClass getArrayOf(final Class<?> clazz, final int dims) {
+    final int[] da = new int[dims];
     for (int i = 0; i < da.length; i++) {
       da[i] = 0;
     }
@@ -135,34 +135,34 @@ public final class MetaClassFactory {
     return getArrayOf(clazz, da);
   }
 
-  public static MetaClass getArrayOf(Class<?> clazz, int... dims) {
+  public static MetaClass getArrayOf(final Class<?> clazz, int... dims) {
     if (dims.length == 0) {
       dims = new int[1];
     }
     return JavaReflectionClass.newInstance(Array.newInstance(clazz, dims).getClass());
   }
 
-  public static MetaClass get(Class<?> clazz, Type type) {
+  public static MetaClass get(final Class<?> clazz, final Type type) {
     return createOrGet(clazz, type);
   }
 
-  public static MetaClass get(TypeLiteral<?> literal) {
+  public static MetaClass get(final TypeLiteral<?> literal) {
     return createOrGet(literal);
   }
 
-  public static MetaMethod get(Method method) {
+  public static MetaMethod get(final Method method) {
     return get(method.getDeclaringClass()).getDeclaredMethod(method.getName(), method.getParameterTypes());
   }
 
-  public static MetaField get(Field field) {
+  public static MetaField get(final Field field) {
     return get(field.getDeclaringClass()).getDeclaredField(field.getName());
   }
 
-  public static Statement getAsStatement(Class<?> clazz) {
+  public static Statement getAsStatement(final Class<?> clazz) {
     final MetaClass metaClass = createOrGet(clazz.getName(), false);
     return new Statement() {
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         return LoadClassReference.getClassReference(metaClass, context);
       }
 
@@ -170,18 +170,14 @@ public final class MetaClassFactory {
       public MetaClass getType() {
         return MetaClassFactory.get(Class.class);
       }
-
-      public Context getContext() {
-        return null;
-      }
     };
   }
 
-  public static boolean isCached(String name) {
+  public static boolean isCached(final String name) {
     return ERASED_CLASS_CACHE.containsKey(name);
   }
 
-  private static MetaClass createOrGet(String fullyQualifiedClassName) {
+  private static MetaClass createOrGet(final String fullyQualifiedClassName) {
     if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
       return createOrGet(fullyQualifiedClassName, false);
     }
@@ -189,11 +185,11 @@ public final class MetaClassFactory {
     return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
   }
 
-  private static MetaClass createOrGet(TypeLiteral type) {
+  private static MetaClass createOrGet(final TypeLiteral type) {
     if (type == null) return null;
 
     if (!ERASED_CLASS_CACHE.containsKey(type.toString())) {
-      MetaClass gwtClass = JavaReflectionClass.newUncachedInstance(type);
+      final MetaClass gwtClass = JavaReflectionClass.newUncachedInstance(type);
 
       addLookups(type, gwtClass);
       return gwtClass;
@@ -202,7 +198,7 @@ public final class MetaClassFactory {
     return ERASED_CLASS_CACHE.get(type.toString());
   }
 
-  private static MetaClass createOrGet(String clsName, boolean erased) {
+  private static MetaClass createOrGet(final String clsName, final boolean erased) {
     if (clsName == null) return null;
 
     MetaClass mCls;
@@ -221,7 +217,7 @@ public final class MetaClassFactory {
     return mCls;
   }
 
-  private static MetaClass createOrGet(Class cls, Type type) {
+  private static MetaClass createOrGet(final Class cls, final Type type) {
     if (cls == null) return null;
 
     if (cls.getTypeParameters() != null) {
@@ -229,7 +225,7 @@ public final class MetaClassFactory {
     }
 
     if (!ERASED_CLASS_CACHE.containsKey(cls.getName())) {
-      MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
+      final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
 
       addLookups(cls, javaReflectionClass);
       return javaReflectionClass;
@@ -238,26 +234,20 @@ public final class MetaClassFactory {
     return ERASED_CLASS_CACHE.get(cls.getName());
   }
 
-  public static MetaClass parameterizedAs(Class clazz, MetaParameterizedType parameterizedType) {
+  public static MetaClass parameterizedAs(final Class clazz, final MetaParameterizedType parameterizedType) {
     return parameterizedAs(MetaClassFactory.get(clazz), parameterizedType);
   }
 
-  public static MetaClass parameterizedAs(MetaClass clazz, MetaParameterizedType parameterizedType) {
+  public static MetaClass parameterizedAs(final MetaClass clazz, final MetaParameterizedType parameterizedType) {
     return cloneToBuildMetaClass(clazz, parameterizedType);
   }
 
-  public static MetaClass erasedVersionOf(MetaClass clazz) {
-    BuildMetaClass mc = cloneToBuildMetaClass(clazz);
-    mc.setParameterizedType(null);
-    return mc;
-  }
-
-  private static BuildMetaClass cloneToBuildMetaClass(MetaClass clazz) {
+  private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz) {
     return cloneToBuildMetaClass(clazz, null);
   }
 
-  private static BuildMetaClass cloneToBuildMetaClass(MetaClass clazz, MetaParameterizedType parameterizedType) {
-    BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create(), clazz.getFullyQualifiedName());
+  private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz, final MetaParameterizedType parameterizedType) {
+    final BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create(), clazz.getFullyQualifiedName());
 
     buildMetaClass.setReifiedFormOf(clazz);
     buildMetaClass.setAbstract(clazz.isAbstract());
@@ -268,7 +258,7 @@ public final class MetaClassFactory {
     buildMetaClass.setScope(GenUtil.scopeOf(clazz));
     buildMetaClass.setSuperClass(clazz.getSuperClass());
 
-    for (MetaTypeVariable typeVariable : clazz.getTypeParameters()) {
+    for (final MetaTypeVariable typeVariable : clazz.getTypeParameters()) {
       buildMetaClass.addTypeVariable(typeVariable);
     }
 
@@ -279,8 +269,8 @@ public final class MetaClassFactory {
       buildMetaClass.setParameterizedType(clazz.getParameterizedType());
     }
 
-    for (MetaField field : clazz.getDeclaredFields()) {
-      BuildMetaField bmf = new ShadowBuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
+    for (final MetaField field : clazz.getDeclaredFields()) {
+      final BuildMetaField bmf = new ShadowBuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
               GenUtil.scopeOf(field), field.getType(), field.getName(), field);
 
       bmf.setFinal(field.isFinal());
@@ -291,8 +281,8 @@ public final class MetaClassFactory {
       buildMetaClass.addField(bmf);
     }
 
-    for (MetaConstructor c : clazz.getDeclaredConstructors()) {
-      BuildMetaConstructor newConstructor = new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
+    for (final MetaConstructor c : clazz.getDeclaredConstructors()) {
+      final BuildMetaConstructor newConstructor = new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
               GenUtil.scopeOf(c),
               DefParameters.from(c));
       newConstructor.setReifiedFormOf(c);
@@ -300,25 +290,25 @@ public final class MetaClassFactory {
       buildMetaClass.addConstructor(newConstructor);
     }
 
-    for (MetaMethod method : clazz.getDeclaredMethods()) {
+    for (final MetaMethod method : clazz.getDeclaredMethods()) {
       MetaClass returnType = method.getReturnType();
       if (method.getGenericReturnType() instanceof MetaTypeVariable) {
-        MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericReturnType();
-        MetaClass tVarVal = getTypeVariableValue(typeVariable, buildMetaClass);
+        final MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericReturnType();
+        final MetaClass tVarVal = getTypeVariableValue(typeVariable, buildMetaClass);
         if (tVarVal != null) {
           returnType = tVarVal;
         }
       }
 
-      List<Parameter> parameters = new ArrayList<Parameter>();
+      final List<Parameter> parameters = new ArrayList<Parameter>();
       int i = 0;
-      for (MetaParameter parm : method.getParameters()) {
+      for (final MetaParameter parm : method.getParameters()) {
         MetaClass parmType = null;
         if (method.getGenericParameterTypes() != null) {
           if (method.getGenericParameterTypes()[i] instanceof MetaTypeVariable) {
-            MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericParameterTypes()[i];
+            final MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericParameterTypes()[i];
 
-            MetaClass tVarVal = getTypeVariableValue(typeVariable, buildMetaClass);
+            final MetaClass tVarVal = getTypeVariableValue(typeVariable, buildMetaClass);
             if (tVarVal != null) {
               parmType = tVarVal;
             }
@@ -333,7 +323,7 @@ public final class MetaClassFactory {
         i++;
       }
 
-      BuildMetaMethod newMethod = new ShadowBuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
+      final BuildMetaMethod newMethod = new ShadowBuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
               GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
               method.getGenericReturnType(),
               DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()), method);
@@ -346,9 +336,9 @@ public final class MetaClassFactory {
     return buildMetaClass;
   }
 
-  private static MetaClass getTypeVariableValue(MetaTypeVariable typeVariable, MetaClass clazz) {
+  private static MetaClass getTypeVariableValue(final MetaTypeVariable typeVariable, final MetaClass clazz) {
     int idx = -1;
-    MetaTypeVariable[] typeVariables = clazz.getTypeParameters();
+    final MetaTypeVariable[] typeVariables = clazz.getTypeParameters();
     for (int i = 0; i < typeVariables.length; i++) {
       if (typeVariables[i].getName().equals(typeVariable.getName())) {
         idx = i;
@@ -357,7 +347,7 @@ public final class MetaClassFactory {
     }
 
     if (idx != -1) {
-      MetaType type = clazz.getParameterizedType().getTypeParameters()[idx];
+      final MetaType type = clazz.getParameterizedType().getTypeParameters()[idx];
       if (type instanceof MetaClass) {
         return (MetaClass) type;
       }
@@ -365,10 +355,10 @@ public final class MetaClassFactory {
     return null;
   }
 
-  public static MetaParameterizedType typeParametersOf(Object... classes) {
-    MetaType[] types = new MetaType[classes.length];
+  public static MetaParameterizedType typeParametersOf(final Object... classes) {
+    final MetaType[] types = new MetaType[classes.length];
     int i = 0;
-    for (Object o : classes) {
+    for (final Object o : classes) {
       if (o instanceof Class) {
         types[i++] = MetaClassFactory.get((Class) o);
       }
@@ -386,25 +376,23 @@ public final class MetaClassFactory {
     return typeParametersOf(types);
   }
 
-  public static MetaParameterizedType typeParametersOf(Class<?>... classes) {
+  public static MetaParameterizedType typeParametersOf(final Class<?>... classes) {
     return typeParametersOf(fromClassArray(classes));
   }
 
-  public static MetaParameterizedType typeParametersOf(MetaType... classes) {
-    BuildMetaParameterizedType buildMetaParms = new BuildMetaParameterizedType(classes, null, null);
-
-    return buildMetaParms;
+  public static MetaParameterizedType typeParametersOf(final MetaType... classes) {
+    return new BuildMetaParameterizedType(classes, null, null);
   }
 
-  private static void addLookups(TypeLiteral literal, MetaClass metaClass) {
+  private static void addLookups(final TypeLiteral literal, final MetaClass metaClass) {
     ERASED_CLASS_CACHE.put(literal.toString(), metaClass);
   }
 
-  private static void addLookups(Class cls, MetaClass metaClass) {
+  private static void addLookups(final Class cls, final MetaClass metaClass) {
     ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
   }
 
-  private static void addLookups(String encName, MetaClass metaClass) {
+  private static void addLookups(final String encName, final MetaClass metaClass) {
     ERASED_CLASS_CACHE.put(encName, metaClass);
   }
 
@@ -423,7 +411,7 @@ public final class MetaClassFactory {
   });
 
 
-  public static Class<?> loadClass(String fullyQualifiedName) {
+  public static Class<?> loadClass(final String fullyQualifiedName) {
     try {
       Class<?> cls = PRIMITIVE_LOOKUP.get(fullyQualifiedName);
       if (cls == null) {
@@ -440,13 +428,13 @@ public final class MetaClassFactory {
         final File sourceFile = new File(url.getFile()).getAbsoluteFile();
         if (sourceFile.exists()) {
 
-          File directory = sourceFile.getParentFile();
-          String packageName = fullyQualifiedName.substring(0, fullyQualifiedName.lastIndexOf('.'));
-          String className = fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf('.') + 1);
+          final File directory = sourceFile.getParentFile();
+          final String packageName = fullyQualifiedName.substring(0, fullyQualifiedName.lastIndexOf('.'));
+          final String className = fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf('.') + 1);
 
-          String temp = RebindUtils.getTempDirectory() + "/hotload/";
+          final String temp = RebindUtils.getTempDirectory() + "/hotload/";
 
-          String location = ClassChangeUtil.compileClass(directory.getAbsolutePath(),
+          final String location = ClassChangeUtil.compileClass(directory.getAbsolutePath(),
                   packageName,
                   className,
                   temp);
@@ -465,9 +453,9 @@ public final class MetaClassFactory {
     }
   }
 
-  public static boolean canLoadClass(String fullyQualifiedName) {
+  public static boolean canLoadClass(final String fullyQualifiedName) {
     try {
-      Class cls = loadClass(fullyQualifiedName);
+      final Class cls = loadClass(fullyQualifiedName);
       return cls != null;
     }
     catch (Throwable t) {
@@ -476,24 +464,24 @@ public final class MetaClassFactory {
   }
 
 
-  public static MetaClass[] fromClassArray(Class<?>[] classes) {
-    MetaClass[] newClasses = new MetaClass[classes.length];
+  public static MetaClass[] fromClassArray(final Class<?>[] classes) {
+    final MetaClass[] newClasses = new MetaClass[classes.length];
     for (int i = 0; i < classes.length; i++) {
       newClasses[i] = createOrGet(classes[i].getName(), false);
     }
     return newClasses;
   }
 
-  public static Class<?>[] asClassArray(MetaParameter[] parms) {
-    MetaType[] type = new MetaType[parms.length];
+  public static Class<?>[] asClassArray(final MetaParameter[] parms) {
+    final MetaType[] type = new MetaType[parms.length];
     for (int i = 0; i < parms.length; i++) {
       type[i] = parms[i].getType();
     }
     return asClassArray(type);
   }
 
-  public static Class<?>[] asClassArray(MetaType[] cls) {
-    Class<?>[] newClasses = new Class<?>[cls.length];
+  public static Class<?>[] asClassArray(final MetaType[] cls) {
+    final Class<?>[] newClasses = new Class<?>[cls.length];
     for (int i = 0; i < cls.length; i++) {
       if (cls[i] instanceof MetaParameterizedType) {
         newClasses[i] = ((MetaClass) ((MetaParameterizedType) cls[i]).getRawType()).asClass();

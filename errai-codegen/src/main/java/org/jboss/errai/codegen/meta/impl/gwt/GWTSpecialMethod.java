@@ -32,20 +32,28 @@ import java.lang.annotation.Annotation;
  * @author Mike Brock
  */
 public class GWTSpecialMethod extends MetaMethod {
-  private DefModifiers modifiers;
-  private Scope scope;
-  private GWTClass declaringClass;
-  private MetaClass returnType;
-  private String methodName;
-  private MetaParameter[] parameters;
+  private final DefModifiers modifiers;
+  private final Scope scope;
+  private final GWTClass declaringClass;
+  private final MetaClass returnType;
+  private final String methodName;
+  private final MetaParameter[] parameters;
 
-  GWTSpecialMethod(GWTClass declaringClass, DefModifiers modifiers, Scope scope,
-                   Class returnType, String methodName, MetaParameter... parameters) {
+  GWTSpecialMethod(final GWTClass declaringClass,
+                   final DefModifiers modifiers,
+                   final Scope scope,
+                   final Class returnType,
+                   final String methodName,
+                   final MetaParameter... parameters) {
     this(declaringClass, modifiers, scope, MetaClassFactory.get(returnType), methodName, parameters);
   }
 
-  GWTSpecialMethod(GWTClass declaringClass, DefModifiers modifiers, Scope scope,
-                   MetaClass returnType, String methodName, MetaParameter... parameters) {
+  GWTSpecialMethod(final GWTClass declaringClass,
+                   final DefModifiers modifiers,
+                   final Scope scope,
+                   final MetaClass returnType,
+                   final String methodName,
+                   final MetaParameter... parameters) {
     this.declaringClass = declaringClass;
     this.modifiers = modifiers;
     this.scope = scope;

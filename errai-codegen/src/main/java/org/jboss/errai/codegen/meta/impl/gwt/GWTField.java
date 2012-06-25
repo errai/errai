@@ -16,26 +16,24 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.lang.annotation.Annotation;
-
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JGenericType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JGenericType;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTField extends MetaField {
-  private JField field;
-  private Annotation[] annotations;
-  private TypeOracle oracle;
+  private final JField field;
+  private final Annotation[] annotations;
+  private final TypeOracle oracle;
 
-  GWTField(TypeOracle oracle, JField field) {
+  GWTField(final TypeOracle oracle, final JField field) {
     this.oracle = oracle;
     this.field = field;
     this.annotations = field.getAnnotations();
@@ -56,22 +54,23 @@ public class GWTField extends MetaField {
     return annotations == null ? new Annotation[0] : annotations;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
+  public <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+    for (final Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
     }
     return null;
   }
 
   @Override
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+  public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 
   @Override
   public MetaType getGenericType() {
-    JGenericType genericType = field.getType().isGenericType();
+    final JGenericType genericType = field.getType().isGenericType();
     if (genericType != null) {
       return new GWTGenericDeclaration(oracle, genericType);
     }

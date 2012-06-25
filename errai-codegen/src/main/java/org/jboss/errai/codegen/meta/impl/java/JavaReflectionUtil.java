@@ -16,6 +16,10 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.ParameterizedType;
@@ -27,29 +31,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionUtil {
 
-  public static MetaTypeVariable[] fromTypeVariable(TypeVariable[] typeVariables) {
-    List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
+  public static MetaTypeVariable[] fromTypeVariable(final TypeVariable[] typeVariables) {
+    final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
 
-    for (TypeVariable typeVariable : typeVariables) {
+    for (final TypeVariable typeVariable : typeVariables) {
       typeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
     }
 
     return typeVariableList.toArray(new MetaTypeVariable[typeVariableList.size()]);
   }
 
-  public static MetaType[] fromTypeArray(Type[] types) {
-    List<MetaType> typeList = new ArrayList<MetaType>();
+  public static MetaType[] fromTypeArray(final Type[] types) {
+    final List<MetaType> typeList = new ArrayList<MetaType>();
 
-    for (Type t : types) {
+    for (final Type t : types) {
       typeList.add(fromType(t));
     }
 
@@ -58,7 +58,7 @@ public class JavaReflectionUtil {
 
   private static final Map<Type, MetaType> FROM_TYPE_CLASS = new HashMap<Type, MetaType>();
 
-  public static MetaType fromType(Type t) {
+  public static MetaType fromType(final Type t) {
     MetaType type = FROM_TYPE_CLASS.get(t);
     if (type == null) {
       if (t instanceof Class) {

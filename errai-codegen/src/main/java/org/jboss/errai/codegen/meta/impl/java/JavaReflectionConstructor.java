@@ -16,13 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -30,6 +23,13 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -40,7 +40,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   private MetaClass declaringClass;
   private Annotation[] annotationsCache;
 
-  JavaReflectionConstructor(Constructor c) {
+  JavaReflectionConstructor(final Constructor c) {
     constructor = c;
   }
 
@@ -48,13 +48,13 @@ public class JavaReflectionConstructor extends MetaConstructor {
   public MetaParameter[] getParameters() {
     if (parameters == null) {
 
-      Class<?>[] parmTypes = constructor.getParameterTypes();
-      Type[] genParmTypes = constructor.getGenericParameterTypes();
-      Annotation[][] parmAnnos = constructor.getParameterAnnotations();
-      List<MetaParameter> parmList = new ArrayList<MetaParameter>(parmTypes.length);
+      final Class<?>[] parmTypes = constructor.getParameterTypes();
+      final Type[] genParmTypes = constructor.getGenericParameterTypes();
+      final Annotation[][] parmAnnos = constructor.getParameterAnnotations();
+      final List<MetaParameter> parmList = new ArrayList<MetaParameter>(parmTypes.length);
 
       for (int i = 0; i < parmTypes.length; i++) {
-        MetaClass mcParm = MetaClassFactory.get(parmTypes[i], genParmTypes[i]);
+        final MetaClass mcParm = MetaClassFactory.get(parmTypes[i], genParmTypes[i]);
         parmList.add(new JavaReflectionParameter(mcParm, parmAnnos[i], this));
       }
 
@@ -172,7 +172,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof MetaConstructor && GenUtil.equals(this, (MetaConstructor) o);
   }
 

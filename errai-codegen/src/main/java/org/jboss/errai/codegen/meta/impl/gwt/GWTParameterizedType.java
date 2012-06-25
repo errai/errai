@@ -16,33 +16,31 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTParameterizedType extends AbstractMetaParameterizedType {
-  private JParameterizedType parameterizedType;
-  private TypeOracle oracle;
+  private final JParameterizedType parameterizedType;
+  private final TypeOracle oracle;
 
-  public GWTParameterizedType(TypeOracle oracle, JParameterizedType parameterizedType) {
+  public GWTParameterizedType(final TypeOracle oracle, final JParameterizedType parameterizedType) {
     this.parameterizedType = parameterizedType;
     this.oracle = oracle;
   }
 
   @Override
   public MetaType[] getTypeParameters() {
-    List<MetaType> types = new ArrayList<MetaType>();
-    for (JClassType parm : parameterizedType.getTypeArgs()) {
+    final List<MetaType> types = new ArrayList<MetaType>();
+    for (final JClassType parm : parameterizedType.getTypeArgs()) {
       types.add(GWTUtil.eraseOrReturn(oracle, parm));
     }
     return types.toArray(new MetaType[types.size()]);
@@ -59,8 +57,8 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   }
 
   public String toString() {
-    StringBuilder buf = new StringBuilder("<");
-    JClassType[] parms = parameterizedType.getTypeArgs();
+    final StringBuilder buf = new StringBuilder("<");
+    final JClassType[] parms = parameterizedType.getTypeArgs();
     for (int i = 0; i < parms.length; i++) {
       buf.append(GWTUtil.eraseOrReturn(oracle, parms[i]).getFullyQualifiedName());
       if (i + 1 < parms.length) buf.append(',');

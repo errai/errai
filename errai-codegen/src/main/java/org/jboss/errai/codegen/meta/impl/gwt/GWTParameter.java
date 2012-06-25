@@ -16,35 +16,33 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.lang.annotation.Annotation;
-
+import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 
-import com.google.gwt.core.ext.typeinfo.JParameter;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTParameter extends MetaParameter {
-  private JParameter parameter;
-  private Annotation[] annotations;
-  private MetaClassMember declaredBy;
-  private TypeOracle oracle;
+  private final JParameter parameter;
+  private final Annotation[] annotations;
+  private final MetaClassMember declaredBy;
+  private final TypeOracle oracle;
 
-  GWTParameter(TypeOracle oracle, JParameter parameter, MetaMethod declaredBy) {
+  GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaMethod declaredBy) {
     this.parameter = parameter;
     this.declaredBy = declaredBy;
     annotations = parameter.getAnnotations();
     this.oracle = oracle;
   }
 
-  GWTParameter(TypeOracle oracle,JParameter parameter, MetaConstructor declaredBy) {
+  GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaConstructor declaredBy) {
     this.parameter = parameter;
     this.declaredBy = declaredBy;
     this.oracle = oracle;
@@ -66,16 +64,17 @@ public class GWTParameter extends MetaParameter {
     return annotations == null ? new Annotation[0] : annotations;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
+  public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+    for (final Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) return (A) a;
     }
     return null;
   }
 
   @Override
-  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+  public final boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 

@@ -16,18 +16,18 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.reflect.WildcardType;
-
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
+
+import java.lang.reflect.WildcardType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionWildcardType implements MetaWildcardType {
-  private WildcardType wildcardType;
+  private final WildcardType wildcardType;
 
-  public JavaReflectionWildcardType(WildcardType wildcardType) {
+  public JavaReflectionWildcardType(final WildcardType wildcardType) {
     this.wildcardType = wildcardType;
   }
 

@@ -16,18 +16,18 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.reflect.GenericArrayType;
-
 import org.jboss.errai.codegen.meta.MetaGenericArrayType;
 import org.jboss.errai.codegen.meta.MetaType;
+
+import java.lang.reflect.GenericArrayType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionGenericArrayType implements MetaGenericArrayType {
-  private GenericArrayType type;
+  private final GenericArrayType type;
 
-  public JavaReflectionGenericArrayType(GenericArrayType type) {
+  public JavaReflectionGenericArrayType(final GenericArrayType type) {
     this.type = type;
   }
 

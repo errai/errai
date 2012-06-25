@@ -16,14 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.reflect.TypeToken;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -32,7 +25,13 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.common.client.framework.Assert;
 
-import com.google.common.reflect.TypeToken;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class JavaReflectionMethod extends MetaMethod {
   private final Method method;
@@ -41,7 +40,7 @@ public class JavaReflectionMethod extends MetaMethod {
   private MetaClass declaringClass;
   private MetaClass returnType;
 
-  JavaReflectionMethod(MetaClass referenceClass, Method method) {
+  JavaReflectionMethod(final MetaClass referenceClass, final Method method) {
     this.referenceClass = Assert.notNull(referenceClass);
     this.method = Assert.notNull(method);
   }
@@ -54,18 +53,18 @@ public class JavaReflectionMethod extends MetaMethod {
   @Override
   public MetaParameter[] getParameters() {
     if (parameters == null) {
-      List<MetaParameter> parmList = new ArrayList<MetaParameter>();
+      final List<MetaParameter> parmList = new ArrayList<MetaParameter>();
 
-      Class<?>[] parmTypes = method.getParameterTypes();
-      Type[] genParmTypes = method.getGenericParameterTypes();
-      Annotation[][] parmAnnos = method.getParameterAnnotations();
+      final Class<?>[] parmTypes = method.getParameterTypes();
+      final Type[] genParmTypes = method.getGenericParameterTypes();
+      final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
       for (int i = 0; i < parmTypes.length; i++) {
-        TypeToken<?> token = TypeToken.of(referenceClass.asClass());
-        Class<?> parmType = token.resolveType(genParmTypes[i]).getRawType();
+        final TypeToken<?> token = TypeToken.of(referenceClass.asClass());
+        final Class<?> parmType = token.resolveType(genParmTypes[i]).getRawType();
 
-        MetaClass mcParm = MetaClassFactory.get(parmType, genParmTypes[i]);
-        parmList.add(new JavaReflectionParameter(mcParm, parmAnnos[i], this));
+        final MetaClass mcParm = MetaClassFactory.get(parmType, genParmTypes[i]);
+        parmList.add(new JavaReflectionParameter(mcParm, parameterAnnotations[i], this));
       }
       parameters = parmList.toArray(new MetaParameter[parmList.size()]);
     }

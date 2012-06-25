@@ -27,10 +27,10 @@ import com.google.gwt.core.ext.typeinfo.JWildcardType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTWildcardType implements MetaWildcardType {
-  private JWildcardType wildcardType;
-  private TypeOracle oracle;
+  private final JWildcardType wildcardType;
+  private final TypeOracle oracle;
 
-  public GWTWildcardType(TypeOracle oracle, JWildcardType wildcardType) {
+  public GWTWildcardType(final TypeOracle oracle, final JWildcardType wildcardType) {
     this.wildcardType = wildcardType;
     this.oracle = oracle;
   }

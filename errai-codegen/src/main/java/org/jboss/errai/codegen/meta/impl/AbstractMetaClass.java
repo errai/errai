@@ -46,29 +46,29 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   protected MetaParameterizedType parameterizedType;
   protected MetaParameterizedType genericSuperClass;
 
-  protected AbstractMetaClass(T enclosedMetaObject) {
+  protected AbstractMetaClass(final T enclosedMetaObject) {
     this.enclosedMetaObject = enclosedMetaObject;
   }
 
   @Override
   public String getFullyQualifiedNameWithTypeParms() {
-    StringBuilder buf = new StringBuilder(getFullyQualifiedName());
+    final StringBuilder buf = new StringBuilder(getFullyQualifiedName());
     buf.append(getTypeParmsString(getParameterizedType()));
     return buf.toString();
   }
 
-  private String getTypeParmsString(MetaParameterizedType parameterizedType) {
-    StringBuilder buf = new StringBuilder(512);
+  private String getTypeParmsString(final MetaParameterizedType parameterizedType) {
+    final StringBuilder buf = new StringBuilder(512);
 
     if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
       buf.append("<");
       for (int i = 0; i < parameterizedType.getTypeParameters().length; i++) {
 
-        MetaType typeParameter = parameterizedType.getTypeParameters()[i];
+        final MetaType typeParameter = parameterizedType.getTypeParameters()[i];
         if (typeParameter instanceof MetaParameterizedType) {
-          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParameter;
-          buf.append(((MetaClass) parameterizedTypeParemeter.getRawType()).getFullyQualifiedName());
-          buf.append(getTypeParmsString(parameterizedTypeParemeter));
+          final MetaParameterizedType parameterizedTypeParameter = (MetaParameterizedType) typeParameter;
+          buf.append(((MetaClass) parameterizedTypeParameter.getRawType()).getFullyQualifiedName());
+          buf.append(getTypeParmsString(parameterizedTypeParameter));
         }
         else {
           buf.append(((MetaClass) typeParameter).getFullyQualifiedName());
@@ -83,12 +83,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return buf.toString();
   }
 
-  protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
+  protected static MetaMethod _getMethod(final MetaMethod[] methods, final String name, final MetaClass... parmTypes) {
     MetaMethod candidate = null;
     int bestScore = 0;
     int score;
 
-    for (MetaMethod method : methods) {
+    for (final MetaMethod method : methods) {
       score = 0;
       if (method.getName().equals(name)) {
         if (method.getParameters().length == parmTypes.length) {
@@ -119,12 +119,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return candidate;
   }
 
-  protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
+  protected static MetaConstructor _getConstructor(final MetaConstructor[] constructors, final MetaClass... parmTypes) {
     MetaConstructor candidate = null;
     int bestScore = 0;
     int score;
 
-    for (MetaConstructor constructor : constructors) {
+    for (final MetaConstructor constructor : constructors) {
       score = 0;
       if (constructor.getParameters().length == parmTypes.length) {
         if (parmTypes.length == 0) {
@@ -151,36 +151,34 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return candidate;
   }
 
-  private Map<String, Map<String, MetaMethod>> METHOD_MATCH_CACHE = new HashMap<String, Map<String, MetaMethod>>();
-
   @Override
-  public MetaMethod getMethod(String name, Class... parmTypes) {
+  public MetaMethod getMethod(final String name, final Class... parmTypes) {
     return _getMethod(getMethods(), name, classToMeta(parmTypes));
   }
 
   @Override
-  public MetaMethod getMethod(String name, MetaClass... parameters) {
+  public MetaMethod getMethod(final String name, final MetaClass... parameters) {
     return _getMethod(getMethods(), name, parameters);
   }
 
   @Override
-  public MetaMethod getDeclaredMethod(String name, Class... parmTypes) {
+  public MetaMethod getDeclaredMethod(final String name, final Class... parmTypes) {
     return _getMethod(getDeclaredMethods(), name, classToMeta(parmTypes));
   }
 
   @Override
-  public MetaMethod getDeclaredMethod(String name, MetaClass... parmTypes) {
+  public MetaMethod getDeclaredMethod(final String name, final MetaClass... parmTypes) {
     return _getMethod(getDeclaredMethods(), name, parmTypes);
   }
 
   @Override
-  public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
+  public MetaMethod getBestMatchingMethod(final String name, final Class... parameters) {
     MetaMethod meth = getMethod(name, parameters);
     if (meth == null || meth.isStatic()) {
       meth = null;
     }
 
-    MetaClass[] mcParms = new MetaClass[parameters.length];
+    final MetaClass[] mcParms = new MetaClass[parameters.length];
     for (int i = 0; i < parameters.length; i++) {
       mcParms[i] = MetaClassFactory.get(parameters[i]);
     }
@@ -198,7 +196,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
+  public MetaMethod getBestMatchingMethod(final String name, final MetaClass... parameters) {
     return getBestMatchingMethod(new GetMethodsCallback() {
       @Override
       public MetaMethod[] getMethods() {
@@ -208,13 +206,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
+  public MetaMethod getBestMatchingStaticMethod(final String name, final Class... parameters) {
     MetaMethod meth = getMethod(name, parameters);
     if (meth == null || !meth.isStatic()) {
       meth = null;
     }
 
-    MetaClass[] mcParms = new MetaClass[parameters.length];
+    final MetaClass[] mcParms = new MetaClass[parameters.length];
     for (int i = 0; i < parameters.length; i++) {
       mcParms[i] = MetaClassFactory.get(parameters[i]);
     }
@@ -231,7 +229,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
+  public MetaMethod getBestMatchingStaticMethod(final String name, final MetaClass... parameters) {
     return getBestMatchingMethod(new GetMethodsCallback() {
       @Override
       public MetaMethod[] getMethods() {
@@ -244,7 +242,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaMethod[] getMethods();
   }
 
-  private MetaMethod getBestMatchingMethod(GetMethodsCallback methodsCallback, String name, MetaClass... parameters) {
+  private MetaMethod getBestMatchingMethod(final GetMethodsCallback methodsCallback, final String name, final MetaClass... parameters) {
     MetaMethod meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
     if (meth == null) {
       meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
@@ -259,9 +257,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return staticMethodCache;
     }
 
-    List<MetaMethod> methods = new ArrayList<MetaMethod>();
+    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
 
-    for (MetaMethod method : getMethods()) {
+    for (final MetaMethod method : getMethods()) {
       if (method.isStatic()) {
         methods.add(method);
       }
@@ -272,7 +270,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private static final Map<MetaMethod[], Method[]> METAMETHOD_TO_METHOD_CACHE = new HashMap<MetaMethod[], Method[]>();
 
-  private static Method[] fromMetaMethod(MetaMethod[] methods) {
+  private static Method[] fromMetaMethod(final MetaMethod[] methods) {
     Method[] result = METAMETHOD_TO_METHOD_CACHE.get(methods);
     if (result == null) {
 
@@ -280,10 +278,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         return new Method[0];
       }
 
-      List<Method> staticMethods = new ArrayList<Method>();
+      final List<Method> staticMethods = new ArrayList<Method>();
 
-      for (MetaMethod m : methods) {
-        Method javaMethod = getJavaMethodFromMetaMethod(m);
+      for (final MetaMethod m : methods) {
+        final Method javaMethod = getJavaMethodFromMetaMethod(m);
         if (javaMethod != null)
           staticMethods.add(javaMethod);
       }
@@ -294,9 +292,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return result;
   }
 
-  private static Method getJavaMethodFromMetaMethod(MetaMethod method) {
-    Class<?> declaring = method.getDeclaringClass().asClass();
-    Class<?>[] parms = getParmTypes(method.getParameters());
+  private static Method getJavaMethodFromMetaMethod(final MetaMethod method) {
+    final Class<?> declaring = method.getDeclaringClass().asClass();
+    final Class<?>[] parms = getParmTypes(method.getParameters());
 
     try {
       return declaring.getMethod(method.getName(), parms);
@@ -306,10 +304,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
   }
 
-  private static Class<?>[] getParmTypes(MetaParameter[] parameters) {
-    List<Class<?>> parmTypes = new ArrayList<Class<?>>();
+  private static Class<?>[] getParmTypes(final MetaParameter[] parameters) {
+    final List<Class<?>> parmTypes = new ArrayList<Class<?>>();
 
-    for (MetaParameter parameter : parameters) {
+    for (final MetaParameter parameter : parameters) {
       parmTypes.add(parameter.getType().asClass());
     }
 
@@ -317,7 +315,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public MetaConstructor getBestMatchingConstructor(Class... parameters) {
+  public MetaConstructor getBestMatchingConstructor(final Class... parameters) {
     return getBestMatchingConstructor(MetaClassFactory.fromClassArray(parameters));
 
 //    Class<?> cls = asClass();
@@ -338,28 +336,29 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
+  public MetaConstructor getBestMatchingConstructor(final MetaClass... parameters) {
     return GenUtil.getBestConstructorCandidate(parameters, this, getConstructors(), false);
   }
 
   @Override
-  public MetaConstructor getConstructor(Class... parameters) {
+  public MetaConstructor getConstructor(final Class... parameters) {
     return _getConstructor(getConstructors(), classToMeta(parameters));
   }
 
   @Override
-  public MetaConstructor getConstructor(MetaClass... parameters) {
+  public MetaConstructor getConstructor(final MetaClass... parameters) {
     return _getConstructor(getConstructors(), parameters);
   }
 
   @Override
-  public MetaConstructor getDeclaredConstructor(Class... parameters) {
+  public MetaConstructor getDeclaredConstructor(final Class... parameters) {
     return _getConstructor(getDeclaredConstructors(), classToMeta(parameters));
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
+  public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
+    for (final Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation))
         return (A) a;
     }
@@ -367,17 +366,17 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+  public final boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
 
   // docs inherited from superclass
   @Override
-  public final List<MetaMethod> getMethodsAnnotatedWith(Class<? extends Annotation> annotation) {
-    List<MetaMethod> methods = new ArrayList<MetaMethod>();
+  public final List<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
+    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
     MetaClass scanTarget = this;
     while (scanTarget != null) {
-      for (MetaMethod m : scanTarget.getDeclaredMethods()) {
+      for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
         if (m.isAnnotationPresent(annotation)) {
           methods.add(m);
         }
@@ -393,7 +392,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private String _hashString;
 
-  private final String hashString() {
+  private String hashString() {
     if (_hashString == null) {
       _hashString = MetaClass.class.getName() + ":" + getFullyQualifiedName();
       if (getParameterizedType() != null) {
@@ -408,7 +407,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 
   @Override
-  public boolean isAssignableFrom(MetaClass clazz) {
+  public boolean isAssignableFrom(final MetaClass clazz) {
     Boolean assignable = ASSIGNABLE_CACHE.get(clazz);
     if (assignable != null) {
       return assignable;
@@ -423,7 +422,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
               && getArrayDimensions(this) == getArrayDimensions(clazz);
     }
 
-    MetaClass sup;
+    final MetaClass sup;
 
     if (MetaClassFactory.get(Object.class).equals(this)) {
       assignable = true;
@@ -434,19 +433,14 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     else if (_hasInterface(clazz.getInterfaces(), this.getErased())) {
       assignable = true;
     }
-    else if ((sup = clazz.getSuperClass()) != null) {
-      assignable = isAssignableFrom(sup);
-    }
-    else {
-      assignable = false;
-    }
+    else assignable = (sup = clazz.getSuperClass()) != null && isAssignableFrom(sup);
 
     ASSIGNABLE_CACHE.put(clazz, assignable);
     return assignable;
   }
 
   @Override
-  public boolean isAssignableTo(MetaClass clazz) {
+  public boolean isAssignableTo(final MetaClass clazz) {
     if (clazz.equals(MetaClassFactory.get(Object.class)))
       return true;
 
@@ -460,11 +454,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _hasInterface(getInterfaces(), clazz.getErased());
   }
 
-  private static boolean _hasInterface(MetaClass[] from, MetaClass to) {
-    for (MetaClass iface : from) {
-      if (to.getFullyQualifiedName().equals(iface.getErased().getFullyQualifiedName()))
+  private static boolean _hasInterface(final MetaClass[] from, final MetaClass to) {
+    for (final MetaClass interfaceType : from) {
+      if (to.getFullyQualifiedName().equals(interfaceType.getErased().getFullyQualifiedName()))
         return true;
-      else if (_hasInterface(iface.getInterfaces(), to))
+      else if (_hasInterface(interfaceType.getInterfaces(), to))
         return true;
     }
 
@@ -472,19 +466,19 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public boolean isAssignableFrom(Class clazz) {
+  public boolean isAssignableFrom(final Class clazz) {
     return isAssignableFrom(MetaClassFactory.get(clazz));
   }
 
   @Override
-  public boolean isAssignableTo(Class clazz) {
+  public boolean isAssignableTo(final Class clazz) {
     return isAssignableTo(MetaClassFactory.get(clazz));
   }
 
 
   @Override
   public boolean isDefaultInstantiable() {
-    MetaConstructor c = getConstructor(new MetaClass[0]);
+    final MetaConstructor c = getConstructor(new MetaClass[0]);
     return c != null && c.isPublic();
   }
 
@@ -499,7 +493,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
@@ -526,7 +520,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     else if (isArray()) {
       try {
-        String name = getInternalName().replaceAll("/", "\\.");
+        final String name = getInternalName().replaceAll("/", "\\.");
 
         cls = Class.forName(name, false,
                 Thread.currentThread().getContextClassLoader());
@@ -544,14 +538,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         // ignore.
       }
     }
-
-
-//    if (cls == NullType.class) {
-//      System.out.println("[Did Not Resolve " + getFullyQualifiedName() + ">>");
-//      new Throwable().printStackTrace();
-//      System.out.println("<<Did Not Resolve " + getFullyQualifiedName() + "]");
-//
-//    }
 
     return _asClassCache = cls;
   }
@@ -627,7 +613,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _internalNameCache = dimString + name;
   }
 
-  private static String getInternalPrimitiveNameFrom(String name) {
+  private static String getInternalPrimitiveNameFrom(final String name) {
     if ("int".equals(name)) {
       return "I";
     }
@@ -658,7 +644,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return name;
   }
 
-  private static Class<?> getPrimitiveRefFrom(String name) {
+  private static Class<?> getPrimitiveRefFrom(final String name) {
     if ("int".equals(name)) {
       return int.class;
     }
