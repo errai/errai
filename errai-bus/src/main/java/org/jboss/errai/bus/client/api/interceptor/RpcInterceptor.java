@@ -21,6 +21,6 @@ package org.jboss.errai.bus.client.api.interceptor;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface RpcInterceptor extends CallInterceptor<RemoteCallContext> {
+public interface RpcInterceptor extends RemoteCallInterceptor<RemoteCallContext> {
 
 }

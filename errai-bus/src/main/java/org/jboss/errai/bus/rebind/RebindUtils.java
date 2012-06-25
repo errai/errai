@@ -22,7 +22,7 @@ import java.lang.reflect.Type;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.interceptor.CallContext;
+import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
@@ -115,7 +115,7 @@ public class RebindUtils {
    * Generates the {@link CallContext} for method interception.
    * 
    * @param callContextType
-   *          the type of {@link CallContext} to use.
+   *          the type of {@link RemoteCallContext} to use.
    * @param proxyClass
    *          the declaring proxy class
    * @param method
@@ -124,7 +124,7 @@ public class RebindUtils {
    *          the logic that should be invoked if {@link CallContext#proceed()} is called.
    * @return statement representing an anonymous implementation of the provided {@link CallContext}
    */
-  public static Statement generateProxyMethodCallContext(Class<? extends CallContext> callContextType,
+  public static Statement generateProxyMethodCallContext(Class<? extends RemoteCallContext> callContextType,
       MetaClass proxyClass, MetaMethod method, Statement proceed) {
 
     Statement callContext =

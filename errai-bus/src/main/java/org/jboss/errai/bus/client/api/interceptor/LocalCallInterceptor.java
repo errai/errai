@@ -16,17 +16,23 @@
 
 package org.jboss.errai.bus.client.api.interceptor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-
 /**
- * Indicates that calls to the annotated method will be intercepted by an interceptor of the provided type.
- * 
- * When used on a class or interface the interceptor will be applied for all methods of the corresponding type.
+ * Represents an interceptor for local method calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * 
+ * @param <T>
+ *          type of {@link CallContext}
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface InterceptedCall {
-  Class<? extends CallInterceptor<? extends CallContext>> value();
+public interface LocalCallInterceptor extends CallInterceptor<CallContext> {
+
+  /**
+   * Interposes on the execution of methods that should be intercepted.
+   * 
+   * @param context
+   *          the call context of the intercepted method, not null.
+   * 
+   * @return the result of the intercepted method.
+   */
+  public Object aroundInvoke(CallContext context);
 }

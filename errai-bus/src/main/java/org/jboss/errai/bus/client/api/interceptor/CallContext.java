@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class CallContext {
+abstract class CallContext {
   private Object[] parameters;
 
   /**
