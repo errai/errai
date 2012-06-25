@@ -90,6 +90,7 @@ import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import org.jboss.errai.enterprise.client.cdi.internal.ObserverModel;
 import org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension;
 import org.jboss.errai.ioc.client.api.Sender;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -353,28 +354,24 @@ public class CDIExtensionPoints implements Extension {
 
         abd.addBean(new ErraiServiceBean(bm, SecureHashUtil.hashToHexString(randBytes)));
 
-        final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints
-                = new HashSet<ObserversMarshallingExtension.ObserverPoint>();
+        if (MarshallingGenUtil.isUseStaticMarshallers()) {
 
-        for (final EventConsumer ec : eventConsumers) {
-          if (ec.getEventBeanType() != null) {
-            abd.addBean(new ConversationalEventBean(ec.getEventBeanType(), (BeanManagerImpl) bm, bus));
+          final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints
+                  = new HashSet<ObserversMarshallingExtension.ObserverPoint>();
+
+          for (final EventConsumer ec : eventConsumers) {
+            if (ec.getEventBeanType() != null) {
+              abd.addBean(new ConversationalEventBean(ec.getEventBeanType(), (BeanManagerImpl) bm, bus));
+            }
+
+            observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
           }
-
-          observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
-        }
-
-        observerPoints.addAll(org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.scanForObserverPointsInClassPath());
 
         for (final org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
                 observerPoints) {
-
           if (org.jboss.errai.common.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
             if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
               abd.addObserverMethod(new ConversationalEventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
-            }
-            else {
-              abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
             }
           }
         }
@@ -395,7 +392,9 @@ public class CDIExtensionPoints implements Extension {
         // subscribe service and rpc endpoints
         subscribeServices(bm, bus);
 
-        final EventDispatcher eventDispatcher = new EventDispatcher(bm, observableEvents, eventQualifiers);
+        final EventDispatcher eventDispatcher
+                = new EventDispatcher(bm, bus, observableEvents,
+                eventQualifiers, MarshallingGenUtil.isUseStaticMarshallers() ? null : abd);
 
         // subscribe event dispatcher
         bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);

@@ -15,20 +15,13 @@
  */
 package org.jboss.errai.cdi.server;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -73,5 +66,42 @@ public class CDIServerUtil {
       subjectName = type.getSimpleName();
 
     return subjectName;
+  }
+
+
+  static class AnnotationHolder implements Annotation {
+    private final Class<? extends Annotation> annotationType;
+
+    AnnotationHolder(Class<? extends Annotation> annotationType) {
+      this.annotationType = annotationType;
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return annotationType;
+    }
+
+    @Override
+    public String toString() {
+      return annotationType.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof AnnotationHolder)) return false;
+
+      AnnotationHolder that = (AnnotationHolder) o;
+
+      if (annotationType != null ? !annotationType.equals(that.annotationType) : that.annotationType != null)
+        return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return annotationType != null ? annotationType.hashCode() : 0;
+    }
   }
 }

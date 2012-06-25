@@ -15,10 +15,10 @@
  */
 package org.jboss.errai.enterprise.client.cdi;
 
+import org.jboss.errai.bus.client.api.MessageCallback;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.jboss.errai.bus.client.api.MessageCallback;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -28,4 +28,8 @@ public abstract class AbstractCDIEventCallback implements MessageCallback {
    * The qualifiers a message must contain to be propagated.
    */
   protected Set<String> qualifierSet = new HashSet<String>();
+
+  public Set<String> getQualifiers() {
+    return qualifierSet;
+  }
 }

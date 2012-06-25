@@ -15,17 +15,10 @@
  */
 package org.jboss.errai.cdi.server.events;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.inject.spi.BeanManager;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.util.LocalContext;
@@ -36,6 +29,16 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.ObserverMethod;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
  * Includes marshalling/unmarshalling of event types.
@@ -44,16 +47,24 @@ public class EventDispatcher implements MessageCallback {
   private static final String CDI_EVENT_CHANNEL_OPEN = "cdi.event.channel.open";
   private static final String CDI_REMOTE_EVENTS_ACTIVE = "cdi.event.active.events";
 
-  private BeanManager beanManager;
+  private final BeanManager beanManager;
+  private final MessageBus messagebus;
+  private final Set<String> observedEvents;
+  private final Map<String, Annotation> allQualifiers;
+  private final AfterBeanDiscovery afterBeanDiscovery;
 
-  private Set<String> observedEvents;
-  private Map<String, Annotation> allQualifiers;
+  private final Set<ObserverMethod> activeObserverMethods = new HashSet<ObserverMethod>();
 
-  public EventDispatcher(BeanManager beanManager, Set<String> observedEvents,
-                         Map<String, Annotation> qualifiers) {
+  public EventDispatcher(final BeanManager beanManager,
+                         final MessageBus messageBus,
+                         final Set<String> observedEvents,
+                         final Map<String, Annotation> qualifiers,
+                         final AfterBeanDiscovery afterBeanDiscovery) {
     this.beanManager = beanManager;
+    this.messagebus = messageBus;
     this.observedEvents = observedEvents;
     this.allQualifiers = qualifiers;
+    this.afterBeanDiscovery = afterBeanDiscovery;
   }
 
   public void callback(final Message message) {
@@ -69,6 +80,23 @@ public class EventDispatcher implements MessageCallback {
       final LocalContext localContext = LocalContext.get(message);
 
       switch (CDICommands.valueOf(message.getCommandType())) {
+        case RemoteSubscribe:
+          if (afterBeanDiscovery != null) {
+            final String typeName = message.get(String.class, CDIProtocol.BeanType);
+            final Class<?> type = Class.forName(typeName);
+            final Set<String> annotationTypes = message.get(Set.class, CDIProtocol.Qualifiers);
+
+            final DevEventObserverMethod observerMethod = new DevEventObserverMethod(messagebus, type, annotationTypes);
+
+            if (!activeObserverMethods.contains(observerMethod)) {
+              afterBeanDiscovery.addObserverMethod(observerMethod);
+              activeObserverMethods.add(observerMethod);
+            }
+            else {
+              System.out.println("SKIP");
+            }
+          }
+          break;
         case CDIEvent:
           if (!isRoutable(localContext, message)) {
             return;

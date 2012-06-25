@@ -15,16 +15,18 @@
  */
 package org.jboss.errai.enterprise.client.cdi.api;
 
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
@@ -140,12 +142,22 @@ public class CDI {
     }
   }
 
-  public static Subscription subscribe(final String eventType, final MessageCallback callback) {
+  public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback callback) {
     List<MessageCallback> observerCallbacks = eventObservers.get(eventType);
     if (observerCallbacks == null) {
       eventObservers.put(eventType, observerCallbacks = new ArrayList<MessageCallback>());
     }
     observerCallbacks.add(callback);
+
+    if (!GWT.isProdMode()) {
+      MessageBuilder.createMessage()
+              .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+              .command(CDICommands.RemoteSubscribe)
+              .with(CDIProtocol.BeanType, eventType)
+              .with(CDIProtocol.Qualifiers, callback.getQualifiers())
+              .noErrorHandling().sendNowWith(ErraiBus.get());
+    }
+
     return new Subscription() {
       @Override
       public void remove() {
