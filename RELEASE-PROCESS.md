@@ -64,26 +64,25 @@ Release Steps
    * % cd $somewhere/archetypes
    * % mvn versions:set -DnewVersion=x.y.z.Final
    * Afterward, verify that all subprojects reference the new parent pom's version: find . -name pom.xml | xargs grep x.y.z | grep SNAP
-   * % mvn clean install
+   * % mvn clean deploy
    * Note that the kitschensink archetype is tested automatically. For the test to work AS7 has to be running
    * Now test the archetypes you just installed (use instructions from quickstart guides)
    * check generated app's pom.xml for correct version
    * mvn gwt:run
-   
-1. % mvn deploy -Dmaven.test.skip=true
-
-1. Tag and push the release to github (DO THIS FOR BOTH ERRAI AND ITS ARCHETYPES):
-   * % git commit a -m "update to new version x.y.z"
-   * % git tag x.y.z.Final
-   * % git push origin /branch/
-   * % git push origin --tags
-   * % git push upstream /branch/
-   * % git push upstream --tags
 
 1. Create and upload the a-la-carte binary Errai distribution and docs
    * % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
    * % cd dist
    * % ./scripts/upload_binaries.sh {version}
+
+1. Tag and push the release to github (DO THIS FOR BOTH ERRAI AND ITS ARCHETYPES):
+   * % git commit a -m "update to new version x.y.z"
+   * % git tag x.y.z.Final
+   * reset all versions to x.y.z+1-SNAPSHOT and commit
+   * % git push origin /branch/
+   * % git push origin --tags
+   * % git push upstream /branch/
+   * % git push upstream --tags
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
    Find the corresponding staging repository (Sort by repository name)
@@ -95,8 +94,6 @@ Release Steps
    the generated/released docs and distribution. Also update the announcement on the welcome page (https://www.jboss.org/author/)
 
 1. Tweet about the release!
-
-1. reset all versions to x.y.z+1-SNAPSHOT, commit and push to upstream
 
 === You're done! Congrats! You deserve beer! ===
 
