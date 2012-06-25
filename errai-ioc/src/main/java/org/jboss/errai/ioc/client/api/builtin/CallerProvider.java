@@ -16,10 +16,6 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
-import java.lang.annotation.Annotation;
-
-import javax.inject.Singleton;
-
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
@@ -27,6 +23,9 @@ import org.jboss.errai.bus.client.framework.RpcStub;
 import org.jboss.errai.ioc.client.api.Caller;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
+
+import javax.inject.Singleton;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock
@@ -40,16 +39,16 @@ public class CallerProvider implements ContextualTypeProvider<Caller> {
   public Caller provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
     return new Caller<Object>() {
       @Override
-      public Object call(RemoteCallback<?> callback) {
-        Object proxy = factory.getRemoteProxy(typeargs[0]);
+      public Object call(final RemoteCallback<?> callback) {
+        final Object proxy = factory.getRemoteProxy(typeargs[0]);
         ((RpcStub) proxy).setRemoteCallback(callback);
         ((RpcStub) proxy).setQualifiers(qualifiers);
         return proxy;
       }
 
       @Override
-      public Object call(RemoteCallback<?> callback, ErrorCallback errorCallback) {
-        Object proxy = factory.getRemoteProxy(typeargs[0]);
+      public Object call(final RemoteCallback<?> callback, final ErrorCallback errorCallback) {
+        final Object proxy = factory.getRemoteProxy(typeargs[0]);
         ((RpcStub) proxy).setRemoteCallback(callback);
         ((RpcStub) proxy).setErrorCallback(errorCallback);
         ((RpcStub) proxy).setQualifiers(qualifiers);

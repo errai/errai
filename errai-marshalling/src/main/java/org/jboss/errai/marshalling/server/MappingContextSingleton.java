@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
@@ -84,7 +83,7 @@ public class MappingContextSingleton {
 
   private static void dynamicMarshallingWarning() {
     log.warn("using dynamic marshallers. dynamic marshallers are designed" +
-            " for development mode testing, and ideally should not be used in production.");
+            " for development mode testing, and ideally should not be used in production. *");
   }
 
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
