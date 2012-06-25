@@ -136,7 +136,6 @@ public class BindableProxyLoaderGenerator extends Generator {
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     String s = classBuilder.toJavaString();
-    System.out.println(s);
     return s;
   }
 }

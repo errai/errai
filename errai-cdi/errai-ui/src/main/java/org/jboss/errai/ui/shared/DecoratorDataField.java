@@ -46,7 +46,6 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   private void saveDataField(InjectableInstance<DataField> ctx, String name, Statement instance) {
     Map<String, Statement> map = dataFieldMap(ctx, ctx.getEnclosingType());
     map.put(name, instance);
-    System.out.println("Saving data-field [" + name + "] Statment instance [" + instance + "]");
   }
 
   private String getTemplateDataFieldName(DataField annotation, String deflt) {

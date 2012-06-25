@@ -79,8 +79,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       }
     }
 
-    System.out.println("Handling @Templated annotation on class: " + declaringClass);
-
     MetaClass callbackMetaClass = MetaClassFactory.parameterizedAs(InitializationCallback.class,
             MetaClassFactory.typeParametersOf(declaringClass));
     BlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(callbackMetaClass).extend()
@@ -121,11 +119,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
               .named(templateVarName)
               .initializeWith(
                       Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
-
-      builder.append(Stmt.loadStatic(System.class, "out").invoke(
-              "println",
-              "Parsing template: " + getTemplateFileName(declaringClass) + "#"
-                      + getTemplateFragmentName(declaringClass) + ""));
 
       /*
        * Get root Template Element
