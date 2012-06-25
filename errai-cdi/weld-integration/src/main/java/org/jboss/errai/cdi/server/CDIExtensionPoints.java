@@ -335,9 +335,6 @@ public class CDIExtensionPoints implements Extension {
         // subscribe event dispatcher
         // Errai Service wrapper
 
-
-        final Set<String> registeredObservers = new HashSet<String>();
-
         final MessageBus bus = service.getBus();
 
         if (bus.isSubscribed(CDI.SERVER_DISPATCHER_SUBJECT)) {
@@ -359,29 +356,13 @@ public class CDIExtensionPoints implements Extension {
             abd.addBean(new ConversationalEventBean(ec.getEventBeanType(), (BeanManagerImpl) bm, bus));
           }
 
-          if (registeredObservers.contains(ec.getRawType().getName())) {
-            continue;
-          }
-
-
-          if (ec.isConversational()) {
-            abd.addObserverMethod(new ConversationalEventObserverMethod(ec.getRawType(), bus, ec.getQualifiers()));
-          }
-          else {
-            observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
-          }
-
-          registeredObservers.add(ec.getRawType().getName());
+          observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
         }
 
         observerPoints.addAll(org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.scanForObserverPointsInClassPath());
 
         for (org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
                 observerPoints) {
-
-          if (registeredObservers.contains(observerPoint.getObservedType().getName())) {
-            continue;
-          }
 
           if (org.jboss.errai.common.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
             if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
@@ -391,9 +372,6 @@ public class CDIExtensionPoints implements Extension {
               abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
             }
           }
-
-          registeredObservers.add(observerPoint.getObservedType().getName());
-
         }
 
         for (MessageSender ms : messageSenders) {

@@ -23,8 +23,6 @@ public final class ErraiServiceSingleton {
       service = ErraiServiceFactory.create(configurator);
       proxy.closeProxy(service);
 
-      System.out.println("Initializing with callbacks (" + callbackList.size() + ")");
-
       for (ErraiInitCallback erraiInitCallback : callbackList) {
         erraiInitCallback.onInit(service);
       }
