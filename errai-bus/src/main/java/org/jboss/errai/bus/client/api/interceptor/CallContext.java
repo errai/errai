@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.api.interceptor;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.framework.Assert;
 
 /**
  * Represents the context of an intercepted method call.
@@ -40,10 +41,10 @@ abstract class CallContext {
    * Overrides the parameters that are passed to the method for which the interceptor was invoked.
    * 
    * @param parameters
-   *          the parameters to use when invoking the intercepted method
+   *          the parameters to use when invoking the intercepted method. Must not be null.
    */
   public void setParameters(Object[] parameters) {
-    this.parameters = parameters;
+    this.parameters = Assert.notNull(parameters);
   }
 
   /**
@@ -57,8 +58,8 @@ abstract class CallContext {
    * Proceeds with the execution of the intercepted method.
    * <p>
    * This method can also be called to proceed with an asynchronous call (e.g. when intercepting a remote procedure
-   * call), but only when the result is of no interest to the interceptor logic. If the result of an asynchronous method
-   * should be accessible in the interceptor, one of the overloaded versions of this method accepting a
+   * call), but only if the call's result is not required in the interceptor logic. If access to the result of an
+   * asynchronous method call is needed in the interceptor, one of the overloaded versions of this method accepting a
    * {@link RemoteCallback} has to be used instead.
    * 
    * @return the return value of the intercepted method. Always null for asynchronous methods.

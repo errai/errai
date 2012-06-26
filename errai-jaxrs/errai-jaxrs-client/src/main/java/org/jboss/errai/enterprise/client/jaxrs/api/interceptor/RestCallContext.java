@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.client.jaxrs.api.interceptor;
 
 import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.common.client.framework.Assert;
 
 import com.google.gwt.http.client.RequestBuilder;
 
@@ -41,9 +42,9 @@ public abstract class RestCallContext extends RemoteCallContext {
    * Changes the {@link RequestBuilder} instance used to executed the call to the REST endpoint.
    * 
    * @param requestBuilder
-   *          the {@link RequestBuilder} instance to use when proceeding with the request
+   *          the {@link RequestBuilder} instance to use when proceeding with the request. Must not be null.
    */
   public void setRequestBuilder(RequestBuilder requestBuilder) {
-    this.requestBuilder = requestBuilder;
+    this.requestBuilder = Assert.notNull(requestBuilder);
   }
 }

@@ -19,7 +19,7 @@ package org.jboss.errai.bus.client.api.interceptor;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 
 /**
- * Represents an interceptor for asynchronous remote method calls.
+ * Represents a interceptor for asynchronous remote method calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * 

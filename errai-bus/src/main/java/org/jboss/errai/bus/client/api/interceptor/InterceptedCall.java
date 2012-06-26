@@ -20,9 +20,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that calls to the annotated method will be intercepted by an interceptor of the provided type.
- * 
- * When used on a class or interface the interceptor will be applied for all methods of the corresponding type.
+ * Indicates that calls to the annotated method will be intercepted by an interceptor of the provided type. When used on
+ * a class or interface the interceptor will be applied for all methods of the corresponding type.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

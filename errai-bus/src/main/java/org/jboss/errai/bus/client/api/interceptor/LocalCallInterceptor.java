@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.api.interceptor;
 
 /**
- * Represents an interceptor for local method calls.
+ * Represents an interceptor for local/synchronous method calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * 
