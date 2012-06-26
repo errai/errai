@@ -33,6 +33,10 @@ public class ArithmeticExpressionBuilder extends ExpressionBuilder<ArithmeticOpe
     super(rhs, operator);
   }
 
+  public ArithmeticExpressionBuilder(Object rhs, ArithmeticOperator operator) {
+    super(rhs, operator);
+  }
+
   public ArithmeticExpressionBuilder(Statement lhs, Statement rhs, ArithmeticOperator operator) {
     super(lhs, rhs, operator);
   }
@@ -40,13 +44,13 @@ public class ArithmeticExpressionBuilder extends ExpressionBuilder<ArithmeticOpe
   public ArithmeticExpressionBuilder(Object lhs, Object rhs, ArithmeticOperator operator) {
     super(lhs, rhs, operator);
   }
-  
+
   public static ArithmeticExpression create(Statement lhs) {
     return new ArithmeticExpressionBuilder(lhs, null, null);
   }
 
   public static ArithmeticExpression create(ArithmeticOperator operator, Object rhs) {
-    return create(null, operator, rhs);
+    return new ArithmeticExpressionBuilder(rhs, operator);
   }
 
   public static ArithmeticExpression create(Object lhs, ArithmeticOperator operator, Object rhs) {
