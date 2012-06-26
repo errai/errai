@@ -28,7 +28,12 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 @NamedQueries({
   @NamedQuery(name="zentityPrimitiveBoolean", query="SELECT z FROM Zentity z WHERE z.primitiveBool = :b"),
   @NamedQuery(name="zentityString", query="SELECT z FROM Zentity z WHERE z.string = :s"),
-  @NamedQuery(name="zentityLiteralString", query="SELECT z FROM Zentity z WHERE z.string = 'D''oh!'")
+  @NamedQuery(name="zentityLiteralString", query="SELECT z FROM Zentity z WHERE z.string = 'D''oh!'"),
+
+  // non-standard date literal syntax (Hibernate doesn't support JPA2 date literals)
+  @NamedQuery(name="zentityLiteralDate", query="SELECT z FROM Zentity z WHERE z.date = '2012-06-22'"),
+
+  @NamedQuery(name="zentityLiteralInt", query="SELECT z FROM Zentity z WHERE z.primitiveInt = -55443322"),
 })
 public class Zentity {
 

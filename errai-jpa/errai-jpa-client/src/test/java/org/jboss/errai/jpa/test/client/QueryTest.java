@@ -195,4 +195,49 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
   }
 
+  /**
+   * This test is being ignored for now because Hibernate does not support the
+   * JPA2 literal date syntax <tt>{d 'yyyy-mm-dd'}</tt>. It would be possible,
+   * but trickier than we want, to support date literals in the Hibernate format
+   * of {@code 'yyyy-mm-dd'}. The workaround is to write queries with named
+   * parameters in place of literal dates.
+   */
+  @SuppressWarnings("deprecation")
+  public void IGNOREtestFilterByLiteralDate() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setDate(new Date(112, 5, 22));
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setDate(new Date(115, 0, 1));
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralDate", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
+
+  public void testFilterByLiteralInteger() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveInt(-55443322);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveInt(12345);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralInt", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
 }

@@ -20,10 +20,13 @@ import org.hibernate.hql.internal.ast.tree.LiteralNode;
 import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
+import org.hibernate.type.StringRepresentableType;
+import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
@@ -175,9 +178,14 @@ public class TypedQueryFactoryGenerator {
       NamedParameterSpecification namedParamSpec = (NamedParameterSpecification) paramNode.getHqlParameterSpecification();
       return Stmt.loadVariable("query").invoke("getParameterValue", namedParamSpec.getName());
     case HqlSqlTokenTypes.QUOTED_STRING:
-      LiteralNode literalNode = (LiteralNode) ast;
-      return Stmt.loadLiteral(SqlUtil.parseStringLiteral(literalNode.getText()));
+      return Stmt.loadLiteral(SqlUtil.parseStringLiteral(ast.getText()));
+//      LiteralNode literalNode = (LiteralNode) ast;
 //      return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
+    case HqlSqlTokenTypes.UNARY_MINUS:
+      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateValueExpression(traverser));
+    case HqlSqlTokenTypes.NUM_INT:
+      LiteralNode literalNode = (LiteralNode) ast;
+      return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
     default:
       throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
     }
