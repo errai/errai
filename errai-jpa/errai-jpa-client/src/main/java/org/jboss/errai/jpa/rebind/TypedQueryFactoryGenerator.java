@@ -16,13 +16,10 @@ import org.hibernate.hql.internal.ast.HqlParser;
 import org.hibernate.hql.internal.ast.HqlSqlWalker;
 import org.hibernate.hql.internal.ast.QueryTranslatorImpl;
 import org.hibernate.hql.internal.ast.tree.DotNode;
-import org.hibernate.hql.internal.ast.tree.LiteralNode;
 import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
-import org.hibernate.type.StringRepresentableType;
 import org.jboss.errai.codegen.ArithmeticOperator;
-import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -200,20 +197,25 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.UNARY_MINUS:
       return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateValueExpression(traverser));
 
-    case HqlSqlTokenTypes.NUM_INT: {
+    case HqlSqlTokenTypes.NUM_INT:
+    case HqlSqlTokenTypes.NUM_DOUBLE:
+    case HqlSqlTokenTypes.NUM_FLOAT:
       // all numeric literals (except longs) are generated as doubles
-      LiteralNode literalNode = (LiteralNode) ast;
-      return Cast.to(double.class, Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText())));
-    }
+      // (and correspondingly, all "dot nodes" (entity attributes) are retrieved as doubles)
+      // this allows us to compare almost any numeric type to any other numeric type
+      // (long and char are the exceptions)
+      return Stmt.loadLiteral(Double.valueOf(ast.getText()));
 
-    case HqlSqlTokenTypes.NUM_LONG: {
-      LiteralNode literalNode = (LiteralNode) ast;
-      return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
-    }
+    case HqlSqlTokenTypes.NUM_LONG:
+      return Stmt.loadLiteral(Long.valueOf(ast.getText()));
 
     default:
       throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
     }
+
+    // I keep feeling like this will be useful, but so far it has turned out to be unnecessary:
+//    LiteralNode literalNode = (LiteralNode) ast;
+//    return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
   }
 
   private static class UnexpectedTokenException extends RuntimeException {

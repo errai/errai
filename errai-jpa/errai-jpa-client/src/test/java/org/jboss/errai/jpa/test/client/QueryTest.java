@@ -311,4 +311,58 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
   }
 
+  public void testFilterByLiteralDouble() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveDouble(123.45);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveDouble(123.0);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralDouble", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
+  public void testFilterByLiteralFloat() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveFloat(-1234.5f);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveFloat(123.0f);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralFloat", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
+  public void testFilterDoubleByLiteralInt() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveDouble(12345.0);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveDouble(123.0);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralDoubleToInt", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
 }

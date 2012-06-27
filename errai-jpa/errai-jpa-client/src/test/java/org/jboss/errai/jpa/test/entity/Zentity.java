@@ -41,7 +41,12 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   // this restriction also exists with Hibernate-on-HSQLDB (so we're consistent with server side behaviour).
   @NamedQuery(name="zentityLiteralChar", query="SELECT z FROM Zentity z WHERE z.primitiveChar = 'c'"),
 
-  @NamedQuery(name="zentityLiteralByte", query="SELECT z FROM Zentity z WHERE z.primitiveByte = -5")
+  @NamedQuery(name="zentityLiteralByte", query="SELECT z FROM Zentity z WHERE z.primitiveByte = -5"),
+  @NamedQuery(name="zentityLiteralDouble", query="SELECT z FROM Zentity z WHERE z.primitiveDouble = 123.45"),
+  @NamedQuery(name="zentityLiteralFloat", query="SELECT z FROM Zentity z WHERE z.primitiveFloat = -1234.5f"),
+
+  // the attribute is a double, but we are comparing it to an integer literal. I believe this will be common.
+  @NamedQuery(name="zentityLiteralDoubleToInt", query="SELECT z FROM Zentity z WHERE z.primitiveDouble = 12345")
 })
 public class Zentity {
 
