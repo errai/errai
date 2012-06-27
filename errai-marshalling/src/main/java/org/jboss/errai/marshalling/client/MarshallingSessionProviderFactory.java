@@ -30,9 +30,9 @@ public class MarshallingSessionProviderFactory {
   }
 
   public static void setMarshallingSessionProvider(final MarshallingSessionProvider provider) {
-    if (sessionProvider != null) {
-      throw new RuntimeException("session provider already set");
-    }
+//    if (sessionProvider != null) {
+//      throw new RuntimeException("session provider already set");
+//    }
     sessionProvider = provider;
   }
 
