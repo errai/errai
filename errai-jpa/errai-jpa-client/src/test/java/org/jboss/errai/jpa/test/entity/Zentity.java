@@ -49,7 +49,13 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityLiteralDoubleToInt", query="SELECT z FROM Zentity z WHERE z.primitiveDouble = 12345"),
 
   @NamedQuery(name="zentityLiteralBoolTrue", query="SELECT z FROM Zentity z WHERE z.primitiveBool = true"),
-  @NamedQuery(name="zentityLiteralBoolFalse", query="SELECT z FROM Zentity z WHERE z.primitiveBool = false")
+  @NamedQuery(name="zentityLiteralBoolFalse", query="SELECT z FROM Zentity z WHERE z.primitiveBool = false"),
+
+  @NamedQuery(name="zentityLiteralNull", query="SELECT z FROM Zentity z WHERE z.string = null"),
+  @NamedQuery(name="zentityLiteralNotNull", query="SELECT z FROM Zentity z WHERE z.string != null")
+
+  // TODO enum literal
+  // TODO entity type (class) literal
 })
 public class Zentity {
 

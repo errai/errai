@@ -385,4 +385,24 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity2.toString(), q2.getSingleResult().toString());
   }
 
+  public void testFilterByLiteralNull() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString(null);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("this is not null");
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralNull", Zentity.class);
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+
+    TypedQuery<Zentity> q2 = em.createNamedQuery("zentityLiteralNotNull", Zentity.class);
+    assertEquals(zentity2.toString(), q2.getSingleResult().toString());
+  }
+
 }

@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.framework.Comparisons;
@@ -154,8 +155,16 @@ public class TypedQueryFactoryGenerator {
   private Statement generateBooleanExpression(AstInorderTraversal traverser) {
     AST ast = traverser.next();
     switch (ast.getType()) {
+
     case HqlSqlTokenTypes.EQ:
       return Stmt.invokeStatic(Comparisons.class, "nullSafeEquals", generateValueExpression(traverser), generateValueExpression(traverser));
+
+    case HqlSqlTokenTypes.IS_NULL:
+      return Bool.isNull(generateValueExpression(traverser));
+
+    case HqlSqlTokenTypes.IS_NOT_NULL:
+      return Bool.isNotNull(generateValueExpression(traverser));
+
     default:
       throw new UnexpectedTokenException(ast.getType(), "Boolean expression root node");
     }
