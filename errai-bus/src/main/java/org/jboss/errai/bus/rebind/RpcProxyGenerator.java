@@ -131,7 +131,6 @@ public class RpcProxyGenerator {
 
     methodBuilder.append(
         Stmt.try_()
-            .append(Stmt.declareVariable(boolean.class).asFinal().named("proceeding").initializeWith(false))
             .append(
                 Stmt.declareVariable(RemoteCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
