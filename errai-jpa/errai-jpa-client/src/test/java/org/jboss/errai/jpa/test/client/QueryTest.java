@@ -365,4 +365,24 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
   }
 
+  public void testFilterByLiteralBool() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveBool(true);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveBool(false);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralBoolTrue", Zentity.class);
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+
+    TypedQuery<Zentity> q2 = em.createNamedQuery("zentityLiteralBoolFalse", Zentity.class);
+    assertEquals(zentity2.toString(), q2.getSingleResult().toString());
+  }
+
 }

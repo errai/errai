@@ -46,7 +46,10 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityLiteralFloat", query="SELECT z FROM Zentity z WHERE z.primitiveFloat = -1234.5f"),
 
   // the attribute is a double, but we are comparing it to an integer literal. I believe this will be common.
-  @NamedQuery(name="zentityLiteralDoubleToInt", query="SELECT z FROM Zentity z WHERE z.primitiveDouble = 12345")
+  @NamedQuery(name="zentityLiteralDoubleToInt", query="SELECT z FROM Zentity z WHERE z.primitiveDouble = 12345"),
+
+  @NamedQuery(name="zentityLiteralBoolTrue", query="SELECT z FROM Zentity z WHERE z.primitiveBool = true"),
+  @NamedQuery(name="zentityLiteralBoolFalse", query="SELECT z FROM Zentity z WHERE z.primitiveBool = false")
 })
 public class Zentity {
 
