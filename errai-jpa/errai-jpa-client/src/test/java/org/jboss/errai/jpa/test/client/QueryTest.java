@@ -12,6 +12,7 @@ import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
+import org.jboss.errai.jpa.test.entity.Format;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -405,4 +406,23 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity2.toString(), q2.getSingleResult().toString());
   }
 
+  public void testFilterByLiteralEnum() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Album album1 = new Album();
+    album1.setName("Hey Jude / Revolution");
+    album1.setFormat(Format.SINGLE);
+    album1.setReleaseDate(new Date(-42580800000L));
+    em.persist(album1);
+
+    Album album2 = new Album();
+    album2.setName("Let It Be");
+    album2.setFormat(Format.LP);
+    album2.setReleaseDate(new Date(11012400000L));
+
+    em.flush();
+
+    TypedQuery<Album> q = em.createNamedQuery("albumLiteralEnum", Album.class);
+    assertEquals(album1.toString(), q.getSingleResult().toString());
+  }
 }

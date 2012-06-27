@@ -222,6 +222,9 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.FALSE:
       return Stmt.loadLiteral(Boolean.parseBoolean(ast.getText()));
 
+    case HqlSqlTokenTypes.JAVA_CONSTANT:
+      return Stmt.loadVariable(ast.getText());
+
     default:
       throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
     }

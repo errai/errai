@@ -52,9 +52,12 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityLiteralBoolFalse", query="SELECT z FROM Zentity z WHERE z.primitiveBool = false"),
 
   @NamedQuery(name="zentityLiteralNull", query="SELECT z FROM Zentity z WHERE z.string = null"),
-  @NamedQuery(name="zentityLiteralNotNull", query="SELECT z FROM Zentity z WHERE z.string != null")
+  @NamedQuery(name="zentityLiteralNotNull", query="SELECT z FROM Zentity z WHERE z.string != null"),
 
-  // TODO enum literal
+  // this is primarily a test for enum literals
+  // but it's also an oblique test for sticking a query for type A on an entity of type B
+  @NamedQuery(name="albumLiteralEnum", query="SELECT a FROM Album a WHERE a.format = org.jboss.errai.jpa.test.entity.Format.SINGLE")
+
   // TODO entity type (class) literal
 })
 public class Zentity {
