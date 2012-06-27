@@ -92,9 +92,6 @@ public class EventDispatcher implements MessageCallback {
               afterBeanDiscovery.addObserverMethod(observerMethod);
               activeObserverMethods.add(observerMethod);
             }
-            else {
-              System.out.println("SKIP");
-            }
           }
           break;
         case CDIEvent:
