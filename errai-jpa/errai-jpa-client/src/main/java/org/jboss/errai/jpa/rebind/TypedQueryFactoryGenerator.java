@@ -22,6 +22,7 @@ import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
 import org.hibernate.type.StringRepresentableType;
 import org.jboss.errai.codegen.ArithmeticOperator;
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -166,26 +167,49 @@ public class TypedQueryFactoryGenerator {
   private Statement generateValueExpression(AstInorderTraversal traverser) {
     AST ast = traverser.next();
     switch (ast.getType()) {
+
     case HqlSqlTokenTypes.DOT:
       DotNode dotNode = (DotNode) ast;
       traverser.fastForwardToNextSiblingOf(dotNode);
+      Class<?> requestedType = dotNode.getDataType().getReturnedClass();
+
+      // normalize all numbers except longs and chars to double (literals do the same)
+      // if we did not do this here, Comparisons.nullSafeEquals() would have to do it at runtime
+      if (requestedType == Float.class || requestedType == float.class
+              || requestedType == Integer.class || requestedType == int.class
+              || requestedType == Short.class || requestedType == short.class
+              || requestedType == Character.class || requestedType == char.class
+              || requestedType == Byte.class || requestedType == byte.class) {
+        requestedType = Double.class;
+      }
+
       // FIXME this assumes the property reference is to the candidate entity instance (it could be to another type)
       return Stmt.invokeStatic(JsonUtil.class, "basicValueFromJson",
               Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()),
-              dotNode.getDataType().getReturnedClass());
+              requestedType);
+
     case HqlSqlTokenTypes.NAMED_PARAM:
       ParameterNode paramNode = (ParameterNode) ast;
       NamedParameterSpecification namedParamSpec = (NamedParameterSpecification) paramNode.getHqlParameterSpecification();
       return Stmt.loadVariable("query").invoke("getParameterValue", namedParamSpec.getName());
+
     case HqlSqlTokenTypes.QUOTED_STRING:
       return Stmt.loadLiteral(SqlUtil.parseStringLiteral(ast.getText()));
-//      LiteralNode literalNode = (LiteralNode) ast;
-//      return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
+
     case HqlSqlTokenTypes.UNARY_MINUS:
       return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateValueExpression(traverser));
-    case HqlSqlTokenTypes.NUM_INT:
+
+    case HqlSqlTokenTypes.NUM_INT: {
+      // all numeric literals (except longs) are generated as doubles
+      LiteralNode literalNode = (LiteralNode) ast;
+      return Cast.to(double.class, Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText())));
+    }
+
+    case HqlSqlTokenTypes.NUM_LONG: {
       LiteralNode literalNode = (LiteralNode) ast;
       return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
+    }
+
     default:
       throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
     }

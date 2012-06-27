@@ -221,6 +221,23 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
   }
 
+  public void testFilterByLiteralLong() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveLong(11223344L);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveLong(12345);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralLong", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
 
   public void testFilterByLiteralInteger() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
@@ -236,6 +253,60 @@ public class QueryTest extends GWTTestCase {
     em.flush();
 
     TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralInt", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
+  public void testFilterByLiteralShort() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveShort((short) -1234);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveShort((short) 12345);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralShort", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
+  public void IGNOREtestFilterByLiteralChar() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveChar((char) 12);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveChar((char) 12345);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralChar", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
+  public void testFilterByLiteralByte() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveByte((byte) -5);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveByte((byte) 123);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralByte", Zentity.class);
 
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
   }
