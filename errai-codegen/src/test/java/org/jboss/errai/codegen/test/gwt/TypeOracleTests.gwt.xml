@@ -4,11 +4,11 @@
 
     <inherits name='com.google.gwt.user.User'/>
 
-    <entry-point class='org.jboss.errai.codegen.tests.gwt.client.TypeOracleTests'/>
+    <entry-point class='org.jboss.errai.codegen.test.gwt.client.TypeOracleTests'/>
 
-    <generate-with class="org.jboss.errai.codegen.tests.gwt.rebind.TypeOracleGenerator">
+    <generate-with class="org.jboss.errai.codegen.test.gwt.rebind.TypeOracleGenerator">
         <when-type-assignable
-                class="org.jboss.errai.codegen.tests.gwt.client.TypeOracleBootstrap"/>
+                class="org.jboss.errai.codegen.test.gwt.client.TypeOracleBootstrap"/>
     </generate-with>
 
 </module>

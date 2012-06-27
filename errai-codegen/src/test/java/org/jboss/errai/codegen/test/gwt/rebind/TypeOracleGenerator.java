@@ -1,10 +1,7 @@
 package org.jboss.errai.codegen.test.gwt.rebind;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import java.io.PrintWriter;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
@@ -12,7 +9,11 @@ import org.jboss.errai.codegen.test.gwt.client.TestInterface;
 import org.jboss.errai.codegen.test.gwt.client.TypeOracleBootstrap;
 import org.jboss.errai.codegen.test.gwt.client.TypeWithNestedClass;
 
-import java.io.PrintWriter;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * @author Mike Brock
