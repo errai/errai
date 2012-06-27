@@ -25,9 +25,12 @@ import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.cdi.server.CDIServerUtil;
 import org.jboss.errai.cdi.server.ScopeUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
@@ -44,6 +47,8 @@ import java.util.Set;
  * Includes marshalling/unmarshalling of event types.
  */
 public class EventDispatcher implements MessageCallback {
+  private static final Logger log = LoggerFactory.getLogger("EventDispatcher");
+
   private static final String CDI_EVENT_CHANNEL_OPEN = "cdi.event.channel.open";
   private static final String CDI_REMOTE_EVENTS_ACTIVE = "cdi.event.active.events";
 
@@ -67,6 +72,7 @@ public class EventDispatcher implements MessageCallback {
     this.afterBeanDiscovery = afterBeanDiscovery;
   }
 
+  @SuppressWarnings("unchecked")
   public void callback(final Message message) {
     try {
       ScopeUtil.associateRequestContext(message);
@@ -84,9 +90,16 @@ public class EventDispatcher implements MessageCallback {
           if (afterBeanDiscovery != null) {
             final String typeName = message.get(String.class, CDIProtocol.BeanType);
             final Class<?> type = Class.forName(typeName);
-            final Set<String> annotationTypes = message.get(Set.class, CDIProtocol.Qualifiers);
 
-            final DevEventObserverMethod observerMethod = new DevEventObserverMethod(messagebus, type, annotationTypes);
+            if (type == null || !EnvUtil.isPortableType(type)) {
+              log.warn("client tried to register a non-portable type: " + type);
+              return;
+            }
+
+
+            final Set<String> annotationTypes = message.get(Set.class, CDIProtocol.Qualifiers);
+            final DevEventObserverMethod observerMethod
+                    = new DevEventObserverMethod(messagebus, type, annotationTypes);
 
             if (!activeObserverMethods.contains(observerMethod)) {
               afterBeanDiscovery.addObserverMethod(observerMethod);

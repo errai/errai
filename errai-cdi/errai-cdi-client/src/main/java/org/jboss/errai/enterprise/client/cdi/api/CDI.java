@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.enterprise.client.cdi.api;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -100,6 +99,7 @@ public class CDI {
    * Return a list of string representations for the qualifiers.
    *
    * @param qualifiers
+   *
    * @return
    */
   public static List<String> getQualifiersPart(Annotation[] qualifiers) {
@@ -149,14 +149,14 @@ public class CDI {
     }
     observerCallbacks.add(callback);
 
-    if (!GWT.isProdMode()) {
-      MessageBuilder.createMessage()
-              .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
-              .command(CDICommands.RemoteSubscribe)
-              .with(CDIProtocol.BeanType, eventType)
-              .with(CDIProtocol.Qualifiers, callback.getQualifiers())
-              .noErrorHandling().sendNowWith(ErraiBus.get());
-    }
+    //  if (!GWT.isProdMode()) {
+    MessageBuilder.createMessage()
+            .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+            .command(CDICommands.RemoteSubscribe)
+            .with(CDIProtocol.BeanType, eventType)
+            .with(CDIProtocol.Qualifiers, callback.getQualifiers())
+            .noErrorHandling().sendNowWith(ErraiBus.get());
+    //  }
 
     return new Subscription() {
       @Override
