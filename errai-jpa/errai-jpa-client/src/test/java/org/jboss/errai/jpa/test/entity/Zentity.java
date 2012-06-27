@@ -33,7 +33,7 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   // non-standard date literal syntax (Hibernate doesn't support JPA2 date literals)
   @NamedQuery(name="zentityLiteralDate", query="SELECT z FROM Zentity z WHERE z.date = '2012-06-22'"),
 
-  @NamedQuery(name="zentityLiteralInt", query="SELECT z FROM Zentity z WHERE z.primitiveInt = -55443322"),
+  @NamedQuery(name="zentityLiteralInt", query="SELECT z FROM Zentity z WHERE z.primitiveInt = -55443322")
 })
 public class Zentity {
 
