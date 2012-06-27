@@ -129,16 +129,11 @@ public class RebindUtils {
 
     Statement callContext =
         Stmt.newObject(callContextType).extend()
-            .privateField("proceeding", boolean.class)
-            .finish()
             .publicOverridesMethod("getMethodName")
             .append(Stmt.load(method.getName()).returnValue())
             .finish()
-            .publicOverridesMethod("isProceeding")
-            .append(Stmt.loadVariable("this").loadField("proceeding").returnValue())
-            .finish()
             .publicOverridesMethod("proceed")
-            .append(Stmt.loadVariable("this").loadField("proceeding").assignValue(true))
+            .append(Stmt.loadVariable("status").invoke("setProceeding", true))
             .append(proceed)
             .append(Stmt.load(null).returnValue())
             .finish()

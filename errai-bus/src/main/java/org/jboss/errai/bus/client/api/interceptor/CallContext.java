@@ -65,11 +65,4 @@ abstract class CallContext {
    * @return the return value of the intercepted method. Always null for asynchronous methods.
    */
   public abstract Object proceed();
-
-  /**
-   * Returns whether or not the execution of the intercepted method was proceeded.
-   * 
-   * @return true, if {@link #proceed()} was called, otherwise false.
-   */
-  public abstract boolean isProceeding();
 }

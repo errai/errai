@@ -25,6 +25,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.bus.client.framework.CallContextStatus;
 import org.jboss.errai.bus.client.framework.RpcStub;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -95,8 +96,8 @@ public class RpcProxyGenerator {
       parmVars.add(Stmt.loadVariable(parms[i].getName()));
     }
 
-    Statement parameters = (intercepted) ? 
-        new StringStatement("getParameters()", MetaClassFactory.get(Object[].class)) : 
+    Statement parameters = (intercepted) ?
+        new StringStatement("getParameters()", MetaClassFactory.get(Object[].class)) :
           Stmt.newArray(Object.class).initialize(parmVars.toArray());
 
     BlockBuilder<?> methodBlock =
@@ -132,6 +133,9 @@ public class RpcProxyGenerator {
     methodBuilder.append(
         Stmt.try_()
             .append(
+                Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
+                    Stmt.newObject(CallContextStatus.class)))
+            .append(
                 Stmt.declareVariable(RemoteCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
             .append(
@@ -141,7 +145,7 @@ public class RpcProxyGenerator {
                 Stmt.nestedCall(Stmt.newObject(interceptedCall.value()))
                     .invoke("aroundInvoke", Variable.get("callContext")))
             .append(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("callContext").invoke("isProceeding")))
+                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
                     .append(
                         Stmt.loadVariable("remoteCallback").invoke("callback",
                             Stmt.loadVariable("callContext").invoke("getResult")))
@@ -153,7 +157,7 @@ public class RpcProxyGenerator {
             .finish()
         );
   }
-  
+
   private Statement generateRequest(MetaMethod method, Statement methodParams, boolean intercepted) {
     return Stmt
         .if_(Bool.isNull(Variable.get("errorCallback")))

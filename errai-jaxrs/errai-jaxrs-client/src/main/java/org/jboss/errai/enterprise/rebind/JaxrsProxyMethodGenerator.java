@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.bus.client.framework.CallContextStatus;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
@@ -106,6 +107,9 @@ public class JaxrsProxyMethodGenerator {
     methodBlock.append(
         Stmt.try_()
             .append(
+                Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
+                    Stmt.newObject(CallContextStatus.class)))
+            .append(
                 Stmt.declareVariable(RestCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
             .append(
@@ -117,7 +121,7 @@ public class JaxrsProxyMethodGenerator {
                 Stmt.nestedCall(Stmt.newObject(interceptedCall.value())).invoke("aroundInvoke",
                     Variable.get("callContext")))
             .append(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("callContext").invoke("isProceeding")))
+                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
                     .append(
                         Stmt.loadVariable("remoteCallback").invoke("callback",
                             Stmt.loadVariable("callContext").invoke("getResult")))
