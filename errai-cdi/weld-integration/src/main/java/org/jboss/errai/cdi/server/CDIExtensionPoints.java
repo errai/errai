@@ -334,52 +334,51 @@ public class CDIExtensionPoints implements Extension {
 
   @SuppressWarnings({"UnusedDeclaration", "CdiInjectionPointsInspection"})
   public void afterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager bm) {
-    final ErraiServiceSingleton.ErraiInitCallback callback = new ErraiServiceSingleton.ErraiInitCallback() {
-      @Override
-      public void onInit(final ErraiService service) {
-        // subscribe event dispatcher
-        // Errai Service wrapper
 
-        final MessageBus bus = service.getBus();
+    ErraiService<?> service = ErraiServiceSingleton.getService();
+    // subscribe event dispatcher
+    // Errai Service wrapper
 
-        if (bus.isSubscribed(CDI.SERVER_DISPATCHER_SUBJECT)) {
-          return;
+    final MessageBus bus = service.getBus();
+
+    if (bus.isSubscribed(CDI.SERVER_DISPATCHER_SUBJECT)) {
+      return;
+    }
+
+    final byte[] randBytes = new byte[32];
+    final Random random = new Random(System.currentTimeMillis());
+
+    random.nextBytes(randBytes);
+
+    abd.addBean(new ErraiServiceBean(bm, SecureHashUtil.hashToHexString(randBytes)));
+
+    if (MarshallingGenUtil.isUseStaticMarshallers()) {
+
+      final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints
+              = new HashSet<ObserversMarshallingExtension.ObserverPoint>();
+
+      for (final EventConsumer ec : eventConsumers) {
+        if (ec.getEventBeanType() != null) {
+          abd.addBean(new ConversationalEventBean(ec.getEventBeanType(), (BeanManagerImpl) bm, bus));
         }
 
-        final byte[] randBytes = new byte[32];
-        final Random random = new Random(System.currentTimeMillis());
+        observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
+      }
 
-        random.nextBytes(randBytes);
+      observerPoints.addAll(org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.scanForObserverPointsInClassPath());
 
-        abd.addBean(new ErraiServiceBean(bm, SecureHashUtil.hashToHexString(randBytes)));
-
-        if (MarshallingGenUtil.isUseStaticMarshallers()) {
-
-          final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints
-                  = new HashSet<ObserversMarshallingExtension.ObserverPoint>();
-
-          for (final EventConsumer ec : eventConsumers) {
-            if (ec.getEventBeanType() != null) {
-              abd.addBean(new ConversationalEventBean(ec.getEventBeanType(), (BeanManagerImpl) bm, bus));
-            }
-
-            observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
+      for (final org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
+              observerPoints) {
+        if (org.jboss.errai.common.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
+          if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
+            abd.addObserverMethod(new ConversationalEventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
           }
-
-          observerPoints.addAll(org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.scanForObserverPointsInClassPath());
-
-          for (final org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
-                  observerPoints) {
-            if (org.jboss.errai.common.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
-              if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
-                abd.addObserverMethod(new ConversationalEventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
-              }
-              else {
-                abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
-              }
-            }
+          else {
+            abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
           }
         }
+      }
+    }
 //        else {
 //          bus.subscribe("cdi.event:DevModeService", new MessageCallback() {
 //            @Override
@@ -389,31 +388,29 @@ public class CDIExtensionPoints implements Extension {
 //          });
 //        }
 
-        for (final MessageSender ms : messageSenders) {
-          abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));
-        }
+    for (final MessageSender ms : messageSenders) {
+      abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));
+    }
 
-        // Errai bus injection
-        abd.addBean(new MessageBusBean(bus));
+    // Errai bus injection
+    abd.addBean(new MessageBusBean(bus));
 
-        // Support to inject the request dispatcher.
-        abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
+    // Support to inject the request dispatcher.
+    abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
 
-        // Register observers
-        abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus));
+    // Register observers
+    abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus));
 
-        // subscribe service and rpc endpoints
-        subscribeServices(bm, bus);
+    // subscribe service and rpc endpoints
+    subscribeServices(bm, bus);
 
-        final EventDispatcher eventDispatcher
-                = new EventDispatcher(bm, bus, observableEvents,
-                eventQualifiers, MarshallingGenUtil.isUseStaticMarshallers() ? null : abd);
+    final EventDispatcher eventDispatcher
+            = new EventDispatcher(bm, bus, observableEvents,
+            eventQualifiers, MarshallingGenUtil.isUseStaticMarshallers() ? null : abd);
 
-        // subscribe event dispatcher
-        bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
-      }
-    };
-    ErraiServiceSingleton.registerInitCallback(callback);
+    // subscribe event dispatcher
+    bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
+
 
   }
 

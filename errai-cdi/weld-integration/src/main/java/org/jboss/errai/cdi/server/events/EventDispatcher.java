@@ -96,7 +96,6 @@ public class EventDispatcher implements MessageCallback {
               return;
             }
 
-
             final Set<String> annotationTypes = message.get(Set.class, CDIProtocol.Qualifiers);
             final DevEventObserverMethod observerMethod
                     = new DevEventObserverMethod(messagebus, type, annotationTypes);
@@ -119,11 +118,11 @@ public class EventDispatcher implements MessageCallback {
             final Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
             List<Annotation> qualifiers = null;
             if (qualifierNames != null) {
-              for (String qualifierName : qualifierNames) {
+              for (final String qualifierName : qualifierNames) {
                 if (qualifiers == null) {
                   qualifiers = new ArrayList<Annotation>();
                 }
-                Annotation qualifier = allQualifiers.get(qualifierName);
+                final Annotation qualifier = allQualifiers.get(qualifierName);
                 if (qualifier != null) {
                   qualifiers.add(qualifier);
                 }
