@@ -1,14 +1,14 @@
 package org.jboss.errai.codegen.util;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.EnvUtil;
 import org.mvel2.util.NullType;
-
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -27,10 +27,8 @@ public final class ClassScanner {
       }
     }
 
-    if (EnvUtil.isProdMode()) {
-      for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-        _addIfMatches(result, MetaClassFactory.get(cls), packages);
-      }
+    for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
+      _addIfMatches(result, MetaClassFactory.get(cls), packages);
     }
 
     return result;
