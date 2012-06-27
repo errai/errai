@@ -275,15 +275,15 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
   }
 
-  public void IGNOREtestFilterByLiteralChar() {
+  public void testFilterByLiteralChar() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 
     Zentity zentity1 = new Zentity();
-    zentity1.setPrimitiveChar((char) 12);
+    zentity1.setPrimitiveChar('c');
     em.persist(zentity1);
 
     Zentity zentity2 = new Zentity();
-    zentity2.setPrimitiveChar((char) 12345);
+    zentity2.setPrimitiveChar('a');
     em.persist(zentity2);
 
     em.flush();

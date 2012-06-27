@@ -36,7 +36,11 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityLiteralLong", query="SELECT z FROM Zentity z WHERE z.primitiveLong = 11223344L"),
   @NamedQuery(name="zentityLiteralInt", query="SELECT z FROM Zentity z WHERE z.primitiveInt = -55443322"),
   @NamedQuery(name="zentityLiteralShort", query="SELECT z FROM Zentity z WHERE z.primitiveShort = -1234"),
-  @NamedQuery(name="zentityLiteralChar", query="SELECT z FROM Zentity z WHERE z.primitiveChar = 12"),
+
+  // note that char-valued attributes will only compare equal to string literals, not numeric literals.
+  // this restriction also exists with Hibernate-on-HSQLDB (so we're consistent with server side behaviour).
+  @NamedQuery(name="zentityLiteralChar", query="SELECT z FROM Zentity z WHERE z.primitiveChar = 'c'"),
+
   @NamedQuery(name="zentityLiteralByte", query="SELECT z FROM Zentity z WHERE z.primitiveByte = -5")
 })
 public class Zentity {

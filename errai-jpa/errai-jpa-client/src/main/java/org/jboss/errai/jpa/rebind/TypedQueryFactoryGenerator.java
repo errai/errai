@@ -178,9 +178,10 @@ public class TypedQueryFactoryGenerator {
       if (requestedType == Float.class || requestedType == float.class
               || requestedType == Integer.class || requestedType == int.class
               || requestedType == Short.class || requestedType == short.class
-              || requestedType == Character.class || requestedType == char.class
               || requestedType == Byte.class || requestedType == byte.class) {
         requestedType = Double.class;
+      } else if (requestedType == Character.class || requestedType == char.class) {
+        requestedType = String.class;
       }
 
       // FIXME this assumes the property reference is to the candidate entity instance (it could be to another type)
