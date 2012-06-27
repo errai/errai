@@ -425,4 +425,27 @@ public class QueryTest extends GWTTestCase {
     TypedQuery<Album> q = em.createNamedQuery("albumLiteralEnum", Album.class);
     assertEquals(album1.toString(), q.getSingleResult().toString());
   }
+
+  public void testNestedBooleanLogic() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    zentity1.setPrimitiveInt(555);
+    zentity1.setPrimitiveByte((byte) 1);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("goodbye");
+    zentity2.setPrimitiveInt(555);
+    zentity2.setPrimitiveByte((byte) 2);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityNestedBooleanLogic", Zentity.class);
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+
+  }
+
 }

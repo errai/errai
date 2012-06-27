@@ -56,9 +56,11 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 
   // this is primarily a test for enum literals
   // but it's also an oblique test for sticking a query for type A on an entity of type B
-  @NamedQuery(name="albumLiteralEnum", query="SELECT a FROM Album a WHERE a.format = org.jboss.errai.jpa.test.entity.Format.SINGLE")
+  @NamedQuery(name="albumLiteralEnum",
+              query="SELECT a FROM Album a WHERE a.format = org.jboss.errai.jpa.test.entity.Format.SINGLE"),
 
-  // TODO entity type (class) literal
+  @NamedQuery(name="zentityNestedBooleanLogic",
+              query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555 OR z.primitiveByte = 1")
 })
 public class Zentity {
 

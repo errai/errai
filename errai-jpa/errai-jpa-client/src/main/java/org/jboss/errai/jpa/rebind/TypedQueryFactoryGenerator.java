@@ -144,7 +144,7 @@ public class TypedQueryFactoryGenerator {
         if (ast.getNumberOfChildren() != 1) {
           throw new IllegalStateException("WHERE clause has " + ast.getNumberOfChildren() + " children (expected 1)");
         }
-        return generateBooleanExpression(traverser);
+        return generateExpression(traverser);
       default:
         System.out.println("Skipping node: " + ast);
       }
@@ -152,27 +152,44 @@ public class TypedQueryFactoryGenerator {
     throw new RuntimeException("Didn't find the WHERE clause in the query");
   }
 
-  private Statement generateBooleanExpression(AstInorderTraversal traverser) {
+  /**
+   * Consumes the next token from the traverser and returns the equivalent Java
+   * expression, recursing if necessary.
+   *
+   * @param traverser
+   *          The traverser that walks through the nodes of the Hibernate
+   *          second-level AST in order. When this method returns, the traverser
+   *          will have completely walked the subtree under the starting node.
+   *          The traverser will be left on the next node.
+   */
+  private Statement generateExpression(AstInorderTraversal traverser) {
     AST ast = traverser.next();
     switch (ast.getType()) {
+
+    //
+    // BOOLEAN EXPRESSIONS
+    //
 
     case HqlSqlTokenTypes.EQ:
-      return Stmt.invokeStatic(Comparisons.class, "nullSafeEquals", generateValueExpression(traverser), generateValueExpression(traverser));
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeEquals",
+              generateExpression(traverser), generateExpression(traverser));
 
     case HqlSqlTokenTypes.IS_NULL:
-      return Bool.isNull(generateValueExpression(traverser));
+      return Bool.isNull(generateExpression(traverser));
 
     case HqlSqlTokenTypes.IS_NOT_NULL:
-      return Bool.isNotNull(generateValueExpression(traverser));
+      return Bool.isNotNull(generateExpression(traverser));
 
-    default:
-      throw new UnexpectedTokenException(ast.getType(), "Boolean expression root node");
-    }
-  }
+    case HqlSqlTokenTypes.OR:
+      return Bool.or(generateExpression(traverser), generateExpression(traverser));
 
-  private Statement generateValueExpression(AstInorderTraversal traverser) {
-    AST ast = traverser.next();
-    switch (ast.getType()) {
+    case HqlSqlTokenTypes.AND:
+      return Bool.and(generateExpression(traverser), generateExpression(traverser));
+
+    //
+    // VALUE EXPRESSIONS
+    //
 
     case HqlSqlTokenTypes.DOT:
       DotNode dotNode = (DotNode) ast;
@@ -204,7 +221,7 @@ public class TypedQueryFactoryGenerator {
       return Stmt.loadLiteral(SqlUtil.parseStringLiteral(ast.getText()));
 
     case HqlSqlTokenTypes.UNARY_MINUS:
-      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateValueExpression(traverser));
+      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateExpression(traverser));
 
     case HqlSqlTokenTypes.NUM_INT:
     case HqlSqlTokenTypes.NUM_DOUBLE:
@@ -226,7 +243,7 @@ public class TypedQueryFactoryGenerator {
       return Stmt.loadVariable(ast.getText());
 
     default:
-      throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
+      throw new UnexpectedTokenException(ast.getType(), "an expression (boolean, literal, JPQL path, or named parameter)");
     }
 
     // I keep feeling like this will be useful, but so far it has turned out to be unnecessary:
