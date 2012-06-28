@@ -34,6 +34,7 @@ import org.jboss.errai.ioc.client.api.PackageTarget;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXParseException;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class UiBinderGenerator extends Generator {
 
   private static final String XSS_SAFE_CONFIG_PROPERTY = "UiBinder.useSafeHtmlTemplates";
   private static final String LAZY_WIDGET_BUILDERS_PROPERTY = "UiBinder.useLazyWidgetBuilders";
-
+  
   private static boolean gaveSafeHtmlWarning;
   private static boolean gaveLazyBuildersWarning;
 
@@ -58,7 +59,7 @@ public class UiBinderGenerator extends Generator {
    * for any classloader to find it as a resource.
    */
   private static String deduceTemplateFile(MortalLogger logger,
-                                           JClassType interfaceType) throws UnableToCompleteException {
+      JClassType interfaceType) throws UnableToCompleteException {
     String templateName = null;
     UiTemplate annotation = interfaceType.getAnnotation(UiTemplate.class);
     if (annotation == null) {
@@ -68,8 +69,7 @@ public class UiBinderGenerator extends Generator {
         interfaceType = interfaceType.getEnclosingType();
       }
       return slashify(interfaceType.getQualifiedBinaryName()) + TEMPLATE_SUFFIX;
-    }
-    else {
+    } else {
       templateName = annotation.value();
       if (!templateName.endsWith(TEMPLATE_SUFFIX)) {
         logger.die("Template file name must end with " + TEMPLATE_SUFFIX);
@@ -80,12 +80,11 @@ public class UiBinderGenerator extends Generator {
        * to the binder's package, otherwise slashify the dots
        */
       String unsuffixed = templateName.substring(0,
-              templateName.lastIndexOf(TEMPLATE_SUFFIX));
+          templateName.lastIndexOf(TEMPLATE_SUFFIX));
       if (!unsuffixed.contains(".")) {
-        templateName = slashify(determinePackage(interfaceType)) + "/"
-                + templateName;
-      }
-      else {
+        templateName = slashify(interfaceType.getPackage().getName()) + "/"
+            + templateName;
+      } else {
         templateName = slashify(unsuffixed) + TEMPLATE_SUFFIX;
       }
     }
@@ -100,23 +99,21 @@ public class UiBinderGenerator extends Generator {
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext genCtx,
-                         String fqInterfaceName) throws UnableToCompleteException {
+      String fqInterfaceName) throws UnableToCompleteException {
     TypeOracle oracle = genCtx.getTypeOracle();
     ResourceOracle resourceOracle = genCtx.getResourcesOracle();
 
     JClassType interfaceType;
     try {
       interfaceType = oracle.getType(fqInterfaceName);
-    }
-    catch (NotFoundException e) {
+    } catch (NotFoundException e) {
       throw new RuntimeException(e);
     }
 
     DesignTimeUtils designTime;
     if (DesignTimeUtilsImpl.isDesignTime(fqInterfaceName)) {
       designTime = new DesignTimeUtilsImpl();
-    }
-    else {
+    } else {
       designTime = DesignTimeUtilsStub.EMPTY;
     }
 
@@ -126,35 +123,14 @@ public class UiBinderGenerator extends Generator {
     String packageName = determinePackage(interfaceType);
 
     PrintWriterManager writers = new PrintWriterManager(genCtx, logger,
-            packageName);
+        packageName);
     PrintWriter printWriter = writers.tryToMakePrintWriterFor(implName);
 
     if (printWriter != null) {
       generateOnce(interfaceType, implName, printWriter, logger, oracle,
-              resourceOracle, genCtx.getPropertyOracle(), writers, designTime);
+          resourceOracle, genCtx.getPropertyOracle(), writers, designTime);
     }
     return packageName + "." + implName;
-  }
-
-  private Boolean extractConfigProperty(MortalLogger logger,
-                                        PropertyOracle propertyOracle, String configProperty, boolean defaultValue) {
-    List<String> values;
-    try {
-      values = propertyOracle.getConfigurationProperty(configProperty).getValues();
-    }
-    catch (BadPropertyValueException e) {
-      logger.warn("No value found for configuration property %s.", configProperty);
-      return defaultValue;
-    }
-
-    String value = values.get(0);
-    if (!value.equals(Boolean.FALSE.toString()) && !value.equals(Boolean.TRUE.toString())) {
-      logger.warn("Unparseable value \"%s\" found for configuration property %s", value,
-              configProperty);
-      return defaultValue;
-    }
-
-    return Boolean.valueOf(value);
   }
 
   private static String determinePackage(JClassType interfaceType) {
@@ -170,24 +146,44 @@ public class UiBinderGenerator extends Generator {
     return packageName;
   }
 
+  private Boolean extractConfigProperty(MortalLogger logger,
+      PropertyOracle propertyOracle, String configProperty, boolean defaultValue) {
+    List<String> values;
+    try {
+      values = propertyOracle.getConfigurationProperty(configProperty).getValues();
+    } catch (BadPropertyValueException e) {
+      logger.warn("No value found for configuration property %s.", configProperty);
+      return defaultValue;
+    }
+
+    String value = values.get(0);
+    if (!value.equals(Boolean.FALSE.toString()) && !value.equals(Boolean.TRUE.toString())) {
+      logger.warn("Unparseable value \"%s\" found for configuration property %s", value,
+          configProperty);
+      return defaultValue;
+    }
+
+    return Boolean.valueOf(value);
+  }
+
   private void generateOnce(JClassType interfaceType, String implName,
-                            PrintWriter binderPrintWriter, TreeLogger treeLogger, TypeOracle oracle,
-                            ResourceOracle resourceOracle, PropertyOracle propertyOracle,
-                            PrintWriterManager writerManager, DesignTimeUtils designTime)
-          throws UnableToCompleteException {
+      PrintWriter binderPrintWriter, TreeLogger treeLogger, TypeOracle oracle,
+      ResourceOracle resourceOracle, PropertyOracle propertyOracle,
+      PrintWriterManager writerManager,  DesignTimeUtils designTime)
+  throws UnableToCompleteException {
 
     MortalLogger logger = new MortalLogger(treeLogger);
     String templatePath = deduceTemplateFile(logger, interfaceType);
-
     MessagesWriter messages = new MessagesWriter(oracle, BINDER_URI, logger,
-            templatePath, determinePackage(interfaceType), implName);
+        templatePath, interfaceType.getPackage().getName(), implName);
 
-    boolean useLazyWidgetBuilders = useLazyWidgetBuilders(logger, propertyOracle);
+    boolean useLazyWidgetBuilders =
+        useLazyWidgetBuilders(logger, propertyOracle) && !designTime.isDesignTime();
     FieldManager fieldManager = new FieldManager(oracle, logger, useLazyWidgetBuilders);
 
     UiBinderWriter uiBinderWriter = new UiBinderWriter(interfaceType, implName,
-            templatePath, oracle, logger, fieldManager, messages, designTime, uiBinderCtx,
-            useSafeHtmlTemplates(logger, propertyOracle), useLazyWidgetBuilders, BINDER_URI);
+        templatePath, oracle, logger, fieldManager, messages, designTime, uiBinderCtx,
+        useSafeHtmlTemplates(logger, propertyOracle), useLazyWidgetBuilders, BINDER_URI);
 
     Document doc = getW3cDoc(logger, designTime, resourceOracle, templatePath);
     designTime.rememberPathForElements(doc);
@@ -205,8 +201,8 @@ public class UiBinderGenerator extends Generator {
   }
 
   private Document getW3cDoc(MortalLogger logger, DesignTimeUtils designTime,
-                             ResourceOracle resourceOracle, String templatePath)
-          throws UnableToCompleteException {
+      ResourceOracle resourceOracle, String templatePath)
+      throws UnableToCompleteException {
 
     Resource resource = resourceOracle.getResourceMap().get(templatePath);
     if (null == resource) {
@@ -220,12 +216,13 @@ public class UiBinderGenerator extends Generator {
         content = Util.readStreamAsString(resource.openContents());
       }
       doc = new W3cDomHelper(logger.getTreeLogger(), resourceOracle).documentFor(
-              content, resource.getPath());
-    }
-    catch (SAXParseException e) {
+          content, resource.getPath());
+    } catch (IOException iex) {
+      logger.die("Error opening resource:" + resource.getLocation(), iex);
+    } catch (SAXParseException e) {
       logger.die(
-              "Error parsing XML (line " + e.getLineNumber() + "): "
-                      + e.getMessage(), e);
+          "Error parsing XML (line " + e.getLineNumber() + "): "
+              + e.getMessage(), e);
     }
     return doc;
   }
@@ -234,8 +231,8 @@ public class UiBinderGenerator extends Generator {
     Boolean rtn = extractConfigProperty(logger, propertyOracle, LAZY_WIDGET_BUILDERS_PROPERTY, true);
     if (!gaveLazyBuildersWarning && !rtn) {
       logger.warn("Configuration property %s is false. Deprecated code generation is in play. " +
-              "This property will soon become a no-op.",
-              LAZY_WIDGET_BUILDERS_PROPERTY);
+                  "This property will soon become a no-op.",
+                  LAZY_WIDGET_BUILDERS_PROPERTY);
       gaveLazyBuildersWarning = true;
     }
     return rtn;
@@ -243,13 +240,13 @@ public class UiBinderGenerator extends Generator {
 
   private Boolean useSafeHtmlTemplates(MortalLogger logger, PropertyOracle propertyOracle) {
     Boolean rtn = extractConfigProperty(
-            logger, propertyOracle, XSS_SAFE_CONFIG_PROPERTY, true);
+        logger, propertyOracle, XSS_SAFE_CONFIG_PROPERTY, true);
 
     if (!gaveSafeHtmlWarning && !rtn) {
       logger.warn("Configuration property %s is false! UiBinder SafeHtml integration is off, "
-              + "leaving your users more vulnerable to cross-site scripting attacks. This property " +
-              "will soon become a no-op, and SafeHtml integration will always be on.",
-              XSS_SAFE_CONFIG_PROPERTY);
+          + "leaving your users more vulnerable to cross-site scripting attacks. This property " +
+          "will soon become a no-op, and SafeHtml integration will always be on.",
+          XSS_SAFE_CONFIG_PROPERTY);
       gaveSafeHtmlWarning = true;
     }
     return rtn;
