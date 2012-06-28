@@ -714,4 +714,81 @@ public class QueryTest extends GWTTestCase {
     assertFalse(resultStrings.contains(zentity2.toString()));
     assertTrue(resultStrings.contains(zentity3.toString()));
   }
+
+  public void testNumericBetween() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setBoxedDouble(1.0);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setBoxedDouble(2.0);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setBoxedDouble(3.0);
+    em.persist(zentity3);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setBoxedDouble(4.0);
+    em.persist(zentity4);
+
+    Zentity zentity5 = new Zentity();
+    zentity5.setBoxedDouble(5.0);
+    em.persist(zentity5);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityBetween", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(3, resultStrings.size());
+    assertFalse(resultStrings.contains(zentity1.toString()));
+    assertTrue(resultStrings.contains(zentity2.toString()));
+    assertTrue(resultStrings.contains(zentity3.toString()));
+    assertTrue(resultStrings.contains(zentity4.toString()));
+    assertFalse(resultStrings.contains(zentity5.toString()));
+  }
+
+  public void testNumericNotBetween() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setBoxedDouble(1.0);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setBoxedDouble(2.0);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setBoxedDouble(3.0);
+    em.persist(zentity3);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setBoxedDouble(4.0);
+    em.persist(zentity4);
+
+    Zentity zentity5 = new Zentity();
+    zentity5.setBoxedDouble(5.0);
+    em.persist(zentity5);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityNotBetween", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertFalse(resultStrings.contains(zentity2.toString()));
+    assertFalse(resultStrings.contains(zentity3.toString()));
+    assertFalse(resultStrings.contains(zentity4.toString()));
+    assertTrue(resultStrings.contains(zentity5.toString()));
+  }
+
 }

@@ -200,6 +200,24 @@ public class TypedQueryFactoryGenerator {
               Comparisons.class, "nullSafeLessThanOrEqualTo",
               generateExpression(traverser), generateExpression(traverser));
 
+    case HqlSqlTokenTypes.BETWEEN: {
+      Statement middle = generateExpression(traverser);
+      Statement small = generateExpression(traverser);
+      Statement big = generateExpression(traverser);
+      return Bool.and(
+              Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", small, middle),
+              Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", middle, big));
+    }
+
+    case HqlSqlTokenTypes.NOT_BETWEEN: {
+      Statement outside = generateExpression(traverser);
+      Statement small = generateExpression(traverser);
+      Statement big = generateExpression(traverser);
+      return Bool.or(
+              Stmt.invokeStatic(Comparisons.class, "nullSafeLessThan", outside, small),
+              Stmt.invokeStatic(Comparisons.class, "nullSafeGreaterThan", outside, big));
+    }
+
     case HqlSqlTokenTypes.IS_NULL:
       return Bool.isNull(generateExpression(traverser));
 
