@@ -66,7 +66,21 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityNot",
               query="SELECT z FROM Zentity z WHERE NOT z.string = 'hello'"),
   @NamedQuery(name="zentityNestedBooleanLogic",
-              query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555 OR z.primitiveByte = 1")
+              query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555 OR z.primitiveByte = 1"),
+
+  // Thoroughness dictates that we should test all combinations of numeric types (int > double, byte > double, ...)
+  // but the equals tests already do that. We'll just assume that coercing everything to double works for inequalities too.
+  @NamedQuery(name="zentityGreaterThan",          query="SELECT z FROM Zentity z WHERE z.primitiveInt > 555"),
+  @NamedQuery(name="zentityGreaterThanOrEqualTo", query="SELECT z FROM Zentity z WHERE z.primitiveInt >= 555"),
+  @NamedQuery(name="zentityLessThan",             query="SELECT z FROM Zentity z WHERE z.primitiveInt < 555"),
+  @NamedQuery(name="zentityLessThanOrEqualTo",    query="SELECT z FROM Zentity z WHERE z.primitiveInt <= 555"),
+
+  // These should ensure inequalities work for Java Comparable<?> types
+  @NamedQuery(name="zentityStringGreaterThan", query="SELECT z FROM Zentity z WHERE z.string > 'hello'"),
+  @NamedQuery(name="zentityStringGreaterThanOrEqualTo", query="SELECT z FROM Zentity z WHERE z.string >= 'hello'"),
+  @NamedQuery(name="zentityStringLessThan", query="SELECT z FROM Zentity z WHERE z.string < 'hello'"),
+  @NamedQuery(name="zentityStringLessThanOrEqualTo", query="SELECT z FROM Zentity z WHERE z.string <= 'hello'"),
+
 })
 public class Zentity {
 

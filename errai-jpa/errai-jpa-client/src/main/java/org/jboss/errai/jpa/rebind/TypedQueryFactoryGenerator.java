@@ -180,6 +180,26 @@ public class TypedQueryFactoryGenerator {
               Comparisons.class, "nullSafeEquals",
               generateExpression(traverser), generateExpression(traverser)));
 
+    case HqlSqlTokenTypes.GT:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeGreaterThan",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.GE:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeGreaterThanOrEqualTo",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.LT:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeLessThan",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.LE:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeLessThanOrEqualTo",
+              generateExpression(traverser), generateExpression(traverser));
+
     case HqlSqlTokenTypes.IS_NULL:
       return Bool.isNull(generateExpression(traverser));
 

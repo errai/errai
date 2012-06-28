@@ -519,4 +519,199 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
   }
 
+  public void testNumericGreaterThan() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveInt(555);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveInt(556);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setPrimitiveInt(554);
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityGreaterThan", Zentity.class);
+    assertEquals(zentity2.toString(), q.getSingleResult().toString());
+  }
+
+  public void testNumericGreaterThanOrEqualTo() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveInt(555);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveInt(556);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setPrimitiveInt(554);
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityGreaterThanOrEqualTo", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertTrue(resultStrings.contains(zentity2.toString()));
+    assertFalse(resultStrings.contains(zentity3.toString()));
+  }
+
+  public void testNumericLessThan() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveInt(555);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveInt(556);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setPrimitiveInt(554);
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLessThan", Zentity.class);
+    assertEquals(zentity3.toString(), q.getSingleResult().toString());
+  }
+
+  public void testNumericLessThanOrEqualTo() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveInt(555);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveInt(556);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setPrimitiveInt(554);
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLessThanOrEqualTo", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertFalse(resultStrings.contains(zentity2.toString()));
+    assertTrue(resultStrings.contains(zentity3.toString()));
+  }
+
+  public void testStringGreaterThan() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("impostor");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("goodbye");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityStringGreaterThan", Zentity.class);
+    assertEquals(zentity2.toString(), q.getSingleResult().toString());
+  }
+
+  public void testStringGreaterThanOrEqualTo() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("impostor");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("goodbye");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityStringGreaterThanOrEqualTo", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertTrue(resultStrings.contains(zentity2.toString()));
+    assertFalse(resultStrings.contains(zentity3.toString()));
+  }
+
+  public void testStringLessThan() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("impostor");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("goodbye");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityStringLessThan", Zentity.class);
+    assertEquals(zentity3.toString(), q.getSingleResult().toString());
+  }
+
+  public void testStringLessThanOrEqualTo() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("impostor");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("goodbye");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityStringLessThanOrEqualTo", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertFalse(resultStrings.contains(zentity2.toString()));
+    assertTrue(resultStrings.contains(zentity3.toString()));
+  }
 }
