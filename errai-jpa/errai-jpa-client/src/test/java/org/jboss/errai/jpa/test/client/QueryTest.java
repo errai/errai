@@ -2,7 +2,9 @@ package org.jboss.errai.jpa.test.client;
 
 
 import java.sql.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -426,6 +428,76 @@ public class QueryTest extends GWTTestCase {
     assertEquals(album1.toString(), q.getSingleResult().toString());
   }
 
+  public void testAnd() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    zentity1.setPrimitiveInt(555);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("goodbye");
+    zentity2.setPrimitiveInt(555);
+    zentity2.setPrimitiveByte((byte) 2);
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityAnd", Zentity.class);
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+
+  }
+
+  public void testOr() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    zentity1.setPrimitiveInt(555);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("goodbye");
+    zentity2.setPrimitiveInt(555);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("goodbye");
+    zentity3.setPrimitiveInt(556);
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityOr", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertTrue(resultStrings.contains(zentity2.toString()));
+    assertFalse(resultStrings.contains(zentity3.toString()));
+  }
+
+  public void testNot() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("goodbye");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("hello");
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityNot", Zentity.class);
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+
+  }
+
   public void testNestedBooleanLogic() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 
@@ -445,7 +517,6 @@ public class QueryTest extends GWTTestCase {
 
     TypedQuery<Zentity> q = em.createNamedQuery("zentityNestedBooleanLogic", Zentity.class);
     assertEquals(zentity1.toString(), q.getSingleResult().toString());
-
   }
 
 }

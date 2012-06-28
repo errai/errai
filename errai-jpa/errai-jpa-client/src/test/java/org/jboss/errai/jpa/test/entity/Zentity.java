@@ -59,6 +59,12 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="albumLiteralEnum",
               query="SELECT a FROM Album a WHERE a.format = org.jboss.errai.jpa.test.entity.Format.SINGLE"),
 
+  @NamedQuery(name="zentityAnd",
+              query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555"),
+  @NamedQuery(name="zentityOr",
+              query="SELECT z FROM Zentity z WHERE z.string = 'hello' OR z.primitiveInt = 555"),
+  @NamedQuery(name="zentityNot",
+              query="SELECT z FROM Zentity z WHERE NOT z.string = 'hello'"),
   @NamedQuery(name="zentityNestedBooleanLogic",
               query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555 OR z.primitiveByte = 1")
 })

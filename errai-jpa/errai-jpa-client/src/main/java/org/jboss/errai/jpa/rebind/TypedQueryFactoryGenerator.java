@@ -175,6 +175,11 @@ public class TypedQueryFactoryGenerator {
               Comparisons.class, "nullSafeEquals",
               generateExpression(traverser), generateExpression(traverser));
 
+    case HqlSqlTokenTypes.NE:
+      return Bool.notExpr(Stmt.invokeStatic(
+              Comparisons.class, "nullSafeEquals",
+              generateExpression(traverser), generateExpression(traverser)));
+
     case HqlSqlTokenTypes.IS_NULL:
       return Bool.isNull(generateExpression(traverser));
 
@@ -186,6 +191,9 @@ public class TypedQueryFactoryGenerator {
 
     case HqlSqlTokenTypes.AND:
       return Bool.and(generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.NOT:
+      return Bool.notExpr(generateExpression(traverser));
 
     //
     // VALUE EXPRESSIONS
