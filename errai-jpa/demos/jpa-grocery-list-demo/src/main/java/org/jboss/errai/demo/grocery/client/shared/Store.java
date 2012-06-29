@@ -10,7 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
-@Entity
+import org.jboss.errai.databinding.client.api.Bindable;
+
+@Bindable @Entity
 @NamedQuery(name="allStores", query="SELECT s FROM Store s WHERE 1 = 1")
 public class Store {
 
