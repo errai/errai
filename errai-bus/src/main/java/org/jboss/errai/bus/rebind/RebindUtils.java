@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -124,11 +125,11 @@ public class RebindUtils {
    *          the logic that should be invoked if {@link CallContext#proceed()} is called.
    * @return statement representing an anonymous implementation of the provided {@link CallContext}
    */
-  public static Statement generateProxyMethodCallContext(Class<? extends RemoteCallContext> callContextType,
+  public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
+      Class<? extends RemoteCallContext> callContextType,
       MetaClass proxyClass, MetaMethod method, Statement proceed) {
 
-    Statement callContext =
-        Stmt.newObject(callContextType).extend()
+    return Stmt.newObject(callContextType).extend()
             .publicOverridesMethod("getMethodName")
             .append(Stmt.load(method.getName()).returnValue())
             .finish()
@@ -176,9 +177,6 @@ public class RebindUtils {
                         .finish())
             )
             .append(Stmt.loadVariable("this").invoke("proceed", Variable.get("interceptorCallback")))
-            .finish()
             .finish();
-
-    return callContext;
   }
 }

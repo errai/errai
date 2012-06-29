@@ -121,9 +121,8 @@ public class RpcProxyGenerator {
   private void generateInterceptorLogic(ClassStructureBuilder<?> classBuilder, BlockBuilder<?> methodBuilder,
       MetaMethod method, Statement requestLogic, List<Statement> parmVars) {
 
-    Statement callContext =
-        RebindUtils.generateProxyMethodCallContext(RemoteCallContext.class, classBuilder.getClassDefinition(), method,
-            requestLogic);
+    Statement callContext = RebindUtils.generateProxyMethodCallContext(RemoteCallContext.class, 
+            classBuilder.getClassDefinition(), method,requestLogic).finish();
 
     InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
     if (interceptedCall == null) {

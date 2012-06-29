@@ -27,8 +27,8 @@ import org.jboss.errai.codegen.builder.ClosedBlock;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BlockStatement extends AbstractStatement {
-  private List<Statement> statements = new ArrayList<Statement>();
-
+  private final List<Statement> statements = new ArrayList<Statement>();
+  
   public BlockStatement(Statement... statements) {
     if (statements != null) {
       for (Statement statement : statements) {
@@ -59,7 +59,7 @@ public class BlockStatement extends AbstractStatement {
     
     StringBuilder buf = new StringBuilder(512);
 
-    boolean lastIsBlock = false;
+    boolean isLastBlock = false;
     for (Statement statement : statements) {
       if (buf.length() != 0)
         buf.append("\n");
@@ -70,10 +70,10 @@ public class BlockStatement extends AbstractStatement {
               && !buf.toString().endsWith(";") && !buf.toString().endsWith(":") && !buf.toString().endsWith("}"))
         buf.append(";");
 
-      lastIsBlock = statement instanceof ClosedBlock;
+      isLastBlock = statement instanceof ClosedBlock;
     }
 
-    if (buf.length() != 0 && buf.charAt(buf.length() - 1) != ';' && !lastIsBlock) {
+    if (buf.length() != 0 && buf.charAt(buf.length() - 1) != ';' && !isLastBlock) {
       buf.append(';');
     }
 

@@ -48,8 +48,8 @@ import com.google.gwt.http.client.Response;
 public class JaxrsProxyGenerator {
   private Class<?> remote = null;
 
-  private JaxrsHeaders headers;
-  private String rootResourcePath;
+  private final JaxrsHeaders headers;
+  private final String rootResourcePath;
 
   public JaxrsProxyGenerator(Class<?> remote) {
     this.remote = remote;

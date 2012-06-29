@@ -18,10 +18,12 @@ package org.jboss.errai.enterprise.jaxrs.client.shared;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallBypassingInterceptor;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallResultManipulatingInterceptor;
 
 /**
@@ -41,4 +43,9 @@ public interface InterceptedTestService {
   @Path("/2")
   @InterceptedCall(RestCallResultManipulatingInterceptor.class)
   public String interceptedGetManipulatingResult(@QueryParam("result") String result);
+  
+  @GET
+  @Path("/3/{result}")
+  @InterceptedCall(RestCallParameterManipulatingInterceptor.class)
+  public String interceptedGetManipulatingParameter(@PathParam("result") String result);
 }

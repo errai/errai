@@ -25,6 +25,7 @@ import java.util.List;
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.client.framework.CallContextStatus;
 import org.jboss.errai.bus.rebind.RebindUtils;
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -80,99 +81,26 @@ public class JaxrsProxyMethodGenerator {
 
   public void generate() {
     if (resourceMethod.getHttpMethod() != null) {
-      generateRequestBuilder();
-      generateHeaders();
+      JaxrsResourceMethodParameters jaxrsParams = resourceMethod.getParameters();
+      methodBlock.append(generateUrl(jaxrsParams));
+      methodBlock.append(generateRequestBuilder(jaxrsParams));
+      methodBlock.append(generateHeaders(jaxrsParams));
 
       if (resourceMethod.getMethod().isAnnotationPresent(InterceptedCall.class) ||
           resourceMethod.getMethod().getDeclaringClass().isAnnotationPresent(InterceptedCall.class)) {
-        generateInterceptorLogic();
+        methodBlock.append(generateInterceptorLogic());
       }
       else {
-        methodBlock.append(generateRequest(false));
+        methodBlock.append(generateRequest());
       }
     }
     generateReturnStatement();
   }
 
-  private void generateInterceptorLogic() {
-    Statement callContext =
-        RebindUtils.generateProxyMethodCallContext(RestCallContext.class, declaringClass, resourceMethod.getMethod(),
-            generateRequest(true));
-
-    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
-    if (interceptedCall == null) {
-      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
-    }
-
-    methodBlock.append(
-        Stmt.try_()
-            .append(
-                Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
-                    Stmt.newObject(CallContextStatus.class)))
-            .append(
-                Stmt.declareVariable(RestCallContext.class).asFinal().named("callContext")
-                    .initializeWith(callContext))
-            .append(
-                Stmt.loadVariable("callContext").invoke("setRequestBuilder", Variable.get("requestBuilder")))
-            .append(
-                Stmt.loadVariable("callContext").invoke("setParameters",
-                    Stmt.newArray(Object.class).initialize(parameters.toArray())))
-            .append(
-                Stmt.nestedCall(Stmt.newObject(interceptedCall.value())).invoke("aroundInvoke",
-                    Variable.get("callContext")))
-            .append(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
-                    .append(
-                        Stmt.loadVariable("remoteCallback").invoke("callback",
-                            Stmt.loadVariable("callContext").invoke("getResult")))
-                    .finish()
-            )
-            .finish()
-            .catch_(Throwable.class, "throwable")
-            .append(errorHandling())
-            .finish()
-        );
-  }
-
-  private Statement generateRequest(boolean intercepted) {
-    ContextualStatementBuilder sendRequest = (intercepted) ?
-        Stmt.nestedCall(new StringStatement("getRequestBuilder()", MetaClassFactory.get(RequestBuilder.class))) :
-          Stmt.loadVariable("requestBuilder");
-
-    if (resourceMethod.getParameters().getEntityParameter() == null) {
-      sendRequest = sendRequest.invoke("sendRequest", null, createRequestCallback());
-    }
-    else {
-      Statement body = marshal(resourceMethod.getParameters().getEntityParameter(),
-          resourceMethod.getContentTypeHeader());
-      sendRequest = sendRequest.invoke("sendRequest", body, createRequestCallback());
-    }
-
-    return Stmt
-        .try_()
-        .append(sendRequest)
-        .finish()
-        .catch_(RequestException.class, "throwable")
-        .append(errorHandling())
-        .finish();
-  }
-
-  private void generateRequestBuilder() {
-    generateUrl();
-
-    Statement requestBuilder =
-        Stmt.declareVariable("requestBuilder", RequestBuilder.class,
-            Stmt.newObject(RequestBuilder.class)
-                .withParameters(resourceMethod.getHttpMethod(), Stmt.loadVariable("url").invoke("toString")));
-
-    methodBlock.append(requestBuilder);
-  }
-
-  private void generateUrl() {
-    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
-        Stmt.newObject(StringBuilder.class).withParameters(Stmt.loadVariable("this").invoke("getBaseUrl"))));
-
-    JaxrsResourceMethodParameters params = resourceMethod.getParameters();
+  private Statement generateUrl(JaxrsResourceMethodParameters params) {
+    BlockStatement block = new BlockStatement();
+    block.addStatement(Stmt.declareVariable("url", StringBuilder.class,
+        Stmt.newObject(StringBuilder.class).withParameters(new StringStatement("getBaseUrl()"))));
 
     // construct path using @PathParams and @MatrixParams
     String path = resourceMethod.getPath();
@@ -197,7 +125,7 @@ public class JaxrsProxyMethodGenerator {
 
       int i = 0;
       for (String queryParamName : params.getQueryParameters().keySet()) {
-        for (Parameter queryParam : params.getQueryParameters(queryParamName)) {
+        for (Statement queryParam : params.getQueryParameters(queryParamName)) {
           if (i++ > 0)
             urlBuilder = urlBuilder.invoke(APPEND, "&");
 
@@ -208,15 +136,26 @@ public class JaxrsProxyMethodGenerator {
     }
 
     if (urlBuilder != null)
-      methodBlock.append(urlBuilder);
+      block.addStatement(urlBuilder);
+
+    return block;
   }
 
-  private void generateHeaders() {
-    JaxrsResourceMethodParameters params = resourceMethod.getParameters();
+  private Statement generateRequestBuilder(JaxrsResourceMethodParameters params) {
+    Statement requestBuilder =
+        Stmt.declareVariable("requestBuilder", RequestBuilder.class,
+            Stmt.newObject(RequestBuilder.class)
+                .withParameters(resourceMethod.getHttpMethod(), Stmt.loadVariable("url").invoke("toString")));
+
+    return requestBuilder;
+  }
+
+  private Statement generateHeaders(JaxrsResourceMethodParameters params) {
+    BlockStatement block = new BlockStatement();
 
     // set headers based on method and class
     for (String key : resourceMethod.getHeaders().keySet()) {
-      methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", key,
+      block.addStatement(Stmt.loadVariable("requestBuilder").invoke("setHeader", key,
           resourceMethod.getHeaders().get(key)));
     }
 
@@ -226,14 +165,14 @@ public class JaxrsProxyMethodGenerator {
         ContextualStatementBuilder headerValueBuilder = Stmt.nestedCall(Stmt.newObject(StringBuilder.class));
 
         int i = 0;
-        for (Parameter headerParam : params.getHeaderParameters(headerParamName)) {
+        for (Statement headerParam : params.getHeaderParameters(headerParamName)) {
           if (i++ > 0) {
             headerValueBuilder = headerValueBuilder.invoke(APPEND, ",");
           }
           headerValueBuilder = headerValueBuilder.invoke(APPEND, marshal(headerParam));
         }
 
-        methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", headerParamName,
+        block.addStatement(Stmt.loadVariable("requestBuilder").invoke("setHeader", headerParamName,
             headerValueBuilder.invoke("toString")));
       }
     }
@@ -241,16 +180,97 @@ public class JaxrsProxyMethodGenerator {
     // set cookies based on @CookieParams
     if (params.getCookieParameters() != null) {
       for (String cookieName : params.getCookieParameters().keySet()) {
-        Parameter cookieParam = params.getCookieParameters().get(cookieName).get(0);
+        Statement cookieParam = params.getCookieParameters().get(cookieName).get(0);
 
-        Statement setCookie = Stmt.loadVariable(cookieParam.getName())
-            .if_(BooleanOperator.NotEquals, null)
-              .append(Stmt.invokeStatic(Cookies.class, "setCookie", cookieName, marshal(cookieParam)))
+        ContextualStatementBuilder setCookie = (cookieParam instanceof Parameter) ?
+            Stmt.loadVariable(((Parameter) cookieParam).getName()) :
+              Stmt.nestedCall(cookieParam);
+
+        setCookie.if_(BooleanOperator.NotEquals, null)
+            .append(Stmt.invokeStatic(Cookies.class, "setCookie", cookieName, marshal(cookieParam)))
             .finish();
 
-        methodBlock.append(setCookie);
+        block.addStatement(setCookie);
       }
     }
+    return block.isEmpty() ? null : block;
+  }
+
+  private Statement generateInterceptorLogic() {
+    JaxrsResourceMethodParameters jaxrsParams =
+        JaxrsResourceMethodParameters.fromMethod(resourceMethod.getMethod(), "parameters");
+
+    Statement callContext =
+        RebindUtils.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
+            resourceMethod.getMethod(), generateInterceptedRequest())
+            .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
+            .append(new StringStatement("super.setParameters(parameters)"))
+            .append(generateUrl(jaxrsParams))
+            .append(generateRequestBuilder(jaxrsParams))
+            .append(generateHeaders(jaxrsParams))
+            .append(new StringStatement("setRequestBuilder(requestBuilder)"))
+            .finish()
+            .finish();
+
+    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
+    if (interceptedCall == null) {
+      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
+    }
+
+    return Stmt.try_()
+            .append(
+                Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
+                    Stmt.newObject(CallContextStatus.class)))
+            .append(
+                Stmt.declareVariable(RestCallContext.class).asFinal().named("callContext")
+                    .initializeWith(callContext))
+            .append(
+                Stmt.loadVariable("callContext").invoke("setRequestBuilder", Variable.get("requestBuilder")))
+            .append(
+                Stmt.loadVariable("callContext").invoke("setParameters",
+                    Stmt.newArray(Object.class).initialize(parameters.toArray())))
+            .append(
+                Stmt.nestedCall(Stmt.newObject(interceptedCall.value())).invoke("aroundInvoke",
+                    Variable.get("callContext")))
+            .append(
+                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
+                    .append(
+                        Stmt.loadVariable("remoteCallback").invoke("callback",
+                            Stmt.loadVariable("callContext").invoke("getResult")))
+                    .finish()
+            )
+            .finish()
+            .catch_(Throwable.class, "throwable")
+            .append(errorHandling())
+            .finish();
+  }
+
+  private Statement generateInterceptedRequest() {
+    return generateRequest(Stmt.nestedCall(
+        new StringStatement("getRequestBuilder()", MetaClassFactory.get(RequestBuilder.class))));
+  }
+
+  private Statement generateRequest() {
+    return generateRequest(Stmt.loadVariable("requestBuilder"));
+  }
+
+  private Statement generateRequest(ContextualStatementBuilder requestBuilder) {
+    if (resourceMethod.getParameters().getEntityParameter() == null) {
+      requestBuilder = requestBuilder.invoke("sendRequest", null, createRequestCallback());
+    }
+    else {
+      Statement body = marshal(resourceMethod.getParameters().getEntityParameter(),
+          resourceMethod.getContentTypeHeader());
+      requestBuilder = requestBuilder.invoke("sendRequest", body, createRequestCallback());
+    }
+
+    return Stmt
+        .try_()
+        .append(requestBuilder)
+        .finish()
+        .catch_(RequestException.class, "throwable")
+        .append(errorHandling())
+        .finish();
   }
 
   private Statement createRequestCallback() {

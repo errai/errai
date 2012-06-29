@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.enterprise.jaxrs.server;
+package org.jboss.errai.enterprise.jaxrs.client.shared.interceptor;
 
-import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedTestService;
+import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
+import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestClientInterceptor;
 
 /**
- * Implementation of {@link InterceptedTestService} returning test data.
+ * Rest client interceptor for testing purposes. Prevents the actual remote request and sets the result directly.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InterceptedTestServiceImpl implements InterceptedTestService {
+public class RestCallParameterManipulatingInterceptor implements RestClientInterceptor {
 
   @Override
-  public String interceptedGetBypassingEndpoint() {
-    // should never be called
-    return "not intercepted";
-  }
-
-  @Override
-  public String interceptedGetManipulatingResult(String result) {
-    return result;
-  }
-
-  @Override
-  public String interceptedGetManipulatingParameter(String result) {
-    return result;
+  public void aroundInvoke(final RestCallContext context) {
+    context.setParameters(new Object[]{"intercepted"});
+    context.proceed();
   }
 }

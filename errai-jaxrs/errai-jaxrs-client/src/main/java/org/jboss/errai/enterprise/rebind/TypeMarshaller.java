@@ -32,12 +32,16 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
  */
 public class TypeMarshaller {
 
-  public static Statement marshal(Parameter param) {
-    return marshal(param.getType(), Variable.get(param.getName()), "text/plain");
+  public static Statement marshal(Statement statement) {
+    return marshal(statement, "text/plain");
   }
 
-  public static Statement marshal(Parameter param, String contentType) {
-    return marshal(param.getType(), Variable.get(param.getName()), contentType);
+  public static Statement marshal(Statement statement, String contentType) {
+    if (statement instanceof Parameter) {
+      Parameter param = (Parameter) statement;
+      return marshal(param.getType(), Variable.get(param.getName()), contentType);
+    }
+    return marshal(statement.getType(), statement, contentType);
   }
 
   public static Statement marshal(MetaClass type, Statement statement, String contentType) {
@@ -51,10 +55,6 @@ public class TypeMarshaller {
     return marshallingStatement;
   }
 
-  public static Statement demarshal(Parameter param, String accepts) {
-    return demarshal(param.getType(), Variable.get(param.getName()), accepts);
-  }
-
   public static Statement demarshal(MetaClass type, Statement statement, String accepts) {
     Statement demarshallingStatement = null;
     if (PrimitiveTypeMarshaller.canHandle(type, accepts)) {
@@ -62,9 +62,9 @@ public class TypeMarshaller {
     }
     else {
       if (!type.equals(MetaClassFactory.get(void.class))) {
-      demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement, 
-          type.asBoxed().asClass(), MarshallingGenUtil.getConcreteElementType(type.asBoxed()));
-      } 
+        demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement,
+            type.asBoxed().asClass(), MarshallingGenUtil.getConcreteElementType(type.asBoxed()));
+      }
       else {
         demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement);
       }
@@ -74,19 +74,19 @@ public class TypeMarshaller {
 
   /**
    * Works for all types that have a 'copy constructor', a toString() representation and a valueOf() method (all
-   * primitive wrapper types and java.lang.String). Will only be used when text/plain was specified as mime type.
+   * primitive wrapper types and java.lang.String). Will only be used in case text/plain was specified as mime type.
    */
   private static class PrimitiveTypeMarshaller {
 
     private static boolean canHandle(MetaClass type, String mimeType) {
       boolean canHandle = false;
-      if (("text/plain".equals(mimeType) && type.asUnboxed().isPrimitive()) 
+      if (("text/plain".equals(mimeType) && type.asUnboxed().isPrimitive())
           || type.equals(MetaClassFactory.get(String.class))) {
         canHandle = true;
       }
       return canHandle;
     }
-    
+
     private static Statement marshal(MetaClass type, Statement statement) {
       return Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement)).invoke("toString");
     }
