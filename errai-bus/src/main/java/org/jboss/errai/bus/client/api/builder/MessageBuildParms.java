@@ -59,9 +59,9 @@ public interface MessageBuildParms<R> extends MessageBuild {
   public MessageBuildParms<R> with(Enum<?> part, Object value);
 
 
-  public MessageBuildParms<R> withProvided(String part, ResourceProvider provider);
+  public MessageBuildParms<R> withProvided(String part, ResourceProvider<?> provider);
 
-  public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider provider);
+  public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider<?> provider);
 
   /**
    * Copies the message part to the specified message

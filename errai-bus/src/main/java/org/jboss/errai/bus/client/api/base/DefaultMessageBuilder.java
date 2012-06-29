@@ -19,9 +19,7 @@ package org.jboss.errai.bus.client.api.base;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConversationService;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
 
-import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
@@ -37,6 +35,8 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.TimeUnit;
@@ -370,13 +370,13 @@ class DefaultMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public MessageBuildParms<R> withProvided(String part, ResourceProvider provider) {
+      public MessageBuildParms<R> withProvided(String part, ResourceProvider<?> provider) {
         message.setProvidedPart(part, provider);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider provider) {
+      public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider<?> provider) {
         message.setProvidedPart(part, provider);
         return this;
       }
@@ -398,7 +398,7 @@ class DefaultMessageBuilder<R extends Sendable> {
         message.copyResource(part, m);
         return this;
       }
-
+      // XXX why does this return R?
       @Override
       public R errorsHandledBy(ErrorCallback callback) {
         message.errorsCall(callback);
