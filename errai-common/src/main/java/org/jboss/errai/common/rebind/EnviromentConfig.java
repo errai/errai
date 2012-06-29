@@ -1,5 +1,7 @@
 package org.jboss.errai.common.rebind;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,13 +12,13 @@ import java.util.Set;
  */
 public class EnviromentConfig {
   private final Map<String, String> mappingAliases;
-  private final Set<Class<?>> exposedClasses;
-  private final Set<Class<?>> portableSuperTypes;
+  private final Set<MetaClass> exposedClasses;
+  private final Set<MetaClass> portableSuperTypes;
   private final Map<String, String> frameworkProperties;
 
   EnviromentConfig(final Map<String, String> mappingAliases,
-                   final Set<Class<?>> exposedClasses,
-                   final Set<Class<?>> portableSuperTypes,
+                   final Set<MetaClass> exposedClasses,
+                   final Set<MetaClass> portableSuperTypes,
                    final Map<String, String> frameworkProperties) {
     this.mappingAliases = Collections.unmodifiableMap(mappingAliases);
     this.exposedClasses = Collections.unmodifiableSet(exposedClasses);
@@ -28,11 +30,11 @@ public class EnviromentConfig {
     return mappingAliases;
   }
 
-  public Set<Class<?>> getExposedClasses() {
+  public Set<MetaClass> getExposedClasses() {
     return exposedClasses;
   }
 
-  public Set<Class<?>> getPortableSuperTypes() {
+  public Set<MetaClass> getPortableSuperTypes() {
     return portableSuperTypes;
   }
 

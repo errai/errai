@@ -59,7 +59,7 @@ import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
-  private final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
+  private final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
 
   /**
    * Map of aliases to the mapped marshalling type.
@@ -152,7 +152,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         final MappingDefinition definition = (MappingDefinition) cls.newInstance();
         definition.setMarshallerInstance(new DefaultDefinitionMarshaller(definition));
         addDefinition(definition);
-        exposedClasses.add(definition.getMappingClass().asClass());
+        exposedClasses.add(definition.getMappingClass());
 
         if (log.isDebugEnabled())
           log.debug("loaded custom mapping class: " + cls.getName() + " (for mapping: "
@@ -162,11 +162,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           final InheritedMappings inheritedMappings = cls.getAnnotation(InheritedMappings.class);
 
           for (Class<?> c : inheritedMappings.value()) {
-            MappingDefinition aliasMappingDef = new MappingDefinition(c, definition.alreadyGenerated());
+            MetaClass metaClass = MetaClassFactory.get(c);
+            MappingDefinition aliasMappingDef = new MappingDefinition(metaClass, definition.alreadyGenerated());
             aliasMappingDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasMappingDef));
             addDefinition(aliasMappingDef);
 
-            exposedClasses.add(c);
+            exposedClasses.add(metaClass);
 
             if (log.isDebugEnabled())
               log.debug("mapping inherited mapping " + c.getName() + " -> " + cls.getName());
@@ -192,7 +193,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           marshallMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
           addDefinition(marshallMappingDef);
 
-          exposedClasses.add(type);
+          exposedClasses.add(MetaClassFactory.get(type));
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
             for (Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
@@ -200,7 +201,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
               addDefinition(aliasMappingDef);
 
-              exposedClasses.add(aliasCls);
+              exposedClasses.add(MetaClassFactory.get(aliasCls));
               mappingAliases.put(aliasCls.getName(), type.getName());
             }
           }
@@ -232,7 +233,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
             addDefinition(definition);
 
-            exposedClasses.add(type);
+            exposedClasses.add(MetaClassFactory.get(marshallerCls));
           }
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
@@ -245,7 +246,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
                 aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
                 addDefinition(aliasMappingDef);
 
-                exposedClasses.add(aliasCls);
+                exposedClasses.add(MetaClassFactory.get(aliasCls));
                 mappingAliases.put(aliasCls.getName(), type.getName());
               }
             }
@@ -263,24 +264,23 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
 
-    exposedClasses.add(Object.class);
+    exposedClasses.add(MetaClassFactory.get(Object.class));
     exposedClasses.addAll(getEnvironmentConfig().getExposedClasses());
     mappingAliases.putAll(getEnvironmentConfig().getMappingAliases());
 
-    final Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
+    final Map<MetaClass, MetaClass> aliasToMarshaller = new HashMap<MetaClass, MetaClass>();
 
     final List<MetaClass> enums = new ArrayList<MetaClass>();
 
-    for (Class<?> mappedClass : exposedClasses) {
+    for (MetaClass mappedClass : exposedClasses) {
       if (mappedClass.isSynthetic()) continue;
 
       Portable portable = mappedClass.getAnnotation(Portable.class);
       if (portable != null && !portable.aliasOf().equals(Object.class)) {
-        aliasToMarshaller.put(mappedClass, portable.aliasOf());
+        aliasToMarshaller.put(mappedClass, MetaClassFactory.get(portable.aliasOf()));
       }
       else if (!hasDefinition(mappedClass)) {
-        MappingDefinition def = DefaultJavaDefinitionMapper.map(MetaClassFactory.get(mappedClass),
-                this);
+        MappingDefinition def = DefaultJavaDefinitionMapper.map(mappedClass, this);
         def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
         addDefinition(def);
 
@@ -298,7 +298,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
                 .map(MetaClassFactory.get(enumType.asClass()), this);
         enumDef.setMarshallerInstance(new DefaultDefinitionMarshaller(enumDef));
         addDefinition(enumDef);
-        exposedClasses.add(enumType.asClass());
+        exposedClasses.add(MetaClassFactory.get(enumType.asClass()));
       }
     }
 
@@ -307,21 +307,23 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     // we only want to deal with the property file specified aliases here.
     for (Map.Entry<String, String> entry : getEnvironmentConfig().getMappingAliases().entrySet()) {
       try {
-        aliasToMarshaller.put(Class.forName(entry.getKey()), Class.forName(entry.getValue()));
+        aliasToMarshaller.put(MetaClassFactory.get(entry.getKey()), MetaClassFactory.get(entry.getValue()));
       }
       catch (Throwable t) {
         throw new RuntimeException("error loading mapping alias", t);
       }
     }
 
-    for (Map.Entry<Class<?>, Class<?>> entry : aliasToMarshaller.entrySet()) {
+    for (Map.Entry<MetaClass, MetaClass> entry : aliasToMarshaller.entrySet()) {
       final MappingDefinition def = getDefinition(entry.getValue());
       if (def == null) {
         throw new InvalidMappingException("cannot alias type " + entry.getKey().getName()
                 + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
       }
 
-      final MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey(), false);
+      final MappingDefinition aliasDef = new MappingDefinition(
+              def.getMarshallerInstance(),entry.getKey(), false
+      );
       if (def.getMarshallerInstance() instanceof DefaultDefinitionMarshaller) {
         aliasDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasDef));
       }
@@ -443,12 +445,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   @Override
-  public boolean isExposedClass(Class<?> clazz) {
+  public boolean isExposedClass(MetaClass clazz) {
     return exposedClasses.contains(clazz);
   }
 
   @Override
-  public Set<Class<?>> getExposedClasses() {
+  public Set<MetaClass> getExposedClasses() {
     return Collections.unmodifiableSet(exposedClasses);
   }
 

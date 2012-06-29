@@ -82,6 +82,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract MetaConstructor[] getDeclaredConstructors();
 
+  public abstract MetaClass[] getDeclaredClasses();
+
   public abstract MetaConstructor getConstructor(Class... parameters);
 
   public abstract MetaConstructor getConstructor(MetaClass... parameters);

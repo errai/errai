@@ -34,10 +34,10 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.ClassScanner;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,8 +107,7 @@ public class RpcProxyLoaderGenerator extends Generator {
     final MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
 
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
+    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Remote.class)) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();

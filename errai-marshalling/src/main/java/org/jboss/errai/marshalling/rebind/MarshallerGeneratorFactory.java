@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import org.apache.tools.ant.taskdefs.Java;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -50,7 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
 import javax.enterprise.util.TypeLiteral;
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -177,8 +175,8 @@ public class MarshallerGeneratorFactory {
 
     constructor = classStructureBuilder.publicConstructor();
 
-    for (Class<?> cls : mappingContext.getDefinitionsFactory().getExposedClasses()) {
-      String clsName = cls.getName();
+    for (MetaClass cls : mappingContext.getDefinitionsFactory().getExposedClasses()) {
+      String clsName = cls.getFullyQualifiedName();
 
       if (!mappingContext.getDefinitionsFactory().hasDefinition(clsName)) {
         continue;
@@ -238,20 +236,19 @@ public class MarshallerGeneratorFactory {
   }
 
   private void generateMarshallers() {
-    final Set<Class<?>> exposed = mappingContext.getDefinitionsFactory().getExposedClasses();
+    final Set<MetaClass> exposed = mappingContext.getDefinitionsFactory().getExposedClasses();
 
-    for (Class<?> clazz : exposed) {
-      mappingContext.registerGeneratedMarshaller(clazz.getName());
+    for (MetaClass clazz : exposed) {
+      mappingContext.registerGeneratedMarshaller(clazz.getFullyQualifiedName());
     }
 
-    for (Class<?> clazz : exposed) {
+    for (MetaClass clazz : exposed) {
       final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clazz);
       if (definition.getClientMarshallerClass() != null || definition.alreadyGenerated()) {
         continue;
       }
 
-      final MetaClass metaClazz = MetaClassFactory.get(clazz);
-      final Statement marshaller = marshal(metaClazz);
+      final Statement marshaller = marshal(clazz);
       final MetaClass type = marshaller.getType();
       final String varName = getVarName(clazz);
 
@@ -267,15 +264,15 @@ public class MarshallerGeneratorFactory {
 
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-              .invoke("put", clazz.getName(), loadVariable(varName)));
+              .invoke("put", clazz.getFullyQualifiedName(), loadVariable(varName)));
 
-      if (!clazz.getName().equals(clazz.getCanonicalName())) {
+      if (!clazz.getFullyQualifiedName().equals(clazz.getCanonicalName())) {
         constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
                 .invoke("put", clazz.getCanonicalName(), loadVariable(varName)));
       }
 
       for (Map.Entry<String, String> aliasEntry : mappingContext.getDefinitionsFactory().getMappingAliases().entrySet()) {
-        if (aliasEntry.getValue().equals(clazz.getName())) {
+        if (aliasEntry.getValue().equals(clazz.getFullyQualifiedName())) {
           constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
                   .invoke("put", aliasEntry.getKey(), loadVariable(varName)));
         }
@@ -289,7 +286,7 @@ public class MarshallerGeneratorFactory {
     final MappingStrategy strategy = MappingStrategyFactory
             .createStrategy(target == MarshallerOuputTarget.GWT, mappingContext, cls);
     if (strategy == null) {
-      throw new RuntimeException("no available marshaller for class: " + cls.getName());
+      throw new RuntimeException("no available marshaller for class: " + cls.getFullyQualifiedName());
     }
     return strategy.getMapper().getMarshaller();
   }

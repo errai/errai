@@ -16,6 +16,9 @@
 
 package org.jboss.errai.common.rebind;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.ClassScanner;
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
@@ -91,15 +94,15 @@ public abstract class EnvUtil {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Map<String, String> frameworkProps = new HashMap<String, String>();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
-    final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
-    final Set<Class<?>> nonportableClasses = new HashSet<Class<?>>();
-    final Set<Class<?>> portableNonExposed = new HashSet<Class<?>>();
+    final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
+    final Set<MetaClass> nonportableClasses = new HashSet<MetaClass>();
+    final Set<MetaClass> portableNonExposed = new HashSet<MetaClass>();
 
-    final Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
-    nonportableClasses.addAll(scanner.getTypesAnnotatedWith(NonPortable.class));
-    
-    for (Class<?> cls : exposedFromScanner) {
-      for (Class<?> decl : cls.getDeclaredClasses()) {
+    final Set<MetaClass> exposedFromScanner = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Portable.class));
+    nonportableClasses.addAll(ClassScanner.getTypesAnnotatedWith(NonPortable.class));
+
+    for (MetaClass cls : exposedFromScanner) {
+      for (MetaClass decl : cls.getDeclaredClasses()) {
         if (decl.isSynthetic()) {
           continue;
         }
@@ -141,8 +144,7 @@ public abstract class EnvUtil {
             if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
               for (String s : props.getString(key).split(" ")) {
                 try {
-                  Class<?> cls = Class.forName(s.trim());
-                  exposedClasses.add(cls);
+                  exposedClasses.add(MetaClassFactory.get(s.trim()));
                 }
                 catch (Exception e) {
                   throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
@@ -155,8 +157,7 @@ public abstract class EnvUtil {
             if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
               for (String s : props.getString(key).split(" ")) {
                 try {
-                  Class<?> cls = Class.forName(s.trim());
-                  nonportableClasses.add(cls);
+                  nonportableClasses.add(MetaClassFactory.get(s.trim()));
                 }
                 catch (Exception e) {
                   throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s);
@@ -206,21 +207,21 @@ public abstract class EnvUtil {
 
     // must do this before filling in interfaces and supertypes!
     exposedClasses.removeAll(nonportableClasses);
-    
-    for (Class<?> cls : exposedClasses) {
+
+    for (MetaClass cls : exposedClasses) {
       fillInInterfacesAndSuperTypes(portableNonExposed, cls);
     }
 
     return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed, frameworkProps);
   }
 
-  private static void fillInInterfacesAndSuperTypes(Set<Class<?>> set, Class<?> type) {
-    for (Class<?> iface : type.getInterfaces()) {
+  private static void fillInInterfacesAndSuperTypes(Set<MetaClass> set, MetaClass type) {
+    for (MetaClass iface : type.getInterfaces()) {
       set.add(iface);
       fillInInterfacesAndSuperTypes(set, iface);
     }
-    if (type.getSuperclass() != null) {
-      fillInInterfacesAndSuperTypes(set, type.getSuperclass());
+    if (type.getSuperClass() != null) {
+      fillInInterfacesAndSuperTypes(set, type.getSuperClass());
     }
   }
 
@@ -232,8 +233,9 @@ public abstract class EnvUtil {
   }
 
   public static boolean isPortableType(Class<?> cls) {
-    if (cls.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(cls)
-            || getEnvironmentConfig().getPortableSuperTypes().contains(cls)) {
+    final MetaClass mc = MetaClassFactory.get(cls);
+    if (cls.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(mc)
+            || getEnvironmentConfig().getPortableSuperTypes().contains(mc)) {
       return true;
     }
     else {

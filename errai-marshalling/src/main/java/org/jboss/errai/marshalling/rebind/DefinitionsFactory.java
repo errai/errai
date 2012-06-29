@@ -96,13 +96,13 @@ public interface DefinitionsFactory {
    * @param clazz fully qualified class name.
    * @return boolean true if exposed.
    */
-  boolean isExposedClass(Class<?> clazz);
+  boolean isExposedClass(MetaClass clazz);
 
   /**
    * Returns a set of all exposed classes.
    * @return a set of exposed classes.
    */
-  Set<Class<?>> getExposedClasses();
+  Set<MetaClass> getExposedClasses();
 
   /**
    * Returns a map of aliases mappers. The keys represent the aliases and values represent the concrete mapping
