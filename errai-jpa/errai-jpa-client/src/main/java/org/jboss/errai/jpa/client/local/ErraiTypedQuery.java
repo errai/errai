@@ -1,6 +1,5 @@
 package org.jboss.errai.jpa.client.local;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -108,7 +107,11 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
    */
   private <T> Parameter<T> verifyTypeCompatibility(Parameter<?> parameter, Class<T> expectedType) {
     if (parameter == null) return null;
-    if (!expectedType.isAssignableFrom(parameter.getParameterType())) {
+
+    // FIXME this only works if the expected type is an exact match
+    // was expectedType.isAssignableFrom(parameter.getParameterType()) but that's not GWT translatable
+    // we can make it better by simulating Class.isAssignableFrom() in a utility method.
+    if (expectedType != parameter.getParameterType()) {
       throw new IllegalArgumentException(
               "Requested type \"" + expectedType + "\" is not assignable from actual type \"" +
               parameter.getParameterType() + "\" in parameter \"" + parameter.getName() + "\"");
@@ -243,13 +246,6 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
   }
 
   @Override
-  public TypedQuery<X> setParameter(Parameter<Calendar> param, Calendar value,
-          TemporalType temporalType) {
-    paramValues.put(param, value);
-    return this;
-  }
-
-  @Override
   public TypedQuery<X> setParameter(Parameter<Date> param, Date value,
           TemporalType temporalType) {
     paramValues.put(param, value);
@@ -258,14 +254,6 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
 
   @Override
   public TypedQuery<X> setParameter(String name, Object value) {
-    Parameter<?> param = getExistingParameter(name);
-    paramValues.put(param, value);
-    return this;
-  }
-
-  @Override
-  public TypedQuery<X> setParameter(String name, Calendar value,
-          TemporalType temporalType) {
     Parameter<?> param = getExistingParameter(name);
     paramValues.put(param, value);
     return this;
@@ -281,13 +269,6 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
 
   @Override
   public TypedQuery<X> setParameter(int position, Object value) {
-    paramValues.put(getParameter(position), value);
-    return this;
-  }
-
-  @Override
-  public TypedQuery<X> setParameter(int position, Calendar value,
-          TemporalType temporalType) {
     paramValues.put(getParameter(position), value);
     return this;
   }

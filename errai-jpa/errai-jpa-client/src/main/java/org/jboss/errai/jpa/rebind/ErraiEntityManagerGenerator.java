@@ -348,7 +348,7 @@ public class ErraiEntityManagerGenerator extends Generator {
    *         {@code OneToOne}.
    */
   private boolean isAssociation(SingularAttribute<?, ?> attr) {
-    AccessibleObject member = (AccessibleObject) attr.getJavaMember();
+    AccessibleObject member = (AccessibleObject) getJavaMember(attr);
     return (member.getAnnotation(ManyToMany.class) != null
             || member.getAnnotation(ManyToOne.class) != null
             || member.getAnnotation(OneToMany.class) != null
@@ -445,7 +445,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       if (sourceObject instanceof SingularAttribute && method.getName().equals("isGeneratedValue")) {
         SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) sourceObject;
 
-        return Stmt.loadLiteral(isGeneratedValue(attr.getJavaMember())).returnValue();
+        return Stmt.loadLiteral(isGeneratedValue(getJavaMember(attr))).returnValue();
       }
 
       // provide generated value iterator
@@ -513,7 +513,7 @@ public class ErraiEntityManagerGenerator extends Generator {
 
       // grab cascade annotations from live object then generate a statement like
       // return (cascadeType == [type] || cascadeType == [type] || ...)
-      CascadeType[] cascadeTypes = extractCascadeTypes(attr.getJavaMember());
+      CascadeType[] cascadeTypes = extractCascadeTypes(getJavaMember(attr));
       if (cascadeTypes == null) {
         return Stmt.throw_(UnsupportedOperationException.class, "Not a relationship attribute");
       }
@@ -541,7 +541,7 @@ public class ErraiEntityManagerGenerator extends Generator {
             ClassStructureBuilder<?> containingClassBuilder) {
       SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) sourceObject;
 
-      if (isGeneratedValue(attr.getJavaMember())) {
+      if (isGeneratedValue(getJavaMember(attr))) {
 
         MetaClass generatorDeclaredType;
         Class<? extends Iterator<?>> generatorType;
@@ -584,23 +584,23 @@ public class ErraiEntityManagerGenerator extends Generator {
       String entityInstanceParam = method.getParameters()[0].getName();
       String newValueParam = method.getParameters()[1].getName();
 
-      if (attr.getJavaMember() instanceof Field) {
+      if (getJavaMember(attr) instanceof Field) {
 
         // The write accessor for the field was defined while generating the get() method.
         // Now generate a call to the private accessor method for the field in question.
-        MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
+        MetaField field = MetaClassFactory.get((Field) getJavaMember(attr));
         return Stmt.loadVariable("this")
                 .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
                         Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)),
                         Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam)));
       }
-      else if (attr.getJavaMember() instanceof Method) {
-        return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
+      else if (getJavaMember(attr) instanceof Method) {
+        return Stmt.loadVariable(entityInstanceParam).invoke(getJavaMember(attr).getName()).returnValue();
       }
       else {
         throw new AssertionError(
                 "JPA properties should only be Field or Method, but this one is " +
-                        attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+                        getJavaMember(attr) == null ? "null" : getJavaMember(attr).getClass());
       }
     }
 
@@ -611,10 +611,10 @@ public class ErraiEntityManagerGenerator extends Generator {
 
       String entityInstanceParam = method.getParameters()[0].getName();
 
-      if (attr.getJavaMember() instanceof Field) {
+      if (getJavaMember(attr) instanceof Field) {
 
         // First we need to generate an accessor for the field.
-        MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
+        MetaField field = MetaClassFactory.get((Field) getJavaMember(attr));
         PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, true, containingClassBuilder, field, new Modifier[] {});
 
         // Now generate a call to the private accessor method for the field in question.
@@ -623,14 +623,27 @@ public class ErraiEntityManagerGenerator extends Generator {
                         Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)))
                         .returnValue();
       }
-      else if (attr.getJavaMember() instanceof Method) {
-        return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
+      else if (getJavaMember(attr) instanceof Method) {
+        return Stmt.loadVariable(entityInstanceParam).invoke(getJavaMember(attr).getName()).returnValue();
       }
       else {
         throw new AssertionError(
                 "JPA properties should only be Field or Method, but this one is " +
-                        attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+                        getJavaMember(attr) == null ? "null" : getJavaMember(attr).getClass());
       }
+    }
+  }
+
+  /**
+   * Gets the Java memeber that defines the given Attribute. This needs to be
+   * done via reflection because Attribute.getJavaMember() is hidden from the
+   * Java compiler by our GWT super-source version of JPA2.
+   */
+  private Member getJavaMember(Attribute<?, ?> attr) {
+    try {
+      return (Member) attr.getClass().getMethod("getJavaMember").invoke(attr);
+    } catch (Exception e) {
+      throw new AssertionError("A Hibernate Attribute is missing the getJavaMember() method?!");
     }
   }
 
