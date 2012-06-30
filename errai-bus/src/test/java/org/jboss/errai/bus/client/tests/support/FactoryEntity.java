@@ -36,6 +36,17 @@ public class FactoryEntity {
     return new FactoryEntity(name, age);
   }
 
+  // This static method is here to ensure that it is not considered for marshalling mapping (it has no @MapsTo annotation on
+  // all its parameters)
+  public static FactoryEntity someStaticMethod(String s) {
+    return null;
+  }
+  // This static method is here to ensure that it is not considered for marshalling mapping (it has no @MapsTo annotation on
+  // all its parameters)
+  /*public static FactoryEntity create(@MapsTo("name") String name, @MapsTo("age") int age, String s) {
+    return null;
+  }*/
+
   public String getName() {
     return name;
   }

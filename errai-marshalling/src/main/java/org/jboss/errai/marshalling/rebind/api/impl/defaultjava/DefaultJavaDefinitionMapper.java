@@ -18,7 +18,9 @@ package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -42,10 +44,11 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DefaultJavaDefinitionMapper {
   public static MappingDefinition map(final MetaClass toMap, final DefinitionsFactory definitionsFactory) {
-    if (toMap.isAbstract() || toMap.isInterface())  {
+    if (toMap.isAbstract() || toMap.isInterface()) {
       throw new RuntimeException("cannot marshal an abstract class or interface: " + toMap.getFullyQualifiedName());
     }
 
@@ -59,25 +62,32 @@ public class DefaultJavaDefinitionMapper {
     MappingDefinition definition = new MappingDefinition(toMap, false);
 
     for (MetaConstructor c : toMap.getDeclaredConstructors()) {
+      List<Boolean> hasMapsTos = new ArrayList<Boolean>();
       if (c.getParameters().length != 0) {
-        boolean satisifed = true;
         for (int i = 0; i < c.getParameters().length; i++) {
           Annotation[] annotations = c.getParameters()[i].getAnnotations();
           if (annotations.length == 0) {
-            satisifed = false;
+            hasMapsTos.add(false);
           }
           else {
+            boolean hasMapsTo = false;
             for (Annotation a : annotations) {
               if (MapsTo.class.isAssignableFrom(a.annotationType())) {
+                hasMapsTo = true;
                 MapsTo mapsTo = (MapsTo) a;
                 String key = mapsTo.value();
                 simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
               }
             }
+            hasMapsTos.add(hasMapsTo);
           }
         }
-
-        if (satisifed) {
+        if (hasMapsTos.contains(true) && hasMapsTos.contains(false)) {
+          throw new InvalidMappingException("Not all parameters of constructor " + c.asConstructor()
+              + " have a @" + MapsTo.class.getSimpleName() + " annotation");
+        }
+        
+        if (hasMapsTos.contains(true)) {
           constructors.add(c);
         }
       }
@@ -108,25 +118,32 @@ public class DefaultJavaDefinitionMapper {
       SimpleFactoryMapping simpleFactoryMapping = new SimpleFactoryMapping();
       for (MetaMethod method : toMap.getDeclaredMethods()) {
         if (method.isStatic()) {
-          boolean satisifed = true;
+          List<Boolean> hasMapsTos = new ArrayList<Boolean>();
           for (int i = 0; i < method.getParameters().length; i++) {
             Annotation[] annotations = method.getParameters()[i].getAnnotations();
             if (annotations.length == 0) {
-              satisifed = false;
+              hasMapsTos.add(false);
             }
             else {
+              boolean hasMapsTo = false;
               for (Annotation a : annotations) {
                 if (MapsTo.class.isAssignableFrom(a.annotationType())) {
+                  hasMapsTo = true;
                   MapsTo mapsTo = (MapsTo) a;
                   String key = mapsTo.value();
                   simpleFactoryMapping.mapParmToIndex(key, i, method.getParameters()[i].getType());
                 }
               }
+              hasMapsTos.add(hasMapsTo);
             }
+          }
+          if (hasMapsTos.contains(true) && hasMapsTos.contains(false)) {
+            throw new InvalidMappingException("Not all parameters of method " + method.asMethod()
+                + " have a @" + MapsTo.class.getSimpleName() + " annotation");
+          }
 
-            if (satisifed) {
-              factoryMethods.add(method);
-            }
+          if (hasMapsTos.contains(true)) {
+            factoryMethods.add(method);
           }
         }
       }
@@ -190,7 +207,7 @@ public class DefaultJavaDefinitionMapper {
                 || field.isTransient() || field.isStatic()) {
           continue;
         }
-        
+
         Field fld = field.asField();
         if (fld != null) {
           fld.setAccessible(true);
@@ -210,8 +227,8 @@ public class DefaultJavaDefinitionMapper {
         }
 
         /**
-         * This case handles the case where a constructor mapping has mapped the value, and there is no
-         * manually mapped reader on the key.
+         * This case handles the case where a constructor mapping has mapped the value, and there is no manually mapped
+         * reader on the key.
          */
         if (writeKeys.contains(field.getName()) && !readKeys.contains(field.getName())) {
           MetaMethod getterMethod = MarshallingGenUtil.findGetterMethod(toMap, field.getName());
@@ -268,7 +285,7 @@ public class DefaultJavaDefinitionMapper {
 
           @Override
           public void setMappingClass(MetaClass clazz) {
-          }
+            }
 
           @Override
           public String toString() {
