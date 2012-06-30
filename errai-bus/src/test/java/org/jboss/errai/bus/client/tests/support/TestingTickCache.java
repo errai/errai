@@ -41,6 +41,18 @@ public class TestingTickCache implements Iterable<TestingTick> {
     entries = queueImpl;
   }
 
+  // We add this constructor to ensure that it is not picked up for mapping (it has no @MapsTo annotation on all its
+  // parameters)
+  public TestingTickCache(@Nonnull String s) {
+    entries = null;
+  }
+  
+  // We add this constructor to ensure that it is not picked up for mapping (it has no @MapsTo annotation on all its
+  // parameters)
+  /*public TestingTickCache(@Nonnull @MapsTo("entries") Queue<TestingTick> queueImpl, @Nonnull String s) {
+    entries = null;
+  }*/
+
   /**
    * Adds the given tick to this cache, pruning ticks that are older than {@link #timeSpan} milliseconds.
    * 
