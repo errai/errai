@@ -3,12 +3,10 @@ package org.jboss.errai.demo.busstress.client.local;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
 /**

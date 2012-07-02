@@ -16,8 +16,6 @@
 
 package org.jboss.errai.cdi.injection.client.test;
 
-import java.lang.annotation.RetentionPolicy;
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,9 +36,7 @@ import org.jboss.errai.cdi.injection.client.ServiceA;
 import org.jboss.errai.cdi.injection.client.ServiceB;
 import org.jboss.errai.cdi.injection.client.ServiceC;
 import org.jboss.errai.cdi.injection.client.UnreferencedDependentRootBean;
-import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 
 /**

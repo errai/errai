@@ -16,12 +16,10 @@
 
 package org.jboss.errai.bus.server;
 
-import junit.framework.TestCase;
 import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;

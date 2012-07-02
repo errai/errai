@@ -22,10 +22,19 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
             <artifactId>errai-codegen</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-codegen-gwt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -50,9 +59,9 @@
             <!--<scope>provided</scope>-->
         </dependency>
         <!--<dependency>-->
-        	<!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
-        	<!--<artifactId>ecj</artifactId>-->
-        	<!--<version>3.7.1</version>-->
+        <!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
+        <!--<artifactId>ecj</artifactId>-->
+        <!--<version>3.7.1</version>-->
         <!--</dependency>-->
 
 

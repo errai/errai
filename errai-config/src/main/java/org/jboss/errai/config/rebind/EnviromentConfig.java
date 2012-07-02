@@ -1,4 +1,4 @@
-package org.jboss.errai.common.rebind;
+package org.jboss.errai.config.rebind;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 

@@ -24,7 +24,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
-import javax.annotation.PreDestroy;
 import javax.enterprise.inject.Disposes;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;

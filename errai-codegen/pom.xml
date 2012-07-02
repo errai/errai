@@ -35,13 +35,7 @@
 			<version>4.8.1</version>
 		</dependency>
 
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <!-- This should not be packaged with the Errai Distro. There are no
-runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
-            <scope>provided</scope>
-        </dependency>
+        <!-- NOTE: THIS IS IMPORTED JUST TO ALIGN VERSIONS WITH JDT -->
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-dev</artifactId>
@@ -49,6 +43,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
         </dependency>
+
 	</dependencies>
 
 	<build>

@@ -41,7 +41,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;

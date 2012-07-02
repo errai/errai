@@ -40,6 +40,12 @@
                 <!-- Errai Core -->
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-common</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-bus</artifactId>
                 </dependency>
 
@@ -250,6 +256,12 @@
                 </dependency>
 
                 <!-- Errai Core -->
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-common</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-ioc</artifactId>

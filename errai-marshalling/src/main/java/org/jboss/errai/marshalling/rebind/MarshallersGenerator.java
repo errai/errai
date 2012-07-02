@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
-import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;

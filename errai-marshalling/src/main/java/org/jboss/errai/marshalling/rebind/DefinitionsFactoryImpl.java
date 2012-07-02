@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
+import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and

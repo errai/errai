@@ -32,6 +32,10 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
   protected final BlockStatement blockStatement;
   protected final BuildCallback<T> callback;
 
+  public BlockBuilderImpl() {
+    this(null);
+  }
+
   public BlockBuilderImpl(final BuildCallback<T> callback) {
     this(new BlockStatement(), callback);
   }

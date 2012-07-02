@@ -1,9 +1,9 @@
-package org.jboss.errai.codegen.util;
+package org.jboss.errai.config.util;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.mvel2.util.NullType;
 
 import java.lang.annotation.Annotation;

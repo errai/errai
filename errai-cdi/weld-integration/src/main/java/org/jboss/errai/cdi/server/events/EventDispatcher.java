@@ -25,7 +25,7 @@ import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.cdi.server.CDIServerUtil;
 import org.jboss.errai.cdi.server.ScopeUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;

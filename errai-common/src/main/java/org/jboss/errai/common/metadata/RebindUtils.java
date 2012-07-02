@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
