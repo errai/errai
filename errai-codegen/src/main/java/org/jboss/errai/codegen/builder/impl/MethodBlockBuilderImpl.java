@@ -48,46 +48,46 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   protected final DefModifiers modifiers = new DefModifiers();
   protected final List<Annotation> annotations = new ArrayList<Annotation>();
 
-  public MethodBlockBuilderImpl(MethodBuildCallback<T> callback) {
+  public MethodBlockBuilderImpl(final MethodBuildCallback<T> callback) {
     super(null);
     this.callback = callback;
   }
 
-  public MethodBlockBuilderImpl(BlockStatement blockStatement, MethodBuildCallback<T> callback) {
+  public MethodBlockBuilderImpl(final BlockStatement blockStatement, final MethodBuildCallback<T> callback) {
     super(blockStatement, null);
     this.callback = callback;
   }
 
   @Override
-  public MethodBlockBuilder<T> methodComment(String comment) {
+  public MethodBlockBuilder<T> methodComment(final String comment) {
     methodComment = comment;
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> annotatedWith(Annotation... annotations) {
-    for (Annotation a : annotations) {
+  public MethodBlockBuilder<T> annotatedWith(final Annotation... annotations) {
+    for (final Annotation a : annotations) {
       this.annotations.add(a);
     }
     return this;
   }
 
   @Override
-  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes) {
+  public BlockBuilder<T> throws_(final Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
     return this;
   }
 
   @Override
-  public BlockBuilder<T> throws_(MetaClass... exceptions) {
+  public BlockBuilder<T> throws_(final MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
     return this;
   }
 
 
   @Override
-  public MethodBlockBuilder<T> modifiers(Modifier... modifiers) {
-    for (Modifier m : modifiers) {
+  public MethodBlockBuilder<T> modifiers(final Modifier... modifiers) {
+    for (final Modifier m : modifiers) {
       switch (m) {
         case Transient:
         case Volatile:
@@ -102,27 +102,27 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(DefParameters parms) {
+  public MethodBlockBuilder<T> parameters(final DefParameters parms) {
     defParameters = parms;
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(Class<?>... parms) {
+  public MethodBlockBuilder<T> parameters(final Class<?>... parms) {
     defParameters = DefParameters.fromTypeArray(MetaClassFactory.fromClassArray(parms)) ;
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(MetaClass... parms) {
+  public MethodBlockBuilder<T> parameters(final MetaClass... parms) {
     defParameters = DefParameters.fromTypeArray(parms);
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(Object... parms) {
-    List<MetaClass> p = new ArrayList<MetaClass>();
-    for (Object o : parms) {
+  public MethodBlockBuilder<T> parameters(final Object... parms) {
+    final List<MetaClass> p = new ArrayList<MetaClass>();
+    for (final Object o : parms) {
       LiteralFactory.getLiteral(o);
 
       if (o instanceof MetaClass) {
