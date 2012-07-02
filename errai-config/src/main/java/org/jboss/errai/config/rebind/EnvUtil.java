@@ -275,4 +275,8 @@ public abstract class EnvUtil {
 
     return portableSubtypes;
   }
+
+  public static void clearCaches() {
+    _environmentConfigCache = null;
+  }
 }

@@ -216,6 +216,7 @@ public class MarshallersGenerator extends Generator {
 
       logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
 
+      EnvUtil.clearCaches();
       GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
       DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
 
