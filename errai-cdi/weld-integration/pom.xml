@@ -47,6 +47,13 @@
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-bus</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-config</artifactId>
+                    <version>${project.version}</version>
                 </dependency>
 
                 <dependency>
