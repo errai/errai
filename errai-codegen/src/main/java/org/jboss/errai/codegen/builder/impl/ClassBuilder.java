@@ -43,7 +43,6 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,38 +56,38 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   protected BuildMetaClass classDefinition;
 
-  ClassBuilder(String className, MetaClass parent, Context context) {
+  ClassBuilder(final String className, final MetaClass parent, final Context context) {
     this.classDefinition = new BuildMetaClass(context, className);
     this.classDefinition.setSuperClass(parent);
     context.attachClass(classDefinition);
   }
 
-  ClassBuilder(ClassBuilder<T> that, Context context) {
+  ClassBuilder(final ClassBuilder<T> that, final Context context) {
     this.classDefinition = that.classDefinition;
     this.classDefinition.setContext(context);
     context.attachClass(classDefinition);
   }
 
-  public static ClassDefinitionBuilderScope<?> define(String fullyQualifiedName) {
+  public static ClassDefinitionBuilderScope<?> define(final String fullyQualifiedName) {
     return new ClassBuilder<DefaultClassStructureBuilder>(fullyQualifiedName, null, Context.create().autoImport());
   }
 
-  public static ClassDefinitionBuilderScope<?> define(String fullQualifiedName, MetaClass parent) {
+  public static ClassDefinitionBuilderScope<?> define(final String fullQualifiedName, final MetaClass parent) {
     return new ClassBuilder<DefaultClassStructureBuilder>(fullQualifiedName, parent, Context.create().autoImport());
   }
 
-  public static ClassDefinitionBuilderScope<?> define(String fullQualifiedName, Class<?> parent) {
+  public static ClassDefinitionBuilderScope<?> define(final String fullQualifiedName, final Class<?> parent) {
     return define(fullQualifiedName, MetaClassFactory.get(parent));
   }
 
-  public static ClassStructureBuilder<?> implement(MetaClass cls) {
+  public static ClassStructureBuilder<?> implement(final MetaClass cls) {
     return new ClassBuilder<DefaultClassStructureBuilder>(cls.getFullyQualifiedName() + "Impl", null, Context.create()
             .autoImport())
             .publicScope()
             .implementsInterface(cls).body();
   }
 
-  public static ClassStructureBuilder<?> implement(Class<?> cls) {
+  public static ClassStructureBuilder<?> implement(final Class<?> cls) {
     return implement(MetaClassFactory.get(cls));
   }
 
@@ -105,22 +104,22 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   }
 
-  public ClassBuilder<T> importsClass(Class<?> clazz) {
+  public ClassBuilder<T> importsClass(final Class<?> clazz) {
     return importsClass(MetaClassFactory.get(clazz));
   }
 
-  public ClassBuilder<T> importsClass(MetaClass clazz) {
+  public ClassBuilder<T> importsClass(final MetaClass clazz) {
     classDefinition.getContext().addImport(clazz);
     return this;
   }
 
   @Override
-  public ClassDefinitionBuilderInterfaces<T> implementsInterface(Class<?> clazz) {
+  public ClassDefinitionBuilderInterfaces<T> implementsInterface(final Class<?> clazz) {
     return implementsInterface(MetaClassFactory.get(clazz));
   }
 
   @Override
-  public ClassDefinitionBuilderInterfaces<T> implementsInterface(MetaClass clazz) {
+  public ClassDefinitionBuilderInterfaces<T> implementsInterface(final MetaClass clazz) {
     if (!clazz.isInterface()) {
       throw new RuntimeException("not an interface: " + clazz.getFullyQualifiedName());
     }
@@ -170,17 +169,17 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public ConstructorBlockBuilder<T> publicConstructor(MetaClass... parms) {
+  public ConstructorBlockBuilder<T> publicConstructor(final MetaClass... parms) {
     return genConstructor(Scope.Public, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> publicConstructor(Class<?>... parms) {
+  public ConstructorBlockBuilder<T> publicConstructor(final Class<?>... parms) {
     return publicConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> publicConstructor(Parameter... parms) {
+  public ConstructorBlockBuilder<T> publicConstructor(final Parameter... parms) {
     return genConstructor(Scope.Public, DefParameters.fromParameters(parms));
   }
 
@@ -190,17 +189,17 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public ConstructorBlockBuilder<T> privateConstructor(MetaClass... parms) {
+  public ConstructorBlockBuilder<T> privateConstructor(final MetaClass... parms) {
     return genConstructor(Scope.Private, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> privateConstructor(Class<?>... parms) {
+  public ConstructorBlockBuilder<T> privateConstructor(final Class<?>... parms) {
     return privateConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> privateConstructor(Parameter... parms) {
+  public ConstructorBlockBuilder<T> privateConstructor(final Parameter... parms) {
     return genConstructor(Scope.Private, DefParameters.fromParameters(parms));
   }
 
@@ -210,17 +209,17 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public ConstructorBlockBuilder<T> protectedConstructor(MetaClass... parms) {
+  public ConstructorBlockBuilder<T> protectedConstructor(final MetaClass... parms) {
     return genConstructor(Scope.Protected, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> protectedConstructor(Class<?>... parms) {
+  public ConstructorBlockBuilder<T> protectedConstructor(final Class<?>... parms) {
     return protectedConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> protectedConstructor(Parameter... parms) {
+  public ConstructorBlockBuilder<T> protectedConstructor(final Parameter... parms) {
     return genConstructor(Scope.Protected, DefParameters.fromParameters(parms));
   }
 
@@ -230,17 +229,17 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public ConstructorBlockBuilder<T> packageConstructor(MetaClass... parms) {
+  public ConstructorBlockBuilder<T> packageConstructor(final MetaClass... parms) {
     return genConstructor(Scope.Package, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> packageConstructor(Class<?>... parms) {
+  public ConstructorBlockBuilder<T> packageConstructor(final Class<?>... parms) {
     return packageConstructor(MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public ConstructorBlockBuilder<T> packageConstructor(Parameter... parms) {
+  public ConstructorBlockBuilder<T> packageConstructor(final Parameter... parms) {
     return genConstructor(Scope.Package, DefParameters.fromParameters(parms));
   }
 
@@ -250,7 +249,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
       @Override
       public T callback(final Statement statement) {
-        BuildMetaConstructor buildMetaConstructor =
+        final BuildMetaConstructor buildMetaConstructor =
                 new BuildMetaConstructor(classDefinition, statement, defParameters);
         buildMetaConstructor.setScope(scope);
 
@@ -267,125 +266,125 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   // public method //
   @Override
-  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> publicMethod(final MetaClass returnType, final String name) {
     return genMethod(Scope.Public, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> publicMethod(final Class<?> returnType, final String name) {
     return publicMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> publicMethod(final MetaClass returnType, final String name, final MetaClass... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> publicMethod(final Class<?> returnType, final String name, final Class<?>... parms) {
     return publicMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> publicMethod(final MetaClass returnType, final String name, final Parameter... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> publicMethod(final Class<?> returnType, final String name, final Parameter... parms) {
     return publicMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // private method //
   @Override
-  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> privateMethod(final MetaClass returnType, final String name) {
     return genMethod(Scope.Private, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> privateMethod(final Class<?> returnType, final String name) {
     return privateMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> privateMethod(final MetaClass returnType, final String name, final MetaClass... parms) {
     return genMethod(Scope.Private, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> privateMethod(final Class<?> returnType, final String name, final Class<?>... parms) {
     return privateMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> privateMethod(final MetaClass returnType, final String name, final Parameter... parms) {
     return genMethod(Scope.Private, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> privateMethod(final Class<?> returnType, final String name, final Parameter... parms) {
     return privateMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // protected method //
   @Override
-  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> protectedMethod(final MetaClass returnType, final String name) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> protectedMethod(final Class<?> returnType, final String name) {
     return protectedMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> protectedMethod(final MetaClass returnType, final String name, final MetaClass... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> protectedMethod(final Class<?> returnType, final String name, final Class<?>... parms) {
     return protectedMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> protectedMethod(final MetaClass returnType, final String name, final Parameter... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> protectedMethod(final Class<?> returnType, final String name, final Parameter... parms) {
     return protectedMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // package-private method //
   @Override
-  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> packageMethod(final MetaClass returnType, final String name) {
     return genMethod(Scope.Package, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> packageMethod(final Class<?> returnType, final String name) {
     return packageMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> packageMethod(final MetaClass returnType, final String name, final MetaClass... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> packageMethod(final Class<?> returnType, final String name, final Class<?>... parms) {
     return packageMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> packageMethod(final MetaClass returnType, final String name, final Parameter... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> packageMethod(final Class<?> returnType, final String name, final Parameter... parms) {
     return packageMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
@@ -403,7 +402,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
                         final List<Annotation> annotations,
                         final String comment) {
 
-        DefParameters dParameters;
+        final DefParameters dParameters;
 
         if (parameters != null) {
           dParameters = parameters;
@@ -412,7 +411,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
           dParameters = defParameters;
         }
 
-        BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
+        final BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
                 modifiers, name, returnType, null, dParameters, throwsDeclaration);
 
         if (annotations != null) {
@@ -427,42 +426,42 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public FieldBuildStart<T> publicField(String name, MetaClass type) {
+  public FieldBuildStart<T> publicField(final String name, final MetaClass type) {
     return genField(Scope.Public, name, type);
   }
 
   @Override
-  public FieldBuildStart<T> publicField(String name, Class<?> type) {
+  public FieldBuildStart<T> publicField(final String name, final Class<?> type) {
     return publicField(name, MetaClassFactory.get(type));
   }
 
   @Override
-  public FieldBuildStart<T> privateField(String name, MetaClass type) {
+  public FieldBuildStart<T> privateField(final String name, final MetaClass type) {
     return genField(Scope.Private, name, type);
   }
 
   @Override
-  public FieldBuildStart<T> privateField(String name, Class<?> type) {
+  public FieldBuildStart<T> privateField(final String name, final Class<?> type) {
     return privateField(name, MetaClassFactory.get(type));
   }
 
   @Override
-  public FieldBuildStart<T> protectedField(String name, MetaClass type) {
+  public FieldBuildStart<T> protectedField(final String name, final MetaClass type) {
     return genField(Scope.Protected, name, type);
   }
 
   @Override
-  public FieldBuildStart<T> protectedField(String name, Class<?> type) {
+  public FieldBuildStart<T> protectedField(final String name, final Class<?> type) {
     return protectedField(name, MetaClassFactory.get(type));
   }
 
   @Override
-  public FieldBuildStart<T> packageField(String name, MetaClass type) {
+  public FieldBuildStart<T> packageField(final String name, final MetaClass type) {
     return genField(Scope.Package, name, type);
   }
 
   @Override
-  public FieldBuildStart<T> packageField(String name, Class<?> type) {
+  public FieldBuildStart<T> packageField(final String name, final Class<?> type) {
     return packageField(name, MetaClassFactory.get(type));
   }
 
@@ -471,7 +470,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     return new FieldBuilder<T>(new BuildCallback<T>() {
       @Override
       public T callback(final Statement statement) {
-        BuildMetaField buildMetaField
+        final BuildMetaField buildMetaField
                 = new BuildMetaField(classDefinition, statement, scope, type, name);
 
         classDefinition.addField(buildMetaField);

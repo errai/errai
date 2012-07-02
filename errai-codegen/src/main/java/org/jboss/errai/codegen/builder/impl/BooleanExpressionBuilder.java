@@ -34,38 +34,38 @@ public class BooleanExpressionBuilder extends ExpressionBuilder<BooleanOperator>
 
   public BooleanExpressionBuilder() {}
 
-  public BooleanExpressionBuilder(Statement rhs, BooleanOperator operator) {
+  public BooleanExpressionBuilder(final Statement rhs, final BooleanOperator operator) {
     super(rhs, operator);
   }
 
-  public BooleanExpressionBuilder(Statement lhs, Statement rhs, BooleanOperator operator) {
+  public BooleanExpressionBuilder(final Statement lhs, final Statement rhs, final BooleanOperator operator) {
     super(lhs, rhs, operator);
   }
 
-  public BooleanExpressionBuilder(Object lhs, Object rhs, BooleanOperator operator) {
+  public BooleanExpressionBuilder(final Object lhs, final Object rhs, final BooleanOperator operator) {
     super(lhs, rhs, operator);
   }
   
-  public static BooleanExpression create(Statement lhs) {
+  public static BooleanExpression create(final Statement lhs) {
     return new BooleanExpressionBuilder(lhs, null, null);
   }
 
-  public static BooleanExpression create(BooleanOperator operator, Object rhs) {
+  public static BooleanExpression create(final BooleanOperator operator, final Object rhs) {
     return create(null, operator, rhs);
   }
 
-  public static BooleanExpression create(Object lhs, BooleanOperator operator, Object rhs) {
+  public static BooleanExpression create(final Object lhs, final BooleanOperator operator, final Object rhs) {
     return new BooleanExpressionBuilder(lhs, rhs, operator);
   }
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     if (operator == null) {
       lhs = GenUtil.generate(context, lhs);
       lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
     }
 
-    String expr = super.generate(context);
+    final String expr = super.generate(context);
 
     if (negated) {
       return UnaryOperator.Complement.getCanonicalString()  + "(" + expr + ")";

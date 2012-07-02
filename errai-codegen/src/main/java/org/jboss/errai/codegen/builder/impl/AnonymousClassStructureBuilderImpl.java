@@ -16,11 +16,6 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
-import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.codegen.AbstractStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
@@ -36,6 +31,11 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -43,14 +43,15 @@ import org.jboss.errai.codegen.util.GenUtil;
 public class AnonymousClassStructureBuilderImpl
         extends ClassBuilder<AnonymousClassStructureBuilder>
         implements AnonymousClassStructureBuilder {
-  private BuildCallback<ObjectBuilder> callback;
-  private List<DeferredGenerateCallback> callables = new ArrayList<DeferredGenerateCallback>();
-  private Context context;
+  private final BuildCallback<ObjectBuilder> callback;
+  private final List<DeferredGenerateCallback> deferredGenerateCallbacks;
+  private final Context context;
 
-  AnonymousClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
+  AnonymousClassStructureBuilderImpl(final MetaClass clazz, final BuildCallback<ObjectBuilder> builderBuildCallback) {
     super(clazz.getFullyQualifiedName(), clazz, builderBuildCallback.getParentContext());
     this.callback = builderBuildCallback;
     this.context = builderBuildCallback.getParentContext();
+    deferredGenerateCallbacks = new ArrayList<DeferredGenerateCallback>();
   }
 
   public BlockBuilder<AnonymousClassStructureBuilder> initialize() {
@@ -61,8 +62,8 @@ public class AnonymousClassStructureBuilderImpl
 
                 addCallable(new DeferredGenerateCallback() {
                   @Override
-                  public String doGenerate(Context context) {
-                    StringBuilder buf = new StringBuilder(256);
+                  public String doGenerate(final Context context) {
+                    final StringBuilder buf = new StringBuilder(256);
                     buf.append("{\n");
                     if (statement != null) {
                       buf.append(statement.generate(Context.create(context))).append("\n");
@@ -92,14 +93,14 @@ public class AnonymousClassStructureBuilderImpl
 
                 addCallable(new DeferredGenerateCallback() {
                   @Override
-                  public String doGenerate(Context context) {
-                    Context subContext = Context.create(context);
-                    for (Parameter parm : parameters.getParameters()) {
+                  public String doGenerate(final Context context) {
+                    final Context subContext = Context.create(context);
+                    for (final Parameter parm : parameters.getParameters()) {
                       subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
                     }
 
-                    StringBuilder buf = new StringBuilder(256);
-                    String returnType = getClassReference(method.getReturnType(), context);
+                    final StringBuilder buf = new StringBuilder(256);
+                    final String returnType = getClassReference(method.getReturnType(), context);
 
                     buf.append("public ").append(returnType)
                             .append(" ")
@@ -124,12 +125,12 @@ public class AnonymousClassStructureBuilderImpl
             });
   }
 
-  public BlockBuilder<AnonymousClassStructureBuilder> publicOverridesMethod(String name, Parameter... args) {
-    List<MetaClass> types = new ArrayList<MetaClass>();
-    for (Parameter arg : args) {
+  public BlockBuilder<AnonymousClassStructureBuilder> publicOverridesMethod(final String name, final Parameter... args) {
+    final List<MetaClass> types = new ArrayList<MetaClass>();
+    for (final Parameter arg : args) {
       types.add(arg.getType());
     }
-    MetaMethod method = classDefinition.getSuperClass()
+    final MetaMethod method = classDefinition.getSuperClass()
             .getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
     if (method == null)
       throw new UndefinedMethodException("Method not found:" + name + "(" + types + ")");
@@ -143,7 +144,7 @@ public class AnonymousClassStructureBuilderImpl
     if (callback != null) {
       return callback.callback(new AbstractStatement() {
         @Override
-        public String generate(Context context) {
+        public String generate(final Context context) {
           context.attachClass(getClassDefinition());
           return doGenerate(context);
         }
@@ -153,30 +154,30 @@ public class AnonymousClassStructureBuilderImpl
     return null;
   }
 
-  private void addCallable(DeferredGenerateCallback callable) {
-    callables.add(callable);
+  private void addCallable(final DeferredGenerateCallback callable) {
+    deferredGenerateCallbacks.add(callable);
   }
 
   String generatedCache;
 
-  private String doGenerate(Context context) {
+  private String doGenerate(final Context context) {
     if (generatedCache != null) return generatedCache;
     try {
-      if (callables == null)
+      if (deferredGenerateCallbacks == null)
         return null;
 
-      Context subContext = Context.create(context);
+      final Context subContext = Context.create(context);
       
-      for (Variable v : classDefinition.getContext().getDeclaredVariables()) {
+      for (final Variable v : classDefinition.getContext().getDeclaredVariables()) {
         subContext.addVariable(v);
       }
       
       subContext.addVariable(Variable.create("this", getClassDefinition()));
 
-      StringBuilder buf = new StringBuilder(256);
+      final StringBuilder buf = new StringBuilder(256);
       buf.append(classDefinition.membersToString().trim()).append("\n");
 
-      for (DeferredGenerateCallback c : callables) {
+      for (final DeferredGenerateCallback c : deferredGenerateCallbacks) {
         buf.append(c.doGenerate(subContext).trim()).append('\n');
       }
 

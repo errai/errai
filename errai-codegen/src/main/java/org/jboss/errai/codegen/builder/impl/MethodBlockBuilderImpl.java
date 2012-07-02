@@ -16,12 +16,6 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
@@ -35,6 +29,11 @@ import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 
+import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
@@ -44,18 +43,18 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
 
   protected String methodComment;
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
-  protected MethodBuildCallback<T> callback;
+  protected final MethodBuildCallback<T> callback;
   protected DefParameters defParameters;
-  protected DefModifiers modifiers = new DefModifiers();
-  protected List<Annotation> annotations = new ArrayList<Annotation>();
-
+  protected final DefModifiers modifiers = new DefModifiers();
+  protected final List<Annotation> annotations = new ArrayList<Annotation>();
 
   public MethodBlockBuilderImpl(MethodBuildCallback<T> callback) {
+    super(null);
     this.callback = callback;
   }
 
   public MethodBlockBuilderImpl(BlockStatement blockStatement, MethodBuildCallback<T> callback) {
-    this.blockStatement = blockStatement;
+    super(blockStatement, null);
     this.callback = callback;
   }
 
