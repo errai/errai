@@ -19,7 +19,7 @@ import com.google.gwt.dom.client.Element;
 /**
  * Store all injected {@link DataField} {@link Statement} instances into the
  * aggregate {@link Map} for this composite {@link Template}.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 @CodeDecorator
@@ -31,7 +31,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
 
   @Override
   public List<? extends Statement> generateDecorator(InjectableInstance<DataField> ctx) {
-
+    ctx.ensureMemberExposed();
     Statement instance = ctx.getValueStatement();
     if (ctx.getType().isAssignableTo(Element.class)) {
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
