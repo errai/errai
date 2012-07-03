@@ -24,9 +24,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.marshalling.client.api.annotations.Key;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
@@ -34,6 +35,7 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
@@ -281,13 +283,8 @@ public class DefaultJavaDefinitionMapper {
           }
 
           @Override
-<<<<<<< HEAD
           public void setMappingClass(final MetaClass clazz) {
           }
-=======
-          public void setMappingClass(MetaClass clazz) {
-            }
->>>>>>> master
 
           @Override
           public String toString() {
