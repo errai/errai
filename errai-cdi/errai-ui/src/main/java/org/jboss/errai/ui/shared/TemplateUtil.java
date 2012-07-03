@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public final class TemplateUtil {
@@ -35,7 +35,7 @@ public final class TemplateUtil {
     Element element = dataFieldElements.get(fieldName);
     if (element == null) {
       throw new IllegalStateException("Template [" + templateFile
-              + "] did not contain data-field attribute for field [" + fieldName + "]");
+              + "] did not contain data-field attribute for field [" + componentType + "." + fieldName + "]");
     }
     System.out.println("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
