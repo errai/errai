@@ -802,7 +802,10 @@
           <strict>true</strict>
           <logLevel>INFO</logLevel>
           <runTarget>index.html</runTarget>
-          <extraJvmArgs>-Xmx1g -XX:MaxPermSize=128m</extraJvmArgs>
+          <extraJvmArgs>
+            -Xmx1g -XX:MaxPermSize=128m
+            <!-- -Derrai.codegen.permissive=true -Derrai.codegen.printOut=true -->
+          </extraJvmArgs>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>

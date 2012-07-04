@@ -24,13 +24,17 @@ public class GroceryListClient extends Composite {
   @Inject @DataField
   private StoreForm storeForm;
 
+  @Inject @DataField
+  private StoresWidget storesWidget;
+
   @PostConstruct
   public void clientMain() {
+    // TODO move this into StoresWidget
     List<Store> allStores = em.createNamedQuery("allStores", Store.class).getResultList();
     for (Store s : allStores) {
-
+      storesWidget.addStore(s);
     }
 
-    RootPanel.get().add(storeForm);
+    RootPanel.get().add(this);
   }
 }

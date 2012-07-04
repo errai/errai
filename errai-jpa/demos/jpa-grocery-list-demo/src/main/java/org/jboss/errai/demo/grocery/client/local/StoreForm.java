@@ -1,6 +1,7 @@
 package org.jboss.errai.demo.grocery.client.local;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -18,33 +19,37 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 
+@Dependent
 @Templated
 public class StoreForm extends Composite {
 
   @Inject private EntityManager em;
 
   // injecting this data binder causes automatic binding between
-  // the String property "store.name" and the text box "name"
+  // the properties of Store and the like-named @DataField members in this class
+  // Example: property "store.name" tracks the value in the TextBox "name"
   @Inject private DataBinder<Store> storeBinder;
 
   @Inject @DataField private TextBox name;
+
   @Inject @DataField private Button saveButton;
 
   public void setStore(Store store) {
     Assert.notNull(store);
-    // do we need to unbind the existing model before adding the new one?
 
-    // FIXME data binder should be okay with null model properties
-    if (store.getName() == null) store.setName("");
-
+    // TODO: do we need to unbind the existing model before adding the new one? (data binding javadoc)
     storeBinder.setModel(store, InitialState.FROM_MODEL);
   }
 
   @PostConstruct
   private void init() {
+    // XXX I don't think this should have been (auto)bound in the first place
+    storeBinder.unbind("saveButton");
+
     setStore(new Store());
 
-    // FEATURE
+    // TODO (errai-ui): I want to get events with an annotated method (like GWT's @UiHandler)
+    //                  rather than programmatically subscribing a listener
     saveButton.addClickHandler(new ClickHandler() {
 
       @Override
