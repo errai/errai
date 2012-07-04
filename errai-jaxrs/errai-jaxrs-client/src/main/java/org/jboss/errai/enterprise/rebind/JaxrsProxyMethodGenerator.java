@@ -200,9 +200,14 @@ public class JaxrsProxyMethodGenerator {
     JaxrsResourceMethodParameters jaxrsParams =
         JaxrsResourceMethodParameters.fromMethod(resourceMethod.getMethod(), "parameters");
 
+    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
+    if (interceptedCall == null) {
+      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
+    }
+
     Statement callContext =
         RebindUtils.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
-            resourceMethod.getMethod(), generateInterceptedRequest())
+            resourceMethod.getMethod(), generateInterceptedRequest(), interceptedCall)
             .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
             .append(new StringStatement("super.setParameters(parameters)"))
             .append(generateUrl(jaxrsParams))
@@ -212,15 +217,10 @@ public class JaxrsProxyMethodGenerator {
             .finish()
             .finish();
 
-    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
-    if (interceptedCall == null) {
-      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
-    }
-
     return Stmt.try_()
             .append(
                 Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
-                    Stmt.newObject(CallContextStatus.class)))
+                    Stmt.newObject(CallContextStatus.class).withParameters((Object[]) interceptedCall.value())))
             .append(
                 Stmt.declareVariable(RestCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
@@ -230,15 +230,7 @@ public class JaxrsProxyMethodGenerator {
                 Stmt.loadVariable("callContext").invoke("setParameters",
                     Stmt.newArray(Object.class).initialize(parameters.toArray())))
             .append(
-                Stmt.nestedCall(Stmt.newObject(interceptedCall.value())).invoke("aroundInvoke",
-                    Variable.get("callContext")))
-            .append(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
-                    .append(
-                        Stmt.loadVariable("remoteCallback").invoke("callback",
-                            Stmt.loadVariable("callContext").invoke("getResult")))
-                    .finish()
-            )
+                Stmt.loadVariable("callContext").invoke("proceed"))
             .finish()
             .catch_(Throwable.class, "throwable")
             .append(errorHandling())

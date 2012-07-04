@@ -26,7 +26,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
  */
 public abstract class RemoteCallContext extends CallContext {
   private Object result;
-  
+
   /**
    * Returns the result of the intercepted remote call.
    * 
@@ -45,9 +45,10 @@ public abstract class RemoteCallContext extends CallContext {
   public void setResult(Object result) {
     this.result = result;
   }
-  
+
   /**
-   * Proceeds with the execution of the intercepted remote call.
+   * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all interceptors
+   * have been executed.
    * 
    * @param callback
    *          The remote callback that receives the return value from the call. This callback is guaranteed to be
@@ -56,7 +57,8 @@ public abstract class RemoteCallContext extends CallContext {
   public abstract void proceed(RemoteCallback<?> callback);
 
   /**
-   * Proceeds with the execution of the intercepted remote call.
+   * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all interceptors
+   * have been executed.
    * 
    * @param callback
    *          The remote callback that receives the return value from the call. This callback is guaranteed to be

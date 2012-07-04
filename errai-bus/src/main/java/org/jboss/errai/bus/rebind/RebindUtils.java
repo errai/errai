@@ -22,16 +22,21 @@ import java.lang.reflect.Type;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.mvel2.util.StringAppender;
 
@@ -123,19 +128,20 @@ public class RebindUtils {
    *          the method that is being proxied.
    * @param proceed
    *          the logic that should be invoked if {@link CallContext#proceed()} is called.
+   * @param interceptedCall
+   *          a reference to the {@link InterceptedCall} annotation on the remote interface or method
    * @return statement representing an anonymous implementation of the provided {@link CallContext}
    */
   public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
       Class<? extends RemoteCallContext> callContextType,
-      MetaClass proxyClass, MetaMethod method, Statement proceed) {
+      MetaClass proxyClass, MetaMethod method, Statement proceed, InterceptedCall interceptedCall) {
 
     return Stmt.newObject(callContextType).extend()
             .publicOverridesMethod("getMethodName")
             .append(Stmt.load(method.getName()).returnValue())
             .finish()
             .publicOverridesMethod("proceed")
-            .append(Stmt.loadVariable("status").invoke("setProceeding", true))
-            .append(proceed)
+            .append(generateInterceptorStackProceedMethod(proceed, interceptedCall))
             .append(Stmt.load(null).returnValue())
             .finish()
             .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback", true))
@@ -178,5 +184,32 @@ public class RebindUtils {
             )
             .append(Stmt.loadVariable("this").invoke("proceed", Variable.get("interceptorCallback")))
             .finish();
+  }
+  
+  private static Statement generateInterceptorStackProceedMethod(Statement proceed, InterceptedCall interceptedCall) {
+    BlockStatement proceedLogic = new BlockStatement();
+    proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
+   
+    BlockBuilder<ElseBlockBuilder> interceptorStack = 
+      Stmt.if_(Bool.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor")));
+    
+    for (Class<?> interceptor : interceptedCall.value()) {
+        interceptorStack.append(Stmt.if_(Bool.equals(
+            Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
+            .append(Stmt.loadVariable("status").invoke("setProceeding", false))
+            .append(
+                Stmt.nestedCall(Stmt.newObject(interceptor))
+                  .invoke("aroundInvoke", Variable.get("this")))
+            .append(
+                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
+                .append(
+                    Stmt.loadVariable("remoteCallback").invoke("callback",
+                        Stmt.loadVariable("this").invoke("getResult")))
+                .finish())
+            .finish()
+        );
+    }
+    proceedLogic.addStatement(interceptorStack.finish().else_().append(proceed).finish());
+    return proceedLogic;
   }
 }

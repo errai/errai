@@ -31,13 +31,16 @@ public interface TestRPCService {
   public Person returnNull();
 
   @InterceptedCall(RpcBypassingInterceptor.class)
-  public String interceptedRpcBypassingRemoteEndpoint();
+  public String interceptedRpcWithEndpointBypassing();
   
   @InterceptedCall(RpcResultManipulatingInterceptor.class)
-  public String interceptedRpcManipulatingResult();
+  public String interceptedRpcWithResultManipulation();
 
   @InterceptedCall(RpcParameterManipulatingInterceptor.class)
-  public String interceptedRpcManipulatingParameters(String parm);
+  public String interceptedRpcWithParameterManipulation(String parm);
+
+  @InterceptedCall({RpcInterceptorOne.class, RpcInterceptorTwo.class})
+  public String interceptedRpcWithChainedInterceptors(String parm);
 
   public String testVarArgs(String name, String... additional);
 }

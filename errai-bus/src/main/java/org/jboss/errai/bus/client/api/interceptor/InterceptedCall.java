@@ -16,16 +16,22 @@
 
 package org.jboss.errai.bus.client.api.interceptor;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that calls to the annotated method will be intercepted by an interceptor of the provided type. When used on
- * a class or interface the interceptor will be applied for all methods of the corresponding type.
+ * Indicates that calls to the annotated method will be intercepted by the specified interceptor(s). When used on
+ * a class or interface, all methods of the corresponding type will be intercepted.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@Documented
 @Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface InterceptedCall {
-  Class<? extends CallInterceptor<? extends CallContext>> value();
+
+  /**
+   * The interceptor type(s) to use. Interceptor execution is guaranteed to be in declaration order.
+   */
+  Class<? extends CallInterceptor<? extends CallContext>>[] value();
 }

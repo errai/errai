@@ -104,7 +104,8 @@ public class RpcProxyGenerator {
         classBuilder.publicMethod(method.getReturnType(), method.getName(), finalParms);
 
     if (intercepted) {
-      generateInterceptorLogic(classBuilder, methodBlock, method, generateRequest(method, parameters, true), parmVars);
+      methodBlock.append(generateInterceptorLogic(classBuilder, method,
+          generateRequest(method, parameters, true), parmVars));
     }
     else {
       methodBlock.append(generateRequest(method, parameters, false));
@@ -118,22 +119,21 @@ public class RpcProxyGenerator {
     methodBlock.finish();
   }
 
-  private void generateInterceptorLogic(ClassStructureBuilder<?> classBuilder, BlockBuilder<?> methodBuilder,
+  private Statement generateInterceptorLogic(ClassStructureBuilder<?> classBuilder,
       MetaMethod method, Statement requestLogic, List<Statement> parmVars) {
-
-    Statement callContext = RebindUtils.generateProxyMethodCallContext(RemoteCallContext.class, 
-            classBuilder.getClassDefinition(), method,requestLogic).finish();
 
     InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
     if (interceptedCall == null) {
       interceptedCall = remote.getAnnotation(InterceptedCall.class);
     }
 
-    methodBuilder.append(
-        Stmt.try_()
+    Statement callContext = RebindUtils.generateProxyMethodCallContext(RemoteCallContext.class,
+            classBuilder.getClassDefinition(), method, requestLogic, interceptedCall).finish();
+
+    return Stmt.try_()
             .append(
                 Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
-                    Stmt.newObject(CallContextStatus.class)))
+                    Stmt.newObject(CallContextStatus.class).withParameters((Object[]) interceptedCall.value())))
             .append(
                 Stmt.declareVariable(RemoteCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
@@ -141,20 +141,11 @@ public class RpcProxyGenerator {
                 Stmt.loadVariable("callContext").invoke("setParameters",
                     Stmt.newArray(Object.class).initialize(parmVars.toArray())))
             .append(
-                Stmt.nestedCall(Stmt.newObject(interceptedCall.value()))
-                    .invoke("aroundInvoke", Variable.get("callContext")))
-            .append(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
-                    .append(
-                        Stmt.loadVariable("remoteCallback").invoke("callback",
-                            Stmt.loadVariable("callContext").invoke("getResult")))
-                    .finish()
-            )
+                Stmt.loadVariable("callContext").invoke("proceed"))
             .finish()
             .catch_(Throwable.class, "throwable")
             .append(Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable")))
-            .finish()
-        );
+            .finish();
   }
 
   private Statement generateRequest(MetaMethod method, Statement methodParams, boolean intercepted) {

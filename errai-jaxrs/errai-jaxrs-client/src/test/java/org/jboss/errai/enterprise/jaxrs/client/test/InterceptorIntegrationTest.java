@@ -34,23 +34,30 @@ public class InterceptorIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
-  public void testInterceptedRestCallBypassingRemoteEndpoint() {
+  public void testInterceptedRestCallWithEndpointBypassing() {
     RestClient.create(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "intercepted"))
-        .interceptedGetBypassingEndpoint();
+        .interceptedGetWithEndpointBypassing();
   }
 
   @Test
   public void testInterceptedRestCallWithParameterManipulation() {
     RestClient.create(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "intercepted"))
-        .interceptedGetManipulatingParameter("will be replaced by interceptor");
+        .interceptedGetWithParameterManipulation("will be replaced by interceptor");
   }
 
   @Test
   public void testInterceptedRestCallWithResultManipulation() {
     RestClient.create(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
-        .interceptedGetManipulatingResult("will be replaced by interceptor");
+        .interceptedGetWithResultManipulation("will be replaced by interceptor");
+  }
+  
+  @Test
+  public void testInterceptedRestCallWithChainedInterceptors() {
+    RestClient.create(InterceptedTestService.class,
+        new AssertionCallback<String>("Request was not intercepted", "ABCD"))
+        .interceptedGetWithChainedInterceptors("");
   }
 }

@@ -16,6 +16,10 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * This class is used internally (in generated code for remote call interceptors) to store status information about an
  * interceptor's call context.
@@ -23,13 +27,40 @@ package org.jboss.errai.bus.client.framework;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CallContextStatus {
-  private boolean proceeding;
+  private boolean proceeding = false;
+  private boolean interceptorChainStarted = false;
+  private final List<Class<?>> interceptors;
+  
+  public CallContextStatus(Class<?>... interceptors) {
+    this.interceptors = new ArrayList<Class<?>>(Arrays.asList(interceptors));
+  }
+    
+  public void proceed() {
+    this.proceeding = true;
+    if (!interceptors.isEmpty()) {
+      if (interceptorChainStarted) {
+        interceptors.remove(0);
+      }
+      else {
+        interceptorChainStarted = true;
+      }
+    }
+  }
 
   public void setProceeding(boolean proceeding) {
     this.proceeding = proceeding;
   }
-
+  
   public boolean isProceeding() {
     return proceeding;
+  }
+  
+  public Class<?> getNextInterceptor() {
+    if (!interceptors.isEmpty()) {
+      return interceptors.get(0);
+    }
+    else {
+      return null;
+    }
   }
 }

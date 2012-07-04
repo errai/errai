@@ -585,19 +585,18 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-  public void testInterceptedRpcBypassingRemoteEndpoint() {
+  public void testInterceptedRpcWithEndpointBypassing() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
           public void callback(String response) {
             assertEquals("Request was not intercepted", "intercepted", response);
             finishTest();
           }
-        }, TestRPCService.class);
-
-        remote.interceptedRpcBypassingRemoteEndpoint();
+        }, TestRPCService.class)
+        .interceptedRpcWithEndpointBypassing();
       }
     });
   }
@@ -606,15 +605,13 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
           public void callback(String response) {
             assertEquals("Request was not intercepted", "result_intercepted", response);
             finishTest();
           }
-        }, TestRPCService.class);
-
-        remote.interceptedRpcManipulatingResult();
+        }, TestRPCService.class).interceptedRpcWithResultManipulation();
       }
     });
   }
@@ -623,15 +620,28 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
           public void callback(String response) {
             assertEquals("Request was not intercepted", "interceptor_value", response);
             finishTest();
           }
-        }, TestRPCService.class);
-
-        remote.interceptedRpcManipulatingParameters("value");
+        }, TestRPCService.class).interceptedRpcWithParameterManipulation("value");
+      }
+    });
+  }
+  
+  public void testInterceptedRpcWithChainedInterceptors() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("Request was not intercepted", "ABCD", response);
+            finishTest();
+          }
+        }, TestRPCService.class).interceptedRpcWithChainedInterceptors("");
       }
     });
   }

@@ -23,6 +23,8 @@ import javax.ws.rs.QueryParam;
 
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallBypassingInterceptor;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorOne;
+import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorTwo;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallParameterManipulatingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallResultManipulatingInterceptor;
 
@@ -35,17 +37,22 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallResult
 public interface InterceptedTestService {
 
   @GET 
+  @Path("/0/{result}")
+  @InterceptedCall({RestCallInterceptorOne.class, RestCallInterceptorTwo.class})
+  public String interceptedGetWithChainedInterceptors(@PathParam("result") String result);
+
+  @GET 
   @Path("/1")
   @InterceptedCall(RestCallBypassingInterceptor.class)
-  public String interceptedGetBypassingEndpoint();
+  public String interceptedGetWithEndpointBypassing();
   
   @GET
   @Path("/2")
   @InterceptedCall(RestCallResultManipulatingInterceptor.class)
-  public String interceptedGetManipulatingResult(@QueryParam("result") String result);
+  public String interceptedGetWithResultManipulation(@QueryParam("result") String result);
   
   @GET
   @Path("/3/{result}")
   @InterceptedCall(RestCallParameterManipulatingInterceptor.class)
-  public String interceptedGetManipulatingParameter(@PathParam("result") String result);
+  public String interceptedGetWithParameterManipulation(@PathParam("result") String result);
 }

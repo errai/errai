@@ -26,18 +26,23 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedTestService;
 public class InterceptedTestServiceImpl implements InterceptedTestService {
 
   @Override
-  public String interceptedGetBypassingEndpoint() {
+  public String interceptedGetWithEndpointBypassing() {
     // should never be called
     return "not intercepted";
   }
 
   @Override
-  public String interceptedGetManipulatingResult(String result) {
+  public String interceptedGetWithResultManipulation(String result) {
     return result;
   }
 
   @Override
-  public String interceptedGetManipulatingParameter(String result) {
+  public String interceptedGetWithParameterManipulation(String result) {
+    return result;
+  }
+
+  @Override
+  public String interceptedGetWithChainedInterceptors(String result) {
     return result;
   }
 }

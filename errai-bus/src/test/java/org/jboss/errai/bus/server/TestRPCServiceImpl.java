@@ -70,17 +70,22 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
   }
 
   @Override
-  public String interceptedRpcBypassingRemoteEndpoint() {
+  public String interceptedRpcWithEndpointBypassing() {
     return "not intercetped";
   }
 
   @Override
-  public String interceptedRpcManipulatingResult() {
+  public String interceptedRpcWithResultManipulation() {
     return "result";
   }
 
   @Override
-  public String interceptedRpcManipulatingParameters(String parm) {
+  public String interceptedRpcWithParameterManipulation(String parm) {
+    return parm;
+  }
+
+  @Override
+  public String interceptedRpcWithChainedInterceptors(String parm) {
     return parm;
   }
 }
