@@ -16,39 +16,21 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.annotation.PostConstruct;
-
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-
-import com.google.gwt.user.client.ui.TextBox;
-
 /**
- * Module used for integration testing.
+ * Thrown to indicate that the property used when binding a widget to a model instance does not exist in the
+ * corresponding model class. This exception is only used internally (in generated code). Bindings to non-existing
+ * properties do not cause an exception to be thrown to the user.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint
-public class Module {
+@SuppressWarnings("serial")
+public class NonExistingPropertyException extends RuntimeException {
 
-  private final TextBox textBox = new TextBox();
-  private Model model = new Model();
-  private final DataBinder<Model> dataBinder = new DataBinder<Model>(model);
-  
-  @PostConstruct
-  public void init() {
-    model = dataBinder.bind(textBox, "value");
+  public NonExistingPropertyException(String message) {
+    super(message);
   }
   
-  public TextBox getTextBox() {
-    return textBox;
-  }
-  
-  public Model getModel() {
-    return model;
-  }
-  
-  public DataBinder<Model> getDataBinder() {
-    return dataBinder;
+  public String createErrorMessage(String error) {
+    return error + " " + this.getMessage();
   }
 }

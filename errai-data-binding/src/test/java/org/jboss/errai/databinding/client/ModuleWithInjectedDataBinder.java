@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
@@ -32,35 +31,20 @@ import com.google.gwt.user.client.ui.TextBox;
  */
 @EntryPoint
 public class ModuleWithInjectedDataBinder {
-
-  private TextBox valueTextBox = new TextBox();
-  private TextBox nameTextBox = new TextBox();
-  private Label idLabel = new Label();
+  private final TextBox nameTextBox = new TextBox();
 
   @Inject
   private DataBinder<Model> dataBinder;
 
   @PostConstruct
   public void init() {
-    // bind the value of the text box to the name property of the model so they are automatically kept in sync
-    // until unbind is called.
     dataBinder.bind(nameTextBox, "name");
-    dataBinder.bind(valueTextBox, "value");
-    dataBinder.bind(idLabel, "id");
   }
 
-  public TextBox getValueTextBox() {
-    return valueTextBox;
-  }
-  
   public TextBox getNameTextBox() {
     return nameTextBox;
   }
   
-  public Label getIdLabel() {
-    return idLabel;
-  }
-
   public Model getModel() {
     return dataBinder.getModel();
   }

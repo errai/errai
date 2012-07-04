@@ -39,10 +39,12 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.Convert;
+import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -174,10 +176,17 @@ public class BindableProxyGenerator {
         .append(
             Stmt.loadVariable("bindings").invoke("keySet").foreach("property")
                 .append(
-                    Stmt.loadVariable("this")
-                        .invoke("syncInitialState",
-                            Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
-                            Stmt.castTo(String.class, Stmt.loadVariable("property"))))
+                    Stmt.try_()
+                    .append(
+                        Stmt.loadVariable("this")
+                          .invoke("syncInitialState",
+                              Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
+                              Stmt.castTo(String.class, Stmt.loadVariable("property"))))
+                    .finish()
+                    .catch_(NonExistingPropertyException.class, "e")
+                    .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
+                        .invoke("createErrorMessage", "Skipping state synchronization for unknown property:")))
+                    .finish())
                 .finish())
          .finish();
 
@@ -268,7 +277,7 @@ public class BindableProxyGenerator {
         generateSetter(classBuilder, propertyDescriptor, setMethod);
       }
     }
-    getMethod.append(Stmt.load(null).returnValue()).finish();
+    getMethod.append(Stmt.throw_(NonExistingPropertyException.class, Variable.get("property"))).finish();
     setMethod.finish();
   }
 

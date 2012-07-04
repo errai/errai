@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.databinding.client.Model;
-import org.jboss.errai.databinding.client.Module;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -31,6 +30,7 @@ import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.junit.Test;
 
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -48,16 +48,14 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBasicBinding() {
-    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
-
-    Model model = module.getModel();
-    TextBox textBox = module.getTextBox();
-
-    model.setValue("model change");
-    assertEquals("Widget not properly updated", "model change", textBox.getText());
+    TextBox textBox = new TextBox();
+    Model model = new DataBinder<Model>(Model.class).bind(textBox, "value");
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getValue());
+
+    model.setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
   }
 
   @Test
@@ -77,11 +75,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testReadOnlyBinding() {
-    ModuleWithInjectedDataBinder module =
-        IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
-
-    Model model = module.getModel();
-    Label label = module.getIdLabel();
+    Label label = new Label();
+    Model model = new DataBinder<Model>(Model.class).bind(label, "id");
 
     model.setId(1701);
     assertEquals("Widget not properly updated", "1701", label.getText());
@@ -89,13 +84,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testIntegerToStringBinding() {
-    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
-
-    Model model = module.getModel();
-    TextBox textBox = module.getTextBox();
-
-    module.getDataBinder().unbind();
-    module.getDataBinder().bind(textBox, "age");
+    TextBox textBox = new TextBox();
+    Model model = new DataBinder<Model>(Model.class).bind(textBox, "age");
 
     model.setAge(25);
     assertEquals("Widget not properly updated", "25", textBox.getText());
@@ -103,14 +93,30 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     textBox.setValue("52", true);
     assertEquals("Model not properly updated", Integer.valueOf(52), model.getAge());
   }
-  
+
+  @Test
+  public void testBindingAndSyncOfNonExistingProperty() {
+    Button button = new Button();
+    button.setText("button");
+
+    Model model = new Model();
+
+    DataBinder<Model> binder = new DataBinder<Model>(Model.class);
+    model = binder.bind(button, "non-existing");
+    binder.setModel(model, InitialState.FROM_MODEL);
+
+    assertEquals("Button text should not have been changed after intial state synchronization " +
+    		"as the property it is bound to does not exist",
+        "button", button.getText());
+  }
+
   @Test
   public void testUnbindingSingleProperty() {
-    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
-    module.getDataBinder().unbind("value");
+    DataBinder<Model> binder = new DataBinder<Model>(Model.class);
+    TextBox textBox = new TextBox();
+    Model model = binder.bind(textBox, "value");
 
-    Model model = module.getModel();
-    TextBox textBox = module.getTextBox();
+    binder.unbind("value");
 
     model.setValue("model change");
     assertEquals("Widget should not have been updated because unbind was called", "", textBox.getText());
@@ -121,11 +127,11 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testUnbindingAll() {
-    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
-    module.getDataBinder().unbind();
+    DataBinder<Model> binder = new DataBinder<Model>(Model.class);
+    TextBox textBox = new TextBox();
+    Model model = binder.bind(textBox, "value");
 
-    Model model = module.getModel();
-    TextBox textBox = module.getTextBox();
+    binder.unbind();
 
     model.setValue("model change");
     assertEquals("Widget should not have been updated because unbind was called", "", textBox.getText());
@@ -136,12 +142,15 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testMultipleDataBindings() {
-    ModuleWithInjectedDataBinder module =
-        IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+    DataBinder<Model> binder = new DataBinder<Model>(Model.class);
+    TextBox valueTextBox = new TextBox();
+    binder.bind(valueTextBox, "value");
+    ;
+    TextBox nameTextBox = new TextBox();
+    binder.bind(nameTextBox, "name");
+    ;
 
-    Model model = module.getModel();
-    TextBox nameTextBox = module.getNameTextBox();
-    TextBox valueTextBox = module.getValueTextBox();
+    Model model = binder.getModel();
 
     nameTextBox.setValue("ui.name", true);
     assertEquals("Name not properly updated", "ui.name", model.getName());
@@ -161,7 +170,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Widget for name not properly updated", "model.name", nameTextBox.getText());
     assertEquals("Widget for value not properly updated", "model.value", valueTextBox.getText());
 
-    module.getDataBinder().unbind("name");
+    binder.unbind("name");
     nameTextBox.setValue("ui.name", true);
     valueTextBox.setValue("ui.value", true);
     assertEquals("Name should not have been updated", "model.name", model.getName());
@@ -175,51 +184,43 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBindableProxyMarshalling() {
-    ModuleWithInjectedDataBinder module =
-        IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+    Model model = new DataBinder<Model>(Model.class).bind(new TextBox(), "value");
 
-    Model model = module.getModel();
     String marshalledModel = Marshalling.toJSON(model);
     assertEquals(model, Marshalling.fromJSON(marshalledModel, Model.class));
   }
 
   @Test
   public void testBindableProxyListMarshalling() {
-    ModuleWithInjectedDataBinder module =
-        IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+    Model model = new DataBinder<Model>(Model.class).bind(new TextBox(), "value");
 
     List<Model> modelList = new ArrayList<Model>();
-    modelList.add(module.getModel());
+    modelList.add(model);
     String marshalledModelList = Marshalling.toJSON(modelList);
     assertEquals(modelList, Marshalling.fromJSON(marshalledModelList, List.class));
   }
 
   @Test
   public void testBindableProxyMapMarshalling() {
-    ModuleWithInjectedDataBinder module =
-        IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+    Model model = new DataBinder<Model>(Model.class).bind(new TextBox(), "value");
 
-    Model model = module.getModel();
     Map<Model, Model> modelMap = new HashMap<Model, Model>();
     modelMap.put(model, model);
     String marshalledModelMap = Marshalling.toJSON(modelMap);
     assertEquals(modelMap, Marshalling.fromJSON(marshalledModelMap, Map.class));
   }
-  
+
   @Test
   public void testInitialStateSync() {
-    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
-    Model model = module.getModel();
-    TextBox textBox = module.getTextBox();
-    DataBinder<Model> binder = module.getDataBinder();
-
-    binder.unbind();
-    
-    model.setName("initial name");
+    DataBinder<Model> binder = new DataBinder<Model>(Model.class);
+    TextBox textBox = new TextBox();
     binder.bind(textBox, "name");
+
+    Model model = new Model();
+    model.setName("initial name");
     binder.setModel(model, InitialState.FROM_MODEL);
     assertEquals("Widget not properly initialized based on model's initial state", "initial name", textBox.getText());
-    
+
     textBox.setText("changed name");
     binder.setModel(model, InitialState.FROM_UI);
     assertEquals("Model not properly initialized based on widget's initial state", "changed name", model.getName());
