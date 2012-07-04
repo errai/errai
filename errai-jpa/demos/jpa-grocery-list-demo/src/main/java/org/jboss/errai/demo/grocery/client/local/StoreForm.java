@@ -43,10 +43,6 @@ public class StoreForm extends Composite {
 
   @PostConstruct
   private void init() {
-    // XXX I don't think this should have been (auto)bound in the first place
-    storeBinder.unbind("saveButton");
-
-    setStore(new Store());
 
     // TODO (errai-ui): I want to get events with an annotated method (like GWT's @UiHandler)
     //                  rather than programmatically subscribing a listener
