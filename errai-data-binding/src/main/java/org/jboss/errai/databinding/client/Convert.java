@@ -26,22 +26,27 @@ import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 
 /**
  * Simple type conversion utility used by the generated {@link Bindable} proxies.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Convert {
 
   /**
    * Convert the provided object to the provided type.
-   * 
+   *
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
-   *          The object to convert, must not be null.
+   *          The object to convert. Must not be null except in the special case where toType is String.
    * @return the converted object
    */
   public static Object to(Class<?> toType, Object o) {
     Assert.notNull(toType);
+
+    if (toType == String.class && o == null) {
+      o = "";
+    }
+
     Assert.notNull(o);
 
     if (toType.equals(o.getClass())) {
