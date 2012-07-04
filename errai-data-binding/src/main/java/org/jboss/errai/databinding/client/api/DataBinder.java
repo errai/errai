@@ -55,7 +55,7 @@ public class DataBinder<T> {
 
   /**
    * Creates a {@link DataBinder} for the provided model instance, initializing either model or UI widgets from the
-   * value defined by {@link InitialState}.
+   * values defined by {@link InitialState}.
    * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
@@ -77,8 +77,8 @@ public class DataBinder<T> {
    * @param property
    *          The name of the property that should be used for the binding, following Java bean conventions. Must not be
    *          null.
-   * @return The proxied model which has to be used in place of the model instance provided (also accessible using
-   *         {@link DataBinder#getModel()}).
+   * @return The proxied model which has to be used in place of the provided model instance if changes should be
+   *         synchronized with the UI (also accessible using {@link DataBinder#getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T bind(final Widget widget, final String property) {
@@ -124,27 +124,29 @@ public class DataBinder<T> {
   }
 
   /**
-   * Changes the model instance. The bindings stay intact.
+   * Changes the underlying model instance. The existing bindings stay intact but only affect the new model instance.
+   * The previously associated model instance will no longer be kept in sync with the UI.
    * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
-   * @return The proxied model which has to be used in place of the provided model instance (also accessible using
-   *         {@link DataBinder#getModel()}).
+   * @return The proxied model which has to be used in place of the provided model instance if changes should be
+   *         synchronized with the UI (also accessible using {@link DataBinder#getModel()}).
    */
   public T setModel(T model) {
     return setModel(model, null);
   }
 
   /**
-   * Changes the model instance. The bindings stay intact.
+   * Changes the underlying model instance. The existing bindings stay intact but only affect the new model instance.
+   * The previously associated model instance will no longer be kept in sync with the UI.
    * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param initialState
    *          Specifies the origin of the initial state of both model and UI widget, null if no initial state
    *          synchronization should be carried out.
-   * @return The proxied model which has to be used in place of the provided model instance (also accessible using
-   *         {@link DataBinder#getModel()})
+   * @return The proxied model which has to be used in place of the provided model instance if changes should be
+   *         synchronized with the UI (also accessible using {@link DataBinder#getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {

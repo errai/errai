@@ -54,6 +54,8 @@ public class RpcTestBean {
   @Inject
   private Caller<SubService> subServiceCaller;
 
+  @Inject @QualA private BImpl b;
+  
   private static RpcTestBean instance;
 
   @PostConstruct
