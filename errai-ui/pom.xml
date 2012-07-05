@@ -11,14 +11,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <parent>
-      <artifactId>cdi-integration-parent</artifactId>
+      <artifactId>errai-parent</artifactId>
       <groupId>org.jboss.errai</groupId>
       <version>2.1-SNAPSHOT</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
 
    <artifactId>errai-ui</artifactId>
-   <name>Errai::CDI::UI</name>
+   <name>Errai::UI</name>
+
+	<properties>
+        <junit.version>4.8.1</junit.version>
+        <weld.version>1.1.6.Final</weld.version>
+	</properties>
 
    <build>
       <resources>
@@ -42,6 +47,7 @@
       <dependency>
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-ioc</artifactId>
+			<version>${project.version}</version>
          <scope>provided</scope>
       </dependency>
 
@@ -76,12 +82,14 @@
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
+			<version>${junit.version}</version>
          <scope>provided</scope>
       </dependency>
 
       <dependency>
          <groupId>org.jboss.weld.se</groupId>
          <artifactId>weld-se-core</artifactId>
+			<version>${weld.version}</version>
          <scope>provided</scope>
       </dependency>
 

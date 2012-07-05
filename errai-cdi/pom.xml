@@ -68,7 +68,6 @@
         <module>errai-cdi-client</module>
         <module>weld-integration</module>
         <module>errai-javax-enterprise</module>
-        <module>errai-ui</module>
         <module>demos/errai-cdi-mobile-demo</module>
         <module>demos/errai-cdi-mvp-demo</module>
         <module>demos/errai-cdi-stock-demo</module>
