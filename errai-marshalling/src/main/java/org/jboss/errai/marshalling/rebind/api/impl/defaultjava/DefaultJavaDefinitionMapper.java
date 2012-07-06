@@ -48,10 +48,6 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
  */
 public class DefaultJavaDefinitionMapper {
   public static MappingDefinition map(final MetaClass toMap, final DefinitionsFactory definitionsFactory) {
-    if (toMap.isArray()) {
-      System.out.println("Skipping array type " + toMap);
-      return null;
-    }
     if (toMap.isAbstract() || toMap.isInterface()) {
       throw new RuntimeException("cannot marshal an abstract class or interface: " + toMap.getFullyQualifiedName());
     }
