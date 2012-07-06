@@ -53,6 +53,7 @@ import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
 import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.SubMoron;
@@ -539,6 +540,29 @@ public class SerializationTests extends AbstractErraiTest {
             finishTest();
           }
         }, TestSerializationRPCService.class).testByteArray(expected);
+      }
+    });
+  }
+
+  /**
+   * This test is disabled because it demonstrates a known limitation of Errai Marshalling.
+   * See ERRAI-339 and ERRAI-341 for details.
+   */
+  public void IGNOREtestPortableArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final NeverDeclareAnArrayOfThisType[] expected = { new NeverDeclareAnArrayOfThisType() };
+
+        MessageBuilder.createCall(new RemoteCallback<NeverDeclareAnArrayOfThisType[]>() {
+          @Override
+          public void callback(NeverDeclareAnArrayOfThisType[] response) {
+            assertNotNull(response);
+            assertEquals(1, response.length);
+            assertNotNull(response[0]);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testPortableArray(expected);
       }
     });
   }
