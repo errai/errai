@@ -1,38 +1,20 @@
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
-import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.json.EJObject;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-
 import java.util.List;
 import java.util.Map;
+
+import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DecodingSession extends AbstractMarshallingSession {
-  private final ServerMappingContext context;
 
   public DecodingSession(ServerMappingContext context) {
-    this.context = context;
-  }
-
-  @Override
-  public ServerMappingContext getMappingContext() {
-    return context;
-  }
-
-  @Override
-  public Marshaller<Object> getMarshallerInstance(String fqcn) {
-    final Marshaller<Object> m = context.getMarshaller(fqcn);
-    if (m == null) {
-      throw new RuntimeException("no marshalling definition available for type:" + fqcn);
-    }
-
-    return m;
+    super(context);
   }
 
   @Override

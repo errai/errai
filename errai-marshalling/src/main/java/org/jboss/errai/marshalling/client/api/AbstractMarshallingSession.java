@@ -20,12 +20,34 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.jboss.errai.common.client.framework.Assert;
+
 /**
  * @author Mike Brock
  */
 public abstract class AbstractMarshallingSession implements MarshallingSession {
+  private final MappingContext context;
+
   private Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
   private Map<String, Object> objectMap = new HashMap<String, Object>();
+
+  protected AbstractMarshallingSession(MappingContext context) {
+    this.context = Assert.notNull(context);
+  }
+
+  @Override
+  public Marshaller<Object> getMarshallerInstance(String fqcn) {
+    Marshaller<Object> marshaller = context.getMarshaller(fqcn);
+    if (marshaller == null) {
+      throw new IllegalArgumentException("No marshaller for " + fqcn);
+    }
+    return marshaller;
+  }
+
+  @Override
+  public MappingContext getMappingContext() {
+    return context;
+  }
 
   @Override
   public boolean hasObjectHash(String hashCode) {
@@ -58,7 +80,7 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   public String getObjectHash(Object o) {
     Integer i = objects.get(o);
     String s;
-    
+
     if (i == null) {
       objects.put(o, (i = objects.size() + 1));
       recordObjectHash(s = i.toString(), o);

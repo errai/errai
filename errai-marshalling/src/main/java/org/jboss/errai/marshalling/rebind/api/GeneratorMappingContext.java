@@ -16,6 +16,11 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -27,11 +32,6 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -71,7 +71,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
     generatedMarshallers.add(clazzName);
   }
 
-
+  @Override
   public boolean hasMarshaller(String clazzName) {
     return definitionsFactory.hasDefinition(clazzName);
   }
@@ -85,6 +85,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return generatedMarshallers.contains(clazzName);
   }
 
+  @Override
   public boolean canMarshal(String clazz) {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }
