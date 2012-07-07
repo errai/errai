@@ -208,9 +208,9 @@ public class MarshallersGenerator extends Generator {
     }
 
     try {
-      TypeOracle typeOracle = context.getTypeOracle();
+      final TypeOracle typeOracle = context.getTypeOracle();
 
-      JClassType classType = typeOracle.getType(typeName);
+      final JClassType classType = typeOracle.getType(typeName);
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
 
