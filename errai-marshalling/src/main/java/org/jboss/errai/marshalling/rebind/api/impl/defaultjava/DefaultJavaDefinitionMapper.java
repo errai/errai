@@ -16,6 +16,13 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -35,13 +42,9 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DefaultJavaDefinitionMapper {
   public static MappingDefinition map(final MetaClass toMap, final DefinitionsFactory definitionsFactory) {
@@ -57,26 +60,33 @@ public class DefaultJavaDefinitionMapper {
     final SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
     final MappingDefinition definition = new MappingDefinition(toMap, false);
 
-    for (final MetaConstructor c : toMap.getDeclaredConstructors()) {
+    for (MetaConstructor c : toMap.getDeclaredConstructors()) {
+      List<Boolean> hasMapsTos = new ArrayList<Boolean>();
       if (c.getParameters().length != 0) {
-        boolean satisfied = true;
         for (int i = 0; i < c.getParameters().length; i++) {
           final Annotation[] annotations = c.getParameters()[i].getAnnotations();
           if (annotations.length == 0) {
-            satisfied = false;
+            hasMapsTos.add(false);
           }
           else {
-            for (final Annotation a : annotations) {
+            boolean hasMapsTo = false;
+            for (Annotation a : annotations) {
               if (MapsTo.class.isAssignableFrom(a.annotationType())) {
-                final MapsTo mapsTo = (MapsTo) a;
-                final String key = mapsTo.value();
+                hasMapsTo = true;
+                MapsTo mapsTo = (MapsTo) a;
+                String key = mapsTo.value();
                 simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
               }
             }
+            hasMapsTos.add(hasMapsTo);
           }
         }
-
-        if (satisfied) {
+        if (hasMapsTos.contains(true) && hasMapsTos.contains(false)) {
+          throw new InvalidMappingException("Not all parameters of constructor " + c.asConstructor()
+              + " have a @" + MapsTo.class.getSimpleName() + " annotation");
+        }
+        
+        if (hasMapsTos.contains(true)) {
           constructors.add(c);
         }
       }
@@ -107,25 +117,32 @@ public class DefaultJavaDefinitionMapper {
 
       for (final MetaMethod method : toMap.getDeclaredMethods()) {
         if (method.isStatic()) {
-          boolean satisfied = true;
+          List<Boolean> hasMapsTos = new ArrayList<Boolean>();
           for (int i = 0; i < method.getParameters().length; i++) {
             final Annotation[] annotations = method.getParameters()[i].getAnnotations();
             if (annotations.length == 0) {
-              satisfied = false;
+              hasMapsTos.add(false);
             }
             else {
-              for (final Annotation a : annotations) {
+              boolean hasMapsTo = false;
+              for (Annotation a : annotations) {
                 if (MapsTo.class.isAssignableFrom(a.annotationType())) {
-                  final MapsTo mapsTo = (MapsTo) a;
-                  final String key = mapsTo.value();
+                  hasMapsTo = true;
+                  MapsTo mapsTo = (MapsTo) a;
+                  String key = mapsTo.value();
                   simpleFactoryMapping.mapParmToIndex(key, i, method.getParameters()[i].getType());
                 }
               }
+              hasMapsTos.add(hasMapsTo);
             }
+          }
+          if (hasMapsTos.contains(true) && hasMapsTos.contains(false)) {
+            throw new InvalidMappingException("Not all parameters of method " + method.asMethod()
+                + " have a @" + MapsTo.class.getSimpleName() + " annotation");
+          }
 
-            if (satisfied) {
-              factoryMethods.add(method);
-            }
+          if (hasMapsTos.contains(true)) {
+            factoryMethods.add(method);
           }
         }
       }
@@ -209,8 +226,8 @@ public class DefaultJavaDefinitionMapper {
         }
 
         /**
-         * This case handles the case where a constructor mapping has mapped the value, and there is no
-         * manually mapped reader on the key.
+         * This case handles the case where a constructor mapping has mapped the value, and there is no manually mapped
+         * reader on the key.
          */
         if (writeKeys.contains(field.getName()) && !readKeys.contains(field.getName())) {
           final MetaMethod getterMethod = MarshallingGenUtil.findGetterMethod(toMap, field.getName());

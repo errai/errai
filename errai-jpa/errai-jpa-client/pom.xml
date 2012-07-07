@@ -82,7 +82,7 @@
             <configuration>
               <skipTests>false</skipTests>
               <forkMode>always</forkMode>
-              <argLine>-Xmx2048m ${argLine}</argLine>
+              <argLine>-Xms1g -Xmx2g -XX:MaxPermSize=128m ${argLine}</argLine>
 
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>

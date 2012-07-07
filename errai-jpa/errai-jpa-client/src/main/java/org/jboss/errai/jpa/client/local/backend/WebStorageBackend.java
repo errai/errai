@@ -41,7 +41,7 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public native void removeAll() /*-{
-    for (var i = 0, n = $wnd.sessionStorage.length; i < n; i++) {
+    for (var i = $wnd.sessionStorage.length - 1; i >= 0; i--) {
       var key = $wnd.sessionStorage.key(i);
       $wnd.sessionStorage.removeItem(key);
     }

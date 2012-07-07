@@ -33,7 +33,56 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   // non-standard date literal syntax (Hibernate doesn't support JPA2 date literals)
   @NamedQuery(name="zentityLiteralDate", query="SELECT z FROM Zentity z WHERE z.date = '2012-06-22'"),
 
-  @NamedQuery(name="zentityLiteralInt", query="SELECT z FROM Zentity z WHERE z.primitiveInt = -55443322")
+  @NamedQuery(name="zentityLiteralLong", query="SELECT z FROM Zentity z WHERE z.primitiveLong = 11223344L"),
+  @NamedQuery(name="zentityLiteralInt", query="SELECT z FROM Zentity z WHERE z.primitiveInt = -55443322"),
+  @NamedQuery(name="zentityLiteralShort", query="SELECT z FROM Zentity z WHERE z.primitiveShort = -1234"),
+
+  // note that char-valued attributes will only compare equal to string literals, not numeric literals.
+  // this restriction also exists with Hibernate-on-HSQLDB (so we're consistent with server side behaviour).
+  @NamedQuery(name="zentityLiteralChar", query="SELECT z FROM Zentity z WHERE z.primitiveChar = 'c'"),
+
+  @NamedQuery(name="zentityLiteralByte", query="SELECT z FROM Zentity z WHERE z.primitiveByte = -5"),
+  @NamedQuery(name="zentityLiteralDouble", query="SELECT z FROM Zentity z WHERE z.primitiveDouble = 123.45"),
+  @NamedQuery(name="zentityLiteralFloat", query="SELECT z FROM Zentity z WHERE z.primitiveFloat = -1234.5f"),
+
+  // the attribute is a double, but we are comparing it to an integer literal. I believe this will be common.
+  @NamedQuery(name="zentityLiteralDoubleToInt", query="SELECT z FROM Zentity z WHERE z.primitiveDouble = 12345"),
+
+  @NamedQuery(name="zentityLiteralBoolTrue", query="SELECT z FROM Zentity z WHERE z.primitiveBool = true"),
+  @NamedQuery(name="zentityLiteralBoolFalse", query="SELECT z FROM Zentity z WHERE z.primitiveBool = false"),
+
+  @NamedQuery(name="zentityLiteralNull", query="SELECT z FROM Zentity z WHERE z.string = null"),
+  @NamedQuery(name="zentityLiteralNotNull", query="SELECT z FROM Zentity z WHERE z.string != null"),
+
+  // this is primarily a test for enum literals
+  // but it's also an oblique test for sticking a query for type A on an entity of type B
+  @NamedQuery(name="albumLiteralEnum",
+              query="SELECT a FROM Album a WHERE a.format = org.jboss.errai.jpa.test.entity.Format.SINGLE"),
+
+  @NamedQuery(name="zentityAnd",
+              query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555"),
+  @NamedQuery(name="zentityOr",
+              query="SELECT z FROM Zentity z WHERE z.string = 'hello' OR z.primitiveInt = 555"),
+  @NamedQuery(name="zentityNot",
+              query="SELECT z FROM Zentity z WHERE NOT z.string = 'hello'"),
+  @NamedQuery(name="zentityNestedBooleanLogic",
+              query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555 OR z.primitiveByte = 1"),
+
+  // Thoroughness dictates that we should test all combinations of numeric types (int > double, byte > double, ...)
+  // but the equals tests already do that. We'll just assume that coercing everything to double works for inequalities too.
+  @NamedQuery(name="zentityGreaterThan",          query="SELECT z FROM Zentity z WHERE z.primitiveInt > 555"),
+  @NamedQuery(name="zentityGreaterThanOrEqualTo", query="SELECT z FROM Zentity z WHERE z.primitiveInt >= 555"),
+  @NamedQuery(name="zentityLessThan",             query="SELECT z FROM Zentity z WHERE z.primitiveInt < 555"),
+  @NamedQuery(name="zentityLessThanOrEqualTo",    query="SELECT z FROM Zentity z WHERE z.primitiveInt <= 555"),
+
+  // These should ensure inequalities work for Java Comparable<?> types
+  @NamedQuery(name="zentityStringGreaterThan", query="SELECT z FROM Zentity z WHERE z.string > 'hello'"),
+  @NamedQuery(name="zentityStringGreaterThanOrEqualTo", query="SELECT z FROM Zentity z WHERE z.string >= 'hello'"),
+  @NamedQuery(name="zentityStringLessThan", query="SELECT z FROM Zentity z WHERE z.string < 'hello'"),
+  @NamedQuery(name="zentityStringLessThanOrEqualTo", query="SELECT z FROM Zentity z WHERE z.string <= 'hello'"),
+
+  @NamedQuery(name="zentityBetween", query="SELECT z FROM Zentity z WHERE z.boxedDouble BETWEEN 2.0 AND 4.0"),
+  @NamedQuery(name="zentityNotBetween", query="SELECT z FROM Zentity z WHERE z.boxedDouble NOT BETWEEN 2.0 AND 4.0")
 })
 public class Zentity {
 

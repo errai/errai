@@ -18,99 +18,144 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.api.ResourceProvider;
 
 /**
- * This interface, <tt>MessageBuildParms</tt>, is a template for building the different parameters of a message. This
- * ensures that they are constructed properly
+ * A template for building the different parameters of a message. This ensures that they are constructed properly.
+ * <p>
+ * Part of the fluent API centered around {@link MessageBuilder}.
  */
 public interface MessageBuildParms<R> extends MessageBuild {
 
   /**
-   * Include a default value with the message. This is the same as with(MessageParts.Value, value). This offers
-   * a convenience method for sending messages which contain a single object payload.
-   *
+   * Include a default value with the message. This is the same as with(MessageParts.Value, value). This offers a
+   * convenience method for sending messages which contain a single object payload.
+   * 
    * @param value
-   * @return
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
    */
   public MessageBuildParms<R> withValue(Object value);
 
   /**
-   * Sets the message part to the specified value
-   *
-   * @param part  - the message part
-   * @param value - the value of the message part
-   * @return the updated instance of <tt>MessageBuildParms</tt>
+   * Sets the message part to the specified value, replacing any old value associated with that part.
+   * 
+   * @param part
+   *          the message part to add or replace
+   * @param value
+   *          the value of the message part
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
    */
   public MessageBuildParms<R> with(String part, Object value);
 
-
+  /**
+   * Sets a {@link RoutingFlag} on the underlying message.
+   * 
+   * @param flag
+   *          the {@link RoutingFlag} to set
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
+   */
   public MessageBuildParms<R> flag(RoutingFlag flag);
 
-
   /**
-   * Sets the message part to the specified value
-   *
-   * @param part  - the message part
-   * @param value - the value of the message part
-   * @return the updated instance of <tt>MessageBuildParms</tt>
+   * Sets the message part to the specified value, replacing any old value associated with that part.
+   * 
+   * @param part
+   *          the message part to add or replace
+   * @param value
+   *          the value of the message part
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
    */
   public MessageBuildParms<R> with(Enum<?> part, Object value);
 
+  /**
+   * Sets the message part to be generated at message transmission time by the given provider, replacing any old value
+   * associated with that part.
+   * 
+   * @param part
+   *          the message part to add or replace
+   * @param provider
+   *          the provider that generates the value for this message part each time the message is transmitted.
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
+   */
+  public MessageBuildParms<R> withProvided(String part, ResourceProvider<?> provider);
 
-  public MessageBuildParms<R> withProvided(String part, ResourceProvider provider);
-
-  public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider provider);
+  /**
+   * Sets the message part to be generated at message transmission time by the given provider, replacing any old value
+   * associated with that part.
+   * 
+   * @param part
+   *          the message part to add or replace
+   * @param provider
+   *          the provider that generates the value for this message part each time the message is transmitted.
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
+   */
+  public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider<?> provider);
 
   /**
    * Copies the message part to the specified message
-   *
-   * @param part - the message part
-   * @param m    - the message
-   * @return the updated instance of <tt>MessageBuildParms</tt>
+   * 
+   * @param part
+   *          the message part
+   * @param m
+   *          the target message to receive the copied part.
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
    */
   public MessageBuildParms<R> copy(String part, Message m);
 
   /**
-   * Copies the message part to the specified message
-   *
-   * @param part - the message part
-   * @param m    - the message
-   * @return the updated instance of <tt>MessageBuildParms</tt>
+   * Copies a message part to the specified message, replacing that part in the target message if it already exists.
+   * 
+   * @param part
+   *          the message part to copy from this builder's message.
+   * @param m
+   *          the target message to receive the copied part.
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
    */
   public MessageBuildParms<R> copy(Enum<?> part, Message m);
 
   /**
-   * Copies the message resource to the specified message
-   *
-   * @param part - the message resource
-   * @param m    - the message
-   * @return the updated instance of <tt>MessageBuildParms</tt>
+   * Copies a message resource to the specified message, replacing that resource in the target message if it already exists.
+   * 
+   * @param part
+   *          the message resource to copy from this builder's message.
+   * @param m
+   *          the target message to receive the copied resource.
+   * @return the updated {@link MessageBuildParms} for chaining additional calls
    */
   public MessageBuildParms<R> copyResource(String part, Message m);
 
   /**
-   * Sets the error callback function for the message
-   *
-   * @param callback - the callback function called if an error occurs
-   * @return -
+   * Sets the error callback function for the message.
+   * 
+   * @param callback
+   *          the function to be called when an error occurs.
+   * @return the underlying Sendable from this builder.
    */
   public R errorsHandledBy(ErrorCallback callback);
 
   /**
-   * Specifies that the message's errors will not be handled
-   *
-   * @return -
+   * Specifies that any errors encountered while handling or transmitting this builder's message should be silently
+   * ignored.
+   * 
+   * @return the underlying Sendable from this builder.
    */
   public R noErrorHandling();
 
   /**
-   * Use the default error handler.
-   *
-   * @return -
+   * Specifies that the default error handler should be notified when there are errors in transmitting this builder's
+   * message (see {@link DefaultErrorCallback}).
+   * 
+   * @return the underlying Sendable from this builder.
    */
   public R defaultErrorHandling();
 
+  /**
+   * No-op method for returning the underlying message being built.
+   * 
+   * @return the underlying Sendable from this builder.
+   */
   public R done();
 }

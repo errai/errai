@@ -36,6 +36,8 @@ public class Album {
 
   private Date releaseDate;
 
+  private Format format;
+
   public Long getId() {
     return id;
   }
@@ -68,12 +70,21 @@ public class Album {
     this.releaseDate = releaseDate;
   }
 
+  public Format getFormat() {
+    return format;
+  }
+
+  public void setFormat(Format format) {
+    this.format = format;
+  }
+
   @Override
   public String toString() {
     // BEWARE: the tests depend on this toString() to fully represent the state of the class
     // BEWARE2: don't cascade the toString() to artist, or you will create infinite recursion
-    return "Album [id=" + id + ", name=" + name + ", artist="
-            + (artist == null ? "null" : artist.getName())
+    return "Album [id=" + id + ", name=" + name
+            + ", artist=" + (artist == null ? "null" : artist.getName())
+            + ", format=" + format
             + ", releaseDate=" + releaseDate + "]";
   }
 

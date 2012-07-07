@@ -16,11 +16,9 @@ import org.hibernate.hql.internal.ast.HqlParser;
 import org.hibernate.hql.internal.ast.HqlSqlWalker;
 import org.hibernate.hql.internal.ast.QueryTranslatorImpl;
 import org.hibernate.hql.internal.ast.tree.DotNode;
-import org.hibernate.hql.internal.ast.tree.LiteralNode;
 import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
-import org.hibernate.type.StringRepresentableType;
 import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -28,6 +26,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.framework.Comparisons;
@@ -145,7 +144,7 @@ public class TypedQueryFactoryGenerator {
         if (ast.getNumberOfChildren() != 1) {
           throw new IllegalStateException("WHERE clause has " + ast.getNumberOfChildren() + " children (expected 1)");
         }
-        return generateBooleanExpression(traverser);
+        return generateExpression(traverser);
       default:
         System.out.println("Skipping node: " + ast);
       }
@@ -153,42 +152,149 @@ public class TypedQueryFactoryGenerator {
     throw new RuntimeException("Didn't find the WHERE clause in the query");
   }
 
-  private Statement generateBooleanExpression(AstInorderTraversal traverser) {
+  /**
+   * Consumes the next token from the traverser and returns the equivalent Java
+   * expression, recursing if necessary.
+   *
+   * @param traverser
+   *          The traverser that walks through the nodes of the Hibernate
+   *          second-level AST in order. When this method returns, the traverser
+   *          will have completely walked the subtree under the starting node.
+   *          The traverser will be left on the next node.
+   */
+  private Statement generateExpression(AstInorderTraversal traverser) {
     AST ast = traverser.next();
     switch (ast.getType()) {
-    case HqlSqlTokenTypes.EQ:
-      return Stmt.invokeStatic(Comparisons.class, "nullSafeEquals", generateValueExpression(traverser), generateValueExpression(traverser));
-    default:
-      throw new UnexpectedTokenException(ast.getType(), "Boolean expression root node");
-    }
-  }
 
-  private Statement generateValueExpression(AstInorderTraversal traverser) {
-    AST ast = traverser.next();
-    switch (ast.getType()) {
+    //
+    // BOOLEAN EXPRESSIONS
+    //
+
+    case HqlSqlTokenTypes.EQ:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeEquals",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.NE:
+      return Bool.notExpr(Stmt.invokeStatic(
+              Comparisons.class, "nullSafeEquals",
+              generateExpression(traverser), generateExpression(traverser)));
+
+    case HqlSqlTokenTypes.GT:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeGreaterThan",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.GE:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeGreaterThanOrEqualTo",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.LT:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeLessThan",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.LE:
+      return Stmt.invokeStatic(
+              Comparisons.class, "nullSafeLessThanOrEqualTo",
+              generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.BETWEEN: {
+      Statement middle = generateExpression(traverser);
+      Statement small = generateExpression(traverser);
+      Statement big = generateExpression(traverser);
+      return Bool.and(
+              Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", small, middle),
+              Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", middle, big));
+    }
+
+    case HqlSqlTokenTypes.NOT_BETWEEN: {
+      Statement outside = generateExpression(traverser);
+      Statement small = generateExpression(traverser);
+      Statement big = generateExpression(traverser);
+      return Bool.or(
+              Stmt.invokeStatic(Comparisons.class, "nullSafeLessThan", outside, small),
+              Stmt.invokeStatic(Comparisons.class, "nullSafeGreaterThan", outside, big));
+    }
+
+    case HqlSqlTokenTypes.IS_NULL:
+      return Bool.isNull(generateExpression(traverser));
+
+    case HqlSqlTokenTypes.IS_NOT_NULL:
+      return Bool.isNotNull(generateExpression(traverser));
+
+    case HqlSqlTokenTypes.OR:
+      return Bool.or(generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.AND:
+      return Bool.and(generateExpression(traverser), generateExpression(traverser));
+
+    case HqlSqlTokenTypes.NOT:
+      return Bool.notExpr(generateExpression(traverser));
+
+    //
+    // VALUE EXPRESSIONS
+    //
+
     case HqlSqlTokenTypes.DOT:
       DotNode dotNode = (DotNode) ast;
       traverser.fastForwardToNextSiblingOf(dotNode);
+      Class<?> requestedType = dotNode.getDataType().getReturnedClass();
+
+      // normalize all numbers except longs and chars to double (literals do the same)
+      // if we did not do this here, Comparisons.nullSafeEquals() would have to do it at runtime
+      if (requestedType == Float.class || requestedType == float.class
+              || requestedType == Integer.class || requestedType == int.class
+              || requestedType == Short.class || requestedType == short.class
+              || requestedType == Byte.class || requestedType == byte.class) {
+        requestedType = Double.class;
+      } else if (requestedType == Character.class || requestedType == char.class) {
+        requestedType = String.class;
+      }
+
       // FIXME this assumes the property reference is to the candidate entity instance (it could be to another type)
       return Stmt.invokeStatic(JsonUtil.class, "basicValueFromJson",
               Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()),
-              dotNode.getDataType().getReturnedClass());
+              requestedType);
+
     case HqlSqlTokenTypes.NAMED_PARAM:
       ParameterNode paramNode = (ParameterNode) ast;
       NamedParameterSpecification namedParamSpec = (NamedParameterSpecification) paramNode.getHqlParameterSpecification();
       return Stmt.loadVariable("query").invoke("getParameterValue", namedParamSpec.getName());
+
     case HqlSqlTokenTypes.QUOTED_STRING:
       return Stmt.loadLiteral(SqlUtil.parseStringLiteral(ast.getText()));
-//      LiteralNode literalNode = (LiteralNode) ast;
-//      return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
+
     case HqlSqlTokenTypes.UNARY_MINUS:
-      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateValueExpression(traverser));
+      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateExpression(traverser));
+
     case HqlSqlTokenTypes.NUM_INT:
-      LiteralNode literalNode = (LiteralNode) ast;
-      return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
+    case HqlSqlTokenTypes.NUM_DOUBLE:
+    case HqlSqlTokenTypes.NUM_FLOAT:
+      // all numeric literals (except longs) are generated as doubles
+      // (and correspondingly, all "dot nodes" (entity attributes) are retrieved as doubles)
+      // this allows us to compare almost any numeric type to any other numeric type
+      // (long and char are the exceptions)
+      return Stmt.loadLiteral(Double.valueOf(ast.getText()));
+
+    case HqlSqlTokenTypes.NUM_LONG:
+      return Stmt.loadLiteral(Long.valueOf(ast.getText()));
+
+    case HqlSqlTokenTypes.TRUE:
+    case HqlSqlTokenTypes.FALSE:
+      return Stmt.loadLiteral(Boolean.parseBoolean(ast.getText()));
+
+    case HqlSqlTokenTypes.JAVA_CONSTANT:
+      return Stmt.loadVariable(ast.getText());
+
     default:
-      throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
+      throw new UnexpectedTokenException(ast.getType(), "an expression (boolean, literal, JPQL path, or named parameter)");
     }
+
+    // I keep feeling like this will be useful, but so far it has turned out to be unnecessary:
+//    LiteralNode literalNode = (LiteralNode) ast;
+//    return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
   }
 
   private static class UnexpectedTokenException extends RuntimeException {

@@ -31,10 +31,15 @@ import javax.ws.rs.MatrixParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import org.jboss.errai.codegen.Cast;
+import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.Stmt;
 
 /**
  * Represents parameters of a JAX-RS resource method.
@@ -47,131 +52,157 @@ public class JaxrsResourceMethodParameters {
   private static final Pattern PATH_PARAM_PATTERN =
       Pattern.compile("(\\{\\s*)(\\w[\\w.-]*)(:\\s*([^{}][^{}]*))*(\\s*\\})");
 
-  private Parameter entityParameter;
-  private Map<Class<? extends Annotation>, Map<String, List<Parameter>>> parameters;
+  private Statement entityParameter;
+  private Map<Class<? extends Annotation>, Map<String, List<Statement>>> parameters;
 
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method) {
-    JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
-
     List<Parameter> defParams = DefParameters.from(method).getParameters();
+    return fromMethod(method, defParams);
+  }
+  
+  public static JaxrsResourceMethodParameters fromMethod(MetaMethod method, String parameterArrayVarName) {
+    List<Statement> params = new ArrayList<Statement>();
+    Parameter[] defParms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
+    for (int i = 0; i < defParms.length; i++) {
+      final MetaClass type = defParms[i].getType();
+      final Statement s = Cast.to(type, Stmt.loadVariable(parameterArrayVarName, i));
+      params.add(new Statement() {
+        @Override
+        public String generate(Context context) {
+          return s.generate(context);
+        }
+
+        @Override
+        public MetaClass getType() {
+          return type;
+        }
+      });
+    }
+    
+    return fromMethod(method, params);
+  }
+  
+  public static JaxrsResourceMethodParameters fromMethod(MetaMethod method, List<? extends Statement> parameterValues) {
+    JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
     int i = 0;
     for (MetaParameter param : method.getParameters()) {
 
-      Parameter defParam = defParams.get(i++);
+      Statement paramValue = parameterValues.get(i++);
       Annotation a = param.getAnnotation(PathParam.class);
       if (a != null) {
-        params.add(PathParam.class, ((PathParam) a).value(), defParam);
+        params.add(PathParam.class, ((PathParam) a).value(), paramValue);
       }
       else if ((a = param.getAnnotation(QueryParam.class)) != null) {
-        params.add(QueryParam.class, ((QueryParam) a).value(), defParam);
+        params.add(QueryParam.class, ((QueryParam) a).value(), paramValue);
       }
       else if ((a = param.getAnnotation(HeaderParam.class)) != null) {
-        params.add(HeaderParam.class, ((HeaderParam) a).value(), defParam);
+        params.add(HeaderParam.class, ((HeaderParam) a).value(), paramValue);
       }
       else if ((a = param.getAnnotation(MatrixParam.class)) != null) {
-        params.add(MatrixParam.class, ((MatrixParam) a).value(), defParam);
+        params.add(MatrixParam.class, ((MatrixParam) a).value(), paramValue);
       }
       else if ((a = param.getAnnotation(FormParam.class)) != null) {
-        params.add(FormParam.class, ((FormParam) a).value(), defParam);
+        params.add(FormParam.class, ((FormParam) a).value(), paramValue);
       }
       else if ((a = param.getAnnotation(CookieParam.class)) != null) {
-        params.add(CookieParam.class, ((CookieParam) a).value(), defParam);
+        params.add(CookieParam.class, ((CookieParam) a).value(), paramValue);
       }
       else {
-        params.setEntityParameter(defParam, method);
+        params.setEntityParameter(paramValue, method);
       }
     }
     return params;
+
   }
 
-  private void add(Class<? extends Annotation> type, String name, Parameter value) {
+  private void add(Class<? extends Annotation> type, String name, Statement value) {
     if (parameters == null)
-      parameters = new HashMap<Class<? extends Annotation>, Map<String, List<Parameter>>>();
+      parameters = new HashMap<Class<? extends Annotation>, Map<String, List<Statement>>>();
 
-    Map<String, List<Parameter>> params = parameters.get(type);
+    Map<String, List<Statement>> params = parameters.get(type);
     if (params == null) {
-      parameters.put(type, params = new HashMap<String, List<Parameter>>());
+      parameters.put(type, params = new HashMap<String, List<Statement>>());
     }
 
-    List<Parameter> values = params.get(name);
+    List<Statement> values = params.get(name);
     if (values == null) {
-      params.put(name, values = new ArrayList<Parameter>());
+      params.put(name, values = new ArrayList<Statement>());
     }
 
     values.add(value);
   }
 
-  public Map<String, List<Parameter>> getPathParameters() {
+  public Map<String, List<Statement>> getPathParameters() {
     return parameters.get(PathParam.class);
   }
 
-  public Parameter getPathParameter(String name) {
-    Parameter param = getParameterByName(PathParam.class, name);
+  public Statement getPathParameter(String name) {
+    Statement param = getParameterByName(PathParam.class, name);
     if (param == null)
       throw new RuntimeException("No @PathParam found with name:" + name);
 
     return param;
   }
 
-  public Map<String, List<Parameter>> getQueryParameters() {
+  public Map<String, List<Statement>> getQueryParameters() {
     return get(QueryParam.class);
   }
 
-  public List<Parameter> getQueryParameters(String name) {
+  public List<Statement> getQueryParameters(String name) {
     return getQueryParameters().get(name);
   }
 
-  public Map<String, List<Parameter>> getHeaderParameters() {
+  public Map<String, List<Statement>> getHeaderParameters() {
     return get(HeaderParam.class);
   }
 
-  public List<Parameter> getHeaderParameters(String name) {
+  public List<Statement> getHeaderParameters(String name) {
     return getHeaderParameters().get(name);
   }
 
-  public Map<String, List<Parameter>> getMatrixParameters() {
+  public Map<String, List<Statement>> getMatrixParameters() {
     return get(MatrixParam.class);
   }
 
-  public Parameter getMatrixParameter(String name) {
+  public Statement getMatrixParameter(String name) {
     return getParameterByName(MatrixParam.class, name);
   }
 
-  public Map<String, List<Parameter>> getFormParameters() {
+  public Map<String, List<Statement>> getFormParameters() {
     return get(FormParam.class);
   }
 
-  public Map<String, List<Parameter>> getCookieParameters() {
+  public Map<String, List<Statement>> getCookieParameters() {
     return get(CookieParam.class);
   }
 
-  public Parameter getCookieParameter(String name) {
+  public Statement getCookieParameter(String name) {
     return getParameterByName(CookieParam.class, name);
   }
 
-  public Parameter getEntityParameter() {
+  public Statement getEntityParameter() {
     return entityParameter;
   }
 
-  private void setEntityParameter(Parameter entityParameter, MetaMethod method) {
+  private void setEntityParameter(Statement entityParameter, MetaMethod method) {
     if (this.entityParameter != null) {
       throw new RuntimeException("Only one non-annotated entity parameter allowed per method:" + method.getName());
     }
     this.entityParameter = entityParameter;
   }
 
-  private Map<String, List<Parameter>> get(Class<? extends Annotation> type) {
+  private Map<String, List<Statement>> get(Class<? extends Annotation> type) {
     if (parameters == null)
       return null;
 
     return parameters.get(type);
   }
 
-  private Parameter getParameterByName(Class<? extends Annotation> type, String name) {
-    Parameter param = null;
+  private Statement getParameterByName(Class<? extends Annotation> type, String name) {
+    Statement param = null;
 
     if (get(type) != null) {
-      List<Parameter> params = get(type).get(name);
+      List<Statement> params = get(type).get(name);
       if (params != null && !params.isEmpty()) {
         param = params.get(0);
       }

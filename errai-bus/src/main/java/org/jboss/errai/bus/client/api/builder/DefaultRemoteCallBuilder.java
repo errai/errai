@@ -16,26 +16,28 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.ProxyFactory;
-import org.jboss.errai.bus.client.framework.RpcStub;
-import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.client.protocols.MessageParts;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ProxyFactory;
+import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
+import org.jboss.errai.bus.client.framework.RpcStub;
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.protocols.MessageParts;
+
 /**
- * The <tt>DefaultRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
- * constructed properly
+ * Facilitates the building of a remote call. Ensures that the remote call is constructed properly.
+ * <p>
+ * Part of the fluent API centered around {@link MessageBuilder}.
  */
 public class DefaultRemoteCallBuilder {
   private static ProxyFactory proxyFactory = new RemoteServiceProxyFactory();
@@ -103,7 +105,7 @@ public class DefaultRemoteCallBuilder {
                   remoteCallback.callback(message.get(responseType, "MethodReply"));
                 }
               }
-          );
+              );
           message.set(MessageParts.ReplyTo, replyTo);
         }
 
@@ -119,7 +121,7 @@ public class DefaultRemoteCallBuilder {
                   message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
                 }
               }
-          );
+              );
           message.set(MessageParts.ErrorTo, errorTo);
         }
 
@@ -170,7 +172,8 @@ public class DefaultRemoteCallBuilder {
 
           message.set("Qualifiers", qualNames);
         }
-        if (args != null) message.set("MethodParms", Arrays.asList(args));
+        if (args != null)
+          message.set("MethodParms", Arrays.asList(args));
 
         return respondDef;
       }

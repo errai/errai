@@ -28,4 +28,97 @@ public class Comparisons {
   public static boolean nullSafeEquals(Object o1, Object o2) {
     return (o1 == o2) || (o1 != null && o1.equals(o2));
   }
+
+  /**
+   * Tests if one potentially null object reference is greater than another.
+   *
+   * @param o1
+   *          One object to compare. Null is permitted.
+   * @param o2
+   *          The other object to compare. Null is permitted.
+   * @return true if {@code o1 > o2} (either by primitive comparison or by
+   *         Comparable.compareTo()); false otherwise
+   */
+  // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
+  public static boolean nullSafeGreaterThan(Object o1, Object o2) {
+    if (o1 == null || o2 == null) return false;
+    if (o1 instanceof Number && o2 instanceof Number) {
+      return ((Number) o1).doubleValue() > ((Number) o2).doubleValue();
+    }
+    if (o1 instanceof Comparable<?>) {
+      return ((Comparable<Object>) o1).compareTo(o2) > 0;
+    }
+    throw new IllegalArgumentException(
+            "Can't compare an instance of " + o1.getClass() + " to an instance of " + o2.getClass());
+  }
+
+  /**
+   * Tests if one potentially null object reference is greater than another.
+   *
+   * @param o1
+   *          One object to compare. Null is permitted.
+   * @param o2
+   *          The other object to compare. Null is permitted.
+   * @return true if {@code o1 > o2} (either by primitive comparison or by
+   *         Comparable.compareTo()); false otherwise
+   */
+  // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
+  public static boolean nullSafeGreaterThanOrEqualTo(Object o1, Object o2) {
+    if (o1 == null || o2 == null) return false;
+    if (o1 instanceof Number && o2 instanceof Number) {
+      return ((Number) o1).doubleValue() >= ((Number) o2).doubleValue();
+    }
+    if (o1 instanceof Comparable<?>) {
+      return ((Comparable<Object>) o1).compareTo(o2) >= 0;
+    }
+    throw new IllegalArgumentException(
+            "Can't compare an instance of " + o1.getClass() + " to an instance of " + o2.getClass());
+  }
+
+  /**
+   * Tests if one potentially null object reference is greater than another.
+   *
+   * @param o1
+   *          One object to compare. Null is permitted.
+   * @param o2
+   *          The other object to compare. Null is permitted.
+   * @return true if {@code o1 > o2} (either by primitive comparison or by
+   *         Comparable.compareTo()); false otherwise
+   */
+  // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
+  public static boolean nullSafeLessThan(Object o1, Object o2) {
+    if (o1 == null || o2 == null) return false;
+    if (o1 instanceof Number && o2 instanceof Number) {
+      return ((Number) o1).doubleValue() < ((Number) o2).doubleValue();
+    }
+    if (o1 instanceof Comparable<?>) {
+      return ((Comparable<Object>) o1).compareTo(o2) < 0;
+    }
+    throw new IllegalArgumentException(
+            "Can't compare an instance of " + o1.getClass() + " to an instance of " + o2.getClass());
+  }
+
+  /**
+   * Tests if one potentially null object reference is greater than another.
+   *
+   * @param o1
+   *          One object to compare. Null is permitted.
+   * @param o2
+   *          The other object to compare. Null is permitted.
+   * @return true if {@code o1 > o2} (either by primitive comparison or by
+   *         Comparable.compareTo()); false otherwise
+   */
+  // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
+  public static boolean nullSafeLessThanOrEqualTo(Object o1, Object o2) {
+    if (o1 == null || o2 == null) return false;
+    if (o1 instanceof Number && o2 instanceof Number) {
+      return ((Number) o1).doubleValue() <= ((Number) o2).doubleValue();
+    }
+    if (o1 instanceof Comparable<?>) {
+      return ((Comparable<Object>) o1).compareTo(o2) <= 0;
+    }
+    throw new IllegalArgumentException(
+            "Can't compare an instance of " + o1.getClass() + " to an instance of " + o2.getClass());
+  }
+
 }

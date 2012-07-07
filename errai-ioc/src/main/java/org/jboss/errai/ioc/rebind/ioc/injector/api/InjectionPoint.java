@@ -145,6 +145,7 @@ public class InjectionPoint<T> {
           MetaMethod declMeth = (MetaMethod) parm.getDeclaringMember();
           injectionContext.addExposedMethod(declMeth);
         }
+        break;
       case PrivateMethod:
         injectionContext.addExposedMethod(method);
         break;

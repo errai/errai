@@ -20,12 +20,18 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.Key;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
+/**
+ * Thrown when an attempt at sending or receiving a message results in an error on the network level (e.g. an HTTP
+ * response code of 4xx or 5xx).
+ */
+@SuppressWarnings("serial")
 @Portable
 public class TransportIOException extends Exception {
-  private int errorCode;
-  private String errorMessage;
+  private final int errorCode;
+  private final String errorMessage;
 
-  public TransportIOException(@MapsTo("message") String message, @MapsTo("errorCode") int errorCode, @MapsTo("errorMessage") String errorMessage) {
+  public TransportIOException(@MapsTo("message") String message, @MapsTo("errorCode") int errorCode,
+      @MapsTo("errorMessage") String errorMessage) {
     super(message);
     this.errorCode = errorCode;
     this.errorMessage = errorMessage;

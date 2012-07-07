@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.bus.client.framework.CallContextStatus;
 import org.jboss.errai.bus.client.framework.RpcStub;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -96,15 +97,16 @@ public class RpcProxyGenerator {
       parmVars.add(Stmt.loadVariable(parms[i].getName()));
     }
 
-    Statement parameters = (intercepted) ? 
-        new StringStatement("getParameters()", MetaClassFactory.get(Object[].class)) : 
+    Statement parameters = (intercepted) ?
+        new StringStatement("getParameters()", MetaClassFactory.get(Object[].class)) :
           Stmt.newArray(Object.class).initialize(parmVars.toArray());
 
     BlockBuilder<?> methodBlock =
         classBuilder.publicMethod(method.getReturnType(), method.getName(), finalParms);
 
     if (intercepted) {
-      generateInterceptorLogic(classBuilder, methodBlock, method, generateRequest(method, parameters, true), parmVars);
+      methodBlock.append(generateInterceptorLogic(classBuilder, method,
+          generateRequest(method, parameters, true), parmVars));
     }
     else {
       methodBlock.append(generateRequest(method, parameters, false));
@@ -118,21 +120,21 @@ public class RpcProxyGenerator {
     methodBlock.finish();
   }
 
-  private void generateInterceptorLogic(ClassStructureBuilder<?> classBuilder, BlockBuilder<?> methodBuilder,
+  private Statement generateInterceptorLogic(ClassStructureBuilder<?> classBuilder,
       MetaMethod method, Statement requestLogic, List<Statement> parmVars) {
-
-    Statement callContext =
-        RebindUtils.generateProxyMethodCallContext(RemoteCallContext.class, classBuilder.getClassDefinition(), method,
-            requestLogic);
 
     InterceptedCall interceptedCall = method.getAnnotation(InterceptedCall.class);
     if (interceptedCall == null) {
       interceptedCall = remote.getAnnotation(InterceptedCall.class);
     }
 
-    methodBuilder.append(
-        Stmt.try_()
-            .append(Stmt.declareVariable(boolean.class).asFinal().named("proceeding").initializeWith(false))
+    Statement callContext = RebindUtils.generateProxyMethodCallContext(RemoteCallContext.class,
+            classBuilder.getClassDefinition(), method, requestLogic, interceptedCall).finish();
+
+    return Stmt.try_()
+            .append(
+                Stmt.declareVariable(CallContextStatus.class).asFinal().named("status").initializeWith(
+                    Stmt.newObject(CallContextStatus.class).withParameters((Object[]) interceptedCall.value())))
             .append(
                 Stmt.declareVariable(RemoteCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
@@ -140,22 +142,13 @@ public class RpcProxyGenerator {
                 Stmt.loadVariable("callContext").invoke("setParameters",
                     Stmt.newArray(Object.class).initialize(parmVars.toArray())))
             .append(
-                Stmt.nestedCall(Stmt.newObject(interceptedCall.value()))
-                    .invoke("aroundInvoke", Variable.get("callContext")))
-            .append(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("callContext").invoke("isProceeding")))
-                    .append(
-                        Stmt.loadVariable("remoteCallback").invoke("callback",
-                            Stmt.loadVariable("callContext").invoke("getResult")))
-                    .finish()
-            )
+                Stmt.loadVariable("callContext").invoke("proceed"))
             .finish()
             .catch_(Throwable.class, "throwable")
             .append(Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable")))
-            .finish()
-        );
+            .finish();
   }
-  
+
   private Statement generateRequest(MetaMethod method, Statement methodParams, boolean intercepted) {
     return Stmt
         .if_(Bool.isNull(Variable.get("errorCallback")))

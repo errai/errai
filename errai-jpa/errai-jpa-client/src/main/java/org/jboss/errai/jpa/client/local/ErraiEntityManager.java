@@ -8,9 +8,15 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -501,5 +507,159 @@ public abstract class ErraiEntityManager implements EntityManager {
     TypedQueryFactory factory = namedQueries.get(name);
     if (factory == null) throw new IllegalArgumentException("No named query \"" + name + "\"");
     return factory.createIfCompatible(resultClass);
+  }
+
+  @Override
+  public <T> T merge(T entity) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public <T> T find(Class<T> entityClass, Object primaryKey,
+          LockModeType lockMode) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public <T> T find(Class<T> entityClass, Object primaryKey,
+          LockModeType lockMode, Map<String, Object> properties) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public <T> T getReference(Class<T> entityClass, Object primaryKey) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void setFlushMode(FlushModeType flushMode) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public FlushModeType getFlushMode() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void lock(Object entity, LockModeType lockMode) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void lock(Object entity, LockModeType lockMode,
+          Map<String, Object> properties) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void refresh(Object entity) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void refresh(Object entity, Map<String, Object> properties) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void refresh(Object entity, LockModeType lockMode) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void refresh(Object entity, LockModeType lockMode,
+          Map<String, Object> properties) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public boolean contains(Object entity) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public LockModeType getLockMode(Object entity) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void setProperty(String propertyName, Object value) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Map<String, Object> getProperties() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Query createQuery(String qlString) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public <T> TypedQuery<T> createQuery(String qlString, Class<T> resultClass) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Query createNativeQuery(String sqlString) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Query createNativeQuery(String sqlString, Class resultClass) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Query createNativeQuery(String sqlString, String resultSetMapping) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void joinTransaction() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public <T> T unwrap(Class<T> cls) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public Object getDelegate() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void close() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public boolean isOpen() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public EntityTransaction getTransaction() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public EntityManagerFactory getEntityManagerFactory() {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public CriteriaBuilder getCriteriaBuilder() {
+    throw new UnsupportedOperationException("Not implemented");
   }
 }

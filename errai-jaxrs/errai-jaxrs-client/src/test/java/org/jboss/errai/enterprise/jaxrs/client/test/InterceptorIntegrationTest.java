@@ -16,7 +16,6 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedTestService;
@@ -35,30 +34,30 @@ public class InterceptorIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
-  public void testInterceptedRestCallBypassingRemoteEndpoint() {
-    delayTestFinish(5000);
-
+  public void testInterceptedRestCallWithEndpointBypassing() {
     RestClient.create(InterceptedTestService.class,
-        new RemoteCallback<String>() {
-          @Override
-          public void callback(String result) {
-            assertEquals("Request was not intercepted", "intercepted", result);
-            finishTest();
-          }
-        }).interceptedGetBypassingEndpoint();
+        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        .interceptedGetWithEndpointBypassing();
+  }
+
+  @Test
+  public void testInterceptedRestCallWithParameterManipulation() {
+    RestClient.create(InterceptedTestService.class,
+        new AssertionCallback<String>("Request was not intercepted", "intercepted"))
+        .interceptedGetWithParameterManipulation("will be replaced by interceptor");
   }
 
   @Test
   public void testInterceptedRestCallWithResultManipulation() {
-    delayTestFinish(5000);
     RestClient.create(InterceptedTestService.class,
-        new RemoteCallback<String>() {
-          @Override
-          public void callback(String result) {
-            assertEquals("Request was not intercepted", "result_intercepted", result);
-            finishTest();
-          }
-        }).interceptedGetManipulatingResult("will be removed by interceptor");
+        new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
+        .interceptedGetWithResultManipulation("will be replaced by interceptor");
   }
-
+  
+  @Test
+  public void testInterceptedRestCallWithChainedInterceptors() {
+    RestClient.create(InterceptedTestService.class,
+        new AssertionCallback<String>("Request was not intercepted", "ABCD"))
+        .interceptedGetWithChainedInterceptors("");
+  }
 }

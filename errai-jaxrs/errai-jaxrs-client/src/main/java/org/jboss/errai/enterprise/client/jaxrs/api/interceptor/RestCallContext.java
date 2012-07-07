@@ -28,18 +28,21 @@ import com.google.gwt.http.client.RequestBuilder;
  */
 public abstract class RestCallContext extends RemoteCallContext {
   private RequestBuilder requestBuilder;
-  
+
   /**
    * Provides access to the {@link RequestBuilder} used to construct and execute the call to the REST endpoint.
+   * <p>
+   * Note that a call to {@link #setParameters(Object[])} will change this context's {@link RequestBuilder} instance to
+   * reflect the parameter changes (affecting the URL and HTTP headers).
    * 
-   * @return the {@link RequestBuilder} with the HTTP method, URL, and HTTP headers set.
+   * @return the {@link RequestBuilder} with the URL, HTTP method and HTTP headers set.
    */
   public RequestBuilder getRequestBuilder() {
     return requestBuilder;
   }
 
   /**
-   * Changes the {@link RequestBuilder} instance used to executed the call to the REST endpoint.
+   * Changes the {@link RequestBuilder} instance used to execute the call to the REST endpoint.
    * 
    * @param requestBuilder
    *          the {@link RequestBuilder} instance to use when proceeding with the request. Must not be null.

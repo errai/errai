@@ -55,7 +55,8 @@ abstract class CallContext {
   public abstract String getMethodName();
 
   /**
-   * Proceeds with the execution of the intercepted method.
+   * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all
+   * interceptors have been executed.
    * <p>
    * This method can also be called to proceed with an asynchronous call (e.g. when intercepting a remote procedure
    * call), but only if the call's result is not required in the interceptor logic. If access to the result of an
@@ -65,11 +66,4 @@ abstract class CallContext {
    * @return the return value of the intercepted method. Always null for asynchronous methods.
    */
   public abstract Object proceed();
-
-  /**
-   * Returns whether or not the execution of the intercepted method was proceeded.
-   * 
-   * @return true, if {@link #proceed()} was called, otherwise false.
-   */
-  public abstract boolean isProceeding();
 }
