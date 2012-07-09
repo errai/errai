@@ -27,4 +27,11 @@ public interface Marshaller<T> {
   T demarshall(EJValue o, MarshallingSession ctx);
 
   String marshall(final T o, MarshallingSession ctx);
+
+  /**
+   * Returns an empty array of the type handled by this marshaller. Useful in conjunction with {@code List.toArray(T[])}.
+   * 
+   * @return a one-dimensional zero-length array of the type handled by this marshaller.
+   */
+  T[] getEmptyArray();
 }

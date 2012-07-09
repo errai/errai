@@ -16,6 +16,11 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -28,11 +33,6 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -40,16 +40,16 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   private final DefinitionsFactory definitionsFactory = DefinitionsFactorySingleton.get();
 
-  private Set<String> generatedMarshallers = new HashSet<String>();
-  private List<String> renderedMarshallers = new ArrayList<String>();
+  private final Set<String> generatedMarshallers = new HashSet<String>();
+  private final List<String> renderedMarshallers = new ArrayList<String>();
 
-  private Context codegenContext;
+  private final Context codegenContext;
 
-  private MetaClass generatedBootstrapClass;
-  private ClassStructureBuilder<?> classStructureBuilder;
-  private ArrayMarshallerCallback arrayMarshallerCallback;
+  private final MetaClass generatedBootstrapClass;
+  private final ClassStructureBuilder<?> classStructureBuilder;
+  private final ArrayMarshallerCallback arrayMarshallerCallback;
 
-  private Set<String> exposedMembers = new HashSet<String>();
+  private final Set<String> exposedMembers = new HashSet<String>();
 
   public GeneratorMappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
                                  ClassStructureBuilder<?> classStructureBuilder,
@@ -71,7 +71,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
     generatedMarshallers.add(clazzName);
   }
 
-
+  @Override
   public boolean hasMarshaller(String clazzName) {
     return definitionsFactory.hasDefinition(clazzName);
   }
@@ -85,6 +85,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return generatedMarshallers.contains(clazzName);
   }
 
+  @Override
   public boolean canMarshal(String clazz) {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }

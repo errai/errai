@@ -16,6 +16,16 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -54,18 +64,9 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
- *
+ * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
@@ -102,18 +103,24 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     return new ObjectMapper() {
       @Override
       public Statement getMarshaller() {
-        final AnonymousClassStructureBuilder classStructureBuilder
-                = Stmt.create(context.getCodegenContext())
+        final AnonymousClassStructureBuilder classStructureBuilder = Stmt.create(context.getCodegenContext())
                 .newObject(parameterizedAs(Marshaller.class, typeParametersOf(toMap))).extend();
 
+        Class<?> arrayType = Array.newInstance(toMap.asClass(), 0).getClass();
+        classStructureBuilder.privateField("EMPTY_ARRAY", arrayType).initializesWith(Stmt.newArray(toMap, 0)).finish();
+
+        classStructureBuilder.publicMethod(arrayType, "getEmptyArray")
+            .append(Stmt.loadClassMember("EMPTY_ARRAY").returnValue())
+            .finish();
+
         classStructureBuilder.publicOverridesMethod("getTypeHandled")
-                .append(Stmt.load(toMap).returnValue())
-                .finish();
+            .append(Stmt.load(toMap).returnValue())
+            .finish();
 
         /**
-         *
+         * 
          * DEMARSHALL METHOD
-         *
+         * 
          */
         final BlockBuilder<?> builder =
                 classStructureBuilder.publicOverridesMethod("demarshall",
@@ -190,14 +197,16 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             }
             else if (instantiationMapping instanceof FactoryMapping) {
               tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                      .initializeWith(Stmt.invokeStatic(toMap, ((FactoryMapping) instantiationMapping).getMember().getName(),
+                      .initializeWith(
+                          Stmt.invokeStatic(toMap, ((FactoryMapping) instantiationMapping).getMember().getName(),
                               constructorParameters.toArray(new Object[constructorParameters.size()]))));
             }
           }
           else {
             // use default constructor
 
-            tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
+            tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(
+                Stmt.nestedCall(Stmt.newObject(toMap))));
           }
 
           tryBuilder.append(loadVariable("a1").invoke("recordObject",
@@ -215,8 +224,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           final Statement bindingStatement;
           final Statement val;
           if (memberMapping.getType().isArray()) {
-            val = context.getArrayMarshallerCallback()
-                    .demarshall(memberMapping.getType(), extractJSONObjectProperty(memberMapping.getKey(), EJObject.class));
+            val =
+                context.getArrayMarshallerCallback()
+                    .demarshall(memberMapping.getType(),
+                        extractJSONObjectProperty(memberMapping.getKey(), EJObject.class));
           }
           else {
             val = fieldDemarshall(memberMapping, MetaClassFactory.get(EJObject.class));
@@ -237,7 +248,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
               if (setterMeth != null && !setterMeth.isPrivate()) {
                 // Bind via setter
-                bindingStatement = loadVariable("entity").invoke(setterMeth, Cast.to(memberMapping.getTargetType(), val));
+                bindingStatement =
+                    loadVariable("entity").invoke(setterMeth, Cast.to(memberMapping.getTargetType(), val));
               }
               else if (field.getType().getCanonicalName().equals("long")) {
                 throw new RuntimeException("cannot support private field marshalling of long type" +
@@ -296,9 +308,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         builder.append(tryBuilder.finish()).finish();
 
         /**
-         *
+         * 
          * MARSHAL METHOD
-         *
+         * 
          */
         final BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
                 Parameter.of(toMap, "a0"), Parameter.of(MarshallingSession.class, "a1"));
@@ -311,7 +323,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       }
     };
   }
-
 
   public Statement fieldDemarshall(final Mapping mapping, final Class<?> fromType) {
     return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
@@ -381,7 +392,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     builder.append(
             Stmt.if_(Bool.isNull(loadVariable("a0")))
                     .append(Stmt.load("null").returnValue()).finish()
-    );
+        );
 
     if (toMap.isEnum()) {
       builder.append(Stmt.nestedCall(marshallEnum(newStringBuilder(256), Stmt.loadVariable("a0"), toMap))
@@ -483,7 +494,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             context.markExposed(field);
           }
 
-          return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), PrivateAccessUtil.getPrivateFieldInjectorName(field),
+          return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), PrivateAccessUtil
+              .getPrivateFieldInjectorName(field),
                   loadVariable("a0"));
         }
       }
@@ -525,7 +537,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     return sb.append(ternaryStatement);
   }
-
 
   public Statement unwrapJSON(final Statement valueStatement, final MetaClass toType) {
     if (toType.isEnum()) {

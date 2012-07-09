@@ -28,11 +28,19 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  */
 @ClientMarshaller @ServerMarshaller
 public class CharacterMarshaller extends AbstractNullableMarshaller<Character> {
+  
+  private static final Character[] EMPTY_ARRAY = new Character[0];
+
   @Override
   public Class<Character> getTypeHandled() {
     return Character.class;
   }
 
+  @Override
+  public Character[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+  
   @Override
   public Character doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
   if (o.isObject() != null) {

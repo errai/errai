@@ -20,13 +20,42 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
+
 /**
  * @author Mike Brock
  */
 public abstract class AbstractMarshallingSession implements MarshallingSession {
-  private Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
-  private Map<String, Object> objectMap = new HashMap<String, Object>();
+  private final MappingContext context;
+
+  private final Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
+  private final Map<String, Object> objectMap = new HashMap<String, Object>();
   private String assumedElementType = null;
+  
+  protected AbstractMarshallingSession(MappingContext context) {
+    this.context = Assert.notNull(context);
+  }
+
+  @Override
+  public Marshaller<Object> getMarshallerInstance(String fqcn) {
+    Marshaller<Object> marshaller = context.getMarshaller(fqcn);
+    if (marshaller == null) {
+      if (fqcn.startsWith("[")) {
+        String componentClassName = MarshallUtil.getComponentClassName(fqcn);
+        marshaller = context.getMarshaller(componentClassName);
+        if (marshaller != null) {
+          marshaller = new ArrayMarshallerWrapper(marshaller);
+        }
+      } 
+    }
+    return marshaller;
+  }
+
+  @Override
+  public MappingContext getMappingContext() {
+    return context;
+  }
 
   @Override
   public boolean hasObject(String hashCode) {
@@ -54,7 +83,7 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   public String getObject(Object reference) {
     Integer i = objects.get(reference);
     String s;
-    
+
     if (i == null) {
       objects.put(reference, (i = objects.size() + 1));
       recordObject(s = i.toString(), reference);

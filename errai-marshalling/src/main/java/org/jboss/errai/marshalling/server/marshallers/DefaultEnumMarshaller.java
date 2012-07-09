@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import java.lang.reflect.Array;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -25,7 +27,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Mike Brock
  */
 public class DefaultEnumMarshaller implements Marshaller<Enum> {
-  private Class enumType;
+  private final Class enumType;
 
   public DefaultEnumMarshaller(Class enumType) {
     this.enumType = enumType;
@@ -36,6 +38,7 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
     return Enum.class;
   }
 
+  @Override
   public Enum demarshall(EJValue a0, MarshallingSession a1) {
     try {
       if (a0.isNull()) {
@@ -49,6 +52,7 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
     }
   }
 
+  @Override
   public String marshall(Enum a0, MarshallingSession a1) {
     if (a0 == null) {
       return "null";
@@ -63,6 +67,11 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
             + "\","
             + "\"" + SerializationParts.OBJECT_ID + "\":\"" + a1.getObject(a0) + "\""
             + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"").append(a0.name()).append("\"}").toString();
+  }
+
+  @Override
+  public Enum[] getEmptyArray() {
+    return (Enum[]) Array.newInstance(enumType, 0);
   }
 
 }

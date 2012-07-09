@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,11 +33,19 @@ public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller
       return "null";
     }
 
+    return marshall(o, o.getClass().getName(), ctx);
+  }
+
+  public final String marshall(C o, String encodedType, MarshallingSession ctx) {
+    if (o == null) {
+      return "null";
+    }
+
     final boolean isNew = !ctx.hasObject(o);
     final String objId = ctx.getObject(o);
 
     final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
-            .append(o.getClass().getName()).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")
+            .append(encodedType).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")
             .append(objId).append("\"");
 
     if (!isNew) {
@@ -59,16 +67,16 @@ public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller
     }
 
     final EJObject obj = o.isObject();
-    
+
     final String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
     if (ctx.hasObject(objId)) {
       return (C) ctx.getObject(Object.class, objId);
     }
-    
+
     final C val = doDemarshall(o, ctx);
     ctx.recordObject(objId, val);
     return val;
   }
-  
+
   public abstract C doDemarshall(EJValue o, MarshallingSession ctx);
 }

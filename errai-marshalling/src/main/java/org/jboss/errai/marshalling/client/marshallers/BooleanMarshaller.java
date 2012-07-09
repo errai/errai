@@ -28,13 +28,21 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ClientMarshaller
 @ServerMarshaller
 public class BooleanMarshaller extends AbstractNullableMarshaller<Boolean> {
+  
+  private static final Boolean[] EMPTY_ARRAY = new Boolean[0];
+  
   @Override
   public Class<Boolean> getTypeHandled() {
     return Boolean.class;
   }
 
   @Override
-  public Boolean doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
+  public Boolean[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+
+  @Override
+  public Boolean doNotNullDemarshall(final EJValue o, MarshallingSession ctx) {
     if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isBoolean().booleanValue();
     }

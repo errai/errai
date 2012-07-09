@@ -16,6 +16,12 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -29,12 +35,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -42,24 +42,28 @@ import java.util.Map;
 @ClientMarshaller
 @ServerMarshaller
 @AlwaysQualify
-@ImplementationAliases({AbstractMap.class, HashMap.class})
+@ImplementationAliases({ AbstractMap.class, HashMap.class })
 public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
+  private static final HashMap[] EMPTY_ARRAY = new HashMap[0];
 
   @Override
   public Class<T> getTypeHandled() {
-    return SimpleTypeLiteral.<T>ofRawType(Map.class).get();
+    return SimpleTypeLiteral.<T> ofRawType(Map.class).get();
+  }
+
+  @Override
+  public T[] getEmptyArray() {
+    return (T[]) EMPTY_ARRAY;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public T demarshall(final EJValue o, final MarshallingSession ctx) {
-    return doDemarshall((T) new HashMap<Object, Object>(), o, ctx);
+    return doDemarshall((T) new HashMap(), o, ctx);
   }
 
-  protected T doDemarshall(final T impl,
-                                             final EJValue o,
-                                             final MarshallingSession ctx) {
+  protected T doDemarshall(final T impl, final EJValue o, final MarshallingSession ctx) {
     final EJObject jsonObject = o.isObject();
 
     Object demarshalledKey, demarshalledValue;
@@ -135,5 +139,4 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
 
     return buf.append("}").toString();
   }
-
 }

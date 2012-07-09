@@ -16,18 +16,17 @@
 
 package org.jboss.errai.js.client.bus;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.js.client.bus.marshall.MsgTools;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportPackage;
 import org.timepedia.exporter.client.Exportable;
+
+import com.google.gwt.core.client.JavaScriptObject;
 
 /**
  * @author Mike Brock
@@ -49,12 +48,8 @@ public class MsgBus implements Exportable {
     bus.unsubscribeAll(subject);
   }
 
-  public void automarshal(boolean auto) {
-    MarshallerFramework.setAutomarshal(auto);
-  }
-
   private static final class JsFunctionMessageCallback implements MessageCallback {
-    private JavaScriptObject functionReference;
+    private final JavaScriptObject functionReference;
 
     private JsFunctionMessageCallback(JavaScriptObject functionReference) {
       this.functionReference = functionReference;
