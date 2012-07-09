@@ -29,7 +29,11 @@ import com.google.gwt.json.client.JSONValue;
 /**
  * Utility to transform Errai's JSON to a Jackson compatible JSON and vice versa.
  * <p>
- * Note: Maps can currently not be transformed.
+ * Limitations: 
+ * <ul>
+ * <li>Maps can currently not be transformed</li>
+ * <li>Fields using nested parameterized types are not supported</li>
+ * </ul>
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -67,6 +71,8 @@ public class JacksonTransformer {
    * with the object's key directly: "gender": {"^EnumStringValue": "MALE"} becomes "gender": "MALE"</li>
    * <li>If a number is encountered, remove the Errai specific NUM_VALUE key, by associating its actual value with the
    * object's key directly and turning it into a JSON number, if required: "id": {"^NumValue": "1"} becomes "id": 1</li>
+   * <li>If a date is encountered, remove the Errai specific VALUE key, by associating its actual value with the
+   * object's key directly and turning it into a JSON number</li>
    * </ul>
    * 
    * @param val
@@ -95,7 +101,8 @@ public class JacksonTransformer {
           }
         }
       }
-
+      
+      JSONValue encType = obj.get(ENCODED_TYPE);
       obj.put(OBJECT_ID, null);
       obj.put(ENCODED_TYPE, null);
 
@@ -134,6 +141,15 @@ public class JacksonTransformer {
             else {
               parent.put(key, obj.get(k));
             }
+          }
+        }
+        else if (k.equals(VALUE)) {
+          if (encType.isString().stringValue().equals("java.util.Date")) {
+            String dateValue = obj.get(k).isString().stringValue();
+            parent.put(key, new JSONNumber(Double.parseDouble(dateValue)));
+          }
+          else {
+            parent.put(key, obj.get(k));
           }
         }
 
@@ -191,7 +207,12 @@ public class JacksonTransformer {
       JSONObject numObject = new JSONObject();
       numObject.put(OBJECT_ID, new JSONString(new Integer(++objectId[0]).toString()));
       numObject.put(NUM_VALUE, num);
-      val = numObject;
+      if (parent != null) {
+        parent.put(key, numObject);
+      }
+      else {
+        val = numObject;
+      }
     }
     else if ((arr = val.isArray()) != null) {
       JSONObject arrayObject = new JSONObject();
@@ -205,7 +226,7 @@ public class JacksonTransformer {
       }
 
       for (int i = 0; i < arr.size(); i++) {
-        arr.set(i, fromJackson(arr.get(i), VALUE, arrayObject, objectId));
+        arr.set(i, fromJackson(arr.get(i), VALUE, null, objectId));
       }
     }
 

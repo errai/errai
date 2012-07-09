@@ -22,49 +22,66 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
-import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 /**
  * This class is used to handle untyped Objects on the wire.
- *
+ * 
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ClientMarshaller
 @ServerMarshaller
 public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
-  
+
   private static final Object[] EMPTY_ARRAY = new Object[0];
 
   @Override
   public Class<Object> getTypeHandled() {
     return Object.class;
   }
-  
+
   @Override
   public Object[] getEmptyArray() {
     return EMPTY_ARRAY;
   }
 
-  @Override
-  public Object doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
+  public final Object demarshall(final Class<?> targetType, final EJValue o, final MarshallingSession ctx) {
+    if (o.isNull()) {
+      return null;
+    }
+
+    Marshaller<Object> marshaller = null;
     if (o.isObject() != null) {
       final EJObject jsObject = o.isObject();
-      final EJString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
-      if (string == null) {
-        return MapMarshaller.INSTANCE.demarshall(o, ctx);
+      final EJValue ejEncType = jsObject.get(SerializationParts.ENCODED_TYPE);
+      String encodedType = null;
+      if (!ejEncType.isNull() && ejEncType.isString() != null) {
+        encodedType = ejEncType.isString().stringValue();
+      }
+
+      if (encodedType == null) {
+        if (targetType == null) {
+          return MapMarshaller.INSTANCE.demarshall(o, ctx);
+        }
+        else {
+          marshaller = ctx.getMarshallerInstance(targetType.getName());
+          if (marshaller != null) {
+            return marshaller.demarshall(o, ctx);
+          }
+        }
       }
 
       if (jsObject.containsKey(SerializationParts.NUMERIC_VALUE)) {
-        return NumbersUtils.getNumber(string.stringValue(), jsObject.get(SerializationParts.NUMERIC_VALUE));
+        return NumbersUtils.getNumber(encodedType, jsObject.get(SerializationParts.NUMERIC_VALUE));
       }
 
-      final Marshaller<Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
+      marshaller = ctx.getMarshallerInstance(encodedType);
 
       if (marshaller == null) {
-        throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + string.stringValue());
+        throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + encodedType);
       }
 
       return marshaller.demarshall(o, ctx);
@@ -77,6 +94,11 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
     }
 
     return null;
+  }
+
+  @Override
+  public Object doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
+    return this.demarshall(null, o, ctx);
   }
 
   @Override

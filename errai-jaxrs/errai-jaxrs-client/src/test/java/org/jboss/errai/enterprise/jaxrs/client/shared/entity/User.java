@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.jaxrs.client.shared.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -46,6 +47,7 @@ public class User {
   private List<Integer> favoriteNumbers = new ArrayList<Integer>();
   private Integer age;
   private boolean alive = true;
+  private Date date;
 
   public User() {}
 
@@ -60,6 +62,7 @@ public class User {
     this.parentRef = parent;
     this.favoriteNumbers.add(17);
     this.favoriteNumbers.add(11);
+    this.setDate(new Date());
   }
 
   public Long getId() {
@@ -150,12 +153,21 @@ public class User {
     this.favoriteNumbers = favoriteNumbers;
   }
 
+  public void setDate(Date date) {
+    this.date = date;
+  }
+
+  public Date getDate() {
+    return date;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((age == null) ? 0 : age.hashCode());
     result = prime * result + (alive ? 1231 : 1237);
+    result = prime * result + ((date == null) ? 0 : date.hashCode());
     result = prime * result + ((favoriteNumbers == null) ? 0 : favoriteNumbers.hashCode());
     result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
     result = prime * result + ((friends == null) ? 0 : friends.hashCode());
@@ -184,6 +196,12 @@ public class User {
     else if (!age.equals(other.age))
       return false;
     if (alive != other.alive)
+      return false;
+    if (date == null) {
+      if (other.date != null)
+        return false;
+    }
+    else if (!date.equals(other.date))
       return false;
     if (favoriteNumbers == null) {
       if (other.favoriteNumbers != null)
@@ -242,7 +260,7 @@ public class User {
   public String toString() {
     return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender
         + ", parent=" + parent + ", parentRef=" + parentRef + ", petNames=" + petNames + ", friends=" + friends
-        + ", favoriteNumbers=" + favoriteNumbers + ", age=" + age + ", alive=" + alive + "]";
+        + ", favoriteNumbers=" + favoriteNumbers + ", age=" + age + ", alive=" + alive + ", date=" + date + "]";
   }
 
 }

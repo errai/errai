@@ -26,10 +26,12 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller
+@ServerMarshaller
 public class DateMarshaller extends AbstractNullableMarshaller<Date> {
-  
+
   private static final Date[] EMPTY_ARRAY = new Date[0];
 
   @Override
@@ -41,10 +43,24 @@ public class DateMarshaller extends AbstractNullableMarshaller<Date> {
   public Date[] getEmptyArray() {
     return EMPTY_ARRAY;
   }
-  
+
   @Override
   public Date doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
-    return new Date(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
+    if (o.isObject() != null) {
+      EJValue qualifiedValue = o.isObject().get(SerializationParts.QUALIFIED_VALUE);
+      if (!qualifiedValue.isNull() && qualifiedValue.isString() != null) {
+        return new Date(Long.parseLong(qualifiedValue.isString().stringValue()));
+      }
+      EJValue numericValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      if (!numericValue.isNull() && numericValue.isNumber() != null) {
+        return new Date(new Double(numericValue.isNumber().doubleValue()).longValue());
+      }
+      if (!numericValue.isNull() && numericValue.isString() != null) {
+        return new Date(Long.parseLong(numericValue.isString().stringValue()));
+      }
+    }
+
+    return null;
   }
 
   @Override

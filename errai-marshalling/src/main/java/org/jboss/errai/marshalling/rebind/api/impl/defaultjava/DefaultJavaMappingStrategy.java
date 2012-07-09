@@ -329,7 +329,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement fieldDemarshall(final Mapping mapping, final MetaClass fromType) {
-    final Statement statement = unwrapJSON(extractJSONObjectProperty(mapping.getKey(), fromType), mapping.getType());
+    final Statement statement = unwrapJSON(extractJSONObjectProperty(mapping.getKey(), fromType), mapping.getType(), mapping.getTargetType());
     if (!mapping.getTargetType().equals(mapping.getType())) {
       return Cast.to(mapping.getTargetType(), statement);
     }
@@ -538,13 +538,21 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     return sb.append(ternaryStatement);
   }
 
-  public Statement unwrapJSON(final Statement valueStatement, final MetaClass toType) {
+  public Statement unwrapJSON(final Statement valueStatement, final MetaClass toType, final MetaClass targetType) {
     if (toType.isEnum()) {
       return demarshallEnum(Stmt.nestedCall(valueStatement).invoke("isObject"), valueStatement, toType);
     }
     else {
+      String varName = MarshallingGenUtil.getVarName(toType);
+      
+      if (toType.equals(MetaClassFactory.get(Object.class))) {
+        return Stmt.create(context.getCodegenContext())
+                .loadVariable(varName)
+                .invoke("demarshall", targetType.asClass(), valueStatement, loadVariable("a1"));
+      }
+      
       return Stmt.create(context.getCodegenContext())
-              .loadVariable(MarshallingGenUtil.getVarName(toType))
+              .loadVariable(varName)
               .invoke("demarshall", valueStatement, loadVariable("a1"));
     }
   }
