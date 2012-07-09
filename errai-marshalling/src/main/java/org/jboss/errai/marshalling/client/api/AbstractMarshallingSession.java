@@ -39,7 +39,11 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   public Marshaller<Object> getMarshallerInstance(String fqcn) {
     Marshaller<Object> marshaller = context.getMarshaller(fqcn);
     if (marshaller == null) {
-      throw new IllegalArgumentException("No marshaller for " + fqcn);
+      if (fqcn.startsWith("[")) {
+        marshaller = ArrayMarshallerWrapper.INSTANCE;
+      } else {
+        throw new IllegalArgumentException("No marshaller for " + fqcn);
+      }
     }
     return marshaller;
   }

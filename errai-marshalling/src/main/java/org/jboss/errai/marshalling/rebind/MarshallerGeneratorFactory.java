@@ -16,7 +16,24 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import org.apache.tools.ant.taskdefs.Java;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Implementations.autoForLoop;
+import static org.jboss.errai.codegen.util.Implementations.autoInitializedField;
+import static org.jboss.errai.codegen.util.Implementations.implement;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
+
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -48,24 +65,6 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.util.TypeLiteral;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Implementations.autoForLoop;
-import static org.jboss.errai.codegen.util.Implementations.autoInitializedField;
-import static org.jboss.errai.codegen.util.Implementations.implement;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -104,7 +103,7 @@ public class MarshallerGeneratorFactory {
 
     String gen;
 
-    log.info("generating marshalling class...");
+    log.info("generating marshalling class " + packageName + "." + clazzName + "...");
     long st = System.currentTimeMillis();
     gen = _generate(packageName, clazzName);
     log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms.");

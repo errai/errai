@@ -30,4 +30,12 @@ public interface MappingContext {
    * @return boolean true if marshallable.
    */
   public boolean canMarshal(String cls);
+
+  /**
+   * Creates an empty array of the type described by the given canonical class name.
+   *
+   * @param canonicalClassName A canonical type name such as {@code [Lcom.mycompany.ClassName;}
+   * @return a new array of the given type and number of dimensions
+   */
+  public Object createArray(String canonicalClassName);
 }

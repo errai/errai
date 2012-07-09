@@ -21,6 +21,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -31,6 +32,7 @@ import java.util.Set;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
 import org.jboss.errai.marshalling.rebind.MarshallersGenerator;
@@ -138,5 +140,16 @@ public abstract class ServerMarshallUtil {
     catch (IOException e) {
       throw new RuntimeException("failed to generate class ", e);
     }
+  }
+
+  public static Object createArray(String canonicalClassName) {
+    String componentClassName = MarshallUtil.getComponentClassName(canonicalClassName);
+    Class<?> componentClass;
+    try {
+      componentClass = Class.forName(componentClassName);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalArgumentException("Unknown component type for array type " + canonicalClassName, e);
+    }
+    return Array.newInstance(componentClass, 0); // FIXME needs to have correct dimensionality
   }
 }

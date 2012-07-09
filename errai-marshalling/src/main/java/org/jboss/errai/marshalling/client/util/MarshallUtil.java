@@ -16,15 +16,12 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -126,5 +123,31 @@ public class MarshallUtil {
           sb.append(ch);
         }
     }
+  }
+
+  /**
+   * Returns the canonical class name of the component type of the given array type.
+   *
+   * @param fqcn An array type of any number of dimensions, such as {@code [[Ljava.lang.String;}.
+   * @return A class name, such as {@code java.lang.String}.
+   */
+  public static String getComponentClassName(String fqcn) {
+
+    int dims = 0;
+    if (fqcn.startsWith("[") && fqcn.endsWith(";")) {
+      while (fqcn.length() > 0 && fqcn.charAt(0) == '[') {
+        fqcn = fqcn.substring(1);
+        dims++;
+      }
+
+      // unfortunately, array types are stored in the map using internal JVM names
+      // like "[Ljava.lang.Object;" but scalar types are stored under their regular
+      // fully-qualified name like "java.lang.Object". We have to strip off the L and ;.
+      if (dims > 0) {
+        fqcn = fqcn.substring(1, fqcn.length() - 1);
+      }
+    }
+
+    return fqcn;
   }
 }

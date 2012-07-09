@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,11 @@
  */
 
 package org.jboss.errai.marshalling.server;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -37,7 +42,6 @@ import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 import org.jboss.errai.marshalling.client.util.EncDecUtil;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
-import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
@@ -45,11 +49,6 @@ import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.DefaultEnumMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.slf4j.Logger;
-
-import java.util.Map;
-import java.util.Set;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Mike Brock
@@ -122,9 +121,14 @@ public class MappingContextSingleton {
           public Marshaller getMarshaller(String fqcn) {
             return marshallerFactory.getMarshaller(null, fqcn);
           }
+
         });
       }
 
+      @Override
+      public Object createArray(String canonicalClassName) {
+        return ServerMarshallUtil.createArray(canonicalClassName);
+      }
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
@@ -311,6 +315,11 @@ public class MappingContextSingleton {
       @Override
       public boolean canMarshal(String cls) {
         return hasMarshaller(cls);
+      }
+
+      @Override
+      public Object createArray(String canonicalClassName) {
+        return ServerMarshallUtil.createArray(canonicalClassName);
       }
     };
   }

@@ -32,6 +32,7 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
+import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -79,6 +80,11 @@ public class GeneratorMappingContext implements ServerMappingContext {
   @Override
   public Marshaller<Object> getMarshaller(String clazz) {
     return null;
+  }
+
+  @Override
+  public Object createArray(String canonicalClassName) {
+    return ServerMarshallUtil.createArray(canonicalClassName);
   }
 
   private boolean hasGeneratedMarshaller(String clazzName) {
