@@ -16,13 +16,13 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import java.lang.reflect.Array;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-
-import java.lang.reflect.Array;
 
 /**
  * @author Mike Brock
@@ -46,10 +46,12 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     this.dimensions = dim;
   }
 
+  @Override
   public Class<Object> getTypeHandled() {
     return (Class<Object>) arrayType.asClass();
   }
 
+  @Override
   public Object demarshall(EJValue a0, MarshallingSession a1) {
     if (a0.isNull()) {
       return null;
@@ -66,6 +68,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     }
   }
 
+  @Override
   public String marshall(Object a0, MarshallingSession a1) {
     if (a0 == null) {
       return null;
@@ -115,5 +118,10 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     }
 
     return builder.append(']').toString();
+  }
+
+  @Override
+  public Object[] getEmptyArray() {
+    return (Object[]) Array.newInstance(arrayType.getOuterComponentType().asClass(), 0);
   }
 }

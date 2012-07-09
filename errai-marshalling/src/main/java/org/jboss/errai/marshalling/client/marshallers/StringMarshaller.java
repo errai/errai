@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -28,11 +27,19 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  */
 @ClientMarshaller @ServerMarshaller
 public class StringMarshaller extends AbstractNullableMarshaller<String> {
+  
+  private static final String[] EMPTY_ARRAY = new String[0];
+
   public static final StringMarshaller INSTANCE = new StringMarshaller();
 
   @Override
   public Class<String> getTypeHandled() {
     return String.class;
+  }
+  
+  @Override
+  public String[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 
   @Override

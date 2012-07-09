@@ -21,6 +21,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * @author Mike Brock
@@ -28,8 +29,8 @@ import org.jboss.errai.common.client.framework.Assert;
 public abstract class AbstractMarshallingSession implements MarshallingSession {
   private final MappingContext context;
 
-  private Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
-  private Map<String, Object> objectMap = new HashMap<String, Object>();
+  private final Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
+  private final Map<String, Object> objectMap = new HashMap<String, Object>();
 
   protected AbstractMarshallingSession(MappingContext context) {
     this.context = Assert.notNull(context);
@@ -40,7 +41,12 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
     Marshaller<Object> marshaller = context.getMarshaller(fqcn);
     if (marshaller == null) {
       if (fqcn.startsWith("[")) {
-        marshaller = ArrayMarshallerWrapper.INSTANCE;
+        String componentClassName = MarshallUtil.getComponentClassName(fqcn);
+        marshaller = context.getMarshaller(componentClassName);
+        if (marshaller == null) {
+          throw new IllegalArgumentException("No marshaller for " + fqcn);
+        }
+        marshaller = new ArrayMarshallerWrapper(marshaller);
       } else {
         throw new IllegalArgumentException("No marshaller for " + fqcn);
       }

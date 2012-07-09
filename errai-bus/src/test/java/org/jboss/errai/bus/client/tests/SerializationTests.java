@@ -548,7 +548,7 @@ public class SerializationTests extends AbstractErraiTest {
    * This test is disabled because it demonstrates a known limitation of Errai Marshalling.
    * See ERRAI-339 and ERRAI-341 for details.
    */
-  public void IGNOREtestPortableArray() {
+  public void testPortableArray() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {

@@ -16,15 +16,15 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -34,6 +34,8 @@ import java.util.TreeMap;
 @AlwaysQualify
 @ImplementationAliases({TreeMap.class})
 public class SortedMapMarshaller extends MapMarshaller<SortedMap> {
+  private static final TreeMap[] EMPTY_ARRAY = new TreeMap[0];
+  
   @Override
   public Class<SortedMap> getTypeHandled() {
     return SortedMap.class;
@@ -42,5 +44,10 @@ public class SortedMapMarshaller extends MapMarshaller<SortedMap> {
   @Override
   public SortedMap demarshall(EJValue o, MarshallingSession ctx) {
     return doDermashall(new TreeMap(), o, ctx);
+  }
+  
+  @Override
+  public SortedMap[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 }

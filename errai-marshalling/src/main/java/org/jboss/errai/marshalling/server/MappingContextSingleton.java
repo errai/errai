@@ -126,11 +126,6 @@ public class MappingContextSingleton {
       }
 
       @Override
-      public Object createArray(String canonicalClassName) {
-        return ServerMarshallUtil.createArray(canonicalClassName);
-      }
-
-      @Override
       public DefinitionsFactory getDefinitionsFactory() {
         return DefinitionsFactorySingleton.get();
       }
@@ -315,11 +310,6 @@ public class MappingContextSingleton {
       @Override
       public boolean canMarshal(String cls) {
         return hasMarshaller(cls);
-      }
-
-      @Override
-      public Object createArray(String canonicalClassName) {
-        return ServerMarshallUtil.createArray(canonicalClassName);
       }
     };
   }

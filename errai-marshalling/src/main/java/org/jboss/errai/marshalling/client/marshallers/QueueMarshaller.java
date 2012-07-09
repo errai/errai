@@ -16,15 +16,15 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.AbstractQueue;
+import java.util.LinkedList;
+import java.util.Queue;
+
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
-
-import java.util.AbstractQueue;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -32,9 +32,17 @@ import java.util.Queue;
 @ClientMarshaller @ServerMarshaller
 @ImplementationAliases({AbstractQueue.class})
 public class QueueMarshaller extends AbstractCollectionMarshaller<Queue> {
+  
+  private static final LinkedList[] EMPTY_ARRAY = new LinkedList[0];
+  
   @Override
   public Class<Queue> getTypeHandled() {
     return Queue.class;
+  }
+  
+  @Override
+  public Queue[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 
   @Override

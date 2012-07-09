@@ -101,18 +101,6 @@ public class MarshallerFramework implements EntryPoint {
         public boolean canMarshal(String cls) {
           return marshallerFactory.getMarshaller("json", cls) != null;
         }
-
-        @Override
-        public Object createArray(String canonicalClassName) {
-          throw new UnsupportedOperationException();
-//          return new DoNot
-//          String componentClassName = MarshallUtil.getComponentClassName(canonicalClassName);
-//          return createArray(componentClassName, 0); // FIXME needs to have correct dimensionality
-        }
-
-//        private native void createArray(String type, int dims) /*-{
-//          return @com.google.gwt.lang.Array::new(Lcom/google/gwt/lang/Array;I)(a, 0);
-//        }-*/;
       });
     }
 

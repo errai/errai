@@ -34,9 +34,17 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 @ClientMarshaller
 @ServerMarshaller
 public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
+  
+  private static final Object[] EMPTY_ARRAY = new Object[0];
+
   @Override
   public Class<Object> getTypeHandled() {
     return Object.class;
+  }
+  
+  @Override
+  public Object[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 
   @Override

@@ -40,6 +40,11 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
   }
 
   @Override
+  public T[] getEmptyArray() {
+    return delegate.getEmptyArray();
+  }
+  
+  @Override
   public T doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
     EJObject obj = o.isObject();
     String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();

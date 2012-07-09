@@ -49,7 +49,7 @@ public class Context {
 
   private boolean autoImportActive = false;
   private Map<String, String> imports;
-  private Set<MetaClass> classContexts;
+  private final Set<MetaClass> classContexts;
 
   private Map<String, Map<Object, Object>> renderingCache;
 
@@ -167,13 +167,15 @@ public class Context {
   /**
    * Imports the given class.
    * 
-   * @param clazz  the class to import, must not be null
+   * @param clazz
+   *          the class to import, must not be null. If it is an array type (of any number of dimensions), its non-array
+   *          component type will be imported.
    * @return the current context with the import added.
    */
   public Context addImport(MetaClass clazz) {
     initImports();
 
-    if (clazz.isArray()) {
+    while (clazz.isArray()) {
       clazz = clazz.getComponentType();
     }
 

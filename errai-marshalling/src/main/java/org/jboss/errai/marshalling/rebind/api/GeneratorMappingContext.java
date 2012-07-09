@@ -32,7 +32,6 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -41,16 +40,16 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   private final DefinitionsFactory definitionsFactory = DefinitionsFactorySingleton.get();
 
-  private Set<String> generatedMarshallers = new HashSet<String>();
-  private List<String> renderedMarshallers = new ArrayList<String>();
+  private final Set<String> generatedMarshallers = new HashSet<String>();
+  private final List<String> renderedMarshallers = new ArrayList<String>();
 
-  private Context codegenContext;
+  private final Context codegenContext;
 
-  private MetaClass generatedBootstrapClass;
-  private ClassStructureBuilder<?> classStructureBuilder;
-  private ArrayMarshallerCallback arrayMarshallerCallback;
+  private final MetaClass generatedBootstrapClass;
+  private final ClassStructureBuilder<?> classStructureBuilder;
+  private final ArrayMarshallerCallback arrayMarshallerCallback;
 
-  private Set<String> exposedMembers = new HashSet<String>();
+  private final Set<String> exposedMembers = new HashSet<String>();
 
   public GeneratorMappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
                                  ClassStructureBuilder<?> classStructureBuilder,
@@ -80,11 +79,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
   @Override
   public Marshaller<Object> getMarshaller(String clazz) {
     return null;
-  }
-
-  @Override
-  public Object createArray(String canonicalClassName) {
-    return ServerMarshallUtil.createArray(canonicalClassName);
   }
 
   private boolean hasGeneratedMarshaller(String clazzName) {

@@ -33,11 +33,19 @@ import org.jboss.errai.marshalling.client.api.json.EJArray;
 @ClientMarshaller @ServerMarshaller
 @ImplementationAliases({AbstractSet.class, HashSet.class, LinkedHashSet.class})
 public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
+  
+  private static final HashSet[] EMPTY_ARRAY = new HashSet[0];
+  
   @Override
   public Class<Set> getTypeHandled() {
     return Set.class;
   }
 
+  @Override
+  public Set[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+  
   @Override
   public Set doDemarshall(EJArray o, MarshallingSession ctx) {
     return marshallToCollection(new HashSet<Object>(o.size()), o, ctx);

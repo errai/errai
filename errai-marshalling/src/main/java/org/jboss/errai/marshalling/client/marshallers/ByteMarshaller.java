@@ -25,16 +25,24 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller
+@ServerMarshaller
 public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
+  private static final Byte[] EMPTY_ARRAY = new Byte[0];
+
   @Override
   public Class<Byte> getTypeHandled() {
     return Byte.class;
   }
 
   @Override
+  public Byte[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+
+  @Override
   public Byte doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
-     if (o.isObject() != null) {
+    if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().byteValue();
     }
     else {

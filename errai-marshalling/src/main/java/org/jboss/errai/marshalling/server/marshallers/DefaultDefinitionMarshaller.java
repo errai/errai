@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.server.marshallers;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -50,7 +51,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
   Charset UTF_8 = Charset.forName("UTF-8");
 
-  private MappingDefinition definition;
+  private final MappingDefinition definition;
 
   public DefaultDefinitionMarshaller(MappingDefinition definition) {
     this.definition = definition;
@@ -69,6 +70,11 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   @Override
   public Class<Object> getTypeHandled() {
     return (Class<Object>) definition.getMappingClass().asClass();
+  }
+  
+  @Override
+  public Object[] getEmptyArray() {
+    return (Object[]) Array.newInstance(getTypeHandled(), 0);
   }
 
   @Override

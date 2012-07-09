@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -29,9 +28,16 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ClientMarshaller
 @ServerMarshaller
 public class ShortMarshaller extends AbstractNumberMarshaller<Short> {
+  private static final Short[] EMPTY_ARRAY = new Short[0];
+
   @Override
   public Class<Short> getTypeHandled() {
     return Short.class;
+  }
+
+  @Override
+  public Short[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 
   @Override

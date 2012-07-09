@@ -16,6 +16,12 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -28,12 +34,6 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -44,12 +44,18 @@ import java.util.Map;
 @ImplementationAliases({AbstractMap.class, HashMap.class})
 public class MapMarshaller<T extends Map> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
+  private static final HashMap[] EMPTY_ARRAY = new HashMap[0];
 
   @Override
   public Class<T> getTypeHandled() {
     return (Class<T>) Map.class;
   }
 
+  @Override
+  public T[] getEmptyArray() {
+    return (T[]) EMPTY_ARRAY;
+  }
+  
   @Override
   public T demarshall(EJValue o, MarshallingSession ctx) {
     return doDermashall((T) new HashMap(), o, ctx);
@@ -77,7 +83,7 @@ public class MapMarshaller<T extends Map> implements Marshaller<T> {
       }
       impl.put(demarshalledKey, demarshalledValue);
     }
-    return (T) impl;
+    return impl;
   }
 
   @Override
@@ -130,5 +136,4 @@ public class MapMarshaller<T extends Map> implements Marshaller<T> {
 
     return buf.append("}").toString();
   }
-
 }

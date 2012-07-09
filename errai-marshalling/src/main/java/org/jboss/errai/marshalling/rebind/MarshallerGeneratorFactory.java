@@ -26,6 +26,7 @@ import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarN
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -348,6 +349,12 @@ public class MarshallerGeneratorFactory {
     classStructureBuilder.publicOverridesMethod("getTypeHandled")
             .append(Stmt.load(toMap).returnValue())
             .finish();
+    
+    Class<?> arrayOfArrayType = Array.newInstance(arrayType.asClass(), 0).getClass();
+    classStructureBuilder.publicMethod(arrayOfArrayType, "getEmptyArray")
+            .append(Stmt.throw_(UnsupportedOperationException.class, "Not implemented!"))
+            .finish();
+
 
     final BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
             Parameter.of(EJValue.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));

@@ -16,18 +16,17 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
-
-import javax.enterprise.util.TypeLiteral;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Mike Brock
@@ -38,7 +37,7 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
 
   @Override
   public Class<Map<String, Object>> getTypeHandled() {
-    return SimpleTypeLiteral.<Map<String, Object>>ofRawType(Map.class).get();
+    return SimpleTypeLiteral.<Map<String, Object>> ofRawType(Map.class).get();
   }
 
   @Override
@@ -114,5 +113,9 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
     return buf.append("}").toString();
   }
 
+  @Override
+  public Map<String, Object>[] getEmptyArray() {
+    throw new UnsupportedOperationException("Not implemented!");
+  }
 
 }
