@@ -61,15 +61,6 @@
   </dependencies>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
-        <configuration>
-          <strict>true</strict>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 
   <profiles>
