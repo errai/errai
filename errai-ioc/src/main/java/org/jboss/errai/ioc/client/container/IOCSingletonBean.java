@@ -51,7 +51,13 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
     return instance;
   }
 
+  @Override
   public T getInstance() {
     return getInstance(null);
+  }
+
+  @Override
+  public String toString() {
+    return "IOCSingletonBean [instance=" + instance + "]";
   }
 }

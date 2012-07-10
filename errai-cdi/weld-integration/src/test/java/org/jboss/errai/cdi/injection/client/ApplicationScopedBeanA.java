@@ -22,10 +22,10 @@ import javax.enterprise.context.ApplicationScoped;
  * @author Mike Brock
  */        
 @ApplicationScoped
-public class ApplicationScopedBeanA {
+public class ApplicationScopedBeanA implements InterfaceA {
   private static int instanceCount = 0;
   
-  private int instanceId = instanceCount++;
+  private final int instanceId = instanceCount++;
 
   public int getInstanceId() {
     return instanceId;

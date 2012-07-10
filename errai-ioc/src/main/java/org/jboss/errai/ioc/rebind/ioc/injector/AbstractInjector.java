@@ -16,6 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
@@ -23,11 +28,6 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 public abstract class AbstractInjector implements Injector {
   protected QualifyingMetadata qualifyingMetadata;
@@ -46,8 +46,9 @@ public abstract class AbstractInjector implements Injector {
 
   protected MetaClass enclosingType;
 
-  private List<RegistrationHook> registrationHooks = new ArrayList<RegistrationHook>();
+  protected final List<RegistrationHook> registrationHooks = new ArrayList<RegistrationHook>();
 
+  @Override
   public boolean isTestmock() {
     return testmock;
   }
@@ -92,6 +93,7 @@ public abstract class AbstractInjector implements Injector {
     return enclosingType;
   }
 
+  @Override
   public boolean isCreated() {
     return created;
   }
@@ -128,6 +130,7 @@ public abstract class AbstractInjector implements Injector {
     this.preDestroyCallbackVar = preDestroyCallbackVar;
   }
 
+  @Override
   public String getCreationalCallbackVarName() {
     return creationalCallbackVarName;
   }
@@ -212,6 +215,7 @@ public abstract class AbstractInjector implements Injector {
     }
   }
 
+  @Override
   public String toString() {
     return this.getClass().getName() + ":" + getInjectedType().getFullyQualifiedName() + " " + getQualifyingMetadata();
   }

@@ -16,17 +16,6 @@
 
 package org.jboss.errai.cdi.injection.client;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+public interface InterfaceB extends InterfaceA {
 
-/**
- * @author Mike Brock
- */
-@ApplicationScoped
-public class ApplicationScopedBeanB implements InterfaceB {
-  @Inject DependentBeanCycleA dependentBeanCycleA;
-
-  public DependentBeanCycleA getDependentBeanCycleA() {
-    return dependentBeanCycleA;
-  }
 }

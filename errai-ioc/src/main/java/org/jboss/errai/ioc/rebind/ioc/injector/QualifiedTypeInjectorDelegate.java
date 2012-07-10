@@ -34,8 +34,8 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
  * @author Mike Brock
  */
 public class QualifiedTypeInjectorDelegate extends AbstractInjector {
-  private MetaClass type;
-  private Injector delegate;
+  private final MetaClass type;
+  private final Injector delegate;
 
   public QualifiedTypeInjectorDelegate(MetaClass type, Injector delegate, MetaParameterizedType parameterizedType) {
     this.type = type;
@@ -128,6 +128,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
     return delegate.getCreationalCallbackVarName();
   }
 
+  @Override
   public void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       QualifyingMetadata md = delegate.getQualifyingMetadata();
@@ -137,8 +138,12 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
 
       context.getProcessingContext().appendToEnd(
               Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                      .invoke("addBean", type, Refs.get(delegate.getCreationalCallbackVarName()),
+                      .invoke("addBean", type, Refs.get(getCreationalCallbackVarName()),
                               isSingleton() ? valueRef : null , md.render()));
+      
+      for (RegistrationHook hook : registrationHooks) {
+        hook.onRegister(context, valueRef);
+      }
     }
   }
 

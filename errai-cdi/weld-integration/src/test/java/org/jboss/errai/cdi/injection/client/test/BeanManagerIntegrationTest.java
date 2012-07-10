@@ -10,7 +10,11 @@ import org.jboss.errai.cdi.injection.client.CommonInterface;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
 import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.InheritedFromAbstractBean;
-import org.jboss.errai.cdi.injection.client.OuterBean;
+import org.jboss.errai.cdi.injection.client.InterfaceA;
+import org.jboss.errai.cdi.injection.client.InterfaceB;
+import org.jboss.errai.cdi.injection.client.InterfaceC;
+import org.jboss.errai.cdi.injection.client.InterfaceD;
+import org.jboss.errai.cdi.injection.client.InterfaceRoot;
 import org.jboss.errai.cdi.injection.client.OuterBeanInterface;
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 import org.jboss.errai.cdi.injection.client.qualifier.QualA;
@@ -18,7 +22,6 @@ import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanB;
 import org.jboss.errai.cdi.injection.client.qualifier.QualB;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
@@ -26,6 +29,7 @@ import org.jboss.errai.ioc.client.container.IOCResolutionException;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
@@ -40,8 +44,8 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerLookupInheritedScopeBean() {
-    final IOCBeanDef<InheritedApplicationScopedBean> bean
-            = IOC.getBeanManager().lookupBean(InheritedApplicationScopedBean.class);
+    final IOCBeanDef<InheritedApplicationScopedBean> bean =
+        IOC.getBeanManager().lookupBean(InheritedApplicationScopedBean.class);
     assertNotNull("inherited application scoped bean did not lookup", bean);
 
     final InheritedApplicationScopedBean beanInst = bean.getInstance();
@@ -55,8 +59,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerLookupBeanFromAbstractRootType() {
-    final IOCBeanDef<AbstractBean> bean
-            = IOC.getBeanManager().lookupBean(AbstractBean.class);
+    final IOCBeanDef<AbstractBean> bean = IOC.getBeanManager().lookupBean(AbstractBean.class);
     assertNotNull("did not find any beans matching", bean);
 
     final AbstractBean beanInst = bean.getInstance();
@@ -66,12 +69,11 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   /**
-   * This test effectively tests that the IOC container comprehends the full type heirarchy, considering both
-   * supertypes and transverse interface types.
+   * This test effectively tests that the IOC container comprehends the full type hierarchy, considering both supertypes
+   * and transverse interface types.
    */
-  public void testBeanManagerLookupBeanFromOuterInterfaceRootType() {
-    final IOCBeanDef<OuterBeanInterface> bean
-            = IOC.getBeanManager().lookupBean(OuterBeanInterface.class);
+  public void testBeanManagerLookupForOuterInterfaceRootType() {
+    final IOCBeanDef<OuterBeanInterface> bean = IOC.getBeanManager().lookupBean(OuterBeanInterface.class);
     assertNotNull("did not find any beans matching", bean);
 
     final OuterBeanInterface beanInst = bean.getInstance();
@@ -80,6 +82,27 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertTrue("bean is incorrect instance: " + beanInst.getClass(), beanInst instanceof InheritedFromAbstractBean);
   }
 
+  public void testBeanManagerLookupForOuterInterfacesOfNonAbstractType() {
+    final IOCBeanDef<InterfaceC> beanC = IOC.getBeanManager().lookupBean(InterfaceC.class);
+    assertNotNull("did not find any beans matching", beanC);
+
+    final IOCBeanDef<InterfaceD> beanD = IOC.getBeanManager().lookupBean(InterfaceD.class);
+    assertNotNull("did not find any beans matching", beanD);
+  }
+  
+  public void testBeanManagerLookupForExtendedInterfaceType() {
+    // This should find ApplicationScopedBeanA, ApplicationScopedBeanB and ApplicationScopedBeanC
+    Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
+    assertEquals("did not find all managed implementations of " + InterfaceRoot.class.getName(), 3, beans.size());
+
+    // This should find ApplicationScopedBeanA and ApplicationScopedBeanB (InterfaceB extends InterfaceA)
+    beans = IOC.getBeanManager().lookupBeans(InterfaceA.class);
+    assertEquals("did not find both managed implementations of " + InterfaceA.class.getName(), 2, beans.size());
+
+    // This should find only ApplicationScopedBeanB
+    beans = IOC.getBeanManager().lookupBeans(InterfaceB.class);
+    assertEquals("did not find exactly one managed implementation of " + InterfaceB.class.getName(), 1, beans.size());
+  }
 
   public void testBeanManagerAPIs() {
     final IOCBeanManager mgr = IOC.getBeanManager();

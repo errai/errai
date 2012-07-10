@@ -212,7 +212,7 @@ public class IOCBeanManager {
       throw new IOCResolutionException("no matching bean instances for: " + type.getName());
     }
     else if (matching.size() > 1) {
-      throw new IOCResolutionException("multiple matching bean instances for: " + type.getName());
+      throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
     }
     else {
       return matching.get(0);
