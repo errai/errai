@@ -14,7 +14,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
 
-@Templated
+@Templated("#main")
 @EntryPoint
 public class GroceryListClient extends Composite {
 

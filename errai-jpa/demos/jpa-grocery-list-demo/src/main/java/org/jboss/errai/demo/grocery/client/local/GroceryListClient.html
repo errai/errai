@@ -1,20 +1,49 @@
 <!DOCTYPE html>
 
 <html>
+<head>
+<link href="../../../../../../../../webapp/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="../../../../../../../../webapp/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+</head>
 <body>
-	<div>
-		<h1>Add a Store</h1>
-		<div data-field="storeForm">moo</div>
+  <div data-field=main class=container>
+    <div class=row>
+      <div class="span10 hero-unit">
+        <h1>Have your JPA and sync it too.</h1>
+        <p>
+          Use your pre-existing JPA entity code in the browser.
+          <br>
+          Sync portions of your database across the wire by writing JPQL queries.
+          <br>
+          Sync your entity state to your UI with Errai Data Binding.
+        </p>
+      </div>
+    </div>
 
-		<h1>Stores!</h1>
-		<div data-field="storesWidget">
-			<table data-field="table">
-	            <tr><td>Example Store 1</tr>
-	            <tr><td>Example Store 2</tr>
-			</table>
-		</div>
-		<button data-field="addStoreButton">+</button>
-		<button data-field="removeStoreButton">-</button>
-	</div>
+    <div class="row">
+      <div class="span4">
+        <h1>Stores!</h1>
+        <div data-field="storesWidget">
+          <table data-field="table">
+            <tr>
+              <td>Example Store 1
+            </tr>
+            <tr>
+              <td>Example Store 2
+            </tr>
+          </table>
+        </div>
+        <div class="btn-group">
+          <button class=btn data-field="addStoreButton">+</button>
+          <button class=btn data-field="removeStoreButton">&ndash;</button>
+        </div>
+      </div>
+
+      <div class="span4">
+        <h1>Add a Store</h1>
+        <div data-field="storeForm">moo</div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
