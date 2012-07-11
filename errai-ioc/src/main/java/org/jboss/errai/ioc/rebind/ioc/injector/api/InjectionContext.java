@@ -302,7 +302,7 @@ public class InjectionContext {
     registerInjector(injector.getInjectedType(), injector, new HashSet<MetaClass>(), true);
   }
 
-  private void registerInjector(MetaClass type, Injector injector, Set<MetaClass> processedTypes, boolean allowOverride) {
+  private void registerInjector(MetaClass type, Injector injector, Set<MetaClass> processedInterfaces, boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
@@ -319,19 +319,19 @@ public class InjectionContext {
       }
     }
 
-    registerInjectorsForSuperTypesAndInterfaces(type, injector, processedTypes);
+    registerInjectorsForSuperTypesAndInterfaces(type, injector, processedInterfaces);
     injectorList.add(injector);
   }
 
   public void registerInjectorsForSuperTypesAndInterfaces(MetaClass type, Injector injector,
-      Set<MetaClass> processedTypes) {
+      Set<MetaClass> processedInterfaces) {
     MetaClass cls = type;
     do {
       if (cls != type && cls.isPublic() && (cls.isAbstract() || cls.isInterface())) {
           final QualifiedTypeInjectorDelegate injectorDelegate =
               new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
 
-          registerInjector(cls, injectorDelegate, processedTypes, false);
+          registerInjector(cls, injectorDelegate, processedInterfaces, false);
           continue;
       }
 
@@ -339,11 +339,11 @@ public class InjectionContext {
         if (!iface.isPublic())
           continue;
 
-        if (processedTypes.add(iface)) {
+        if (processedInterfaces.add(iface)) {
           final QualifiedTypeInjectorDelegate injectorDelegate =
               new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
 
-          registerInjector(iface, injectorDelegate, processedTypes, false);
+          registerInjector(iface, injectorDelegate, processedInterfaces, false);
         }
       }
     }
