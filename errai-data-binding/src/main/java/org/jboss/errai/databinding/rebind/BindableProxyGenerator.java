@@ -210,7 +210,10 @@ public class BindableProxyGenerator {
                         .append(
                             Stmt.loadVariable("hasValue").invoke(
                                 "setValue",
-                                Variable.get("value")))
+                                Stmt.invokeStatic(Convert.class, "to",
+                                    Stmt.castTo(HasValue.class,
+                                        Stmt.loadVariable("widget")).invoke("getValue").invoke("getClass"),
+                                        Stmt.loadVariable("value"))))
                         .append(
                             Stmt.loadVariable("this").invoke(
                                 "set",
@@ -231,7 +234,11 @@ public class BindableProxyGenerator {
                         .append(
                             Stmt.loadVariable("hasText").invoke(
                                 "setText",
-                                Variable.get("stringValue")))
+                                Stmt.castTo(String.class,
+                                    Stmt.invokeStatic(Convert.class, "to",
+                                        Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke("getValue")
+                                            .invoke("getClass"),
+                                        Stmt.loadVariable("stringValue")))))
                         .append(
                             Stmt.loadVariable("this").invoke(
                                 "set",
