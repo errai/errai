@@ -199,11 +199,12 @@ public class BindableProxyGenerator {
         Parameter.of(String.class, "property", true), Parameter.of(InitialState.class, "initialState", true))
         .append(
             Stmt.if_(Bool.isNotNull(Variable.get("initialState")))
+                .append(Stmt.declareVariable("value", Object.class, null))
                 .append(
                     Stmt.if_(Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
                         .append(Stmt.declareVariable("hasValue", HasValue.class,
                             Stmt.castTo(HasValue.class, Stmt.loadVariable("widget"))))
-                        .append(Stmt.declareVariable("value", Object.class,
+                        .append(Stmt.loadVariable("value").assignValue(
                             Stmt.loadVariable("initialState").invoke("getInitialValue",
                                 Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                 Stmt.loadVariable("hasValue").invoke("getValue"))))
@@ -214,40 +215,27 @@ public class BindableProxyGenerator {
                                     Stmt.castTo(HasValue.class,
                                         Stmt.loadVariable("widget")).invoke("getValue").invoke("getClass"),
                                         Stmt.loadVariable("value"))))
-                        .append(
-                            Stmt.loadVariable("this").invoke(
-                                "set",
-                                Variable.get("property"),
-                                Variable.get("value")))
                         .finish()
                         .elseif_(
                             Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasText.class)))
                         .append(
                             Stmt.declareVariable("hasText", HasText.class,
                                 Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))))
-                        .append(Stmt.declareVariable("value", Object.class,
+                        .append(Stmt.loadVariable("value").assignValue(
                             Stmt.loadVariable("initialState").invoke("getInitialValue",
                                 Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                 Stmt.loadVariable("hasText").invoke("getText"))))
-                        .append(Stmt.declareVariable("stringValue", String.class,
-                            Stmt.castTo(String.class, Stmt.loadVariable("value"))))
                         .append(
                             Stmt.loadVariable("hasText").invoke(
                                 "setText",
-                                Stmt.castTo(String.class,
-                                    Stmt.invokeStatic(Convert.class, "to",
-                                        Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke("getValue")
-                                            .invoke("getClass"),
-                                        Stmt.loadVariable("stringValue")))))
-                        .append(
-                            Stmt.loadVariable("this").invoke(
-                                "set",
-                                Variable.get("property"),
-                                Variable.get("stringValue")))
+                                Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "to", String.class, Stmt
+                                    .loadVariable("value")))))
                         .finish()
                 )
+                .append(Stmt.loadVariable("this").invoke("set", Variable.get("property"), Variable.get("value")))
                 .finish()
-        ).finish();
+        )
+        .finish();
   }
 
   private void generateProxyUnbindMethods(ClassStructureBuilder<?> classBuilder) {
