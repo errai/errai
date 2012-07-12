@@ -77,8 +77,8 @@ public class DataBinder<T> {
    * @param property
    *          The name of the property that should be used for the binding, following Java bean conventions. Must not be
    *          null.
-   * @return The proxied model which has to be used in place of the provided model instance if changes should be
-   *         synchronized with the UI (also accessible using {@link DataBinder#getModel()}).
+   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
+   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T bind(final Widget widget, final String property) {
@@ -95,7 +95,7 @@ public class DataBinder<T> {
    * @param property
    *          The name of the property to unbind, must not be null.
    * 
-   * @return the unwrapped model
+   * @return the model instance with the property unbound.
    */
   @SuppressWarnings("unchecked")
   public T unbind(String property) {
@@ -106,7 +106,7 @@ public class DataBinder<T> {
   /**
    * Unbinds the widget and model bound by previous calls to {@link DataBinder#bind(HasValue, Object, String)}.
    * 
-   * @return the unwrapped model
+   * @return the model instance without any bound property.
    */
   @SuppressWarnings("unchecked")
   public T unbind() {
@@ -129,8 +129,8 @@ public class DataBinder<T> {
    * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
-   * @return The proxied model which has to be used in place of the provided model instance if changes should be
-   *         synchronized with the UI (also accessible using {@link DataBinder#getModel()}).
+   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
+   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
    */
   public T setModel(T model) {
     return setModel(model, null);
@@ -145,8 +145,8 @@ public class DataBinder<T> {
    * @param initialState
    *          Specifies the origin of the initial state of both model and UI widget, null if no initial state
    *          synchronization should be carried out.
-   * @return The proxied model which has to be used in place of the provided model instance if changes should be
-   *         synchronized with the UI (also accessible using {@link DataBinder#getModel()}).
+   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
+   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
@@ -155,7 +155,7 @@ public class DataBinder<T> {
       model = (T) ((BindableProxy<?>) model).unwrap();
     }
 
-    ((BindableProxy<T>) this.model).setTarget(model, initialState);
+    ((BindableProxy<T>) this.model).setModel(model, initialState);
     return this.model;
   }
 }
