@@ -21,6 +21,7 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 
 import org.jboss.errai.common.client.api.WrappedPortable;
+import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
@@ -30,6 +31,7 @@ import org.jboss.errai.jpa.test.entity.Genre;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Tests the JPA EntityManager facilities provided by Errai JPA.
@@ -683,5 +685,29 @@ public class ErraiJpaTest extends GWTTestCase {
     Album fetchedAlbum = em.find(Album.class, album.getId());
     assertNotSame(album, fetchedAlbum);
     assertEquals(album.toString(), fetchedAlbum.toString());
+  }
+
+  /**
+   * Ensures the ErraiEntityManager transparently recognizes wrapped/proxied
+   * entities.
+   */
+  public void testUpdateDataBinderProxiedEntity() {
+
+    // make it
+    Album album = new Album();
+    TextBox box = new TextBox();
+
+    DataBinder<Album> binder = new DataBinder<Album>(album);
+    binder.bind(box, "id");
+    album = binder.getModel();
+    assertEquals("", box.getText());
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+    em.detach(album);
+    assertNotNull(album.getId());
+    assertEquals(String.valueOf(album.getId()), box.getText());
   }
 }

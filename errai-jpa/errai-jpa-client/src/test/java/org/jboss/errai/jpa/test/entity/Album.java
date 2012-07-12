@@ -19,10 +19,11 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
 @NamedQuery(name="selectAlbumByName", query="SELECT a FROM Album a WHERE a.name=:name")
-@TestOnly @Portable @Entity
+@TestOnly @Bindable @Portable @Entity
 public class Album {
 
   @GeneratedValue

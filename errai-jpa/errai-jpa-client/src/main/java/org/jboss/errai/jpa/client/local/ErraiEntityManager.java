@@ -21,6 +21,7 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.common.client.api.WrappedPortable;
+import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -113,28 +114,11 @@ public abstract class ErraiEntityManager implements EntityManager {
    */
   @SuppressWarnings("unchecked")
   private <T> Class<T> getNarrowedClass(T object) {
-    return (Class<T>) object.getClass();
-  }
-
-  /**
-   * Removes zero or more {@link WrappedPortable} layers from the given object,
-   * returning the original object without its proxies. All entity instances
-   * passed to a public method must be passed through this method before being
-   * used with JPA.
-   *
-   * @param entity
-   *          an entity instance that might be wrapped in a proxy. Null is
-   *          permitted.
-   * @return The entity instance that was wrapped, or the given object if it was
-   *         not proxied. Returns null if the given entity value is null.
-   */
-  @SuppressWarnings("unchecked")
-  private <X> X unwrap(X entity) {
-    Object o = entity;
+    Object o = object;
     while (o instanceof WrappedPortable) {
       o = ((WrappedPortable) o).unwrap();
     }
-    return (X) o;
+    return (Class<T>) o.getClass();
   }
 
   /**
@@ -236,6 +220,13 @@ public abstract class ErraiEntityManager implements EntityManager {
       throw new IllegalArgumentException("Entities can't transition from " + oldState + " to " + newState);
     }
 
+    // Tell the BindableProxy that we changed the entity
+    // (we haven't _necessarily_ changed anything.. if this becomes a performance problem,
+    // we can set a flag in the above state change logic make this call depend on that flag)
+    if (entity instanceof BindableProxy) {
+      ((BindableProxy<?>) entity).updateWidgets();
+    }
+
     // now cascade the operation
     for (SingularAttribute<? super X, ?> a : entityType.getSingularAttributes()) {
       ErraiSingularAttribute<? super X, ?> attrib = (ErraiSingularAttribute<? super X, ?>) a;
@@ -265,7 +256,6 @@ public abstract class ErraiEntityManager implements EntityManager {
    *         just been set on the entity.
    */
   public <X> Key<X, ?> keyFor(X entity) {
-    entity = unwrap(entity);
     ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
     return keyFor(entityType, entity);
   }
@@ -284,7 +274,6 @@ public abstract class ErraiEntityManager implements EntityManager {
    *         just been set on the entity.
    */
   public <X> Key<X, ?> keyFor(ErraiEntityType<X> entityType, X entity) {
-    entity = unwrap(entity);
     ErraiSingularAttribute<? super X, ?> idAttr;
     switch (entityType.getIdType().getPersistenceType()) {
     case BASIC:
@@ -457,7 +446,6 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void persist(Object entity) {
-    entity = unwrap(entity);
     changeEntityState(entity, EntityState.MANAGED);
   }
 
@@ -474,7 +462,6 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void detach(Object entity) {
-    entity = unwrap(entity);
     changeEntityState(entity, EntityState.DETACHED);
   }
 
@@ -509,7 +496,6 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void remove(Object entity) {
-    entity = unwrap(entity);
     changeEntityState(entity, EntityState.REMOVED);
   }
 
@@ -538,7 +524,6 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public <T> T merge(T entity) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 
@@ -571,20 +556,17 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void lock(Object entity, LockModeType lockMode) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 
   @Override
   public void lock(Object entity, LockModeType lockMode,
           Map<String, Object> properties) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 
   @Override
   public void refresh(Object entity) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 
@@ -595,26 +577,22 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void refresh(Object entity, LockModeType lockMode) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 
   @Override
   public void refresh(Object entity, LockModeType lockMode,
           Map<String, Object> properties) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 
   @Override
   public boolean contains(Object entity) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 
   @Override
   public LockModeType getLockMode(Object entity) {
-    entity = unwrap(entity);
     throw new UnsupportedOperationException("Not implemented");
   }
 

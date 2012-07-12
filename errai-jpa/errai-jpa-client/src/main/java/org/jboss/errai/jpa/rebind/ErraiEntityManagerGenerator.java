@@ -53,6 +53,7 @@ import org.apache.commons.collections.OrderedMap;
 import org.hibernate.ejb.HibernatePersistence;
 import org.hibernate.ejb.packaging.PersistenceMetadata;
 import org.hibernate.ejb.packaging.PersistenceXmlLoader;
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -77,6 +78,7 @@ import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -586,13 +588,26 @@ public class ErraiEntityManagerGenerator extends Generator {
 
       if (getJavaMember(attr) instanceof Field) {
 
-        // The write accessor for the field was defined while generating the get() method.
-        // Now generate a call to the private accessor method for the field in question.
+
+        BlockStatement methodBody = new BlockStatement();
+
+        // Now unwrap in case it's a WrappedPortable
+        methodBody.addStatement(
+                Stmt.if_(Bool.instanceOf(Stmt.loadVariable(entityInstanceParam), MetaClassFactory.getAsStatement(WrappedPortable.class)))
+                    .append(Stmt.loadVariable(entityInstanceParam).assignValue(Stmt.castTo(WrappedPortable.class, Stmt.loadVariable(entityInstanceParam)).invoke("unwrap")))
+                    .finish());
+
         MetaField field = MetaClassFactory.get((Field) getJavaMember(attr));
-        return Stmt.loadVariable("this")
-                .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+
+        // Now generate a call to the private accessor method for the field in question.
+        // (The write accessor for the field was defined while generating the get() method).
+        methodBody.addStatement(
+                Stmt.loadVariable("this")
+                    .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
                         Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)),
-                        Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam)));
+                        Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam))));
+
+        return methodBody;
       }
       else if (getJavaMember(attr) instanceof Method) {
         return Stmt.loadVariable(entityInstanceParam).invoke(getJavaMember(attr).getName()).returnValue();
@@ -617,11 +632,22 @@ public class ErraiEntityManagerGenerator extends Generator {
         MetaField field = MetaClassFactory.get((Field) getJavaMember(attr));
         PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, true, containingClassBuilder, field, new Modifier[] {});
 
+        BlockStatement methodBody = new BlockStatement();
+
+        // Now unwrap in case it's a WrappedPortable
+        methodBody.addStatement(
+                Stmt.if_(Bool.instanceOf(Stmt.loadVariable(entityInstanceParam), MetaClassFactory.getAsStatement(WrappedPortable.class)))
+                    .append(Stmt.loadVariable(entityInstanceParam).assignValue(Stmt.castTo(WrappedPortable.class, Stmt.loadVariable(entityInstanceParam)).invoke("unwrap")))
+                    .finish());
+
         // Now generate a call to the private accessor method for the field in question.
-        return Stmt.loadVariable("this")
-                .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+        methodBody.addStatement(
+                Stmt.loadVariable("this")
+                    .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
                         Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)))
-                        .returnValue();
+                        .returnValue());
+
+        return methodBody;
       }
       else if (getJavaMember(attr) instanceof Method) {
         return Stmt.loadVariable(entityInstanceParam).invoke(getJavaMember(attr).getName()).returnValue();
