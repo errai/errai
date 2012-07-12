@@ -7,6 +7,7 @@
 </head>
 <body>
   <div data-field=main class=container>
+
     <div class=row>
       <div class="span10 hero-unit">
         <h1>Have your JPA and sync it too.</h1>
@@ -37,13 +38,27 @@
           <button class=btn data-field="addStoreButton">+</button>
           <button class=btn data-field="removeStoreButton">&ndash;</button>
         </div>
-      </div>
+        
+        <div id=addStorePopover class="popover right" style="position: absolute">
+          <div class="arrow"></div>
+          <div class="popover-inner">
+            <h3 class="popover-title">Add a Store</h3>
+            <div class="popover-content">
+              <div data-field="storeForm">Placeholder for "add store" form</div>
+            </div>
+          </div>
+        </div>
 
-      <div class="span4">
-        <h1>Add a Store</h1>
-        <div data-field="storeForm">moo</div>
       </div>
     </div>
+
+    <div class="row">
+      <div class=span12 style="height: 200px">
+        <!-- This div provides extra space at the bottom of the
+           page so popovers aren't jammed up against the bottom -->
+      </div>
+    </div>
+
   </div>
 </body>
 </html>

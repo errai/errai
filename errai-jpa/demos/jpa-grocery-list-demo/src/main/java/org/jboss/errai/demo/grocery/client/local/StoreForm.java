@@ -34,6 +34,8 @@ public class StoreForm extends Composite {
 
   @Inject @DataField private Button saveButton;
 
+  private Runnable afterSaveAction;
+
   public void setStore(Store store) {
     Assert.notNull(store);
 
@@ -57,8 +59,16 @@ public class StoreForm extends Composite {
         em.persist(s);
         em.flush();
 
+        if (afterSaveAction != null) {
+          afterSaveAction.run();
+        }
+
         setStore(new Store());
       }
     });
+  }
+
+  public void setAfterSaveAction(Runnable afterSaveAction) {
+    this.afterSaveAction = afterSaveAction;
   }
 }
