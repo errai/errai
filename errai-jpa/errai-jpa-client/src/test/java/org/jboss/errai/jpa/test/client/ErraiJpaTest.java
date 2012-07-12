@@ -20,10 +20,12 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
+import org.jboss.errai.jpa.test.entity.Format;
 import org.jboss.errai.jpa.test.entity.Genre;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
@@ -570,4 +572,116 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(original.toString(), fetched.toString());
   }
 
+  /**
+   * Ensures the ErraiEntityManager transparently recognizes wrapped/proxied
+   * entities.
+   */
+  public void testPersistProxiedEntity() {
+
+    // make it
+    Album album = new Album();
+
+    class AlbumProxy extends Album implements WrappedPortable {
+
+      private Album wrapped;
+
+      AlbumProxy(Album wrapme) {
+        wrapped = wrapme;
+      }
+
+      @Override
+      public Object unwrap() {
+        return wrapped;
+      }
+
+      @Override
+      public Long getId() {
+        return wrapped.getId();
+      }
+
+      @Override
+      public void setId(Long id) {
+        wrapped.setId(id);
+      }
+
+      @Override
+      public String getName() {
+        return wrapped.getName();
+      }
+
+      @Override
+      public Artist getArtist() {
+        return wrapped.getArtist();
+      }
+
+      @Override
+      public Date getReleaseDate() {
+        return wrapped.getReleaseDate();
+      }
+
+      @Override
+      public void setName(String name) {
+        wrapped.setName(name);
+      }
+
+      @Override
+      public void setArtist(Artist artist) {
+        wrapped.setArtist(artist);
+      }
+
+      @Override
+      public void setReleaseDate(Date releaseDate) {
+        wrapped.setReleaseDate(releaseDate);
+      }
+
+      @Override
+      public Format getFormat() {
+        return wrapped.getFormat();
+      }
+
+      @Override
+      public void setFormat(Format format) {
+        wrapped.setFormat(format);
+      }
+
+      @Override
+      public int hashCode() {
+        return wrapped.hashCode();
+      }
+
+      @Override
+      public String toString() {
+        return wrapped.toString();
+      }
+
+      @Override
+      public List<Class<?>> getCallbackLog() {
+        return wrapped.getCallbackLog();
+      }
+
+      @Override
+      public void postLoad() {
+        wrapped.postLoad();
+      }
+
+      @Override
+      public boolean equals(Object obj) {
+        return wrapped.equals(obj);
+      }
+    }
+
+    album = new AlbumProxy(album);
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+    em.detach(album);
+    assertNotNull(album.getId());
+
+    // fetch it
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    assertNotSame(album, fetchedAlbum);
+    assertEquals(album.toString(), fetchedAlbum.toString());
+  }
 }

@@ -5,7 +5,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -31,7 +30,6 @@ public class StoreForm extends Composite {
   @Inject private DataBinder<Store> storeBinder;
 
   @Inject @DataField private TextBox name;
-
   @Inject @DataField private Button saveButton;
 
   private Runnable afterSaveAction;
@@ -43,6 +41,10 @@ public class StoreForm extends Composite {
     storeBinder.setModel(store, InitialState.FROM_MODEL);
   }
 
+  public Store getStore() {
+    return storeBinder.getModel();
+  }
+
   @PostConstruct
   private void init() {
 
@@ -52,11 +54,7 @@ public class StoreForm extends Composite {
 
       @Override
       public void onClick(ClickEvent event) {
-
-        // XXX the following silliness will be unnecessary when Errai JPA knows about WrappedPortable
-        Store s = (Store) ((WrappedPortable) storeBinder.getModel()).unwrap();
-
-        em.persist(s);
+        em.persist(storeBinder.getModel());
         em.flush();
 
         if (afterSaveAction != null) {

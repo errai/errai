@@ -67,4 +67,13 @@ public class HibernateJpaTest extends ErraiJpaTest {
   public void testStoreAndFetchOneWithEverything() throws Exception {
     // skip
   }
+
+  /**
+   * Hibernate doesn't know how to unwrap Errai's WrappedPortables, so we have
+   * to skip this test.
+   */
+  @Override
+  public void testPersistProxiedEntity() {
+    // skip
+  }
 }
