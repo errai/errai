@@ -23,7 +23,7 @@ import javax.inject.Inject;
  * @author Mike Brock
  */
 @ApplicationScoped
-public class ApplicationScopedBeanB {
+public class ApplicationScopedBeanB implements InterfaceB {
   @Inject DependentBeanCycleA dependentBeanCycleA;
 
   public DependentBeanCycleA getDependentBeanCycleA() {

@@ -74,6 +74,8 @@ public interface TestSerializationRPCService {
 
   public byte[] testByteArray(byte[] b);
 
+  public NeverDeclareAnArrayOfThisType[] testPortableArray(NeverDeclareAnArrayOfThisType[] expected);
+
 
   public List<Long> listOfLong(List<Long> list);
 
@@ -116,7 +118,7 @@ public interface TestSerializationRPCService {
   public FactoryEntity testFactorySerialization(FactoryEntity e);
 
   public BuilderEntity testBuilderSerializationWithPrivateConstructor(BuilderEntity e);
-  
+
   public java.util.Date testJavaUtilDate(java.util.Date d);
 
   public Date testJavaSqlDate(Date d);

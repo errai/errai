@@ -14,24 +14,8 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.api;
+package org.jboss.errai.cdi.injection.client;
 
-import org.jboss.errai.marshalling.client.api.json.EJValue;
+public interface InterfaceRoot {
 
-/**
- * @author Mike Brock <cbrock@redhat.com>
- */
-public interface Marshaller<T> {
-  Class<T> getTypeHandled();
-
-  T demarshall(EJValue o, MarshallingSession ctx);
-
-  String marshall(final T o, MarshallingSession ctx);
-
-  /**
-   * Returns an empty array of the type handled by this marshaller. Useful in conjunction with {@code List.toArray(T[])}.
-   * 
-   * @return a one-dimensional zero-length array of the type handled by this marshaller.
-   */
-  T[] getEmptyArray();
 }

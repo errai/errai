@@ -28,13 +28,20 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ClientMarshaller
 @ServerMarshaller
 public class FloatMarshaller extends AbstractNumberMarshaller<Float> {
+  private static final Float[] EMPTY_ARRAY = new Float[0];
+  
   @Override
   public Class<Float> getTypeHandled() {
     return Float.class;
   }
 
   @Override
-  public Float doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
+  public Float[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+  
+  @Override
+  public Float doNotNullDemarshall(final EJValue o, MarshallingSession ctx) {
     if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().floatValue();
     }

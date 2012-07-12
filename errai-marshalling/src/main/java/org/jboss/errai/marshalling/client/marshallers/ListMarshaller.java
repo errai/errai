@@ -16,13 +16,17 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.Vector;
+
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
-
-import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -31,6 +35,9 @@ import java.util.*;
 @ServerMarshaller
 @ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
 public class ListMarshaller extends AbstractCollectionMarshaller<List> {
+  
+  private static final ArrayList[] EMPTY_ARRAY = new ArrayList[0];
+  
   public static final ListMarshaller INSTANCE = new ListMarshaller();
 
   @Override
@@ -38,6 +45,11 @@ public class ListMarshaller extends AbstractCollectionMarshaller<List> {
     return List.class;
   }
 
+  @Override
+  public List[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+  
   @Override
   public List doDemarshall(final EJArray o, final MarshallingSession ctx) {
     return marshallToCollection(new ArrayList<Object>(o.size()), o, ctx);

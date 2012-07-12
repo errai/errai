@@ -16,29 +16,50 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.sql.Time;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
-import java.sql.Time;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
 public class TimeMarshaller extends AbstractNullableMarshaller<Time> {
+  
+  private static final Time[] EMPTY_ARRAY = new Time[0];
 
   @Override
   public Time doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
-    return o.isObject() == null ? null :
-            new Time(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
+    if (o.isObject() != null) {
+      EJValue qualifiedValue = o.isObject().get(SerializationParts.QUALIFIED_VALUE);
+      if (!qualifiedValue.isNull() && qualifiedValue.isString() != null) {
+        return new Time(Long.parseLong(qualifiedValue.isString().stringValue()));
+      }
+      EJValue numericValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      if (!numericValue.isNull() && numericValue.isNumber() != null) {
+        return new Time(new Double(numericValue.isNumber().doubleValue()).longValue());
+      }
+      if (!numericValue.isNull() && numericValue.isString() != null) {
+        return new Time(Long.parseLong(numericValue.isString().stringValue()));
+      }
+    }
+    
+    return null;
   }
 
   @Override
   public Class<Time> getTypeHandled() {
     return Time.class;
+  }
+  
+  @Override
+  public Time[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 
   @Override

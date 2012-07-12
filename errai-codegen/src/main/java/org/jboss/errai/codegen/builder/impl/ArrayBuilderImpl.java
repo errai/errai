@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.util.GenUtil;
  * StatementBuilder to create and initialize Arrays.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayBuilder, ArrayInitializationBuilder {
   private MetaClass type;
@@ -41,12 +42,6 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   protected ArrayBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
   }
-
-//  @Override
-//  public ArrayInitializationBuilder newArray(Class<?> componentType) {
-//    return newArray(componentType);
-//  }
-
 
   @Override
   public ArrayInitializationBuilder newArray(MetaClass componentType, Object... dimensions) {

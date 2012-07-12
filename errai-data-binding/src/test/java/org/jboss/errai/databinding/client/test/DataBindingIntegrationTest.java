@@ -59,22 +59,22 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingUsingInjectedDataBinder() {
+  public void testBasicBindingWithInjectedDataBinder() {
     ModuleWithInjectedDataBinder module =
         IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
 
     Model model = module.getModel();
     TextBox nameTextBox = module.getNameTextBox();
 
-    model.setName("name change");
-    assertEquals("Widget not properly updated", "name change", nameTextBox.getText());
+    model.setName("model change");
+    assertEquals("Widget not properly updated", "model change", nameTextBox.getText());
 
     nameTextBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getName());
   }
 
   @Test
-  public void testReadOnlyBinding() {
+  public void testHasTextBinding() {
     Label label = new Label();
     Model model = new DataBinder<Model>(Model.class).bind(label, "id");
 

@@ -16,13 +16,13 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.math.BigDecimal;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-
-import java.math.BigDecimal;
 
 /**
  * @author Mike Brock
@@ -30,9 +30,17 @@ import java.math.BigDecimal;
 @ClientMarshaller
 @ServerMarshaller
 public class BigDecimalMarshaller extends AbstractNullableMarshaller<BigDecimal> {
+  
+  private static final BigDecimal[] EMPTY_ARRAY = new BigDecimal[0];
+
   @Override
   public Class<BigDecimal> getTypeHandled() {
     return BigDecimal.class;
+  }
+  
+  @Override
+  public BigDecimal[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 
   @Override

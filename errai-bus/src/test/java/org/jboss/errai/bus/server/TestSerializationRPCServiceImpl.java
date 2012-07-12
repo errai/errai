@@ -42,6 +42,7 @@ import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
 import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
@@ -146,6 +147,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public byte[] testByteArray(byte[] b) {
     return b;
+  }
+
+  @Override
+  public NeverDeclareAnArrayOfThisType[] testPortableArray(NeverDeclareAnArrayOfThisType[] p) {
+    return p;
   }
 
   @Override

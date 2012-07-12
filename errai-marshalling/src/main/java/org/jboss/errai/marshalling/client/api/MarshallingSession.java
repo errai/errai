@@ -21,35 +21,47 @@ package org.jboss.errai.marshalling.client.api;
  */
 public interface MarshallingSession {
   public MappingContext getMappingContext();
-  
+
+  /**
+   * Returns a marshaller for the provided type.
+   * 
+   * @param fqcn
+   *          fully qualified class name of the type to be marshalled.
+   * 
+   * @return marshaller instance, or null if no marshaller was found for the provided type.
+   */
   public Marshaller<Object> getMarshallerInstance(String fqcn);
-  
+
   public String determineTypeFor(String formatType, Object o);
-  
+
   public String getAssumedElementType();
-  
+
   public void setAssumedElementType(String assumedElementType);
 
   /**
    * Records a new object to the session with the specified <tt>hashCode</tt> identifier.
-   *
-   * @param hashCode a unique identifier
-   * @param instance the instance of the entity.
+   * 
+   * @param hashCode
+   *          a unique identifier
+   * @param instance
+   *          the instance of the entity.
    */
   public void recordObject(String hashCode, Object instance);
 
   /**
    * Checks if the object is already in the context based on the object reference.
-   *
-   * @param reference the entity reference
+   * 
+   * @param reference
+   *          the entity reference
    * @return true if the session contains the object reference.
    */
   public boolean hasObject(Object reference);
 
   /**
    * Checks if the object is already in the context based on the hash code.
-   *
-   * @param hashCode the hash code
+   * 
+   * @param hashCode
+   *          the hash code
    * @return true if the session contains the object reference.
    */
   public boolean hasObject(String hashCode);
@@ -57,8 +69,9 @@ public interface MarshallingSession {
   /**
    * Returns a unique identifier for the specified object reference. Returns a new identifier if the object is unknown
    * to the session, or returns the existing one if it is known.
-   *
-   * @param reference the entity reference
+   * 
+   * @param reference
+   *          the entity reference
    * @return a new or existing identifier within this session
    */
   public String getObject(Object reference);
@@ -66,10 +79,13 @@ public interface MarshallingSession {
   /**
    * Looks up the object based on the specified <tt>hashCode</tt> identifier. Returns null if the specified identifier
    * does not exist.
-   *
-   * @param type the type of entity being looked up
-   * @param hashCode the identifier of the entity within the session
-   * @param <T>  the type of entity being looked up
+   * 
+   * @param type
+   *          the type of entity being looked up
+   * @param hashCode
+   *          the identifier of the entity within the session
+   * @param <T>
+   *          the type of entity being looked up
    * @return the instance of the entity or null if not present
    */
   public <T> T getObject(Class<T> type, String hashCode);

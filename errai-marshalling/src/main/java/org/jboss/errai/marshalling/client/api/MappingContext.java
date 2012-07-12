@@ -30,4 +30,5 @@ public interface MappingContext {
    * @return boolean true if marshallable.
    */
   public boolean canMarshal(String cls);
+
 }

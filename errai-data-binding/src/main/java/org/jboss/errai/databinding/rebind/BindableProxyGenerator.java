@@ -101,11 +101,14 @@ public class BindableProxyGenerator {
             .append(Stmt.loadClassMember("target").assignValue(Variable.get("target")))
             .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
             .finish()
-            .publicMethod(void.class, "setTarget", Parameter.of(Object.class, "target"),
+            .publicMethod(void.class, "setModel", Parameter.of(Object.class, "target"),
                 Parameter.of(InitialState.class, "initialState"))
             .append(Stmt.loadClassMember("target").assignValue(Stmt.castTo(bindable, Stmt.loadVariable("target"))))
             .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
-            .append(Stmt.loadVariable("this").invoke("syncInitialState"))
+            .append(Stmt.loadVariable("this").invoke("syncState", Variable.get("initialState")))
+            .finish()
+            .publicMethod(void.class, "updateWidgets")
+            .append(Stmt.loadVariable("this").invoke("syncState", Stmt.loadStatic(InitialState.class, "FROM_MODEL")))
             .finish()
             .publicMethod(bindable, "unwrap")
             .append(Stmt.loadClassMember("target").returnValue())
@@ -166,32 +169,34 @@ public class BindableProxyGenerator {
                     .finish()
             )
             .append(
-                Stmt.loadVariable("this").invoke("syncInitialState", Variable.get("widget"), Variable.get("property")));
+                Stmt.loadVariable("this").invoke("syncState", Variable.get("widget"), Variable.get("property"),
+                    Variable.get("initialState")));
 
     bindMethodBuilder.finish();
   }
 
   private void generateInitialStateSyncMethods(ClassStructureBuilder<?> classBuilder) {
-    classBuilder.privateMethod(void.class, "syncInitialState")
+    classBuilder.privateMethod(void.class, "syncState", Parameter.of(InitialState.class, "initialState", true))
         .append(
             Stmt.loadVariable("bindings").invoke("keySet").foreach("property")
                 .append(
                     Stmt.try_()
-                    .append(
-                        Stmt.loadVariable("this")
-                          .invoke("syncInitialState",
-                              Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
-                              Stmt.castTo(String.class, Stmt.loadVariable("property"))))
-                    .finish()
-                    .catch_(NonExistingPropertyException.class, "e")
-                    .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
-                        .invoke("createErrorMessage", "Skipping state synchronization for unknown property:")))
-                    .finish())
+                        .append(
+                            Stmt.loadVariable("this")
+                                .invoke("syncState",
+                                    Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
+                                    Stmt.castTo(String.class, Stmt.loadVariable("property")),
+                                    Stmt.loadVariable("initialState")))
+                        .finish()
+                        .catch_(NonExistingPropertyException.class, "e")
+                        .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
+                            .invoke("createErrorMessage", "Skipping state synchronization for unknown property:")))
+                        .finish())
                 .finish())
          .finish();
 
-    classBuilder.privateMethod(void.class, "syncInitialState", Parameter.of(Widget.class, "widget", true),
-        Parameter.of(String.class, "property", true))
+    classBuilder.privateMethod(void.class, "syncState", Parameter.of(Widget.class, "widget", true),
+        Parameter.of(String.class, "property", true), Parameter.of(InitialState.class, "initialState", true))
         .append(
             Stmt.if_(Bool.isNotNull(Variable.get("initialState")))
                 .append(
