@@ -306,6 +306,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean directSubscribe(final String subject,
                                   final MessageCallback callback,
                                   final boolean local) {
+
     return directSubscribe(subject, callback, local, new WrappedCallbackHolder(null));
   }
 
@@ -1697,7 +1698,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     LogUtil.displayDebuggerUtilityTitle("ErraiBus Status");
 
-    LogUtil.nativeLog("------------------------------------------------");
     LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
     LogUtil.nativeLog("");
     LogUtil.nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
