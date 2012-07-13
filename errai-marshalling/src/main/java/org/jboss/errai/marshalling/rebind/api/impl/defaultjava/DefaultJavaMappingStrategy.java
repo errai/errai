@@ -440,7 +440,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       final MetaClass targetType = GenUtil.getPrimitiveWrapper(mapping.getType());
       final MetaClass compType = targetType.isArray() ? targetType.getOuterComponentType().asBoxed() : targetType.asBoxed();
 
-      if (!targetType.isEnum() && !context.canMarshal(compType.getFullyQualifiedName())) {
+      if (!targetType.isInterface() &&!targetType.isEnum() && !context.canMarshal(compType.getFullyQualifiedName())) {
         throw new NoAvailableMarshallerException(compType.getFullyQualifiedName());
       }
 

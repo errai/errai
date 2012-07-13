@@ -16,6 +16,18 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -39,23 +51,13 @@ import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshalle
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
- * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and
- * mapping of classes annotated with the {@link Portable} annotation, and custom mappings annotated with
- * {@link CustomMapping}.
- *
+ * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
+ * classes annotated with the {@link Portable} annotation, and custom mappings annotated with {@link CustomMapping}.
+ * 
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
@@ -66,8 +68,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
    */
   private final Map<String, String> mappingAliases = new HashMap<String, String>();
 
-  private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
-          = new HashMap<String, MappingDefinition>();
+  private final Map<String, MappingDefinition> MAPPING_DEFINITIONS = new HashMap<String, MappingDefinition>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
@@ -145,7 +146,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     for (Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
-        throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit " + MappingDefinition.class.getName());
+        throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit "
+            + MappingDefinition.class.getName());
       }
 
       try {
@@ -272,7 +274,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final List<MetaClass> enums = new ArrayList<MetaClass>();
 
     for (Class<?> mappedClass : exposedClasses) {
-      if (mappedClass.isSynthetic()) continue;
+      if (mappedClass.isSynthetic())
+        continue;
 
       Portable portable = mappedClass.getAnnotation(Portable.class);
       if (portable != null && !portable.aliasOf().equals(Object.class)) {
@@ -334,10 +337,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     // key = all types, value = list of all types which inherit from.
-    final Map<String, List<String>> inheritanceMap = new HashMap<String, List<String>>();
+    Multimap<String, String> inheritanceMap = HashMultimap.create();
 
     for (Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
-      checkInheritance(inheritanceMap, entry.getValue().getMappingClass());
+      fillInheritanceMap(inheritanceMap, entry.getValue().getMappingClass());
     }
 
     MetaClass javaLangObjectRef = MetaClassFactory.get(Object.class);
@@ -347,13 +350,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       InstantiationMapping instantiationMapping = def.getInstantiationMapping();
       for (Mapping mapping : instantiationMapping.getMappings()) {
-        if (!isTypeFinal(inheritanceMap, mapping.getType())) {
+        if (shouldUseObjectMarshaller(inheritanceMap, mapping.getType())) {
           mapping.setType(javaLangObjectRef);
         }
       }
 
       for (Mapping mapping : entry.getValue().getMemberMappings()) {
-        if (!isTypeFinal(inheritanceMap, mapping.getType())) {
+        if (shouldUseObjectMarshaller(inheritanceMap, mapping.getType())) {
           mapping.setType(javaLangObjectRef);
         }
       }
@@ -362,37 +365,48 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
-  private static boolean isTypeFinal(final Map<String, List<String>> inheritanceMap, final MetaClass type) {
-    final List<String> subTypes = inheritanceMap.get(type.getFullyQualifiedName());
-    return subTypes == null || subTypes.isEmpty();
+  /**
+   * Returns true if the marshalling system should treat the given type as polymorphic.
+   * 
+   * @param inheritanceMap
+   *          Multimap with keys that are class or interface names and values are concrete portable type names. In all
+   *          cases, the names must have been obtained from {@link MetaClass#getFullyQualifiedName()}.
+   * @param type
+   *          The type to test for the existence of portable implementation/subtypes.
+   */
+  private boolean shouldUseObjectMarshaller(Multimap<String, String> inheritanceMap, MetaClass type) {
+    boolean hasPortableSubtypes = inheritanceMap.containsKey(type.getFullyQualifiedName());
+    boolean hasMarshaller = getDefinition(type.asClass()) != null;
+    boolean isConcrete = !(type.isAbstract() || type.isInterface());
+    return (hasPortableSubtypes && !hasMarshaller) || (hasPortableSubtypes && hasMarshaller && isConcrete);
   }
 
-
-  private static void checkInheritance(final Map<String, List<String>> inheritanceMap, final MetaClass root) {
-    MetaClass cls = root;
-    String fqcn;
-
-    do {
-      fqcn = cls.getFullyQualifiedName();
-
-      if (cls.getSuperClass() != null)
-        registerInheritance(inheritanceMap, cls.getSuperClass().getFullyQualifiedName(), fqcn);
-
-      for (MetaClass iface : cls.getInterfaces()) {
-        checkInheritance(inheritanceMap, iface);
-      }
-
-    }
-    while ((cls = cls.getSuperClass()) != null && cls.getFullyQualifiedName().equals(Object.class.getName()));
+  /**
+   * Populates the inheritance map with all supertypes (except java.lang.Object) and all directly- and
+   * indirectly-implemented interfaces of the given class.
+   * 
+   * @param inheritanceMap
+   * @param mappingClass
+   */
+  private void fillInheritanceMap(Multimap<String, String> inheritanceMap, MetaClass mappingClass) {
+    fillInheritanceMap(inheritanceMap, mappingClass, mappingClass);
   }
 
-  static void registerInheritance(Map<String, List<String>> inheritanceMap, String parent, String child) {
-    List<String> subtypes = inheritanceMap.get(parent);
-    if (subtypes == null) {
-      subtypes = new ArrayList<String>();
-      inheritanceMap.put(parent, subtypes);
+  /** Recursive subroutine of {@link #fillInheritanceMap(Multimap, MetaClass)}. */
+  private static void fillInheritanceMap(Multimap<String, String> inheritanceMap, MetaClass visiting,
+      MetaClass mappingClass) {
+    if (visiting == null || visiting.equals(MetaClassFactory.get(Object.class)))
+      return;
+
+    if (!visiting.equals(mappingClass)) {
+      inheritanceMap.put(visiting.getFullyQualifiedName(), mappingClass.getFullyQualifiedName());
     }
-    subtypes.add(child);
+
+    fillInheritanceMap(inheritanceMap, visiting.getSuperClass(), mappingClass);
+
+    for (MetaClass iface : visiting.getInterfaces()) {
+      fillInheritanceMap(inheritanceMap, iface, mappingClass);
+    }
   }
 
   @Override
@@ -412,7 +426,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
         final Iterator<MemberMapping> defMappings = def.getMemberMappings().iterator();
         while (defMappings.hasNext()) {
-          if (parentKeys.contains(defMappings.next().getKey())) defMappings.remove();
+          if (parentKeys.contains(defMappings.next().getKey()))
+            defMappings.remove();
         }
 
         for (MemberMapping memberMapping : toMerge.getMemberMappings()) {
@@ -470,4 +485,3 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     loadCustomMappings();
   }
 }
-
