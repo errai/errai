@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,20 +16,18 @@
 
 package org.jboss.errai.marshalling.server;
 
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
-import org.jboss.errai.marshalling.client.api.Marshaller;
-
-import java.util.Map;
 
 /**
  * @author Mike Brock
  */
 public class EncodingSession extends AbstractMarshallingSession {
-  private final ServerMappingContext context;
-
+  
   public EncodingSession(final ServerMappingContext context) {
-    this.context = context;
+    super(context);
   }
 
   @Override
@@ -37,7 +35,7 @@ public class EncodingSession extends AbstractMarshallingSession {
     if (o == null) return null;
 
     if (o instanceof Map) {
-      final Map map = (Map) o;
+      Map map = (Map) o;
       if (map.containsKey(SerializationParts.ENCODED_TYPE)) {
         return (String) map.get(SerializationParts.ENCODED_TYPE);
       }
@@ -48,19 +46,5 @@ public class EncodingSession extends AbstractMarshallingSession {
     else {
       return o.getClass().getName();
     }
-  }
-
-  @Override
-  public Marshaller<Object> getMarshallerInstance(final String fqcn) {
-    final Marshaller<Object> m = context.getMarshaller(fqcn);
-    if (m == null) {
-      throw new RuntimeException("no marshaller available for: " + fqcn);
-    }
-    return m;
-  }
-
-  @Override
-  public ServerMappingContext getMappingContext() {
-    return context;
   }
 }

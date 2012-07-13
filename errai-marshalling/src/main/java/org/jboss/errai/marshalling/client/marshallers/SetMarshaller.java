@@ -16,16 +16,16 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.AbstractSet;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
-
-import java.util.AbstractSet;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -33,11 +33,19 @@ import java.util.Set;
 @ClientMarshaller @ServerMarshaller
 @ImplementationAliases({AbstractSet.class, HashSet.class, LinkedHashSet.class})
 public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
+  
+  private static final HashSet[] EMPTY_ARRAY = new HashSet[0];
+  
   @Override
   public Class<Set> getTypeHandled() {
     return Set.class;
   }
 
+  @Override
+  public Set[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+  
   @Override
   public Set doDemarshall(final EJArray o, final MarshallingSession ctx) {
     return marshallToCollection(new HashSet<Object>(o.size()), o, ctx);

@@ -101,11 +101,14 @@ public class BindableProxyGenerator {
             .append(Stmt.loadClassMember("target").assignValue(Variable.get("target")))
             .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
             .finish()
-            .publicMethod(void.class, "setTarget", Parameter.of(Object.class, "target"),
+            .publicMethod(void.class, "setModel", Parameter.of(Object.class, "target"),
                 Parameter.of(InitialState.class, "initialState"))
             .append(Stmt.loadClassMember("target").assignValue(Stmt.castTo(bindable, Stmt.loadVariable("target"))))
             .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
-            .append(Stmt.loadVariable("this").invoke("syncInitialState"))
+            .append(Stmt.loadVariable("this").invoke("syncState", Variable.get("initialState")))
+            .finish()
+            .publicMethod(void.class, "updateWidgets")
+            .append(Stmt.loadVariable("this").invoke("syncState", Stmt.loadStatic(InitialState.class, "FROM_MODEL")))
             .finish()
             .publicMethod(bindable, "unwrap")
             .append(Stmt.loadClassMember("target").returnValue())
@@ -166,76 +169,73 @@ public class BindableProxyGenerator {
                     .finish()
             )
             .append(
-                Stmt.loadVariable("this").invoke("syncInitialState", Variable.get("widget"), Variable.get("property")));
+                Stmt.loadVariable("this").invoke("syncState", Variable.get("widget"), Variable.get("property"),
+                    Variable.get("initialState")));
 
     bindMethodBuilder.finish();
   }
 
   private void generateInitialStateSyncMethods(ClassStructureBuilder<?> classBuilder) {
-    classBuilder.privateMethod(void.class, "syncInitialState")
+    classBuilder.privateMethod(void.class, "syncState", Parameter.of(InitialState.class, "initialState", true))
         .append(
             Stmt.loadVariable("bindings").invoke("keySet").foreach("property")
                 .append(
                     Stmt.try_()
-                    .append(
-                        Stmt.loadVariable("this")
-                          .invoke("syncInitialState",
-                              Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
-                              Stmt.castTo(String.class, Stmt.loadVariable("property"))))
-                    .finish()
-                    .catch_(NonExistingPropertyException.class, "e")
-                    .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
-                        .invoke("createErrorMessage", "Skipping state synchronization for unknown property:")))
-                    .finish())
+                        .append(
+                            Stmt.loadVariable("this")
+                                .invoke("syncState",
+                                    Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
+                                    Stmt.castTo(String.class, Stmt.loadVariable("property")),
+                                    Stmt.loadVariable("initialState")))
+                        .finish()
+                        .catch_(NonExistingPropertyException.class, "e")
+                        .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
+                            .invoke("createErrorMessage", "Skipping state synchronization for unknown property:")))
+                        .finish())
                 .finish())
          .finish();
 
-    classBuilder.privateMethod(void.class, "syncInitialState", Parameter.of(Widget.class, "widget", true),
-        Parameter.of(String.class, "property", true))
+    classBuilder.privateMethod(void.class, "syncState", Parameter.of(Widget.class, "widget", true),
+        Parameter.of(String.class, "property", true), Parameter.of(InitialState.class, "initialState", true))
         .append(
             Stmt.if_(Bool.isNotNull(Variable.get("initialState")))
+                .append(Stmt.declareVariable("value", Object.class, null))
                 .append(
                     Stmt.if_(Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
                         .append(Stmt.declareVariable("hasValue", HasValue.class,
                             Stmt.castTo(HasValue.class, Stmt.loadVariable("widget"))))
-                        .append(Stmt.declareVariable("value", Object.class,
+                        .append(Stmt.loadVariable("value").assignValue(
                             Stmt.loadVariable("initialState").invoke("getInitialValue",
                                 Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                 Stmt.loadVariable("hasValue").invoke("getValue"))))
                         .append(
                             Stmt.loadVariable("hasValue").invoke(
                                 "setValue",
-                                Variable.get("value")))
-                        .append(
-                            Stmt.loadVariable("this").invoke(
-                                "set",
-                                Variable.get("property"),
-                                Variable.get("value")))
+                                Stmt.invokeStatic(Convert.class, "to",
+                                    Stmt.castTo(HasValue.class,
+                                        Stmt.loadVariable("widget")).invoke("getValue").invoke("getClass"),
+                                        Stmt.loadVariable("value"))))
                         .finish()
                         .elseif_(
                             Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasText.class)))
                         .append(
                             Stmt.declareVariable("hasText", HasText.class,
                                 Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))))
-                        .append(Stmt.declareVariable("value", Object.class,
+                        .append(Stmt.loadVariable("value").assignValue(
                             Stmt.loadVariable("initialState").invoke("getInitialValue",
                                 Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                 Stmt.loadVariable("hasText").invoke("getText"))))
-                        .append(Stmt.declareVariable("stringValue", String.class,
-                            Stmt.castTo(String.class, Stmt.loadVariable("value"))))
                         .append(
                             Stmt.loadVariable("hasText").invoke(
                                 "setText",
-                                Variable.get("stringValue")))
-                        .append(
-                            Stmt.loadVariable("this").invoke(
-                                "set",
-                                Variable.get("property"),
-                                Variable.get("stringValue")))
+                                Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "to", String.class, Stmt
+                                    .loadVariable("value")))))
                         .finish()
                 )
+                .append(Stmt.loadVariable("this").invoke("set", Variable.get("property"), Variable.get("value")))
                 .finish()
-        ).finish();
+        )
+        .finish();
   }
 
   private void generateProxyUnbindMethods(ClassStructureBuilder<?> classBuilder) {

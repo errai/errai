@@ -16,6 +16,15 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
@@ -72,6 +81,11 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   @Override
   public Class<Object> getTypeHandled() {
     return (Class<Object>) definition.getMappingClass().asClass();
+  }
+  
+  @Override
+  public Object[] getEmptyArray() {
+    return (Object[]) Array.newInstance(getTypeHandled(), 0);
   }
 
   @SuppressWarnings({"ConstantConditions", "unchecked"})

@@ -31,6 +31,7 @@ import java.lang.reflect.Array;
  * StatementBuilder to create and initialize Arrays.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayBuilder, ArrayInitializationBuilder {
   private MetaClass type;

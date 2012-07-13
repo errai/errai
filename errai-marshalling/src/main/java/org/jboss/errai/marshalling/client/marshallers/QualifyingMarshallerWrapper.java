@@ -27,6 +27,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * Used to wrap marshallers annotated with {@link org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify}
  * 
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T> {
   private final Marshaller<T> delegate;
@@ -41,9 +42,14 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
   }
 
   @Override
+  public T[] getEmptyArray() {
+    return delegate.getEmptyArray();
+  }
+  
+  @Override
   public T doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     final EJObject obj = o.isObject();
-
+    
     T val = null;
     if (obj != null) {
       final String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();

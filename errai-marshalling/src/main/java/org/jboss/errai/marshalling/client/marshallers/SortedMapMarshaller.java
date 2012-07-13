@@ -16,6 +16,9 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
@@ -23,9 +26,6 @@ import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
-
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -35,6 +35,8 @@ import java.util.TreeMap;
 @AlwaysQualify
 @ImplementationAliases({TreeMap.class})
 public class SortedMapMarshaller extends MapMarshaller<SortedMap<Object, Object>> {
+  private static final TreeMap[] EMPTY_ARRAY = new TreeMap[0];
+  
   @Override
   public Class<SortedMap<Object, Object>> getTypeHandled() {
     return SimpleTypeLiteral.<SortedMap<Object, Object>>ofRawType(SortedMap.class).get();
@@ -44,5 +46,10 @@ public class SortedMapMarshaller extends MapMarshaller<SortedMap<Object, Object>
   @Override
   public SortedMap<Object, Object> demarshall(final EJValue o, final MarshallingSession ctx) {
     return doDemarshall(new TreeMap(), o, ctx);
+  }
+  
+  @Override
+  public SortedMap[] getEmptyArray() {
+    return EMPTY_ARRAY;
   }
 }

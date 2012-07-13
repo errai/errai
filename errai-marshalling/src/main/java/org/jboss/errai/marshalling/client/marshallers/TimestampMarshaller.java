@@ -16,27 +16,50 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.sql.Timestamp;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
-import java.sql.Timestamp;
-
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
 public class TimestampMarshaller extends AbstractNullableMarshaller<Timestamp> {
+  
+  private static final Timestamp[] EMPTY_ARRAY = new Timestamp[0];
+
   @Override
   public Class<Timestamp> getTypeHandled() {
     return Timestamp.class;
   }
+  
+  @Override
+  public Timestamp[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
 
   @Override
   public Timestamp doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
-    return new Timestamp(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
+    if (o.isObject() != null) {
+      EJValue qualifiedValue = o.isObject().get(SerializationParts.QUALIFIED_VALUE);
+      if (!qualifiedValue.isNull() && qualifiedValue.isString() != null) {
+        return new Timestamp(Long.parseLong(qualifiedValue.isString().stringValue()));
+      }
+      EJValue numericValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      if (!numericValue.isNull() && numericValue.isNumber() != null) {
+        return new Timestamp(new Double(numericValue.isNumber().doubleValue()).longValue());
+      }
+      if (!numericValue.isNull() && numericValue.isString() != null) {
+        return new Timestamp(Long.parseLong(numericValue.isString().stringValue()));
+      }
+    }
+
+    return null;
   }
 
   @Override

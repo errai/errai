@@ -26,21 +26,36 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller
+@ServerMarshaller
 public class LongMarshaller extends AbstractNumberMarshaller<Long> {
+  private static final Long[] EMPTY_ARRAY = new Long[0];
+
   @Override
   public Class<Long> getTypeHandled() {
     return Long.class;
   }
 
   @Override
+  public Long[] getEmptyArray() {
+    return EMPTY_ARRAY;
+  }
+
+  @Override
   public Long doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
       final EJValue numValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+
+      if (numValue.isNumber() != null) {
+        return new Double(numValue.isNumber().doubleValue()).longValue();
+      }
       return Long.parseLong(numValue.isString().stringValue());
     }
     else {
-      return new Double(o.isNumber().doubleValue()).longValue();
+      if (o.isNumber() != null) {
+        return new Double(o.isNumber().doubleValue()).longValue();
+      }
+      return Long.parseLong(o.isString().stringValue());
     }
   }
 

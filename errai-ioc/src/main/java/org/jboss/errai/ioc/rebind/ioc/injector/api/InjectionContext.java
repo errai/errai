@@ -16,9 +16,22 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import static java.util.Collections.unmodifiableCollection;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.HasAnnotations;
@@ -41,28 +54,14 @@ import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Collections.unmodifiableCollection;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 
 public class InjectionContext {
   private final IOCProcessingContext processingContext;
 
-  private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings
-          = HashMultimap.create();
+  private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings = HashMultimap.create();
 
   // do not refactor to a MultiMap. the resolution algorithm has dynamic replacement of injectors that is difficult
   // to achieve with a MultiMap
@@ -74,10 +73,8 @@ public class InjectionContext {
 
   private final Set<String> enabledAlternatives;
 
-  private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators
-          = HashMultimap.create();
-  private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType
-          = HashMultimap.create();
+  private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
+  private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
 
   private final Map<MetaParameter, Statement> inlineBeanReferenceMap = new HashMap<MetaParameter, Statement>();
 
@@ -122,7 +119,6 @@ public class InjectionContext {
       return new InjectionContext(this);
     }
   }
-
 
   public Injector getProxiedInjector(final MetaClass type, final QualifyingMetadata metadata) {
     //todo: figure out why I was doing this.
@@ -215,7 +211,6 @@ public class InjectionContext {
     }
   }
 
-
   public void recordCycle(MetaClass from, MetaClass to) {
     cyclingTypes.put(from, to);
   }
@@ -304,34 +299,13 @@ public class InjectionContext {
   }
 
   public void registerInjector(Injector injector) {
-    _registerInjector(injector.getInjectedType(), injector, true);
+    registerInjector(injector.getInjectedType(), injector, new HashSet<MetaClass>(), true);
   }
 
-
-  private void _registerInjector(MetaClass type, Injector injector, boolean allowOverride) {
+  private void registerInjector(MetaClass type, Injector injector, Set<MetaClass> processedInterfaces, boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
-
-      MetaClass cls = type;
-      do {
-        if (cls != type && cls.isPublic() && (cls.isAbstract() || cls.isInterface())) {
-          final QualifiedTypeInjectorDelegate injectorDelegate
-                  = new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
-
-          _registerInjector(cls, injectorDelegate, false);
-        }
-
-        for (MetaClass iface : cls.getInterfaces()) {
-          if (!iface.isPublic()) continue;
-
-          final QualifiedTypeInjectorDelegate injectorDelegate
-                  = new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
-
-          _registerInjector(iface, injectorDelegate, false);
-        }
-      }
-      while ((cls = cls.getSuperClass()) != null);
     }
     else if (allowOverride) {
       Iterator<Injector> iter = injectorList.iterator();
@@ -345,13 +319,40 @@ public class InjectionContext {
       }
     }
 
+    registerInjectorsForSuperTypesAndInterfaces(type, injector, processedInterfaces);
     injectorList.add(injector);
+  }
+
+  public void registerInjectorsForSuperTypesAndInterfaces(MetaClass type, Injector injector,
+      Set<MetaClass> processedInterfaces) {
+    MetaClass cls = type;
+    do {
+      if (cls != type && cls.isPublic() && (cls.isAbstract() || cls.isInterface())) {
+          final QualifiedTypeInjectorDelegate injectorDelegate =
+              new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
+
+          registerInjector(cls, injectorDelegate, processedInterfaces, false);
+          continue;
+      }
+
+      for (MetaClass iface : cls.getInterfaces()) {
+        if (!iface.isPublic())
+          continue;
+
+        if (processedInterfaces.add(iface)) {
+          final QualifiedTypeInjectorDelegate injectorDelegate =
+              new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+
+          registerInjector(iface, injectorDelegate, processedInterfaces, false);
+        }
+      }
+    }
+    while ((cls = cls.getSuperClass()) != null);
   }
 
   public void registerDecorator(IOCDecoratorExtension<?> iocExtension) {
     decorators.get(iocExtension.decoratesWith()).add(iocExtension);
   }
-
 
   public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
     return Collections.unmodifiableSet(decorators.keySet());
@@ -396,7 +397,6 @@ public class InjectionContext {
     privateFieldsToExpose.put(field, accessType);
   }
 
-
   public void addExposedMethod(MetaMethod method) {
     String methodSignature = PrivateAccessUtil.getPrivateMethodName(method);
     if (!exposedMembers.contains(methodSignature)) {
@@ -417,7 +417,8 @@ public class InjectionContext {
   }
 
   public void addType(MetaClass type) {
-    if (injectors.containsKey(type)) return;
+    if (injectors.containsKey(type))
+      return;
     registerInjector(new TypeInjector(type, this));
   }
 
@@ -427,7 +428,6 @@ public class InjectionContext {
     registerInjector(inj);
   }
 
-
   public IOCProcessingContext getProcessingContext() {
     return processingContext;
   }
@@ -435,7 +435,6 @@ public class InjectionContext {
   public void addEnabledAlternative(String name) {
     enabledAlternatives.add(name);
   }
-
 
   public void mapElementType(WiringElementType type, Class<? extends Annotation> annotationType) {
     elementBindings.put(type, annotationType);
@@ -451,7 +450,8 @@ public class InjectionContext {
 
   public boolean isAnyOfElementTypes(HasAnnotations hasAnnotations, WiringElementType... types) {
     for (WiringElementType t : types) {
-      if (isElementType(t, hasAnnotations)) return true;
+      if (isElementType(t, hasAnnotations))
+        return true;
     }
     return false;
   }
@@ -462,7 +462,7 @@ public class InjectionContext {
 
   /**
    * Overloaded version to check GWT's JClassType classes.
-   *
+   * 
    * @param type
    * @param hasAnnotations
    * @return
@@ -484,7 +484,6 @@ public class InjectionContext {
     }
     return null;
   }
-
 
   public Collection<Map.Entry<WiringElementType, Class<? extends Annotation>>> getAllElementMappings() {
     return unmodifiableCollection(elementBindings.entries());

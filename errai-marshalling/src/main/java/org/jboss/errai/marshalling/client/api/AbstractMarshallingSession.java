@@ -20,42 +20,70 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
+
 /**
  * @author Mike Brock
  */
 public abstract class AbstractMarshallingSession implements MarshallingSession {
+  private final MappingContext context;
+
   private final Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
   private final Map<String, Object> objectMap = new HashMap<String, Object>();
   private String assumedElementType = null;
+  
+  protected AbstractMarshallingSession(MappingContext context) {
+    this.context = Assert.notNull(context);
+  }
 
   @Override
-  public boolean hasObject(final String hashCode) {
+  public Marshaller<Object> getMarshallerInstance(String fqcn) {
+    Marshaller<Object> marshaller = context.getMarshaller(fqcn);
+    if (marshaller == null) {
+      if (fqcn.startsWith("[")) {
+        String componentClassName = MarshallUtil.getComponentClassName(fqcn);
+        marshaller = context.getMarshaller(componentClassName);
+        if (marshaller != null) {
+          marshaller = new ArrayMarshallerWrapper(marshaller);
+        }
+      } 
+    }
+    return marshaller;
+  }
+
+  @Override
+  public MappingContext getMappingContext() {
+    return context;
+  }
+
+  @Override
+  public boolean hasObject(String hashCode) {
     return objectMap.containsKey(hashCode);
   }
 
   @Override
-  public boolean hasObject(final Object reference) {
+  public boolean hasObject(Object reference) {
     return reference != null && objects.containsKey(reference);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public <T> T getObject(final Class<T> type, final String hashCode) {
+  public <T> T getObject(Class<T> type, String hashCode) {
     return (T) objectMap.get(hashCode);
   }
 
   @Override
-  public void recordObject(final String hashCode, final Object instance) {
+  public void recordObject(String hashCode, Object instance) {
     if ("-1".equals(hashCode)) return;
 
     objectMap.put(hashCode, instance);
   }
 
   @Override
-  public String getObject(final Object reference) {
+  public String getObject(Object reference) {
     Integer i = objects.get(reference);
-    final String s;
-    
+    String s;
+
     if (i == null) {
       objects.put(reference, (i = objects.size() + 1));
       recordObject(s = i.toString(), reference);
@@ -73,7 +101,7 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   @Override
-  public void setAssumedElementType(final String assumendElementType) {
+  public void setAssumedElementType(String assumendElementType) {
      this.assumedElementType = assumendElementType;
   }
 }

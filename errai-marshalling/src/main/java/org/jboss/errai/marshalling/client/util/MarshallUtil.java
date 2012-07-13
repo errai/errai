@@ -68,6 +68,11 @@ public class MarshallUtil {
       public Class<Object> getTypeHandled() {
         return type;
       }
+
+      @Override
+      public Object[] getEmptyArray() {
+        throw new UnsupportedOperationException("Not implemented!");
+      }
     };
   }
 
@@ -127,7 +132,7 @@ public class MarshallUtil {
         }
     }
   }
-  
+
   public static Marshaller<Object> getMarshaller(Object obj, MarshallingSession session) {
     Marshaller<Object> m = session.getMarshallerInstance(obj.getClass().getName());
     if (m == null && obj instanceof WrappedPortable) {
@@ -146,5 +151,31 @@ public class MarshallUtil {
 
   public static boolean isEncodedNumeric(final EJObject value) {
     return value.containsKey(SerializationParts.NUMERIC_VALUE);
+  }
+
+  /**
+   * Returns the canonical class name of the component type of the given array type.
+   *
+   * @param fqcn An array type of any number of dimensions, such as {@code [[Ljava.lang.String;}.
+   * @return A class name, such as {@code java.lang.String}.
+   */
+  public static String getComponentClassName(String fqcn) {
+
+    int dims = 0;
+    if (fqcn.startsWith("[") && fqcn.endsWith(";")) {
+      while (fqcn.length() > 0 && fqcn.charAt(0) == '[') {
+        fqcn = fqcn.substring(1);
+        dims++;
+      }
+
+      // unfortunately, array types are stored in the map using internal JVM names
+      // like "[Ljava.lang.Object;" but scalar types are stored under their regular
+      // fully-qualified name like "java.lang.Object". We have to strip off the L and ;.
+      if (dims > 0) {
+        fqcn = fqcn.substring(1, fqcn.length() - 1);
+      }
+    }
+
+    return fqcn;
   }
 }

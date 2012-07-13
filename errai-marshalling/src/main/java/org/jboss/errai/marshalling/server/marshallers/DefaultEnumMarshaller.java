@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import java.lang.reflect.Array;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -63,6 +65,11 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
             + "\","
             + "\"" + SerializationParts.OBJECT_ID + "\":\"" + a1.getObject(a0) + "\""
             + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"").append(a0.name()).append("\"}").toString();
+  }
+
+  @Override
+  public Enum[] getEmptyArray() {
+    return (Enum[]) Array.newInstance(enumType, 0);
   }
 
 }
