@@ -27,12 +27,13 @@ import java.io.InputStream;
  * @author Mike Brock
  */
 public abstract class ServerMarshalling extends Marshalling {
-  public static <T> T fromJSON(InputStream inputStream, Class<T> type) throws IOException {
-    MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
+  @SuppressWarnings("unchecked")
+  public static <T> T fromJSON(final InputStream inputStream, final Class<T> type) throws IOException {
+    final MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
     return (T) session.getMarshallerInstance(type.getName()).demarshall(JSONStreamDecoder.decode(inputStream), session);
   }
 
-  public static Object fromJSON(InputStream inputStream) throws IOException {
+  public static Object fromJSON(final InputStream inputStream) throws IOException {
     return fromJSON(inputStream, Object.class);
   }
 }

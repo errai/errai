@@ -37,7 +37,7 @@ public class EncodingSession extends AbstractMarshallingSession {
     if (o == null) return null;
 
     if (o instanceof Map) {
-      Map map = (Map) o;
+      final Map map = (Map) o;
       if (map.containsKey(SerializationParts.ENCODED_TYPE)) {
         return (String) map.get(SerializationParts.ENCODED_TYPE);
       }
@@ -51,7 +51,7 @@ public class EncodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public Marshaller<Object> getMarshallerInstance(String fqcn) {
+  public Marshaller<Object> getMarshallerInstance(final String fqcn) {
     final Marshaller<Object> m = context.getMarshaller(fqcn);
     if (m == null) {
       throw new RuntimeException("no marshaller available for: " + fqcn);

@@ -25,9 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Mike Brock
  */
 public class DefaultEnumMarshaller implements Marshaller<Enum> {
-  private Class enumType;
+  private final Class enumType;
 
-  public DefaultEnumMarshaller(Class enumType) {
+  public DefaultEnumMarshaller(final Class enumType) {
     this.enumType = enumType;
   }
 
@@ -36,7 +36,7 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
     return Enum.class;
   }
 
-  public Enum demarshall(EJValue a0, MarshallingSession a1) {
+  public Enum demarshall(final EJValue a0, final MarshallingSession a1) {
     try {
       if (a0.isNull()) {
         return null;
@@ -49,7 +49,7 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
     }
   }
 
-  public String marshall(Enum a0, MarshallingSession a1) {
+  public String marshall(final Enum a0, final MarshallingSession a1) {
     if (a0 == null) {
       return "null";
     }

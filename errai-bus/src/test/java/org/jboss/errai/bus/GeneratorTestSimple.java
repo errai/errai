@@ -17,14 +17,14 @@
 package org.jboss.errai.bus;
 
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
-import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
+import org.jboss.errai.marshalling.rebind.MarshallerOutputTarget;
 
 /**
  * @author Mike Brock
  */
 public class GeneratorTestSimple {
   public static void main(String[] args) {
-    String s = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT)
+    String s = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.GWT)
             .generate("org.jboss.errai.marshalling.client.api", "MarshallerFactoryImpl");
     System.out.println(s);
   }

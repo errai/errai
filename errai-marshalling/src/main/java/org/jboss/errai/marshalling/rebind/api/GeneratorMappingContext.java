@@ -28,9 +28,7 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,20 +38,20 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   private final DefinitionsFactory definitionsFactory = DefinitionsFactorySingleton.get();
 
-  private Set<String> generatedMarshallers = new HashSet<String>();
-  private List<String> renderedMarshallers = new ArrayList<String>();
+  private final Set<String> generatedMarshallers = new HashSet<String>();
 
-  private Context codegenContext;
+  private final Context codegenContext;
 
-  private MetaClass generatedBootstrapClass;
-  private ClassStructureBuilder<?> classStructureBuilder;
-  private ArrayMarshallerCallback arrayMarshallerCallback;
+  private final MetaClass generatedBootstrapClass;
+  private final ClassStructureBuilder<?> classStructureBuilder;
+  private final ArrayMarshallerCallback arrayMarshallerCallback;
 
-  private Set<String> exposedMembers = new HashSet<String>();
+  private final Set<String> exposedMembers = new HashSet<String>();
 
-  public GeneratorMappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
-                                 ClassStructureBuilder<?> classStructureBuilder,
-                                 ArrayMarshallerCallback callback) {
+  public GeneratorMappingContext(final Context codegenContext,
+                                 final MetaClass generatedBootstrapClass,
+                                 final ClassStructureBuilder<?> classStructureBuilder,
+                                 final ArrayMarshallerCallback callback) {
 
     this.codegenContext = codegenContext;
     this.generatedBootstrapClass = generatedBootstrapClass;
@@ -67,34 +65,30 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return definitionsFactory;
   }
 
-  public void registerGeneratedMarshaller(String clazzName) {
+  public void registerGeneratedMarshaller(final String clazzName) {
     generatedMarshallers.add(clazzName);
   }
 
 
-  public boolean hasMarshaller(String clazzName) {
+  public boolean hasMarshaller(final String clazzName) {
     return definitionsFactory.hasDefinition(clazzName);
   }
 
   @Override
-  public Marshaller<Object> getMarshaller(String clazz) {
+  public Marshaller<Object> getMarshaller(final String clazz) {
     return null;
   }
 
-  private boolean hasGeneratedMarshaller(String clazzName) {
+  private boolean hasGeneratedMarshaller(final String clazzName) {
     return generatedMarshallers.contains(clazzName);
   }
 
-  public boolean canMarshal(String clazz) {
+  public boolean canMarshal(final String clazz) {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }
 
   public Context getCodegenContext() {
     return codegenContext;
-  }
-
-  public void markRendered(String className) {
-    renderedMarshallers.add(className);
   }
 
   public MetaClass getGeneratedBootstrapClass() {
@@ -109,7 +103,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return arrayMarshallerCallback;
   }
 
-  private static String getPrivateMemberName(MetaClassMember member) {
+  private static String getPrivateMemberName(final MetaClassMember member) {
     if (member instanceof MetaField) {
       return PrivateAccessUtil.getPrivateFieldInjectorName((MetaField) member);
     }
@@ -118,11 +112,11 @@ public class GeneratorMappingContext implements ServerMappingContext {
     }
   }
 
-  public void markExposed(MetaClassMember member) {
+  public void markExposed(final MetaClassMember member) {
     exposedMembers.add(getPrivateMemberName(member));
   }
 
-  public boolean isExposed(MetaClassMember member) {
+  public boolean isExposed(final MetaClassMember member) {
     return exposedMembers.contains(getPrivateMemberName(member));
   }
 }

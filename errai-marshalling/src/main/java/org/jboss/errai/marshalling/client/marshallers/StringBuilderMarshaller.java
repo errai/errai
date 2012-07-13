@@ -30,7 +30,6 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 public class StringBuilderMarshaller extends AbstractNullableMarshaller<StringBuilder> {
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
 
-
   @Override
   public Class<StringBuilder> getTypeHandled() {
     return StringBuilder.class;

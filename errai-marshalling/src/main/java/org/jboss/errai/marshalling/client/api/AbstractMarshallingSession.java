@@ -24,36 +24,37 @@ import java.util.Map;
  * @author Mike Brock
  */
 public abstract class AbstractMarshallingSession implements MarshallingSession {
-  private Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
-  private Map<String, Object> objectMap = new HashMap<String, Object>();
+  private final Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
+  private final Map<String, Object> objectMap = new HashMap<String, Object>();
   private String assumedElementType = null;
 
   @Override
-  public boolean hasObject(String hashCode) {
+  public boolean hasObject(final String hashCode) {
     return objectMap.containsKey(hashCode);
   }
 
   @Override
-  public boolean hasObject(Object reference) {
+  public boolean hasObject(final Object reference) {
     return reference != null && objects.containsKey(reference);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <T> T getObject(Class<T> type, String hashCode) {
+  public <T> T getObject(final Class<T> type, final String hashCode) {
     return (T) objectMap.get(hashCode);
   }
 
   @Override
-  public void recordObject(String hashCode, Object instance) {
+  public void recordObject(final String hashCode, final Object instance) {
     if ("-1".equals(hashCode)) return;
 
     objectMap.put(hashCode, instance);
   }
 
   @Override
-  public String getObject(Object reference) {
+  public String getObject(final Object reference) {
     Integer i = objects.get(reference);
-    String s;
+    final String s;
     
     if (i == null) {
       objects.put(reference, (i = objects.size() + 1));
@@ -72,7 +73,7 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   @Override
-  public void setAssumedElementType(String assumendElementType) {
+  public void setAssumedElementType(final String assumendElementType) {
      this.assumedElementType = assumendElementType;
   }
 }
