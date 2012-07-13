@@ -302,7 +302,7 @@ public class InjectionContext {
     registerInjector(injector.getInjectedType(), injector, new HashSet<MetaClass>(), true);
   }
 
-  private void registerInjector(MetaClass type, Injector injector, Set<MetaClass> processedInterfaces, boolean allowOverride) {
+  private void registerInjector(MetaClass type, Injector injector, Set<MetaClass> processedTypes, boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
@@ -319,31 +319,33 @@ public class InjectionContext {
       }
     }
 
-    registerInjectorsForSuperTypesAndInterfaces(type, injector, processedInterfaces);
+    registerInjectorsForSuperTypesAndInterfaces(type, injector, processedTypes);
     injectorList.add(injector);
   }
 
   public void registerInjectorsForSuperTypesAndInterfaces(MetaClass type, Injector injector,
-      Set<MetaClass> processedInterfaces) {
+      Set<MetaClass> processedTypes) {
     MetaClass cls = type;
     do {
       if (cls != type && cls.isPublic() && (cls.isAbstract() || cls.isInterface())) {
+        if (processedTypes.add(cls)) {
           final QualifiedTypeInjectorDelegate injectorDelegate =
               new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
 
-          registerInjector(cls, injectorDelegate, processedInterfaces, false);
-          continue;
+          registerInjector(cls, injectorDelegate, processedTypes, false);
+        }
+        continue;
       }
 
       for (MetaClass iface : cls.getInterfaces()) {
         if (!iface.isPublic())
           continue;
 
-        if (processedInterfaces.add(iface)) {
+        if (processedTypes.add(iface)) {
           final QualifiedTypeInjectorDelegate injectorDelegate =
               new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
 
-          registerInjector(iface, injectorDelegate, processedInterfaces, false);
+          registerInjector(iface, injectorDelegate, processedTypes, false);
         }
       }
     }
