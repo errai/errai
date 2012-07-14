@@ -16,11 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
@@ -28,6 +23,11 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 public abstract class AbstractInjector implements Injector {
   protected QualifyingMetadata qualifyingMetadata;
@@ -203,7 +203,7 @@ public abstract class AbstractInjector implements Injector {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       _registerCache = new RegisterCache(context, valueRef);
 
-      context.getProcessingContext().appendToEnd(
+      context.getProcessingContext().globalAppend(
               loadVariable(context.getProcessingContext().getContextVariableReference())
                       .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
                               isSingleton() ? valueRef : null, qualifyingMetadata.render())

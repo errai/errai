@@ -17,10 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
@@ -29,16 +25,11 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.util.PrivateAccessType;
-import org.jboss.errai.codegen.util.Refs;
-import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
-import org.jboss.errai.ioc.client.container.BeanRef;
-import org.jboss.errai.ioc.client.container.CreationalCallback;
-import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
@@ -48,19 +39,13 @@ import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
 import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProducerInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
@@ -68,7 +53,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -78,13 +62,10 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortAndPartitionGraph;
 import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
@@ -179,6 +160,8 @@ public class IOCProcessorFactory {
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
               final MetaClass MC_ContextualTypeProvider = MetaClassFactory.get(ContextualTypeProvider.class);
 
+
+
               MetaClass providerInterface = null;
               MetaClass providedType;
 
@@ -208,7 +191,6 @@ public class IOCProcessorFactory {
                 }
 
                 injectionContext.registerInjector(new ProviderInjector(providedType, providerClassType, injectionContext));
-
               }
               else if (MC_ContextualTypeProvider.isAssignableFrom(providerClassType)) {
                 for (MetaClass iface : providerClassType.getInterfaces()) {
@@ -241,6 +223,8 @@ public class IOCProcessorFactory {
                 throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
                         + " does not implement: " + Provider.class.getName() + " or " + ContextualTypeProvider.class);
               }
+
+              graphBuilder.addDependency(providedType, Dependency.on(providerClassType));
 
               control.masqueradeAs(providedType);
               super.getDependencies(control, instance, annotation, context);
@@ -401,10 +385,14 @@ public class IOCProcessorFactory {
     List<SortUnit> toSort = graphBuilder.build();
     List<SortUnit> list = sortGraph(toSort);
 
-    for (SortUnit unit : list) {
-      for (Object item : unit.getItems()) {
-        if (item instanceof ProcessingDelegate) {
-          ((ProcessingDelegate) item).process();
+    final Set<List<SortUnit>> partitions = sortAndPartitionGraph(toSort);
+    for (final List<SortUnit> partitionList : partitions) {
+      context.globalAppend(new SplitPoint());
+      for (final SortUnit unit : partitionList) {
+        for (final Object item : unit.getItems()) {
+          if (item instanceof ProcessingDelegate) {
+            ((ProcessingDelegate) item).process();
+          }
         }
       }
     }
@@ -623,6 +611,10 @@ public class IOCProcessorFactory {
     public String toString() {
       return "Scope:" + annotationClass.getName();
     }
+  }
+
+  public GraphBuilder getGraphBuilder() {
+    return graphBuilder;
   }
 
   private static interface ProcessingDelegate {

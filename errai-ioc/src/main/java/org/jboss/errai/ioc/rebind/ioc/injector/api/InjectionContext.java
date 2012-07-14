@@ -19,6 +19,9 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -51,10 +54,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static java.util.Collections.unmodifiableCollection;
 
 public class InjectionContext {
-  private final IOCProcessingContext processingContext;
+  private IOCProcessingContext processingContext;
 
   private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings = HashMultimap.create();
 
@@ -91,7 +109,7 @@ public class InjectionContext {
     List<Injector> matching = new ArrayList<Injector>();
 
     if (injs != null) {
-      for (Injector inj : injs) {
+      for (final Injector inj : injs) {
         if (inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
         }
@@ -115,7 +133,7 @@ public class InjectionContext {
     boolean alternativeBeans = false;
 
     if (injs != null) {
-      for (Injector inj : injs) {
+      for (final Injector inj : injs) {
         if (inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
           if (inj.isAlternative()) {
@@ -130,7 +148,7 @@ public class InjectionContext {
     }
     else if (matching.size() > 1) {
       if (alternativeBeans) {
-        Iterator<Injector> matchIter = matching.iterator();
+        final Iterator<Injector> matchIter = matching.iterator();
         while (matchIter.hasNext()) {
           if (!enabledAlternatives.contains(matchIter.next().getInjectedType().getFullyQualifiedName())) {
             matchIter.remove();
@@ -139,8 +157,8 @@ public class InjectionContext {
       }
 
       if (IOCGenerator.isTestMode) {
-        List<Injector> matchingMocks = new ArrayList<Injector>();
-        for (Injector inj : matching) {
+        final List<Injector> matchingMocks = new ArrayList<Injector>();
+        for (final Injector inj : matching) {
           if (inj.isTestmock()) {
             matchingMocks.add(inj);
           }
@@ -159,8 +177,8 @@ public class InjectionContext {
         return matching.get(0);
       }
 
-      StringBuilder buf = new StringBuilder();
-      for (Injector inj : matching) {
+      final StringBuilder buf = new StringBuilder();
+      for (final Injector inj : matching) {
         buf.append("     matching> ").append(inj.toString()).append("\n");
       }
 
@@ -175,21 +193,21 @@ public class InjectionContext {
     }
   }
 
-  public void recordCycle(MetaClass from, MetaClass to) {
+  public void recordCycle(final MetaClass from, final MetaClass to) {
     cyclingTypes.put(from, to);
   }
 
-  public boolean cycles(MetaClass from, MetaClass to) {
+  public boolean cycles(final MetaClass from, final MetaClass to) {
     return cyclingTypes.containsEntry(from, to);
   }
 
-  public void addProxiedInjector(ProxyInjector proxyInjector) {
+  public void addProxiedInjector(final ProxyInjector proxyInjector) {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
 
-  public boolean isProxiedInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
+  public boolean isProxiedInjectorRegistered(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
-      for (Injector inj : proxiedInjectors.get(injectorType.getErased())) {
+      for (final Injector inj : proxiedInjectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
           return true;
         }
@@ -198,9 +216,9 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
+  public boolean isInjectorRegistered(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
     if (injectors.containsKey(injectorType.getErased())) {
-      for (Injector inj : injectors.get(injectorType.getErased())) {
+      for (final Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
           return true;
         }
@@ -209,9 +227,9 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isInjectableQualified(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
+  public boolean isInjectableQualified(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
     if (injectors.containsKey(injectorType.getErased())) {
-      for (Injector inj : injectors.get(injectorType.getErased())) {
+      for (final Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
           return inj.isRendered();
         }
@@ -220,7 +238,7 @@ public class InjectionContext {
     return false;
   }
 
-  public Injector getInjector(Class<?> injectorType) {
+  public Injector getInjector(final Class<?> injectorType) {
     return getInjector(MetaClassFactory.get(injectorType));
   }
 
@@ -262,20 +280,21 @@ public class InjectionContext {
     return injectorList.get(0);
   }
 
-  public void registerInjector(Injector injector) {
+  public void registerInjector(final Injector injector) {
     registerInjector(injector.getInjectedType(), injector, new HashSet<MetaClass>(), true);
   }
 
   private void registerInjector(MetaClass type, Injector injector, Set<MetaClass> processedTypes, boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
+
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
     }
     else if (allowOverride) {
-      Iterator<Injector> iter = injectorList.iterator();
+      final Iterator<Injector> iter = injectorList.iterator();
 
       while (iter.hasNext()) {
-        Injector inj = iter.next();
+        final Injector inj = iter.next();
 
         if (inj.isPseudo()) {
           iter.remove();
@@ -301,13 +320,13 @@ public class InjectionContext {
         continue;
       }
 
-      for (MetaClass iface : cls.getInterfaces()) {
+      for (final MetaClass iface : cls.getInterfaces()) {
         if (!iface.isPublic())
           continue;
 
         if (processedTypes.add(iface)) {
           final QualifiedTypeInjectorDelegate injectorDelegate =
-              new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+                  new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
 
           registerInjector(iface, injectorDelegate, processedTypes, false);
         }
@@ -316,7 +335,7 @@ public class InjectionContext {
     while ((cls = cls.getSuperClass()) != null);
   }
 
-  public void registerDecorator(IOCDecoratorExtension<?> iocExtension) {
+  public void registerDecorator(final IOCDecoratorExtension<?> iocExtension) {
     decorators.get(iocExtension.decoratesWith()).add(iocExtension);
   }
 
@@ -324,14 +343,14 @@ public class InjectionContext {
     return Collections.unmodifiableSet(decorators.keySet());
   }
 
-  public IOCDecoratorExtension[] getDecorator(Class<? extends Annotation> annotation) {
-    Collection<IOCDecoratorExtension> decs = decorators.get(annotation);
-    IOCDecoratorExtension[] da = new IOCDecoratorExtension[decs.size()];
+  public IOCDecoratorExtension[] getDecorator(final Class<? extends Annotation> annotation) {
+    final Collection<IOCDecoratorExtension> decs = decorators.get(annotation);
+    final IOCDecoratorExtension[] da = new IOCDecoratorExtension[decs.size()];
     decs.toArray(da);
     return da;
   }
 
-  public Collection<Class<? extends Annotation>> getDecoratorAnnotationsBy(ElementType type) {
+  public Collection<Class<? extends Annotation>> getDecoratorAnnotationsBy(final ElementType type) {
     if (decoratorsByElementType.size() == 0) {
       sortDecorators();
     }
@@ -344,16 +363,16 @@ public class InjectionContext {
   }
 
   private void sortDecorators() {
-    for (Class<? extends Annotation> a : getDecoratorAnnotations()) {
+    for (final Class<? extends Annotation> a : getDecoratorAnnotations()) {
       if (a.isAnnotationPresent(Target.class)) {
-        for (ElementType type : a.getAnnotation(Target.class).value()) {
+        for (final ElementType type : a.getAnnotation(Target.class).value()) {
           decoratorsByElementType.get(type).add(a);
         }
       }
     }
   }
 
-  public void addExposedField(MetaField field, PrivateAccessType accessType) {
+  public void addExposedField(final MetaField field, PrivateAccessType accessType) {
     if (!privateFieldsToExpose.containsKey(field)) {
       privateFieldsToExpose.put(field, accessType);
     }
@@ -363,8 +382,8 @@ public class InjectionContext {
     privateFieldsToExpose.put(field, accessType);
   }
 
-  public void addExposedMethod(MetaMethod method) {
-    String methodSignature = PrivateAccessUtil.getPrivateMethodName(method);
+  public void addExposedMethod(final MetaMethod method) {
+    final String methodSignature = PrivateAccessUtil.getPrivateMethodName(method);
     if (!exposedMembers.contains(methodSignature)) {
       exposedMembers.add(methodSignature);
     }
@@ -382,14 +401,14 @@ public class InjectionContext {
     return unmodifiableCollection(privateMethodsToExpose);
   }
 
-  public void addType(MetaClass type) {
+  public void addType(final MetaClass type) {
     if (injectors.containsKey(type))
       return;
     registerInjector(new TypeInjector(type, this));
   }
 
-  public void addPsuedoScopeForType(MetaClass type) {
-    TypeInjector inj = new TypeInjector(type, this);
+  public void addPsuedoScopeForType(final MetaClass type) {
+    final TypeInjector inj = new TypeInjector(type, this);
     inj.setReplaceable(true);
     registerInjector(inj);
   }
@@ -398,43 +417,44 @@ public class InjectionContext {
     return processingContext;
   }
 
-  public void addEnabledAlternative(String name) {
+  public void addEnabledAlternative(final String name) {
     enabledAlternatives.add(name);
   }
 
-  public void mapElementType(WiringElementType type, Class<? extends Annotation> annotationType) {
+  public void mapElementType(final WiringElementType type, final Class<? extends Annotation> annotationType) {
     elementBindings.put(type, annotationType);
   }
 
-  public Collection<Class<? extends Annotation>> getAnnotationsForElementType(WiringElementType type) {
+  public Collection<Class<? extends Annotation>> getAnnotationsForElementType(final WiringElementType type) {
     return unmodifiableCollection(elementBindings.get(type));
   }
 
-  public boolean isAnyKnownElementType(HasAnnotations hasAnnotations) {
+  public boolean isAnyKnownElementType(final HasAnnotations hasAnnotations) {
     return isAnyOfElementTypes(hasAnnotations, WiringElementType.values());
   }
 
-  public boolean isAnyOfElementTypes(HasAnnotations hasAnnotations, WiringElementType... types) {
-    for (WiringElementType t : types) {
+  public boolean isAnyOfElementTypes(final HasAnnotations hasAnnotations, final WiringElementType... types) {
+    for (final WiringElementType t : types) {
       if (isElementType(t, hasAnnotations))
         return true;
     }
     return false;
   }
 
-  public boolean isElementType(WiringElementType type, HasAnnotations hasAnnotations) {
+  public boolean isElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
     return getMatchingAnnotationForElementType(type, hasAnnotations) != null;
   }
 
   /**
    * Overloaded version to check GWT's JClassType classes.
-   * 
+   *
    * @param type
    * @param hasAnnotations
+   *
    * @return
    */
-  public boolean isElementType(WiringElementType type, com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
-    for (Annotation a : hasAnnotations.getAnnotations()) {
+  public boolean isElementType(final WiringElementType type, final com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
+    for (final Annotation a : hasAnnotations.getAnnotations()) {
       if (getAnnotationsForElementType(type).contains(a.annotationType())) {
         return true;
       }
@@ -442,8 +462,8 @@ public class InjectionContext {
     return false;
   }
 
-  public Annotation getMatchingAnnotationForElementType(WiringElementType type, HasAnnotations hasAnnotations) {
-    for (Annotation a : hasAnnotations.getAnnotations()) {
+  public Annotation getMatchingAnnotationForElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
+    for (final Annotation a : hasAnnotations.getAnnotations()) {
       if (getAnnotationsForElementType(type).contains(a.annotationType())) {
         return a;
       }
@@ -481,15 +501,15 @@ public class InjectionContext {
     allowProxyCapture = false;
   }
 
-  public void setAttribute(String name, Object value) {
+  public void setAttribute(final String name, final Object value) {
     attributeMap.put(name, value);
   }
 
-  public Object getAttribute(String name) {
+  public Object getAttribute(final String name) {
     return attributeMap.get(name);
   }
 
-  public boolean hasAttribute(String name) {
+  public boolean hasAttribute(final String name) {
     return attributeMap.containsKey(name);
   }
 }

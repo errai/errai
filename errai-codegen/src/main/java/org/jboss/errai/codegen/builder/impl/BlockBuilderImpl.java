@@ -24,6 +24,11 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.BuildCallback;
 import org.jboss.errai.codegen.meta.MetaClass;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -101,10 +106,38 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
   }
 
   @Override
+  public List<Statement> splitFrom(final Statement statement) {
+    final List<Statement> statements = blockStatement.getStatements();
+    final int index = statements.indexOf(statement);
+
+    if (index > 0) {
+      final List<Statement> split = new ArrayList<Statement>(statements.subList(index, statements.size()));
+      statements.removeAll(split);
+      return split;
+    }
+    else {
+      return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public Statement peek() {
+    final List<Statement> statements = blockStatement.getStatements();
+    return statements.isEmpty() ? null : statements.get(statements.size() - 1);
+  }
+
+  @Override
+  public Iterator<Statement> iterator() {
+    return blockStatement.getStatements().iterator();
+  }
+
+  @Override
   public T finish() {
     if (callback != null) {
       return callback.callback(blockStatement);
     }
     return null;
   }
+
+
 }
