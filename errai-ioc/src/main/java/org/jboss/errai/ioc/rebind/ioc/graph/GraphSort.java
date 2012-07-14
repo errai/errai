@@ -56,25 +56,19 @@ public final class GraphSort {
   public static Set<List<SortUnit>> sortAndPartitionGraph(final Collection<SortUnit> in) {
     final Map<MetaClass, Set<SortUnit>> builderMap = new LinkedHashMap<MetaClass, Set<SortUnit>>();
 
-    for (final SortUnit unit : in) {
+    for (final SortUnit unit : sortGraph(in)) {
       final Set<SortUnit> traversal = new HashSet<SortUnit>();
       _traverseGraphExtent(traversal, unit);
 
-      Set<SortUnit> partition = null;
-      for (final SortUnit travUnit : traversal) {
-        if (builderMap.containsKey(travUnit.getType())) {
-          partition = builderMap.get(travUnit.getType());
-          break;
+      final Set<SortUnit> partition = new HashSet<SortUnit>(traversal);
+      for (final SortUnit tUnit : traversal) {
+        final Set<SortUnit> c = builderMap.get(tUnit.getType());
+        if (c != null) {
+          partition.addAll(c);
         }
       }
 
-      if (partition == null) {
-        partition = new HashSet<SortUnit>();
-      }
-
-      partition.addAll(traversal);
-
-      for (final SortUnit partitionedUnit : traversal) {
+      for (final SortUnit partitionedUnit : partition) {
         builderMap.put(partitionedUnit.getType(), partition);
       }
     }
