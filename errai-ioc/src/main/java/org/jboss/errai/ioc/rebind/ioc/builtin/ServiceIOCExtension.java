@@ -16,16 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.builtin;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.ioc.util.MessageCallbackWrapper.wrapMessageCallbackInAsync;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
-
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Local;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.Parameter;
@@ -42,7 +34,14 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.jboss.errai.ioc.util.MessageCallbackWrapper;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.ioc.util.MessageCallbackWrapper.wrapMessageCallbackInAsync;
 
 @SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
@@ -60,7 +59,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
      */
     injectableInstance.ensureMemberExposed();
 
-    final Statement busHandle = ctx.getInjector(MessageBus.class).getBeanInstance(injectableInstance);
+    // final Statement busHandle = ctx.getInjector(MessageBus.class).getBeanInstance(injectableInstance);
 
     /**
      * Figure out the service name;
@@ -80,11 +79,11 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
     Statement subscribeStatement;
 
     if (local) {
-      subscribeStatement = Stmt.nestedCall(busHandle)
+      subscribeStatement = Stmt.invokeStatic(ErraiBus.class, "get")
               .invoke("subscribeLocal", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
     else {
-      subscribeStatement = Stmt.nestedCall(busHandle)
+      subscribeStatement = Stmt.invokeStatic(ErraiBus.class, "get")
               .invoke("subscribe", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
 
