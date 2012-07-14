@@ -16,23 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import static java.util.Collections.unmodifiableCollection;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -50,9 +36,22 @@ import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Collections.unmodifiableCollection;
 
 public class InjectionContext {
   private final IOCProcessingContext processingContext;
