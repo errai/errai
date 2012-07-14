@@ -18,8 +18,8 @@ package org.jboss.errai.enterprise.rebind;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.ClassScanner;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
@@ -68,20 +68,17 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
   }
 
-  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext,
+  public void afterInitialization(IOCProcessingContext context,
+                                  InjectionContext injectionContext,
                                   IOCProcessorFactory procFactory) {
 
 
     final Set<MetaClass> knownObserverTypes = new HashSet<MetaClass>();
 
-    for (MetaClass type : injectionContext.getAllKnownInjectionTypes()) {
-      for (MetaMethod method : type.getMethods()) {
-        for (MetaParameter parameter : method.getParameters()) {
-          if (parameter.isAnnotationPresent(Observes.class)) {
-            knownObserverTypes.add(parameter.getType());
-          }
-        }
-      }
+    for (MetaParameter parameter : ClassScanner.getParametersAnnotatedWith(Observes.class)) {
+      knownObserverTypes.add(parameter.getType());
+//      injectionContext.getGraphBuilder().addDependency(parameter.getDeclaringMember().getDeclaringClass(),
+//              Dependency.on(MessageBus.class));
     }
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
@@ -96,7 +93,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     addTypeHeirarchyFor(context, knownTypesWithSuperTypes);
 
     context.append(Stmt.nestedCall(Stmt.newObject(CDI.class))
-                .invoke("__resetSubsystem"));
+            .invoke("__resetSubsystem"));
 
     context.append(Stmt.nestedCall(Stmt.newObject(CDI.class))
             .invoke("initLookupTable", Stmt.invokeStatic(CDIEventTypeLookup.class, "get")));

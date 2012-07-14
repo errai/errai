@@ -15,8 +15,8 @@
  */
 package org.jboss.errai.enterprise.rebind;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
@@ -78,7 +78,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getBeanInstance(instance);
+ //   final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getBeanInstance(instance);
     final List<Annotation> annotations = InjectUtil.extractQualifiers(instance);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
     final List<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
@@ -136,7 +136,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     for (Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
       final String subscrHandle = InjectUtil.getUniqueVarName();
       statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
-              .initializeWith(Stmt.nestedCall(bus).invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
+              .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
                       Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
       destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
     }

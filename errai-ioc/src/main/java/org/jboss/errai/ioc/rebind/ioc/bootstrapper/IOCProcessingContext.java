@@ -94,42 +94,42 @@ public class IOCProcessingContext {
       return new Builder();
     }
 
-    public Builder logger(TreeLogger treeLogger) {
+    public Builder logger(final TreeLogger treeLogger) {
       this.treeLogger = treeLogger;
       return this;
     }
 
-    public Builder generatorContext(GeneratorContext generatorContext) {
+    public Builder generatorContext(final GeneratorContext generatorContext) {
       this.generatorContext = generatorContext;
       return this;
     }
 
-    public Builder sourceWriter(SourceWriter sourceWriter) {
+    public Builder sourceWriter(final SourceWriter sourceWriter) {
       this.sourceWriter = sourceWriter;
       return this;
     }
 
-    public Builder context(Context context) {
+    public Builder context(final Context context) {
       this.context = context;
       return this;
     }
 
-    public Builder bootstrapClassInstance(BuildMetaClass bootstrapClassInstance) {
+    public Builder bootstrapClassInstance(final BuildMetaClass bootstrapClassInstance) {
       this.bootstrapClassInstance = bootstrapClassInstance;
       return this;
     }
 
-    public Builder blockBuilder(BlockBuilder<?> blockBuilder) {
+    public Builder blockBuilder(final BlockBuilder<?> blockBuilder) {
       this.blockBuilder = blockBuilder;
       return this;
     }
 
-    public Builder packages(Set<String> packages) {
+    public Builder packages(final Set<String> packages) {
       this.packages = packages;
       return this;
     }
 
-    public Builder qualifyingMetadata(QualifyingMetadataFactory qualifyingMetadataFactory) {
+    public Builder qualifyingMetadata(final QualifyingMetadataFactory qualifyingMetadataFactory) {
       this.qualifyingMetadataFactory = qualifyingMetadataFactory;
       return this;
     }
@@ -154,19 +154,24 @@ public class IOCProcessingContext {
     return blockBuilder.peek();
   }
 
-  public BlockBuilder<?> append(Statement statement) {
+  public BlockBuilder<?> append(final Statement statement) {
     return getBlockBuilder().append(statement);
   }
 
-  public void globalInsertBefore(Statement statement) {
-    blockBuilder.get(0).insertBefore(statement);
+  public void globalInsertBefore(final Statement statement) {
+    if (blockBuilder.get(0).peek() instanceof SplitPoint) {
+      globalAppend(statement);
+    }
+    else {
+      blockBuilder.get(0).insertBefore(statement);
+    }
   }
 
-  public BlockBuilder<?> globalAppend(Statement statement) {
+  public BlockBuilder<?> globalAppend(final Statement statement) {
     return blockBuilder.get(0).append(statement);
   }
 
-  public void pushBlockBuilder(BlockBuilder<?> blockBuilder) {
+  public void pushBlockBuilder(final BlockBuilder<?> blockBuilder) {
     this.blockBuilder.push(blockBuilder);
   }
 
@@ -178,7 +183,7 @@ public class IOCProcessingContext {
     }
   }
 
-  public void appendToEnd(Statement statement) {
+  public void appendToEnd(final Statement statement) {
     appendToEnd.add(statement);
   }
 
@@ -215,13 +220,13 @@ public class IOCProcessingContext {
     return qualifyingMetadataFactory;
   }
 
-  public void registerTypeDiscoveryListener(TypeDiscoveryListener discoveryListener) {
+  public void registerTypeDiscoveryListener(final TypeDiscoveryListener discoveryListener) {
     this.typeDiscoveryListeners.add(discoveryListener);
   }
 
-  public void handleDiscoveryOfType(InjectionPoint injectionPoint) {
+  public void handleDiscoveryOfType(final InjectionPoint injectionPoint) {
     if (discovered.contains(injectionPoint.getType())) return;
-    for (TypeDiscoveryListener listener : typeDiscoveryListeners) {
+    for (final TypeDiscoveryListener listener : typeDiscoveryListeners) {
       listener.onDiscovery(this, injectionPoint);
     }
     discovered.add(injectionPoint.getType());
