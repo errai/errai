@@ -59,8 +59,6 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
      */
     injectableInstance.ensureMemberExposed();
 
-    // final Statement busHandle = ctx.getInjector(MessageBus.class).getBeanInstance(injectableInstance);
-
     /**
      * Figure out the service name;
      */
