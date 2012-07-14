@@ -82,36 +82,13 @@ public final class GraphSort {
     final Set<List<SortUnit>> consolidated = new LinkedHashSet<List<SortUnit>>();
     final Map<Set<SortUnit>, List<SortUnit>> sortingCache = new IdentityHashMap<Set<SortUnit>, List<SortUnit>>();
 
-    for (final Map.Entry<MetaClass, Set<SortUnit>> metaClassSetEntry : _consolidatePartitions(builderMap).entrySet()) {
+
+    for (final Map.Entry<MetaClass, Set<SortUnit>> metaClassSetEntry : builderMap.entrySet()) {
       if (!sortingCache.containsKey(metaClassSetEntry.getValue())) {
         sortingCache.put(metaClassSetEntry.getValue(), sortGraph(metaClassSetEntry.getValue()));
       }
 
       consolidated.add(sortingCache.get(metaClassSetEntry.getValue()));
-    }
-
-    return consolidated;
-  }
-
-  private static Map<MetaClass, Set<SortUnit>> _consolidatePartitions(final Map<MetaClass, Set<SortUnit>> partitionedMap) {
-    final Map<MetaClass, Set<SortUnit>> consolidated = new LinkedHashMap<MetaClass, Set<SortUnit>>(partitionedMap);
-
-    final Set<Map.Entry<MetaClass, Set<SortUnit>>> entries = partitionedMap.entrySet();
-    for (final Map.Entry<MetaClass, Set<SortUnit>> metaClassSetEntry : entries) {
-      final Set<SortUnit> value = metaClassSetEntry.getValue();
-
-      for (final SortUnit unit : value) {
-        final Set<SortUnit> part = partitionedMap.get(unit.getType());
-
-        if (part != value) {
-          final Set<SortUnit> combined = new HashSet<SortUnit>();
-          combined.addAll(value);
-          combined.addAll(part);
-
-          consolidated.put(unit.getType(), combined);
-          consolidated.put(metaClassSetEntry.getKey(), combined);
-        }
-      }
     }
 
     return consolidated;
@@ -136,6 +113,7 @@ public final class GraphSort {
     }
     return sorted;
   }
+
 
   private static void _topologicalSort(final Set<String> visited,
                                        final List<SortUnit> sorted,
