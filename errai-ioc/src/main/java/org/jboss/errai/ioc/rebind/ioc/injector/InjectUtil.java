@@ -193,7 +193,7 @@ public class InjectUtil {
 
     renderLifeCycleEvents(PostConstruct.class, injector, ctx, initMeth, postConstructTasks);
 
-    AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+    final AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
     final IOCProcessingContext pc = ctx.getProcessingContext();
 

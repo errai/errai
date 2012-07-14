@@ -19,11 +19,13 @@ package org.jboss.errai.codegen.builder;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
 
+import java.util.List;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BlockBuilder<T> extends Finishable<T> {
+public interface BlockBuilder<T> extends Finishable<T>, Iterable<Statement> {
   public void insertBefore(Statement stmt);
   public void insertBefore(InnerClass innerClass);
 
@@ -43,5 +45,21 @@ public interface BlockBuilder<T> extends Finishable<T> {
    * @return
    */
   public BlockBuilder<T> _(InnerClass innerClass);
+
+  /**
+   * Return a list of statements from the specified statement (inclusive), and remove all of the returned statements
+   * from the underlying builder.
+   *
+   * @param statement the statement to split from.
+   * @return a list of statements from the specified statement
+   */
+  public List<Statement> splitFrom(Statement statement);
+
+  /**
+   * Show the last statement in the block.
+   *
+   * @return the last statement in the block.
+   */
+  public Statement peek();
 }
 

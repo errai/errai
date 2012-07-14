@@ -64,6 +64,7 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortAndPartitionGraph;
 import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
@@ -169,6 +170,8 @@ public class IOCProcessorFactory {
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
               final MetaClass MC_ContextualTypeProvider = MetaClassFactory.get(ContextualTypeProvider.class);
 
+
+
               MetaClass providerInterface = null;
               final MetaClass providedType;
 
@@ -198,7 +201,6 @@ public class IOCProcessorFactory {
                 }
 
                 injectionContext.registerInjector(new ProviderInjector(providedType, providerClassType, injectionContext));
-
               }
               else if (MC_ContextualTypeProvider.isAssignableFrom(providerClassType)) {
                 for (final MetaClass interfaceType : providerClassType.getInterfaces()) {
@@ -231,6 +233,8 @@ public class IOCProcessorFactory {
                 throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
                         + " does not implement: " + Provider.class.getName() + " or " + ContextualTypeProvider.class);
               }
+
+              injectionContext.getGraphBuilder().addDependency(providedType, Dependency.on(providerClassType));
 
               control.masqueradeAs(providedType);
               super.getDependencies(control, instance, annotation, context);
@@ -401,9 +405,9 @@ public class IOCProcessorFactory {
 
     RebindUtils.writeStringToFile(dotFile,
             "//\n" +
-            "// Generated IOC bean dependency graph in GraphViz DOT format.\n" +
-            "//\n\n" +
-            GraphBuilder.toDOTRepresentation(list));
+                    "// Generated IOC bean dependency graph in GraphViz DOT format.\n" +
+                    "//\n\n" +
+                    GraphBuilder.toDOTRepresentation(list));
 
     for (final SortUnit unit : list) {
       if (unit.isCyclicGraph()) {
@@ -420,10 +424,14 @@ public class IOCProcessorFactory {
       }
     }
 
-    for (final SortUnit unit : list) {
-      for (final Object item : unit.getItems()) {
-        if (item instanceof ProcessingDelegate) {
-          ((ProcessingDelegate) item).process();
+    final Set<List<SortUnit>> partitions = sortAndPartitionGraph(toSort);
+    for (final List<SortUnit> partitionList : partitions) {
+      context.globalAppend(new SplitPoint());
+      for (final SortUnit unit : partitionList) {
+        for (final Object item : unit.getItems()) {
+          if (item instanceof ProcessingDelegate) {
+            ((ProcessingDelegate) item).process();
+          }
         }
       }
     }

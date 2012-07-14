@@ -26,6 +26,8 @@ import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.DefParameters;
+import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -37,6 +39,7 @@ import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -71,6 +74,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -250,22 +255,91 @@ public class IOCBootstrapGenerator {
 
     procFactory.process(scanner, procContext);
 
-    for (Statement stmt : procContext.getAppendToEnd()) {
+    for (final Statement stmt : procContext.getAppendToEnd()) {
       blockBuilder.append(stmt);
     }
 
     final Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
-    for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
+    for (final Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
       PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
     }
 
     final Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
 
-    for (MetaMethod m : privateMethods) {
+    for (final MetaMethod m : privateMethods) {
       PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
     }
 
     _doRunnableTasks(afterTasks, blockBuilder);
+
+    int methodCount = 0;
+
+    List<Statement> toProcess = null;
+
+    /**
+     * Find the first split point and skip back-to-back splits.
+     */
+    final Iterator<Statement> iter = blockBuilder.iterator();
+    Statement lastSplit = null;
+    while (iter.hasNext()) {
+      final Statement next = iter.next();
+      if (next instanceof SplitPoint) {
+        lastSplit = next;
+        iter.remove();
+      }
+      else if (lastSplit != null) {
+        toProcess = blockBuilder.splitFrom(next);
+        break;
+      }
+    }
+
+    if (toProcess != null) {
+      final Map<String, List<Statement>> methodGroups = new LinkedHashMap<String, List<Statement>>();
+      boolean lastWasSplit = false;
+
+      for (final Statement stmt : toProcess) {
+        if (stmt instanceof SplitPoint) {
+          if (!lastWasSplit) {
+            methodCount++;
+          }
+          lastWasSplit = true;
+          continue;
+        }
+        else {
+          lastWasSplit = false;
+        }
+
+        final String methName = "wireContainer_" + methodCount;
+
+        List<Statement> methodStatements = methodGroups.get(methName);
+        if (methodStatements == null) {
+          methodGroups.put(methName, methodStatements = new ArrayList<Statement>());
+        }
+
+        methodStatements.add(stmt);
+      }
+
+      final Set<Map.Entry<String, List<Statement>>> entries = methodGroups.entrySet();
+      for (final Map.Entry<String, List<Statement>> entry : entries) {
+        final BlockBuilder<? extends ClassStructureBuilder<?>> body
+                = classBuilder.privateMethod(void.class, entry.getKey())
+                .parameters(
+                        DefParameters.of(
+                                Parameter.of(BootstrapperInjectionContext.class, "injContext", true),
+                                Parameter.of(CreationalContext.class, "context", true)
+                        )
+                ).body();
+
+        for (final Statement stmt : entry.getValue()) {
+          body.append(stmt);
+        }
+
+        body.finish();
+
+        blockBuilder.append(Stmt.loadVariable("this").invoke(entry.getKey(), Refs.get("injContext"), Refs.get("context")));
+      }
+    }
+
 
     blockBuilder.append(loadVariable(procContext.getContextVariableReference()).returnValue());
 

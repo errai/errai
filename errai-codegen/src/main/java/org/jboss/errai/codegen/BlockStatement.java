@@ -16,10 +16,10 @@
 
 package org.jboss.errai.codegen;
 
+import org.jboss.errai.codegen.builder.ClosedBlock;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jboss.errai.codegen.builder.ClosedBlock;
 
 /**
  * Represents a code block (e.g. a loop body).
@@ -46,7 +46,7 @@ public class BlockStatement extends AbstractStatement {
 
   public void insertBefore(Statement statement) {
     if (statement != null) {
-      int pos = statements.size() == 0 ? 0 : statements.size() - 1;
+      final int pos = statements.size() == 0 ? 0 : statements.size() - 1;
       statements.add(pos, statement);
     }
 

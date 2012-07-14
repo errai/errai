@@ -1916,14 +1916,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithSuperClassField>() {
           @Override
           public void callback(EntityWithSuperClassField response) {
-            try {
               assertEquals(entity, response);
               finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
           }
         }, TestSerializationRPCService.class).testEntityWithSuperClassField(entity);
       }

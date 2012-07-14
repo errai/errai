@@ -53,4 +53,11 @@ public class EntityWithSuperClassField {
   public int hashCode() {
     return person != null ? person.hashCode() : 0;
   }
+
+  @Override
+  public String toString() {
+    return "EntityWithSuperClassField [person=" + person + "]";
+  }
+  
+  
 }

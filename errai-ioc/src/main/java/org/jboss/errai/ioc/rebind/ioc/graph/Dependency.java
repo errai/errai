@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.rebind.ioc.graph;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 
 /**
  * @author Mike Brock
@@ -14,6 +15,10 @@ public class Dependency {
 
   public static Dependency on(final MetaClass type) {
     return new Dependency(type);
+  }
+
+  public static Dependency on(final Class<?> type) {
+    return new Dependency(MetaClassFactory.get(type));
   }
 
   public MetaClass getType() {

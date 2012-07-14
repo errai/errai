@@ -21,6 +21,12 @@ import java.util.Set;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
+import org.jboss.errai.marshalling.tests.res.AImpl1;
+import org.jboss.errai.marshalling.tests.res.AImpl2;
+import org.jboss.errai.marshalling.tests.res.BImpl1;
+import org.jboss.errai.marshalling.tests.res.BImpl2;
+import org.jboss.errai.marshalling.tests.res.EntityWithAbstractFieldType;
+import org.jboss.errai.marshalling.tests.res.EntityWithInterface;
 import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
@@ -115,5 +121,28 @@ public class MarshallingAPITest {
   public void testNullEnumInEntity() {
     ItemWithEnum itemWithEnum = new ItemWithEnum();
     testEncodeDecode(itemWithEnum);
+  }
+  
+
+  @Test
+  public void testEntityWithInterface() {
+    EntityWithInterface ewi = new EntityWithInterface();
+    ewi.setA(new AImpl1(4711));
+    testEncodeDecode(ewi);
+   
+    ewi = new EntityWithInterface();
+    ewi.setA(new AImpl2("admin"));
+    testEncodeDecode(ewi);
+  }
+  
+  @Test
+  public void testEntityWithAbstractFieldType() {
+    EntityWithAbstractFieldType ewaft = new EntityWithAbstractFieldType();
+    ewaft.setB(new BImpl1(4711));
+    testEncodeDecode(ewaft);
+   
+    ewaft = new EntityWithAbstractFieldType();
+    ewaft.setB(new BImpl2("admin"));
+    testEncodeDecode(ewaft);
   }
 }
