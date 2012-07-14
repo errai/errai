@@ -26,7 +26,6 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
@@ -63,7 +62,6 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortAndPartitionGraph;
-import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
@@ -383,7 +381,7 @@ public class IOCProcessorFactory {
     while (!processingTasksStack.isEmpty());
 
     List<SortUnit> toSort = graphBuilder.build();
-    List<SortUnit> list = sortGraph(toSort);
+ //   List<SortUnit> list = sortGraph(toSort);
 
     final Set<List<SortUnit>> partitions = sortAndPartitionGraph(toSort);
     for (final List<SortUnit> partitionList : partitions) {
