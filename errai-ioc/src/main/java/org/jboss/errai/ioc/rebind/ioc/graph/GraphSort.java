@@ -61,9 +61,9 @@ public final class GraphSort {
       _traverseGraphExtent(traversal, unit);
 
       Set<SortUnit> partition = null;
-      for (final SortUnit travUnit : traversal) {
-        if (builderMap.containsKey(travUnit.getType())) {
-          partition = builderMap.get(travUnit.getType());
+      for (final SortUnit sortUnit : traversal) {
+        if (builderMap.containsKey(sortUnit.getType())) {
+          partition = builderMap.get(sortUnit.getType());
           break;
         }
       }
@@ -81,7 +81,6 @@ public final class GraphSort {
 
     final Set<List<SortUnit>> consolidated = new LinkedHashSet<List<SortUnit>>();
     final Map<Set<SortUnit>, List<SortUnit>> sortingCache = new IdentityHashMap<Set<SortUnit>, List<SortUnit>>();
-
 
     for (final Map.Entry<MetaClass, Set<SortUnit>> metaClassSetEntry : builderMap.entrySet()) {
       if (!sortingCache.containsKey(metaClassSetEntry.getValue())) {
@@ -104,16 +103,14 @@ public final class GraphSort {
     }
   }
 
-
-  private static List<SortUnit> topologicalSort(List<SortUnit> toSort) {
+  private static List<SortUnit> topologicalSort(final List<SortUnit> toSort) {
     final Set<String> visited = new HashSet<String>();
     final List<SortUnit> sorted = new ArrayList<SortUnit>();
-    for (SortUnit n : toSort) {
+    for (final SortUnit n : toSort) {
       _topologicalSort(visited, sorted, n);
     }
     return sorted;
   }
-
 
   private static void _topologicalSort(final Set<String> visited,
                                        final List<SortUnit> sorted,
