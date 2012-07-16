@@ -118,7 +118,7 @@ public class GenUtil {
         return v.getReference();
       }
       else {
-        if (isPermissiveMode()) {
+        if (context.isPermissiveMode()) {
           return v.getReference();
         }
         else {
@@ -153,9 +153,9 @@ public class GenUtil {
     classAliases.add(cls.getName());
   }
 
-  public static void assertAssignableTypes(final MetaClass from, final MetaClass to) {
+  public static void assertAssignableTypes(final Context context, final MetaClass from, final MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
-      if (!isPermissiveMode()) {
+      if (!context.isPermissiveMode()) {
         if (classAliases.contains(from.getFullyQualifiedName()) && classAliases.contains(to.getFullyQualifiedName())) {
           // handle convertibility between MetaClass API and java Class reference.
           return;
@@ -178,7 +178,7 @@ public class GenUtil {
             return (Statement) input;
           }
 
-          assertAssignableTypes(((Statement) input).getType(), targetType);
+          assertAssignableTypes(context, ((Statement) input).getType(), targetType);
           return (Statement) input;
         }
       }

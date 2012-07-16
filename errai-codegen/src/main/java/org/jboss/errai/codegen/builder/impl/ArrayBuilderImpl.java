@@ -16,8 +16,6 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
-import java.lang.reflect.Array;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ArrayBuilder;
@@ -26,6 +24,8 @@ import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.GenUtil;
+
+import java.lang.reflect.Array;
 
 /**
  * StatementBuilder to create and initialize Arrays.
@@ -144,7 +144,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
       else {
         Statement statement = GenUtil.generate(context, element);
         String statementExpr = statement.generate(context);
-        GenUtil.assertAssignableTypes(statement.getType(), componentType);
+        GenUtil.assertAssignableTypes(context, statement.getType(), componentType);
         buf.append(statementExpr);
       }
       if (i + 1 < length) {

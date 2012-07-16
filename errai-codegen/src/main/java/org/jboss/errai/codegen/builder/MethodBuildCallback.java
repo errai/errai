@@ -16,9 +16,9 @@
 
 package org.jboss.errai.codegen.builder;
 
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
-import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.ThrowsDeclaration;
 
 import java.lang.annotation.Annotation;
@@ -28,6 +28,6 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface MethodBuildCallback<T> {
-  public T callback(Statement statement, DefParameters parms, DefModifiers modifiers,
+  public T callback(BlockStatement statement, DefParameters parms, DefModifiers modifiers,
                     ThrowsDeclaration throwsDeclaration, List<Annotation> annotations, String comment);
 }

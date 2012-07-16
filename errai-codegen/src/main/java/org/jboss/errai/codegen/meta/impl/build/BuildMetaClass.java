@@ -16,12 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.build;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
@@ -42,6 +36,12 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrettyPrinter;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -527,6 +527,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public String toJavaString() {
+    return toJavaString(this.context);
+  }
+
+  public String toJavaString(Context context) {
     if (generatedCache != null) return generatedCache;
 
     StringBuilder buf = new StringBuilder(512);

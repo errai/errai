@@ -16,20 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.load;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.enterprise.inject.New;
-
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -46,6 +32,19 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.mvel2.util.NullType;
 
+import javax.enterprise.inject.New;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.load;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
  * for generating the <tt>CreationalContext</tt>'s which produce instances of beans. It is also responsible for
@@ -57,11 +56,11 @@ public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
   protected String varName;
 
-  public TypeInjector(MetaClass type, InjectionContext context) {
+  public TypeInjector(final MetaClass type, final InjectionContext context) {
     this(type, context, new Annotation[0]);
   }
 
-  public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
+  public TypeInjector(final MetaClass type, final InjectionContext context, final Annotation[] additionalQualifiers) {
     this.type = type;
 
     if (type.getFullyQualifiedName().equals(NullType.class.getName())) {
@@ -74,7 +73,7 @@ public class TypeInjector extends AbstractInjector {
 
     this.varName = InjectUtil.getNewInjectorName() + "_" + type.getName();
 
-    Set<Annotation> qualifiers = new HashSet<Annotation>();
+    final Set<Annotation> qualifiers = new HashSet<Annotation>();
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
@@ -89,13 +88,13 @@ public class TypeInjector extends AbstractInjector {
   }
 
   @Override
-  public Statement getBeanInstance(InjectableInstance injectableInstance) {
-    Statement val = _getType(injectableInstance);
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
+    final Statement val = _getType(injectableInstance);
     registerWithBeanManager(injectableInstance.getInjectionContext(), val);
     return val;
   }
 
-  private Statement _getType(InjectableInstance injectableInstance) {
+  private Statement _getType(final InjectableInstance injectableInstance) {
     // check to see if this injector has already been injected
     if (isCreated()) {
       if (isSingleton() && !hasNewQualifier(injectableInstance)) {
@@ -183,7 +182,7 @@ public class TypeInjector extends AbstractInjector {
     ctx.globalAppend(declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
             .initializeWith(callbackBuilder.finish().finish()));
 
-    Statement retVal;
+    final Statement retVal;
 
     if (isSingleton()) {
       /*
@@ -220,9 +219,9 @@ public class TypeInjector extends AbstractInjector {
     return retVal;
   }
 
-  private static boolean hasNewQualifier(InjectableInstance instance) {
+  private static boolean hasNewQualifier(final InjectableInstance instance) {
     if (instance != null) {
-      for (Annotation annotation : instance.getQualifiers()) {
+      for (final Annotation annotation : instance.getQualifiers()) {
         if (annotation.annotationType().equals(New.class)) return true;
       }
     }
