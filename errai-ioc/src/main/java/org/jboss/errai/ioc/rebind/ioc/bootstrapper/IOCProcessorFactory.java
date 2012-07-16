@@ -37,6 +37,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
 import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
 import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
@@ -61,7 +62,6 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortAndPartitionGraph;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
@@ -381,18 +381,18 @@ public class IOCProcessorFactory {
     while (!processingTasksStack.isEmpty());
 
     List<SortUnit> toSort = graphBuilder.build();
- //   List<SortUnit> list = sortGraph(toSort);
+    List<SortUnit> list = GraphSort.sortGraph(toSort);
 
-    final Set<List<SortUnit>> partitions = sortAndPartitionGraph(toSort);
-    for (final List<SortUnit> partitionList : partitions) {
-      context.globalAppend(new SplitPoint());
-      for (final SortUnit unit : partitionList) {
+//    final Set<List<SortUnit>> partitions = sortAndPartitionGraph(toSort);
+//    for (final List<SortUnit> partitionList : partitions) {
+     // context.globalAppend(new SplitPoint());
+      for (final SortUnit unit : list) {
         for (final Object item : unit.getItems()) {
           if (item instanceof ProcessingDelegate) {
             ((ProcessingDelegate) item).process();
           }
         }
-      }
+//      }
     }
   }
 

@@ -190,8 +190,12 @@ public class InjectUtil {
 
     IOCProcessingContext pc = ctx.getProcessingContext();
 
-    pc.globalInsertBefore(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
-            .initializeWith(classStructureBuilder.finish()));
+//    pc.globalInsertBefore(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
+//            .initializeWith(classStructureBuilder.finish()));
+
+    pc.getBootstrapBuilder()
+            .privateField(varName, initializationCallbackType)
+            .initializesWith(classStructureBuilder.finish()).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
             Refs.get(injector.getVarName()), Refs.get(varName)));
@@ -227,8 +231,11 @@ public class InjectUtil {
 
     IOCProcessingContext pc = ctx.getProcessingContext();
 
-    pc.globalInsertBefore(Stmt.declareVariable(destructionCallbackType).asFinal().named(varName)
-            .initializeWith(classStructureBuilder.finish()));
+//    pc.globalInsertBefore(Stmt.declareVariable(destructionCallbackType).asFinal().named(varName)
+//            .initializeWith(classStructureBuilder.finish()));
+
+    pc.getBootstrapBuilder().privateField(varName, destructionCallbackType)
+            .initializesWith(classStructureBuilder.finish()).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
             Refs.get(injector.getVarName()), Refs.get(varName)));

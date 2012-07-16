@@ -136,7 +136,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
         md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
       }
 
-      context.getProcessingContext().globalAppend(
+      context.getProcessingContext().appendToEnd(
               Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
                       .invoke("addBean", type, Refs.get(getCreationalCallbackVarName()),
                               isSingleton() ? valueRef : null , md.render()));
