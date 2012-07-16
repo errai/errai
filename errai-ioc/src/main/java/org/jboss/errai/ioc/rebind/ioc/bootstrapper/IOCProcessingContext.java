@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.VariableReference;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.common.client.framework.Assert;
@@ -48,6 +49,7 @@ public class IOCProcessingContext {
 
   protected final Context context;
   protected final BuildMetaClass bootstrapClass;
+  protected final ClassStructureBuilder bootstrapBuilder;
 
   protected final Stack<BlockBuilder<?>> blockBuilder;
 
@@ -64,12 +66,17 @@ public class IOCProcessingContext {
 
   protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
-  private IOCProcessingContext(final Builder builder) {
-    this.treeLogger = builder.treeLogger;
-    this.generatorContext = builder.generatorContext;
-    this.writer = builder.sourceWriter;
-    this.context = builder.context;
-    this.bootstrapClass = builder.bootstrapClassInstance;
+  public IOCProcessingContext(TreeLogger treeLogger,
+                              GeneratorContext generatorContext,
+                              SourceWriter writer,
+                              Context context,
+                              BuildMetaClass bootstrapClass,
+                              BlockBuilder<?> blockBuilder) {
+    this.treeLogger = treeLogger;
+    this.generatorContext = generatorContext;
+    this.writer = writer;
+    this.context = context;
+    this.bootstrapClass = bootstrapClass;
 
     this.blockBuilder = new Stack<BlockBuilder<?>>();
     this.blockBuilder.push(builder.blockBuilder);
@@ -195,11 +202,19 @@ public class IOCProcessingContext {
     return bootstrapClass;
   }
 
+  public ClassStructureBuilder getBootstrapBuilder() {
+    return bootstrapBuilder;
+  }
+
   public Context getContext() {
     return context;
   }
 
-  public Set<String> getPackages() {
+  public void setPackages(Collection<String> packages) {
+    this.packages = packages;
+  }
+
+  public Collection<String> getPackages() {
     return packages;
   }
 
@@ -218,6 +233,10 @@ public class IOCProcessingContext {
 
   public QualifyingMetadataFactory getQualifyingMetadataFactory() {
     return qualifyingMetadataFactory;
+  }
+
+  public void setQualifyingMetadataFactory(QualifyingMetadataFactory qualifyingMetadataFactory) {
+    this.qualifyingMetadataFactory = qualifyingMetadataFactory;
   }
 
   public void registerTypeDiscoveryListener(final TypeDiscoveryListener discoveryListener) {

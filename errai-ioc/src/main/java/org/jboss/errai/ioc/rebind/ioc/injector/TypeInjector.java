@@ -16,6 +16,20 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.load;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.enterprise.inject.New;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -32,19 +46,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.mvel2.util.NullType;
 
-import javax.enterprise.inject.New;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.load;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
  * for generating the <tt>CreationalContext</tt>'s which produce instances of beans. It is also responsible for
@@ -56,16 +57,18 @@ public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
   protected String varName;
 
-  public TypeInjector(final MetaClass type, final InjectionContext context) {
+  public TypeInjector(MetaClass type, InjectionContext context) {
     this(type, context, new Annotation[0]);
   }
 
-  public TypeInjector(final MetaClass type, final InjectionContext context, final Annotation[] additionalQualifiers) {
+  public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
     this.type = type;
 
     if (type.getFullyQualifiedName().equals(NullType.class.getName())) {
       new Throwable().printStackTrace();
     }
+
+    // check to see if this is a singleton and/or alternative bean
 
     this.testmock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
@@ -73,7 +76,7 @@ public class TypeInjector extends AbstractInjector {
 
     this.varName = InjectUtil.getNewInjectorName() + "_" + type.getName();
 
-    final Set<Annotation> qualifiers = new HashSet<Annotation>();
+    Set<Annotation> qualifiers = new HashSet<Annotation>();
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
@@ -179,19 +182,25 @@ public class TypeInjector extends AbstractInjector {
     declare a final variable for the CreationalCallback and initialize it with the anonymous class we just
     built.
     */
-    ctx.globalAppend(declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
-            .initializeWith(callbackBuilder.finish().finish()));
+//    ctx.globalAppend(declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
+//            .initializeWith(callbackBuilder.finish().finish()));
 
-    final Statement retVal;
+    ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
+            .initializesWith(callbackBuilder.finish().finish()).finish();
+
+    Statement retVal;
 
     if (isSingleton()) {
       /*
        if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
        method and assign it with CreationalContext.getInstance().
        */
-      ctx.globalAppend(declareVariable(type).asFinal().named(varName)
-              .initializeWith(loadVariable(creationalCallbackVarName).invoke("getInstance",
-                      Refs.get("context"))));
+//      ctx.globalAppend(declareVariable(type).asFinal().named(varName)
+//              .initializeWith(loadVariable(creationalCallbackVarName).invoke("getInstance",
+//                      Refs.get("context"))));
+
+      ctx.getBootstrapBuilder().privateField(varName, type).modifiers(Modifier.Final)
+              .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
 
       /*
        use the variable we just assigned as the return value for this injector.

@@ -93,9 +93,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     addTypeHeirarchyFor(context, knownTypesWithSuperTypes);
 
     context.append(Stmt.nestedCall(Stmt.newObject(CDI.class))
-            .invoke("__resetSubsystem"));
-
-    context.append(Stmt.nestedCall(Stmt.newObject(CDI.class))
             .invoke("initLookupTable", Stmt.invokeStatic(CDIEventTypeLookup.class, "get")));
 
   }
