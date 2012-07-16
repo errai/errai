@@ -71,6 +71,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Map<String, MappingDefinition> MAPPING_DEFINITIONS = new HashMap<String, MappingDefinition>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
+  
+  // key = all types, value = list of all types which inherit from.
+  private final Multimap<String, String> inheritanceMap = HashMultimap.create();
+
 
   DefinitionsFactoryImpl() {
     loadCustomMappings();
@@ -336,11 +340,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       addDefinition(aliasDef);
     }
 
-    // key = all types, value = list of all types which inherit from.
-    Multimap<String, String> inheritanceMap = HashMultimap.create();
-
     for (Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
-      fillInheritanceMap(inheritanceMap, entry.getValue().getMappingClass());
+      fillInheritanceMap(entry.getValue().getMappingClass());
     }
 
     MetaClass javaLangObjectRef = MetaClassFactory.get(Object.class);
@@ -350,13 +351,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       InstantiationMapping instantiationMapping = def.getInstantiationMapping();
       for (Mapping mapping : instantiationMapping.getMappings()) {
-        if (shouldUseObjectMarshaller(inheritanceMap, mapping.getType())) {
+        if (shouldUseObjectMarshaller(mapping.getType())) {
           mapping.setType(javaLangObjectRef);
         }
       }
 
       for (Mapping mapping : entry.getValue().getMemberMappings()) {
-        if (shouldUseObjectMarshaller(inheritanceMap, mapping.getType())) {
+        if (shouldUseObjectMarshaller(mapping.getType())) {
           mapping.setType(javaLangObjectRef);
         }
       }
@@ -365,16 +366,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
-  /**
-   * Returns true if the marshalling system should treat the given type as polymorphic.
-   * 
-   * @param inheritanceMap
-   *          Multimap with keys that are class or interface names and values are concrete portable type names. In all
-   *          cases, the names must have been obtained from {@link MetaClass#getFullyQualifiedName()}.
-   * @param type
-   *          The type to test for the existence of portable implementation/subtypes.
-   */
-  private boolean shouldUseObjectMarshaller(Multimap<String, String> inheritanceMap, MetaClass type) {
+  @Override
+  public boolean shouldUseObjectMarshaller(MetaClass type) {
     boolean hasPortableSubtypes = inheritanceMap.containsKey(type.getFullyQualifiedName());
     boolean hasMarshaller = getDefinition(type.asClass()) != null;
     boolean isConcrete = !(type.isAbstract() || type.isInterface());
@@ -388,7 +381,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
    * @param inheritanceMap
    * @param mappingClass
    */
-  private void fillInheritanceMap(Multimap<String, String> inheritanceMap, MetaClass mappingClass) {
+  private void fillInheritanceMap(MetaClass mappingClass) {
     fillInheritanceMap(inheritanceMap, mappingClass, mappingClass);
   }
 

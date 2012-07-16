@@ -16,12 +16,12 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
 /**
  * The definitions factory is responsible for loading / registering mapping definitions for entities that will
@@ -110,6 +110,14 @@ public interface DefinitionsFactory {
    * @return a map of aliases.
    */
   Map<String, String> getMappingAliases();
+  
+  /**
+   * Returns true if the marshalling system should treat the given type as polymorphic.
+   * 
+   * @param type
+   *          The type to test for the existence of portable implementation/subtypes.
+   */
+  boolean shouldUseObjectMarshaller(MetaClass type);
 
   /**
    * Returns a collection of all registered mapping definitions.

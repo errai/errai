@@ -324,6 +324,7 @@ public class MarshallerGeneratorFactory {
     while (toMap.isArray()) {
       toMap = toMap.getComponentType();
     }
+    
     final int dimensions = GenUtil.getArrayDimensions(arrayType);
 
     final AnonymousClassStructureBuilder classStructureBuilder
@@ -386,9 +387,17 @@ public class MarshallerGeneratorFactory {
       outerType = outerType.asBoxed();
     }
 
-    final Statement demarshallerStatement =
-            Stmt.loadVariable(getVarName(outerType)).invoke("demarshall", loadVariable("a0")
-                    .invoke("get", loadVariable("i")), Stmt.loadVariable("a1"));
+    String marshallerVarName;
+    if (DefinitionsFactorySingleton.get().shouldUseObjectMarshaller(toMap)) {
+      marshallerVarName = getVarName(MetaClassFactory.get(Object.class));
+    } 
+    else {
+      marshallerVarName = getVarName(toMap);
+    }
+    
+    final Statement demarshallerStatement = Stmt.castTo(toMap.asBoxed().asClass(), 
+            Stmt.loadVariable(marshallerVarName).invoke("demarshall", loadVariable("a0")
+                    .invoke("get", loadVariable("i")), Stmt.loadVariable("a1")));
 
     final Statement outerAccessorStatement =
             loadVariable("newArray", loadVariable("i"))
@@ -426,7 +435,7 @@ public class MarshallerGeneratorFactory {
                     .append(Stmt.if_(Bool.greaterThan(Stmt.loadVariable("i"), 0))
                             .append(Stmt.loadVariable("sb").invoke("append", ",")).finish())
                     .append(Stmt.loadVariable("sb").invoke("append", dim == 1 ?
-                            Stmt.loadVariable(MarshallingGenUtil.getVarName(outerType))
+                            Stmt.loadVariable(MarshallingGenUtil.getVarName(MetaClassFactory.get(Object.class)))
                                     .invoke("marshall",
                                             Stmt.loadVariable("a0", Stmt.loadVariable("i")),
                                             Stmt.loadVariable("a1"))
