@@ -16,18 +16,13 @@
 
 package org.jboss.errai.codegen.meta.impl.build;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.ThrowsDeclaration;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.Builder;
@@ -41,13 +36,18 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BuildMetaMethod extends MetaMethod implements Builder {
   private BuildMetaClass declaringClass;
-  private Statement body;
+  private BlockStatement body;
 
   private Scope scope;
   private DefModifiers modifiers;
@@ -66,15 +66,15 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   private String methodComment;
 
-  public BuildMetaMethod(BuildMetaClass declaringClass,
-                         Statement body,
-                         Scope scope,
-                         DefModifiers modifiers,
-                         String name,
-                         MetaClass returnType,
-                         MetaType genericReturnType,
-                         DefParameters defParameters,
-                         ThrowsDeclaration throwsDeclaration
+  public BuildMetaMethod(final BuildMetaClass declaringClass,
+                         final BlockStatement body,
+                         final Scope scope,
+                         final DefModifiers modifiers,
+                         final String name,
+                         final MetaClass returnType,
+                         final MetaType genericReturnType,
+                         final DefParameters defParameters,
+                         final ThrowsDeclaration throwsDeclaration
   ) {
 
     this.declaringClass = declaringClass;
@@ -113,9 +113,9 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public MetaParameter[] getParameters() {
-    List<Parameter> parameters = defParameters.getParameters();
+    final List<Parameter> parameters = defParameters.getParameters();
     if (parameters != null) {
-      List<MetaParameter> metaParameterList = new ArrayList<MetaParameter>();
+      final List<MetaParameter> metaParameterList = new ArrayList<MetaParameter>();
       for (final Parameter p : parameters) {
         metaParameterList.add(new MetaParameter() {
           @Override
@@ -139,12 +139,12 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
           }
 
           @Override
-          public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+          public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
             return false;
           }
 
           @Override
-          public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+          public <A extends Annotation> A getAnnotation(final Class<A> annotation) {
             return null;
           }
         });
@@ -212,14 +212,14 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     return modifiers.hasModifier(Modifier.Synchronized);
   }
 
-  public void addAnnotations(Annotation... annotations) {
-    for (Annotation a : annotations) {
+  public void addAnnotations(final Annotation... annotations) {
+    for (final Annotation a : annotations) {
       this.annotations.add(a);
     }
   }
 
-  public void addAnnotations(Collection<Annotation> annotations) {
-    for (Annotation a : annotations) {
+  public void addAnnotations(final Collection<Annotation> annotations) {
+    for (final Annotation a : annotations) {
       this.annotations.add(a);
     }
   }
@@ -240,40 +240,44 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     return throwsDeclaration.getExceptionTypes();
   }
 
-  public void setDeclaringClass(BuildMetaClass declaringClass) {
+  public void setDeclaringClass(final BuildMetaClass declaringClass) {
     this.declaringClass = declaringClass;
   }
 
-  public void setScope(Scope scope) {
+  public void setScope(final Scope scope) {
     this.scope = scope;
   }
 
-  public void setName(String name) {
+  public void setName(final String name) {
     this.name = name;
   }
 
-  public void setReturnType(MetaClass returnType) {
+  public void setReturnType(final MetaClass returnType) {
     this.returnType = returnType;
   }
 
-  public void setGenericReturnType(MetaType genericReturnType) {
+  public void setGenericReturnType(final MetaType genericReturnType) {
     //   this.genericReturnType = genericReturnType;
   }
 
-  public void setGenericParameterTypes(List<MetaType> genericParameterTypes) {
+  public void setGenericParameterTypes(final List<MetaType> genericParameterTypes) {
     this.genericParameterTypes = genericParameterTypes;
   }
 
-  public void setBody(Statement body) {
+  public void setBody(final BlockStatement body) {
     this.body = body;
   }
 
-  public void setDefParameters(DefParameters defParameters) {
+  public void setDefParameters(final DefParameters defParameters) {
     this.defParameters = defParameters;
   }
 
-  public void setThrowsDeclaration(ThrowsDeclaration throwsDeclaration) {
+  public void setThrowsDeclaration(final ThrowsDeclaration throwsDeclaration) {
     this.throwsDeclaration = throwsDeclaration;
+  }
+
+  public BlockStatement getBody() {
+    return body;
   }
 
   @Override
@@ -289,25 +293,25 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     return reifiedFormOf;
   }
 
-  public void setReifiedFormOf(MetaMethod reifiedFormOf) {
+  public void setReifiedFormOf(final MetaMethod reifiedFormOf) {
     this.reifiedFormOf = reifiedFormOf;
   }
 
-  public void setMethodComment(String methodComment) {
+  public void setMethodComment(final String methodComment) {
     this.methodComment = methodComment;
   }
 
   @Override
   public String toJavaString() {
-    Context context = Context.create(declaringClass.getContext());
+    final Context context = Context.create(declaringClass.getContext());
 
-    for (Parameter p : defParameters.getParameters()) {
+    for (final Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
-    StringBuilder buf = new StringBuilder(256);
+    final StringBuilder buf = new StringBuilder(256);
 
     if (!annotations.isEmpty()) {
-      for (Annotation a : annotations) {
+      for (final Annotation a : annotations) {
         buf.append(new AnnotationLiteral(a).getCanonicalString(context)).append(" ");
       }
       buf.append("\n");

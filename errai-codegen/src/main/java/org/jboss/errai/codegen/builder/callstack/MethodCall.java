@@ -16,10 +16,6 @@
 
 package org.jboss.errai.codegen.builder.callstack;
 
-import static org.jboss.errai.codegen.CallParameters.fromStatements;
-
-import java.util.Arrays;
-
 import org.jboss.errai.codegen.CallParameters;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.MethodInvocation;
@@ -33,6 +29,10 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
+
+import java.util.Arrays;
+
+import static org.jboss.errai.codegen.CallParameters.fromStatements;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -69,7 +69,7 @@ public class MethodCall extends AbstractCallElement {
 
       if (method == null) {
 
-        if (GenUtil.isPermissiveMode()) {
+        if (context.isPermissiveMode()) {
           UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
           GenUtil.rewriteBlameStackTrace(blame);
           udme.initCause(blame);

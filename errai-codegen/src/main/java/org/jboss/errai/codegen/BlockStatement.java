@@ -27,6 +27,18 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BlockStatement extends AbstractStatement {
+  public static final BlockStatement EMPTY_BLOCK = new BlockStatement() {
+    @Override
+    public BlockStatement addStatement(Statement statement) {
+      throw new UnsupportedOperationException("this is an immutable object");
+    }
+
+    @Override
+    public void insertBefore(Statement statement) {
+      throw new UnsupportedOperationException("this is an immutable object");
+    }
+  };
+
   private final List<Statement> statements = new ArrayList<Statement>();
   
   public BlockStatement(Statement... statements) {
@@ -80,6 +92,12 @@ public class BlockStatement extends AbstractStatement {
     return generatedCache = buf.toString();
   }
 
+  /**
+   * Returns a <b>mutable</b> representation of the statements in this block. Changes to the List returned by this
+   * method <b>will</b> be reflected in the state of this method when the code is generated.
+   *
+   * @return a list representing the underlying set of statements in this block.
+   */
   public List<Statement> getStatements() {
     return statements;
   }
