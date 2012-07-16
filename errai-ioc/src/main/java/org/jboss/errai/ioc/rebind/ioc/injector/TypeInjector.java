@@ -16,20 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.load;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.enterprise.inject.New;
-
+import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -45,6 +32,19 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.mvel2.util.NullType;
+
+import javax.enterprise.inject.New;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.load;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible

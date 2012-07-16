@@ -39,6 +39,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
 import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
 import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
@@ -167,7 +168,6 @@ public class IOCProcessorFactory {
               final MetaClass providerClassType = instance.getType();
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
               final MetaClass MC_ContextualTypeProvider = MetaClassFactory.get(ContextualTypeProvider.class);
-
 
 
               MetaClass providerInterface = null;
@@ -429,8 +429,7 @@ public class IOCProcessorFactory {
           ((ProcessingDelegate) item).process();
         }
       }
-//      }
-  }
+    }
   }
 
   @SuppressWarnings("unchecked")

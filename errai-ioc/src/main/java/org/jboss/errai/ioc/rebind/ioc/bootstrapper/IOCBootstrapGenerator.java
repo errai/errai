@@ -72,15 +72,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
@@ -163,14 +159,14 @@ public class IOCBootstrapGenerator {
 
     final SourceWriter sourceWriter = new StringSourceWriter();
 
-    procContext = new IOCProcessingContext(logger, context, sourceWriter, buildContext, bootStrapClass, blockBuilder);
-    injectionContext = new InjectionContext(procContext);
-    procFactory = new IOCProcessorFactory(injectionContext);
+    final IOCProcessingContext.Builder iocProcContextBuilder
+            = IOCProcessingContext.Builder.create();
 
     iocProcContextBuilder.blockBuilder(blockBuilder);
     iocProcContextBuilder.generatorContext(context);
     iocProcContextBuilder.context(buildContext);
     iocProcContextBuilder.bootstrapClassInstance(bootStrapClass);
+    iocProcContextBuilder.bootstrapBuilder(classStructureBuilder);
     iocProcContextBuilder.logger(logger);
     iocProcContextBuilder.sourceWriter(sourceWriter);
 
@@ -233,17 +229,19 @@ public class IOCBootstrapGenerator {
     return sourceWriter.toString();
   }
 
-  private void generateExtensions(SourceWriter sourceWriter, ClassStructureBuilder<?> classBuilder,
-                                  BlockBuilder<?> blockBuilder) {
-    blockBuilder.append(
-            Stmt.declareVariable(procContext.getContextVariableReference().getType()).asFinal()
-                    .named(procContext.getContextVariableReference().getName())
-                    .initializeWith(Stmt.newObject(BootstrapperInjectionContext.class)));
+  private void generateExtensions(final IOCProcessingContext procContext,
+                                  final IOCProcessorFactory procFactory,
+                                  final InjectionContext injectionContext,
+                                  final SourceWriter sourceWriter,
+                                  final ClassStructureBuilder<?> classBuilder,
+                                  final BlockBuilder<?> blockBuilder) {
+    classBuilder.privateField(procContext.getContextVariableReference().getName(), procContext.getContextVariableReference().getType())
+            .modifiers(Modifier.Final).initializesWith(Stmt.newObject(BootstrapperInjectionContext.class)).finish();
 
-    blockBuilder.append(Stmt.declareVariable(CreationalContext.class)
-            .named("context")
-            .initializeWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
-                    .invoke("getRootContext")));
+    classBuilder.privateField("context", CreationalContext.class).modifiers(Modifier.Final)
+            .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
+                                .invoke("getRootContext")).finish();
+
 
     _doRunnableTasks(beforeTasks, blockBuilder);
 
@@ -271,15 +269,19 @@ public class IOCBootstrapGenerator {
       i++;
     }
 
+    if (declareBeanBody != null) {
+      declareBeanBody.finish();
+    }
+
 
     final Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
-    for (final Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
+    for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
       PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
     }
 
     final Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
 
-    for (final MetaMethod m : privateMethods) {
+    for (MetaMethod m : privateMethods) {
       PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
     }
 
