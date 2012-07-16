@@ -20,7 +20,6 @@ import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.client.framework.Assert;
 import org.mvel2.util.NullType;
 
@@ -62,7 +61,7 @@ public class Cast implements Statement {
             && !toType.isAssignableTo(statement.getType()) && !toType.isInterface()
             && !statement.getType().asBoxed().equals(toType)) {
 
-      if (GenUtil.isPermissiveMode()) {
+      if (context.isPermissiveMode()) {
         return "(" + LoadClassReference.getClassReference(toType, context) + ") " + stmt;
       }
       else {

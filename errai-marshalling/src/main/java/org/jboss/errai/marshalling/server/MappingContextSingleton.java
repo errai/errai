@@ -88,8 +88,7 @@ public class MappingContextSingleton {
 
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
 
-    final Class<? extends MarshallerFactory> cls
-            = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer();
+    final Class<? extends MarshallerFactory> cls = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer();
 
     if (cls == null) {
       return loadDynamicMarshallers();
@@ -180,8 +179,8 @@ public class MappingContextSingleton {
           }
           else if (def.getServerMarshallerClass() != null) {
             try {
-              @SuppressWarnings("unchecked") final Marshaller<Object> marshallerInstance
-                      = def.getServerMarshallerClass().asSubclass(Marshaller.class).newInstance();
+              final Marshaller<Object> marshallerInstance =
+                  def.getServerMarshallerClass().asSubclass(Marshaller.class).newInstance();
 
               if (def.getServerMarshallerClass().isAnnotationPresent(AlwaysQualify.class)) {
                 def.setMarshallerInstance(new QualifyingMarshallerWrapper<Object>(marshallerInstance));
@@ -216,23 +215,25 @@ public class MappingContextSingleton {
         if (!factory.hasDefinition(type.getFullyQualifiedName())
                 && !factory.hasDefinition(type.getInternalName())) {
 
-          final MappingDefinition outerDef = factory.getDefinition(compType);
-          final Marshaller<Object> marshaller = outerDef.getMarshallerInstance();
-
-          if (marshaller == null) {
-            System.out.println(outerDef.getMappingClass() + " has no registered marshaller; " +
-            "marshCls=" + outerDef.getServerMarshallerClass());
+          MappingDefinition outerDef = factory.getDefinition(compType);
+          Marshaller<Object> marshaller;
+          
+          if (outerDef != null && !factory.shouldUseObjectMarshaller(compType)) {
+             marshaller = outerDef.getMarshallerInstance();
           }
-
-          final MappingDefinition newDef = new MappingDefinition(EncDecUtil.qualifyMarshaller(
+          else {
+            marshaller = factory.getDefinition(Object.class).getMarshallerInstance();
+          }
+          MappingDefinition newDef = new MappingDefinition(EncDecUtil.qualifyMarshaller(
                   new DefaultArrayMarshaller(type, marshaller)), true);
 
-          newDef.setClientMarshallerClass(outerDef.getClientMarshallerClass());
-
+          if (outerDef != null) {
+            newDef.setClientMarshallerClass(outerDef.getClientMarshallerClass());
+          }
+          
           factory.addDefinition(newDef);
         }
       }
-
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {

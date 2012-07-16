@@ -106,9 +106,8 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
 
     for (int i = 0; i < length; i++) {
       element = Array.get(a0, i);
-      if (element.getClass().isArray()) {
+      if (element != null && element.getClass().isArray()) {
         builder.append(_marshall(element, a1));
-
       }
       else {
         builder.append(outerMarshaller.marshall(element, a1));

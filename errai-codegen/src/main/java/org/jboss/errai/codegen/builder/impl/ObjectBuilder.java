@@ -149,7 +149,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
                   fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
 
           if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null) {
-            if (GenUtil.isPermissiveMode()) {
+            if (context.isPermissiveMode()) {
               // fall-through
             }
             else {

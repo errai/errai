@@ -41,6 +41,7 @@ import java.util.TreeSet;
  * compilation.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class Context {
   private Context parent = null;
@@ -55,6 +56,10 @@ public class Context {
   private final Set<MetaClass> literalizableClasses;
 
   private Map<String, Map<Object, Object>> renderingCache;
+
+  private boolean permissiveMode = GenUtil.isPermissiveMode();
+  private Set<String> missingSymbols = new HashSet<String>();
+
 
   private Context() {
     classContexts = new HashSet<MetaClass>();
@@ -89,6 +94,10 @@ public class Context {
    */
   public static Context create(final Context parent) {
     return new Context(parent);
+  }
+
+  public boolean isPermissiveMode() {
+    return permissiveMode;
   }
 
   /**
@@ -297,6 +306,7 @@ public class Context {
     while (found == null && (ctx = ctx.parent) != null);
 
     if (found == null) {
+      missingSymbols.add(name);
       if (GenUtil.isPermissiveMode()) {
         return Variable.create(name, Object.class).getReference();
       }
@@ -327,8 +337,9 @@ public class Context {
     }
     while (found == null && (ctx = ctx.parent) != null);
 
-    if (found == null)
+    if (found == null) {
       throw new OutOfScopeException("Label not found: " + name);
+    }
 
     return found.getReference();
   }
@@ -472,7 +483,7 @@ public class Context {
   /**
    * Returns true if the specified class is literalizable.
    * 
-   * @see #addLiteralizableClass(org.jboss.errai.codegen.meta.MetaClass)
+   * @see #addLiteralizableClass(MetaClass)
    * @param clazz
    *          the class, interface or superclass to be tested if literalizable
    * @return true if the specified class is literalizable
@@ -608,5 +619,9 @@ public class Context {
     while ((ctx = ctx.parent) != null);
 
     return context.toString();
+  }
+
+  public Set<String> getMissingSymbols() {
+    return Collections.unmodifiableSet(missingSymbols);
   }
 }

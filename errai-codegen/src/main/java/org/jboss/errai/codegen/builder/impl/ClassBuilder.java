@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
@@ -395,7 +396,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
     return new MethodBlockBuilderImpl<T>(new MethodBuildCallback<T>() {
       @Override
-      public T callback(final Statement statement,
+      public T callback(final BlockStatement statement,
                         final DefParameters parameters,
                         final DefModifiers modifiers,
                         final ThrowsDeclaration throwsDeclaration,
@@ -491,7 +492,8 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   @Override
   public String toJavaString() {
     try {
-      return classDefinition.toJavaString();
+      final String generated = classDefinition.toJavaString();
+      return generated;
     }
     catch (Throwable t) {
       GenUtil.throwIfUnhandled("error generating class: " + classDefinition.getFullyQualifiedName(), t);

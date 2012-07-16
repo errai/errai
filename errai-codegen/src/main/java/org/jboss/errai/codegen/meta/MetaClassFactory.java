@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.meta;
 
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -323,7 +324,7 @@ public final class MetaClassFactory {
         i++;
       }
 
-      final BuildMetaMethod newMethod = new ShadowBuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
+      final BuildMetaMethod newMethod = new ShadowBuildMetaMethod(buildMetaClass, BlockStatement.EMPTY_BLOCK,
               GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
               method.getGenericReturnType(),
               DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()), method);

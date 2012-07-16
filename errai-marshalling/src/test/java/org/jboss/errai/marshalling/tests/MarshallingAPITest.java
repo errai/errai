@@ -23,10 +23,14 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.AImpl1;
 import org.jboss.errai.marshalling.tests.res.AImpl2;
+import org.jboss.errai.marshalling.tests.res.ASubImpl1;
 import org.jboss.errai.marshalling.tests.res.BImpl1;
 import org.jboss.errai.marshalling.tests.res.BImpl2;
 import org.jboss.errai.marshalling.tests.res.EntityWithAbstractFieldType;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterface;
+import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArray;
+import org.jboss.errai.marshalling.tests.res.EntityWithPortableSubtypesInArray;
+import org.jboss.errai.marshalling.tests.res.InterfaceA;
 import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
@@ -45,7 +49,6 @@ public class MarshallingAPITest {
     MappingContextSingleton.get();
   }
 
-  @SuppressWarnings("unchecked")
   private void testEncodeDecode(Object value) {
     if (value == null) return;
     Assert.assertEquals(value, ServerMarshalling.fromJSON(ServerMarshalling.toJSON(value)));
@@ -135,6 +138,33 @@ public class MarshallingAPITest {
     testEncodeDecode(ewi);
   }
   
+  @Test
+  public void testEntityWithInterfaceArray() {
+    EntityWithInterfaceArray ewia = new EntityWithInterfaceArray();
+    
+    InterfaceA[] a = new InterfaceA[4];
+    a[0] = new AImpl1(4711);
+    a[1] = null;
+    a[2] = new AImpl2("admin");
+    a[3] = new ASubImpl1(11f);
+    ewia.setA(a);
+    
+    testEncodeDecode(ewia);
+  }
+
+  @Test
+  public void testEntityWithPortableSubtypesInArray() {
+    EntityWithPortableSubtypesInArray ewpsia = new EntityWithPortableSubtypesInArray();
+    
+    AImpl1[] a = new AImpl1[3];
+    a[0] = new AImpl1(4711);
+    a[1] = null;
+    a[2] = new ASubImpl1(11f);
+    ewpsia.setA(a);
+    
+    testEncodeDecode(ewpsia);
+  }
+
   @Test
   public void testEntityWithAbstractFieldType() {
     EntityWithAbstractFieldType ewaft = new EntityWithAbstractFieldType();

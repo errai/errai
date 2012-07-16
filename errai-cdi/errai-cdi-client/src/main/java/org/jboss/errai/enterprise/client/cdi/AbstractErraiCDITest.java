@@ -39,6 +39,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
+    new CDI().__resetSubsystem();
     new Container().onModuleLoad();
     new CDIClientBootstrap().onModuleLoad();
   }

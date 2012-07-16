@@ -16,11 +16,11 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.ThrowsDeclaration;
 import org.jboss.errai.codegen.builder.ClassStructureBuilderAbstractMethodOption;
 import org.jboss.errai.codegen.builder.MethodBuildCallback;
@@ -157,7 +157,7 @@ public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructur
     return new MethodBuilderAbstractOption<ClassStructureBuilderAbstractMethodOption>(
             new MethodBuildCallback<ClassStructureBuilderAbstractMethodOption>() {
       @Override
-      public ClassStructureBuilderAbstractMethodOption callback(final Statement statement,
+      public ClassStructureBuilderAbstractMethodOption callback(final BlockStatement statement,
                                                                 final DefParameters parameters,
                                                                 final DefModifiers modifiers,
                                                                 final ThrowsDeclaration throwsDeclaration,

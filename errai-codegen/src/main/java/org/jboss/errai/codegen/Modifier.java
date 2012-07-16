@@ -31,7 +31,7 @@ public enum Modifier implements Comparable<Modifier> {
 
   private final String canonicalString;
 
-  Modifier(String cananonicalString) {
+  Modifier(final String cananonicalString) {
     this.canonicalString = cananonicalString;
   }
 

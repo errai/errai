@@ -526,6 +526,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public String toJavaString() {
+    return toJavaString(this.context);
+  }
+
+  public String toJavaString(Context context) {
     if (generatedCache != null) return generatedCache;
 
     final StringBuilder buf = new StringBuilder(512);

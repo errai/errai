@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.VariableReference;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.common.client.framework.Assert;
@@ -48,6 +49,7 @@ public class IOCProcessingContext {
 
   protected final Context context;
   protected final BuildMetaClass bootstrapClass;
+  protected final ClassStructureBuilder bootstrapBuilder;
 
   protected final Stack<BlockBuilder<?>> blockBuilder;
 
@@ -70,6 +72,7 @@ public class IOCProcessingContext {
     this.writer = builder.sourceWriter;
     this.context = builder.context;
     this.bootstrapClass = builder.bootstrapClassInstance;
+    this.bootstrapBuilder = builder.bootstrapBuilder;
 
     this.blockBuilder = new Stack<BlockBuilder<?>>();
     this.blockBuilder.push(builder.blockBuilder);
@@ -86,6 +89,7 @@ public class IOCProcessingContext {
     private SourceWriter sourceWriter;
     private Context context;
     private BuildMetaClass bootstrapClassInstance;
+    private ClassStructureBuilder bootstrapBuilder;
     private BlockBuilder<?> blockBuilder;
     private Set<String> packages;
     private QualifyingMetadataFactory qualifyingMetadataFactory;
@@ -94,42 +98,47 @@ public class IOCProcessingContext {
       return new Builder();
     }
 
-    public Builder logger(final TreeLogger treeLogger) {
+    public Builder logger(TreeLogger treeLogger) {
       this.treeLogger = treeLogger;
       return this;
     }
 
-    public Builder generatorContext(final GeneratorContext generatorContext) {
+    public Builder generatorContext(GeneratorContext generatorContext) {
       this.generatorContext = generatorContext;
       return this;
     }
 
-    public Builder sourceWriter(final SourceWriter sourceWriter) {
+    public Builder sourceWriter(SourceWriter sourceWriter) {
       this.sourceWriter = sourceWriter;
       return this;
     }
 
-    public Builder context(final Context context) {
+    public Builder context(Context context) {
       this.context = context;
       return this;
     }
 
-    public Builder bootstrapClassInstance(final BuildMetaClass bootstrapClassInstance) {
+    public Builder bootstrapClassInstance(BuildMetaClass bootstrapClassInstance) {
       this.bootstrapClassInstance = bootstrapClassInstance;
       return this;
     }
 
-    public Builder blockBuilder(final BlockBuilder<?> blockBuilder) {
+    public Builder bootstrapBuilder(ClassStructureBuilder classStructureBuilder) {
+      this.bootstrapBuilder = classStructureBuilder;
+      return this;
+    }
+
+    public Builder blockBuilder(BlockBuilder<?> blockBuilder) {
       this.blockBuilder = blockBuilder;
       return this;
     }
 
-    public Builder packages(final Set<String> packages) {
+    public Builder packages(Set<String> packages) {
       this.packages = packages;
       return this;
     }
 
-    public Builder qualifyingMetadata(final QualifyingMetadataFactory qualifyingMetadataFactory) {
+    public Builder qualifyingMetadata(QualifyingMetadataFactory qualifyingMetadataFactory) {
       this.qualifyingMetadataFactory = qualifyingMetadataFactory;
       return this;
     }
@@ -139,6 +148,7 @@ public class IOCProcessingContext {
       Assert.notNull("sourceWriter cannot be null", sourceWriter);
       Assert.notNull("context cannot be null", context);
       Assert.notNull("bootstrapClassInstance cannot be null", bootstrapClassInstance);
+      Assert.notNull("bootstrapBuilder cannot be null", bootstrapBuilder);
       Assert.notNull("blockBuilder cannot be null", blockBuilder);
       Assert.notNull("packages cannot be null", packages);
 
@@ -154,24 +164,19 @@ public class IOCProcessingContext {
     return blockBuilder.peek();
   }
 
-  public BlockBuilder<?> append(final Statement statement) {
+  public BlockBuilder<?> append(Statement statement) {
     return getBlockBuilder().append(statement);
   }
 
-  public void globalInsertBefore(final Statement statement) {
-    if (blockBuilder.get(0).peek() instanceof SplitPoint) {
-      globalAppend(statement);
-    }
-    else {
-      blockBuilder.get(0).insertBefore(statement);
-    }
+  public void globalInsertBefore(Statement statement) {
+    blockBuilder.get(0).insertBefore(statement);
   }
 
-  public BlockBuilder<?> globalAppend(final Statement statement) {
+  public BlockBuilder<?> globalAppend(Statement statement) {
     return blockBuilder.get(0).append(statement);
   }
 
-  public void pushBlockBuilder(final BlockBuilder<?> blockBuilder) {
+  public void pushBlockBuilder(BlockBuilder<?> blockBuilder) {
     this.blockBuilder.push(blockBuilder);
   }
 
@@ -183,7 +188,7 @@ public class IOCProcessingContext {
     }
   }
 
-  public void appendToEnd(final Statement statement) {
+  public void appendToEnd(Statement statement) {
     appendToEnd.add(statement);
   }
 
@@ -193,6 +198,10 @@ public class IOCProcessingContext {
 
   public BuildMetaClass getBootstrapClass() {
     return bootstrapClass;
+  }
+
+  public ClassStructureBuilder getBootstrapBuilder() {
+    return bootstrapBuilder;
   }
 
   public Context getContext() {
@@ -220,13 +229,13 @@ public class IOCProcessingContext {
     return qualifyingMetadataFactory;
   }
 
-  public void registerTypeDiscoveryListener(final TypeDiscoveryListener discoveryListener) {
+  public void registerTypeDiscoveryListener(TypeDiscoveryListener discoveryListener) {
     this.typeDiscoveryListeners.add(discoveryListener);
   }
 
-  public void handleDiscoveryOfType(final InjectionPoint injectionPoint) {
+  public void handleDiscoveryOfType(InjectionPoint injectionPoint) {
     if (discovered.contains(injectionPoint.getType())) return;
-    for (final TypeDiscoveryListener listener : typeDiscoveryListeners) {
+    for (TypeDiscoveryListener listener : typeDiscoveryListeners) {
       listener.onDiscovery(this, injectionPoint);
     }
     discovered.add(injectionPoint.getType());

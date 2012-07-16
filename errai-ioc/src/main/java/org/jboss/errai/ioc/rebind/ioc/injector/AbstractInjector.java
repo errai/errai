@@ -204,7 +204,7 @@ public abstract class AbstractInjector implements Injector {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       _registerCache = new RegisterCache(context, valueRef);
 
-      context.getProcessingContext().globalAppend(
+      context.getProcessingContext().appendToEnd(
               loadVariable(context.getProcessingContext().getContextVariableReference())
                       .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
                               isSingleton() ? valueRef : null, qualifyingMetadata.render())

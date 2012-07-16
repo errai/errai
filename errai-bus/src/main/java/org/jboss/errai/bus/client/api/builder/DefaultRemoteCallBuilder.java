@@ -16,11 +16,6 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -33,6 +28,11 @@ import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.bus.client.framework.RpcStub;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Facilitates the building of a remote call. Ensures that the remote call is constructed properly.
@@ -92,6 +92,12 @@ public class DefaultRemoteCallBuilder {
 
         final String errorTo =
             message.getSubject() + "." + message.getCommandType() + ":Errors:" + ((id == null) ? uniqueNumber() : id);
+
+        new MessageCallback() {
+          @Override
+          public void callback(Message message) {
+          }
+        };
 
         if (remoteCallback != null) {
           bus.subscribe(replyTo,

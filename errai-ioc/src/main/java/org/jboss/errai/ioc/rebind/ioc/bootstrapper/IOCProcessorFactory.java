@@ -65,7 +65,6 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortAndPartitionGraph;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
@@ -169,7 +168,6 @@ public class IOCProcessorFactory {
               final MetaClass providerClassType = instance.getType();
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
               final MetaClass MC_ContextualTypeProvider = MetaClassFactory.get(ContextualTypeProvider.class);
-
 
 
               MetaClass providerInterface = null;
@@ -424,14 +422,11 @@ public class IOCProcessorFactory {
       }
     }
 
-    final Set<List<SortUnit>> partitions = sortAndPartitionGraph(toSort);
-    for (final List<SortUnit> partitionList : partitions) {
-      context.globalAppend(new SplitPoint());
-      for (final SortUnit unit : partitionList) {
-        for (final Object item : unit.getItems()) {
-          if (item instanceof ProcessingDelegate) {
-            ((ProcessingDelegate) item).process();
-          }
+
+    for (final SortUnit unit : list) {
+      for (final Object item : unit.getItems()) {
+        if (item instanceof ProcessingDelegate) {
+          ((ProcessingDelegate) item).process();
         }
       }
     }

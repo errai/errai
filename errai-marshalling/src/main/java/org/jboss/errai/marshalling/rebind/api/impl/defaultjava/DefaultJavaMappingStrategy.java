@@ -365,11 +365,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           if (mapping.getType().isArray()) {
             def = context.getDefinitionsFactory().getDefinition(mapping.getType().getOuterComponentType().asBoxed());
 
-            if (def == null) {
-              System.out.println("not found: " + mapping.getType().getOuterComponentType());
+            // def could still be null in the case where the array component type is abstract or an interface
+            if (def != null) {
+              bufSize += (calcBufferSize(stack, def)) * 4;
             }
-
-            bufSize += (calcBufferSize(stack, def)) * 4;
           }
 
           continue;
@@ -440,7 +439,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       final MetaClass targetType = GenUtil.getPrimitiveWrapper(mapping.getType());
       final MetaClass compType = targetType.isArray() ? targetType.getOuterComponentType().asBoxed() : targetType.asBoxed();
 
-      if (!targetType.isInterface() &&!targetType.isEnum() && !context.canMarshal(compType.getFullyQualifiedName())) {
+      if (!(targetType.isAbstract() || targetType.isInterface() || targetType.isEnum()) && !context.canMarshal(compType.getFullyQualifiedName())) {
         throw new NoAvailableMarshallerException(compType.getFullyQualifiedName());
       }
 

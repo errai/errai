@@ -144,7 +144,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
       else {
         Statement statement = GenUtil.generate(context, element);
         String statementExpr = statement.generate(context);
-        GenUtil.assertAssignableTypes(statement.getType(), componentType);
+        GenUtil.assertAssignableTypes(context, statement.getType(), componentType);
         buf.append(statementExpr);
       }
       if (i + 1 < length) {

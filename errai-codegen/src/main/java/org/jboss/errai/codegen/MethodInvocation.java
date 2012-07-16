@@ -40,7 +40,7 @@ public class MethodInvocation extends AbstractStatement {
   private final MetaClass inputType;
   private final MetaMethod method;
   private final CallParameters callParameters;
-  private final Map<String, MetaClass> typeVariables = new HashMap<String, MetaClass>();
+  private Map<String, MetaClass> typeVariables;
   private final CallWriter writer;
 
   public MethodInvocation(final CallWriter writer,
@@ -70,6 +70,7 @@ public class MethodInvocation extends AbstractStatement {
     MetaClass returnType = method.getReturnType();
 
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
+      typeVariables = new HashMap<String, MetaClass>();
       resolveTypeVariables();
 
       final MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
