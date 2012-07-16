@@ -24,16 +24,18 @@ import org.jboss.errai.codegen.control.branch.Label;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DefineLabel extends AbstractCallElement {
+  private final String name;
   
-  private String name;
-  
-  public DefineLabel(String name) {
+  public DefineLabel(final String name) {
     this.name = name;
   }
   
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
-    Label label = Label.create(name);
+  public void handleCall(final CallWriter writer,
+                         final Context context,
+                         final Statement statement) {
+
+    final Label label = Label.create(name);
     context.addLabel(label);
     
     writer.reset();

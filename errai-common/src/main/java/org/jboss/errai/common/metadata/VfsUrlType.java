@@ -29,9 +29,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * An {@link org.reflections.vfs.Vfs.UrlType} for deployment archives served through the JBoss virtual filesytem. <br/>
- * It simply delegates to {@link org.reflections.vfs.SystemDir} and
- * {@link org.reflections.vfs.ZipDir} respectively
+ * An {@link Vfs.UrlType} for deployment archives served through the JBoss virtual filesytem. <br/>
+ * It simply delegates to {@link SystemDir} and
+ * {@link ZipDir} respectively
  *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>

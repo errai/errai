@@ -16,11 +16,7 @@
 
 package org.jboss.errai.codegen;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.codegen.builder.callstack.CallWriter;
-import org.jboss.errai.codegen.literal.ClassLiteral;
 import org.jboss.errai.codegen.literal.TypeLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -30,6 +26,9 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.mvel2.util.NullType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a method invocation statement.
@@ -41,10 +40,14 @@ public class MethodInvocation extends AbstractStatement {
   private final MetaClass inputType;
   private final MetaMethod method;
   private final CallParameters callParameters;
-  private Map<String, MetaClass> typeVariables;
-  private CallWriter writer;
+  private final Map<String, MetaClass> typeVariables = new HashMap<String, MetaClass>();
+  private final CallWriter writer;
 
-  public MethodInvocation(CallWriter writer, MetaClass inputType, MetaMethod method, CallParameters callParameters) {
+  public MethodInvocation(final CallWriter writer,
+                          final MetaClass inputType,
+                          final MetaMethod method,
+                          final CallParameters callParameters) {
+
     this.inputType = inputType;
     this.method = method;
     this.callParameters = callParameters;
@@ -54,10 +57,10 @@ public class MethodInvocation extends AbstractStatement {
   String generatedCache;
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     if (generatedCache != null) return generatedCache;
 
-    StringBuilder buf = new StringBuilder(128);
+    final StringBuilder buf = new StringBuilder(128);
     buf.append(method.getName()).append(callParameters.generate(context));
     return generatedCache = buf.toString();
   }
@@ -67,10 +70,9 @@ public class MethodInvocation extends AbstractStatement {
     MetaClass returnType = method.getReturnType();
 
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
-      typeVariables = new HashMap<String, MetaClass>();
       resolveTypeVariables();
 
-      MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
+      final MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
       if (typeVariables.containsKey(typeVar.getName())) {
         returnType = typeVariables.get(typeVar.getName());
       }
@@ -95,13 +97,13 @@ public class MethodInvocation extends AbstractStatement {
 
   // Resolves type variables by inspecting call parameters
   private void resolveTypeVariables() {
-    MetaParameterizedType gSuperClass = inputType.getGenericSuperClass();
-    MetaClass superClass = inputType.getSuperClass();
+    final MetaParameterizedType gSuperClass = inputType.getGenericSuperClass();
+    final MetaClass superClass = inputType.getSuperClass();
 
     if (superClass != null && superClass.getTypeParameters() != null & superClass.getTypeParameters().length > 0
             && gSuperClass != null && gSuperClass.getTypeParameters().length > 0) {
       for (int i = 0; i < superClass.getTypeParameters().length; i++) {
-        String varName = superClass.getTypeParameters()[i].getName();
+        final String varName = superClass.getTypeParameters()[i].getName();
         if (gSuperClass.getTypeParameters()[i] instanceof MetaClass) {
           typeVariables.put(varName, (MetaClass) gSuperClass.getTypeParameters()[i]);
         }
@@ -109,7 +111,7 @@ public class MethodInvocation extends AbstractStatement {
           typeVariables.put(varName, MetaClassFactory.get(Object.class));
         }
         else {
-          MetaClass clazz = writer.getTypeParm(varName);
+          final MetaClass clazz = writer.getTypeParm(varName);
           if (clazz != null) {
             typeVariables.put(varName, clazz);
           }
@@ -118,10 +120,10 @@ public class MethodInvocation extends AbstractStatement {
     }
 
     int methodParmIndex = 0;
-    for (MetaType methodParmType : method.getGenericParameterTypes()) {
-      Statement parm = callParameters.getParameters().get(methodParmIndex);
+    for (final MetaType methodParmType : method.getGenericParameterTypes()) {
+      final Statement parm = callParameters.getParameters().get(methodParmIndex);
 
-      MetaType callParmType;
+      final MetaType callParmType;
       if (parm instanceof TypeLiteral) {
         callParmType = ((TypeLiteral) parm).getActualType();
       }
@@ -134,13 +136,13 @@ public class MethodInvocation extends AbstractStatement {
     }
   }
 
-  private void resolveTypeVariable(MetaType methodParmType, MetaType callParmType) {
+  private void resolveTypeVariable(final MetaType methodParmType, final MetaType callParmType) {
     if (methodParmType instanceof MetaTypeVariable) {
-      MetaTypeVariable typeVar = (MetaTypeVariable) methodParmType;
+      final MetaTypeVariable typeVar = (MetaTypeVariable) methodParmType;
       typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
     }
     else if (methodParmType instanceof MetaParameterizedType) {
-      MetaType parameterizedCallParmType;
+      final MetaType parameterizedCallParmType;
       if (callParmType instanceof MetaParameterizedType) {
         parameterizedCallParmType = callParmType;
       }
@@ -148,9 +150,9 @@ public class MethodInvocation extends AbstractStatement {
         parameterizedCallParmType = ((MetaClass) callParmType).getParameterizedType();
       }
 
-      MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
+      final MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
       int typeParmIndex = 0;
-      for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
+      for (final MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
         if (parameterizedCallParmType != null) {
           resolveTypeVariable(typeParm,
                   ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);

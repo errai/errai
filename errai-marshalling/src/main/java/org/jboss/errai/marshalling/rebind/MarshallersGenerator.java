@@ -70,22 +70,21 @@ public class MarshallersGenerator extends Generator {
 
   private static final DiscoveryStrategy[] rootDiscoveryStrategies;
 
-  private static Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
+  private static final Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
 
   static {
-    // define the strategies which will be used to figure out where to desposit the server-side marshaller
+    // define the strategies which will be used to figure out where to deposit the server-side marshaller
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
             new DiscoveryStrategy() {
               @Override
-              public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto) {
-                File cwd = new File("").getAbsoluteFile();
-                Set<File> matching = ClassChangeUtil.findAllMatching("classlist.mf", cwd);
-                Set<String> candidateDirectories = new HashSet<String>();
+              public Set<String> getCandidate(final GeneratorContext context, final DiscoveryContext veto) {
+                final File cwd = new File("").getAbsoluteFile();
+                final Set<File> matching = ClassChangeUtil.findAllMatching("classlist.mf", cwd);
+                final Set<String> candidateDirectories = new HashSet<String>();
 
                 veto.resultsAbsolute();
 
                 if (!matching.isEmpty()) {
-
                   class Candidate {
                     int score;
                     File root;

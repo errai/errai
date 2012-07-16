@@ -24,14 +24,14 @@ import org.jboss.errai.codegen.Variable;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DeclareVariable extends AbstractCallElement {
-  private Variable variable;
+  private final Variable variable;
 
-  public DeclareVariable(Variable variable) {
+  public DeclareVariable(final Variable variable) {
     this.variable = variable;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer, final Context context, final Statement statement) {
     writer.reset();
     context.addVariable(variable);
     writer.append(variable.generate(context));

@@ -23,12 +23,12 @@ import org.jboss.errai.codegen.Context;
  */
 public class LongValue extends LiteralValue<Long> {
 
-  public LongValue(Long value) {
+  public LongValue(final Long value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return getValue().toString() + "L";
   }
 }

@@ -16,14 +16,6 @@
 
 package org.jboss.errai.codegen;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.jboss.errai.codegen.control.branch.Label;
 import org.jboss.errai.codegen.control.branch.LabelReference;
 import org.jboss.errai.codegen.exception.OutOfScopeException;
@@ -33,6 +25,14 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.client.framework.Assert;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * This class represents a context in which {@link Statement}s are generated.
@@ -62,7 +62,7 @@ public class Context {
     literalizableClasses = new HashSet<MetaClass>();
   }
 
-  private Context(Context parent) {
+  private Context(final Context parent) {
     this();
     this.parent = parent;
     this.autoImportActive = parent.autoImportActive;
@@ -87,7 +87,7 @@ public class Context {
    * 
    * @return Created sub context
    */
-  public static Context create(Context parent) {
+  public static Context create(final Context parent) {
     return new Context(parent);
   }
 
@@ -100,7 +100,7 @@ public class Context {
    *          the type of the variable, must not be null.
    * @return the current context with the variable added.
    */
-  public Context addVariable(String name, Class<?> type) {
+  public Context addVariable(final String name, final Class<?> type) {
     return addVariable(Variable.create(Assert.notNull(name), Assert.notNull(type)));
   }
 
@@ -115,8 +115,8 @@ public class Context {
    *          the {@link Statement} or literal value to initialize the {@link Variable}, can be null.
    * @return the current context with the variable added.
    */
-  public Context addVariable(String name, Class<?> type, Object initialization) {
-    Variable v = Variable.create(Assert.notNull(name), Assert.notNull(type), initialization);
+  public Context addVariable(final String name, final Class<?> type, final Object initialization) {
+    final Variable v = Variable.create(Assert.notNull(name), Assert.notNull(type), initialization);
     return addVariable(v);
   }
 
@@ -127,7 +127,7 @@ public class Context {
    *          the variable instance to add, must not be null.
    * @return the current context with the variable added.
    */
-  public Context addVariable(Variable variable) {
+  public Context addVariable(final Variable variable) {
     if (variables == null)
       variables = new HashMap<String, Variable>();
 
@@ -142,7 +142,7 @@ public class Context {
    *          the label instance to add, must not be null.
    * @return the current context with the label added.
    */
-  public Context addLabel(Label label) {
+  public Context addLabel(final Label label) {
     if (labels == null)
       labels = new HashMap<String, Label>();
 
@@ -193,7 +193,7 @@ public class Context {
     }
 
     if (!imports.containsKey(clazz.getName())) {
-      String imp = getImportForClass(clazz);
+      final String imp = getImportForClass(clazz);
       if (imp != null) {
         imports.put(clazz.getName(), imp);
       }
@@ -218,11 +218,11 @@ public class Context {
         imports.get(clazz.getName()).equals(getImportForClass(clazz));
   }
 
-  private String getImportForClass(MetaClass clazz) {
+  private String getImportForClass(final MetaClass clazz) {
     String imp = null;
 
-    String fqcn = clazz.getCanonicalName();
-    int idx = fqcn.lastIndexOf('.');
+    final String fqcn = clazz.getCanonicalName();
+    final int idx = fqcn.lastIndexOf('.');
     if (idx != -1) {
       imp = fqcn.substring(0, idx);
     }
@@ -239,9 +239,9 @@ public class Context {
     if (imports == null)
       return Collections.emptySet();
 
-    Set<String> importedClasses = new TreeSet<String>();
-    for (String className : imports.keySet()) {
-      String packageName = imports.get(className);
+    final Set<String> importedClasses = new TreeSet<String>();
+    for (final String className : imports.keySet()) {
+      final String packageName = imports.get(className);
       if (!packageName.equals("java.lang")) {
         importedClasses.add(packageName + "." + className);
       }
@@ -268,7 +268,7 @@ public class Context {
    * @throws OutOfScopeException
    *           if variable with the given name can not be found.
    */
-  public VariableReference getVariable(String name) {
+  public VariableReference getVariable(final String name) {
     return getVariable(name, false);
   }
 
@@ -281,16 +281,16 @@ public class Context {
    * @throws OutOfScopeException
    *           if member variable with the given name can not be found.
    */
-  public VariableReference getClassMember(String name) {
+  public VariableReference getClassMember(final String name) {
     return getVariable(name, true);
   }
 
-  private VariableReference getVariable(String name, boolean mustBeClassMember) {
+  private VariableReference getVariable(final String name, final boolean mustBeClassMember) {
     Variable found = null;
     Context ctx = this;
     do {
       if (ctx.variables != null) {
-        Variable var = ctx.variables.get(name);
+        final Variable var = ctx.variables.get(name);
         found = (mustBeClassMember && var != null && !variables.containsKey(var.getName())) ? null : var;
       }
     }
@@ -317,7 +317,7 @@ public class Context {
    * @throws OutOfScopeException
    *           if label with the given name can not be found.
    */
-  public LabelReference getLabel(String name) {
+  public LabelReference getLabel(final String name) {
     Label found = null;
     Context ctx = this;
     do {
@@ -340,7 +340,7 @@ public class Context {
    *          the variable to check.
    * @return true if in scope, otherwise false.
    */
-  public boolean isScoped(Variable variable) {
+  public boolean isScoped(final Variable variable) {
     Context ctx = this;
     do {
       if (ctx.variables != null && ctx.variables.containsValue(variable))
@@ -357,11 +357,11 @@ public class Context {
    *          the method to check.
    * @return true if in scope, otherwise false.
    */
-  public boolean isInScope(MetaMethod method) {
+  public boolean isInScope(final MetaMethod method) {
     Context c = this;
     do {
-      for (MetaClass clazz : c.classContexts) {
-        for (MetaMethod m : clazz.getDeclaredMethods()) {
+      for (final MetaClass clazz : c.classContexts) {
+        for (final MetaMethod m : clazz.getDeclaredMethods()) {
           if (m.equals(method))
             return true;
         }
@@ -379,11 +379,11 @@ public class Context {
    *          the field to check.
    * @return true if in scope, otherwise false.
    */
-  public boolean isInScope(MetaField field) {
+  public boolean isInScope(final MetaField field) {
     Context c = this;
     do {
-      for (MetaClass clazz : c.classContexts) {
-        for (MetaField m : clazz.getDeclaredFields()) {
+      for (final MetaClass clazz : c.classContexts) {
+        for (final MetaField m : clazz.getDeclaredFields()) {
           if (m.equals(field))
             return true;
         }
@@ -401,7 +401,7 @@ public class Context {
    *          the variable name to check.
    * @return true if ambiguous, otherwise false.
    */
-  public boolean isAmbiguous(String varName) {
+  public boolean isAmbiguous(final String varName) {
     Context ctx = this;
     int matches = 0;
     do {
@@ -423,14 +423,14 @@ public class Context {
     return variables.values();
   }
 
-  public void addLiteralizableClasses(Collection<Class<?>> clazzes) {
-    for (Class<?> cls : clazzes) {
+  public void addLiteralizableClasses(final Collection<Class<?>> clazzes) {
+    for (final Class<?> cls : clazzes) {
       addLiteralizableClass(cls);
     }
   }
 
-  public void addLiteralizableMetaClasses(Collection<MetaClass> clazzes) {
-    for (MetaClass cls : clazzes) {
+  public void addLiteralizableMetaClasses(final Collection<MetaClass> clazzes) {
+    for (final MetaClass cls : clazzes) {
       addLiteralizableClass(cls);
     }
   }
@@ -442,7 +442,7 @@ public class Context {
    * @param clazz
    *          the class, interface or superclass to be considered literalizable.
    */
-  public void addLiteralizableClass(Class clazz) {
+  public void addLiteralizableClass(final Class clazz) {
     addLiteralizableClass(MetaClassFactory.get(clazz));
   }
 
@@ -453,7 +453,7 @@ public class Context {
    * @param clazz
    *          the class, interface or superclass to be considered literalizable.
    */
-  public void addLiteralizableClass(MetaClass clazz) {
+  public void addLiteralizableClass(final MetaClass clazz) {
     literalizableClasses.add(clazz.getErased());
   }
 
@@ -472,7 +472,7 @@ public class Context {
   /**
    * Returns true if the specified class is literalizable.
    * 
-   * @see #addLiteralizableClass(org.jboss.errai.codegen.framework.meta.MetaClass)
+   * @see #addLiteralizableClass(org.jboss.errai.codegen.meta.MetaClass)
    * @param clazz
    *          the class, interface or superclass to be tested if literalizable
    * @return true if the specified class is literalizable
@@ -515,7 +515,7 @@ public class Context {
         if (ctx.literalizableClasses.contains(cls))
           return cls.asClass();
 
-        for (MetaClass iface : cls.getInterfaces()) {
+        for (final MetaClass iface : cls.getInterfaces()) {
           if (ctx.literalizableClasses.contains(iface))
             return iface.asClass();
         }
@@ -545,7 +545,7 @@ public class Context {
    * @param clazz
    *          class to attach.
    */
-  public void attachClass(MetaClass clazz) {
+  public void attachClass(final MetaClass clazz) {
     this.classContexts.add(clazz);
   }
 
@@ -559,7 +559,7 @@ public class Context {
   }
 
   // TODO factor this out. should not be part of Context.
-  public <K, V> Map<K, V> getRenderingCache(RenderCacheStore<K, V> store) {
+  public <K, V> Map<K, V> getRenderingCache(final RenderCacheStore<K, V> store) {
     Map<K, V> cacheStore = (Map<K, V>) renderingCache.get(store.getName());
     if (cacheStore == null) {
       renderingCache.put(store.getName(), (Map<Object, Object>) (cacheStore = new HashMap<K, V>()));
@@ -570,34 +570,34 @@ public class Context {
   @Override
   public String toString() {
     String indent = "";
-    StringBuilder context = new StringBuilder();
+    final StringBuilder context = new StringBuilder();
 
     Context ctx = this;
     do {
       if (ctx.variables != null && !ctx.variables.isEmpty()) {
         context.append("Variables:\n");
-        for (String varName : ctx.variables.keySet()) {
+        for (final String varName : ctx.variables.keySet()) {
           context.append(indent).append(ctx.variables.get(varName)).append("\n");
         }
       }
 
       if (ctx.labels != null && !ctx.labels.isEmpty()) {
         context.append("Labels:\n");
-        for (String labelName : ctx.labels.keySet()) {
+        for (final String labelName : ctx.labels.keySet()) {
           context.append(indent).append(ctx.labels.get(labelName)).append("\n");
         }
       }
 
       if (ctx.classContexts != null && !ctx.classContexts.isEmpty()) {
         context.append("Classes:\n");
-        for (MetaClass clazz : ctx.classContexts) {
+        for (final MetaClass clazz : ctx.classContexts) {
           context.append(indent).append(clazz.getFullyQualifiedName()).append("\n");
         }
       }
 
       if (ctx.imports != null && !ctx.imports.isEmpty()) {
         context.append("Imports:\n");
-        for (String className : ctx.imports.keySet()) {
+        for (final String className : ctx.imports.keySet()) {
           context.append(indent).append(ctx.imports.get(className)).append(".").append(className).append("\n");
           ;
         }

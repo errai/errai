@@ -16,28 +16,27 @@
 
 package org.jboss.errai.codegen;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.jboss.errai.codegen.literal.NullLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.mvel2.util.NullType;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CallParameters extends AbstractStatement {
-  private List<Statement> parameters;
+  private final List<Statement> parameters;
 
-  public CallParameters(List<Statement> parameters) {
+  public CallParameters(final List<Statement> parameters) {
     this.parameters = parameters;
   }
 
-  public static CallParameters fromStatements(Statement... statements) {
+  public static CallParameters fromStatements(final Statement... statements) {
     return new CallParameters(Arrays.asList(statements));
   }
 
@@ -47,7 +46,7 @@ public class CallParameters extends AbstractStatement {
   }
 
   public MetaClass[] getParameterTypes() {
-    MetaClass[] parameterTypes = new MetaClass[parameters.size()];
+    final MetaClass[] parameterTypes = new MetaClass[parameters.size()];
     for (int i = 0; i < parameters.size(); i++) {
       if (parameters.get(i) instanceof NullLiteral) {
         parameterTypes[i] = MetaClassFactory.get(NullType.class);
@@ -65,8 +64,8 @@ public class CallParameters extends AbstractStatement {
   }
 
   @Override
-  public String generate(Context context) {
-    StringBuilder buf = new StringBuilder("(");
+  public String generate(final Context context) {
+    final StringBuilder buf = new StringBuilder("(");
     for (int i = 0; i < parameters.size(); i++) {
       String parm = parameters.get(i).generate(context).trim();
 

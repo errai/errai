@@ -23,15 +23,18 @@ import org.jboss.errai.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public enum AssignmentOperator implements Operator {
-  Assignment("=", 0),
-  PreIncrementAssign("+=", 0, CharSequence.class, Number.class),
-  PostIncrementAssign("=+", 0, CharSequence.class, Number.class),
-  PreDecrementAssign("-=", 0, Number.class),
-  PostDecrementAssign("=-", 0, Number.class);
+  Assignment          ("=", 0),
+  PreIncrementAssign  ("+=", 0, CharSequence.class, Number.class),
+  PostIncrementAssign ("=+", 0, CharSequence.class, Number.class),
+  PreDecrementAssign  ("-=", 0, Number.class),
+  PostDecrementAssign ("=-", 0, Number.class);
 
   private final Operator operator;
 
-  AssignmentOperator(String canonicalString, int operatorPrecedence, Class<?>... constraints) {
+  AssignmentOperator(final String canonicalString,
+                     final int operatorPrecedence,
+                     final Class<?>... constraints) {
+
     operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
   }
 
@@ -46,22 +49,22 @@ public enum AssignmentOperator implements Operator {
   }
 
   @Override
-  public boolean isHigherPrecedenceThan(Operator op) {
+  public boolean isHigherPrecedenceThan(final Operator op) {
     return op.getOperatorPrecedence() < getOperatorPrecedence();
   }
 
   @Override
-  public boolean isEqualOrHigherPrecedenceThan(Operator op) {
+  public boolean isEqualOrHigherPrecedenceThan(final Operator op) {
     return op.getOperatorPrecedence() <= getOperatorPrecedence();
   }
 
   @Override
-  public boolean canBeApplied(MetaClass clazz) {
+  public boolean canBeApplied(final MetaClass clazz) {
     return operator.canBeApplied(clazz);
   }
 
   @Override
-  public void assertCanBeApplied(MetaClass clazz) {
+  public void assertCanBeApplied(final MetaClass clazz) {
     operator.assertCanBeApplied(clazz);
   }
 }

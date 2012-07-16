@@ -27,14 +27,17 @@ import org.jboss.errai.codegen.exception.GenerationException;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DeferredCallElement extends AbstractCallElement {
-  private DeferredCallback callback;
+  private final DeferredCallback callback;
 
-  public DeferredCallElement(DeferredCallback callback) {
+  public DeferredCallElement(final DeferredCallback callback) {
     this.callback = callback;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer,
+                         final Context context,
+                         final Statement statement) {
+
     try {
       callback.doDeferred(writer, context, statement);
   

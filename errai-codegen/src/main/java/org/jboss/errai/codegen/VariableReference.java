@@ -29,7 +29,7 @@ public abstract class VariableReference extends AbstractStatement {
   protected Statement[] indexes;
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     return getName();
   }
 
@@ -37,7 +37,7 @@ public abstract class VariableReference extends AbstractStatement {
     return indexes;
   }
   
-  public void setIndexes(Statement[] indexes) {
+  public void setIndexes(final Statement[] indexes) {
     this.indexes = indexes;
   }
 }

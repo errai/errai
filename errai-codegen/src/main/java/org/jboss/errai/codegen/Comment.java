@@ -9,13 +9,13 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 public class Comment implements Statement {
   private final String comment;
 
-  public Comment(String comment) {
+  public Comment(final String comment) {
     this.comment = comment.trim();
   }
 
   @Override
-  public String generate(Context context) {
-    StringBuilder sb = new StringBuilder("// ");
+  public String generate(final Context context) {
+    final StringBuilder sb = new StringBuilder("// ");
     for (int i = 0; i < comment.length(); i++) {
       switch (comment.charAt(i)) {
         case '\r':

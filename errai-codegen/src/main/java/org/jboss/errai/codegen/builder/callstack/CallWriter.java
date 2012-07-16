@@ -26,13 +26,13 @@ import java.util.Map;
  */
 public class CallWriter {
   private StringBuilder buffer;
-  private Map<String, MetaClass> typeParmCapture = new HashMap<String, MetaClass>();
+  private final Map<String, MetaClass> typeParmCapture = new HashMap<String, MetaClass>();
 
   public CallWriter() {
     reset();
   }
 
-  public CallWriter append(String str) {
+  public CallWriter append(final String str) {
     buffer.append(str);
     return this;
   }
@@ -45,12 +45,11 @@ public class CallWriter {
     return buffer.toString();
   }
 
-  public void recordTypeParm(String var, MetaClass type) {
+  public void recordTypeParm(final String var, final MetaClass type) {
     this.typeParmCapture.put(var, type);
   }
 
-  public MetaClass getTypeParm(String var) {
+  public MetaClass getTypeParm(final String var) {
     return typeParmCapture.get(var);
-
   }
 }

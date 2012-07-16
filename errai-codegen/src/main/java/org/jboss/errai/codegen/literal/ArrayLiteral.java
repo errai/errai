@@ -16,15 +16,15 @@
 
 package org.jboss.errai.codegen.literal;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Type;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 
 /**
  * Renders an array back to it's canonical Java-based literal representation, assuming the contents
@@ -35,11 +35,10 @@ import org.jboss.errai.codegen.util.GenUtil;
  */
 public class ArrayLiteral extends LiteralValue<Object> {
   private final int dimensions;
-  private Class<?> arrayType;
-
-  private MetaClass mArrayType;
+  private final Class<?> arrayType;
+  private final MetaClass mArrayType;
   
-  public ArrayLiteral(Object value) {
+  public ArrayLiteral(final Object value) {
     super(value);
 
     Class<?> type = value.getClass();
@@ -64,11 +63,11 @@ public class ArrayLiteral extends LiteralValue<Object> {
   }
 
   @Override
-  public String getCanonicalString(Context context) {
-    StringBuilder buf = new StringBuilder("new " +
+  public String getCanonicalString(final Context context) {
+    final StringBuilder buf = new StringBuilder("new " +
             LoadClassReference.getClassReference(MetaClassFactory.get(arrayType), context));
 
-    Object val = getValue();
+    final Object val = getValue();
 
     if (Array.getLength(val) == 0) {
       return buf.append("[0]").toString();
@@ -83,10 +82,10 @@ public class ArrayLiteral extends LiteralValue<Object> {
     return buf.toString();
   }
 
-  private static String renderInlineArrayLiteral(Context context, Object arrayInstance) {
-    StringBuilder builder = new StringBuilder("{ ");
+  private static String renderInlineArrayLiteral(final Context context, final Object arrayInstance) {
+    final StringBuilder builder = new StringBuilder("{ ");
 
-    int length = Array.getLength(arrayInstance);
+    final int length = Array.getLength(arrayInstance);
 
     Object element;
 

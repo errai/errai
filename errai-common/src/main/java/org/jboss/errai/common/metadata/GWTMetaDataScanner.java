@@ -28,32 +28,32 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class GWTMetaDataScanner extends MetaDataScanner {
-  public GWTMetaDataScanner(List<URL> urls) {
+  public GWTMetaDataScanner(final List<URL> urls) {
     super(urls);
   }
 
   @Override
-  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
+  public Set<Class<?>> getTypesAnnotatedWith(final Class<? extends Annotation> annotation) {
     return super.getTypesAnnotatedWith(annotation);
   }
 
   @Override
-  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
+  public Set<Field> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation, final Collection<String> packages) {
     return super.getFieldsAnnotatedWith(annotation, packages);
   }
 
   @Override
-  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
+  public Set<Method> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation, final Collection<String> packages) {
     return super.getMethodsAnnotatedWith(annotation, packages);
   }
 
   @Override
-  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
+  public Set<Class<?>> getTypesAnnotatedWith(final Class<? extends Annotation> annotation, final Collection<String> packages) {
     return super.getTypesAnnotatedWith(annotation, packages);
   }
 
   @Override
-  public Set<Class<?>> getTypesAnnotatedWithExcluding(Class<? extends Annotation> annotation, String excludeRegex) {
+  public Set<Class<?>> getTypesAnnotatedWithExcluding(final Class<? extends Annotation> annotation, final String excludeRegex) {
     return super.getTypesAnnotatedWithExcluding(annotation, excludeRegex);
   }
 }

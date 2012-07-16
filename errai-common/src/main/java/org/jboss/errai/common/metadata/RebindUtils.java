@@ -1,5 +1,13 @@
 package org.jboss.errai.common.metadata;
 
+import com.google.common.io.Files;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.typeinfo.JPackage;
+import com.google.gwt.dev.cfg.ModuleDef;
+import com.google.gwt.dev.javac.StandardGeneratorContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -22,15 +30,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.io.Files;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.typeinfo.JPackage;
-import com.google.gwt.dev.cfg.ModuleDef;
-import com.google.gwt.dev.javac.StandardGeneratorContext;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -46,11 +45,11 @@ public class RebindUtils {
 
   static {
     try {
-      Enumeration<URL> resources = MetaDataScanner.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+      final Enumeration<URL> resources = MetaDataScanner.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
       SeedFinder:
       while (resources.hasMoreElements()) {
 
-        URL url = resources.nextElement();
+        final URL url = resources.nextElement();
         String urlString = url.getFile();
 
         if (erraiCommonJarFinder.matcher(urlString).matches()) {
@@ -58,12 +57,12 @@ public class RebindUtils {
             urlString = urlString.substring(5);
           }
 
-          String fileName = urlString.substring(0, urlString.indexOf('!'));
+          final String fileName = urlString.substring(0, urlString.indexOf('!'));
 
-          File file = new File(fileName);
+          final File file = new File(fileName);
 
           if (file.exists() && !file.isDirectory()) {
-            ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
+            final ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
 
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -92,7 +91,7 @@ public class RebindUtils {
       return _tempDirectory;
     }
 
-    File file = new File(System.getProperty("java.io.tmpdir") + "/errai/" + getClasspathHash() + "/");
+    final File file = new File(System.getProperty("java.io.tmpdir") + "/errai/" + getClasspathHash() + "/");
 
     if (!file.exists()) {
       file.mkdirs();
@@ -114,10 +113,10 @@ public class RebindUtils {
 
       md.update(hashSeed.getBytes());
 
-      for (String p : classPath.split(System.getProperty("path.separator"))) {
+      for (final String p : classPath.split(System.getProperty("path.separator"))) {
         _recurseDir(new File(p), new FileVisitor() {
           @Override
-          public void visit(File f) {
+          public void visit(final File f) {
             md.update(f.getName().getBytes());
             md.update((byte) f.lastModified());
             md.update((byte) f.length());
@@ -132,9 +131,9 @@ public class RebindUtils {
     }
   }
 
-  public static String hashToHexString(byte[] hash) {
+  public static String hashToHexString(final byte[] hash) {
     final StringBuilder hexString = new StringBuilder();
-    for (byte mdbyte : hash) {
+    for (final byte mdbyte : hash) {
       hexString.append(Integer.toHexString(0xFF & mdbyte));
     }
     return hexString.toString();
@@ -143,7 +142,7 @@ public class RebindUtils {
   public static File getErraiCacheDir() {
     String cacheDir = System.getProperty("errai.devel.debugCacheDir");
     if (cacheDir == null) cacheDir = new File(".errai/").getAbsolutePath();
-    File fileCacheDir = new File(cacheDir);
+    final File fileCacheDir = new File(cacheDir);
     fileCacheDir.mkdirs();
     return fileCacheDir;
   }
@@ -154,14 +153,14 @@ public class RebindUtils {
   public static boolean hasClasspathChanged() {
     if (nocache) return true;
     if (_hasClasspathChanged != null) return _hasClasspathChanged;
-    File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/classpath.sha");
-    String hashValue = RebindUtils.getClasspathHash();
+    final File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/classpath.sha");
+    final String hashValue = RebindUtils.getClasspathHash();
 
     if (!hashFile.exists()) {
       writeStringToFile(hashFile, hashValue);
     }
     else {
-      String fileHashValue = readFileToString(hashFile);
+      final String fileHashValue = readFileToString(hashFile);
       if (fileHashValue.equals(hashValue)) {
         return _hasClasspathChanged = true;
       }
@@ -176,11 +175,11 @@ public class RebindUtils {
   private static Map<Class<? extends Annotation>, Boolean> _changeMapForAnnotationScope
           = new HashMap<Class<? extends Annotation>, Boolean>();
 
-  public static boolean hasClasspathChangedForAnnotatedWith(Set<Class<? extends Annotation>> annotations) {
+  public static boolean hasClasspathChangedForAnnotatedWith(final Set<Class<? extends Annotation>> annotations) {
     if (Boolean.getBoolean("errai.devel.forcecache")) return true;
 
     boolean result = false;
-    for (Class<? extends Annotation> a : annotations) {
+    for (final Class<? extends Annotation> a : annotations) {
       /**
        * We don't terminate prematurely, because we want to cache the hashes for the next run.
        */
@@ -195,11 +194,11 @@ public class RebindUtils {
     if (nocache) return true;
     Boolean changed = _changeMapForAnnotationScope.get(annoClass);
     if (changed == null) {
-      File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/"
+      final File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/"
               + annoClass.getName().replaceAll("\\.", "_") + ".sha");
 
-      MetaDataScanner singleton = ScannerSingleton.getOrCreateInstance();
-      String hash = singleton.getHashForTypesAnnotatedWith(hashSeed, annoClass);
+      final MetaDataScanner singleton = ScannerSingleton.getOrCreateInstance();
+      final String hash = singleton.getHashForTypesAnnotatedWith(hashSeed, annoClass);
 
       if (!hashFile.exists()) {
         writeStringToFile(hashFile, hash);
@@ -259,7 +258,7 @@ public class RebindUtils {
 
   private static void _recurseDir(final File f, final FileVisitor visitor) {
     if (f.isDirectory()) {
-      for (File file : f.listFiles()) {
+      for (final File file : f.listFiles()) {
         _recurseDir(file, visitor);
       }
     }
@@ -281,10 +280,10 @@ public class RebindUtils {
       final String workingDir = new File("").getAbsolutePath();
 
       Pathcheck:
-      for (URL url : configUrls) {
+      for (final URL url : configUrls) {
         String filePath = url.getFile();
         if (filePath.startsWith(workingDir) && filePath.indexOf('!') == -1) {
-          int start = workingDir.length() + 1;
+          final int start = workingDir.length() + 1;
           int firstSubDir = -1;
           for (int i = start; i < filePath.length(); i++) {
             if (filePath.charAt(i) == File.separatorChar) {
@@ -296,7 +295,7 @@ public class RebindUtils {
           if (firstSubDir != -1) {
             filePath = filePath.substring(start, firstSubDir) + "/";
 
-            for (String excl : moduleRootExclusions) {
+            for (final String excl : moduleRootExclusions) {
               if (filePath.startsWith(excl)) continue Pathcheck;
             }
 
@@ -310,7 +309,7 @@ public class RebindUtils {
         return new File("").getAbsolutePath() + "/";
       }
       else if (candidateRoots.size() != 1) {
-        for (String res : candidateRoots) {
+        for (final String res : candidateRoots) {
           logger.warn(" Multiple Possible Roots for Project -> " + res);
         }
 
@@ -358,7 +357,7 @@ public class RebindUtils {
       final String moduleName = moduleDef.getCanonicalName().replace(".JUnit", "");
       final String modulePackage = moduleName.substring(0, moduleName.lastIndexOf('.'));
 
-      for (String packageName : findTranslatablePackages(context)) {
+      for (final String packageName : findTranslatablePackages(context)) {
         if (packageName != null && packageName.startsWith(modulePackage)) {
           packages.add(packageName);
         }
@@ -377,7 +376,7 @@ public class RebindUtils {
   public static Set<String> findTranslatablePackages(final GeneratorContext context) {
     final JPackage[] jpackages = context.getTypeOracle().getPackages();
     final Set<String> packages = new HashSet<String>(jpackages.length * 2);
-    for (JPackage p : jpackages) {
+    for (final JPackage p : jpackages) {
       packages.add(p.getName());
     }
 

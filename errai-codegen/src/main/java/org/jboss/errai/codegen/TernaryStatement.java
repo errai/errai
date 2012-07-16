@@ -11,15 +11,17 @@ public class TernaryStatement extends AbstractStatement {
   private final Statement falseStatement;
   private MetaClass returnType;
 
-  public TernaryStatement(BooleanExpression condition, Statement trueStatement, Statement falseStatement) {
+  public TernaryStatement(final BooleanExpression condition,
+                          final Statement trueStatement,
+                          final Statement falseStatement) {
     this.condition = condition;
     this.trueStatement = trueStatement;
     this.falseStatement = falseStatement;
   }
 
   @Override
-  public String generate(Context context) {
-    final String condString = condition.generate(context);
+  public String generate(final Context context) {
+    final String conditionString = condition.generate(context);
     final String trueString = trueStatement.generate(context);
     final String falseString = falseStatement.generate(context);
 
@@ -28,7 +30,7 @@ public class TernaryStatement extends AbstractStatement {
       returnType = falseStatement.getType();
     }
 
-    return condString + " ? " + trueString + " : " + falseString;
+    return conditionString + " ? " + trueString + " : " + falseString;
   }
 
   @Override

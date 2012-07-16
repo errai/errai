@@ -35,17 +35,17 @@ public class PropertyScanner extends AbstractScanner {
   Predicate<String> predicate;
   Map<String, Properties> properties = new HashMap<String, Properties>();
 
-  public PropertyScanner(Predicate<String> predicate) {
+  public PropertyScanner(final Predicate<String> predicate) {
     this.predicate = predicate;
   }
 
-  public boolean acceptsInput(String file) {
+  public boolean acceptsInput(final String file) {
     return predicate.apply(file);
   }
 
-  public void scan(Vfs.File file) {
+  public void scan(final Vfs.File file) {
 
-    String key = file.getName();
+    final String key = file.getName();
     if (null == properties.get(key)) {
       properties.put(key, new Properties());
     }
@@ -58,7 +58,7 @@ public class PropertyScanner extends AbstractScanner {
     }
   }
 
-  public void scan(Object cls) {
+  public void scan(final Object cls) {
     throw new UnsupportedOperationException(); //shouldn't get here
   }
 

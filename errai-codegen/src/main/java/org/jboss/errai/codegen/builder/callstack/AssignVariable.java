@@ -31,28 +31,28 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class AssignVariable extends AbstractCallElement {
-  private AssignmentOperator operator;
-  private Object value;
+  private final AssignmentOperator operator;
+  private final Object value;
 
-  public AssignVariable(AssignmentOperator operator, Object value) {
+  public AssignVariable(final AssignmentOperator operator, final Object value) {
     this.operator = operator;
     this.value = value;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer, final Context context, final Statement statement) {
     writer.reset();
 
     final Statement stmt = new AssignmentBuilder(false, operator, (VariableReference) statement, GenUtil.generate(context,
             value));
     
-    Statement wrapperStmt;
+    final Statement wrapperStmt;
     
     try {
       if (next == null) {
         wrapperStmt = new Statement() {
           @Override
-          public String generate(Context context) {
+          public String generate(final Context context) {
             return stmt.generate(context) + ";";
           }
   

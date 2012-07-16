@@ -16,8 +16,6 @@
 
 package org.jboss.errai.codegen;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.builder.impl.DeclareAssignmentBuilder;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.literal.LiteralFactory;
@@ -25,6 +23,8 @@ import org.jboss.errai.codegen.literal.LiteralValue;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.GenUtil;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * This class represents a variable.
@@ -35,7 +35,7 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Variable extends AbstractStatement {
-  private String name;
+  private final String name;
   private MetaClass type;
   private Statement value;
 
@@ -43,15 +43,15 @@ public class Variable extends AbstractStatement {
 
   private boolean isFinal;
 
-  private Variable(String name, MetaClass type) {
+  private Variable(final String name, final MetaClass type) {
     this.name = name;
     this.type = type;
   }
 
-  private Variable(String name, MetaClass type, Object initialization) {
+  private Variable(final String name, final MetaClass type, final Object initialization) {
     this(name, type);
 
-    LiteralValue<?> val = LiteralFactory.isLiteral(initialization);
+    final LiteralValue<?> val = LiteralFactory.isLiteral(initialization);
     if (val != null) {
       this.type = (type == null) ? val.getType() : type;
       this.value = GenUtil.convert(Context.create(), initialization, this.type);
@@ -62,13 +62,13 @@ public class Variable extends AbstractStatement {
     }
   }
 
-  public void initialize(Object initializationValue) {
+  public void initialize(final Object initializationValue) {
     this.initialization = initializationValue;
   }
 
-  private MetaClass inferType(Context context, Object initialization) {
-    Statement initStatement = GenUtil.generate(context, initialization);
-    MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
+  private MetaClass inferType(final Context context, final Object initialization) {
+    final Statement initStatement = GenUtil.generate(context, initialization);
+    final MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
     if (inferredType == null) {
       throw new InvalidTypeException("No type specified and no initialization provided to infer the type.");
     }
@@ -76,55 +76,55 @@ public class Variable extends AbstractStatement {
     return inferredType;
   }
 
-  public static Variable createFinal(String name, Class<?> type) {
+  public static Variable createFinal(final String name, final Class<?> type) {
     return createFinal(name, MetaClassFactory.get(type));
   }
 
-  public static Variable createFinal(String name, MetaClass type) {
-    Variable variable = create(name, type);
+  public static Variable createFinal(final String name, final MetaClass type) {
+    final Variable variable = create(name, type);
     variable.isFinal = true;
     return variable;
   }
 
-  public static Variable from(VariableReference ref) {
+  public static Variable from(final VariableReference ref) {
     return new Variable(ref.getName(), ref.getType());
   }
 
-  public static Variable create(String name, Class<?> type) {
+  public static Variable create(final String name, final Class<?> type) {
     return new Variable(name, MetaClassFactory.get(type));
   }
 
-  public static Variable create(String name, TypeLiteral<?> type) {
+  public static Variable create(final String name, final TypeLiteral<?> type) {
     return new Variable(name, MetaClassFactory.get(type));
   }
 
-  public static Variable create(String name, MetaClass type) {
+  public static Variable create(final String name, final MetaClass type) {
     return new Variable(name, type);
   }
 
-  public static Variable create(String name, Object initialization) {
+  public static Variable create(final String name, final Object initialization) {
     return new Variable(name, null, initialization);
   }
 
-  public static Variable createFinal(String name, Class<?> type, Object initialization) {
+  public static Variable createFinal(final String name, final Class<?> type, final Object initialization) {
     return createFinal(name, MetaClassFactory.get(type), initialization);
   }
 
-  public static Variable createFinal(String name, MetaClass type, Object initialization) {
-    Variable variable = create(name, type, initialization);
+  public static Variable createFinal(final String name, final MetaClass type, final Object initialization) {
+    final Variable variable = create(name, type, initialization);
     variable.isFinal = true;
     return variable;
   }
 
-  public static Variable create(String name, Class<?> type, Object initialization) {
+  public static Variable create(final String name, final Class<?> type, final Object initialization) {
     return new Variable(name, MetaClassFactory.get(type), initialization);
   }
 
-  public static Variable create(String name, TypeLiteral<?> type, Object initialization) {
+  public static Variable create(final String name, final TypeLiteral<?> type, final Object initialization) {
     return new Variable(name, MetaClassFactory.get(type), initialization);
   }
 
-  public static Variable create(String name, MetaClass type, Object initialization) {
+  public static Variable create(final String name, final MetaClass type, final Object initialization) {
     return new Variable(name, type, initialization);
   }
 
@@ -199,7 +199,7 @@ public class Variable extends AbstractStatement {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof Variable
             && hashString().equals(Variable.class.getName() + ":" + name + ":" + ((Variable) o).type.getFullyQualifiedName());
   }
@@ -217,7 +217,7 @@ public class Variable extends AbstractStatement {
   String generatedCache;
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     if (generatedCache != null) return generatedCache;
 
     if (initialization != null) {

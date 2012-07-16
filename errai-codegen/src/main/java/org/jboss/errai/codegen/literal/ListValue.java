@@ -13,16 +13,16 @@ import java.util.List;
  * @author Mike Brock
  */
 public class ListValue extends LiteralValue<List> {
-  public ListValue(List value) {
+  public ListValue(final List value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
-    BlockBuilder<AnonymousClassStructureBuilder> initBlock
+  public String getCanonicalString(final Context context) {
+    final BlockBuilder<AnonymousClassStructureBuilder> initBlock
             = ObjectBuilder.newInstanceOf(ArrayList.class, context).extend().initialize();
 
-    for (Object v : getValue()) {
+    for (final Object v : getValue()) {
       initBlock.append(Stmt.loadVariable("this").invoke("add", LiteralFactory.getLiteral(context, v)));
     }
 

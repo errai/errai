@@ -108,17 +108,17 @@ public class IOCBootstrapGenerator {
   private static volatile String _bootstrapperCache;
   private static final Object generatorLock = new Object();
 
-  public IOCBootstrapGenerator(GeneratorContext context,
-                               TreeLogger logger,
-                               Set<String> packages,
-                               boolean useReflectionStubs) {
+  public IOCBootstrapGenerator(final GeneratorContext context,
+                               final TreeLogger logger,
+                               final Set<String> packages,
+                               final boolean useReflectionStubs) {
     this.context = context;
     this.logger = logger;
     this.packages = packages;
     this.useReflectionStubs = useReflectionStubs;
   }
 
-  public String generate(String packageName, String className) {
+  public String generate(final String packageName, final String className) {
     synchronized (generatorLock) {
       EnvUtil.recordEnvironmentState();
 
@@ -129,7 +129,7 @@ public class IOCBootstrapGenerator {
       final File fileCacheDir = RebindUtils.getErraiCacheDir();
       final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
-      String gen;
+      final String gen;
 
       if (context != null) {
         // context == null during some tests, in which case we don't have a GWT type oracle
@@ -137,7 +137,7 @@ public class IOCBootstrapGenerator {
       }
 
       log.info("generating IOC bootstrapping class...");
-      long st = System.currentTimeMillis();
+      final long st = System.currentTimeMillis();
       gen = _generate(packageName, className);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
 
@@ -149,7 +149,7 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  private String _generate(String packageName, String className) {
+  private String _generate(final String packageName, final String className) {
     final ClassStructureBuilder<?> classStructureBuilder =
             Implementations.implement(Bootstrapper.class, packageName, className);
 
@@ -183,10 +183,10 @@ public class IOCBootstrapGenerator {
     if (props != null) {
       logger.log(TreeLogger.Type.INFO, "Checking ErraiApp.properties for configured types ...");
 
-      for (Object o : props.keySet()) {
-        String key = (String) o;
+      for (final Object o : props.keySet()) {
+        final String key = (String) o;
         if (key.equals(QUALIFYING_METADATA_FACTORY_PROPERTY)) {
-          String fqcnQualifyingMetadataFactory = String.valueOf(props.get(key));
+          final String fqcnQualifyingMetadataFactory = String.valueOf(props.get(key));
 
           try {
             final QualifyingMetadataFactory factory = (QualifyingMetadataFactory)
@@ -206,8 +206,8 @@ public class IOCBootstrapGenerator {
           }
         }
         else if (key.equals(ENABLED_ALTERNATIVES_PROPERTY)) {
-          String[] alternatives = String.valueOf(props.get(ENABLED_ALTERNATIVES_PROPERTY)).split("\\s");
-          for (String alternative : alternatives) {
+          final String[] alternatives = String.valueOf(props.get(ENABLED_ALTERNATIVES_PROPERTY)).split("\\s");
+          for (final String alternative : alternatives) {
             injectionContextBuilder.enabledAlternative(alternative.trim());
           }
         }
@@ -348,8 +348,8 @@ public class IOCBootstrapGenerator {
     sourceWriter.print(classBuilder.toJavaString());
   }
 
-  private static void _doRunnableTasks(Collection<Class<?>> classes, BlockBuilder<?> blockBuilder) {
-    for (Class<?> clazz : classes) {
+  private static void _doRunnableTasks(final Collection<Class<?>> classes, final BlockBuilder<?> blockBuilder) {
+    for (final Class<?> clazz : classes) {
       if (!Runnable.class.isAssignableFrom(clazz)) {
         throw new RuntimeException("annotated @IOCBootstrap task: " + clazz.getName() + " is not of type: "
                 + Runnable.class.getName());
@@ -359,12 +359,12 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  public static void processExtensions(GeneratorContext context,
-                                       IOCProcessingContext procContext,
-                                       InjectionContext injectionContext,
-                                       IOCProcessorFactory procFactory,
-                                       List<Class<?>> beforeTasks,
-                                       List<Class<?>> afterTasks) {
+  public static void processExtensions(final GeneratorContext context,
+                                       final IOCProcessingContext procContext,
+                                       final InjectionContext injectionContext,
+                                       final IOCProcessorFactory procFactory,
+                                       final List<Class<?>> beforeTasks,
+                                       final List<Class<?>> afterTasks) {
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
@@ -375,7 +375,7 @@ public class IOCBootstrapGenerator {
             .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
     final List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
 
-    for (Class<?> clazz : iocExtensions) {
+    for (final Class<?> clazz : iocExtensions) {
       try {
         final Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
 
@@ -392,8 +392,8 @@ public class IOCBootstrapGenerator {
     computeDependentScope(context, injectionContext);
 
     final Set<Class<?>> bootstrappers = scanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
-    for (Class<?> clazz : bootstrappers) {
-      IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
+    for (final Class<?> clazz : bootstrappers) {
+      final IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
         beforeTasks.add(clazz);
       }
@@ -406,17 +406,17 @@ public class IOCBootstrapGenerator {
      * CodeDecorator.class
      */
     final Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
-    for (Class<?> clazz : decorators) {
+    for (final Class<?> clazz : decorators) {
       try {
-        Class<? extends IOCDecoratorExtension> decoratorClass = clazz.asSubclass(IOCDecoratorExtension.class);
+        final Class<? extends IOCDecoratorExtension> decoratorClass = clazz.asSubclass(IOCDecoratorExtension.class);
 
         Class<? extends Annotation> annoType = null;
-        Type t = decoratorClass.getGenericSuperclass();
+        final Type t = decoratorClass.getGenericSuperclass();
         if (!(t instanceof ParameterizedType)) {
           throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
         }
 
-        ParameterizedType pType = (ParameterizedType) t;
+        final ParameterizedType pType = (ParameterizedType) t;
         if (IOCDecoratorExtension.class.equals(pType.getRawType())) {
           if (pType.getActualTypeArguments().length == 0
                   || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
@@ -435,7 +435,7 @@ public class IOCBootstrapGenerator {
       }
     }
 
-    for (IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
+    for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
       extensionConfigurator.afterInitialization(procContext, injectionContext, procFactory);
     }
   }
@@ -461,12 +461,12 @@ public class IOCBootstrapGenerator {
 
   private static void computeDependentScope(final GeneratorContext context, final InjectionContext injectionContext) {
     if (context != null) {
-      for (JPackage pkg : context.getTypeOracle().getPackages()) {
+      for (final JPackage pkg : context.getTypeOracle().getPackages()) {
         TypeScan:
-        for (JClassType type : pkg.getTypes()) {
+        for (final JClassType type : pkg.getTypes()) {
           if (!type.isDefaultInstantiable()) {
             boolean hasInjectableConstructor = false;
-            for (JConstructor c : type.getConstructors()) {
+            for (final JConstructor c : type.getConstructors()) {
               if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
                 hasInjectableConstructor = true;
                 break;
@@ -478,8 +478,8 @@ public class IOCBootstrapGenerator {
             }
           }
 
-          for (Annotation a : type.getAnnotations()) {
-            Class<? extends Annotation> annoClass = a.annotationType();
+          for (final Annotation a : type.getAnnotations()) {
+            final Class<? extends Annotation> annoClass = a.annotationType();
             if (annoClass.isAnnotationPresent(Scope.class)
                     || annoClass.isAnnotationPresent(NormalScope.class)) {
               continue TypeScan;

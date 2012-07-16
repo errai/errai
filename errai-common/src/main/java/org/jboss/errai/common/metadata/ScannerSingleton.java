@@ -37,7 +37,7 @@ public class ScannerSingleton {
   );
 
   static {
-    Thread thread = new Thread(future);
+    final Thread thread = new Thread(future);
     thread.start();
   }
 

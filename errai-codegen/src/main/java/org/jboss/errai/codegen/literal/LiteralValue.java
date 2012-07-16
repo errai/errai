@@ -25,12 +25,12 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class LiteralValue<T> implements Statement {
-  private T value;
+  private final T value;
   protected Class<T> clazz;
   
   public abstract String getCanonicalString(Context context);
 
-  protected LiteralValue(T value) {
+  protected LiteralValue(final T value) {
     this.value = value;
   }
 
@@ -39,7 +39,7 @@ public abstract class LiteralValue<T> implements Statement {
   }
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     return getCanonicalString(context);
   }
 
@@ -58,14 +58,14 @@ public abstract class LiteralValue<T> implements Statement {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (this == obj)
       return true;
     if (obj == null)
       return false;
     if (getClass() != obj.getClass())
       return false;
-    LiteralValue<?> other = (LiteralValue<?>) obj;
+    final LiteralValue<?> other = (LiteralValue<?>) obj;
     if (value == null) {
       if (other.value != null)
         return false;

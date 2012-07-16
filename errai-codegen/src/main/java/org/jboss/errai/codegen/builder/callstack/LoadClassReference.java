@@ -16,8 +16,6 @@
 
 package org.jboss.errai.codegen.builder.callstack;
 
-import java.util.Map;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.RenderCacheStore;
 import org.jboss.errai.codegen.Statement;
@@ -28,6 +26,8 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 
+import java.util.Map;
+
 /**
  * {@link CallElement} to create a class reference.
  *
@@ -36,12 +36,14 @@ import org.jboss.errai.codegen.meta.MetaWildcardType;
 public class LoadClassReference extends AbstractCallElement {
   private final MetaClass metaClass;
 
-  public LoadClassReference(MetaClass type) {
+  public LoadClassReference(final MetaClass type) {
     this.metaClass = type;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer,
+                         final Context context,
+                         final Statement statement) {
     writer.reset();
 
     try {
@@ -53,14 +55,14 @@ public class LoadClassReference extends AbstractCallElement {
   }
 
   public static class ClassReference implements Statement {
-    private MetaClass metaClass;
+    private final MetaClass metaClass;
 
-    public ClassReference(MetaClass metaClass) {
+    public ClassReference(final MetaClass metaClass) {
       this.metaClass = metaClass;
     }
 
     @Override
-    public String generate(Context context) {
+    public String generate(final Context context) {
       return getClassReference(metaClass, context);
     }
 
@@ -70,10 +72,9 @@ public class LoadClassReference extends AbstractCallElement {
     }
   }
 
-  public static String getClassReference(MetaType metaClass, Context context) {
+  public static String getClassReference(final MetaType metaClass, final Context context) {
     return getClassReference(metaClass, context, true);
   }
-
 
   private static final RenderCacheStore<MetaType, String> CLASS_LITERAL_RENDER_CACHE
           = new RenderCacheStore<MetaType, String>() {
@@ -83,8 +84,8 @@ public class LoadClassReference extends AbstractCallElement {
     }
   };
 
-  public static String getClassReference(MetaType metaClass, Context context, boolean typeParms) {
-    Map<MetaType, String> cacheStore = context.getRenderingCache(CLASS_LITERAL_RENDER_CACHE);
+  public static String getClassReference(final MetaType metaClass, final Context context, final boolean typeParms) {
+    final Map<MetaType, String> cacheStore = context.getRenderingCache(CLASS_LITERAL_RENDER_CACHE);
 
     String result = cacheStore.get(metaClass);
 
@@ -94,22 +95,22 @@ public class LoadClassReference extends AbstractCallElement {
     return result;
   }
 
-  private static String _getClassReference(MetaType metaClass, Context context, boolean typeParms) {
+  private static String _getClassReference(final MetaType metaClass, final Context context, final boolean typeParms) {
 
-    MetaClass erased;
+    final MetaClass erased;
     if (metaClass instanceof MetaClass) {
       erased = ((MetaClass) metaClass).getErased();
     }
     else if (metaClass instanceof MetaParameterizedType) {
-      MetaParameterizedType parameterizedType = (MetaParameterizedType) metaClass;
+      final MetaParameterizedType parameterizedType = (MetaParameterizedType) metaClass;
       return parameterizedType.toString();
     }
     else if (metaClass instanceof MetaTypeVariable) {
-      MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
+      final MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
       return parameterizedType.getName();
     }
     else if (metaClass instanceof MetaWildcardType) {
-      MetaWildcardType wildCardType = (MetaWildcardType) metaClass;
+      final MetaWildcardType wildCardType = (MetaWildcardType) metaClass;
       return wildCardType.toString();
     }
     else {
@@ -117,7 +118,7 @@ public class LoadClassReference extends AbstractCallElement {
     }
 
     String fqcn = erased.getCanonicalName();
-    int idx = fqcn.lastIndexOf('.');
+    final int idx = fqcn.lastIndexOf('.');
     if (idx != -1) {
 
       if ((context.isAutoImportActive() || "java.lang".equals(erased.getPackageName()))
@@ -130,7 +131,7 @@ public class LoadClassReference extends AbstractCallElement {
       }
     }
 
-    StringBuilder buf = new StringBuilder(fqcn);
+    final StringBuilder buf = new StringBuilder(fqcn);
     if (typeParms) {
       buf.append(getClassReferencesForParameterizedTypes(((MetaClass) metaClass).getParameterizedType(), context));
     }
@@ -146,30 +147,30 @@ public class LoadClassReference extends AbstractCallElement {
             }
           };
 
-  private static String getClassReferencesForParameterizedTypes(MetaParameterizedType parameterizedType,
-                                                                Context context) {
-    Map<MetaParameterizedType, String> cacheStore = context.getRenderingCache(PARMTYPE_LITERAL_RENDER_CACHE);
+  private static String getClassReferencesForParameterizedTypes(final MetaParameterizedType parameterizedType,
+                                                                final Context context) {
+    final Map<MetaParameterizedType, String> cacheStore = context.getRenderingCache(PARMTYPE_LITERAL_RENDER_CACHE);
 
     String result = cacheStore.get(parameterizedType);
 
     if (result == null) {
 
-      StringBuilder buf = new StringBuilder(64);
+      final StringBuilder buf = new StringBuilder(64);
 
       if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
         buf.append("<");
 
         for (int i = 0; i < parameterizedType.getTypeParameters().length; i++) {
-          MetaType typeParameter = parameterizedType.getTypeParameters()[i];
+          final MetaType typeParameter = parameterizedType.getTypeParameters()[i];
 
           if (typeParameter instanceof MetaParameterizedType) {
-            MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParameter;
+            final MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParameter;
             buf.append(getClassReference(parameterizedTypeParemeter.getRawType(), context));
             buf.append(getClassReferencesForParameterizedTypes(parameterizedTypeParemeter, context));
           }
           else {
             // fix to a weirdness in the GWT deferred bining API;
-            String ref = getClassReference(typeParameter, context);
+            final String ref = getClassReference(typeParameter, context);
             if ("Object".equals(ref)) {
               //ignore;
               return "";

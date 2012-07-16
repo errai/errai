@@ -16,14 +16,14 @@
 
 package org.jboss.errai.codegen;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -31,54 +31,54 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 public class DefParameters extends AbstractStatement {
   private final List<Parameter> parameters;
 
-  private DefParameters(List<Parameter> parameters) {
+  private DefParameters(final List<Parameter> parameters) {
     this.parameters = parameters;
   }
 
-  public static DefParameters from(MetaMethod method) {
-    List<Parameter> parameters = new ArrayList<Parameter>();
+  public static DefParameters from(final MetaMethod method) {
+    final List<Parameter> parameters = new ArrayList<Parameter>();
 
     int i = 0;
-    for (MetaParameter parm : method.getParameters()) {
+    for (final MetaParameter parm : method.getParameters()) {
       parameters.add(Parameter.of(parm.getType(), "a" + i++));
     }
     return new DefParameters(parameters);
   }
   
-  public static DefParameters from(MetaMethod method, Parameter... mergeNames) {
-    List<Parameter> parameters = new ArrayList<Parameter>();
+  public static DefParameters from(final MetaMethod method, final Parameter... mergeNames) {
+    final List<Parameter> parameters = new ArrayList<Parameter>();
 
     int i = 0;
-    for (MetaParameter parm : method.getParameters()) {
+    for (final MetaParameter parm : method.getParameters()) {
       parameters.add(Parameter.of(parm.getType(), mergeNames[i].getName(), mergeNames[i++].isFinal()));
     }
     return new DefParameters(parameters);
   }
 
-  public static DefParameters fromParameters(List<Parameter> statements) {
+  public static DefParameters fromParameters(final List<Parameter> statements) {
     return new DefParameters(statements);
   }
 
-  public static DefParameters fromParameters(Parameter... statements) {
+  public static DefParameters fromParameters(final Parameter... statements) {
     return new DefParameters(Arrays.asList(statements));
   }
 
-  public static DefParameters fromTypeArray(MetaClass... types) {
+  public static DefParameters fromTypeArray(final MetaClass... types) {
     return fromTypeArray("a", types);
   }
 
-  public static DefParameters fromTypeArray(String prefix, MetaClass... types) {
-    List<Parameter> parms = new ArrayList<Parameter>();
+  public static DefParameters fromTypeArray(final String prefix, final MetaClass... types) {
+    final List<Parameter> parms = new ArrayList<Parameter>();
     int idx = 0;
 
-    for (MetaClass metaClass : types) {
+    for (final MetaClass metaClass : types) {
       parms.add(Parameter.of(metaClass, prefix + idx++));
     }
 
     return new DefParameters(parms);
   }
   
-  public static DefParameters of(Parameter... parms) {
+  public static DefParameters of(final Parameter... parms) {
     return new DefParameters(Arrays.asList(parms));
     
   }
@@ -92,8 +92,8 @@ public class DefParameters extends AbstractStatement {
   }
 
   @Override
-  public String generate(Context context) {
-    StringBuilder buf = new StringBuilder("(");
+  public String generate(final Context context) {
+    final StringBuilder buf = new StringBuilder("(");
     for (int i = 0; i < parameters.size(); i++) {
       buf.append(parameters.get(i).generate(context));
 
@@ -106,7 +106,7 @@ public class DefParameters extends AbstractStatement {
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder("(");
+    final StringBuilder buf = new StringBuilder("(");
     for (int i = 0; i < parameters.size(); i++) {
       buf.append(parameters.get(i).getType().getFullyQualifiedName())
               .append(' ').append(parameters.get(i).getName());

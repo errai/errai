@@ -24,14 +24,14 @@ import org.jboss.errai.codegen.control.branch.AbstractBranchStatement;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BranchCallElement extends AbstractCallElement {
-  private AbstractBranchStatement branchStatement;
+  private final AbstractBranchStatement branchStatement;
   
-  public BranchCallElement(AbstractBranchStatement branchStatement) {
+  public BranchCallElement(final AbstractBranchStatement branchStatement) {
     this.branchStatement = branchStatement;
   }
   
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer, final Context context, final Statement statement) {
     writer.append(branchStatement.generate(context));
   }
 

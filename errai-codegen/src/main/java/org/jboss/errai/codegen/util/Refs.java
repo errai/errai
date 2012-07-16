@@ -42,10 +42,10 @@ public abstract class Refs {
           String generatedCache;
 
           @Override
-          public String generate(Context context) {
+          public String generate(final Context context) {
             if (generatedCache != null) return generatedCache;
 
-            VariableReference var = context.getVariable(name);
+            final VariableReference var = context.getVariable(name);
 
             if (var == null) {
               throw new OutOfScopeException("could not access variable: " + name);
@@ -64,7 +64,7 @@ public abstract class Refs {
       }
 
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         return getValue().generate(context);
       }
 
@@ -78,6 +78,5 @@ public abstract class Refs {
         return "[var-ref:" + name + "::" + type + "]";
       }
     };
-
   }
 }
