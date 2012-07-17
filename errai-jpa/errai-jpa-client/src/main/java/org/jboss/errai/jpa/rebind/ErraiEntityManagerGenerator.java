@@ -25,6 +25,7 @@ import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 import javax.persistence.CascadeType;
+import javax.persistence.EntityListeners;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
@@ -300,8 +301,36 @@ public class ErraiEntityManagerGenerator extends Generator {
                       "deliver" + eventType.getSimpleName(),
                       Parameter.of(entityType, "targetEntity"));
 
-      // TODO also scan standalone listener types mentioned in class-level annotation
+      // standalone entity listeners
+      EntityListeners entityListeners = entityType.getAnnotation(EntityListeners.class);
+      if (entityListeners != null) {
+        for (Class<?> listenerClass : entityListeners.value()) {
+          MetaClass listenerMetaClass = MetaClassFactory.get(listenerClass);
+          for (MetaMethod callback : listenerMetaClass.getMethodsAnnotatedWith(eventType)) {
+            if (callback.getParameters().length != 1) {
+              throw new GenerationException("JPA lifecycle listener method " + callback.getName() + " has " +
+                      callback.getParameters().length + " parameters (expected 1)");
+            }
+            if (!callback.getParameters()[0].getType().isAssignableFrom(entityType)) {
+              throw new GenerationException("JPA lifecycle listener method " + callback.getName() + " parameter type " +
+                      callback.getParameters()[0].getType().getName() + " is incompatible with the entity type " +
+                      entityType.getName());
+            }
+            if (!callback.isPublic()) {
+              PrivateAccessUtil.addPrivateAccessStubs(true, classBuilder, callback, new Modifier[] {});
+              methodBuilder.append(
+                      Stmt.loadVariable("this")
+                      .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.newObject(listenerClass), Stmt.loadVariable("targetEntity")));
+            }
+            else {
+              methodBuilder.append(Stmt.nestedCall(Stmt.newObject(listenerClass))
+                      .invoke(callback, Stmt.loadVariable("targetEntity")));
+            }
+          }
+        }
+      }
 
+      // listener methods on the entity class itself
       for (MetaMethod callback : entityType.getMethodsAnnotatedWith(eventType)) {
         if (!callback.isPublic()) {
           PrivateAccessUtil.addPrivateAccessStubs(true, classBuilder, callback, new Modifier[] {});

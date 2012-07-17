@@ -55,9 +55,12 @@ public class CallbackLogEntry {
   @Override
   public String toString() {
     String receiverClassName = eventReceiver.getClass().getName();
+    int receiverIdentity = System.identityHashCode(eventReceiver instanceof StandaloneLifecycleListener ?
+            ((StandaloneLifecycleListener) eventReceiver).getEventSubject() : eventReceiver);
     String eventClassName = eventType.getName();
+
     return receiverClassName.substring(receiverClassName.lastIndexOf('.') + 1)
-            + "@" + System.identityHashCode(eventReceiver)
+            + "@" + receiverIdentity
             + ":" + eventClassName.substring(eventClassName.lastIndexOf('.') + 1);
   }
 }

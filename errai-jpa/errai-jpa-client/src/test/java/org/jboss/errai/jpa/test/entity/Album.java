@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -22,6 +23,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
 @NamedQuery(name="selectAlbumByName", query="SELECT a FROM Album a WHERE a.name=:name")
+@EntityListeners(StandaloneLifecycleListener.class)
 @TestOnly @Bindable @Portable @Entity
 public class Album {
 

@@ -29,6 +29,7 @@ import org.jboss.errai.jpa.test.entity.Artist;
 import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
 import org.jboss.errai.jpa.test.entity.Format;
 import org.jboss.errai.jpa.test.entity.Genre;
+import org.jboss.errai.jpa.test.entity.StandaloneLifecycleListener;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -425,7 +426,11 @@ public class ErraiJpaTest extends GWTTestCase {
     EntityManager em = getEntityManager();
     em.persist(album);
 
+    // the standalone listener is always notified before the entity itself (JPA2 section 3.5.4)
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
@@ -452,12 +457,15 @@ public class ErraiJpaTest extends GWTTestCase {
     em.detach(album);
 
     List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // fetch a fresh copy
     Album fetchedAlbum = em.find(Album.class, album.getId());
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
@@ -482,19 +490,24 @@ public class ErraiJpaTest extends GWTTestCase {
     em.detach(album);
 
     List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // fetch a fresh copy
     Album fetchedAlbum = em.find(Album.class, album.getId());
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostLoad.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // delete it
     em.remove(fetchedAlbum);
     em.flush();
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PreRemove.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PreRemove.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(fetchedAlbum), PostRemove.class));
     expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostRemove.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
@@ -514,7 +527,9 @@ public class ErraiJpaTest extends GWTTestCase {
 
     List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
 
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
@@ -522,7 +537,9 @@ public class ErraiJpaTest extends GWTTestCase {
     album.setName("Cowabunga");
     em.flush();
 
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PreUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PreUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostUpdate.class));
     expectedLifecycle.add(new CallbackLogEntry(album, PostUpdate.class));
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
