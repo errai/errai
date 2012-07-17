@@ -16,12 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.build;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
@@ -43,6 +37,12 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrettyPrinter;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -63,6 +63,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private boolean isStatic;
   private boolean isInner;
 
+  private BlockStatement staticInitializer = new BlockStatement();
   private List<Annotation> annotations = new ArrayList<Annotation>();
   private List<InnerClass> innerClasses = new ArrayList<InnerClass>();
   private List<BuildMetaMethod> methods = new ArrayList<BuildMetaMethod>();
@@ -513,6 +514,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     this.classComment = classComment;
   }
 
+  public BlockStatement getStaticInitializer() {
+    return staticInitializer;
+  }
+
   String generatedCache;
 
   @Override
@@ -572,6 +577,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     context.addVariable(Variable.create("super", superClass));
 
     buf.append(" {\n");
+
+    if (!staticInitializer.isEmpty()) {
+      buf.append("static {\n");
+      buf.append(staticInitializer.generate(context));
+      buf.append("\n}\n");
+    }
 
     buf.append(membersToString());
 
