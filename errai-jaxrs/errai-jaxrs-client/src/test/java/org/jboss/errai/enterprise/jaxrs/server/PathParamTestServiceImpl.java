@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import javax.ws.rs.core.PathSegment;
+
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 
 /**
@@ -62,5 +64,10 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   
   @Override
   public void headWithPathParam(long id) {
+  }
+
+  @Override
+  public String getWithWithPathSegmentPathParam(PathSegment id) {
+    return id.getPath();
   }
 }

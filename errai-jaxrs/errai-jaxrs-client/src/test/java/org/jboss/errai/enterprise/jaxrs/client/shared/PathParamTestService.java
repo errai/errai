@@ -24,6 +24,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.PathSegment;
 
 /**
  * This service is used to test support for path parameters (@PathParam).
@@ -41,6 +42,10 @@ public interface PathParamTestService {
   @GET 
   @Path("/t2/{id}")
   public String getWithStringPathParam(@PathParam("id") String id);
+  
+  @GET 
+  @Path("/t3/{id}")
+  public String getWithWithPathSegmentPathParam(@PathParam("id") PathSegment id);
   
   @GET 
   @Path("/{id1}/{id2}")

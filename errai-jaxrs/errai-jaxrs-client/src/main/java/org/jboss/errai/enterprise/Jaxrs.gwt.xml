@@ -8,4 +8,7 @@
         <when-type-assignable
                 class="org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader"/>
     </generate-with>
+    
+    <super-source path="compat"/>
+    <source path="client" />
 </module>

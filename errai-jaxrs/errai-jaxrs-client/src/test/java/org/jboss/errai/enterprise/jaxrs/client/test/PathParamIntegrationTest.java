@@ -16,6 +16,9 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import javax.ws.rs.core.PathSegment;
+
+import org.jboss.errai.enterprise.client.jaxrs.api.PathSegmentImpl;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
@@ -46,6 +49,17 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
     String pathWithSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
     RestClient.create(PathParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @PathParam failed",
         pathWithSpecialChars)).getWithStringPathParam(pathWithSpecialChars);
+  }
+  
+  @Test
+  public void testGetWithPathSegmentPathParam() {
+   PathSegment ps = new PathSegmentImpl("path;name=nameValue;author=authorValue;empty=");
+   assertEquals("nameValue", ps.getMatrixParameters().getFirst("name"));
+   assertEquals("authorValue", ps.getMatrixParameters().getFirst("author"));
+   assertEquals("", ps.getMatrixParameters().getFirst("empty"));
+    
+   RestClient.create(PathParamTestService.class, new AssertionCallback<String>("@GET with @PathParam failed", "path"))
+        .getWithWithPathSegmentPathParam(new PathSegmentImpl("path"));
   }
   
   @Test

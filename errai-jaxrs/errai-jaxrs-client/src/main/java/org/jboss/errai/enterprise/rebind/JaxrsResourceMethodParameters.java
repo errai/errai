@@ -30,6 +30,8 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.MatrixParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.PathSegment;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
@@ -37,9 +39,11 @@ import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.enterprise.client.jaxrs.api.MultivaluedMapImpl;
 
 /**
  * Represents parameters of a JAX-RS resource method.
@@ -47,19 +51,20 @@ import org.jboss.errai.codegen.util.Stmt;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsResourceMethodParameters {
-  // path param examples that are matched by this regex: /{isbn}/aaa{param}bbb/{name}-{zip}/aaa{param:b+}/{many:.*}
+  // path param examples which are matched by this regex: /{isbn}/aaa{param}bbb/{name}-{zip}/aaa{param:b+}/{many:.*}
   // leading and trailing white spaces are tolerated
+  // see http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html_single/index.html#_PathParam
   private static final Pattern PATH_PARAM_PATTERN =
       Pattern.compile("(\\{\\s*)(\\w[\\w.-]*)(:\\s*([^{}][^{}]*))*(\\s*\\})");
 
   private Statement entityParameter;
-  private Map<Class<? extends Annotation>, Map<String, List<Statement>>> parameters;
+  private Map<Class<? extends Annotation>, MultivaluedMap<String, Statement>> parameters;
 
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method) {
     List<Parameter> defParams = DefParameters.from(method).getParameters();
     return fromMethod(method, defParams);
   }
-  
+
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method, String parameterArrayVarName) {
     List<Statement> params = new ArrayList<Statement>();
     Parameter[] defParms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
@@ -78,10 +83,10 @@ public class JaxrsResourceMethodParameters {
         }
       });
     }
-    
+
     return fromMethod(method, params);
   }
-  
+
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method, List<? extends Statement> parameterValues) {
     JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
     int i = 0;
@@ -117,34 +122,47 @@ public class JaxrsResourceMethodParameters {
 
   private void add(Class<? extends Annotation> type, String name, Statement value) {
     if (parameters == null)
-      parameters = new HashMap<Class<? extends Annotation>, Map<String, List<Statement>>>();
+      parameters = new HashMap<Class<? extends Annotation>, MultivaluedMap<String, Statement>>();
 
-    Map<String, List<Statement>> params = parameters.get(type);
+    MultivaluedMap<String, Statement> params = parameters.get(type);
     if (params == null) {
-      parameters.put(type, params = new HashMap<String, List<Statement>>());
+      parameters.put(type, params = new MultivaluedMapImpl<String, Statement>());
     }
-
-    List<Statement> values = params.get(name);
-    if (values == null) {
-      params.put(name, values = new ArrayList<Statement>());
-    }
-
-    values.add(value);
+    params.add(name, value);
   }
 
-  public Map<String, List<Statement>> getPathParameters() {
+  public MultivaluedMap<String, Statement> getPathParameters() {
     return parameters.get(PathParam.class);
   }
 
   public Statement getPathParameter(String name) {
-    Statement param = getParameterByName(PathParam.class, name);
+    final Statement param = getParameterByName(PathParam.class, name);
     if (param == null)
       throw new RuntimeException("No @PathParam found with name:" + name);
+
+    if (MetaClassFactory.get(PathSegment.class).equals(param.getType())) {
+      return new Statement() {
+        @Override
+        public String generate(Context context) {
+          if (param instanceof Parameter) {
+            return Stmt.loadVariable(((Parameter) param).getName()).invoke("getPath").generate(context);
+          }
+          else {
+            return Stmt.nestedCall(param).invoke("getPath").generate(context);
+          }
+        }
+
+        @Override
+        public MetaClass getType() {
+          return MetaClassFactory.get(String.class);
+        }
+      };
+    }
 
     return param;
   }
 
-  public Map<String, List<Statement>> getQueryParameters() {
+  public MultivaluedMap<String, Statement> getQueryParameters() {
     return get(QueryParam.class);
   }
 
@@ -152,7 +170,7 @@ public class JaxrsResourceMethodParameters {
     return getQueryParameters().get(name);
   }
 
-  public Map<String, List<Statement>> getHeaderParameters() {
+  public MultivaluedMap<String, Statement> getHeaderParameters() {
     return get(HeaderParam.class);
   }
 
@@ -160,7 +178,7 @@ public class JaxrsResourceMethodParameters {
     return getHeaderParameters().get(name);
   }
 
-  public Map<String, List<Statement>> getMatrixParameters() {
+  public MultivaluedMap<String, Statement> getMatrixParameters() {
     return get(MatrixParam.class);
   }
 
@@ -168,11 +186,11 @@ public class JaxrsResourceMethodParameters {
     return getParameterByName(MatrixParam.class, name);
   }
 
-  public Map<String, List<Statement>> getFormParameters() {
+  public MultivaluedMap<String, Statement> getFormParameters() {
     return get(FormParam.class);
   }
 
-  public Map<String, List<Statement>> getCookieParameters() {
+  public MultivaluedMap<String, Statement> getCookieParameters() {
     return get(CookieParam.class);
   }
 
@@ -191,7 +209,7 @@ public class JaxrsResourceMethodParameters {
     this.entityParameter = entityParameter;
   }
 
-  private Map<String, List<Statement>> get(Class<? extends Annotation> type) {
+  private MultivaluedMap<String, Statement> get(Class<? extends Annotation> type) {
     if (parameters == null)
       return null;
 
