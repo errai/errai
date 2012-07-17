@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -49,16 +50,18 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
   }
 
   public static void addTypeHeirarchyFor(IOCProcessingContext context, final Set<MetaClass> classes) {
+    final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
+
     for (final MetaClass subClass : classes) {
       MetaClass cls = subClass;
       do {
         if (cls != subClass) {
-          context.append(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
+          instanceInitializer.addStatement(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
                   .invoke("addLookup", subClass.getFullyQualifiedName(), cls.getFullyQualifiedName()));
         }
 
         for (MetaClass interfaceClass : cls.getInterfaces()) {
-          context.append(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
+          instanceInitializer.addStatement(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
                   .invoke("addLookup", subClass.getFullyQualifiedName(), interfaceClass.getFullyQualifiedName()));
 
         }
@@ -72,13 +75,12 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
                                   InjectionContext injectionContext,
                                   IOCProcessorFactory procFactory) {
 
+    final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
 
     final Set<MetaClass> knownObserverTypes = new HashSet<MetaClass>();
 
     for (MetaParameter parameter : ClassScanner.getParametersAnnotatedWith(Observes.class)) {
       knownObserverTypes.add(parameter.getType());
-//      injectionContext.getGraphBuilder().addDependency(parameter.getDeclaringMember().getDeclaringClass(),
-//              Dependency.on(MessageBus.class));
     }
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
@@ -92,8 +94,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
     addTypeHeirarchyFor(context, knownTypesWithSuperTypes);
 
-    context.append(Stmt.nestedCall(Stmt.newObject(CDI.class))
+    instanceInitializer.addStatement(Stmt.nestedCall(Stmt.newObject(CDI.class))
             .invoke("initLookupTable", Stmt.invokeStatic(CDIEventTypeLookup.class, "get")));
-
   }
 }
