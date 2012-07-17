@@ -1,8 +1,13 @@
 package org.jboss.errai.jpa.client.local;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 public class LongIdGenerator implements Iterator<Long> {
+
+  static final Map<String, Object> NO_SIDE_EFFECTS_OPTION =
+           Collections.singletonMap(ErraiEntityManager.NO_SIDE_EFFECTS, (Object) Boolean.TRUE);
 
   private final ErraiEntityManager entityManager;
   private final ErraiSingularAttribute<?, Long> attr;
@@ -38,7 +43,7 @@ public class LongIdGenerator implements Iterator<Long> {
 
   @Override
   public Long next() {
-    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId) != null) {
+    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId, NO_SIDE_EFFECTS_OPTION) != null) {
       nextCandidateId += (long) (Math.random() * probeJumpSize);
 
       // control rollover in case we run out of values

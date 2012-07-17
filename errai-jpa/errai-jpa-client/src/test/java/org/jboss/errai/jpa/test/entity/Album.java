@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -16,13 +17,14 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
-import javax.persistence.Transient;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
 @NamedQuery(name="selectAlbumByName", query="SELECT a FROM Album a WHERE a.name=:name")
-@TestOnly @Portable @Entity
+@EntityListeners(StandaloneLifecycleListener.class)
+@TestOnly @Bindable @Portable @Entity
 public class Album {
 
   @GeneratedValue
@@ -90,22 +92,22 @@ public class Album {
 
   // ------ Lifecycle callbacks (assorted access levels to test that they all work) ------
 
-  @Transient
-  private transient final List<Class<?>> callbackLog = new ArrayList<Class<?>>();
+  /**
+   * A place to record JPA entity lifecycle events when they happen so they can
+   * be verified in the test suite.
+   */
+  public static final List<CallbackLogEntry> CALLBACK_LOG = new ArrayList<CallbackLogEntry>();
 
-  public List<Class<?>> getCallbackLog() {
-    return callbackLog;
-  }
-
-  @SuppressWarnings("unused")
-  @PrePersist private void prePersist() { callbackLog.add(PrePersist.class); };
 
   @SuppressWarnings("unused")
-  @PostPersist private void postPersist() { callbackLog.add(PostPersist.class); };
+  @PrePersist private void prePersist() { CALLBACK_LOG.add(new CallbackLogEntry(this, PrePersist.class)); };
 
-  @PreRemove void preRemove() { callbackLog.add(PreRemove.class); };
-  @PostRemove void postRemove() { callbackLog.add(PostRemove.class); };
-  @PreUpdate protected void preUpdate() { callbackLog.add(PreUpdate.class); };
-  @PostUpdate protected void postUpdate() { callbackLog.add(PostUpdate.class); };
-  @PostLoad public void postLoad() { callbackLog.add(PostLoad.class); };
+  @SuppressWarnings("unused")
+  @PostPersist private void postPersist() { CALLBACK_LOG.add(new CallbackLogEntry(this, PostPersist.class)); };
+
+  @PreRemove void preRemove() { CALLBACK_LOG.add(new CallbackLogEntry(this, PreRemove.class)); };
+  @PostRemove void postRemove() { CALLBACK_LOG.add(new CallbackLogEntry(this, PostRemove.class)); };
+  @PreUpdate protected void preUpdate() { CALLBACK_LOG.add(new CallbackLogEntry(this, PreUpdate.class)); };
+  @PostUpdate protected void postUpdate() { CALLBACK_LOG.add(new CallbackLogEntry(this, PostUpdate.class)); };
+  @PostLoad public void postLoad() { CALLBACK_LOG.add(new CallbackLogEntry(this, PostLoad.class)); };
 }

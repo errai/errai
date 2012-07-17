@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.jboss.errai.jpa.test.entity.Album;
+
 /**
  * Provides a sanity check for {@link ErraiJpaTest} by running all the same
  * tests that we run against Errai JPA against Hibernate.
@@ -41,6 +43,8 @@ public class HibernateJpaTest extends ErraiJpaTest {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiJpaClientTests", properties);
     entityManager = emf.createEntityManager();
     entityManager.getTransaction().begin();
+
+    Album.CALLBACK_LOG.clear();
   }
 
   @Override
@@ -65,6 +69,24 @@ public class HibernateJpaTest extends ErraiJpaTest {
    */
   @Override
   public void testStoreAndFetchOneWithEverything() throws Exception {
+    // skip
+  }
+
+  /**
+   * Hibernate doesn't know how to unwrap Errai's WrappedPortables, so we have
+   * to skip this test.
+   */
+  @Override
+  public void testPersistProxiedEntity() {
+    // skip
+  }
+
+  /**
+   * Hibernate doesn't know how to unwrap Errai's WrappedPortables, so we have
+   * to skip this test.
+   */
+  @Override
+  public void testUpdateDataBinderProxiedEntity() {
     // skip
   }
 }

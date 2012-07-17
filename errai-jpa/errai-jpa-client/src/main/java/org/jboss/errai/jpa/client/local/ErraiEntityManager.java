@@ -1,6 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.jboss.errai.common.client.api.WrappedPortable;
+import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -32,6 +35,13 @@ import org.jboss.errai.marshalling.client.api.MarshallerFramework;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public abstract class ErraiEntityManager implements EntityManager {
+
+  /**
+   * Hint that can be used with {@link #find(Class, Object, Map)} to specify
+   * that the find operation should not have any side effects, such as adding
+   * the entity to the persistence context and delivering PostLoad event.
+   */
+  static final String NO_SIDE_EFFECTS = "errai.jpa.NO_SIDE_EFFECTS";
 
   // magic incantation. ooga booga!
   static {
@@ -112,7 +122,11 @@ public abstract class ErraiEntityManager implements EntityManager {
    */
   @SuppressWarnings("unchecked")
   private <T> Class<T> getNarrowedClass(T object) {
-    return (Class<T>) object.getClass();
+    Object o = object;
+    while (o instanceof WrappedPortable) {
+      o = ((WrappedPortable) o).unwrap();
+    }
+    return (Class<T>) o.getClass();
   }
 
   /**
@@ -212,6 +226,13 @@ public abstract class ErraiEntityManager implements EntityManager {
       break;
     case NEW:
       throw new IllegalArgumentException("Entities can't transition from " + oldState + " to " + newState);
+    }
+
+    // Tell the BindableProxy that we changed the entity
+    // (we haven't _necessarily_ changed anything.. if this becomes a performance problem,
+    // we can set a flag in the above state change logic make this call depend on that flag)
+    if (entity instanceof BindableProxy) {
+      ((BindableProxy<?>) entity).updateWidgets();
     }
 
     // now cascade the operation
@@ -462,11 +483,16 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public <X> X find(Class<X> entityClass, Object primaryKey) {
+    return find(entityClass, primaryKey, Collections.<String, Object>emptyMap());
+  }
+
+  @Override
+  public <X> X find(Class<X> entityClass, Object primaryKey, Map<String, Object> properties) {
     Key<X, ?> key = Key.get(this, entityClass, primaryKey);
     X entity = cast(entityClass, persistenceContext.get(key));
     if (entity == null) {
       entity = backend.get(key);
-      if (entity != null) {
+      if (entity != null && !properties.containsKey(NO_SIDE_EFFECTS)) {
         persistenceContext.put(key, entity);
 
         // XXX when persistenceContext gets its own class, this should go on the ultimate ingress point
@@ -474,11 +500,6 @@ public abstract class ErraiEntityManager implements EntityManager {
       }
     }
     return entity;
-  }
-
-  @Override
-  public <T> T find(Class<T> entityClass, Object primaryKey, Map<String, Object> properties) {
-    return find(entityClass, primaryKey);
   }
 
   @Override

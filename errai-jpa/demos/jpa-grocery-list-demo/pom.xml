@@ -801,7 +801,7 @@
         <configuration>
           <strict>true</strict>
           <logLevel>INFO</logLevel>
-          <runTarget>index.html</runTarget>
+          <runTarget>index.jsp</runTarget>
           <extraJvmArgs>
             -Xmx1g -XX:MaxPermSize=128m
             <!-- -Derrai.codegen.permissive=true -Derrai.codegen.printOut=true -->

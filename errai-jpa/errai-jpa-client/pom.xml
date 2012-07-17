@@ -43,6 +43,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-data-binding</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
     </dependency>
@@ -61,15 +67,6 @@
   </dependencies>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
-        <configuration>
-          <strict>true</strict>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 
   <profiles>
@@ -123,8 +120,7 @@
               </systemProperties>
 
               <includes>
-                <include>**/*Test.java</include>
-                <include>**/*Tests.java</include>
+                <include>**/AllJpaTests.java</include>
               </includes>
             </configuration>
           </plugin>
