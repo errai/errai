@@ -551,7 +551,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     context.addVariable(Variable.create("this", this));
 
-    for (final Annotation a : annotations) {
+    for (BuildMetaField buildMetaField : fields) {
+      context.addVariable(Variable.create(buildMetaField.getName(), buildMetaField.getType()));
+    }
+
+    for (Annotation a : annotations) {
       buf.append(new AnnotationLiteral(a).getCanonicalString(context));
       buf.append(" ");
     }
