@@ -21,6 +21,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiTemplate;
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -45,8 +46,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.uibinder.client.UiBinderProvider;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -99,11 +98,13 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
 
           context.getBootstrapClass().addInnerClass(new InnerClass(uiBinderBoilerPlaterIface));
 
+          final BlockStatement staticInit = context.getBootstrapClass().getStaticInitializer();
+
           String varName = "uiBinderInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
                   .replaceAll("\\.", "_");
 
           if (Boolean.getBoolean("errai.simulatedClient")) {
-            context.globalAppend(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+            staticInit.addStatement(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
                     ObjectBuilder.newInstanceOf(uiBinderBoilerPlaterIface)
                             .extend()
                             .publicOverridesMethod("createAndBindUi", Parameter.of(injectionPoint.getEnclosingType(), "w"))
@@ -113,12 +114,12 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
             );
           }
           else {
-            context.globalAppend(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+            staticInit.addStatement(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
                     Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(uiBinderBoilerPlaterIface))
             ));
           }
 
-          context.globalAppend(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
+          staticInit.addStatement(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
                   injectionPoint.getEnclosingType(), Refs.get(varName)));
         }
         else if (injectionPoint.getType().isAssignableTo(SafeHtmlTemplates.class)) {

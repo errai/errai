@@ -63,8 +63,9 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private boolean isStatic;
   private boolean isInner;
 
-  private final List<Annotation> annotations = new ArrayList<Annotation>();
-  private final List<InnerClass> innerClasses = new ArrayList<InnerClass>();
+  private BlockStatement staticInitializer = new BlockStatement();  
+  private List<Annotation> annotations = new ArrayList<Annotation>();
+  private List<InnerClass> innerClasses = new ArrayList<InnerClass>();
   private List<BuildMetaMethod> methods = new ArrayList<BuildMetaMethod>();
   private List<BuildMetaField> fields = new ArrayList<BuildMetaField>();
   private List<BuildMetaConstructor> constructors = new ArrayList<BuildMetaConstructor>();
@@ -522,6 +523,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     this.classComment = classComment;
   }
 
+  public BlockStatement getStaticInitializer() {
+    return staticInitializer;
+  }
+
   String generatedCache;
 
   @Override
@@ -598,6 +603,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     context.addVariable(Variable.create("super", superClass));
 
     buf.append(" {\n");
+
+    if (!staticInitializer.isEmpty()) {
+      buf.append("static {\n");
+      buf.append(staticInitializer.generate(context));
+      buf.append("\n}\n");
+    }
 
     buf.append(membersToString());
 

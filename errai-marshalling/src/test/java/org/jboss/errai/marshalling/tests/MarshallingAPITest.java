@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.tests;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import org.jboss.errai.marshalling.tests.res.EntityWithAbstractFieldType;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterface;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArray;
 import org.jboss.errai.marshalling.tests.res.EntityWithPortableSubtypesInArray;
+import org.jboss.errai.marshalling.tests.res.EntityWithPublicFields;
 import org.jboss.errai.marshalling.tests.res.InterfaceA;
 import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
@@ -41,6 +43,7 @@ import org.junit.Test;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingAPITest {
 
@@ -174,5 +177,20 @@ public class MarshallingAPITest {
     ewaft = new EntityWithAbstractFieldType();
     ewaft.setB(new BImpl2("admin"));
     testEncodeDecode(ewaft);
+  }
+  
+  @Test
+  public void testEntityWithPublicFields() {
+    EntityWithPublicFields ewpf = new EntityWithPublicFields();
+    
+    ArrayList<String> values = new ArrayList<String>();
+    values.add("1");
+    values.add("2");
+    values.add("3");
+    
+    ewpf.value = 17;
+    ewpf.values = values;
+    
+    testEncodeDecode(ewpf);
   }
 }

@@ -330,12 +330,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement fieldDemarshall(final Mapping mapping, final MetaClass fromType) {
     final Statement statement = unwrapJSON(extractJSONObjectProperty(mapping.getKey(), fromType), mapping.getType(), mapping.getTargetType());
-    if (!mapping.getTargetType().equals(mapping.getType())) {
-      return Cast.to(mapping.getTargetType(), statement);
-    }
-    else {
-      return statement;
-    }
+    return Cast.to(mapping.getTargetType(), statement);
   }
 
   public Statement extractJSONObjectProperty(final String fieldName, final Class fromType) {
