@@ -39,11 +39,13 @@ public class BigIntegerIdGenerator implements Iterator<BigInteger> {
 
   @Override
   public BigInteger next() {
-    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId) != null) {
-      nextCandidateId = nextCandidateId.add(new BigInteger(String.valueOf(Math.random() * probeJumpSize)));
+    BigInteger nextAvailableId = nextCandidateId;
+    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextAvailableId,
+            LongIdGenerator.NO_SIDE_EFFECTS_OPTION) != null) {
+      nextAvailableId = nextAvailableId.add(new BigInteger(String.valueOf(Math.random() * probeJumpSize)));
     }
-    nextCandidateId = nextCandidateId.add(BigInteger.ONE);
-    return nextCandidateId;
+    nextCandidateId = nextAvailableId.add(BigInteger.ONE);
+    return nextAvailableId;
   }
 
   /**

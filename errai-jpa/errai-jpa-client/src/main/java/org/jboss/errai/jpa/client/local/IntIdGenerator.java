@@ -38,7 +38,8 @@ public class IntIdGenerator implements Iterator<Integer> {
 
   @Override
   public Integer next() {
-    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId) != null) {
+    while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId,
+            LongIdGenerator.NO_SIDE_EFFECTS_OPTION) != null) {
       nextCandidateId += (int) (Math.random() * probeJumpSize);
 
       // control rollover in case we run out of values

@@ -26,6 +26,7 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
+import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
 import org.jboss.errai.jpa.test.entity.Format;
 import org.jboss.errai.jpa.test.entity.Genre;
 import org.jboss.errai.jpa.test.entity.Zentity;
@@ -59,6 +60,8 @@ public class ErraiJpaTest extends GWTTestCase {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+
+    Album.CALLBACK_LOG.clear();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
@@ -409,30 +412,29 @@ public class ErraiJpaTest extends GWTTestCase {
 
   public void testPersistNewEntityLifecycle() throws Exception {
 
-    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
-
     // make it
     Album album = new Album();
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
-    assertEquals(expectedLifecycle, album.getCallbackLog());
+    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // store it
     EntityManager em = getEntityManager();
     em.persist(album);
 
-    expectedLifecycle.add(PrePersist.class);
-    expectedLifecycle.add(PostPersist.class);
-    assertEquals(expectedLifecycle, album.getCallbackLog());
+    expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     em.flush();
-    assertEquals(expectedLifecycle, album.getCallbackLog());
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // verify that detach causes no lifecycle updates
     em.detach(album);
-    assertEquals(expectedLifecycle, album.getCallbackLog());
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
 
   public void testFetchEntityLifecycle() throws Exception {
@@ -446,19 +448,23 @@ public class ErraiJpaTest extends GWTTestCase {
     // store it
     EntityManager em = getEntityManager();
     em.persist(album);
-    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
     em.flush();
     em.detach(album);
 
+    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+
     // fetch a fresh copy
     Album fetchedAlbum = em.find(Album.class, album.getId());
-    expectedLifecycle.add(PostLoad.class);
-    assertEquals(expectedLifecycle, fetchedAlbum.getCallbackLog());
+    expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // fetch again; expect no more PostLoad notifications
     Album fetchedAlbum2 = em.find(Album.class, album.getId());
     assertSame(fetchedAlbum, fetchedAlbum2);
-    assertEquals(expectedLifecycle, fetchedAlbum2.getCallbackLog());
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
 
   public void testRemoveEntityLifecycle() throws Exception {
@@ -472,27 +478,25 @@ public class ErraiJpaTest extends GWTTestCase {
     // store it
     EntityManager em = getEntityManager();
     em.persist(album);
-    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
     em.flush();
     em.detach(album);
 
+    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+    expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+
     // fetch a fresh copy
     Album fetchedAlbum = em.find(Album.class, album.getId());
-    expectedLifecycle.add(PostLoad.class);
-    assertEquals(expectedLifecycle, fetchedAlbum.getCallbackLog());
+    expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostLoad.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // delete it
     em.remove(fetchedAlbum);
     em.flush();
-    expectedLifecycle.add(PreRemove.class);
-    expectedLifecycle.add(PostRemove.class);
-    assertEquals(expectedLifecycle, fetchedAlbum.getCallbackLog());
-
-    // verify that detached entity received no further lifecycle updates
-    expectedLifecycle.clear();
-    expectedLifecycle.add(PrePersist.class);
-    expectedLifecycle.add(PostPersist.class);
-    assertEquals(expectedLifecycle, album.getCallbackLog());
+    expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PreRemove.class));
+    expectedLifecycle.add(new CallbackLogEntry(fetchedAlbum, PostRemove.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
 
   public void testUpdateEntityLifecycle() throws Exception {
@@ -506,20 +510,21 @@ public class ErraiJpaTest extends GWTTestCase {
     // store it
     EntityManager em = getEntityManager();
     em.persist(album);
-    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
     em.flush();
 
-    expectedLifecycle.add(PrePersist.class);
-    expectedLifecycle.add(PostPersist.class);
-    assertEquals(expectedLifecycle, album.getCallbackLog());
+    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+
+    expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
 
     // modify it
     album.setName("Cowabunga");
     em.flush();
 
-    expectedLifecycle.add(PreUpdate.class);
-    expectedLifecycle.add(PostUpdate.class);
-    assertEquals(expectedLifecycle, album.getCallbackLog());
+    expectedLifecycle.add(new CallbackLogEntry(album, PreUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostUpdate.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
 
   public void testStoreAndFetchOneWithEverything() throws Exception {
@@ -654,11 +659,6 @@ public class ErraiJpaTest extends GWTTestCase {
       @Override
       public String toString() {
         return wrapped.toString();
-      }
-
-      @Override
-      public List<Class<?>> getCallbackLog() {
-        return wrapped.getCallbackLog();
       }
 
       @Override
