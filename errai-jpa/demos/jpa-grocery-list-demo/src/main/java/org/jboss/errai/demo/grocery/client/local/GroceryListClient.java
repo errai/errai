@@ -1,12 +1,8 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
-import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -25,9 +21,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 @EntryPoint
 public class GroceryListClient extends Composite {
 
-  @Inject
-  private EntityManager em;
-
   @Inject @DataField
   private StoreForm storeForm;
 
@@ -39,11 +32,6 @@ public class GroceryListClient extends Composite {
 
   @PostConstruct
   public void clientMain() {
-    // TODO move this into StoresWidget
-    List<Store> allStores = em.createNamedQuery("allStores", Store.class).getResultList();
-    for (Store s : allStores) {
-      storesWidget.addStore(s);
-    }
 
     // show store form in popup when "+" button is pressed
     addStoreButton.addClickHandler(new ClickHandler() {
@@ -68,6 +56,8 @@ public class GroceryListClient extends Composite {
         el.getStyle().setDisplay(Display.NONE);
       }
     });
+
+    storesWidget.refreshFromDb();
 
     RootPanel.get().add(this);
   }
