@@ -119,8 +119,6 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
             ));
           }
 
-
-
           staticInit.addStatement(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
                   injectionPoint.getEnclosingType(), Refs.get(varName)));
         }
