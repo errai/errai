@@ -270,7 +270,7 @@ public class IOCBootstrapGenerator {
             .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
                                 .invoke("getRootContext")).finish();
 
-    final BlockBuilder builder = new BlockBuilderImpl(classBuilder.getClassDefinition().getStaticInitializer(), null);
+    final BlockBuilder builder = new BlockBuilderImpl(classBuilder.getClassDefinition().getInstanceInitializer(), null);
 
     _doRunnableTasks(beforeTasks, builder);
 

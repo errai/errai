@@ -64,6 +64,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private boolean isInner;
 
   private BlockStatement staticInitializer = new BlockStatement();
+  private BlockStatement instanceInitializer = new BlockStatement();
+
   private List<Annotation> annotations = new ArrayList<Annotation>();
   private List<InnerClass> innerClasses = new ArrayList<InnerClass>();
   private List<BuildMetaMethod> methods = new ArrayList<BuildMetaMethod>();
@@ -518,6 +520,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return staticInitializer;
   }
 
+  public BlockStatement getInstanceInitializer() {
+    return instanceInitializer;
+  }
+
   String generatedCache;
 
   @Override
@@ -581,6 +587,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!staticInitializer.isEmpty()) {
       buf.append("static {\n");
       buf.append(staticInitializer.generate(context));
+      buf.append("\n}\n");
+    }
+
+    if (!instanceInitializer.isEmpty()) {
+      buf.append("{\n");
+      buf.append(instanceInitializer.generate(context));
       buf.append("\n}\n");
     }
 
