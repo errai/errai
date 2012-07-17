@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.BlockBuilderImpl;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -269,7 +270,9 @@ public class IOCBootstrapGenerator {
             .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
                                 .invoke("getRootContext")).finish();
 
-    _doRunnableTasks(beforeTasks, blockBuilder);
+    final BlockBuilder builder = new BlockBuilderImpl(classBuilder.getClassDefinition().getStaticInitializer(), null);
+
+    _doRunnableTasks(beforeTasks, builder);
 
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
