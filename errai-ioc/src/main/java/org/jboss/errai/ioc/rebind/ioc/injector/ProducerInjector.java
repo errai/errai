@@ -1,6 +1,5 @@
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
-import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
@@ -96,14 +95,8 @@ public class ProducerInjector extends AbstractInjector {
             ._(Stmt.loadVariable(var).returnValue())
             .finish().finish();
 
-//    callbackBuilder.append(Stmt.declareVariable(creationCallbackRef).asFinal().named(var)
-//            .initializeWith(producerCreationalCallback));
-
-    injectableInstance.getInjectionContext()
-            .getProcessingContext().getBootstrapBuilder()
-            .privateField(var, creationCallbackRef)
-            .modifiers(Modifier.Final)
-            .initializesWith(producerCreationalCallback).finish();
+    callbackBuilder.append(Stmt.declareVariable(creationCallbackRef).asFinal().named(var)
+            .initializeWith(producerCreationalCallback));
 
     return loadVariable("context").invoke("getSingletonInstanceOrNew",
             Stmt.loadVariable("injContext"),
@@ -125,6 +118,5 @@ public class ProducerInjector extends AbstractInjector {
   @Override
   public MetaClass getInjectedType() {
     return injectedType;
-
   }
 }
