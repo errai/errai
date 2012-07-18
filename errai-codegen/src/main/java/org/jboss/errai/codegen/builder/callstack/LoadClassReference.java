@@ -25,8 +25,6 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.MetaWildcardType;
 
 /**
  * {@link CallElement} to create a class reference.
@@ -53,7 +51,7 @@ public class LoadClassReference extends AbstractCallElement {
   }
 
   public static class ClassReference implements Statement {
-    private MetaClass metaClass;
+    private final MetaClass metaClass;
 
     public ClassReference(MetaClass metaClass) {
       this.metaClass = metaClass;
@@ -100,20 +98,8 @@ public class LoadClassReference extends AbstractCallElement {
     if (metaClass instanceof MetaClass) {
       erased = ((MetaClass) metaClass).getErased();
     }
-    else if (metaClass instanceof MetaParameterizedType) {
-      MetaParameterizedType parameterizedType = (MetaParameterizedType) metaClass;
-      return parameterizedType.toString();
-    }
-    else if (metaClass instanceof MetaTypeVariable) {
-      MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
-      return parameterizedType.getName();
-    }
-    else if (metaClass instanceof MetaWildcardType) {
-      MetaWildcardType wildCardType = (MetaWildcardType) metaClass;
-      return wildCardType.toString();
-    }
     else {
-      throw new RuntimeException("unknown class reference type: " + metaClass);
+      return metaClass.getName();
     }
 
     String fqcn = erased.getCanonicalName();

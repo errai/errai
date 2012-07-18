@@ -33,7 +33,13 @@ public abstract class AbstractMetaParameterizedType implements MetaParameterized
       compareTo = new MetaType[compareFrom.length];
       for (int i = 0; i < compareFrom.length; i++) {
         compareTo[i] = new MetaType() {
+          @Override
           public String toString() {
+            return getName();
+          }
+
+          @Override
+          public String getName() {
             return "?";
           }
         };

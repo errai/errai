@@ -16,19 +16,18 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 
 import com.google.gwt.core.ext.typeinfo.JWildcardType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTWildcardType implements MetaWildcardType {
-  private JWildcardType wildcardType;
-  private TypeOracle oracle;
+  private final JWildcardType wildcardType;
+  private final TypeOracle oracle;
 
   public GWTWildcardType(TypeOracle oracle, JWildcardType wildcardType) {
     this.wildcardType = wildcardType;
@@ -47,6 +46,11 @@ public class GWTWildcardType implements MetaWildcardType {
 
   @Override
   public String toString() {
-    return wildcardType.toString();
+    return getName();
+  }
+
+  @Override
+  public String getName() {
+    return wildcardType.getParameterizedQualifiedSourceName();
   }
 }

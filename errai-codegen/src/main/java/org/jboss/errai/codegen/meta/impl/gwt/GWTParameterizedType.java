@@ -19,20 +19,19 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTParameterizedType extends AbstractMetaParameterizedType {
-  private JParameterizedType parameterizedType;
-  private TypeOracle oracle;
+  private final JParameterizedType parameterizedType;
+  private final TypeOracle oracle;
 
   public GWTParameterizedType(TypeOracle oracle, JParameterizedType parameterizedType) {
     this.parameterizedType = parameterizedType;
@@ -58,13 +57,13 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
     return GWTClass.newInstance(oracle, parameterizedType.getRawType());
   }
 
+  @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder("<");
-    JClassType[] parms = parameterizedType.getTypeArgs();
-    for (int i = 0; i < parms.length; i++) {
-      buf.append(GWTUtil.eraseOrReturn(oracle, parms[i]).getFullyQualifiedName());
-      if (i + 1 < parms.length) buf.append(',');
-    }
-    return buf.append('>').toString();
+    return getName();
+  }
+
+  @Override
+  public String getName() {
+    return parameterizedType.getParameterizedQualifiedSourceName();
   }
 }

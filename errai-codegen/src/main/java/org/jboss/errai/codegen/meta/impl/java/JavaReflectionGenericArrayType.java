@@ -25,7 +25,7 @@ import org.jboss.errai.codegen.meta.MetaType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionGenericArrayType implements MetaGenericArrayType {
-  private GenericArrayType type;
+  private final GenericArrayType type;
 
   public JavaReflectionGenericArrayType(GenericArrayType type) {
     this.type = type;
@@ -35,4 +35,10 @@ public class JavaReflectionGenericArrayType implements MetaGenericArrayType {
   public MetaType getGenericComponentType() {
     return JavaReflectionUtil.fromType(type.getGenericComponentType());
   }
+
+  @Override
+  public String getName() {
+    return type.toString();
+  }
+  
 }

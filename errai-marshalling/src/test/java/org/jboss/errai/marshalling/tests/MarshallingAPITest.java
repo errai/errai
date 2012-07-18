@@ -17,7 +17,9 @@
 package org.jboss.errai.marshalling.tests;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
@@ -30,6 +32,7 @@ import org.jboss.errai.marshalling.tests.res.BImpl2;
 import org.jboss.errai.marshalling.tests.res.EntityWithAbstractFieldType;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterface;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArray;
+import org.jboss.errai.marshalling.tests.res.EntityWithMapUsingArrayValues;
 import org.jboss.errai.marshalling.tests.res.EntityWithPortableSubtypesInArray;
 import org.jboss.errai.marshalling.tests.res.EntityWithPublicFields;
 import org.jboss.errai.marshalling.tests.res.InterfaceA;
@@ -192,5 +195,17 @@ public class MarshallingAPITest {
     ewpf.values = values;
     
     testEncodeDecode(ewpf);
+  }
+  
+  @Test
+  public void testEntityWithMapUsingArrayValues() {
+    EntityWithMapUsingArrayValues ewmuav = new EntityWithMapUsingArrayValues();
+    
+    Map<String, String[]> data = new HashMap<String, String[]>();
+    data.put("1", new String[]{"2", "3", "4"});
+    data.put("5", new String[]{"6", "7", "8"});
+    
+    ewmuav.setData(data);
+    testEncodeDecode(ewmuav);
   }
 }

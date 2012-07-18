@@ -25,7 +25,7 @@ import org.jboss.errai.codegen.meta.MetaWildcardType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionWildcardType implements MetaWildcardType {
-  private WildcardType wildcardType;
+  private final WildcardType wildcardType;
 
   public JavaReflectionWildcardType(WildcardType wildcardType) {
     this.wildcardType = wildcardType;
@@ -41,7 +41,13 @@ public class JavaReflectionWildcardType implements MetaWildcardType {
     return JavaReflectionUtil.fromTypeArray(wildcardType.getUpperBounds());
   }
   
+  @Override
   public String toString() {
+    return getName();
+  }
+
+  @Override
+  public String getName() {
     return wildcardType.toString();
   }
 }

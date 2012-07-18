@@ -19,20 +19,19 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaGenericDeclaration;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 
 import com.google.gwt.core.ext.typeinfo.JGenericType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTGenericDeclaration implements MetaGenericDeclaration {
-  private JGenericType genericType;
-  private TypeOracle oracle;
+  private final JGenericType genericType;
+  private final TypeOracle oracle;
 
   public GWTGenericDeclaration(TypeOracle oracle, JGenericType genericType) {
     this.oracle = oracle;
@@ -48,5 +47,10 @@ public class GWTGenericDeclaration implements MetaGenericDeclaration {
     }
 
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
+  }
+
+  @Override
+  public String getName() {
+    return genericType.getParameterizedQualifiedSourceName();
   }
 }

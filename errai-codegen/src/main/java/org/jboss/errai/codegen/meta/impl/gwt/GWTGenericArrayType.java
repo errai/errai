@@ -16,19 +16,18 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaGenericArrayType;
 import org.jboss.errai.codegen.meta.MetaType;
 
 import com.google.gwt.core.ext.typeinfo.JGenericType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTGenericArrayType implements MetaGenericArrayType {
-  private JGenericType genericType;
-  private TypeOracle oracle;
+  private final JGenericType genericType;
+  private final TypeOracle oracle;
 
   public GWTGenericArrayType(TypeOracle oracle, JGenericType genericType) {
     this.genericType = genericType;
@@ -38,5 +37,10 @@ public class GWTGenericArrayType implements MetaGenericArrayType {
   @Override
   public MetaType getGenericComponentType() {
     return GWTUtil.fromType(oracle, genericType.getErasedType());
+  }
+  
+  @Override
+  public String getName() {
+    return genericType.getParameterizedQualifiedSourceName();
   }
 }
