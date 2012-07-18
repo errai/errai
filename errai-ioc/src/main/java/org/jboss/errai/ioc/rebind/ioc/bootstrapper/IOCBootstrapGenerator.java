@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.BlockBuilderImpl;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -135,7 +136,7 @@ public class IOCBootstrapGenerator {
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
       gen = _generate(packageName, className);
-      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
+      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms " + "(" + MetaClassFactory.getAllCachedClasses().size()  + " beans processed)");
 
       RebindUtils.writeStringToFile(cacheFile, gen);
 

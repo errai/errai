@@ -22,10 +22,10 @@ public final class ClassScanner {
   }
 
   public static Set<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                          final Set<String> packages)  {
+                                                              final Set<String> packages) {
     final Set<MetaParameter> result = new HashSet<MetaParameter>();
     for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-      for (final MetaMethod method : metaClass.getDeclaredMethods())  {
+      for (final MetaMethod method : metaClass.getDeclaredMethods()) {
         for (final MetaParameter parameter : method.getParameters()) {
           if (parameter.isAnnotationPresent(annotation)) {
             _addIfMatches(result, parameter, packages);

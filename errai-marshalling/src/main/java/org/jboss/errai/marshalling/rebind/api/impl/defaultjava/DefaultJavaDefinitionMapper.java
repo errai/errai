@@ -16,13 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -41,6 +34,13 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMappin
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -219,7 +219,7 @@ public class DefaultJavaDefinitionMapper {
         final MetaClass type = field.getType().getErased();
         final MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
 
-        if (!type.isEnum() && !definitionsFactory.isExposedClass(compType)) {
+        if (!(type.isAbstract() || type.isInterface() || type.isEnum()) && !definitionsFactory.isExposedClass(compType)) {
           throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
                   + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
                   + compType.getFullyQualifiedName());
