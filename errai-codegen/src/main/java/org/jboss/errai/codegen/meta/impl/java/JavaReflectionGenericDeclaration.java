@@ -44,4 +44,9 @@ public class JavaReflectionGenericDeclaration implements MetaGenericDeclaration 
 
     return metaTypeVariableList.toArray(new MetaTypeVariable[metaTypeVariableList.size()]);
   }
+
+  @Override
+  public String getName() {
+    return genericDeclaration.toString();
+  }
 }

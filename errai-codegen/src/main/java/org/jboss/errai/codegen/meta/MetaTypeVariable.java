@@ -21,8 +21,6 @@ package org.jboss.errai.codegen.meta;
  */
 public interface MetaTypeVariable extends MetaType {
   public MetaType[] getBounds();
-
   public MetaGenericDeclaration getGenericDeclaration();
-
-  public String getName();
+  
 }

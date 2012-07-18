@@ -23,9 +23,9 @@ import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class BuildMetaParameterizedType extends AbstractMetaParameterizedType {
-  private MetaType[] types;
-  private MetaType ownerType;
-  private MetaType rawType;
+  private final MetaType[] types;
+  private final MetaType ownerType;
+  private final MetaType rawType;
 
   public BuildMetaParameterizedType(MetaType[] types, MetaType ownerType, MetaType rawType) {
     this.types = types;
@@ -46,5 +46,10 @@ public class BuildMetaParameterizedType extends AbstractMetaParameterizedType {
   @Override
   public MetaType getRawType() {
     return rawType;
+  }
+
+  @Override
+  public String getName() {
+    return ownerType.getName();
   }
 }

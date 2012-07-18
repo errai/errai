@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.builder.callstack;
 
+import java.util.Map;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.RenderCacheStore;
 import org.jboss.errai.codegen.Statement;
@@ -23,10 +25,6 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.MetaWildcardType;
-
-import java.util.Map;
 
 /**
  * {@link CallElement} to create a class reference.
@@ -48,7 +46,7 @@ public class LoadClassReference extends AbstractCallElement {
 
     try {
       nextOrReturn(writer, context, new ClassReference(metaClass));
-    } 
+    }
     catch (GenerationException e) {
       blameAndRethrow(e);
     }
@@ -101,20 +99,8 @@ public class LoadClassReference extends AbstractCallElement {
     if (metaClass instanceof MetaClass) {
       erased = ((MetaClass) metaClass).getErased();
     }
-    else if (metaClass instanceof MetaParameterizedType) {
-      final MetaParameterizedType parameterizedType = (MetaParameterizedType) metaClass;
-      return parameterizedType.toString();
-    }
-    else if (metaClass instanceof MetaTypeVariable) {
-      final MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
-      return parameterizedType.getName();
-    }
-    else if (metaClass instanceof MetaWildcardType) {
-      final MetaWildcardType wildCardType = (MetaWildcardType) metaClass;
-      return wildCardType.toString();
-    }
     else {
-      throw new RuntimeException("unknown class reference type: " + metaClass);
+      return metaClass.getName();
     }
 
     String fqcn = erased.getCanonicalName();

@@ -48,6 +48,7 @@ public class JavaReflectionParameterizedType extends AbstractMetaParameterizedTy
     return JavaReflectionUtil.fromType(parameterizedType.getRawType());
   }
 
+  @Override
   public String toString() {
     final StringBuilder buf = new StringBuilder("<");
     final Type[] parms = parameterizedType.getActualTypeArguments();
@@ -61,5 +62,10 @@ public class JavaReflectionParameterizedType extends AbstractMetaParameterizedTy
       if (i + 1 < parms.length) buf.append(',');
     }
     return buf.append('>').toString();
+  }
+
+  @Override
+  public String getName() {
+    return parameterizedType.toString();
   }
 }

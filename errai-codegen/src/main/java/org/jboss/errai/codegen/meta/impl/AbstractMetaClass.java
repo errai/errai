@@ -16,15 +16,8 @@
 
 package org.jboss.errai.codegen.meta.impl;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.util.GenUtil;
-import org.mvel2.util.NullType;
+import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
+import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -34,8 +27,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
-import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.mvel2.util.NullType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -317,22 +318,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaConstructor getBestMatchingConstructor(final Class... parameters) {
     return getBestMatchingConstructor(MetaClassFactory.fromClassArray(parameters));
-
-//    Class<?> cls = asClass();
-//    if (cls != null) {
-//      Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, true);
-//      if (c == null) {
-//        c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
-//        if (c == null) {
-//          return null;
-//        }
-//      }
-//      MetaClass metaClass = MetaClassFactory.get(cls);
-//      return metaClass.getConstructor(c.getParameterTypes());
-//    }
-//    else {
-//      return getConstructor(parameters);
-//    }
   }
 
   @Override
@@ -355,7 +340,20 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _getConstructor(getDeclaredConstructors(), classToMeta(parameters));
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+  public MetaField getInheritedField(String name) {
+    MetaField f = getDeclaredField(name);
+    if (f != null) return f;
+    for (MetaClass iface : getInterfaces()) {
+      f = iface.getInheritedField(name);
+      if (f != null) return f;
+    }
+    if (getSuperClass() != null) {
+      return getSuperClass().getInheritedField(name);
+    }
+    return null;
+  }
+
   @Override
   public final <A extends Annotation> A getAnnotation(final Class<A> annotation) {
     for (final Annotation a : getAnnotations()) {
@@ -402,7 +400,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _hashString;
   }
 
-  private Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
+  private final Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
 
   private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 

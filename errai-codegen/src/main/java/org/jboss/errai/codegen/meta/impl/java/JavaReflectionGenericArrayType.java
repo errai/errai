@@ -35,4 +35,10 @@ public class JavaReflectionGenericArrayType implements MetaGenericArrayType {
   public MetaType getGenericComponentType() {
     return JavaReflectionUtil.fromType(type.getGenericComponentType());
   }
+
+  @Override
+  public String getName() {
+    return type.toString();
+  }
+  
 }

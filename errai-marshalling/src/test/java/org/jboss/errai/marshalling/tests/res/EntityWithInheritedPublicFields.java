@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.meta;
+package org.jboss.errai.marshalling.tests.res;
+
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * Portable type used to test marshalling of types inherting public fields.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface MetaGenericArrayType extends MetaType {
-  public MetaType getGenericComponentType();
-  
+@Portable
+public class EntityWithInheritedPublicFields extends EntityWithPublicFields {
+
 }
