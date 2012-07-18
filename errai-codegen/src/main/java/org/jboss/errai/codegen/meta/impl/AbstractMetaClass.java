@@ -16,13 +16,10 @@
 
 package org.jboss.errai.codegen.meta.impl;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.asClassArray;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
-import static org.jboss.errai.codegen.util.GenUtil.getBestConstructorCandidate;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,13 +29,13 @@ import java.util.Map;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
-import org.mvel2.util.ParseTools;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -154,7 +151,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return candidate;
   }
 
-  private Map<String, Map<String, MetaMethod>> METHOD_MATCH_CACHE = new HashMap<String, Map<String, MetaMethod>>();
+  private final Map<String, Map<String, MetaMethod>> METHOD_MATCH_CACHE = new HashMap<String, Map<String, MetaMethod>>();
 
   @Override
   public MetaMethod getMethod(String name, Class... parmTypes) {
@@ -361,6 +358,20 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
+  public MetaField getInheritedField(String name) {
+    MetaField f = getDeclaredField(name);
+    if (f != null) return f;
+    for (MetaClass iface : getInterfaces()) {
+      f = iface.getInheritedField(name);
+      if (f != null) return f;
+    }
+    if (getSuperClass() != null) {
+      return getSuperClass().getInheritedField(name);
+    }
+    return null;
+  }
+  
+  @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation))
@@ -390,7 +401,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _hashString;
   }
 
-  private Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
+  private final Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
 
   private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 

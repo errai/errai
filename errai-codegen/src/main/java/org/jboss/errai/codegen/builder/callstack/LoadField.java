@@ -29,7 +29,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaField;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class LoadField extends AbstractCallElement {
-  private String fieldName;
+  private final String fieldName;
 
   public LoadField(String fieldName) {
     this.fieldName = fieldName;
@@ -43,7 +43,7 @@ public class LoadField extends AbstractCallElement {
       field = new BuildMetaField(null, null, Scope.Private, statement.getType(), "this");
     } 
     else {
-      field = statement.getType().getDeclaredField(fieldName);
+      field = statement.getType().getInheritedField(fieldName);
     }
 
     if (field == null) {

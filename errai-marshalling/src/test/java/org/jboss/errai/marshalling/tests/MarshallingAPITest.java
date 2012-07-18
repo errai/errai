@@ -30,6 +30,7 @@ import org.jboss.errai.marshalling.tests.res.ASubImpl1;
 import org.jboss.errai.marshalling.tests.res.BImpl1;
 import org.jboss.errai.marshalling.tests.res.BImpl2;
 import org.jboss.errai.marshalling.tests.res.EntityWithAbstractFieldType;
+import org.jboss.errai.marshalling.tests.res.EntityWithInheritedPublicFields;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterface;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArray;
 import org.jboss.errai.marshalling.tests.res.EntityWithMapUsingArrayValues;
@@ -195,6 +196,21 @@ public class MarshallingAPITest {
     ewpf.values = values;
     
     testEncodeDecode(ewpf);
+  }
+  
+  @Test
+  public void testEntityWithInheritedPublicFields() {
+    EntityWithInheritedPublicFields ewipf = new EntityWithInheritedPublicFields();
+    
+    ArrayList<String> values = new ArrayList<String>();
+    values.add("1");
+    values.add("2");
+    values.add("3");
+    
+    ewipf.value = 17;
+    ewipf.values = values;
+    
+    testEncodeDecode(ewipf);
   }
   
   @Test
