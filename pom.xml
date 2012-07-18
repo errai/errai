@@ -74,7 +74,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwt.version>2.5.0-rc1</gwt.version>
+        <gwt.version>2.4.0</gwt.version>
         <gwt.maven.version>2.4.0</gwt.maven.version>
         <guice.version>3.0</guice.version>
         <guava.version>12.0</guava.version>
@@ -112,7 +112,6 @@
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-user</artifactId>
                 <version>${gwt.version}</version>
-                <!--<version>2.5.0-rc1</version>-->
             </dependency>
 
             <dependency>
