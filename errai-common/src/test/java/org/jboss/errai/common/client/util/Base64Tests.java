@@ -2,7 +2,6 @@ package org.jboss.errai.common.client.util;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import org.jboss.errai.common.client.util.Base64Util;
 import org.junit.Test;
 
 /**

@@ -23,19 +23,22 @@ import org.jboss.errai.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public enum BooleanOperator implements Operator {
-  Or("||", 3, Boolean.class),
-  And("&&", 4, Boolean.class),
-  Equals("==", 8),
-  NotEquals("!=", 8),
-  InstanceOf("instanceof", 9),
-  GreaterThanOrEqual(">=", 9, Number.class),
-  GreaterThan(">", 9, Number.class),
-  LessThanOrEqual("<=", 9, Number.class),
-  LessThan("<", 9, Number.class);
+  Or                  ("||", 3, Boolean.class),
+  And                 ("&&", 4, Boolean.class),
+  Equals              ("==", 8),
+  NotEquals           ("!=", 8),
+  InstanceOf          ("instanceof", 9),
+  GreaterThanOrEqual  (">=", 9, Number.class),
+  GreaterThan         (">", 9, Number.class),
+  LessThanOrEqual     ("<=", 9, Number.class),
+  LessThan            ("<", 9, Number.class);
 
   private final Operator operator;
 
-  BooleanOperator(String canonicalString, int operatorPrecedence, Class<?>... constraints) {
+  BooleanOperator(final String canonicalString,
+                  final int operatorPrecedence,
+                  final Class<?>... constraints) {
+
     operator = new OperatorImpl(canonicalString, operatorPrecedence, constraints);
   }
 
@@ -50,22 +53,22 @@ public enum BooleanOperator implements Operator {
   }
 
   @Override
-  public boolean isHigherPrecedenceThan(Operator operator) {
+  public boolean isHigherPrecedenceThan(final Operator operator) {
     return operator.getOperatorPrecedence() < getOperatorPrecedence();
   }
 
   @Override
-  public boolean isEqualOrHigherPrecedenceThan(Operator operator) {
+  public boolean isEqualOrHigherPrecedenceThan(final Operator operator) {
     return operator.getOperatorPrecedence() <= getOperatorPrecedence();
   }
 
   @Override
-  public boolean canBeApplied(MetaClass clazz) {
+  public boolean canBeApplied(final MetaClass clazz) {
     return operator.canBeApplied(clazz);
   }
 
   @Override
-  public void assertCanBeApplied(MetaClass clazz) {
+  public void assertCanBeApplied(final MetaClass clazz) {
     operator.assertCanBeApplied(clazz);
   }
 }

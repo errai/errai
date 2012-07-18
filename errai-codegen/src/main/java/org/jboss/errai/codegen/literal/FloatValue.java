@@ -23,12 +23,12 @@ import org.jboss.errai.codegen.Context;
  */
 public class FloatValue extends LiteralValue<Float> {
 
-  public FloatValue(Float value) {
+  public FloatValue(final Float value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return getValue().toString() + "f";
   }
 }

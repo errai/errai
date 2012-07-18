@@ -16,16 +16,16 @@
 
 package org.jboss.errai.marshalling.rebind.api.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.api.model.impl.NoConstructMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -47,9 +47,13 @@ public class MappingDefinition {
   public MappingDefinition(Marshaller<Object> marshaller, boolean cached) {
     this(marshaller, marshaller.getTypeHandled(), cached);
   }
-
   public MappingDefinition(Marshaller<Object> marshaller, Class<?> toMap, boolean doNotGenerate) {
-    this.toMap = JavaReflectionClass.newUncachedInstance(toMap);
+    this(marshaller, JavaReflectionClass.newUncachedInstance(toMap), doNotGenerate);
+  }
+
+
+  public MappingDefinition(Marshaller<Object> marshaller, MetaClass toMap, boolean doNotGenerate) {
+    this.toMap = toMap;
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
     this.doNotGenerate = doNotGenerate;

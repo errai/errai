@@ -264,6 +264,17 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
   }
 
+  @Override
+  public MetaClass[] getDeclaredClasses() {
+    final Class[] declaredClasses = getEnclosedMetaObject().getDeclaredClasses();
+    final MetaClass[]  declaredClassesMC = new MetaClass[declaredClasses.length];
+    int i = 0;
+    for (Class c : declaredClasses) {
+      declaredClassesMC[i++] = MetaClassFactory.get(c);
+    }
+    return declaredClassesMC;
+  }
+
   private MetaClass[] _interfacesCache;
 
   @Override

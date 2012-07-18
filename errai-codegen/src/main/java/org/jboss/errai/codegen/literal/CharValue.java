@@ -23,12 +23,12 @@ import org.jboss.errai.codegen.Context;
  */
 public class CharValue extends LiteralValue<Character> {
 
-  public CharValue(Character value) {
+  public CharValue(final Character value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return "'"+getValue().toString()+"'";
   }
 }

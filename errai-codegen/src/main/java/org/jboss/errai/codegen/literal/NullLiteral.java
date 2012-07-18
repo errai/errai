@@ -32,7 +32,7 @@ public class NullLiteral extends LiteralValue<Object> {
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return "null";
   }
 

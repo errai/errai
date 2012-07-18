@@ -49,6 +49,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <!--<dependency>-->
+        <!--<groupId>org.jboss.errai</groupId>-->
+        <!--<artifactId>errai-codegen</artifactId>-->
+        <!--<version>${project.version}</version>-->
+        <!--<scope>provided</scope>-->
+    <!--</dependency>-->
+
     <dependency>
       <groupId>org.jboss.errai.reflections</groupId>
       <artifactId>reflections</artifactId>

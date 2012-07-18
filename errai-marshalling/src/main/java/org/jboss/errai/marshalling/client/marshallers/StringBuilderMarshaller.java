@@ -33,7 +33,6 @@ public class StringBuilderMarshaller extends AbstractNullableMarshaller<StringBu
 
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
 
-
   @Override
   public Class<StringBuilder> getTypeHandled() {
     return StringBuilder.class;

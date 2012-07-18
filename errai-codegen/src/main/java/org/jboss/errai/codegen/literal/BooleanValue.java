@@ -23,12 +23,12 @@ import org.jboss.errai.codegen.Context;
  */
 public class BooleanValue extends LiteralValue<Boolean> {
 
-  public BooleanValue(Boolean value) {
+  public BooleanValue(final Boolean value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return getValue().toString();
   }
 }

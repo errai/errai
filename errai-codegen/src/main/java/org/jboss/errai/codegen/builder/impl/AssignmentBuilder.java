@@ -32,12 +32,14 @@ import org.jboss.errai.codegen.meta.MetaClass;
 public class AssignmentBuilder implements Statement {
   protected boolean isFinal;
 
-  protected AssignmentOperator operator;
-  protected VariableReference reference;
-  protected Statement statement;
+  protected final AssignmentOperator operator;
+  protected final VariableReference reference;
+  protected final Statement statement;
 
-  public AssignmentBuilder(boolean isFinal, AssignmentOperator operator, VariableReference reference,
-                           Statement statement) {
+  public AssignmentBuilder(final boolean isFinal,
+                           final AssignmentOperator operator,
+                           final VariableReference reference,
+                           final Statement statement) {
     this.isFinal = isFinal;
     this.operator = operator;
     this.reference = reference;
@@ -45,11 +47,11 @@ public class AssignmentBuilder implements Statement {
   }
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     MetaClass referenceType = reference.getType();
-    Statement[] indexes = reference.getIndexes();
+    final Statement[] indexes = reference.getIndexes();
     if (indexes!=null) {
-      for (Statement index : indexes) {
+      for (final Statement index : indexes) {
         if (!referenceType.isArray())
           throw new InvalidTypeException("Variable is not a " + indexes.length + "-dimensional array!");
         referenceType = referenceType.getComponentType();
@@ -62,11 +64,11 @@ public class AssignmentBuilder implements Statement {
         " " + operator.getCanonicalString() + " " + statement.generate(context);
   }
 
-  private String generateIndexes(Context context, Statement[] indexes) {
+  private String generateIndexes(final Context context, final Statement[] indexes) {
     if (indexes==null || indexes.length == 0) return "";
    
-    StringBuilder buf = new StringBuilder(128);
-    for (Statement index : indexes) {
+    final StringBuilder buf = new StringBuilder(128);
+    for (final Statement index : indexes) {
       buf.append("[").append(index.generate(context)).append("]");
     }
     return buf.toString();

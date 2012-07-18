@@ -23,12 +23,12 @@ import org.jboss.errai.codegen.Context;
  */
 public class IntValue extends LiteralValue<Integer> {
 
-  public IntValue(Integer value) {
+  public IntValue(final Integer value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return getValue().toString();
   }
 }

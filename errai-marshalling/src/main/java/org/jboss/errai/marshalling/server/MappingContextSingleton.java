@@ -45,13 +45,13 @@ import org.slf4j.Logger;
  */
 public class MappingContextSingleton {
   private static final ServerMappingContext context;
-  private static Logger log = getLogger("ErraiMarshalling");
+  private static final Logger log = getLogger("ErraiMarshalling");
 
   static {
     ParserFactory.registerParser(
             new Parser() {
               @Override
-              public EJValue parse(String input) {
+              public EJValue parse(final String input) {
                 return JSONDecoder.decode(input);
               }
             });
@@ -111,12 +111,12 @@ public class MappingContextSingleton {
           }
 
           @Override
-          public boolean hasMarshaller(String fqcn) {
+          public boolean hasMarshaller(final String fqcn) {
             return marshallerFactory.getMarshaller(null, fqcn) != null;
           }
 
           @Override
-          public Marshaller getMarshaller(String fqcn) {
+          public Marshaller getMarshaller(final String fqcn) {
             return marshallerFactory.getMarshaller(null, fqcn);
           }
 
@@ -129,17 +129,17 @@ public class MappingContextSingleton {
       }
 
       @Override
-      public Marshaller<Object> getMarshaller(String clazz) {
+      public Marshaller<Object> getMarshaller(final String clazz) {
         return marshallerFactory.getMarshaller(null, clazz);
       }
 
       @Override
-      public boolean hasMarshaller(String clazzName) {
+      public boolean hasMarshaller(final String clazzName) {
         return marshallerFactory.getMarshaller(null, clazzName) != null;
       }
 
       @Override
-      public boolean canMarshal(String cls) {
+      public boolean canMarshal(final String cls) {
         return hasMarshaller(cls);
       }
     };
@@ -164,17 +164,17 @@ public class MappingContextSingleton {
           }
 
           @Override
-          public boolean hasMarshaller(String fqcn) {
+          public boolean hasMarshaller(final String fqcn) {
             return factory.hasDefinition(fqcn);
           }
 
           @Override
-          public Marshaller getMarshaller(String fqcn) {
+          public Marshaller getMarshaller(final String fqcn) {
             return factory.getDefinition(fqcn).getMarshallerInstance();
           }
         });
 
-        for (MappingDefinition def : factory.getMappingDefinitions()) {
+        for (final MappingDefinition def : factory.getMappingDefinitions()) {
           if (def.getMarshallerInstance() != null) {
           }
           else if (def.getServerMarshallerClass() != null) {
@@ -197,20 +197,20 @@ public class MappingContextSingleton {
             }
           }
 
-          for (MemberMapping mapping : def.getMemberMappings()) {
+          for (final MemberMapping mapping : def.getMemberMappings()) {
             if (mapping.getType().isArray()) {
               addArrayMarshaller(mapping.getType());
             }
           }
         }
 
-        for (MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
+        for (final MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
           addArrayMarshaller(arrayType);
         }
       }
 
       private void addArrayMarshaller(final MetaClass type) {
-        MetaClass compType = type.getOuterComponentType();
+        final MetaClass compType = type.getOuterComponentType();
 
         if (!factory.hasDefinition(type.getFullyQualifiedName())
                 && !factory.hasDefinition(type.getInternalName())) {
@@ -241,7 +241,7 @@ public class MappingContextSingleton {
       }
 
       @Override
-      public Marshaller<Object> getMarshaller(String clazz) {
+      public Marshaller<Object> getMarshaller(final String clazz) {
         final MappingDefinition def = factory.getDefinition(clazz);
 
         if (def == null) {
@@ -252,12 +252,12 @@ public class MappingContextSingleton {
       }
 
       @Override
-      public boolean hasMarshaller(String clazzName) {
+      public boolean hasMarshaller(final String clazzName) {
         return factory.hasDefinition(clazzName);
       }
 
       @Override
-      public boolean canMarshal(String cls) {
+      public boolean canMarshal(final String cls) {
         return hasMarshaller(cls);
       }
     };

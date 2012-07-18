@@ -28,12 +28,12 @@ public class InnerClass {
 
   private BuildMetaClass clazz = null;
   
-  public InnerClass(BuildMetaClass clazz) {
+  public InnerClass(final BuildMetaClass clazz) {
     this.clazz = clazz;
     this.clazz.setInner(true);
   }
   
-  public String generate(Context context) {
+  public String generate(final Context context) {
     clazz.setContext(Context.create(context));
     return clazz.toJavaString();
   }

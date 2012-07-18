@@ -83,7 +83,7 @@ import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
@@ -366,7 +366,7 @@ public class CDIExtensionPoints implements Extension {
 
       for (final org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
               observerPoints) {
-        if (org.jboss.errai.common.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
+        if (org.jboss.errai.config.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
           if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
             abd.addObserverMethod(new ConversationalEventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
           }

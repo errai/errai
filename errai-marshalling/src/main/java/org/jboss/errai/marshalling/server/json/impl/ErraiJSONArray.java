@@ -27,7 +27,7 @@ import java.util.List;
 public class ErraiJSONArray implements EJArray {
   private final List list;
 
-  public ErraiJSONArray(List list) {
+  public ErraiJSONArray(final List list) {
     this.list = list;
   }
 
@@ -37,7 +37,7 @@ public class ErraiJSONArray implements EJArray {
   }
 
   @Override
-  public EJValue get(int index) {
+  public EJValue get(final int index) {
     return new ErraiJSONValue(list.get(index));
   }
 }

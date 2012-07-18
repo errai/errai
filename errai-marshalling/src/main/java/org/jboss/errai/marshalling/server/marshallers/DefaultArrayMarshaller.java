@@ -33,7 +33,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
   private final Marshaller<Object> outerMarshaller;
   private final int dimensions;
 
-  public DefaultArrayMarshaller(MetaClass arrayType, Marshaller<Object> outerMarshaller) {
+  public DefaultArrayMarshaller(final MetaClass arrayType, final Marshaller<Object> outerMarshaller) {
     this.arrayType = Assert.notNull(arrayType);
     this.outerMarshaller = Assert.notNull("no outer marshaller specified for: " +
             arrayType.getOuterComponentType().getFullyQualifiedName(),
@@ -49,30 +49,29 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     this.dimensions = dim;
   }
 
-  @Override
+  @SuppressWarnings("unchecked")
   public Class<Object> getTypeHandled() {
     return (Class<Object>) arrayType.asClass();
   }
 
-  @Override
-  public Object demarshall(EJValue a0, MarshallingSession a1) {
+  public Object demarshall(final EJValue a0, final MarshallingSession a1) {
     if (a0.isNull()) {
       return null;
     }
     else {
-      EJArray arr = a0.isArray();
+      final EJArray arr = a0.isArray();
 
-      int[] dims = new int[dimensions];
+      final int[] dims = new int[dimensions];
       dims[0] = arr.size();
 
-      Object arrayInstance = Array.newInstance(arrayType.getOuterComponentType().asClass(), dims);
+      final Object arrayInstance = Array.newInstance(arrayType.getOuterComponentType().asClass(), dims);
       _demarshall(dimensions - 1, arrayInstance, arr, a1);
       return arrayInstance;
     }
   }
 
-  @Override
-  public String marshall(Object a0, MarshallingSession a1) {
+  @Override  
+  public String marshall(final Object a0, final MarshallingSession a1) {
     if (a0 == null) {
       return null;
     }
@@ -81,7 +80,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     }
   }
 
-  private Object _demarshall(int dim, Object arrayInstance, EJArray a0, MarshallingSession a1) {
+  private Object _demarshall(final int dim, final Object arrayInstance, final EJArray a0, final MarshallingSession a1) {
     if (dim == 0) {
       for (int i = 0; i < a0.size(); i++) {
         Array.set(arrayInstance, i, outerMarshaller.demarshall(a0.get(i), a1));
@@ -98,10 +97,10 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     return arrayInstance;
   }
 
-  private String _marshall(Object a0, MarshallingSession a1) {
-    StringBuilder builder = new StringBuilder("[");
+  private String _marshall(final Object a0, final MarshallingSession a1) {
+    final StringBuilder builder = new StringBuilder("[");
 
-    int length = Array.getLength(a0);
+    final int length = Array.getLength(a0);
 
     Object element;
 

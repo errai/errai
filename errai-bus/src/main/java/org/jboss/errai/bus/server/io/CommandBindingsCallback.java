@@ -16,19 +16,19 @@
 
 package org.jboss.errai.bus.server.io;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.common.client.framework.Assert;
 import org.slf4j.Logger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class CommandBindingsCallback implements MessageCallback {
   private static final Logger log = getLogger(CommandBindingsCallback.class);
@@ -44,8 +44,8 @@ public class CommandBindingsCallback implements MessageCallback {
     this.defaultCallback = defaultAction ? (MessageCallback) delegate : null;
     this.bus = Assert.notNull(bus);
 
-    for (Map.Entry<String, Method> entry : commandBindings.entrySet()) {
-      Class[] parmTypes = entry.getValue().getParameterTypes();
+    for (final Map.Entry<String, Method> entry : commandBindings.entrySet()) {
+      final Class[] parmTypes = entry.getValue().getParameterTypes();
 
       if (parmTypes.length > 1 ||
           (parmTypes.length == 1 && !Message.class.isAssignableFrom(parmTypes[0]))) {
@@ -60,8 +60,9 @@ public class CommandBindingsCallback implements MessageCallback {
     }
   }
 
-  public void callback(Message message) {
-    MethodDispatcher method = methodDispatchers.get(message.getCommandType());
+  public void callback(final Message message) {
+    final MethodDispatcher method = methodDispatchers.get(message.getCommandType());
+
     if (method == null) {
       if (defaultAction) {
         defaultCallback.callback(message);
@@ -85,7 +86,7 @@ public class CommandBindingsCallback implements MessageCallback {
     protected Object delegate;
     protected Method method;
 
-    protected MethodDispatcher(Object delegate, Method method) {
+    protected MethodDispatcher(final Object delegate, final Method method) {
       this.delegate = delegate;
       this.method = method;
     }
@@ -94,25 +95,24 @@ public class CommandBindingsCallback implements MessageCallback {
   }
 
   private class NoParamMethodDispatcher extends MethodDispatcher {
-    NoParamMethodDispatcher(Object delegate, Method method) {
+    NoParamMethodDispatcher(final Object delegate, final Method method) {
       super(delegate, method);
     }
 
     @Override
-    void dispatch(Message m) throws Exception {
+    void dispatch(final Message m) throws Exception {
       method.invoke(delegate);
     }
   }
 
   private class DefaultMethodDispatcher extends MethodDispatcher {
-    DefaultMethodDispatcher(Object delegate, Method method) {
+    DefaultMethodDispatcher(final Object delegate, final Method method) {
       super(delegate, method);
     }
 
     @Override
-    void dispatch(Message m) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    void dispatch(final Message m) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
       method.invoke(delegate, m);
     }
   }
-
 }

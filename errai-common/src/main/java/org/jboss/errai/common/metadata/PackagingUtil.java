@@ -40,7 +40,7 @@ public class PackagingUtil {
       actualFilePath = actualFilePath.substring(5);
     }
 
-    int nestedSeperator = actualFilePath.indexOf('!');
+    final int nestedSeperator = actualFilePath.indexOf('!');
     if (nestedSeperator != -1) {
       actualFilePath = actualFilePath.substring(0, nestedSeperator);
     }
@@ -63,9 +63,9 @@ public class PackagingUtil {
     return start;
   }
 
-  static void process(DeploymentContext ctx) {
-    for (URL url : ctx.getConfigUrls()) {
-      File file = PackagingUtil.identifyDeployment(url);
+  static void process(final DeploymentContext ctx) {
+    for (final URL url : ctx.getConfigUrls()) {
+      final File file = PackagingUtil.identifyDeployment(url);
 
       /**
        * several config urls may derive from the same archive
@@ -80,14 +80,14 @@ public class PackagingUtil {
     }
   }
 
-  private static void processNestedZip(File file, DeploymentContext ctx) {
+  private static void processNestedZip(final File file, final DeploymentContext ctx) {
     try {
       if (file.getName().matches(".+\\.(ear|war|sar)$") && !file.isDirectory()) // process only certain deployment types
       {
         if (file.getName().endsWith(".war"))
           ctx.getSubContexts().put(file.getName(), file); // WEB-INF/classes
 
-        ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
+        final ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
         ZipEntry zipEntry;
 
         try {
@@ -95,7 +95,7 @@ public class PackagingUtil {
             if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) // expand nested zip archives
             {
               if (!ctx.getSubContexts().containsKey(zipEntry.getName())) {
-                File tmpUnZip = expandZipEntry(zipFile, zipEntry, ctx);
+                final File tmpUnZip = expandZipEntry(zipFile, zipEntry, ctx);
                 ctx.getSubContexts().put(zipEntry.getName(), tmpUnZip);
                 processNestedZip(tmpUnZip, ctx);
               }
@@ -112,23 +112,23 @@ public class PackagingUtil {
     }
   }
 
-  protected static File expandZipEntry(ZipInputStream stream, ZipEntry entry, DeploymentContext ctx) {
+  protected static File expandZipEntry(final ZipInputStream stream, final ZipEntry entry, final DeploymentContext ctx) {
     final String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
     final String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
     final int idx = entry.getName().lastIndexOf('/');
     final String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
 
     try {
-      File tmpDirFile = new File(tmpDir);
+      final File tmpDirFile = new File(tmpDir);
       if (!tmpDirFile.exists() && !tmpDirFile.mkdirs()) {
         throw new RuntimeException("unable to create temporary directory: " + tmpDirFile.getAbsolutePath());
       }
       ctx.markTmpFile(tmpDirFile);
 
-      File newFile = new File(tmpFileName);
+      final File newFile = new File(tmpFileName);
 
-      FileOutputStream outStream = new FileOutputStream(newFile);
-      byte[] buf = new byte[1024];
+      final FileOutputStream outStream = new FileOutputStream(newFile);
+      final byte[] buf = new byte[1024];
       int read;
       while ((read = stream.read(buf)) != -1) {
         outStream.write(buf, 0, read);

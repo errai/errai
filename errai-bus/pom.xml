@@ -46,6 +46,12 @@
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-config</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
             <artifactId>errai-marshalling</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

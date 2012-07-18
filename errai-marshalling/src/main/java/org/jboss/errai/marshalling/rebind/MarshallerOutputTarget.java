@@ -19,6 +19,6 @@ package org.jboss.errai.marshalling.rebind;
 /**
  * @author Mike Brock
  */
-public enum MarshallerOuputTarget {
+public enum MarshallerOutputTarget {
   GWT, Java
 }

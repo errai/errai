@@ -25,7 +25,7 @@ public class CallElementBuilder {
   protected CallElement rootElement;
   protected CallElement callElement;
 
-  public void appendCallElement(CallElement element) {
+  public void appendCallElement(final CallElement element) {
     if (callElement == null) {
       rootElement = callElement = element;
     }

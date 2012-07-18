@@ -28,14 +28,14 @@ import org.jboss.errai.codegen.exception.GenerationException;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ConditionalBlockCallElement extends AbstractCallElement {
-  private AbstractConditionalBlock conditionalBlock;
+  private final AbstractConditionalBlock conditionalBlock;
   
   public ConditionalBlockCallElement(final AbstractConditionalBlock conditionalBlock) {
     this.conditionalBlock = conditionalBlock;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement lhs) {
+  public void handleCall(final CallWriter writer, final Context context, final Statement lhs) {
     try {
       if (lhs != null) {
         // The LHS value is on the current callstack. So we grab the value from there at generation time.

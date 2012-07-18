@@ -23,14 +23,14 @@ import org.jboss.errai.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public enum UnaryOperator implements Operator {
-  New("new", 0),
-  Increment("++", 0),
-  Decrement("--", 0),
-  Complement("!", 0);
+  New         ("new", 0),
+  Increment   ("++", 0),
+  Decrement   ("--", 0),
+  Complement  ("!", 0);
 
   private final Operator operator;
 
-  UnaryOperator(String canonicalString, int operatorPrecedence) {
+  UnaryOperator(final String canonicalString, final int operatorPrecedence) {
     operator = new OperatorImpl(canonicalString, operatorPrecedence);
   }
 
@@ -45,22 +45,22 @@ public enum UnaryOperator implements Operator {
   }
 
   @Override
-  public boolean isHigherPrecedenceThan(Operator operator) {
+  public boolean isHigherPrecedenceThan(final Operator operator) {
     return operator.getOperatorPrecedence() < getOperatorPrecedence();
   }
 
   @Override
-  public boolean isEqualOrHigherPrecedenceThan(Operator operator) {
+  public boolean isEqualOrHigherPrecedenceThan(final Operator operator) {
     return operator.getOperatorPrecedence() <= getOperatorPrecedence();
   }
 
   @Override
-  public boolean canBeApplied(MetaClass clazz) {
+  public boolean canBeApplied(final MetaClass clazz) {
     return operator.canBeApplied(clazz);
   }
 
   @Override
-  public void assertCanBeApplied(MetaClass clazz) {
+  public void assertCanBeApplied(final MetaClass clazz) {
     operator.assertCanBeApplied(clazz);
   }
 }

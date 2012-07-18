@@ -13,16 +13,16 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class SetValue extends LiteralValue<Set> {
-  public SetValue(Set value) {
+  public SetValue(final Set value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
-    BlockBuilder<AnonymousClassStructureBuilder> initBlock
+  public String getCanonicalString(final Context context) {
+    final BlockBuilder<AnonymousClassStructureBuilder> initBlock
             = ObjectBuilder.newInstanceOf(HashSet.class, context).extend().initialize();
 
-    for (Object v : getValue()) {
+    for (final Object v : getValue()) {
       initBlock.append(Stmt.loadVariable("this").invoke("add", LiteralFactory.getLiteral(v)));
     }
 

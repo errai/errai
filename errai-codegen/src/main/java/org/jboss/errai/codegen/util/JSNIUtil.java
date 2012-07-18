@@ -50,12 +50,12 @@ public class JSNIUtil {
     buf.append('@').append(method.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\."))
             .append("::").append(method instanceof MetaConstructor ? "new" : method.getName()).append('(');
 
-    for (MetaParameter parm : method.getParameters()) {
+    for (final MetaParameter parm : method.getParameters()) {
       buf.append(parm.getType().getInternalName());
     }
     buf.append(")(");
 
-    int length = method.getParameters().length;
+    final int length = method.getParameters().length;
 
     for (int i = 0; i < length; i++) {
       buf.append("a").append(i);

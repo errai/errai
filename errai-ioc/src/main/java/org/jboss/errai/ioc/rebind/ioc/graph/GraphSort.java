@@ -76,7 +76,6 @@ public final class GraphSort {
     final Set<List<SortUnit>> consolidated = new LinkedHashSet<List<SortUnit>>();
     final Map<Set<SortUnit>, List<SortUnit>> sortingCache = new IdentityHashMap<Set<SortUnit>, List<SortUnit>>();
 
-
     for (final Map.Entry<MetaClass, Set<SortUnit>> metaClassSetEntry : builderMap.entrySet()) {
       if (!sortingCache.containsKey(metaClassSetEntry.getValue())) {
         sortingCache.put(metaClassSetEntry.getValue(), sortGraph(metaClassSetEntry.getValue()));
@@ -98,16 +97,14 @@ public final class GraphSort {
     }
   }
 
-
-  private static List<SortUnit> topologicalSort(List<SortUnit> toSort) {
+  private static List<SortUnit> topologicalSort(final List<SortUnit> toSort) {
     final Set<String> visited = new HashSet<String>();
     final List<SortUnit> sorted = new ArrayList<SortUnit>();
-    for (SortUnit n : toSort) {
+    for (final SortUnit n : toSort) {
       _topologicalSort(visited, sorted, n);
     }
     return sorted;
   }
-
 
   private static void _topologicalSort(final Set<String> visited,
                                        final List<SortUnit> sorted,

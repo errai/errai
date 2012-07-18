@@ -16,10 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.build;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
@@ -35,6 +31,10 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -55,21 +55,27 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
 
   private String constructorComment;
 
-  public BuildMetaConstructor(BuildMetaClass declaringClass) {
+  public BuildMetaConstructor(final BuildMetaClass declaringClass) {
     this.declaringClass = declaringClass;
   }
 
-  public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body) {
+  public BuildMetaConstructor(final BuildMetaClass declaringClass,
+                              final Statement body) {
     this.declaringClass = declaringClass;
     this.body = body;
   }
 
-  public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body, DefParameters defParameters) {
+  public BuildMetaConstructor(final BuildMetaClass declaringClass,
+                              final Statement body,
+                              final DefParameters defParameters) {
     this(declaringClass, body);
     this.defParameters = defParameters;
   }
 
-  public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body, Scope scope, DefParameters defParameters) {
+  public BuildMetaConstructor(final BuildMetaClass declaringClass,
+                              final Statement body,
+                              final Scope scope,
+                              final DefParameters defParameters) {
     this(declaringClass, body, defParameters);
     this.scope = scope;
   }
@@ -80,7 +86,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
       return new MetaParameter[0];
     }
     else {
-      List<MetaParameter> metaParameterList = new ArrayList<MetaParameter>();
+      final List<MetaParameter> metaParameterList = new ArrayList<MetaParameter>();
       for (final Parameter p : defParameters.getParameters()) {
 
         metaParameterList.add(new MetaParameter() {
@@ -105,12 +111,12 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
           }
 
           @Override
-          public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+          public boolean isAnnotationPresent(final Class<? extends Annotation> annotation) {
             return false;
           }
 
           @Override
-          public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+          public <A extends Annotation> A getAnnotation(final Class<A> annotation) {
             return null;
           }
         });
@@ -184,7 +190,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     return false;
   }
 
-  public void setScope(Scope scope) {
+  public void setScope(final Scope scope) {
     this.scope = scope;
   }
 
@@ -202,11 +208,11 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     return body;
   }
 
-  public void setBody(Statement body) {
+  public void setBody(final Statement body) {
     this.body = body;
   }
 
-  public void setDefParameters(DefParameters defParameters) {
+  public void setDefParameters(final DefParameters defParameters) {
     this.defParameters = defParameters;
   }
 
@@ -239,11 +245,11 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     return reifiedFormOf;
   }
 
-  public void setReifiedFormOf(MetaConstructor reifiedFormOf) {
+  public void setReifiedFormOf(final MetaConstructor reifiedFormOf) {
     this.reifiedFormOf = reifiedFormOf;
   }
 
-  public void setConstructorComment(String constructorComment) {
+  public void setConstructorComment(final String constructorComment) {
     this.constructorComment = constructorComment;
   }
 
@@ -253,19 +259,20 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   public String toJavaString() {
     if (generatedCache != null) return generatedCache;
 
-    Context context = Context.create(declaringClass.getContext());
+    final Context context = Context.create(declaringClass.getContext());
     
-    for (Parameter p : defParameters.getParameters()) {
+    for (final Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
 
-    StringBuilder build = new StringBuilder(512);
+    final StringBuilder build = new StringBuilder(512);
 
     if (constructorComment != null)  {
       build.append(new Comment(constructorComment).generate(null)).append('\n');
     }
 
-    return generatedCache = new StringBuilder(512).append(scope.getCanonicalName())
+    return generatedCache =
+            build.append(scope.getCanonicalName())
             .append(" ")
             .append(declaringClass.getName())
             .append(defParameters.generate(context))
@@ -274,7 +281,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     return o instanceof MetaConstructor && GenUtil.equals(this, (MetaConstructor) o);
   }
 }

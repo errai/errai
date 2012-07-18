@@ -16,7 +16,11 @@
 
 package org.jboss.errai.codegen;
 
-import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.Stmt;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -27,11 +31,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.util.Stmt;
+import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
 
 public class AnnotationEncoder {
   public static Statement encode(final Annotation annotation) {
@@ -41,25 +41,25 @@ public class AnnotationEncoder {
       String generatedCache;
 
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         if (generatedCache != null) return generatedCache;
 
         final AnonymousClassStructureBuilder builder
                 = ObjectBuilder.newInstanceOf(annotationClass, context)
                 .extend();
 
-        Class<? extends Annotation> annoClass = annotation.getClass();
+        final Class<? extends Annotation> annotationClass = annotation.getClass();
 
-        List<Method> sortedMethods = Arrays.asList(annoClass.getDeclaredMethods());
+        final List<Method> sortedMethods = Arrays.asList(annotationClass.getDeclaredMethods());
         Collections.sort(sortedMethods, new Comparator<Method>() {
                     @Override
-                    public int compare(Method m1, Method m2) {
+                    public int compare(final Method m1, final Method m2) {
                         return m1.getName().compareTo(m2.getName());
                     }
             
         });
         
-        for (Method method : sortedMethods) {
+        for (final Method method : sortedMethods) {
           if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
                   && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
             try {
@@ -84,13 +84,5 @@ public class AnnotationEncoder {
         return MetaClassFactory.get(annotationClass);
       }
     };
-  }
-
-  public static Statement[] encode(Annotation[] annotations) {
-    Statement[] statements = new Statement[annotations.length];
-    for (int i = 0; i < annotations.length; i++) {
-      statements[i] = encode(annotations[i]);
-    }
-    return statements;
   }
 }

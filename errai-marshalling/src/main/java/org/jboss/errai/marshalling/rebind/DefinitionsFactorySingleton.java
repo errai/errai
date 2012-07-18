@@ -27,7 +27,7 @@ public class DefinitionsFactorySingleton {
     }
     catch (Exception e) {
       // This exception will probably be swallowed by the VM, which is why we print the stack trace here.
-      System.err.println("Failed to boostrap errai marshalling system!");
+      System.err.println("Failed to bootstrap errai marshalling system!");
       e.printStackTrace();
       throw new RuntimeException(e);
     }

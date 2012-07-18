@@ -16,9 +16,12 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.io.File;
-import java.io.PrintWriter;
-
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
@@ -31,19 +34,15 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.util.ClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.io.File;
+import java.io.PrintWriter;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
@@ -70,13 +69,13 @@ public class RpcProxyLoaderGenerator extends Generator {
           throws UnableToCompleteException {
 
     typeOracle = context.getTypeOracle();
-  
+
     try {
-      JClassType classType = typeOracle.getType(typeName);
+      final JClassType classType = typeOracle.getType(typeName);
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
-  
-      PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+
+      final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       // If code has not already been generated.
       if (printWriter != null) {
         printWriter.append(generate(className));
@@ -86,25 +85,18 @@ public class RpcProxyLoaderGenerator extends Generator {
     catch (Throwable e) {
       logger.log(TreeLogger.ERROR, "Error generating extensions", e);
     }
-      
+
     // return the fully qualified name of the class generated
     return packageName + "." + className;
   }
 
   private String generate(String className) {
-    File fileCacheDir = RebindUtils.getErraiCacheDir();
-    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+    final File fileCacheDir = RebindUtils.getErraiCacheDir();
+    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+    log.info("generating rpc proxy loader class.");
 
-    String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Remote.class) || !cacheFile.exists()) {
-      log.info("generating rpc proxy loader class.");
-      gen = generate();
-      RebindUtils.writeStringToFile(cacheFile, gen);
-    }
-    else {
-      log.info("nothing has changed. using cached rpc proxy loader class.");
-      gen = RebindUtils.readFileToString(cacheFile);
-    }
+    String gen = generate();
+    RebindUtils.writeStringToFile(cacheFile, gen);
 
     return gen;
   }
@@ -112,30 +104,29 @@ public class RpcProxyLoaderGenerator extends Generator {
   private String generate() {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
 
-    MethodBlockBuilder<?> loadProxies =
+    final MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
 
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
+    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Remote.class)) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
-        ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
+        final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
         loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         // create the proxy provider
-        Statement proxyProvider = ObjectBuilder.newInstanceOf(ProxyProvider.class)
-          .extend()
-          .publicOverridesMethod("getProxy")
-          .append(Stmt.nestedCall(Stmt.newObject(remoteProxy.getClassDefinition())).returnValue())
-          .finish()
-          .finish();
-        
+        final Statement proxyProvider = ObjectBuilder.newInstanceOf(ProxyProvider.class)
+                .extend()
+                .publicOverridesMethod("getProxy")
+                .append(Stmt.nestedCall(Stmt.newObject(remoteProxy.getClassDefinition())).returnValue())
+                .finish()
+                .finish();
+
         loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", remote, proxyProvider));
       }
     }
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    String generatedStr = classBuilder.toJavaString();
+    final String generatedStr = classBuilder.toJavaString();
     if (Boolean.getBoolean("errai.codegen.printOut")) {
       System.out.println("----[start rpc proxy]---");
       System.out.println(generatedStr);

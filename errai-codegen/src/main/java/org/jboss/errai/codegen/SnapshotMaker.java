@@ -1,15 +1,5 @@
 package org.jboss.errai.codegen;
 
-import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Set;
-
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -22,7 +12,17 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Stmt;
 
-import com.google.gwt.dev.util.collect.IdentityHashSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
+
+//import com.google.gwt.dev.util.collect.IdentityHashSet;
 
 /**
  * Utility class for creating code-generated snapshots of certain types of live value objects.
@@ -179,7 +179,7 @@ public final class SnapshotMaker {
         methodBodyCallback,
         new HashSet<MetaClass>(Arrays.asList(typesToRecurseOn)),
         new IdentityHashMap<Object, Statement>(),
-        new IdentityHashSet<Object>());
+        Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
   }
 
   /**
@@ -220,7 +220,7 @@ public final class SnapshotMaker {
       final MethodBodyCallback methodBodyCallback,
       final Set<MetaClass> typesToRecurseOn,
       final IdentityHashMap<Object, Statement> existingSnapshots,
-      final IdentityHashSet<Object> unfinishedSnapshots) {
+      final Set<Object> unfinishedSnapshots) {
 
     if (o == null) {
       return NullLiteral.INSTANCE;

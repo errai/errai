@@ -23,12 +23,12 @@ import org.jboss.errai.codegen.Context;
  */
 public class ShortValue extends LiteralValue<Short> {
 
-  public ShortValue(Short value) {
+  public ShortValue(final Short value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return getValue().toString();
   }
 }

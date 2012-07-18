@@ -16,10 +16,6 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -35,10 +31,15 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Generates an Errai RPC remote proxy.
@@ -46,14 +47,14 @@ import org.jboss.errai.codegen.util.Stmt;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyGenerator {
-  private Class<?> remote = null;
+  private final MetaClass remote;
 
-  public RpcProxyGenerator(Class<?> remote) {
+  public RpcProxyGenerator(MetaClass remote) {
     this.remote = remote;
   }
 
   public ClassStructureBuilder<?> generate() {
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getSimpleName() + "Impl")
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getName() + "Impl")
         .packageScope()
         .implementsInterface(remote)
         .implementsInterface(RpcStub.class)
@@ -77,7 +78,7 @@ public class RpcProxyGenerator {
         .append(Stmt.loadClassMember("qualifiers").assignValue(Variable.get("quals")))
         .finish();
 
-    for (MetaMethod method : MetaClassFactory.get(remote).getMethods()) {
+    for (MetaMethod method : remote.getMethods()) {
       generateMethod(classBuilder, method);
     }
 
@@ -154,7 +155,7 @@ public class RpcProxyGenerator {
         .append(
             Stmt
                 .invokeStatic(MessageBuilder.class, "createCall")
-                .invoke("call", remote.getName())
+                .invoke("call", remote.getFullyQualifiedName())
                 .invoke("endpoint", RebindUtils.createCallSignature(method),
                     Stmt.loadClassMember("qualifiers"),
                     methodParams)
@@ -166,7 +167,7 @@ public class RpcProxyGenerator {
         .append(
             Stmt
                 .invokeStatic(MessageBuilder.class, "createCall")
-                .invoke("call", remote.getName())
+                .invoke("call", remote.getFullyQualifiedName())
                 .invoke("endpoint", RebindUtils.createCallSignature(method),
                     Stmt.loadClassMember("qualifiers"),
                     methodParams)

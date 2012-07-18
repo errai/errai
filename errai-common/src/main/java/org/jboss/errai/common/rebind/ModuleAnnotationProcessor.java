@@ -39,13 +39,16 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
 
   final Set<Element> allKnownElements = new HashSet<Element>();
 
+  @SuppressWarnings("NullArgumentToVariableArgMethod")
   @Override
-  public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment roundEnvironment) {
+  public boolean process(final Set<? extends TypeElement> typeElements,
+                         final RoundEnvironment roundEnvironment) {
+
     allKnownElements.addAll(roundEnvironment.getRootElements());
 
     if (roundEnvironment.processingOver()) {
-      StringBuilder builder = new StringBuilder();
-      for (Element e : allKnownElements) {
+      final StringBuilder builder = new StringBuilder();
+      for (final Element e : allKnownElements) {
         builder.append(e.toString()).append('\n');
       }
 
@@ -53,7 +56,7 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
         final FileObject fo
                 = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf", null);
 
-        Writer writer = fo.openWriter();
+        final Writer writer = fo.openWriter();
         writer.write(builder.toString());
         writer.close();
       }

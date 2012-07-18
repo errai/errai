@@ -13,7 +13,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 public class SplitPoint implements Statement {
   @Override
   public String generate(Context context) {
-    return "";
+    return "// split code here //";
   }
 
   @Override

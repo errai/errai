@@ -46,20 +46,18 @@ import static org.jboss.errai.ioc.util.MessageCallbackWrapper.wrapMessageCallbac
 @SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
 public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
-  public ServiceIOCExtension(Class<Service> decoratesWith) {
+  public ServiceIOCExtension(final Class<Service> decoratesWith) {
     super(decoratesWith);
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(InjectableInstance<Service> injectableInstance) {
+  public List<? extends Statement> generateDecorator(final InjectableInstance<Service> injectableInstance) {
     final InjectionContext ctx = injectableInstance.getInjectionContext();
 
     /**
      * Ensure the the container generates a stub to internally expose the field if it's private.
      */
     injectableInstance.ensureMemberExposed();
-
-   // final Statement busHandle = ctx.getInjector(MessageBus.class).getBeanInstance(injectableInstance);
 
     /**
      * Figure out the service name;
@@ -68,7 +66,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
             ? injectableInstance.getMemberName() : injectableInstance.getAnnotation().value();
 
     boolean local = false;
-    for (Annotation a : injectableInstance.getQualifiers()) {
+    for (final Annotation a : injectableInstance.getQualifiers()) {
       if (Local.class.equals(a.annotationType())) {
         local = true;
       }
@@ -76,18 +74,18 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
 
     final String varName = InjectUtil.getUniqueVarName();
 
-    Statement subscribeStatement;
+    final Statement subscribeStatement;
 
     if (local) {
-      subscribeStatement =  Stmt.invokeStatic(ErraiBus.class, "get")
+      subscribeStatement = Stmt.invokeStatic(ErraiBus.class, "get")
               .invoke("subscribeLocal", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
     else {
-      subscribeStatement =  Stmt.invokeStatic(ErraiBus.class, "get")
+      subscribeStatement = Stmt.invokeStatic(ErraiBus.class, "get")
               .invoke("subscribe", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
 
-    Statement declareVar = Stmt.declareVariable(Subscription.class).asFinal().named(varName)
+    final Statement declareVar = Stmt.declareVariable(Subscription.class).asFinal().named(varName)
             .initializeWith(subscribeStatement);
 
     final MetaClass destructionCallbackType =
@@ -99,7 +97,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
             .publicOverridesMethod("destroy", Parameter.of(injectableInstance.getEnclosingType(), "obj", true))
             .append(Stmt.loadVariable(varName).invoke("remove"));
 
-    Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
+    final Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
             Refs.get(injectableInstance.getInjector().getVarName()), destroyMeth.finish().finish());
 
 
