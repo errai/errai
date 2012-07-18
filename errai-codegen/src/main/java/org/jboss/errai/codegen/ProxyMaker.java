@@ -41,14 +41,15 @@ import static org.jboss.errai.codegen.util.Stmt.throw_;
  * @author Mike Brock
  */
 public class ProxyMaker {
-  public static BuildMetaClass makeProxy(String proxyClassName, Class cls) {
+  public static BuildMetaClass makeProxy(final String proxyClassName, final Class cls) {
     return makeProxy(proxyClassName, MetaClassFactory.get(cls));
   }
 
   public static final String PROXY_BIND_METHOD = "__$setProxiedInstance$";
 
-  public static BuildMetaClass makeProxy(String proxyClassName, MetaClass toProxy) {
-    ClassStructureBuilder builder;
+  public static BuildMetaClass makeProxy(final String proxyClassName,
+                                         final MetaClass toProxy) {
+    final ClassStructureBuilder builder;
 
     if (!toProxy.isInterface()) {
       if (toProxy.isFinal()) {
@@ -68,32 +69,32 @@ public class ProxyMaker {
 
     final String proxyVar = "$$_proxy_$$";
 
-    Set<String> renderedMethods = new HashSet<String>();
+    final Set<String> renderedMethods = new HashSet<String>();
 
     builder.privateField(proxyVar, toProxy).finish();
-    for (MetaMethod method : toProxy.getMethods()) {
-      String methodString = GenUtil.getMethodString(method);
+    for (final MetaMethod method : toProxy.getMethods()) {
+      final String methodString = GenUtil.getMethodString(method);
       if (renderedMethods.contains(methodString) || method.getName().equals("hashCode")
               || (method.getName().equals("equals") && method.getParameters().length == 1
               && method.getParameters()[0].getType().getFullyQualifiedName().equals(Object.class.getName()))) continue;
 
       renderedMethods.add(methodString);
 
-      if (!method.isPublic() || 
-          method.isSynthetic() ||
-          method.isFinal() ||
-          method.isStatic() ||
-          method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName()))
+      if (!method.isPublic() ||
+              method.isSynthetic() ||
+              method.isFinal() ||
+              method.isStatic() ||
+              method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName()))
         continue;
 
-      DefParameters defParameters = DefParameters.from(method);
-      BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
-            .parameters(defParameters)
-            .throws_(method.getCheckedExceptions());
+      final DefParameters defParameters = DefParameters.from(method);
+      final BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
+              .parameters(defParameters)
+              .throws_(method.getCheckedExceptions());
 
-      List<Parameter> parms = defParameters.getParameters();
+      final List<Parameter> parms = defParameters.getParameters();
 
-      Statement[] statementVars = new Statement[parms.size()];
+      final Statement[] statementVars = new Statement[parms.size()];
       for (int i = 0; i < parms.size(); i++) {
         statementVars[i] = loadVariable(parms.get(i).getName());
       }

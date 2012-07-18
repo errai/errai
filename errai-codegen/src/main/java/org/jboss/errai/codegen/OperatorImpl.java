@@ -56,7 +56,6 @@ public class OperatorImpl implements Operator {
     return operator.getOperatorPrecedence() <= getOperatorPrecedence();
   }
 
-
   @Override
   public void assertCanBeApplied(MetaClass clazz) {
     if (!canBeApplied(clazz)) {

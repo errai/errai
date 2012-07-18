@@ -30,6 +30,10 @@ import java.io.PrintWriter;
 /**
  * The main generator class for the Errai IOC framework.
  *
+ * <pre>
+ *
+ * </pre>
+ *
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
