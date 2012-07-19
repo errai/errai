@@ -1,5 +1,7 @@
 package org.jboss.errai.codegen.util;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import org.eclipse.jdt.core.compiler.CompilationProgress;
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -24,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Mike Brock
@@ -99,6 +99,24 @@ public class ClassChangeUtil {
     }
   }
 
+
+  public static Class compileAndLoad(final String sourcePath,
+                                     final String packageName,
+                                     final String className) throws IOException {
+    final String tempDirectory = RebindUtils.getTempDirectory();
+
+    return compileAndLoad(sourcePath, packageName, className, tempDirectory);
+  }
+
+
+  public static Class compileAndLoad(final String sourcePath,
+                                     final String packageName,
+                                     final String className,
+                                     final String outputPath) throws IOException {
+
+    final String outputLocation = compileClass(sourcePath, packageName, className, outputPath);
+    return loadClassDefinition(outputLocation, packageName, className);
+  }
 
   @SuppressWarnings({"ConstantConditions", "ResultOfMethodCallIgnored"})
   public static String compileClass(final String sourcePath,
@@ -196,8 +214,16 @@ public class ClassChangeUtil {
                     ClassLoader.getSystemClassLoader() :
                     Thread.currentThread().getContextClassLoader());
 
+    final String fqcn;
+    if ("".equals(packageName)) {
+      fqcn = className;
+    }
+    else {
+      fqcn = packageName + "." + className;
+    }
+
     try {
-      return clsLoader.loadClass(packageName + "." + className);
+      return clsLoader.loadClass(fqcn);
     }
     catch (Throwable t) {
       // fall through
@@ -210,11 +236,11 @@ public class ClassChangeUtil {
         String s = file.getName();
         s = s.substring(s.indexOf('$') + 1, s.lastIndexOf('.'));
 
-        final String fqcn = packageName + "." + className + "$" + s;
+        final String nestedClassName = fqcn + "$" + s;
 
         Class cls = null;
         try {
-          cls = clsLoader.loadClass(fqcn);
+          cls = clsLoader.loadClass(nestedClassName);
         }
         catch (ClassNotFoundException ignored) {
         }
@@ -229,7 +255,7 @@ public class ClassChangeUtil {
             classDefinition = new byte[inputStream.available()];
             inputStream.read(classDefinition);
 
-            clsLoader.defineClassX(fqcn, classDefinition, 0, classDefinition.length);
+            clsLoader.defineClassX(nestedClassName, classDefinition, 0, classDefinition.length);
           }
           finally {
             inputStream.close();
@@ -242,17 +268,17 @@ public class ClassChangeUtil {
     }
 
     final Class<?> mainClass = clsLoader
-            .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
+            .defineClassX(fqcn, classDefinition, 0, classDefinition.length);
 
     inputStream.close();
 
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
 
-      final String fqcn = packageName + "." + className + "$" + i;
+      final String nestedClassName = fqcn + "$" + i;
 
       Class cls = null;
       try {
-        cls = clsLoader.loadClass(fqcn);
+        cls = clsLoader.loadClass(nestedClassName);
       }
       catch (ClassNotFoundException ignored) {
       }
@@ -268,7 +294,7 @@ public class ClassChangeUtil {
           classDefinition = new byte[inputStream.available()];
           inputStream.read(classDefinition);
 
-          clsLoader.defineClassX(fqcn, classDefinition, 0, classDefinition.length);
+          clsLoader.defineClassX(nestedClassName, classDefinition, 0, classDefinition.length);
         }
         finally {
           inputStream.close();
