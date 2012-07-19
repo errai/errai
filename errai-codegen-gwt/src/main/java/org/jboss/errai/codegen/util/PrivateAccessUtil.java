@@ -1,6 +1,12 @@
 package org.jboss.errai.codegen.util;
 
-import com.google.gwt.core.client.UnsafeNativeLong;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
@@ -20,12 +26,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gwt.core.client.UnsafeNativeLong;
 
 /**
  * Utility class with methods that generate code to access private, default
@@ -100,7 +101,7 @@ public class PrivateAccessUtil {
   public static void createJavaReflectionConstructorInitializerUtilMethod(
           final ClassStructureBuilder<?> classBuilder) {
 
-    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_CONSTRUCTOR_UTIL_METH, Class.class, String.class,
+    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_CONSTRUCTOR_UTIL_METH, Class.class,
             Class[].class) != null) {
       return;
     }
