@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -45,15 +49,9 @@ public class InjectionPoint<T> {
   protected Injector injector;
   protected InjectionContext injectionContext;
 
-  public InjectionPoint(final T annotation,
-                        final TaskType taskType,
-                        final MetaConstructor constructor,
-                        final MetaMethod method,
-                        final MetaField field,
-                        final MetaClass type,
-                        final MetaParameter parm,
-                        final Injector injector,
-                        final InjectionContext injectionContext) {
+  public InjectionPoint(final T annotation, final TaskType taskType, final MetaConstructor constructor,
+          final MetaMethod method, final MetaField field, final MetaClass type, final MetaParameter parm,
+          final Injector injector, final InjectionContext injectionContext) {
 
     this.annotation = annotation;
     this.taskType = taskType;
@@ -92,33 +90,33 @@ public class InjectionPoint<T> {
     }
 
     switch (taskType) {
-      case PrivateField:
-      case Field:
-        return type = field.getType();
-      case PrivateMethod:
-      case Parameter:
-        return type = parm.getType();
-      case Type:
-        return type;
-      default:
-        throw new RuntimeException("unsupported operation: getType for task: " + taskType);
+    case PrivateField:
+    case Field:
+      return type = field.getType();
+    case PrivateMethod:
+    case Parameter:
+      return type = parm.getType();
+    case Type:
+      return type;
+    default:
+      throw new RuntimeException("unsupported operation: getType for task: " + taskType);
     }
   }
 
   public MetaClass getElementTypeOrMethodReturnType() {
     switch (taskType) {
-      case PrivateField:
-      case Field:
-        return type = field.getType();
-      case PrivateMethod:
-      case Method:
-        return type = method.getReturnType();
-      case Parameter:
-        return type = parm.getType();
-      case Type:
-        return type;
-      default:
-        throw new RuntimeException("unsupported operation: getType for task: " + taskType);
+    case PrivateField:
+    case Field:
+      return type = field.getType();
+    case PrivateMethod:
+    case Method:
+      return type = method.getReturnType();
+    case Parameter:
+      return type = parm.getType();
+    case Type:
+      return type;
+    default:
+      throw new RuntimeException("unsupported operation: getType for task: " + taskType);
     }
   }
 
@@ -157,64 +155,64 @@ public class InjectionPoint<T> {
 
   public String getMemberName() {
     switch (taskType) {
-      case PrivateField:
-      case Field:
-        return field.getName();
+    case PrivateField:
+    case Field:
+      return field.getName();
 
-      case Parameter:
-         return parm.getName();
-      case PrivateMethod:
-      case Method:
-        return method.getName();
+    case Parameter:
+      return parm.getName();
+    case PrivateMethod:
+    case Method:
+      return method.getName();
 
-      case Type:
-        return type.getName();
+    case Type:
+      return type.getName();
 
-      default:
-        return null;
+    default:
+      return null;
     }
   }
 
   public MetaClass getEnclosingType() {
     switch (taskType) {
-      case PrivateField:
-      case Field:
-        return field.getDeclaringClass();
-      case PrivateMethod:
-      case Method:
-        return method.getDeclaringClass();
-      case Type:
-        return type;
-      case Parameter:
-        return parm.getDeclaringMember().getDeclaringClass();
-      default:
-        throw new RuntimeException("unsupported operation: getEncodingType for task: " + taskType);
+    case PrivateField:
+    case Field:
+      return field.getDeclaringClass();
+    case PrivateMethod:
+    case Method:
+      return method.getDeclaringClass();
+    case Type:
+      return type;
+    case Parameter:
+      return parm.getDeclaringMember().getDeclaringClass();
+    default:
+      throw new RuntimeException("unsupported operation: getEncodingType for task: " + taskType);
     }
   }
 
   public Annotation[] getQualifiers() {
     final List<Annotation> annotations;
     switch (taskType) {
-      case PrivateField:
-      case Field:
-        annotations = InjectUtil.getQualifiersFromAnnotations(field.getAnnotations());
-        return annotations.toArray(new Annotation[annotations.size()]);
+    case PrivateField:
+    case Field:
+      annotations = InjectUtil.getQualifiersFromAnnotations(field.getAnnotations());
+      return annotations.toArray(new Annotation[annotations.size()]);
 
-      case Parameter:
-        annotations = InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations());
-        return annotations.toArray(new Annotation[annotations.size()]);
+    case Parameter:
+      annotations = InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations());
+      return annotations.toArray(new Annotation[annotations.size()]);
 
-      case PrivateMethod:
-      case Method:
-        annotations = InjectUtil.getQualifiersFromAnnotations(method.getAnnotations());
-        return annotations.toArray(new Annotation[annotations.size()]);
+    case PrivateMethod:
+    case Method:
+      annotations = InjectUtil.getQualifiersFromAnnotations(method.getAnnotations());
+      return annotations.toArray(new Annotation[annotations.size()]);
 
-      case Type:
-        annotations = InjectUtil.getQualifiersFromAnnotations(type.getAnnotations());
-        return annotations.toArray(new Annotation[annotations.size()]);
+    case Type:
+      annotations = InjectUtil.getQualifiersFromAnnotations(type.getAnnotations());
+      return annotations.toArray(new Annotation[annotations.size()]);
 
-      default:
-        return new Annotation[0];
+    default:
+      return new Annotation[0];
     }
   }
 
@@ -225,12 +223,46 @@ public class InjectionPoint<T> {
   private Boolean _isProxyCache;
 
   public boolean isProxy() {
-    if (_isProxyCache != null) return _isProxyCache;
+    if (_isProxyCache != null)
+      return _isProxyCache;
     try {
       return _isProxyCache = injectionContext.isProxiedInjectorRegistered(getEnclosingType(), getQualifyingMetadata());
-    }
-    catch (InjectionFailure e) {
+    } catch (InjectionFailure e) {
       return _isProxyCache = false;
+    }
+  }
+
+  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
+
+  public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : Arrays.asList(getAnnotations())) {
+      if (annotation != null && annotation.getClass().isAssignableFrom(a.getClass())) {
+        return (A) a;
+      }
+    }
+    return null;
+  }
+
+  public Annotation[] getAnnotations() {
+    switch (taskType) {
+    case PrivateField:
+    case Field:
+      return field.getAnnotations();
+
+    case Parameter:
+      return parm.getAnnotations();
+
+    case PrivateMethod:
+    case Method:
+      return method.getAnnotations();
+
+    case Type:
+      return type.getAnnotations();
+
+    default:
+      return new Annotation[0];
     }
   }
 }
