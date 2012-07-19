@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
+import org.jboss.errai.codegen.builder.VariableReferenceContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -29,7 +30,10 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.PrivateAccessType;
@@ -44,11 +48,13 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.BeanMetric;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
@@ -158,7 +164,118 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        */
       generateComponentCompositions(ctx, builder, component, rootTemplateElement,
               Stmt.loadVariable(dataFieldElementsVarName));
+
+      generateEventHandlerMethodClasses(ctx, builder, component, Stmt.loadVariable(dataFieldElementsVarName));
     }
+  }
+
+  private void generateEventHandlerMethodClasses(InjectableInstance<Templated> ctx,
+          BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component,
+          VariableReferenceContextualStatementBuilder dataFieldElements) {
+    // TODO finish me
+
+    MetaClass declaringClass = ctx.getEnclosingType();
+    for (MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
+      // if (method.getParameters().length != 1 ||
+      // !method.getParameters()[0].getType().isAssignableTo(DomEvent.class)) {
+      // throw new GenerationException("@EventHandler method [" +
+      // method.getName() + "] in class ["
+      // + declaringClass.getFullyQualifiedName() +
+      // "] must have at least one parameter of a type extending ["
+      // + DomEvent.class.getName() + "]");
+      // }
+
+      MetaClass eventType = method.getParameters()[0].getType();
+      MetaClass handlerType = getHandlerForEvent(eventType);
+      BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType).extend()
+              .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
+      listenerBuiler.append(Stmt.nestedCall(component).invoke(method, Stmt.loadVariable("event")));
+
+      AnonymousClassStructureBuilder listenerInstance = listenerBuiler.finish();
+      String handlerVarName = InjectUtil.getUniqueVarName();
+      builder.append(Stmt.declareVariable(handlerType).named(handlerVarName).initializeWith(listenerInstance.finish()));
+
+      String[] dataFieldNames = method.getAnnotation(EventHandler.class).value();
+
+      if (dataFieldNames.length == 0)
+        throw new GenerationException("@EventHandler annotation on method [" + declaringClass.getFullyQualifiedName()
+                + "." + method.getName() + "] must specify at least one data-field target.");
+
+      Class<?> hasHandlerType = MetaClassFactory.loadClass("com.google.gwt.event.dom.client.Has"
+              + handlerType.getName() + "s");
+
+      Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+      Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
+
+      for (String name : dataFieldNames) {
+        MetaClass dataFieldType = dataFieldTypes.get(name);
+
+        if (!dataFieldType.isAssignableTo(hasHandlerType)) {
+          throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
+                  + "] in class [" + declaringClass.getFullyQualifiedName()
+                  + "] does not implement required interface [" + hasHandlerType.getName() + "]");
+        }
+
+        Statement widget = Cast.to(hasHandlerType, dataFields.get(name));
+
+        builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
+                Cast.to(handlerType, Stmt.loadVariable(handlerVarName))));
+      }
+    }
+  }
+
+  private MetaClass getHandlerForEvent(MetaClass eventType) {
+
+    /*
+     * All handlers event must have an overrided method getAssociatedType(). We
+     * take advantage of this information to get the associated handler. Ex:
+     * com.google.gwt.event.dom.client.ClickEvent --->
+     * com.google.gwt.event.dom.client.ClickHandler
+     * 
+     * com.google.gwt.event.dom.client.BlurEvent --->
+     * com.google.gwt.event.dom.client.BlurHandler
+     */
+
+    if (eventType == null) {
+      return null;
+    }
+
+    MetaMethod method = eventType.getBestMatchingMethod("getAssociatedType", Type.class);
+
+    if (method == null) {
+      for (MetaMethod m : eventType.getMethods()) {
+        if ("getAssociatedType".equals(m.getName())) {
+          method = m;
+          break;
+        }
+      }
+    }
+
+    if (method == null) {
+      throw new GenerationException("Method 'getAssociatedType()' could not be found in the event ["
+              + eventType.getName() + "]");
+    }
+
+    MetaClass returnType = method.getReturnType();
+    if (returnType == null) {
+      throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
+              + "] returns void.");
+    }
+
+    MetaParameterizedType parameterizedType = returnType.getParameterizedType();
+    if (parameterizedType == null) {
+      throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
+              + "] does not return Type<? extends EventHandler>..");
+    }
+
+    MetaType[] argTypes = parameterizedType.getTypeParameters();
+    if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass
+            && !((MetaClass) argTypes[0]).isAssignableTo(EventHandler.class)) {
+      throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
+              + "] does not return Type<? extends EventHandler>..");
+    }
+
+    return (MetaClass) argTypes[0];
   }
 
   @SuppressWarnings("serial")
