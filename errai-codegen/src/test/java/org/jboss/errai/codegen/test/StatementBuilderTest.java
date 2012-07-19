@@ -623,5 +623,13 @@ public class StatementBuilderTest extends AbstractCodegenTest {
     assertEquals("1 | 2 | (10 & 20)", generate);
   }
 
+  @Test
+  public void testPassBitwiseToMethodParameter() {
+    final Statement bitwiseStatement = Bitwise.or(Stmt.load(1), Stmt.load(2),
+            Expr.qualify(Bitwise.and(Stmt.load(10), Stmt.load(20))));
 
+    final String generate = Stmt.newObject(Integer.class).withParameters(bitwiseStatement).generate(Context.create());
+
+    assertEquals("new Integer(1 | 2 | (10 & 20))", generate);
+  }
 }
