@@ -49,6 +49,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.BeanMetric;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.common.base.Strings;
@@ -58,6 +59,8 @@ import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -176,51 +179,107 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
     MetaClass declaringClass = ctx.getEnclosingType();
     for (MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
-      // if (method.getParameters().length != 1 ||
-      // !method.getParameters()[0].getType().isAssignableTo(DomEvent.class)) {
-      // throw new GenerationException("@EventHandler method [" +
-      // method.getName() + "] in class ["
-      // + declaringClass.getFullyQualifiedName() +
-      // "] must have at least one parameter of a type extending ["
-      // + DomEvent.class.getName() + "]");
-      // }
 
       MetaClass eventType = method.getParameters()[0].getType();
-      MetaClass handlerType = getHandlerForEvent(eventType);
-      BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType).extend()
-              .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
-      listenerBuiler.append(Stmt.nestedCall(component).invoke(method, Stmt.loadVariable("event")));
 
-      AnonymousClassStructureBuilder listenerInstance = listenerBuiler.finish();
-      String handlerVarName = InjectUtil.getUniqueVarName();
-      builder.append(Stmt.declareVariable(handlerType).named(handlerVarName).initializeWith(listenerInstance.finish()));
+      if (eventType.isAssignableTo(Event.class)) {
+        MetaClass handlerType = MetaClassFactory.get(EventListener.class);
+        BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType).extend()
+                .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
+        listenerBuiler.append(Stmt.nestedCall(component).invoke(method, Stmt.loadVariable("event")));
 
-      String[] dataFieldNames = method.getAnnotation(EventHandler.class).value();
+        ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
 
-      if (dataFieldNames.length == 0)
-        throw new GenerationException("@EventHandler annotation on method [" + declaringClass.getFullyQualifiedName()
-                + "." + method.getName() + "] must specify at least one data-field target.");
+        String[] dataFieldNames = method.getAnnotation(EventHandler.class).value();
 
-      Class<?> hasHandlerType = MetaClassFactory.loadClass("com.google.gwt.event.dom.client.Has"
-              + handlerType.getName() + "s");
+        if (dataFieldNames.length == 0)
+          throw new GenerationException("@EventHandler annotation on method [" + declaringClass.getFullyQualifiedName()
+                  + "." + method.getName() + "] must specify at least one data-field target.");
 
-      Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
-      Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
+        Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+        Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
 
-      for (String name : dataFieldNames) {
-        MetaClass dataFieldType = dataFieldTypes.get(name);
-
-        if (!dataFieldType.isAssignableTo(hasHandlerType)) {
-          throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
-                  + "] in class [" + declaringClass.getFullyQualifiedName()
-                  + "] does not implement required interface [" + hasHandlerType.getName()
-                  + "] specified by @EventHandler method " + method.getName() + "(" + eventType.getName() + ")]");
+        int eventsToSink = Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS
+                | Event.TOUCHEVENTS;
+        if (method.isAnnotationPresent(SinkNative.class)) {
+          eventsToSink = method.getAnnotation(SinkNative.class).value();
         }
 
-        Statement widget = Cast.to(hasHandlerType, dataFields.get(name));
+        for (String name : dataFieldNames) {
+          if (dataFields.containsKey(name)) {
+            MetaClass dataFieldType = dataFieldTypes.get(name);
 
-        builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
-                Cast.to(handlerType, Stmt.loadVariable(handlerVarName))));
+            if (!dataFieldType.isAssignableTo(Element.class)) {
+              /* We have a wrapped element */
+              throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
+                      + "] in class [" + declaringClass.getFullyQualifiedName() + "] is not assignable to ["
+                      + Element.class.getName() + "] specified by @EventHandler method " + method.getName() + "("
+                      + eventType.getName() + ")]");
+            }
+          }
+          else {
+            /* We are completely native */
+            builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupNativeEventListener", component,
+                    dataFieldElements.invoke("get", name), listenerInstance, eventsToSink));
+          }
+        }
+      }
+      else {
+
+        // if (method.getParameters().length != 1 ||
+        // !method.getParameters()[0].getType().isAssignableTo(DomEvent.class))
+        // {
+        // throw new GenerationException("@EventHandler method [" +
+        // method.getName() + "] in class ["
+        // + declaringClass.getFullyQualifiedName() +
+        // "] must have at least one parameter of a type extending ["
+        // + DomEvent.class.getName() + "]");
+        // }
+
+        MetaClass handlerType = getHandlerForEvent(eventType);
+        BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType).extend()
+                .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
+        listenerBuiler.append(Stmt.nestedCall(component).invoke(method, Stmt.loadVariable("event")));
+
+        ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
+
+        String[] dataFieldNames = method.getAnnotation(EventHandler.class).value();
+
+        if (dataFieldNames.length == 0)
+          throw new GenerationException("@EventHandler annotation on method [" + declaringClass.getFullyQualifiedName()
+                  + "." + method.getName() + "] must specify at least one data-field target.");
+
+        MetaClass hasHandlerType = MetaClassFactory.get("com.google.gwt.event.dom.client.Has" + handlerType.getName()
+                + "s");
+
+        Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+        Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
+
+        for (String name : dataFieldNames) {
+          MetaClass dataFieldType = dataFieldTypes.get(name);
+
+          if (dataFieldType.isAssignableTo(Element.class)) {
+            builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component,
+                    dataFields.get(name), listenerInstance, Stmt.invokeStatic(eventType, "getType")));
+          }
+          else if (dataFieldType.isAssignableTo(hasHandlerType)) {
+          }
+          else {
+            // TODO this needs to be moved up into the 'else if' statement once
+            // MetaClass knows about interfaces.
+            Statement widget = Cast.to(hasHandlerType, dataFields.get(name));
+            builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
+                    Cast.to(handlerType, listenerInstance)));
+
+            // throw new GenerationException("@DataField [" + name +
+            // "] of type [" + dataFieldType.getName()
+            // + "] in class [" + declaringClass.getFullyQualifiedName()
+            // + "] does not implement required interface [" +
+            // hasHandlerType.getName()
+            // + "] specified by @EventHandler method " + method.getName() + "("
+            // + eventType.getName() + ")]");
+          }
+        }
       }
     }
   }

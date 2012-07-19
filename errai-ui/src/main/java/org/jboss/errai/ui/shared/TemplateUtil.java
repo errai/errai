@@ -7,7 +7,9 @@ import java.util.Map;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.UIObject;
@@ -15,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
- *
+ * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public final class TemplateUtil {
@@ -133,6 +135,18 @@ public final class TemplateUtil {
     });
 
     return childTemplateElements;
+  }
+
+  public static void setupNativeEventListener(Composite component, Element element, EventListener listener,
+          int eventsToSink) {
+
+    DOM.setEventListener((com.google.gwt.user.client.Element) element, listener);
+    DOM.sinkEvents((com.google.gwt.user.client.Element) element, eventsToSink);
+  }
+
+  public static <T extends EventHandler> void setupWrappedElementEventHandler(Composite component,
+          ElementWrapperWidget widget, T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
+    widget.addDomHandler(handler, type);
   }
 
   /**

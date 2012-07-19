@@ -5,8 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
@@ -33,10 +36,16 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   public List<? extends Statement> generateDecorator(InjectableInstance<DataField> ctx) {
     ctx.ensureMemberExposed();
     Statement instance = ctx.getValueStatement();
+    String name = getTemplateDataFieldName(ctx.getAnnotation(), ctx.getMemberName());
     if (ctx.getType().isAssignableTo(Element.class)) {
+      if (ctx.isAnnotationPresent(Inject.class)) {
+        throw new GenerationException("@DataField [" + name + "] in class ["
+                + ctx.getEnclosingType().getFullyQualifiedName() + "] is of type ["
+                + ctx.getType().getFullyQualifiedName()
+                + "] which does not support @Inject; this instance must be created manually.");
+      }
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
-    String name = getTemplateDataFieldName(ctx.getAnnotation(), ctx.getMemberName());
     saveDataField(ctx, ctx.getType(), name, instance);
 
     return new ArrayList<Statement>();

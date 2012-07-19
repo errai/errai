@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 @Documented
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EventHandler {
-  String[] value();
+public @interface SinkNative {
+  int value();
 }
