@@ -1,13 +1,12 @@
 package org.jboss.errai.demo.grocery.client.local;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -18,6 +17,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 
+/**
+ * A form for editing the properties of a new or existing Store object.
+ *
+ * @author Jonathan Fuerth <jfuerth@gmail.com>
+ */
 @Dependent
 @Templated
 public class StoreForm extends Composite {
@@ -34,13 +38,14 @@ public class StoreForm extends Composite {
 
   private Runnable afterSaveAction;
 
-  public void setStore(Store store) {
-    Assert.notNull(store);
-
-    // TODO: do we need to unbind the existing model before adding the new one? (data binding javadoc)
-    storeBinder.setModel(store, InitialState.FROM_MODEL);
-  }
-
+  /**
+   * Returns the store instance that is permanently associated with this form.
+   * The returned instance is bound to this store's fields: updates to the form
+   * fields will cause matching updates in the returned object's state, and
+   * vice-versa.
+   *
+   * @return the Store instance that is bound to the fields of this form.
+   */
   public Store getStore() {
     return storeBinder.getModel();
   }
@@ -54,16 +59,21 @@ public class StoreForm extends Composite {
 
       @Override
       public void onClick(ClickEvent event) {
+        System.out.println("Save button pressed for " + storeBinder.getModel());
         em.persist(storeBinder.getModel());
         em.flush();
 
         if (afterSaveAction != null) {
           afterSaveAction.run();
         }
-
-        setStore(new Store());
+        System.out.println("Click handler finished for " + storeBinder.getModel());
       }
     });
+  }
+
+  @PreDestroy
+  void cleanup() {
+    storeBinder.unbind();
   }
 
   public void setAfterSaveAction(Runnable afterSaveAction) {
