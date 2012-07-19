@@ -50,7 +50,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   }
 
   @Override
-  public void gwtSetUp() throws Exception {
+  protected void gwtSetUp() throws Exception {
     DependentBeanCycleB.instanceCount = 1;
 
     super.gwtSetUp();

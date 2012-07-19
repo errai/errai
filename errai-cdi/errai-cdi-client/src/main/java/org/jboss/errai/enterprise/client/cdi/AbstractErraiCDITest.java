@@ -16,10 +16,11 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
+
+import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Abstract base class of all Errai CDI integration tests,
@@ -30,7 +31,7 @@ import org.jboss.errai.ioc.client.Container;
 public abstract class AbstractErraiCDITest extends GWTTestCase {
 
   @Override
-  public void gwtSetUp() throws Exception {
+  protected void gwtSetUp() throws Exception {
     InitVotes.reset();
     InitVotes.setTimeoutMillis(60000);
     super.gwtSetUp();
