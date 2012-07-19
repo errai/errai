@@ -82,7 +82,7 @@ public class PrivateAccessUtil {
   public static void createJavaReflectionConstructorInitializerUtilMethod(
       ClassStructureBuilder<?> classBuilder) {
 
-    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_CONSTRUCTOR_UTIL_METH, Class.class, String.class,
+    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_CONSTRUCTOR_UTIL_METH, Class.class, 
         Class[].class) != null) {
       return;
     }
