@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -232,5 +233,29 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     DataBinder<Model> binder = new DataBinder<Model>(model);
     assertEquals(model.toString(), binder.getModel().toString());
+  }
+
+  @Test
+  public void testCustomConverter() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return 1701;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "test";
+      }
+    };
+
+    TextBox textBox = new TextBox();
+    Model model = new DataBinder<Model>(Model.class).bind(textBox, "age", converter);
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
+
+    model.setAge(123);
+    assertEquals("Widget not properly updated using custom converter", "test", textBox.getText());
   }
 }

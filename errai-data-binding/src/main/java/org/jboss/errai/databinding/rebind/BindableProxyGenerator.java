@@ -41,6 +41,7 @@ import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.Convert;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 
@@ -76,7 +77,7 @@ public class BindableProxyGenerator {
   }
 
   public ClassStructureBuilder<?> generate() {
-    @SuppressWarnings("serial")
+    @SuppressWarnings({ "serial", "rawtypes" })
     ClassStructureBuilder<?> classBuilder =
         ClassBuilder.define(bindable.getSimpleName() + "Proxy", bindable)
             .packageScope()
@@ -84,6 +85,9 @@ public class BindableProxyGenerator {
             .body()
             .privateField("bindings", MetaClassFactory.get(new TypeLiteral<Map<String, Widget>>() {}))
             .initializesWith(Stmt.newObject(new TypeLiteral<HashMap<String, Widget>>() {}))
+            .finish()
+            .privateField("converters", MetaClassFactory.get(new TypeLiteral<Map<String, Converter>>() {}))
+            .initializesWith(Stmt.newObject(new TypeLiteral<HashMap<String, Converter>>() {}))
             .finish()
             .privateField("handlerRegistrations",
                 MetaClassFactory.get(new TypeLiteral<Map<String, HandlerRegistration>>() {}))
@@ -141,7 +145,7 @@ public class BindableProxyGenerator {
   private void generateProxyBindMethod(ClassStructureBuilder<?> classBuilder) {
     BlockBuilder<?> bindMethodBuilder =
         classBuilder.publicMethod(void.class, "bind", Parameter.of(Widget.class, "widget", true),
-            Parameter.of(String.class, "property", true))
+            Parameter.of(String.class, "property", true), Parameter.of(Converter.class, "converter", true))
             .append(Stmt.loadVariable("this").invoke("unbind", Variable.get("property")))
             .append(
                 Stmt.if_(Bool.expr(Stmt.loadVariable("bindings").invoke("containsValue", Variable.get("widget"))))
@@ -149,6 +153,8 @@ public class BindableProxyGenerator {
                     .finish()
             )
             .append(Stmt.loadClassMember("bindings").invoke("put", Variable.get("property"), Variable.get("widget")))
+            .append(
+                Stmt.loadClassMember("converters").invoke("put", Variable.get("property"), Variable.get("converter")))
             .append(
                 Stmt.if_(Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
                     .append(
@@ -214,10 +220,11 @@ public class BindableProxyGenerator {
                         .append(
                             Stmt.loadVariable("hasValue").invoke(
                                 "setValue",
-                                Stmt.invokeStatic(Convert.class, "to",
+                                Stmt.invokeStatic(Convert.class, "toWidgetValue",
                                     Stmt.castTo(HasValue.class,
                                         Stmt.loadVariable("widget")).invoke("getValue").invoke("getClass"),
-                                        Stmt.loadVariable("value"))))
+                                        Stmt.loadVariable("value"),
+                                        Stmt.loadVariable("converters").invoke("get", Variable.get("property")))))
                         .finish()
                         .elseif_(
                             Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasText.class)))
@@ -231,8 +238,9 @@ public class BindableProxyGenerator {
                         .append(
                             Stmt.loadVariable("hasText").invoke(
                                 "setText",
-                                Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "to", String.class, Stmt
-                                    .loadVariable("value")))))
+                                Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "toWidgetValue", String.class, 
+                                    Stmt.loadVariable("value"),
+                                    Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
                         .finish()
                 )
                 .append(Stmt.loadVariable("this").invoke("set", Variable.get("property"), Variable.get("value")))
@@ -315,9 +323,10 @@ public class BindableProxyGenerator {
                   Stmt.loadVariable("target").invoke(
                       setterMethod.getName(),
                       Cast.to(MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed(),
-                          Stmt.invokeStatic(Convert.class, "to",
+                          Stmt.invokeStatic(Convert.class, "toModelValue",
                               MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed().asClass(),
-                              Stmt.loadVariable("value")))))
+                              Stmt.loadVariable("value"),
+                              Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
               .finish()
           );
 
@@ -337,10 +346,12 @@ public class BindableProxyGenerator {
                           .append(
                               Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke(
                                   "setValue",
-                                  Stmt.invokeStatic(Convert.class, "to",
+                                  Stmt.invokeStatic(Convert.class, "toWidgetValue",
                                       Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke("getValue")
                                           .invoke("getClass"),
-                                      Stmt.loadVariable(propertyDescriptor.getName())), true))
+                                      Stmt.loadVariable(propertyDescriptor.getName()),
+                                      Stmt.loadVariable("converters").invoke("get", propertyDescriptor.getName())    
+                                  ), true))
                           .finish()
                           .elseif_(
                               Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasText.class)))
@@ -349,9 +360,10 @@ public class BindableProxyGenerator {
                                   .invoke(
                                       "setText",
                                       Stmt.castTo(String.class,
-                                          Stmt.invokeStatic(Convert.class, "to", String.class,
+                                          Stmt.invokeStatic(Convert.class, "toWidgetValue", String.class,
                                               Stmt.castTo(boxedParmType, Stmt
-                                                  .loadVariable(propertyDescriptor.getName()))
+                                                  .loadVariable(propertyDescriptor.getName())),
+                                              Stmt.loadVariable("converters").invoke("get", propertyDescriptor.getName())
                                               )
                                           )
                                   )

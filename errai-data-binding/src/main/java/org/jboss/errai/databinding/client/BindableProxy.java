@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.InitialState;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -37,8 +38,10 @@ public interface BindableProxy<T> extends WrappedPortable {
    *          the widget to bind, must not be null.
    * @param property
    *          the property of the model to bind the widget to, must not be null.
+   * @param converter
+   *          the converter to use for this binding, null if default conversion should be used.
    */
-  public void bind(Widget widget, String property);
+  public void bind(Widget widget, String property, @SuppressWarnings("rawtypes") Converter converter);
 
   /**
    * Unbinds the property with the given name.

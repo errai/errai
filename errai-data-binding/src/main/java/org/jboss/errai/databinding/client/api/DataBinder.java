@@ -19,6 +19,7 @@ package org.jboss.errai.databinding.client.api;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
+import org.jboss.errai.databinding.client.Convert;
 
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
@@ -80,11 +81,31 @@ public class DataBinder<T> {
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
    *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
    */
-  @SuppressWarnings("unchecked")
   public T bind(final Widget widget, final String property) {
+    return bind(widget, property, null);
+  }
+
+  /**
+   * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}
+   * instance. If an existing binding for the specified property exists it will be replaced.
+   * 
+   * @param <T>
+   *          The model type
+   * @param widget
+   *          The widget the model instance should be bound to, must not be null.
+   * @param property
+   *          The name of the property that should be used for the binding, following Java bean conventions. Must not be
+   *          null.
+   * @param converter
+   *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
+   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
+   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
+   */
+  @SuppressWarnings("unchecked")
+  public T bind(final Widget widget, final String property, @SuppressWarnings("rawtypes") final Converter converter) {
     Assert.notNull(widget);
     Assert.notNull(property);
-    ((BindableProxy<T>) this.model).bind(widget, property);
+    ((BindableProxy<T>) this.model).bind(widget, property, converter);
     return this.model;
   }
 
@@ -128,7 +149,7 @@ public class DataBinder<T> {
    * The previously associated model instance will no longer be kept in sync with the UI.
    * 
    * @param model
-   *         The instance of a {@link Bindable} type, must not be null.
+   *          The instance of a {@link Bindable} type, must not be null.
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
    *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
    */

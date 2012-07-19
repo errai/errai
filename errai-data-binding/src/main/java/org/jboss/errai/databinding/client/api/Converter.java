@@ -1,0 +1,53 @@
+/*
+ * Copyright 2011 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jboss.errai.databinding.client.api;
+
+import java.awt.Checkbox;
+
+import com.google.gwt.user.client.ui.TextBox;
+
+/**
+ * Contract for converters than can perform model value to widget value transformations and vice versa.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ * 
+ * @param <M>
+ *          The type of the model value (field type of the model)
+ * @param <W>
+ *          The type of the widget value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
+ *          {@link Checkbox} (=HasValue&lt;Boolean&gt;)))
+ */
+public interface Converter<M, W> {
+
+  /**
+   * Converts the provided widget value to a model value of type &lt;M&gt;.
+   * 
+   * @param widgetValue
+   *          widget value to convert
+   * @return converted value for the model.
+   */
+  public M toModelValue(W widgetValue);
+
+  /**
+   * Converts the provided model value to a value usable by widgets of type {@link HasValue&lt;W&gt;}.
+   * 
+   * @param modelValue
+   *          model value to convert
+   * @return converted value for the widget.
+   */
+  public W toWidgetValue(M modelValue);
+}

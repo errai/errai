@@ -20,20 +20,22 @@ import java.util.Date;
 
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.Converter;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 
 /**
- * Simple type conversion utility used by the generated {@link Bindable} proxies.
- *
+ * Type conversion utility used by the generated {@link Bindable} proxies.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Convert {
 
   /**
-   * Convert the provided object to the provided type.
-   *
+   * Convert the provided object to the provided type. This method is used in case no {@link Converter} has been
+   * specified for the binding.
+   * 
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
@@ -54,7 +56,6 @@ public class Convert {
     }
     else if (toType.equals(String.class)) {
       if (o.getClass().equals(Date.class)) {
-        // TODO we obviously need to give users more control over this!
         return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).format((Date) o);
       }
       return o.toString();
@@ -80,5 +81,43 @@ public class Convert {
       }
     }
     return o;
+  }
+
+  /**
+   * Convert the provided object so it can be used as a widget value.
+   * 
+   * @param toType
+   *          The type to convert to, must not be null.
+   * @param o
+   *          The object to convert.
+   * @param converter
+   *          The converter to use, null if default conversion should be used (see {@link Convert#to(Class, Object)}
+   * @return the converted object
+   */
+  public static Object toWidgetValue(Class<?> toType, Object o, Converter converter) {
+    if (converter != null) {
+      return converter.toWidgetValue(o);
+    }
+
+    return to(toType, o);
+  }
+
+  /**
+   * Convert the provided object to a model value.
+   * 
+   * @param toType
+   *          The type to convert to, must not be null.
+   * @param o
+   *          The object to convert.
+   * @param converter
+   *          The converter to use, null if default conversion should be used (see {@link Convert#to(Class, Object)}
+   * @return the converted object
+   */
+  public static Object toModelValue(Class<?> toType, Object o, Converter converter) {
+    if (converter != null) {
+      return converter.toModelValue(o);
+    }
+
+    return to(toType, o);
   }
 }
