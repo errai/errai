@@ -156,6 +156,7 @@ public class ClassChangeUtil {
 
       final List<URL> configUrls = MetaDataScanner.getConfigUrls();
       final List<File> classpathElements = new ArrayList<File>(configUrls.size());
+      classpathElements.add(new File(outputPath));
 
       log.debug(">>> Searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
       for (final URL url : configUrls) {

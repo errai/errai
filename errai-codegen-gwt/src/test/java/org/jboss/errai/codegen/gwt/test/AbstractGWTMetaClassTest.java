@@ -31,6 +31,14 @@ public abstract class AbstractGWTMetaClassTest {
         return RebindUtils.readFileToString(new File(pathToTestFiles, getPath()));
       }
     });
+
+    try {
+      Class cls = loadTestClass(fqcn);
+      System.out.println("loaded: " + cls);
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+    }
   }
 
   protected TypeOracle generateMockacle() {
@@ -47,9 +55,9 @@ public abstract class AbstractGWTMetaClassTest {
 
   protected Class loadTestClass(final String fqcn) throws Exception {
     return ClassChangeUtil.compileAndLoad(
-                 getFullyQualifiedPathToClassFromName(fqcn),
-                 getPackageFromFQCN(fqcn),
-                 getNameFromFQCN(fqcn));
+            getFullyQualifiedPathToClassFromName(fqcn),
+            getPackageFromFQCN(fqcn),
+            getNameFromFQCN(fqcn));
   }
 
   private static String getPackageFromFQCN(final String fqcn) {

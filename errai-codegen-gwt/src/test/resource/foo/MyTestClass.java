@@ -2,7 +2,7 @@ package foo;
 
 import java.lang.String;
 
-public class MyTestClass {
+public class MyTestClass extends MyTestSuperClass {
   private String name;
   private int age;
 

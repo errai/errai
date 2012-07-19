@@ -16,7 +16,11 @@ public class GWTMetaClassTests extends AbstractGWTMetaClassTest {
   private final TypeOracle mockacle;
 
   public GWTMetaClassTests() {
+    addTestClass("foo.SuperInterface");
+    addTestClass("foo.TestInterface");
+    addTestClass("foo.MyTestSuperClass");
     addTestClass("foo.MyTestClass");
+
     mockacle = generateMockacle();
   }
 
@@ -41,5 +45,14 @@ public class GWTMetaClassTests extends AbstractGWTMetaClassTest {
     assertEquals(gwtMC.isDefaultInstantiable(), javaMC.isDefaultInstantiable());
 
     assertArrayEquals(gwtMC.getDeclaredMethods(), javaMC.getDeclaredMethods());
+
+    final MetaClass gwtSuperMC = gwtMC.getSuperClass();
+    final MetaClass javaSuperMC = javaMC.getSuperClass();
+
+    assertEquals(gwtSuperMC.getFullyQualifiedName(), javaSuperMC.getFullyQualifiedName());
+    assertEquals(1, gwtSuperMC.getInterfaces().length);
+    assertEquals(1, javaSuperMC.getInterfaces().length);
+
+    assertArrayEquals(gwtSuperMC.getInterfaces(), javaSuperMC.getInterfaces());
   }
 }
