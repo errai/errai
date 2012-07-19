@@ -213,7 +213,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         if (!dataFieldType.isAssignableTo(hasHandlerType)) {
           throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
                   + "] in class [" + declaringClass.getFullyQualifiedName()
-                  + "] does not implement required interface [" + hasHandlerType.getName() + "]");
+                  + "] does not implement required interface [" + hasHandlerType.getName()
+                  + "] specified by @EventHandler method " + method.getName() + "(" + eventType.getName() + ")]");
         }
 
         Statement widget = Cast.to(hasHandlerType, dataFields.get(name));
