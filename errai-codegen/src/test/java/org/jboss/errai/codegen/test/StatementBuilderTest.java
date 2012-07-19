@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths;
 import org.jboss.errai.codegen.test.model.Foo;
 import org.jboss.errai.codegen.util.Bitwise;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.Expr;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Assert;
@@ -601,9 +602,26 @@ public class StatementBuilderTest extends AbstractCodegenTest {
   }
 
   @Test
-  public void testBitwiseExpresion() {
+  public void testBitwiseOrExpression() {
     final String generate = Bitwise.or(Stmt.load(1), Stmt.load(2), Stmt.load(3)).generate(Context.create());
 
     assertEquals("1 | 2 | 3", generate);
   }
+
+  @Test
+  public void testBitwiseAndExpression() {
+    final String generate = Bitwise.and(Stmt.load(1), Stmt.load(2), Stmt.load(3)).generate(Context.create());
+
+    assertEquals("1 & 2 & 3", generate);
+  }
+
+  @Test
+  public void testMixedBitwise() {
+    final String generate = Bitwise.or(Stmt.load(1), Stmt.load(2),
+            Expr.qualify(Bitwise.and(Stmt.load(10), Stmt.load(20)))).generate(Context.create());
+
+    assertEquals("1 | 2 | (10 & 20)", generate);
+  }
+
+
 }
