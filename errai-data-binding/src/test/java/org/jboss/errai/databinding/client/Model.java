@@ -120,4 +120,9 @@ public class Model {
     return true;
   }
 
+  @Override
+  public String toString() {
+    return "Model [id=" + id + ", value=" + value + ", _name=" + _name + ", _age=" + _age + ", active=" + active + "]";
+  }
+
 }

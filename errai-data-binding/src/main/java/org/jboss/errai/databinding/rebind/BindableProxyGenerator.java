@@ -60,8 +60,8 @@ import com.google.gwt.user.client.ui.Widget;
  * <ul>
  * <li>Carry out an initial state sync between the bound widgets and the target model, if specified (see
  * {@link DataBinder#DataBinder(Object, InitialState)})</li>
- * <li>Update the bound widget when a setter method is invoked (works for widgets that either implement {@link HasValue}
- * or {@link HasText})</li>
+ * <li>Update the bound widget when a setter method is invoked on the model (works for widgets that either implement
+ * {@link HasValue} or {@link HasText})</li>
  * <li>Update the target model's state in response to value change events (only works for widgets that implement
  * {@link HasValue})</li>
  * <ul>
@@ -118,6 +118,9 @@ public class BindableProxyGenerator {
             .finish()
             .publicMethod(int.class, "hashCode")
             .append(Stmt.loadClassMember("target").invoke("hashCode").returnValue())
+            .finish()
+            .publicMethod(String.class, "toString")
+            .append(Stmt.loadClassMember("target").invoke("toString").returnValue())
             .finish();
 
     BeanInfo beanInfo;

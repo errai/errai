@@ -106,7 +106,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     binder.setModel(model, InitialState.FROM_MODEL);
 
     assertEquals("Button text should not have been changed after intial state synchronization " +
-    		"as the property it is bound to does not exist",
+        "as the property it is bound to does not exist",
         "button", button.getText());
   }
 
@@ -145,10 +145,9 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     DataBinder<Model> binder = new DataBinder<Model>(Model.class);
     TextBox valueTextBox = new TextBox();
     binder.bind(valueTextBox, "value");
-    ;
+
     TextBox nameTextBox = new TextBox();
     binder.bind(nameTextBox, "name");
-    ;
 
     Model model = binder.getModel();
 
@@ -224,5 +223,14 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     textBox.setText("changed name");
     binder.setModel(model, InitialState.FROM_UI);
     assertEquals("Model not properly initialized based on widget's initial state", "changed name", model.getName());
+  }
+
+  @Test
+  public void testBindableProxyToString() {
+    Model model = new Model();
+    model.setName("test");
+
+    DataBinder<Model> binder = new DataBinder<Model>(model);
+    assertEquals(model.toString(), binder.getModel().toString());
   }
 }

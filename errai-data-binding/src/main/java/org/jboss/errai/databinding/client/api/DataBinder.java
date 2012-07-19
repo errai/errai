@@ -128,7 +128,7 @@ public class DataBinder<T> {
    * The previously associated model instance will no longer be kept in sync with the UI.
    * 
    * @param model
-   *          The instance of a {@link Bindable} type, must not be null.
+   *         The instance of a {@link Bindable} type, must not be null.
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
    *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
    */
