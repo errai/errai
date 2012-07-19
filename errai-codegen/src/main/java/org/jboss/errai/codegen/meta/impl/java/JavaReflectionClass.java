@@ -67,6 +67,8 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   public static MetaClass newInstance(final Class type) {
+    if (type == null) return null;
+
     if (!MetaClassFactory.isCached(type.getName())) {
       final MetaClass clazz = newUncachedInstance(type);
       MetaClassFactory.pushCache(clazz);
