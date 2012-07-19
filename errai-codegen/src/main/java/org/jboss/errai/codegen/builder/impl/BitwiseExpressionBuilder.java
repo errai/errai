@@ -75,6 +75,6 @@ public class BitwiseExpressionBuilder extends ExpressionBuilder<BitwiseOperator>
 
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(boolean.class);
+    return lhs.getType();
   }
 }
