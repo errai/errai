@@ -129,7 +129,8 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     final List<MetaMethod> methodList = new ArrayList<MetaMethod>();
 
     for (final Method m : methods) {
-      if (!m.isBridge()) {
+      // hack to exclude jacoco instrumented methods.
+      if (!m.isBridge() && !m.getName().startsWith("$jacoco")) {
         methodList.add(new JavaReflectionMethod(this, m));
       }
     }

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.junit.Test;
@@ -12,10 +14,10 @@ import org.junit.Test;
 /**
  * @author Mike Brock
  */
-public class GWTMetaClassTests extends AbstractGWTMetaClassTest {
+public class GWTMetaClassTest extends AbstractGWTMetaClassTest {
   private final TypeOracle mockacle;
 
-  public GWTMetaClassTests() {
+  public GWTMetaClassTest() {
     addTestClass("foo.SuperInterface");
     addTestClass("foo.TestInterface");
     addTestClass("foo.MyTestSuperClass");
@@ -27,6 +29,8 @@ public class GWTMetaClassTests extends AbstractGWTMetaClassTest {
   @Test
   public void confirmContractConsistency1() throws Exception {
     final String classToTest = "foo.MyTestClass";
+
+    MetaClassFactory.emptyCache();
 
     final MetaClass gwtMC = GWTClass.newInstance(mockacle, mockacle.getType(classToTest));
     final MetaClass javaMC = JavaReflectionClass.newUncachedInstance(loadTestClass(classToTest));
@@ -43,6 +47,16 @@ public class GWTMetaClassTests extends AbstractGWTMetaClassTest {
     assertEquals(gwtMC.isPrivate(), javaMC.isPrivate());
 
     assertEquals(gwtMC.isDefaultInstantiable(), javaMC.isDefaultInstantiable());
+
+    System.out.println("--gwt methods--");
+    for (MetaMethod method : gwtMC.getDeclaredMethods()) {
+      System.out.println(method.toString());
+    }
+
+    System.out.println("--java methods--");
+    for (MetaMethod method : javaMC.getDeclaredMethods()) {
+      System.out.println(method.toString());
+    }
 
     assertArrayEquals(gwtMC.getDeclaredMethods(), javaMC.getDeclaredMethods());
 

@@ -60,6 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class MetaClassFactory {
   private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
   private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
+
   static {
     DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
       @Override
