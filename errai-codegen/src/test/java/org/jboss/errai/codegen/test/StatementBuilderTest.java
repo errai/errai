@@ -19,16 +19,6 @@ package org.jboss.errai.codegen.test;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
-
 import org.jboss.errai.codegen.AssignmentOperator;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
@@ -44,11 +34,21 @@ import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths;
 import org.jboss.errai.codegen.test.model.Foo;
+import org.jboss.errai.codegen.util.Bitwise;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.util.TypeLiteral;
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -598,5 +598,12 @@ public class StatementBuilderTest extends AbstractCodegenTest {
     assertEquals("org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE" +
             ".setFooBarMap(org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE.getFooBarMap())",
             s);
+  }
+
+  @Test
+  public void testBitwiseExpresion() {
+    final String generate = Bitwise.or(Stmt.load(1), Stmt.load(2), Stmt.load(3)).generate(Context.create());
+
+    assertEquals("1 | 2 | 3", generate);
   }
 }

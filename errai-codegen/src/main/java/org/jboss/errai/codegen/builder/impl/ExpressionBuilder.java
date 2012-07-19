@@ -37,6 +37,8 @@ public abstract class ExpressionBuilder<T extends Operator> implements Statement
   protected T operator;
   protected String operExpr;
 
+  protected boolean qualifyingBrackets = true;
+
   public ExpressionBuilder() {}
 
   public ExpressionBuilder(Statement rhs, T operator) {
@@ -79,7 +81,7 @@ public abstract class ExpressionBuilder<T extends Operator> implements Statement
     rhsExpr = "";
 
     if (lhsExpr == null && lhs != null) {
-      if (lhs instanceof ExpressionBuilder && this.operator != null) {
+      if (qualifyingBrackets && lhs instanceof ExpressionBuilder && this.operator != null) {
         lhsExpr = "(" + lhs.generate(context) + ")";
       }
       else {
@@ -95,7 +97,7 @@ public abstract class ExpressionBuilder<T extends Operator> implements Statement
     }
 
     if (rhs != null) {
-      if (rhs instanceof ExpressionBuilder) {
+      if (qualifyingBrackets && rhs instanceof ExpressionBuilder) {
         rhsExpr = "(" + rhs.generate(context) + ")";
       }
       else {

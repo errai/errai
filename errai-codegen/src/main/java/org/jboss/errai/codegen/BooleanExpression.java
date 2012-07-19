@@ -21,7 +21,7 @@ package org.jboss.errai.codegen;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BooleanExpression extends Expression<BooleanOperator>, Statement {
+public interface BooleanExpression extends Expression<BooleanOperator> {
   
   public BooleanExpression negate();
 }

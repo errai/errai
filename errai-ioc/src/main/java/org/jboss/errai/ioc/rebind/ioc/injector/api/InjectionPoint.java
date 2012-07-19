@@ -16,9 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -29,6 +26,9 @@ import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -138,11 +138,11 @@ public class InjectionPoint<T> {
     ensureMemberExposed(PrivateAccessType.Both);
   }
 
-  public void ensureMemberExposed(PrivateAccessType accessType) {
+  public void ensureMemberExposed(final PrivateAccessType accessType) {
     switch (taskType) {
       case Parameter:
         if (parm.getDeclaringMember() instanceof MetaMethod) {
-          MetaMethod declMeth = (MetaMethod) parm.getDeclaringMember();
+          final MetaMethod declMeth = (MetaMethod) parm.getDeclaringMember();
           injectionContext.addExposedMethod(declMeth);
         }
         break;
@@ -193,7 +193,7 @@ public class InjectionPoint<T> {
   }
 
   public Annotation[] getQualifiers() {
-    List<Annotation> annotations;
+    final List<Annotation> annotations;
     switch (taskType) {
       case PrivateField:
       case Field:
