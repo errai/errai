@@ -26,6 +26,7 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.framework.TransportErrorHandler;
 
 import java.util.Collections;
 import java.util.Set;
@@ -131,6 +132,10 @@ public class ErraiBus implements EntryPoint {
         @Override
         public LogAdapter getLogAdapter() {
           return null;
+        }
+
+        @Override
+        public void addTransportErrorHandler(TransportErrorHandler errorHandler) {
         }
       };
     }

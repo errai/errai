@@ -16,6 +16,12 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
@@ -78,12 +84,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
-import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
-
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
  * with the server immediately upon initialization.
@@ -134,6 +134,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private final List<PreInitializationListener> preInitializationListeners
           = new ArrayList<PreInitializationListener>();
+
+  private final List<TransportErrorHandler> transportErrorHandlers
+          = new ArrayList<TransportErrorHandler>();
 
   /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
 * initialization and is now communicating with the remote bus. */
@@ -608,10 +611,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       try {
         sendBuilder.sendRequest(message, new RequestCallback() {
+          int statusCode = 0;
 
           @Override
           public void onResponseReceived(final Request request, final Response response) {
-            switch (response.getStatusCode()) {
+            switch (statusCode = response.getStatusCode()) {
               case 1:
               case 404:
               case 408:
@@ -623,18 +627,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 // Handle it gracefully
                 //noinspection ThrowableInstanceNeverThrown
 
-                LogUtil.log("connection problem. server returned status code: " + response.getStatusCode()
-                        + " (" + response.getStatusText() + ")");
 
                 final TransportIOException tioe
                         = new TransportIOException(response.getText(), response.getStatusCode(),
                         "Failure communicating with server");
+
+                if (handleHTTPTransportError(request, tioe, statusCode)) {
+                  return;
+                }
+
+                LogUtil.log("connection problem. server returned status code: " + response.getStatusCode()
+                        + " (" + response.getStatusText() + ")");
 
                 for (final Message txM : txMessages) {
                   callErrorHandler(txM, tioe);
                 }
                 return;
               }
+
             }
 
             /**
@@ -659,6 +669,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           @Override
           public void onError(final Request request, final Throwable exception) {
+            handleHTTPTransportError(request, exception, statusCode);
+
             for (final Message txM : txMessages) {
               if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
                 logError("Failed to communicate with remote bus", "", exception);
@@ -687,9 +699,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     catch (RequestTimeoutException e) {
       statusCode = 1;
+
+      if (handleHTTPTransportError(null, e, statusCode)) {
+        return;
+      }
+
       receiveCommCallback.onError(null, e);
     }
     catch (Throwable t) {
+      if (handleHTTPTransportError(null, t, statusCode)) {
+        return;
+      }
+
       DefaultErrorCallback.INSTANCE.error(null, t);
     }
     finally {
@@ -1146,6 +1167,74 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  private boolean handleHTTPTransportError(final Request request, final Throwable throwable, final int statusCode) {
+    class ErrorHandling {
+      boolean stopDefaultErrorHandler = false;
+    }
+
+    final ErrorHandling errorHandling = new ErrorHandling();
+
+    final TransportError transportError = new TransportError() {
+
+      @Override
+      public Request getRequest() {
+        return request;
+      }
+
+      @Override
+      public String getErrorMessage() {
+        return throwable != null ? throwable.getMessage() : "";
+      }
+
+      @Override
+      public boolean isHTTP() {
+        return true;
+      }
+
+      @Override
+      public boolean isWebSocket() {
+        return false;
+      }
+
+      @Override
+      public int getStatusCode() {
+        return statusCode;
+      }
+
+      @Override
+      public Throwable getException() {
+        return throwable;
+      }
+
+      @Override
+      public void stopDefaultErrorHandling() {
+        errorHandling.stopDefaultErrorHandler = true;
+      }
+
+      @Override
+      public BusControl getBusControl() {
+        return new BusControl() {
+          @Override
+          public void disconnect() {
+            ClientMessageBusImpl.this.stop(true);
+          }
+
+          @Override
+          public void reconnect() {
+            ClientMessageBusImpl.this.setReinit(true);
+            ClientMessageBusImpl.this.init();
+          }
+        };
+      }
+    };
+
+    for (TransportErrorHandler handler : transportErrorHandlers) {
+      handler.onError(transportError);
+    }
+
+    return errorHandling.stopDefaultErrorHandler;
+  }
+
   /**
    * Sends the initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
    * requests will result in multiple sessions being created.
@@ -1236,6 +1325,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   protected class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(final Request request, final Throwable throwable) {
+      if (handleHTTPTransportError(request, throwable, statusCode)) {
+        return;
+      }
+
       switch (statusCode) {
         case 0:
           return;
@@ -1249,9 +1342,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               createConnectAttemptGUI();
             }
 
-            logAdapter.warn("Attempting reconnection -- Retries: " + (maxRetries - retries));
-            timeoutMessage.setText("Connection Interrupted -- Retries: " + (maxRetries - retries));
+            final String message = "Attempting reconnection -- Retries: " + (maxRetries - retries);
+            logAdapter.warn(message);
+            timeoutMessage.setText(message);
             retries++;
+
             new Timer() {
               @Override
               public void run() {
@@ -1517,6 +1612,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public Set<String> getAllRegisteredSubjects() {
     return Collections.unmodifiableSet(subscriptions.keySet());
+  }
+
+  @Override
+  public void addTransportErrorHandler(TransportErrorHandler errorHandler) {
+    transportErrorHandlers.add(errorHandler);
   }
 
   public void _store(final String subject, final Message msg) {

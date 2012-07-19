@@ -19,8 +19,6 @@ package org.jboss.errai.bus.client.framework;
 import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.SessionExpirationListener;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -72,4 +70,11 @@ public interface ClientMessageBus extends MessageBus {
   public Set<String> getAllRegisteredSubjects();
 
   public LogAdapter getLogAdapter();
+
+  /**
+   * Adds a global transport error handler to deal with any errors which arise from communication between the bus
+   * and the server
+   * @param errorHandler the error handler to add.
+   */
+  public void addTransportErrorHandler(TransportErrorHandler errorHandler);
 }
