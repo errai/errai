@@ -164,9 +164,7 @@ public class PrivateAccessUtil {
    * Reflection. The generated method will be private and static.
    *
    * @param accessorType
-   *         If true, the generated method will use JSNI to access the field.
-   *         Otherwise, Java reflection will be used (in this case, the
-   *         generated code will not be GWT translatable).
+   *         The type of accessors to use (ie. "reflection" or "jsni").
    * @param classBuilder
    *         The class builder to add the generated method to.
    * @param m
