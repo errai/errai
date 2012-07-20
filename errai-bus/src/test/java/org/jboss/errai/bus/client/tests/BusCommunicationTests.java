@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
@@ -38,19 +39,24 @@ import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
-import com.google.gwt.user.client.Timer;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BusCommunicationTests extends AbstractErraiTest {
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.bus.ErraiBusTests";
   }
 
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+  }
+
   public void testBasicRoundTrip() {
+
     runAfterInit(new Runnable() {
       @Override
       public void run() {

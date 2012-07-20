@@ -16,11 +16,11 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.marshalling.client.Marshalling;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Wrapper around {@link Marshalling} to provide a hook for format transformations.
@@ -28,19 +28,19 @@ import org.jboss.errai.marshalling.client.Marshalling;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingWrapper {
-  public static String toJSON(Object obj) {
+  public static String toJSON(final Object obj) {
     return _toJSON(Marshalling.toJSON(obj));
   }
 
-  public static String toJSON(Map<Object, Object> obj) {
+  public static String toJSON(final Map<Object, Object> obj) {
     return _toJSON(Marshalling.toJSON(obj));
   }
 
-  public static String toJSON(List<?> arr) {
+  public static String toJSON(final List<?> arr) {
     return _toJSON(Marshalling.toJSON(arr));
   }
 
-  private static String _toJSON(String erraiJson) {
+  private static String _toJSON(final String erraiJson) {
     if (RestClient.isJacksonMarshallingActive()) {
       return JacksonTransformer.toJackson(erraiJson);
     }
@@ -48,19 +48,19 @@ public class MarshallingWrapper {
     return erraiJson;
   }
 
-  public static <T> T fromJSON(String json, Class<T> type) {
+  public static <T> T fromJSON(final String json, final Class<T> type) {
     return Marshalling.fromJSON(_fromJSON(json), type);
   }
   
-  public static <T> T fromJSON(String json, Class<T> type, Class<?> elementType) {
+  public static <T> T fromJSON(final String json, final Class<T> type, final Class<?> elementType) {
     return Marshalling.fromJSON(_fromJSON(json), type, elementType);
   }
 
-  public static Object fromJSON(String json) {
+  public static Object fromJSON(final String json) {
     return Marshalling.fromJSON(_fromJSON(json), Object.class);
   }
 
-  private static String _fromJSON(String erraiJson) {
+  private static String _fromJSON(final String erraiJson) {
     if (RestClient.isJacksonMarshallingActive()) {
       return JacksonTransformer.fromJackson(erraiJson);
     }

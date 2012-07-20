@@ -16,15 +16,15 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.api;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * API for communicating with REST endpoints based on JAX-RS interfaces.
@@ -145,7 +145,7 @@ public class RestClient {
   /**
    * Configures the JAX-RS default application root path.
    * 
-   * @param root
+   * @param path
    *          path to use when sending requests to the JAX-RS endpoint
    */
   public static native void setApplicationRoot(String path) /*-{

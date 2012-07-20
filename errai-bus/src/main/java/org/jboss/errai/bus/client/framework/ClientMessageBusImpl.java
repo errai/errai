@@ -203,7 +203,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getSendBuilder() {
-    final String endpoint = OUT_SERVICE_ENTRY_POINT;
+    final String endpoint = getApplicationRoot() + OUT_SERVICE_ENTRY_POINT;
 
     final RequestBuilder builder = new RequestBuilder(
             RequestBuilder.POST,
@@ -217,7 +217,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getReceiveBuilder() {
-    final String endpoint = IN_SERVICE_ENTRY_POINT;
+    final String endpoint = getApplicationRoot() + IN_SERVICE_ENTRY_POINT;
 
     final RequestBuilder builder = new RequestBuilder(
             RequestBuilder.GET,
@@ -1871,4 +1871,38 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return $wnd.erraiBusRemoteCommunicationEnabled;
     }
   }-*/;
+
+
+  /**
+   * Returns the application root for the remote message bus endpoints.
+   *
+   * @return path with trailing slash, or empty string if undefined or explicitly set to empty
+   */
+  public static native String getApplicationRoot() /*-{
+    if ($wnd.erraiBusApplicationRoot === undefined || $wnd.erraiBusApplicationRoot.length === 0) {
+      return "";
+     }
+     else {
+       if ($wnd.erraiBusApplicationRoot.substr(-1) !== "/") {
+         return $wnd.erraiBusApplicationRoot + "/";
+       }
+       return $wnd.erraiBusApplicationRoot;
+     }
+   }-*/;
+
+  /**
+   * Sets the application root for the remote message bus endpoints.
+   *
+   * @param path
+   *          path to use when sending requests to the JAX-RS endpoint
+   */
+  public static native void setApplicationRoot(String path) /*-{
+    if (path == null) {
+      $wnd.erraiBusApplicationRoot = undefined;
+    }
+    else {
+      $wnd.erraiBusApplicationRoot = path;
+    }
+  }-*/;
+
 }
