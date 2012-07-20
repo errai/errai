@@ -22,10 +22,6 @@ import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -63,6 +59,10 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -186,7 +186,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         .withParameters(constructorParameters.toArray(new Object[constructorParameters.size()]))));
               }
               else {
-                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), constructor);
+                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), constructor);
                 tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
                     .initializeWith(
                         Stmt.invokeStatic(
@@ -258,7 +258,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               }
               else {
                 if (!context.isExposed(field)) {
-                  PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
+                  PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), field);
                   context.markExposed(field);
                 }
 
@@ -484,7 +484,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
         else {
           if (!context.isExposed(field)) {
-            PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
+            PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), field);
             context.markExposed(field);
           }
 

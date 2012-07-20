@@ -16,9 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
-
 import java.lang.annotation.Annotation;
 
 import org.jboss.errai.codegen.Statement;

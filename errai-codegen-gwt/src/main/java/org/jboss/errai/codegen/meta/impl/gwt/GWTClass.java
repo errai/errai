@@ -38,7 +38,9 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   static {
     GenUtil.addClassAlias(GWTClass.class);
+    PrivateAccessUtil.registerPrivateMemberAccessor("jsni", new GWTPrivateMemberAccessor());
   }
 
   protected GWTClass(final TypeOracle oracle, final JType classType, final boolean erased) {

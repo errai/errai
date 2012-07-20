@@ -31,9 +31,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
 /**
  * @author Mike Brock
  */

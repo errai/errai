@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -78,8 +80,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
  * Generator for the Bootstrapper class generated to wire an application at runtime.
@@ -279,13 +279,13 @@ public class IOCBootstrapGenerator {
 
     final Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
     for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
-      PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
+      PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs ? "jsni" : "reflection", classBuilder, f.getKey());
     }
 
     final Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
 
     for (MetaMethod m : privateMethods) {
-      PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
+      PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs ? "jsni" : "reflection", classBuilder, m);
     }
 
     _doRunnableTasks(afterTasks, blockBuilder);
