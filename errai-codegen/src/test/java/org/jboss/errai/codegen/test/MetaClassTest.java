@@ -16,12 +16,14 @@
 
 package org.jboss.errai.codegen.test;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.test.model.ObjectWithNested;
 import org.jboss.errai.codegen.test.model.TestInterface;
 import org.jboss.errai.codegen.test.model.tree.Child;
@@ -34,6 +36,7 @@ import org.jboss.errai.codegen.test.model.tree.ParentInterface;
 import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface1;
 import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface2;
 import org.junit.Test;
+import org.mvel2.util.NullType;
 
 /**
  * Epic team effort!
@@ -73,6 +76,39 @@ public class MetaClassTest {
   }
 
   @Test
+  public void testObjectIsAssignableFromNull() throws Exception {
+	  // This test checks the valid case:
+	  // Object example = null;
+
+	  MetaClass metaObject = MetaClassFactory.get(Object.class);
+	  MetaClass metaNull = MetaClassFactory.get(NullType.class);
+
+	  assertTrue(metaObject.isAssignableFrom(metaNull));
+  }
+
+  @Test
+  public void testChildIsAssignableFromNull() throws Exception {
+	  // This test checks the valid case:
+	  // Child example = null;
+
+	  MetaClass metaChild = MetaClassFactory.get(Child.class);
+	  MetaClass metaNull = MetaClassFactory.get(NullType.class);
+
+	  assertTrue(metaChild.isAssignableFrom(metaNull));
+  }
+
+  @Test
+  public void testNullIsAssignableToChild() throws Exception {
+	  // This test checks the valid case:
+	  // Child example = null;
+
+	  MetaClass metaChild = MetaClassFactory.get(Child.class);
+	  MetaClass metaNull = MetaClassFactory.get(NullType.class);
+
+	  assertTrue(metaNull.isAssignableTo(metaChild));
+  }
+
+  @Test
   public void testIsAssignableFromComparisonForNested() {
     ObjectWithNested objectWithNested = new ObjectWithNested();
 
@@ -80,6 +116,26 @@ public class MetaClassTest {
     MetaClass metaClass = MetaClassFactory.get(objectWithNested.getMyNestedInterface().getClass());
 
     assertTrue("should be assignable", interfaceClass.isAssignableFrom(metaClass));
+  }
+
+  @Test
+  public void testChildIsAssignableFromChild() {
+    // This test checks the valid case:
+    // Child example = new Child();
+
+    MetaClass metaChild = MetaClassFactory.get(Child.class);
+
+    assertTrue(metaChild.isAssignableFrom(metaChild));
+  }
+
+  @Test
+  public void testChildIsAssignableToChild() {
+    // This test checks the valid case:
+    // Child example = new Child();
+
+    MetaClass metaChild = MetaClassFactory.get(Child.class);
+
+    assertTrue(metaChild.isAssignableTo(metaChild));
   }
 
   @Test
@@ -294,4 +350,16 @@ public class MetaClassTest {
 
     assertFalse(metaInterface.isAssignableFrom(metaObject));
   }
+  
+  @Test
+  public void testUncleIsAssignableToChild() {
+    // This test checks the allowed case:
+	// ParentInterface pi = new Child();
+
+    MetaClass metaChild = MetaClassFactory.get(Child.class);
+    MetaClass metaUncle = MetaClassFactory.get(ParentInterface.class);
+
+    assertTrue(metaChild.isAssignableTo(metaUncle));
+  }
+
 }
