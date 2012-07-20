@@ -66,7 +66,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates the code required for {@link Templated} classes.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -263,21 +263,18 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                     dataFields.get(name), listenerInstance, Stmt.invokeStatic(eventType, "getType")));
           }
           else if (dataFieldType.isAssignableTo(hasHandlerType)) {
-          }
-          else {
-            // TODO this needs to be moved up into the 'else if' statement once
-            // MetaClass knows about interfaces.
             Statement widget = Cast.to(hasHandlerType, dataFields.get(name));
             builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
                     Cast.to(handlerType, listenerInstance)));
-
-            // throw new GenerationException("@DataField [" + name +
-            // "] of type [" + dataFieldType.getName()
-            // + "] in class [" + declaringClass.getFullyQualifiedName()
-            // + "] does not implement required interface [" +
-            // hasHandlerType.getName()
-            // + "] specified by @EventHandler method " + method.getName() + "("
-            // + eventType.getName() + ")]");
+          }
+          else {
+            throw new GenerationException("@DataField [" + name +
+                    "] of type [" + dataFieldType.getName()
+                    + "] in class [" + declaringClass.getFullyQualifiedName()
+                    + "] does not implement required interface [" +
+                    hasHandlerType.getName()
+                    + "] specified by @EventHandler method " + method.getName() + "("
+                    + eventType.getName() + ")]");
           }
         }
       }
@@ -291,7 +288,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * take advantage of this information to get the associated handler. Ex:
      * com.google.gwt.event.dom.client.ClickEvent --->
      * com.google.gwt.event.dom.client.ClickHandler
-     * 
+     *
      * com.google.gwt.event.dom.client.BlurEvent --->
      * com.google.gwt.event.dom.client.BlurHandler
      */
