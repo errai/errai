@@ -53,6 +53,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
@@ -200,6 +201,9 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       MetaClass eventType = method.getParameters()[0].getType();
 
       if (eventType.isAssignableTo(Event.class)) {
+        /*
+         * Generate native DOM event handlers.
+         */
         MetaClass handlerType = MetaClassFactory.get(EventListener.class);
         BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType).extend()
                 .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
@@ -214,35 +218,47 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         }
 
         for (String name : targetDataFieldNames) {
+
           if (dataFieldTypes.containsKey(name)) {
             MetaClass dataFieldType = dataFieldTypes.get(name);
-
             if (!dataFieldType.isAssignableTo(Element.class)) {
-              /* We have a wrapped element */
+              /*
+               * We have a GWT or other Widget type.
+               */
               throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
                       + "] in class [" + declaringClass.getFullyQualifiedName() + "] is not assignable to ["
                       + Element.class.getName() + "] specified by @EventHandler method " + method.getName() + "("
                       + eventType.getName() + ")]");
             }
+            else {
+              /*
+               * We have a wrapped native Element reference
+               */
+              throw new GenerationException("Cannot attach native DOM events to @DataField [" + name + "] of type ["
+                      + dataFieldType.getName() + "] in class [" + declaringClass.getFullyQualifiedName()
+                      + "] specified by @EventHandler method " + method.getName() + "(" + eventType.getName()
+                      + ")] - Use the corresponding GWT 'EventHandler' types instead.");
+            }
           }
           else {
-            /* We are completely native */
+            /*
+             * We are completely native and have no reference to this data-field
+             * Element in Java
+             */
             builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupNativeEventListener", component,
                     dataFieldElements.invoke("get", name), listenerInstance, eventsToSink));
           }
         }
       }
       else {
-
-        // if (method.getParameters().length != 1 ||
-        // !method.getParameters()[0].getType().isAssignableTo(DomEvent.class))
-        // {
-        // throw new GenerationException("@EventHandler method [" +
-        // method.getName() + "] in class ["
-        // + declaringClass.getFullyQualifiedName() +
-        // "] must have at least one parameter of a type extending ["
-        // + DomEvent.class.getName() + "]");
-        // }
+        /*
+         * We have a GWT Widget type
+         */
+        if (method.getParameters().length != 1 || !method.getParameters()[0].getType().isAssignableTo(DomEvent.class)) {
+          throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
+                  + declaringClass.getFullyQualifiedName() + "] must have at least one parameter of a type extending ["
+                  + DomEvent.class.getName() + "]");
+        }
 
         MetaClass handlerType = getHandlerForEvent(eventType);
         BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType).extend()
@@ -332,7 +348,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     return (MetaClass) argTypes[0];
   }
 
-  @SuppressWarnings("serial")
   private void generateComponentCompositions(InjectableInstance<Templated> ctx,
           BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component, Statement rootTemplateElement,
           Statement dataFieldElements, Statement fieldsMap) {
@@ -401,9 +416,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
 
     /*
-     * Bind each widget if data-binder is found and has been initialized. TODO
-     * this should really only bind if the developer has have asked it to be
-     * bound.
+     * Bind each widget if data-binder is found and has been initialized.
      */
     if (dataBinderRef != null) {
       BlockBuilder<ElseBlockBuilder> binderBlockBuilder = Stmt.if_(Bool.isNotNull(Variable.get("binder")));

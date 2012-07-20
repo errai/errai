@@ -144,8 +144,16 @@ public final class TemplateUtil {
     DOM.sinkEvents((com.google.gwt.user.client.Element) element, eventsToSink);
   }
 
-  public static <T extends EventHandler> void setupWrappedElementEventHandler(Composite component,
-          ElementWrapperWidget widget, T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
+  public static <T extends EventHandler> Widget setupPlainElementEventHandler(Composite component, Element element,
+          T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
+    ElementWrapperWidget widget = new ElementWrapperWidget(element);
+    widget.addDomHandler(handler, type);
+    // TODO add to Composite as child.
+    return widget;
+  }
+
+  public static <T extends EventHandler> void setupWrappedElementEventHandler(Composite component, Widget widget,
+          T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
     widget.addDomHandler(handler, type);
   }
 
