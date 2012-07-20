@@ -143,21 +143,25 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
 
 
   @Override
-  public void createWritableField(MetaClass type,
-                                  ClassStructureBuilder<?> classBuilder,
-                                  MetaField field,
-                                  Modifier[] modifiers) {
+  public void createWritableField(final MetaClass type,
+                                  final ClassStructureBuilder<?> classBuilder,
+                                  final MetaField field,
+                                  final Modifier[] modifiers) {
 
     final String cachedField = initCachedField(classBuilder, field);
-    final String setterName = PrivateAccessUtil.getReflectionFieldSetterName(field);
+    final String setterName = getReflectionFieldSetterName(field);
 
     final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
             classBuilder.privateMethod(void.class, PrivateAccessUtil.getPrivateFieldInjectorName(field));
 
     if (!field.isStatic()) {
       methodBuilder
-              .parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass(), "instance"),
-                      Parameter.of(field.getType(), "value")));
+              .parameters(
+                      DefParameters.fromParameters(
+                              Parameter.of(field.getDeclaringClass(), "instance"),
+                              Parameter.of(field.getType(), "value")
+                      )
+              );
     }
 
     methodBuilder.modifiers(modifiers)
@@ -174,20 +178,23 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
 
 
   @Override
-  public void createReadableField(MetaClass type,
-                                  ClassStructureBuilder<?> classBuilder,
-                                  MetaField field,
-                                  Modifier[] modifiers) {
+  public void createReadableField(final MetaClass type,
+                                  final ClassStructureBuilder<?> classBuilder,
+                                  final MetaField field,
+                                  final Modifier[] modifiers) {
 
     final String cachedField = initCachedField(classBuilder, field);
-    final String getterName = PrivateAccessUtil.getReflectionFieldGetterName(field);
+    final String getterName = getReflectionFieldGetterName(field);
 
     final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
             classBuilder.privateMethod(field.getType(), PrivateAccessUtil.getPrivateFieldInjectorName(field));
 
     if (!field.isStatic()) {
-      methodBuilder
-              .parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass(), "instance")));
+      methodBuilder.parameters(
+              DefParameters.fromParameters(
+                      Parameter.of(field.getDeclaringClass(), "instance")
+              )
+      );
     }
 
     methodBuilder.modifiers(modifiers)
@@ -204,9 +211,9 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
   }
 
   @Override
-  public void makeMethodAccessible(ClassStructureBuilder<?> classBuilder,
-                                   MetaMethod method,
-                                   Modifier[] modifiers) {
+  public void makeMethodAccessible(final ClassStructureBuilder<?> classBuilder,
+                                   final MetaMethod method,
+                                   final Modifier[] modifiers) {
 
     final List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
 
@@ -225,7 +232,6 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     }
 
     final String cachedMethod = initCachedMethod(classBuilder, method);
-
 
     final BlockBuilder<? extends ClassStructureBuilder> body
             = classBuilder.publicMethod(method.getReturnType(),
@@ -256,20 +262,21 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
   }
 
   @Override
-  public void makeConstructorAccessible(ClassStructureBuilder<?> classBuilder, MetaConstructor constructor) {
+  public void makeConstructorAccessible(final ClassStructureBuilder<?> classBuilder,
+                                        final MetaConstructor constructor) {
 
     final DefParameters methodDefParms = DefParameters.from(constructor);
-
-
     final String cachedMethod = initCachedMethod(classBuilder, constructor);
+
     final Object[] args = new Object[methodDefParms.getParameters().size()];
+
     int i = 0;
     for (final Parameter p : methodDefParms.getParameters()) {
       args[i++] = Refs.get(p.getName());
     }
 
     final BlockBuilder<? extends ClassStructureBuilder> body = classBuilder.publicMethod(constructor.getReturnType(),
-             PrivateAccessUtil.getPrivateMethodName(constructor))
+            PrivateAccessUtil.getPrivateMethodName(constructor))
             .parameters(methodDefParms)
             .modifiers(Modifier.Static)
             .body();
@@ -280,7 +287,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
                             Stmt.nestedCall(
                                     Stmt.castTo(constructor.getReturnType(),
                                             Stmt.loadVariable(cachedMethod).invoke("newInstance",
-                                            (Object) args))).returnValue())
+                                                    (Object) args))).returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")
                     .append(Stmt.loadVariable("e").invoke("printStackTrace"))
@@ -288,5 +295,71 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
                     .finish();
 
     body.append(tryBuilder).finish();
+  }
+
+  public static String getReflectionFieldGetterName(final MetaField f) {
+    final MetaClass t = f.getType();
+
+    if (!t.isPrimitive()) {
+      return "get";
+    }
+    else if (t.getFullyQualifiedName().equals("int")) {
+      return "getInt";
+    }
+    else if (t.getFullyQualifiedName().equals("short")) {
+      return "getShort";
+    }
+    else if (t.getFullyQualifiedName().equals("boolean")) {
+      return "getBoolean";
+    }
+    else if (t.getFullyQualifiedName().equals("double")) {
+      return "getDouble";
+    }
+    else if (t.getFullyQualifiedName().equals("float")) {
+      return "getFloat";
+    }
+    else if (t.getFullyQualifiedName().equals("byte")) {
+      return "getByte";
+    }
+    else if (t.getFullyQualifiedName().equals("long")) {
+      return "getLong";
+    }
+    else if (t.getFullyQualifiedName().equals("char")) {
+      return "getChar";
+    }
+    return null;
+  }
+
+  public static String getReflectionFieldSetterName(final MetaField f) {
+    final MetaClass t = f.getType();
+
+    if (!t.isPrimitive()) {
+      return "set";
+    }
+    else if (t.getFullyQualifiedName().equals("int")) {
+      return "setInt";
+    }
+    else if (t.getFullyQualifiedName().equals("short")) {
+      return "setShort";
+    }
+    else if (t.getFullyQualifiedName().equals("boolean")) {
+      return "setBoolean";
+    }
+    else if (t.getFullyQualifiedName().equals("double")) {
+      return "setDouble";
+    }
+    else if (t.getFullyQualifiedName().equals("float")) {
+      return "setFloat";
+    }
+    else if (t.getFullyQualifiedName().equals("byte")) {
+      return "setByte";
+    }
+    else if (t.getFullyQualifiedName().equals("long")) {
+      return "setLong";
+    }
+    else if (t.getFullyQualifiedName().equals("char")) {
+      return "setChar";
+    }
+    return null;
   }
 }

@@ -7,7 +7,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -196,104 +195,13 @@ public class PrivateAccessUtil {
 
   public static String getPrivateFieldInjectorName(final MetaField field) {
     return field.getDeclaringClass()
-            .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + field.getName();
+            .getFullyQualifiedName().replaceAll("\\.", "_")
+            + "_" + field.getName();
   }
 
   public static String getPrivateMethodName(final MetaMethod method) {
     final StringBuilder buf = new StringBuilder(method.getDeclaringClass()
             .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + method.getName());
-
-    for (final MetaParameter parm : method.getParameters()) {
-      buf.append('_').append(parm.getType().getFullyQualifiedName().replaceAll("\\.", "_"));
-    }
-
     return buf.toString();
   }
-
-  /**
-   * Returns a new array consisting of a copy of the given array, plus
-   * Modifiers.JSNI as the last element.
-   *
-   * @param modifiers
-   *         The array to copy. May be empty, but must not be null.
-   *
-   * @return An array of length {@code n + 1}, where {@code n} is the length of
-   *         the given array. Positions 0..n-1 correspond with the respective
-   *         entries in the given array, and position n contains Modifiers.JSNI.
-   */
-  public static Modifier[] appendJsni(Modifier[] modifiers) {
-    final Modifier[] origModifiers = modifiers;
-    modifiers = new Modifier[origModifiers.length + 1];
-    System.arraycopy(origModifiers, 0, modifiers, 0, origModifiers.length);
-    modifiers[modifiers.length - 1] = Modifier.JSNI;
-    return modifiers;
-  }
-
-  public static String getReflectionFieldGetterName(final MetaField f) {
-    final MetaClass t = f.getType();
-
-    if (!t.isPrimitive()) {
-      return "get";
-    }
-    else if (t.getFullyQualifiedName().equals("int")) {
-      return "getInt";
-    }
-    else if (t.getFullyQualifiedName().equals("short")) {
-      return "getShort";
-    }
-    else if (t.getFullyQualifiedName().equals("boolean")) {
-      return "getBoolean";
-    }
-    else if (t.getFullyQualifiedName().equals("double")) {
-      return "getDouble";
-    }
-    else if (t.getFullyQualifiedName().equals("float")) {
-      return "getFloat";
-    }
-    else if (t.getFullyQualifiedName().equals("byte")) {
-      return "getByte";
-    }
-    else if (t.getFullyQualifiedName().equals("long")) {
-      return "getLong";
-    }
-    else if (t.getFullyQualifiedName().equals("char")) {
-      return "getChar";
-    }
-    return null;
-  }
-
-  public static String getReflectionFieldSetterName(final MetaField f) {
-    final MetaClass t = f.getType();
-
-    if (!t.isPrimitive()) {
-      return "set";
-    }
-    else if (t.getFullyQualifiedName().equals("int")) {
-      return "setInt";
-    }
-    else if (t.getFullyQualifiedName().equals("short")) {
-      return "setShort";
-    }
-    else if (t.getFullyQualifiedName().equals("boolean")) {
-      return "setBoolean";
-    }
-    else if (t.getFullyQualifiedName().equals("double")) {
-      return "setDouble";
-    }
-    else if (t.getFullyQualifiedName().equals("float")) {
-      return "setFloat";
-    }
-    else if (t.getFullyQualifiedName().equals("byte")) {
-      return "setByte";
-    }
-    else if (t.getFullyQualifiedName().equals("long")) {
-      return "setLong";
-    }
-    else if (t.getFullyQualifiedName().equals("char")) {
-      return "setChar";
-    }
-    return null;
-  }
-
-
 }

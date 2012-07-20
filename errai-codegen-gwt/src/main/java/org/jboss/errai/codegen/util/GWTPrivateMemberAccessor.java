@@ -32,14 +32,11 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
     }
   };
 
-
   @Override
   public void createWritableField(final MetaClass type,
                                   final ClassStructureBuilder<?> classBuilder,
                                   final MetaField field,
-                                  Modifier[] modifiers)  {
-
-    modifiers = PrivateAccessUtil.appendJsni(modifiers);
+                                  final Modifier[] modifiers)  {
 
     final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
             classBuilder.privateMethod(void.class, PrivateAccessUtil.getPrivateFieldInjectorName(field));
@@ -54,19 +51,17 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
                       Parameter.of(type, "value")));
     }
 
-    methodBuilder.modifiers(modifiers)
+    methodBuilder.modifiers(appendJsni(modifiers))
             .body()
             ._(new StringStatement(JSNIUtil.fieldAccess(field) + " = value"))
             .finish();
   }
 
   @Override
-  public void createReadableField(MetaClass type,
-                                  ClassStructureBuilder<?> classBuilder,
-                                  MetaField field,
-                                  Modifier[] modifiers) {
-
-    modifiers = PrivateAccessUtil.appendJsni(modifiers);
+  public void createReadableField(final MetaClass type,
+                                  final ClassStructureBuilder<?> classBuilder,
+                                  final MetaField field,
+                                  final Modifier[] modifiers) {
 
     final MethodBlockBuilder<? extends ClassStructureBuilder<?>> instance =
             classBuilder.privateMethod(type, PrivateAccessUtil.getPrivateFieldInjectorName(field));
@@ -79,16 +74,16 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
       instance.annotatedWith(UNSAFE_NATIVE_LONG_ANNOTATION);
     }
 
-    instance.modifiers(modifiers)
+    instance.modifiers(appendJsni(modifiers))
             .body()
             ._(new StringStatement("return " + JSNIUtil.fieldAccess(field)))
             .finish();
   }
 
   @Override
-  public void makeMethodAccessible(ClassStructureBuilder<?> classBuilder,
-                                   MetaMethod method,
-                                   Modifier[] modifiers) {
+  public void makeMethodAccessible(final ClassStructureBuilder<?> classBuilder,
+                                   final MetaMethod method,
+                                   final Modifier[] modifiers) {
 
     final List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
 
@@ -99,19 +94,17 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
     final List<Parameter> methodDefParms = DefParameters.from(method).getParameters();
     wrapperDefParms.addAll(methodDefParms);
 
-
-    modifiers = PrivateAccessUtil.appendJsni(modifiers);
     classBuilder.publicMethod(method.getReturnType(), PrivateAccessUtil.getPrivateMethodName(method))
             .parameters(DefParameters.fromParameters(wrapperDefParms))
-            .modifiers(modifiers)
+            .modifiers(appendJsni(modifiers))
             .body()
             ._(new StringStatement(JSNIUtil.methodAccess(method)))
             .finish();
   }
 
   @Override
-  public void makeConstructorAccessible(ClassStructureBuilder<?> classBuilder,
-                                        MetaConstructor constructor) {
+  public void makeConstructorAccessible(final ClassStructureBuilder<?> classBuilder,
+                                        final MetaConstructor constructor) {
 
     final DefParameters methodDefParms = DefParameters.from(constructor);
 
@@ -121,5 +114,24 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
                     .body()
                     ._(new StringStatement(JSNIUtil.methodAccess(constructor)))
                     .finish();
+  }
+
+  /**
+   * Returns a new array consisting of a copy of the given array, plus
+   * Modifiers.JSNI as the last element.
+   *
+   * @param modifiers
+   *         The array to copy. May be empty, but must not be null.
+   *
+   * @return An array of length {@code n + 1}, where {@code n} is the length of
+   *         the given array. Positions 0..n-1 correspond with the respective
+   *         entries in the given array, and position n contains Modifiers.JSNI.
+   */
+  public static Modifier[] appendJsni(Modifier[] modifiers) {
+    final Modifier[] origModifiers = modifiers;
+    modifiers = new Modifier[origModifiers.length + 1];
+    System.arraycopy(origModifiers, 0, modifiers, 0, origModifiers.length);
+    modifiers[modifiers.length - 1] = Modifier.JSNI;
+    return modifiers;
   }
 }
