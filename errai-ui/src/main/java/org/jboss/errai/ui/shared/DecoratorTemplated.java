@@ -1,8 +1,6 @@
 package org.jboss.errai.ui.shared;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,7 +64,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates the code required for {@link Templated} classes.
- *
+ * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -165,20 +163,39 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       /*
        * Attach Widget field children Elements to the Template DOM
        */
-      generateComponentCompositions(ctx, builder, component, rootTemplateElement,
-              Stmt.loadVariable(dataFieldElementsVarName));
 
-      generateEventHandlerMethodClasses(ctx, builder, component, Stmt.loadVariable(dataFieldElementsVarName));
+      String fieldsMapVarName = InjectUtil.getUniqueVarName();
+
+      /*
+       * The Map<String, Widget> to store actual component field references.
+       */
+      builder.append(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {
+      }, Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
+      })));
+      Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
+
+      generateComponentCompositions(ctx, builder, component, rootTemplateElement,
+              Stmt.loadVariable(dataFieldElementsVarName), fieldsMap);
+
+      generateEventHandlerMethodClasses(ctx, builder, component, Stmt.loadVariable(dataFieldElementsVarName), fieldsMap);
     }
   }
 
   private void generateEventHandlerMethodClasses(InjectableInstance<Templated> ctx,
           BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component,
-          VariableReferenceContextualStatementBuilder dataFieldElements) {
-    // TODO finish me
+          VariableReferenceContextualStatementBuilder dataFieldElements, Statement fieldsMap) {
+
+    Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
 
     MetaClass declaringClass = ctx.getEnclosingType();
     for (MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
+
+      String[] targetDataFieldNames = method.getAnnotation(EventHandler.class).value();
+
+      if (targetDataFieldNames.length == 0) {
+        throw new GenerationException("@EventHandler annotation on method [" + declaringClass.getFullyQualifiedName()
+                + "." + method.getName() + "] must specify at least one data-field target.");
+      }
 
       MetaClass eventType = method.getParameters()[0].getType();
 
@@ -190,23 +207,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
         ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
 
-        String[] dataFieldNames = method.getAnnotation(EventHandler.class).value();
-
-        if (dataFieldNames.length == 0)
-          throw new GenerationException("@EventHandler annotation on method [" + declaringClass.getFullyQualifiedName()
-                  + "." + method.getName() + "] must specify at least one data-field target.");
-
-        Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
-        Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
-
         int eventsToSink = Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS
                 | Event.TOUCHEVENTS;
         if (method.isAnnotationPresent(SinkNative.class)) {
           eventsToSink = method.getAnnotation(SinkNative.class).value();
         }
 
-        for (String name : dataFieldNames) {
-          if (dataFields.containsKey(name)) {
+        for (String name : targetDataFieldNames) {
+          if (dataFieldTypes.containsKey(name)) {
             MetaClass dataFieldType = dataFieldTypes.get(name);
 
             if (!dataFieldType.isAssignableTo(Element.class)) {
@@ -243,38 +251,27 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
         ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
 
-        String[] dataFieldNames = method.getAnnotation(EventHandler.class).value();
-
-        if (dataFieldNames.length == 0)
-          throw new GenerationException("@EventHandler annotation on method [" + declaringClass.getFullyQualifiedName()
-                  + "." + method.getName() + "] must specify at least one data-field target.");
-
         MetaClass hasHandlerType = MetaClassFactory.get("com.google.gwt.event.dom.client.Has" + handlerType.getName()
                 + "s");
 
-        Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
-        Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
-
-        for (String name : dataFieldNames) {
+        for (String name : targetDataFieldNames) {
           MetaClass dataFieldType = dataFieldTypes.get(name);
 
           if (dataFieldType.isAssignableTo(Element.class)) {
-            builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component,
-                    dataFields.get(name), listenerInstance, Stmt.invokeStatic(eventType, "getType")));
+            builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component, Stmt
+                    .nestedCall(fieldsMap).invoke("get", name), listenerInstance, Stmt.invokeStatic(eventType,
+                    "getType")));
           }
           else if (dataFieldType.isAssignableTo(hasHandlerType)) {
-            Statement widget = Cast.to(hasHandlerType, dataFields.get(name));
+            Statement widget = Cast.to(hasHandlerType, Stmt.nestedCall(fieldsMap).invoke("get", name));
             builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
                     Cast.to(handlerType, listenerInstance)));
           }
           else {
-            throw new GenerationException("@DataField [" + name +
-                    "] of type [" + dataFieldType.getName()
+            throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()
                     + "] in class [" + declaringClass.getFullyQualifiedName()
-                    + "] does not implement required interface [" +
-                    hasHandlerType.getName()
-                    + "] specified by @EventHandler method " + method.getName() + "("
-                    + eventType.getName() + ")]");
+                    + "] does not implement required interface [" + hasHandlerType.getName()
+                    + "] specified by @EventHandler method " + method.getName() + "(" + eventType.getName() + ")]");
           }
         }
       }
@@ -288,7 +285,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * take advantage of this information to get the associated handler. Ex:
      * com.google.gwt.event.dom.client.ClickEvent --->
      * com.google.gwt.event.dom.client.ClickHandler
-     *
+     * 
      * com.google.gwt.event.dom.client.BlurEvent --->
      * com.google.gwt.event.dom.client.BlurHandler
      */
@@ -338,12 +335,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   @SuppressWarnings("serial")
   private void generateComponentCompositions(InjectableInstance<Templated> ctx,
           BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component, Statement rootTemplateElement,
-          Statement dataFieldElements) {
-
-    String fieldsVarName = InjectUtil.getUniqueVarName();
-    builder.append(Stmt.declareVariable(fieldsVarName, new TypeLiteral<Collection<Widget>>() {
-    }, Stmt.newObject(new TypeLiteral<ArrayList<Widget>>() {
-    })));
+          Statement dataFieldElements, Statement fieldsMap) {
 
     /*
      * In case of constructor injection, search for the data binder parameter
@@ -405,7 +397,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Template
      */
     for (Entry<String, Statement> field : dataFields.entrySet()) {
-      builder.append(Stmt.loadVariable(fieldsVarName).invoke("add", field.getValue()));
+      builder.append(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
     }
 
     /*
@@ -431,7 +423,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * to preserve Handlers and DOM events.
      */
     builder.append(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement,
-            Stmt.loadVariable(fieldsVarName)));
+            Stmt.nestedCall(fieldsMap).invoke("values")));
 
   }
 

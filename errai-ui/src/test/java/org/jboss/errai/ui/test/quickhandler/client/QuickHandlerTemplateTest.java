@@ -38,8 +38,7 @@ public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
 
     assertFalse(app.getComponent().isC1EventFired());
     c1.dispatchEvent(generateClickEvent());
-    // FIXME This is currently not working because the Handler is being attached to the wrong ElementWrapperWidget instance
-    // assertTrue(app.getComponent().isC1EventFired());
+    assertTrue(app.getComponent().isC1EventFired());
 
     assertFalse(app.getComponent().isC2EventFired());
     c2.click();
