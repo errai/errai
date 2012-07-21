@@ -34,7 +34,7 @@ public interface TransportError {
   public boolean isWebSocket();
 
   /**
-   * Any applicable HTTP status code with the error.
+   * Any applicable HTTP status code with the error. Otherwise returns -1.
    * @return an HTTP status code.
    */
   public int getStatusCode();

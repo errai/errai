@@ -16,6 +16,14 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Implementations.autoForLoop;
+import static org.jboss.errai.codegen.util.Implementations.autoInitializedField;
+import static org.jboss.errai.codegen.util.Implementations.implement;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -27,6 +35,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
@@ -56,14 +65,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Implementations.autoForLoop;
-import static org.jboss.errai.codegen.util.Implementations.autoInitializedField;
-import static org.jboss.errai.codegen.util.Implementations.implement;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -342,7 +343,7 @@ public class MarshallerGeneratorFactory {
             Parameter.of(EJValue.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
     bBuilder.append(
-            Stmt.if_(Bool.isNull(loadVariable("a0")))
+            If.isNull(loadVariable("a0"))
                     .append(Stmt.load(null).returnValue())
                     .finish()
                     .else_()
@@ -359,7 +360,7 @@ public class MarshallerGeneratorFactory {
             Parameter.of(toMap.asArrayOf(dimensions), "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
     marshallMethodBlock.append(
-            Stmt.if_(Bool.isNull(loadVariable("a0")))
+        If.isNull(loadVariable("a0"))
                     .append(Stmt.load(null).returnValue())
                     .finish()
                     .else_()

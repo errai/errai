@@ -1,5 +1,9 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
+
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -21,8 +25,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.util.Arith;
-import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -40,11 +44,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.if_;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
 
 /**
  * @author Mike Brock
@@ -128,10 +127,10 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     builder.publicMethod(boolean.class, "isEqual",
             Parameter.of(Annotation.class, "a1"), Parameter.of(Annotation.class, "a2"))
             .body()
-            ._(if_(Bool.expr(invokeStatic(QualifierUtil.class, "isSameType", Refs.get("a1"), Refs.get("a2"))))
+            ._(If.cond(invokeStatic(QualifierUtil.class, "isSameType", Refs.get("a1"), Refs.get("a2")))
                     ._(
-                            if_(Bool.expr(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
-                                    Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))))
+                            If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
+                                    Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
                                     ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
                                             ).invoke("isEqual", Refs.get("a1"), Refs.get("a2")).returnValue())
                                     .finish()
@@ -148,8 +147,8 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     builder.publicMethod(int.class, "hashCodeOf", Parameter.of(Annotation.class, "a1"))
             .body()
             ._(
-                    if_(Bool.expr(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
-                      Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))))
+                    If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
+                      Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
                       ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
                               .invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
                       ).invoke("hashCodeOf", Refs.get("a1")).returnValue())
@@ -195,14 +194,14 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     for (MetaMethod method : methods) {
       if (method.getReturnType().isPrimitive()) {
         isEqualBuilder._(
-                Stmt.if_(Bool.notEquals(Stmt.loadVariable("a1").invoke(method), Stmt.loadVariable("a2").invoke(method)))
+                If.notEquals(Stmt.loadVariable("a1").invoke(method), Stmt.loadVariable("a2").invoke(method))
                         ._(Stmt.load(false).returnValue())
                         .finish()
         );
       }
       else {
         isEqualBuilder._(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("a1").invoke(method).invoke("equals", Stmt.loadVariable("a2").invoke(method))))
+                If.not(Stmt.loadVariable("a1").invoke(method).invoke("equals", Stmt.loadVariable("a2").invoke(method)))
                         ._(Stmt.load(false).returnValue())
                         .finish()
         );

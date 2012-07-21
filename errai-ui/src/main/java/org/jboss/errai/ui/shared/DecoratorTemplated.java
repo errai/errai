@@ -1,16 +1,27 @@
 package org.jboss.errai.ui.shared;
 
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.enterprise.util.TypeLiteral;
-
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
+com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -50,7 +61,17 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.common.base.Strings;
+import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Patternimport com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.DomEvent;
@@ -419,7 +440,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Bind each widget if data-binder is found and has been initialized.
      */
     if (dataBinderRef != null) {
-      BlockBuilder<ElseBlockBuilder> binderBlockBuilder = Stmt.if_(Bool.isNotNull(Variable.get("binder")));
+      BlockBuilder<ElseBlockBuilder> binderBlockBuilder = If.isNotNull(Variable.get("binder"));
       for (Entry<String, Statement> field : dataFields.entrySet()) {
         binderBlockBuilder.append(Stmt.loadVariable("binder").invoke("bind", field.getValue(), field.getKey()));
       }

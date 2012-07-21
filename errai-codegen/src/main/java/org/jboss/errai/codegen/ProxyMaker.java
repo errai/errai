@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen;
 
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.throw_;
+
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -25,17 +28,13 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.jboss.errai.codegen.util.Bool.isNull;
-import static org.jboss.errai.codegen.util.Stmt.if_;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.throw_;
 
 /**
  * @author Mike Brock
@@ -111,7 +110,7 @@ public class ProxyMaker {
     // implement hashCode()
     builder.publicMethod(int.class, "hashCode").body()
             ._(
-                    if_(isNull(loadVariable(proxyVar)))
+                    If.isNull(loadVariable(proxyVar))
                             ._(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
                             .finish()
                             .else_()
@@ -123,7 +122,7 @@ public class ProxyMaker {
     // implements equals()
     builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o")).body()
             ._(
-                    if_(isNull(loadVariable(proxyVar)))
+                    If.isNull(loadVariable(proxyVar))
                             ._(throw_(IllegalStateException.class, "call to equal() on an unclosed proxy."))
                             .finish()
                             .else_()

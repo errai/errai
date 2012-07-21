@@ -72,8 +72,12 @@ public class Bool {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.And, rhs);
   }
 
-  public static BooleanExpression instanceOf(final Object lhs, final Object rhs) {
-    return BooleanExpressionBuilder.create(lhs, BooleanOperator.InstanceOf, rhs);
+  public static BooleanExpression instanceOf(final Object lhs, final Class<?> type) {
+    return instanceOf(lhs, MetaClassFactory.get(type));
+  }
+
+  public static BooleanExpression instanceOf(final Object lhs, final MetaClass type) {
+    return BooleanExpressionBuilder.create(lhs, BooleanOperator.InstanceOf, MetaClassFactory.getAsStatement(type));
   }
 
   public static BooleanExpression greaterThanOrEqual(final Object lhs, final Object rhs) {

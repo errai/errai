@@ -162,7 +162,11 @@ public final class MetaClassFactory {
   }
 
   public static Statement getAsStatement(final Class<?> clazz) {
-    final MetaClass metaClass = createOrGet(clazz.getName(), false);
+     return getAsStatement(createOrGet(clazz.getName(), false));
+  }
+
+
+  public static Statement getAsStatement(final MetaClass metaClass) {
     return new Statement() {
       @Override
       public String generate(final Context context) {

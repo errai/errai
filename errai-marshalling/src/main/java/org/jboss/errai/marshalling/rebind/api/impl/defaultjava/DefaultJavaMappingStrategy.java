@@ -38,6 +38,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
@@ -384,7 +385,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
 
     builder.append(
-            Stmt.if_(Bool.isNull(loadVariable("a0")))
+            If.isNull(loadVariable("a0"))
                     .append(Stmt.load("null").returnValue()).finish()
         );
 
@@ -401,7 +402,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     string(SerializationParts.OBJECT_ID) + ":\"").append(loadVariable("objId")).append("\"");
 
     builder.append(
-            Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObject", loadVariable("a0"))))
+            If.cond(loadVariable("a1").invoke("hasObject", loadVariable("a0")))
                     .append(declareVariable(String.class).named("objId").initializeWith(loadVariable("a1").invoke("getObject", Stmt.loadVariable("a0"))))
                     .append(Stmt.nestedCall(newStringBuilder(128).append("{"
                             + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")

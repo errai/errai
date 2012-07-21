@@ -16,17 +16,13 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.enterprise.util.TypeLiteral;
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Variable;
@@ -36,6 +32,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.Convert;
@@ -45,17 +42,19 @@ import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.Widget;
+import javax.enterprise.util.TypeLiteral;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Generates a proxy for a {@link Bindable} type.
- * 
+ *
  * <p>
  * The proxy will:
  * <ul>
@@ -66,7 +65,7 @@ import com.google.gwt.user.client.ui.Widget;
  * <li>Update the target model's state in response to value change events (only works for widgets that implement
  * {@link HasValue})</li>
  * <ul>
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyGenerator {
@@ -148,7 +147,7 @@ public class BindableProxyGenerator {
             Parameter.of(String.class, "property", true), Parameter.of(Converter.class, "converter", true))
             .append(Stmt.loadVariable("this").invoke("unbind", Variable.get("property")))
             .append(
-                Stmt.if_(Bool.expr(Stmt.loadVariable("bindings").invoke("containsValue", Variable.get("widget"))))
+                If.cond(Stmt.loadVariable("bindings").invoke("containsValue", Variable.get("widget")))
                     .append(Stmt.throw_(RuntimeException.class, "Widget already bound to a different property!"))
                     .finish()
             )
@@ -156,7 +155,7 @@ public class BindableProxyGenerator {
             .append(
                 Stmt.loadClassMember("converters").invoke("put", Variable.get("property"), Variable.get("converter")))
             .append(
-                Stmt.if_(Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
+                If.instanceOf(Variable.get("widget"), HasValue.class)
                     .append(
                         Stmt.loadClassMember("handlerRegistrations").invoke(
                             "put",
@@ -207,10 +206,10 @@ public class BindableProxyGenerator {
     classBuilder.privateMethod(void.class, "syncState", Parameter.of(Widget.class, "widget", true),
         Parameter.of(String.class, "property", true), Parameter.of(InitialState.class, "initialState", true))
         .append(
-            Stmt.if_(Bool.isNotNull(Variable.get("initialState")))
+           If.isNotNull(Variable.get("initialState"))
                 .append(Stmt.declareVariable("value", Object.class, null))
                 .append(
-                    Stmt.if_(Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
+                   If.instanceOf(Variable.get("widget"), HasValue.class)
                         .append(Stmt.declareVariable("hasValue", HasValue.class,
                             Stmt.castTo(HasValue.class, Stmt.loadVariable("widget"))))
                         .append(Stmt.loadVariable("value").assignValue(
@@ -227,7 +226,7 @@ public class BindableProxyGenerator {
                                         Stmt.loadVariable("converters").invoke("get", Variable.get("property")))))
                         .finish()
                         .elseif_(
-                            Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasText.class)))
+                            Bool.instanceOf(Variable.get("widget"), HasText.class))
                         .append(
                             Stmt.declareVariable("hasText", HasText.class,
                                 Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))))
@@ -301,8 +300,8 @@ public class BindableProxyGenerator {
     Method getterMethod = propertyDescriptor.getReadMethod();
     if (getterMethod != null && !Modifier.isFinal(getterMethod.getModifiers())) {
       getMethod
-          .append(Stmt
-              .if_(Bool.expr(Stmt.loadVariable("property").invoke("equals", propertyDescriptor.getName())))
+          .append(
+                  If.objEquals(Stmt.loadVariable("property"), propertyDescriptor.getName())
               .append(
                   Stmt.loadVariable("this").invoke(getterMethod.getName()).returnValue())
               .finish()
@@ -320,8 +319,8 @@ public class BindableProxyGenerator {
     Method setterMethod = propertyDescriptor.getWriteMethod();
     if (setterMethod != null && !Modifier.isFinal(setterMethod.getModifiers())) {
       setMethod
-          .append(Stmt
-              .if_(Bool.expr(Stmt.loadVariable("property").invoke("equals", propertyDescriptor.getName())))
+          .append(
+             If.cond(Stmt.loadVariable("property").invoke("equals", propertyDescriptor.getName()))
               .append(
                   Stmt.loadVariable("target").invoke(
                       setterMethod.getName(),
@@ -339,13 +338,11 @@ public class BindableProxyGenerator {
           .append(Stmt.loadClassMember("target").invoke(setterMethod.getName(),
                     Cast.to(setterMethod.getParameterTypes()[0], Stmt.loadVariable(propertyDescriptor.getName()))))
           .append(
-              Stmt.if_(
-                  Bool.expr(Stmt.loadClassMember("bindings").invoke("containsKey", propertyDescriptor.getName())))
+              If.cond(Stmt.loadClassMember("bindings").invoke("containsKey", propertyDescriptor.getName()))
                   .append(Stmt.declareVariable("widget", Widget.class,
                       Stmt.loadClassMember("bindings").invoke("get", propertyDescriptor.getName())))
                   .append(
-                      Stmt.if_(
-                          Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
+                      If.instanceOf(Variable.get("widget"), HasValue.class)
                           .append(
                               Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke(
                                   "setValue",
@@ -357,7 +354,7 @@ public class BindableProxyGenerator {
                                       ), true))
                           .finish()
                           .elseif_(
-                              Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasText.class)))
+                              Bool.instanceOf(Variable.get("widget"), HasText.class))
                           .append(
                               Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))
                                   .invoke(

@@ -34,7 +34,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 
 import java.lang.annotation.Annotation;
@@ -150,8 +150,7 @@ public class RpcProxyGenerator {
   }
 
   private Statement generateRequest(MetaMethod method, Statement methodParams, boolean intercepted) {
-    return Stmt
-        .if_(Bool.isNull(Variable.get("errorCallback")))
+    return If.isNull(Variable.get("errorCallback"))
         .append(
             Stmt
                 .invokeStatic(MessageBuilder.class, "createCall")
