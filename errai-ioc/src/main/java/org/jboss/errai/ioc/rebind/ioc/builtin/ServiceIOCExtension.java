@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.builtin;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.ioc.util.MessageCallbackWrapper.wrapMessageCallbackInAsync;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.framework.Subscription;
@@ -38,10 +42,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.ioc.util.MessageCallbackWrapper.wrapMessageCallbackInAsync;
 
 @SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
@@ -85,8 +85,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
               .invoke("subscribe", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
 
-    final Statement declareVar = Stmt.declareVariable(Subscription.class).asFinal().named(varName)
-            .initializeWith(subscribeStatement);
+    final Statement declareVar = Stmt.declareFinalVariable(varName, Subscription.class, subscribeStatement);
 
     final MetaClass destructionCallbackType =
             parameterizedAs(DestructionCallback.class, typeParametersOf(injectableInstance.getEnclosingType()));

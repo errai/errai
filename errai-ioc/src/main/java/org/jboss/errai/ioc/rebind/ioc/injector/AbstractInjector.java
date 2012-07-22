@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
@@ -26,8 +28,6 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 public abstract class AbstractInjector implements Injector {
   protected QualifyingMetadata qualifyingMetadata;
@@ -99,15 +99,15 @@ public abstract class AbstractInjector implements Injector {
     return created;
   }
 
-  public void setCreated(boolean created) {
+  public void setCreated(final boolean created) {
     this.created = created;
   }
 
-  public void setRendered(boolean rendered) {
+  public void setRendered(final boolean rendered) {
     this.rendered = rendered;
   }
 
-  public void setReplaceable(boolean replaceable) {
+  public void setReplaceable(final boolean replaceable) {
     this.replaceable = replaceable;
   }
 
@@ -117,7 +117,7 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public void setPostInitCallbackVar(String var) {
+  public void setPostInitCallbackVar(final String var) {
     this.postInitCallbackVar = var;
   }
 
@@ -127,7 +127,7 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public void setPreDestroyCallbackVar(String preDestroyCallbackVar) {
+  public void setPreDestroyCallbackVar(final String preDestroyCallbackVar) {
     this.preDestroyCallbackVar = preDestroyCallbackVar;
   }
 
@@ -136,18 +136,18 @@ public abstract class AbstractInjector implements Injector {
     return creationalCallbackVarName;
   }
 
-  public void setCreationalCallbackVarName(String creationalCallbackVarName) {
+  public void setCreationalCallbackVarName(final String creationalCallbackVarName) {
     this.creationalCallbackVarName = creationalCallbackVarName;
   }
 
   @Override
-  public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
+  public boolean matches(final MetaParameterizedType parameterizedType, final QualifyingMetadata qualifyingMetadata) {
     boolean parmTypesSatisfied = true;
     if (parameterizedType != null) {
       parmTypesSatisfied = parameterizedType.isAssignableFrom(getQualifyingTypeInformation());
     }
 
-    boolean metaDataSatisfied = getQualifyingMetadata() == null || getQualifyingMetadata().doesSatisfy
+    final boolean metaDataSatisfied = getQualifyingMetadata() == null || getQualifyingMetadata().doesSatisfy
             (qualifyingMetadata);
 
     return parmTypesSatisfied && metaDataSatisfied;
@@ -163,7 +163,7 @@ public abstract class AbstractInjector implements Injector {
     return qualifyingTypeInformation;
   }
 
-  public void setQualifyingTypeInformation(MetaParameterizedType qualifyingTypeInformation) {
+  public void setQualifyingTypeInformation(final MetaParameterizedType qualifyingTypeInformation) {
     this.qualifyingTypeInformation = qualifyingTypeInformation;
   }
 
@@ -176,7 +176,7 @@ public abstract class AbstractInjector implements Injector {
     private final InjectionContext _injectionContextForRegister;
     private final Statement _valueRefForRegister;
 
-    RegisterCache(InjectionContext _injectionContextForRegister, Statement _valueRefForRegister) {
+    RegisterCache(final InjectionContext _injectionContextForRegister, final Statement _valueRefForRegister) {
       this._injectionContextForRegister = _injectionContextForRegister;
       this._valueRefForRegister = _valueRefForRegister;
     }
@@ -193,14 +193,15 @@ public abstract class AbstractInjector implements Injector {
   private RegisterCache _registerCache;
 
   @Override
-  public void addRegistrationHook(RegistrationHook registrationHook) {
+  public void addRegistrationHook(final RegistrationHook registrationHook) {
     if (_registerCache == null)
       registrationHooks.add(registrationHook);
     else
       registrationHook.onRegister(_registerCache.getInjectionContextForRegister(), _registerCache.getValueRefForRegister());
   }
 
-  public void registerWithBeanManager(InjectionContext context, Statement valueRef) {
+  public void registerWithBeanManager(final InjectionContext context,
+                                      final Statement valueRef) {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       _registerCache = new RegisterCache(context, valueRef);
 
@@ -210,7 +211,7 @@ public abstract class AbstractInjector implements Injector {
                               isSingleton() ? valueRef : null, qualifyingMetadata.render())
       );
 
-      for (RegistrationHook hook : registrationHooks) {
+      for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
       }
     }

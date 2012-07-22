@@ -100,7 +100,7 @@ public class JaxrsProxyMethodGenerator {
   private Statement generateUrl(JaxrsResourceMethodParameters params) {
     BlockStatement block = new BlockStatement();
     block.addStatement(Stmt.declareVariable("url", StringBuilder.class,
-        Stmt.newObject(StringBuilder.class).withParameters(new StringStatement("getBaseUrl()"))));
+        Stmt.newObject(StringBuilder.class, new StringStatement("getBaseUrl()"))));
 
     // construct path using @PathParams and @MatrixParams
     String path = resourceMethod.getPath();

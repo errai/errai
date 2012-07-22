@@ -147,9 +147,50 @@ public class Stmt {
   }
 
   public static StatementBuilder declareVariable(final String name,
+                                                 final MetaClass type,
+                                                 final Object initialization) {
+    return StatementBuilder.create().declareVariable(name, type, initialization);
+  }
+
+
+  public static StatementBuilder declareVariable(final String name,
                                                  final TypeLiteral<?> type,
                                                  final Object initialization) {
     return StatementBuilder.create().declareVariable(name, type, initialization);
+  }
+
+
+  public static StatementBuilder declareFinalVariable(final String name,
+                                                 final Class<?> type) {
+    return StatementBuilder.create().declareFinalVariable(name, type);
+  }
+
+  public static StatementBuilder declareFinalVariable(final String name,
+                                                 final TypeLiteral<?> type) {
+    return StatementBuilder.create().declareFinalVariable(name, type);
+  }
+
+  public static StatementBuilder declareFinalVariable(final VariableReference ref,
+                                                 final Object initialization) {
+    return StatementBuilder.create().declareFinalVariable(ref.getName(), ref.getType(), initialization);
+  }
+
+  public static StatementBuilder declareFinalVariable(final String name,
+                                                 final Class<?> type,
+                                                 final Object initialization) {
+    return StatementBuilder.create().declareFinalVariable(name, type, initialization);
+  }
+
+  public static StatementBuilder declareFinalVariable(final String name,
+                                                 final MetaClass type,
+                                                 final Object initialization) {
+    return StatementBuilder.create().declareFinalVariable(name, type, initialization);
+  }
+
+  public static StatementBuilder declareFinalVariable(final String name,
+                                                 final TypeLiteral<?> type,
+                                                 final Object initialization) {
+    return StatementBuilder.create().declareFinalVariable(name, type, initialization);
   }
   
   public static VariableReferenceContextualStatementBuilder loadVariable(final VariableReference reference) {
@@ -224,6 +265,18 @@ public class Stmt {
 
   public static ObjectBuilder newObject(final TypeLiteral<?> type) {
     return StatementBuilder.create().newObject(type);
+  }
+
+  public static Statement newObject(final Class<?> type, Object... parms) {
+    return StatementBuilder.create().newObject(type, parms);
+  }
+
+  public static Statement newObject(final MetaClass type, Object... parms) {
+    return StatementBuilder.create().newObject(type, parms);
+  }
+
+  public static Statement newObject(final TypeLiteral<?> type, Object... parms) {
+    return StatementBuilder.create().newObject(type, parms);
   }
 
   public static StatementEnd throw_(final Class<? extends Throwable> throwableType,

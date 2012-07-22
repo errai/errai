@@ -1,5 +1,9 @@
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -24,10 +28,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import javax.enterprise.inject.Disposes;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
  * @author Mike Brock
@@ -105,8 +105,7 @@ public class ProducerInjector extends AbstractInjector {
             ._(Stmt.loadVariable(var).returnValue())
             .finish().finish();
 
-    callbackBuilder.append(Stmt.declareVariable(creationCallbackRef).asFinal().named(var)
-            .initializeWith(producerCreationalCallback));
+    callbackBuilder.append(Stmt.declareFinalVariable(var, creationCallbackRef, producerCreationalCallback));
 
     final Statement retVal = loadVariable("context").invoke("getSingletonInstanceOrNew",
             Stmt.loadVariable("injContext"),
@@ -151,7 +150,7 @@ public class ProducerInjector extends AbstractInjector {
     }
 
     final String varName = InjectUtil.getUniqueVarName();
-    bb._(Stmt.declareVariable(injectedType).asFinal().named(varName).initializeWith(beanValue));
+    bb._(Stmt.declareFinalVariable(varName, injectedType, beanValue));
 
     final MetaClass destructionCallbackType =
             parameterizedAs(DestructionCallback.class, typeParametersOf(injectedType));
@@ -177,9 +176,7 @@ public class ProducerInjector extends AbstractInjector {
 
     final AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
-    bb._(Stmt.declareVariable(destructionCallbackType).asFinal().named(destroyVarName)
-            .initializeWith(classStructureBuilder.finish()));
-
+    bb._(Stmt.declareFinalVariable(destroyVarName, destructionCallbackType, classStructureBuilder.finish()));
     bb._(Stmt.loadVariable("context").invoke("addDestructionCallback",
             Refs.get(varName), Refs.get(destroyVarName)));
 

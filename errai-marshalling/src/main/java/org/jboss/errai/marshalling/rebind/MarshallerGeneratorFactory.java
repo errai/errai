@@ -256,7 +256,7 @@ public class MarshallerGeneratorFactory {
 
       if (clazz.isAnnotationPresent(AlwaysQualify.class)) {
         constructor.append(loadVariable(varName).assignValue(
-                Stmt.newObject(QualifyingMarshallerWrapper.class).withParameters(marshaller)));
+                Stmt.newObject(QualifyingMarshallerWrapper.class, marshaller)));
       }
       else {
         constructor.append(loadVariable(varName).assignValue(marshaller));
@@ -305,8 +305,7 @@ public class MarshallerGeneratorFactory {
               .finish();
 
       constructor.append(loadVariable(varName).assignValue(
-              Stmt.newObject(QualifyingMarshallerWrapper.class)
-                      .withParameters(marshaller)));
+              Stmt.newObject(QualifyingMarshallerWrapper.class, marshaller)));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
@@ -431,7 +430,7 @@ public class MarshallerGeneratorFactory {
             .parameters(arrayType, MarshallingSession.class).body();
 
     mBuilder.append(Stmt.declareVariable(StringBuilder.class).named("sb")
-            .initializeWith(Stmt.newObject(StringBuilder.class).withParameters("[")))
+            .initializeWith(Stmt.newObject(StringBuilder.class, "[")))
             .append(autoForLoop("i", Stmt.loadVariable("a0").loadField("length"))
                     .append(Stmt.if_(Bool.greaterThan(Stmt.loadVariable("i"), 0))
                             .append(Stmt.loadVariable("sb").invoke("append", ",")).finish())

@@ -183,8 +183,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
               if (constructor.isPublic()) {
                 tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                    .initializeWith(Stmt.newObject(toMap)
-                        .withParameters(constructorParameters.toArray(new Object[constructorParameters.size()]))));
+                    .initializeWith(Stmt.newObject(toMap, constructorParameters.toArray(new Object[constructorParameters.size()]))));
               }
               else {
                 PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), constructor);
@@ -206,11 +205,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           else {
             // use default constructor
 
-            tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(
+            tryBuilder._(
+                Stmt.declareVariable(toMap).named("entity").initializeWith(
                 Stmt.nestedCall(Stmt.newObject(toMap))));
           }
 
-          tryBuilder.append(loadVariable("a1").invoke("recordObject",
+          tryBuilder._(loadVariable("a1").invoke("recordObject",
                   loadVariable("objId"), loadVariable("entity")));
         }
 

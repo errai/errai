@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -64,9 +67,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-
 public class InjectUtil {
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
   private static final AtomicInteger uniqueCounter = new AtomicInteger(0);
@@ -110,12 +110,8 @@ public class InjectUtil {
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
-                  Stmt.declareVariable(type)
-                          .asFinal()
-                          .named(injector.getVarName())
-                          .initializeWith(Stmt
-                                  .newObject(type)
-                                  .withParameters(parameterStatements))
+                  Stmt.declareFinalVariable(injector.getVarName(), type, Stmt.newObject(type, parameterStatements))
+
           );
           callback.beanConstructed();
 
@@ -640,8 +636,7 @@ public class InjectUtil {
     final String varName = InjectUtil.getUniqueVarName();
 
     ctx.getProcessingContext()
-            .append(Stmt.declareVariable(parm.getType()).asFinal().named(varName)
-                    .initializeWith(beanCreationStmt));
+            .append(Stmt.declareFinalVariable(varName, parm.getType(), beanCreationStmt));
 
     final Statement stmt = Refs.get(varName);
 

@@ -80,10 +80,36 @@ public class Variable extends AbstractStatement {
     return createFinal(name, MetaClassFactory.get(type));
   }
 
+  public static Variable createFinal(final String name, final TypeLiteral<?> type) {
+    final Variable variable = create(name, type);
+    variable.isFinal = true;
+    return variable;
+  }
+
   public static Variable createFinal(final String name, final MetaClass type) {
     final Variable variable = create(name, type);
     variable.isFinal = true;
     return variable;
+  }
+
+  public static Variable createFinal(final String name, final Class<?> type, final Object initialization) {
+    return createFinal(name, MetaClassFactory.get(type), initialization);
+  }
+
+  public static Variable createFinal(final String name, final MetaClass type, final Object initialization) {
+    final Variable variable = create(name, type, initialization);
+    variable.isFinal = true;
+    return variable;
+  }
+
+  public static Variable createFinal(final String name, final TypeLiteral<?> type, final Object initialization) {
+    final Variable variable = create(name, type, initialization);
+    variable.isFinal = true;
+    return variable;
+  }
+
+  public static Variable create(final String name, final Object initialization) {
+    return new Variable(name, null, initialization);
   }
 
   public static Variable from(final VariableReference ref) {
@@ -98,22 +124,10 @@ public class Variable extends AbstractStatement {
     return new Variable(name, MetaClassFactory.get(type));
   }
 
+
+
   public static Variable create(final String name, final MetaClass type) {
     return new Variable(name, type);
-  }
-
-  public static Variable create(final String name, final Object initialization) {
-    return new Variable(name, null, initialization);
-  }
-
-  public static Variable createFinal(final String name, final Class<?> type, final Object initialization) {
-    return createFinal(name, MetaClassFactory.get(type), initialization);
-  }
-
-  public static Variable createFinal(final String name, final MetaClass type, final Object initialization) {
-    final Variable variable = create(name, type, initialization);
-    variable.isFinal = true;
-    return variable;
   }
 
   public static Variable create(final String name, final Class<?> type, final Object initialization) {
@@ -183,7 +197,6 @@ public class Variable extends AbstractStatement {
   public Statement getValue() {
     return value;
   }
-
 
   public boolean isFinal() {
     return isFinal;
