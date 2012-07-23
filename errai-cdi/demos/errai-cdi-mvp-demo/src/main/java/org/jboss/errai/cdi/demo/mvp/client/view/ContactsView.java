@@ -40,9 +40,9 @@ public class ContactsView extends Composite implements ContactsPresenter.Display
     hPanel.setBorderWidth(0);
     hPanel.setSpacing(0);
     hPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_LEFT);
-    addButton = new Button("Add");
+    addButton = new Button("Add Contact");
     hPanel.add(addButton);
-    deleteButton = new Button("Delete");
+    deleteButton = new Button("Delete Contact");
     hPanel.add(deleteButton);
     contentTable.getCellFormatter().addStyleName(0, 0, "contacts-ListMenu");
     contentTable.setWidget(0, 0, hPanel);

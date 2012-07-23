@@ -1336,8 +1336,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         case 408:
         case 502:
         case 504:
-
-          if (retries != maxRetries) {
+          if (retries <= maxRetries) {
             if (timeoutDB == null) {
               createConnectAttemptGUI();
             }
@@ -1350,6 +1349,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             new Timer() {
               @Override
               public void run() {
+                cometChannelOpen = true;
                 performPoll();
               }
             }.schedule(timeout);
@@ -1359,6 +1359,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           }
           else {
             timeoutMessage.setText("Connection re-attempt failed!");
+            cometChannelOpen = false;
           }
       }
 
@@ -1394,8 +1395,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         schedule();
       }
       catch (Throwable e) {
-        logError("bus disconnected due to fatal error",
-                response.getText(), e);
+        logError("bus disconnected due to fatal error", response.getText(), e);
       }
     }
 
