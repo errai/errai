@@ -27,6 +27,7 @@ import org.jboss.errai.cdi.injection.client.EquHashCheckCycleA;
 import org.jboss.errai.cdi.injection.client.EquHashCheckCycleB;
 import org.jboss.errai.cdi.injection.client.Petrol;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.IOC;
 
 /**
  * @author Mike Brock
@@ -45,7 +46,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
   public void testBasicDependencyCycle() {
 
-    CycleNodeA nodeA = getBeanManager()
+    final CycleNodeA nodeA = getBeanManager()
             .lookupBean(CycleNodeA.class).getInstance();
 
     assertNotNull(nodeA);
@@ -60,14 +61,14 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testCircularInjectionOnOneNormalAndOneDependentBean() throws Exception {
-    Petrol petrol = getBeanManager().lookupBean(Petrol.class).getInstance();
-    Car car = getBeanManager().lookupBean(Car.class).getInstance();
+    final Petrol petrol = getBeanManager().lookupBean(Petrol.class).getInstance();
+    final Car car = getBeanManager().lookupBean(Car.class).getInstance();
     assertEquals(petrol.getNameOfCar(), car.getName());
     assertEquals(car.getNameOfPetrol(), petrol.getName());
   }
 
   public void testBeanInjectsIntoSelf() {
-    BeanInjectSelf beanA = getBeanManager()
+    final BeanInjectSelf beanA = getBeanManager()
             .lookupBean(BeanInjectSelf.class).getInstance();
 
     assertNotNull(beanA);
@@ -80,7 +81,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testCyclingBeanDestroy() {
-    DependentBeanInjectSelf beanA = getBeanManager()
+    final DependentBeanInjectSelf beanA = getBeanManager()
             .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
     assertNotNull(beanA);
@@ -95,7 +96,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
   public void testCyclingBeanDestroyViaProxy() {
 
-    DependentBeanInjectSelf beanA = getBeanManager()
+    final DependentBeanInjectSelf beanA = getBeanManager()
             .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
     assertNotNull(beanA);
@@ -112,7 +113,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
   public void testDependentBeanInjectsIntoSelf() {
 
-    DependentBeanInjectSelf beanA = getBeanManager()
+    final DependentBeanInjectSelf beanA = getBeanManager()
             .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
     assertNotNull(beanA);
@@ -127,7 +128,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
   public void testCycleOnProducerBeans() {
 
-    ConsumerBeanA consumerBeanA = getBeanManager()
+    final ConsumerBeanA consumerBeanA = getBeanManager()
             .lookupBean(ConsumerBeanA.class).getInstance();
 
     assertNotNull(consumerBeanA);
@@ -148,14 +149,18 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
   public void testHashcodeAndEqualsWorkThroughProxies() {
 
-    EquHashCheckCycleA equHashCheckCycleA = getBeanManager()
+    final EquHashCheckCycleA equHashCheckCycleA = getBeanManager()
             .lookupBean(EquHashCheckCycleA.class).getInstance();
 
-    EquHashCheckCycleB equHashCheckCycleB = getBeanManager()
+    final EquHashCheckCycleB equHashCheckCycleB = getBeanManager()
             .lookupBean(EquHashCheckCycleB.class).getInstance();
 
     assertNotNull(equHashCheckCycleA);
     assertNotNull(equHashCheckCycleB);
+
+    assertTrue("at least one bean should be proxied",
+        IOC.getBeanManager().isProxyReference(equHashCheckCycleA.getEquHashCheckCycleB())
+        || IOC.getBeanManager().isProxyReference(equHashCheckCycleB.getEquHashCheckCycleA()));
 
     assertEquals("equals contract broken", equHashCheckCycleA, equHashCheckCycleB.getEquHashCheckCycleA());
     assertEquals("equals contract broken", equHashCheckCycleB, equHashCheckCycleA.getEquHashCheckCycleB());
