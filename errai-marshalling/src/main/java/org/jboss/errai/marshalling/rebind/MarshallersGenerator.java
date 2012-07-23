@@ -16,6 +16,25 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.ClassListReader;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.marshalling.server.ServerMappingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,25 +43,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.gwt.core.client.GWT;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.util.ClassChangeUtil;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.rebind.ClassListReader;
-import org.jboss.errai.common.rebind.EnvUtil;
-import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
-import org.jboss.errai.marshalling.server.ServerMappingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -70,22 +70,21 @@ public class MarshallersGenerator extends Generator {
 
   private static final DiscoveryStrategy[] rootDiscoveryStrategies;
 
-  private static Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
+  private static final Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
 
   static {
-    // define the strategies which will be used to figure out where to desposit the server-side marshaller
+    // define the strategies which will be used to figure out where to deposit the server-side marshaller
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
             new DiscoveryStrategy() {
               @Override
-              public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto) {
-                File cwd = new File("").getAbsoluteFile();
-                Set<File> matching = ClassChangeUtil.findAllMatching("classlist.mf", cwd);
-                Set<String> candidateDirectories = new HashSet<String>();
+              public Set<String> getCandidate(final GeneratorContext context, final DiscoveryContext veto) {
+                final File cwd = new File("").getAbsoluteFile();
+                final Set<File> matching = ClassChangeUtil.findAllMatching("classlist.mf", cwd);
+                final Set<String> candidateDirectories = new HashSet<String>();
 
                 veto.resultsAbsolute();
 
                 if (!matching.isEmpty()) {
-
                   class Candidate {
                     int score;
                     File root;
@@ -101,22 +100,22 @@ public class MarshallersGenerator extends Generator {
                     }
                     gwtModuleName = gwtModuleName.substring(0, gwtModuleName.lastIndexOf('.'));
 
-                    for (File f : matching) {
-                      Candidate candidate = new Candidate();
+                    for (final File f : matching) {
+                      final Candidate candidate = new Candidate();
                       candidate.root = f.getParentFile();
 
-                      Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
+                      final Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
 
-                      for (String fqcn : clazzes) {
+                      for (final String fqcn : clazzes) {
 
                         try {
-                          JClassType type = context.getTypeOracle().findType(fqcn);
+                          final JClassType type = context.getTypeOracle().findType(fqcn);
 
                           if (type != null && fqcn.startsWith(gwtModuleName)) {
                             candidate.score++;
                           }
                         }
-                        catch (Throwable e) {
+                        catch (Throwable ignored) {
                         }
                       }
 
@@ -137,21 +136,23 @@ public class MarshallersGenerator extends Generator {
             ,
             new DiscoveryStrategy() {
               @Override
-              public Set<String> getCandidate(GeneratorContext context, DiscoveryContext discoveryContext) {
-                ServerMappingContext ctx = MappingContextSingleton.get();
+              public Set<String> getCandidate(final GeneratorContext context,
+                                              final DiscoveryContext discoveryContext) {
 
-                Map<String, String> matchNames = new HashMap<String, String>();
+                final ServerMappingContext ctx = MappingContextSingleton.get();
 
-                for (Class<?> cls : ctx.getDefinitionsFactory().getExposedClasses()) {
-                  matchNames.put(cls.getSimpleName(), cls.getName());
+                final Map<String, String> matchNames = new HashMap<String, String>();
+
+                for (final MetaClass cls : ctx.getDefinitionsFactory().getExposedClasses()) {
+                  matchNames.put(cls.getName(), cls.getName());
                 }
 
-                File cwd = new File("").getAbsoluteFile();
+                final File cwd = new File("").getAbsoluteFile();
 
-                Set<File> roots = ClassChangeUtil.findMatchingOutputDirectoryByModel(matchNames, cwd);
+                final Set<File> roots = ClassChangeUtil.findMatchingOutputDirectoryByModel(matchNames, cwd);
 
                 if (!roots.isEmpty()) {
-                  for (File file : roots) {
+                  for (final File file : roots) {
                     log.info(" ** signature matched root! " + file.getAbsolutePath());
                   }
                   discoveryContext.resultsAbsolute();
@@ -162,8 +163,8 @@ public class MarshallersGenerator extends Generator {
                 }
 
 
-                Set<String> rootsPaths = new HashSet<String>();
-                for (File f : roots) {
+                final Set<String> rootsPaths = new HashSet<String>();
+                for (final File f : roots) {
                   rootsPaths.add(f.getAbsolutePath());
                 }
 
@@ -173,7 +174,8 @@ public class MarshallersGenerator extends Generator {
 
             new DiscoveryStrategy() {
               @Override
-              public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto) {
+              public Set<String> getCandidate(final GeneratorContext context,
+                                              final DiscoveryContext veto) {
                 // try the CWD
                 return Collections.singleton(new File("").getAbsolutePath());
               }
@@ -181,7 +183,9 @@ public class MarshallersGenerator extends Generator {
             ,
             new DiscoveryStrategy() {
               @Override
-              public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto) {
+              public Set<String> getCandidate(final GeneratorContext context,
+                                              final DiscoveryContext veto) {
+
                 return Collections.singleton(RebindUtils.guessWorkingDirectoryForModule(context));
               }
             }
@@ -208,14 +212,15 @@ public class MarshallersGenerator extends Generator {
     }
 
     try {
-      TypeOracle typeOracle = context.getTypeOracle();
+      final TypeOracle typeOracle = context.getTypeOracle();
 
-      JClassType classType = typeOracle.getType(typeName);
+      final JClassType classType = typeOracle.getType(typeName);
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
 
       logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
 
+      EnvUtil.clearCaches();
       GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
       DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
 
@@ -232,8 +237,8 @@ public class MarshallersGenerator extends Generator {
     return packageName + "." + className;
   }
 
-  public void generateMarshallerBootstrapper(TreeLogger logger, GeneratorContext context) {
-    PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+  public void generateMarshallerBootstrapper(final TreeLogger logger, final GeneratorContext context) {
+    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter == null) return;
     printWriter.write(_generate(context));
     context.commit(logger, printWriter);
@@ -246,27 +251,27 @@ public class MarshallersGenerator extends Generator {
   private static volatile String _clientMarshallerCache;
   private static final Object generatorLock = new Object();
 
-  private String _generate(GeneratorContext context) {
+  private String _generate(final GeneratorContext context) {
     synchronized (generatorLock) {
-      boolean junitOrDevMode = !EnvUtil.isProdMode();
+      final boolean junitOrDevMode = !EnvUtil.isProdMode();
 
       if (SERVER_MARSHALLER_OUTPUT_ENABLED && MarshallingGenUtil.isUseStaticMarshallers()) {
 
-        String serverSideClass;
+        final String serverSideClass;
         if (!junitOrDevMode && _serverMarshallerCache != null) {
           serverSideClass = _serverMarshallerCache;
         }
         else {
-          serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
+          serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.Java)
                   .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
           _serverMarshallerCache = serverSideClass;
         }
 
         if (junitOrDevMode) {
-          String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
+          final String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
           log.info("*** using temporary path: " + tmpLocation + " ***");
 
-          String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
+          final String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
 
           try {
             ClassChangeUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
@@ -303,10 +308,10 @@ public class MarshallersGenerator extends Generator {
 
 
           Strategies:
-          for (DiscoveryStrategy strategy : rootDiscoveryStrategies) {
-            DiscoveryContextImpl discoveryContext = new DiscoveryContextImpl();
-            for (String rootPath : strategy.getCandidate(context, discoveryContext)) {
-              for (String candidate : discoveryContext.absolute ? new String[]{"/"} : candidateOutputDirectories) {
+          for (final DiscoveryStrategy strategy : rootDiscoveryStrategies) {
+            final DiscoveryContextImpl discoveryContext = new DiscoveryContextImpl();
+            for (final String rootPath : strategy.getCandidate(context, discoveryContext)) {
+              for (final String candidate : discoveryContext.absolute ? new String[]{"/"} : candidateOutputDirectories) {
                 logger.info("considering '" + rootPath + candidate + "' as module output path ...");
 
                 if (discoveryContext.vetoed) {
@@ -346,7 +351,7 @@ public class MarshallersGenerator extends Generator {
       }
 
       return _clientMarshallerCache
-              = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
+              = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.GWT).generate(packageName, className);
     }
   }
 
@@ -361,15 +366,19 @@ public class MarshallersGenerator extends Generator {
   }
 
 
-  private String generateServerMarshallers(String sourceDir, String serverSideClass, String outputPath) {
-    File outputDir = new File(sourceDir + File.separator +
+  private String generateServerMarshallers(final String sourceDir,
+                                           final String serverSideClass,
+                                           final String outputPath) {
+
+    final File outputDir = new File(sourceDir + File.separator +
             RebindUtils.packageNameToDirName(SERVER_MARSHALLER_PACKAGE_NAME) + File.separator);
 
-    File classOutputPath = new File(outputPath);
+    final File classOutputPath = new File(outputPath);
 
+    //noinspection ResultOfMethodCallIgnored
     outputDir.mkdirs();
 
-    File sourceFile = new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".java");
+    final File sourceFile = new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".java");
 
     RebindUtils.writeStringToFile(sourceFile, serverSideClass);
 

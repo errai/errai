@@ -1,27 +1,51 @@
 package org.jboss.errai.jpa.rebind;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.math.BigInteger;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import org.apache.commons.collections.OrderedMap;
+import org.hibernate.ejb.HibernatePersistence;
+import org.hibernate.ejb.packaging.PersistenceMetadata;
+import org.hibernate.ejb.packaging.PersistenceXmlLoader;
+import org.jboss.errai.codegen.BlockStatement;
+import org.jboss.errai.codegen.BooleanExpression;
+import org.jboss.errai.codegen.Modifier;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.SnapshotMaker;
+import org.jboss.errai.codegen.SnapshotMaker.MethodBodyCallback;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.StringStatement;
+import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.builder.MethodCommentBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
+import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.WrappedPortable;
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
+import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
+import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
+import org.jboss.errai.jpa.client.local.IntIdGenerator;
+import org.jboss.errai.jpa.client.local.LongIdGenerator;
 
 import javax.enterprise.util.TypeLiteral;
 import javax.persistence.CascadeType;
@@ -49,53 +73,29 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
-
-import org.apache.commons.collections.OrderedMap;
-import org.hibernate.ejb.HibernatePersistence;
-import org.hibernate.ejb.packaging.PersistenceMetadata;
-import org.hibernate.ejb.packaging.PersistenceXmlLoader;
-import org.jboss.errai.codegen.BlockStatement;
-import org.jboss.errai.codegen.BooleanExpression;
-import org.jboss.errai.codegen.Modifier;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.SnapshotMaker;
-import org.jboss.errai.codegen.SnapshotMaker.MethodBodyCallback;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.StringStatement;
-import org.jboss.errai.codegen.Variable;
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.MethodBlockBuilder;
-import org.jboss.errai.codegen.builder.MethodCommentBuilder;
-import org.jboss.errai.codegen.exception.GenerationException;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.util.Bool;
-import org.jboss.errai.codegen.util.Implementations;
-import org.jboss.errai.codegen.util.PrivateAccessType;
-import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.client.api.WrappedPortable;
-import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
-import org.jboss.errai.jpa.client.local.ErraiEntityManager;
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
-import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
-import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
-import org.jboss.errai.jpa.client.local.IntIdGenerator;
-import org.jboss.errai.jpa.client.local.LongIdGenerator;
-
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.math.BigInteger;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ErraiEntityManagerGenerator extends Generator {
 
@@ -157,6 +157,11 @@ public class ErraiEntityManagerGenerator extends Generator {
     pnqm.finish();
 
     String out = classBuilder.toJavaString();
+    final File fileCacheDir = RebindUtils.getErraiCacheDir();
+    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/"
+            + classBuilder.getClassDefinition().getName() + ".java");
+
+    RebindUtils.writeStringToFile(cacheFile, out);
 
     if (Boolean.getBoolean("errai.codegen.printOut")) {
       System.out.println("---ErraiEntityManager-->");
@@ -317,7 +322,7 @@ public class ErraiEntityManagerGenerator extends Generator {
                       entityType.getName());
             }
             if (!callback.isPublic()) {
-              PrivateAccessUtil.addPrivateAccessStubs(true, classBuilder, callback, new Modifier[] {});
+              PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[] {});
               methodBuilder.append(
                       Stmt.loadVariable("this")
                       .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.newObject(listenerClass), Stmt.loadVariable("targetEntity")));
@@ -333,7 +338,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       // listener methods on the entity class itself
       for (MetaMethod callback : entityType.getMethodsAnnotatedWith(eventType)) {
         if (!callback.isPublic()) {
-          PrivateAccessUtil.addPrivateAccessStubs(true, classBuilder, callback, new Modifier[] {});
+          PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[] {});
           methodBuilder.append(
                   Stmt.loadVariable("this")
                   .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.loadVariable("targetEntity")));
@@ -622,7 +627,7 @@ public class ErraiEntityManagerGenerator extends Generator {
 
         // Now unwrap in case it's a WrappedPortable
         methodBody.addStatement(
-                Stmt.if_(Bool.instanceOf(Stmt.loadVariable(entityInstanceParam), MetaClassFactory.getAsStatement(WrappedPortable.class)))
+                If.instanceOf(Stmt.loadVariable(entityInstanceParam), WrappedPortable.class)
                     .append(Stmt.loadVariable(entityInstanceParam).assignValue(Stmt.castTo(WrappedPortable.class, Stmt.loadVariable(entityInstanceParam)).invoke("unwrap")))
                     .finish());
 
@@ -659,13 +664,13 @@ public class ErraiEntityManagerGenerator extends Generator {
 
         // First we need to generate an accessor for the field.
         MetaField field = MetaClassFactory.get((Field) getJavaMember(attr));
-        PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, true, containingClassBuilder, field, new Modifier[] {});
+        PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, "jsni", containingClassBuilder, field, new Modifier[] {});
 
         BlockStatement methodBody = new BlockStatement();
 
         // Now unwrap in case it's a WrappedPortable
         methodBody.addStatement(
-                Stmt.if_(Bool.instanceOf(Stmt.loadVariable(entityInstanceParam), MetaClassFactory.getAsStatement(WrappedPortable.class)))
+                If.instanceOf(Stmt.loadVariable(entityInstanceParam), WrappedPortable.class)
                     .append(Stmt.loadVariable(entityInstanceParam).assignValue(Stmt.castTo(WrappedPortable.class, Stmt.loadVariable(entityInstanceParam)).invoke("unwrap")))
                     .finish());
 

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
@@ -38,25 +39,30 @@ import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
-import com.google.gwt.user.client.Timer;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BusCommunicationTests extends AbstractErraiTest {
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.bus.ErraiBusTests";
   }
 
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+  }
+
   public void testBasicRoundTrip() {
+
     runAfterInit(new Runnable() {
       @Override
       public void run() {
         bus.subscribe("MyTestService", new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             finishTest();
           }
         });
@@ -77,7 +83,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         bus.subscribe("GiantStringClient", new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             if (++replies == 51)
               finishTest();
           }
@@ -97,7 +103,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         bus.subscribe("MyTestService", new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             finishTest();
           }
         });
@@ -110,7 +116,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   public static class GWTRandomProvider implements RandomProvider {
-    private static char[] CHARS = {
+    private static final char[] CHARS = {
             'a', 'b', 'c', 'd', 'e', 'f',
             'g', 'h', 'i', 'j', 'k', 'l',
             'm', 'n', 'o', 'p', 'q', 'r',
@@ -125,7 +131,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     }
 
     @Override
-    public int nextInt(int upper) {
+    public int nextInt(final int upper) {
       return com.google.gwt.user.client.Random.nextInt(upper);
     }
 
@@ -142,7 +148,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     @Override
     public String randString() {
       final StringBuilder builder = new StringBuilder();
-      int len = nextInt(25) + 5;
+      final int len = nextInt(25) + 5;
       for (int i = 0; i < len; i++) {
         builder.append(nextChar());
       }
@@ -159,8 +165,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
           bus.subscribe("ClientReceiver", new MessageCallback() {
             @Override
-            public void callback(Message message) {
-              SType type = message.get(SType.class, "SType");
+            public void callback(final Message message) {
+              final SType type = message.get(SType.class, "SType");
 
               try {
                 assertNotNull(type);
@@ -196,8 +202,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
         bus.subscribe("ClientReceiver2", new MessageCallback() {
           @Override
-          public void callback(Message message) {
-            User u = message.get(User.class, "User");
+          public void callback(final Message message) {
+            final User u = message.get(User.class, "User");
 
             try {
               assertNotNull(u);
@@ -226,9 +232,9 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
+        final TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
           @Override
-          public void callback(Boolean response) {
+          public void callback(final Boolean response) {
             assertTrue(response);
             finishTest();
           }
@@ -248,16 +254,16 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        SubService remote = MessageBuilder.createCall(new RemoteCallback<Integer>() {
+        final SubService remote = MessageBuilder.createCall(new RemoteCallback<Integer>() {
           @Override
-          public void callback(Integer response) {
+          public void callback(final Integer response) {
             assertNotNull(response);
             assertEquals(1, (int) response);
             finishTest();
           }
         }, SubService.class);
 
-        remote.baseServiceMethod(); // this is a service method inherited from the superinterface
+        remote.baseServiceMethod(); // this is a service method inherited from the super interface
       }
     });
   }
@@ -267,30 +273,30 @@ public class BusCommunicationTests extends AbstractErraiTest {
       @Override
       public void run() {
         MessageBuilder.createCall(
-            new RemoteCallback<Object>() {
-              @Override
-              public void callback(Object response) {
-              }
-            },
-            new ErrorCallback() {
-              @Override
-              public boolean error(final Message message, final Throwable caught) {
-                assertNotNull("Message is null.", message);
-                assertNotNull("Throwable is null.", caught);
+                new RemoteCallback<Object>() {
+                  @Override
+                  public void callback(final Object response) {
+                  }
+                },
+                new ErrorCallback() {
+                  @Override
+                  public boolean error(final Message message, final Throwable caught) {
+                    assertNotNull("Message is null.", message);
+                    assertNotNull("Throwable is null.", caught);
 
-                try {
-                  throw caught;
-                }
-                catch (TestException e) {
-                  finishTest();
-                }
-                catch (Throwable throwable) {
-                  fail("Received wrong Throwable.");
-                }
-                return false;
-              }
-            },
-            TestRPCService.class
+                    try {
+                      throw caught;
+                    }
+                    catch (TestException e) {
+                      finishTest();
+                    }
+                    catch (Throwable throwable) {
+                      fail("Received wrong Throwable.");
+                    }
+                    return false;
+                  }
+                },
+                TestRPCService.class
         ).exception();
       }
     });
@@ -301,13 +307,13 @@ public class BusCommunicationTests extends AbstractErraiTest {
       @Override
       public void run() {
         MessageBuilder.createCall(
-            new RemoteCallback<Void>() {
-              @Override
-              public void callback(Void response) {
-                finishTest();
-              }
-            },
-            TestRPCService.class).returnVoid();
+                new RemoteCallback<Void>() {
+                  @Override
+                  public void callback(final Void response) {
+                    finishTest();
+                  }
+                },
+                TestRPCService.class).returnVoid();
       }
     });
   }
@@ -319,9 +325,10 @@ public class BusCommunicationTests extends AbstractErraiTest {
         MessageBuilder.createCall(
                 new RemoteCallback<Person>() {
                   @Override
-                  public void callback(Person response) {
+                  public void callback(final Person response) {
                     assertNull(response);
                     finishTest();
+
                   }
                 },
                 TestRPCService.class).returnNull();
@@ -329,14 +336,13 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
- 
   public void testRpcToGenericService() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
         final GenericServiceB remote = MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertNotNull(response);
             assertEquals("SpecificEntity", response);
             finishTest();
@@ -357,7 +363,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertEquals("foobar", response);
             finishTest();
           }
@@ -368,11 +374,12 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
   public void testVarArgsToRPC2() {
     runAfterInit(new Runnable() {
+      @SuppressWarnings("NullArgumentToVariableArgMethod")
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertEquals("foo", response);
             finishTest();
           }
@@ -387,7 +394,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertEquals("foo", response);
             finishTest();
           }
@@ -395,7 +402,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMultipleEndpointsOnRemoteService() {
     runAfterInit(new Runnable() {
       @Override
@@ -403,7 +410,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
         class TestCount {
           private int countdown;
 
-          TestCount(int countdown) {
+          TestCount(final int countdown) {
             this.countdown = countdown;
           }
 
@@ -419,7 +426,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 .command("foo")
                 .done().repliesTo(new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             assertEquals("Foo!", message.get(String.class, "Msg"));
             if (testCount.done()) {
               finishTest();
@@ -433,7 +440,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 .done().repliesTo(new MessageCallback() {
 
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             assertEquals("Bar!", message.get(String.class, "Msg"));
             if (testCount.done()) {
               finishTest();
@@ -449,69 +456,67 @@ public class BusCommunicationTests extends AbstractErraiTest {
       @Override
       public void run() {
         MessageBuilder.createMessage()
-          .toSubject("TestSvc")
-          .command("baz")
-          .errorsHandledBy(new ErrorCallback() {
-              @Override
-              public boolean error(Message message, Throwable throwable) {
-                fail("An exception thrown by a MessageCallback should not be delivered to the caller!");
-                return false;
-              }
-            })
-          .repliesTo(new MessageCallback() {
-              @Override
-              public void callback(Message message) {
-                fail("This service throws an Exception and does not reply. " +
-                		"The MessageCallback should not have been invoked.");
-              }
-            })
-        .sendGlobalWith(ErraiBus.get());
+                .toSubject("TestSvc")
+                .command("baz")
+                .errorsHandledBy(new ErrorCallback() {
+                  @Override
+                  public boolean error(final Message message, final Throwable throwable) {
+                    fail("An exception thrown by a MessageCallback should not be delivered to the caller!");
+                    return false;
+                  }
+                })
+                .repliesTo(new MessageCallback() {
+                  @Override
+                  public void callback(final Message message) {
+                    fail("This service throws an Exception and does not reply. " +
+                            "The MessageCallback should not have been invoked.");
+                  }
+                })
+                .sendGlobalWith(ErraiBus.get());
       }
     }, 20000);
-    
+
     new Timer() {
       @Override
       public void run() {
         finishTest();
-        
       }
     }.schedule(15000);
   }
-  
+
   public void testNonExistingCommandMessage() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
         bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
           @Override
-          public void callback(Message message) {
-            assertTrue("throwable should contain non-existing service name", 
-                message.get(String.class, MessageParts.ErrorMessage).contains("non-existing"));
+          public void callback(final Message message) {
+            assertTrue("throwable should contain non-existing service name",
+                    message.get(String.class, MessageParts.ErrorMessage).contains("non-existing"));
             finishTest();
           }
         });
-        
+
         MessageBuilder.createMessage()
-          .toSubject("TestSvc")
-          .command("non-existing")
-          .done()
-          .repliesTo(new MessageCallback() {
-              @Override
-              public void callback(Message message) {
-                fail("Callback should not have been invoked!");
-              }
-            })
-        .sendGlobalWith(ErraiBus.get());
+                .toSubject("TestSvc")
+                .command("non-existing")
+                .done()
+                .repliesTo(new MessageCallback() {
+                  @Override
+                  public void callback(final Message message) {
+                    fail("Callback should not have been invoked!");
+                  }
+                })
+                .sendGlobalWith(ErraiBus.get());
       }
     });
   }
-  
-  
+
   public void testMultipleEndpointsOnRemoteServiceWithAuthentication() {
     class TestCount {
       private int countdown;
 
-      TestCount(int countdown) {
+      TestCount(final int countdown) {
         this.countdown = countdown;
       }
 
@@ -529,7 +534,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 .command("foo")
                 .done().repliesTo(new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             assertEquals("Foo!", message.get(String.class, "Msg"));
             if (testCount.done()) {
               finishTest();
@@ -542,26 +547,25 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 .command("bar")
                 .done()
                 .repliesTo(new MessageCallback() {
-          @Override
-          public void callback(Message message) {
-            assertEquals("Bar!", message.get(String.class, "Msg"));
-            if (testCount.done()) {
-              finishTest();
-            }
-          }
-        })
-        .sendGlobalWith(ErraiBus.get());
+                  @Override
+                  public void callback(final Message message) {
+                    assertEquals("Bar!", message.get(String.class, "Msg"));
+                    if (testCount.done()) {
+                      finishTest();
+                    }
+                  }
+                })
+                .sendGlobalWith(ErraiBus.get());
       }
     }
 
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-
         // create a login client to handle the authentication handshake
         ErraiBus.get().subscribe("LoginClient", new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             if (message.getCommandType().equals("FailedAuth")) {
               fail("failed to authenticate with server");
             }
@@ -591,23 +595,23 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertEquals("Request was not intercepted", "intercepted", response);
             finishTest();
           }
         }, TestRPCService.class)
-        .interceptedRpcWithEndpointBypassing();
+                .interceptedRpcWithEndpointBypassing();
       }
     });
   }
-  
+
   public void testInterceptedRpcWithResultManipulation() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertEquals("Request was not intercepted", "result_intercepted", response);
             finishTest();
           }
@@ -615,14 +619,14 @@ public class BusCommunicationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testInterceptedRpcWithParameterManipulation() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertEquals("Request was not intercepted", "interceptor_value", response);
             finishTest();
           }
@@ -630,14 +634,14 @@ public class BusCommunicationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testInterceptedRpcWithChainedInterceptors() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
         MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
-          public void callback(String response) {
+          public void callback(final String response) {
             assertEquals("Request was not intercepted", "ABCD", response);
             finishTest();
           }
@@ -645,14 +649,14 @@ public class BusCommunicationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testPlainMessagingWithRpcEndpoint() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
         bus.subscribe("PlainMessageResponse", new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
             finishTest();
           }
         });
@@ -669,11 +673,11 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final String subjectToSubcribe = "testBusUnsubscribeTestSubjectThatWillBeRemovedAndThrowAnException";
+        final String subjectToSubscribe = "testBusUnsubscribeTestSubjectThatWillBeRemovedAndThrowAnException";
 
-        final Subscription subs = bus.subscribe(subjectToSubcribe, new MessageCallback() {
+        final Subscription subs = bus.subscribe(subjectToSubscribe, new MessageCallback() {
           @Override
-          public void callback(Message message) {
+          public void callback(final Message message) {
           }
         });
 
@@ -681,7 +685,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
         try {
           MessageBuilder.createMessage()
-                  .toSubject(subjectToSubcribe).done().sendNowWith(bus);
+                  .toSubject(subjectToSubscribe).done().sendNowWith(bus);
         }
         catch (NoSubscribersToDeliverTo e) {
           finishTest();

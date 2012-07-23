@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -28,8 +30,6 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-
-import java.lang.annotation.Annotation;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
 

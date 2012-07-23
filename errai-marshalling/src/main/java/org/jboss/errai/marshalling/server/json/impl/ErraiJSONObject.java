@@ -28,12 +28,12 @@ import java.util.Set;
 public class ErraiJSONObject implements EJObject {
   final Map oMap;
 
-  public ErraiJSONObject(Map oMap) {
+  public ErraiJSONObject(final Map oMap) {
     this.oMap = oMap;
   }
 
   @Override
-  public EJValue get(String name) {
+  public EJValue get(final String name) {
     return new ErraiJSONValue(oMap.get(name));
   }
 
@@ -43,7 +43,7 @@ public class ErraiJSONObject implements EJObject {
   }
 
   @Override
-  public boolean containsKey(String name) {
+  public boolean containsKey(final String name) {
     return oMap.containsKey(name);
   }
 

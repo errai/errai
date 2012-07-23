@@ -25,7 +25,7 @@ public final class LogUtil {
   private LogUtil() {
   }
 
-  public static void log(String message) {
+  public static void log(final String message) {
     if (GWT.isClient() && isNativeJavaScriptLoggerSupported()) {
       nativeLog("[errai] " + message);
     }
@@ -47,12 +47,10 @@ public final class LogUtil {
 
   public static void displaySeparator() {
     nativeLog("------------------------------------------------");
-
   }
 
-  public static void displayDebuggerUtilityTitle(String title) {
+  public static void displayDebuggerUtilityTitle(final String title) {
     nativeLog(title);
     displaySeparator();
   }
-
 }

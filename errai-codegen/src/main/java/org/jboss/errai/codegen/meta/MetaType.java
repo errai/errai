@@ -20,4 +20,5 @@ package org.jboss.errai.codegen.meta;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface MetaType {
+  public String getName();
 }

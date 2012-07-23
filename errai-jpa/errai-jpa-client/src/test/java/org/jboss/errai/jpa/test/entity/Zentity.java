@@ -24,6 +24,7 @@ import org.jboss.errai.ioc.client.api.TestOnly;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
+@SuppressWarnings("JpaQlInspection")
 @TestOnly @Entity
 @NamedQueries({
   @NamedQuery(name="zentityPrimitiveBoolean", query="SELECT z FROM Zentity z WHERE z.primitiveBool = :b"),

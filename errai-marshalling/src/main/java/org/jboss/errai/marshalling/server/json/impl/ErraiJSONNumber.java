@@ -24,7 +24,7 @@ import org.jboss.errai.marshalling.client.api.json.EJNumber;
 public class ErraiJSONNumber implements EJNumber {
   private final Number number;
 
-  public ErraiJSONNumber(Number number) {
+  public ErraiJSONNumber(final Number number) {
     this.number = number;
   }
 

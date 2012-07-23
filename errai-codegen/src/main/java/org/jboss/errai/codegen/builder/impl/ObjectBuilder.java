@@ -44,18 +44,18 @@ import static org.jboss.errai.codegen.CallParameters.fromStatements;
  */
 public class ObjectBuilder extends AbstractStatementBuilder {
 
-  private MetaClass type;
+  private final MetaClass type;
   private Object[] parameters;
 
   private Statement extendsBlock;
 
-  ObjectBuilder(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
+  ObjectBuilder(final MetaClass type, final Context context, final CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
 
     if (context != null) {
       context.attachClass(type);
 
-      for (MetaField field : type.getDeclaredFields()) {
+      for (final MetaField field : type.getDeclaredFields()) {
         context.addVariable(Variable.create(field.getName(), field.getType()));
       }
     }
@@ -63,56 +63,51 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     this.type = type;
   }
 
-  ObjectBuilder(MetaClass type, Context context) {
+  ObjectBuilder(final MetaClass type, final Context context) {
     this(type, context, new CallElementBuilder());
   }
 
-  ObjectBuilder(MetaClass type) {
+  ObjectBuilder(final MetaClass type) {
     this(type, Context.create(), new CallElementBuilder());
   }
 
-  ObjectBuilder() {
-    super(Context.create());
-    context.attachClass(type);
-  }
-
-  public static ObjectBuilder newInstanceOf(MetaClass type) {
+  public static ObjectBuilder newInstanceOf(final MetaClass type) {
     return new ObjectBuilder(type);
   }
 
-  public static ObjectBuilder newInstanceOf(Class<?> type) {
+  public static ObjectBuilder newInstanceOf(final Class<?> type) {
     return newInstanceOf(MetaClassFactory.get(type));
   }
 
-  public static ObjectBuilder newInstanceOf(TypeLiteral<?> type) {
+  public static ObjectBuilder newInstanceOf(final TypeLiteral<?> type) {
     return newInstanceOf(MetaClassFactory.get(type));
   }
 
-  public static ObjectBuilder newInstanceOf(MetaClass type, Context context) {
+  public static ObjectBuilder newInstanceOf(final MetaClass type, final Context context) {
     return new ObjectBuilder(type, context);
   }
 
-  public static ObjectBuilder newInstanceOf(Class<?> type, Context context) {
+  public static ObjectBuilder newInstanceOf(final Class<?> type, final Context context) {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
 
-  public static ObjectBuilder newInstanceOf(TypeLiteral<?> type, Context context) {
+  public static ObjectBuilder newInstanceOf(final TypeLiteral<?> type, final Context context) {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
 
-  public static ObjectBuilder newInstanceOf(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
+  public static ObjectBuilder newInstanceOf(final MetaClass type, final Context context, final CallElementBuilder callElementBuilder) {
     return new ObjectBuilder(type, context, callElementBuilder);
   }
 
-  public static ObjectBuilder newInstanceOf(Class<?> type, Context context, CallElementBuilder callElementBuilder) {
+  public static ObjectBuilder newInstanceOf(final Class<?> type, final Context context, final CallElementBuilder callElementBuilder) {
     return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
   }
 
-  public static ObjectBuilder newInstanceOf(TypeLiteral<?> type, Context context, CallElementBuilder callElementBuilder) {
+  public static ObjectBuilder newInstanceOf(final TypeLiteral<?> type, final Context context, final CallElementBuilder callElementBuilder) {
     return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
   }
 
-  public StatementEnd withParameters(Object... parameters) {
+  public StatementEnd withParameters(final Object... parameters) {
     this.parameters = parameters;
     return this;
   }
@@ -121,7 +116,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   public AnonymousClassStructureBuilder extend() {
     return new AnonymousClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       @Override
-      public ObjectBuilder callback(Statement statement) {
+      public ObjectBuilder callback(final Statement statement) {
         extendsBlock = statement;
         return ObjectBuilder.this;
       }
@@ -144,13 +139,13 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     if (!generated) {
       appendCallElement(new DeferredCallElement(new DeferredCallback() {
         @Override
-        public void doDeferred(CallWriter writer, Context context, Statement statement) {
+        public void doDeferred(final CallWriter writer, final Context context, final Statement statement) {
           if (extendsBlock == null && (type.isAbstract() || type.isInterface() || type.isPrimitive()))
             throw new InvalidTypeException("Cannot instantiate type:" + type);
 
           writer.reset();
 
-          CallParameters callParameters = (parameters != null) ?
+          final CallParameters callParameters = (parameters != null) ?
                   fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
 
           if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null) {
@@ -162,13 +157,13 @@ public class ObjectBuilder extends AbstractStatementBuilder {
             }
           }
 
-          StringBuilder buf = new StringBuilder();
+          final StringBuilder buf = new StringBuilder();
           buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
           if (callParameters != null) {
             buf.append(callParameters.generate(Context.create(context)));
           }
           if (extendsBlock != null) {
-            for (MetaField field : type.getDeclaredFields()) {
+            for (final MetaField field : type.getDeclaredFields()) {
               context.addVariable(Variable.create(field.getName(), field.getType()));
             }
             buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");

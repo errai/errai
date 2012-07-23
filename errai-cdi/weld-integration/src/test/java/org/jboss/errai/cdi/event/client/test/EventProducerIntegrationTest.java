@@ -20,7 +20,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   @Override
-  public void gwtSetUp() throws Exception {
+  protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
   }
 
@@ -40,7 +40,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
           assertNotNull(module.getEventAC());
           assertNotNull(module.getEventBC());
           assertNotNull(module.getEventABC());
-          
+
           finishTest();
       }
     });
@@ -48,6 +48,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
 
   public void testEventProducers() {
     final Runnable verifier = new Runnable() {
+      @Override
       public void run() {
         EventProducerTestModule module = IOC.getBeanManager().lookupBean(EventProducerTestModule.class).getInstance();
 

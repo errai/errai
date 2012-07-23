@@ -27,7 +27,6 @@ import org.jboss.errai.cdi.injection.client.EquHashCheckCycleA;
 import org.jboss.errai.cdi.injection.client.EquHashCheckCycleB;
 import org.jboss.errai.cdi.injection.client.Petrol;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
  * @author Mike Brock
@@ -40,7 +39,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   @Override
-  public void gwtSetUp() throws Exception {
+  protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
   }
 

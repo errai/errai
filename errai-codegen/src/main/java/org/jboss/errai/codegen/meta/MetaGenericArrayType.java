@@ -21,4 +21,5 @@ package org.jboss.errai.codegen.meta;
  */
 public interface MetaGenericArrayType extends MetaType {
   public MetaType getGenericComponentType();
+  
 }

@@ -53,11 +53,12 @@ import java.util.Set;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenUtil {
+  private static final String PERMISSIVE_PROPERTY = "errai.codegen.permissive";
   private static boolean PERMISSIVE_MODE;
 
   static {
-    PERMISSIVE_MODE = System.getProperty("errai.codegen.permissive") != null
-            && Boolean.getBoolean("errai.codegen.permissive");
+    PERMISSIVE_MODE = System.getProperty(PERMISSIVE_PROPERTY) != null
+            && Boolean.getBoolean(PERMISSIVE_PROPERTY);
   }
 
   public static boolean isPermissiveMode() {

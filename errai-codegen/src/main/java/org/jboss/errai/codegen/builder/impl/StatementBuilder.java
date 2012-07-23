@@ -16,8 +16,6 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Comment;
@@ -53,6 +51,8 @@ import org.jboss.errai.codegen.control.branch.BreakStatement;
 import org.jboss.errai.codegen.control.branch.ContinueStatement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -125,7 +125,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
         }
         else {
           declareVariable(isFinal ? Variable.createFinal(name, type, initialization) : Variable.create(name, type,
-                  initialization));
+              initialization));
         }
         return StatementBuilder.this;
       }
@@ -165,6 +165,37 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   @Override
   public StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization) {
     Variable v = Variable.create(name, type, initialization);
+    return declareVariable(v);
+  }
+
+
+  @Override
+  public StatementBuilder declareFinalVariable(String name, Class<?> type) {
+    Variable v = Variable.createFinal(name, type);
+    return declareVariable(v);
+  }
+
+  @Override
+  public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type) {
+    Variable v = Variable.createFinal(name, type);
+    return declareVariable(v);
+  }
+
+  @Override
+  public StatementBuilder declareFinalVariable(String name, MetaClass type, Object initialization) {
+    Variable v = Variable.createFinal(name, type, initialization);
+    return declareVariable(v);
+  }
+
+  @Override
+  public StatementBuilder declareFinalVariable(String name, Class<?> type, Object initialization) {
+    Variable v = Variable.createFinal(name, type, initialization);
+    return declareVariable(v);
+  }
+
+  @Override
+  public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type, Object initialization) {
+    Variable v = Variable.createFinal(name, type, initialization);
     return declareVariable(v);
   }
 
@@ -259,6 +290,24 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   @Override
   public ObjectBuilder newObject(TypeLiteral<?> type) {
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
+  }
+
+  @Override
+  public Statement newObject(Class<?> type, Object... parameters) {
+    return ObjectBuilder.newInstanceOf(type, context, callElementBuilder)
+        .withParameters(parameters);
+  }
+
+  @Override
+  public Statement newObject(MetaClass type, Object... parameters) {
+    return ObjectBuilder.newInstanceOf(type, context, callElementBuilder)
+        .withParameters(parameters);
+  }
+
+  @Override
+  public Statement newObject(TypeLiteral<?> type, Object... parameters) {
+    return ObjectBuilder.newInstanceOf(type, context, callElementBuilder)
+        .withParameters(parameters);
   }
 
   @Override

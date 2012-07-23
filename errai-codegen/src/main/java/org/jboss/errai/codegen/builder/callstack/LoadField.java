@@ -43,7 +43,7 @@ public class LoadField extends AbstractCallElement {
       field = new BuildMetaField(null, null, Scope.Private, statement.getType(), "this");
     } 
     else {
-      field = statement.getType().getDeclaredField(fieldName);
+      field = statement.getType().getInheritedField(fieldName);
     }
 
     if (field == null) {

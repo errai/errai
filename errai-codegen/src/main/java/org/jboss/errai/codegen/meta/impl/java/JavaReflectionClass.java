@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -36,9 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private Annotation[] _annotationsCache;
@@ -67,7 +67,17 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   public static MetaClass newInstance(final Class type) {
-    return MetaClassFactory.get(type);
+    if (type == null) return null;
+
+    if (!MetaClassFactory.isCached(type.getName())) {
+      final MetaClass clazz = newUncachedInstance(type);
+      MetaClassFactory.pushCache(clazz);
+
+      return clazz;
+    }
+    else {
+      return MetaClassFactory.get(type);
+    }
   }
 
   public static MetaClass newUncachedInstance(final Class type) {
@@ -119,7 +129,8 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     final List<MetaMethod> methodList = new ArrayList<MetaMethod>();
 
     for (final Method m : methods) {
-      if (!m.isBridge()) {
+      // hack to exclude jacoco instrumented methods.
+      if (!m.isBridge() && !m.getName().startsWith("$jacoco")) {
         methodList.add(new JavaReflectionMethod(this, m));
       }
     }
@@ -231,7 +242,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       // (getParameterTypes().length != getGenericParameterTypes().length)
       return new MetaConstructor[0];
     }
-    
+
     if (declConstructorCache != null) {
       return declConstructorCache;
     }
@@ -262,6 +273,17 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     catch (Exception e) {
       return null;
     }
+  }
+
+  @Override
+  public MetaClass[] getDeclaredClasses() {
+    final Class[] declaredClasses = getEnclosedMetaObject().getDeclaredClasses();
+    final MetaClass[] declaredClassesMC = new MetaClass[declaredClasses.length];
+    int i = 0;
+    for (Class c : declaredClasses) {
+      declaredClassesMC[i++] = MetaClassFactory.get(c);
+    }
+    return declaredClassesMC;
   }
 
   private MetaClass[] _interfacesCache;
@@ -295,7 +317,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return parameterizedAs(getEnclosedMetaObject().getSuperclass(), typeParametersOf(getGenericSuperClass().getTypeParameters()));
     }
     else {
-      return MetaClassFactory.get(getEnclosedMetaObject().getSuperclass());
+      return newInstance(getEnclosedMetaObject().getSuperclass());
     }
   }
 

@@ -16,6 +16,10 @@
 
 package org.jboss.errai.codegen.literal;
 
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -28,48 +32,44 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-
 /**
  * @author Mike Brock
  */
 public class AnnotationLiteral extends LiteralValue<Annotation> {
 
-  public AnnotationLiteral(Annotation value) {
+  public AnnotationLiteral(final Annotation value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
-    Class<? extends Annotation> annoClass = getValue().annotationType();
+  public String getCanonicalString(final Context context) {
+    final Class<? extends Annotation> annotationClass = getValue().annotationType();
+    final String ref = LoadClassReference.getClassReference(MetaClassFactory.get(annotationClass), context);
+    final StringBuilder builder = new StringBuilder();
 
-    String ref = LoadClassReference.getClassReference(MetaClassFactory.get(annoClass), context);
-    StringBuilder builder = new StringBuilder();
     builder.append("@").append(ref);
 
-    List<Method> sortedMethods = Arrays.asList(annoClass.getDeclaredMethods());
+    final List<Method> sortedMethods = Arrays.asList(annotationClass.getDeclaredMethods());
     Collections.sort(sortedMethods, new Comparator<Method>() {
       @Override
-      public int compare(Method m1, Method m2) {
+      public int compare(final Method m1, final Method m2) {
         return m1.getName().compareTo(m2.getName());
       }
 
     });
 
-    List<String> elements = new ArrayList<String>();
+    final List<String> elements = new ArrayList<String>();
 
     String lastMethodRendered = "";
     String lastValueRendered = "";
 
-    for (Method method : sortedMethods) {
+    for (final Method method : sortedMethods) {
       if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
               && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
         try {
           method.setAccessible(true);
           lastMethodRendered = method.getName();
-          Object methodValue = method.invoke(getValue());
+          final Object methodValue = method.invoke(getValue());
 
           if (method.getReturnType().isArray() && Array.getLength(methodValue) == 1) {
             lastValueRendered = LiteralFactory.getLiteral(Array.get(methodValue, 0)).getCanonicalString(context);
@@ -89,7 +89,7 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
       }
     }
 
-    Iterator<String> els = elements.iterator();
+    final Iterator<String> els = elements.iterator();
     if (els.hasNext()) {
       builder.append("(");
     }

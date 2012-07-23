@@ -26,7 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 public class JavaReflectionField extends MetaField {
-  private Field field;
+  private final Field field;
 
   JavaReflectionField(final Field field) {
     this.field = field;

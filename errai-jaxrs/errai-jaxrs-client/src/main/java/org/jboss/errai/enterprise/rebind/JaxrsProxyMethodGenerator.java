@@ -19,9 +19,13 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Cookies;
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.client.framework.CallContextStatus;
 import org.jboss.errai.bus.rebind.RebindUtils;
@@ -38,18 +42,14 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Cookies;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Generates a JAX-RS remote proxy method.
@@ -100,7 +100,7 @@ public class JaxrsProxyMethodGenerator {
   private Statement generateUrl(JaxrsResourceMethodParameters params) {
     BlockStatement block = new BlockStatement();
     block.addStatement(Stmt.declareVariable("url", StringBuilder.class,
-        Stmt.newObject(StringBuilder.class).withParameters(new StringStatement("getBaseUrl()"))));
+        Stmt.newObject(StringBuilder.class, new StringStatement("getBaseUrl()"))));
 
     // construct path using @PathParams and @MatrixParams
     String path = resourceMethod.getPath();
@@ -328,8 +328,7 @@ public class JaxrsProxyMethodGenerator {
     }
 
     Statement handleResult =
-        Stmt
-            .if_(Bool.equals(Stmt.loadVariable("response").invoke("getStatusCode"), 204))
+        If.idEquals(Stmt.loadVariable("response").invoke("getStatusCode"), 204)
             .append(
                 Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", Stmt.load(null)))
             .finish()
@@ -337,9 +336,8 @@ public class JaxrsProxyMethodGenerator {
             .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", result))
             .finish();
 
-    return Stmt
-        .if_(Bool.instanceOf(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback"),
-            MetaClassFactory.getAsStatement(ResponseCallback.class)))
+    return
+        If.instanceOf(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback"), ResponseCallback.class)
         .append(handleResponse)
         .finish()
         .else_()

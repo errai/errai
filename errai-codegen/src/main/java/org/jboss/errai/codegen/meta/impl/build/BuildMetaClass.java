@@ -49,7 +49,7 @@ import java.util.List;
 public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder {
   private Context context;
 
-  private String className;
+  private final String className;
   private MetaClass superClass;
   private List<MetaClass> interfaces = new ArrayList<MetaClass>();
 
@@ -76,7 +76,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   private String classComment;
 
-  public BuildMetaClass(Context context, String name) {
+  public BuildMetaClass(final Context context, final String name) {
     super(null);
     this.className = name;
     this.context = Context.create(context);
@@ -85,7 +85,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   private BuildMetaClass shallowCopy() {
-    BuildMetaClass copy = new BuildMetaClass(context, className);
+    final BuildMetaClass copy = new BuildMetaClass(context, className);
 
     copy.superClass = superClass;
     copy.interfaces = interfaces;
@@ -114,7 +114,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public String getName() {
     if (_nameCache != null) return _nameCache;
 
-    int idx = className.lastIndexOf('.');
+    final int idx = className.lastIndexOf('.');
     if (idx != -1) {
       return _nameCache = className.substring(idx + 1);
     }
@@ -135,9 +135,9 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public String getInternalName() {
-    String internalName = "L" + className.replace("\\.", "/") + ";";
+    final String internalName = "L" + className.replace("\\.", "/") + ";";
     if (isArray) {
-      StringBuilder buf = new StringBuilder("");
+      final StringBuilder buf = new StringBuilder("");
       for (int i = 0; i < dimensions; i++) {
         buf.append("[");
       }
@@ -150,7 +150,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public String getPackageName() {
-    int idx = className.lastIndexOf(".");
+    final int idx = className.lastIndexOf(".");
     if (idx != -1) {
       return className.substring(0, idx);
     }
@@ -163,12 +163,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public MetaMethod[] getMethods() {
     if (_methodsCache != null) return _methodsCache;
 
-    MetaMethod[] methodArray = methods.toArray(new MetaMethod[methods.size()]);
-    MetaMethod[] outputMethods;
+    final MetaMethod[] methodArray = methods.toArray(new MetaMethod[methods.size()]);
+    final MetaMethod[] outputMethods;
 
     if (superClass != null) {
-      List<MetaMethod> methodList = new ArrayList<MetaMethod>();
-      for (MetaMethod m : superClass.getMethods()) {
+      final List<MetaMethod> methodList = new ArrayList<MetaMethod>();
+      for (final MetaMethod m : superClass.getMethods()) {
         if (_getMethod(methodArray, m.getName(), GenUtil.fromParameters(m.getParameters())) == null) {
           methodList.add(m);
         }
@@ -204,8 +204,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   @Override
-  public MetaField getField(String name) {
-    for (MetaField field : fields) {
+  public MetaField getField(final String name) {
+    for (final MetaField field : fields) {
       if (field.getName().equals(name)) {
         return field;
       }
@@ -215,7 +215,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   @Override
-  public MetaField getDeclaredField(String name) {
+  public MetaField getDeclaredField(final String name) {
     return getField(name);
   }
 
@@ -227,7 +227,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     if (constructors.isEmpty()) {
       // add an empty no-arg constructor
-      BuildMetaConstructor buildMetaConstructor =
+      final BuildMetaConstructor buildMetaConstructor =
               new BuildMetaConstructor(this, new BlockStatement(), DefParameters.none());
 
       buildMetaConstructor.setScope(Scope.Public);
@@ -243,6 +243,17 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return getConstructors();
   }
 
+
+  @Override
+  public MetaClass[] getDeclaredClasses() {
+    final MetaClass[] declaredClass = new MetaClass[innerClasses.size()];
+    int i = 0;
+    for (final InnerClass innerClass : innerClasses) {
+      declaredClass[i++] = innerClass.getType();
+    }
+    return declaredClass;
+  }
+
   @Override
   public MetaClass[] getInterfaces() {
     return interfaces.toArray(new MetaClass[interfaces.size()]);
@@ -256,7 +267,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   @Override
   public MetaClass getComponentType() {
     if (isArray) {
-      BuildMetaClass compType = shallowCopy();
+      final BuildMetaClass compType = shallowCopy();
       if (dimensions > 1) {
         compType.setDimensions(dimensions - 1);
       }
@@ -354,27 +365,27 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 //    this.className = className;
 //  }
 
-  public void setSuperClass(MetaClass superClass) {
+  public void setSuperClass(final MetaClass superClass) {
     this.superClass = superClass;
   }
 
-  public void setInterfaces(List<MetaClass> interfaces) {
+  public void setInterfaces(final List<MetaClass> interfaces) {
     this.interfaces = interfaces;
   }
 
-  public void setInterface(boolean anInterface) {
+  public void setInterface(final boolean anInterface) {
     isInterface = anInterface;
   }
 
-  public void setAbstract(boolean anAbstract) {
+  public void setAbstract(final boolean anAbstract) {
     isAbstract = anAbstract;
   }
 
-  public void setArray(boolean array) {
+  public void setArray(final boolean array) {
     isArray = array;
   }
 
-  public void setDimensions(int dimensions) {
+  public void setDimensions(final int dimensions) {
     this.dimensions = dimensions;
   }
 
@@ -382,23 +393,23 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return dimensions;
   }
 
-  public void setFinal(boolean aFinal) {
+  public void setFinal(final boolean aFinal) {
     isFinal = aFinal;
   }
 
-  public void setStatic(boolean aStatic) {
+  public void setStatic(final boolean aStatic) {
     isStatic = aStatic;
   }
 
-  public void setInner(boolean aInner) {
+  public void setInner(final boolean aInner) {
     isInner = aInner;
   }
 
-  public void setScope(Scope scope) {
+  public void setScope(final Scope scope) {
     this.scope = scope;
   }
 
-  public void setContext(Context context) {
+  public void setContext(final Context context) {
     this.context = context;
   }
 
@@ -406,38 +417,38 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return context;
   }
 
-  public void addAnnotation(Annotation annotation) {
+  public void addAnnotation(final Annotation annotation) {
     annotations.add(annotation);
   }
 
-  public void addInnerClass(InnerClass innerClass) {
+  public void addInnerClass(final InnerClass innerClass) {
     innerClasses.add(innerClass);
   }
 
-  public void addInterface(MetaClass interfaceClass) {
+  public void addInterface(final MetaClass interfaceClass) {
     interfaces.add(interfaceClass);
   }
 
-  public void addConstructor(BuildMetaConstructor constructor) {
+  public void addConstructor(final BuildMetaConstructor constructor) {
     _constructorsCache = null;
     constructors.add(constructor);
   }
 
-  public void addMethod(BuildMetaMethod method) {
+  public void addMethod(final BuildMetaMethod method) {
     _methodsCache = null;
     methods.add(method);
   }
 
-  public void addField(BuildMetaField field) {
+  public void addField(final BuildMetaField field) {
     _fieldsCache = null;
     fields.add(field);
   }
 
-  public void addTypeVariable(MetaTypeVariable typeVariable) {
+  public void addTypeVariable(final MetaTypeVariable typeVariable) {
     typeVariables.add(typeVariable);
   }
 
-  public void setParameterizedType(MetaParameterizedType parameterizedType) {
+  public void setParameterizedType(final MetaParameterizedType parameterizedType) {
     this.parameterizedType = parameterizedType;
   }
 
@@ -449,54 +460,42 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return reifiedFormOf;
   }
 
-  public void setReifiedFormOf(MetaClass reifiedFormOf) {
+  public void setReifiedFormOf(final MetaClass reifiedFormOf) {
     this.reifiedFormOf = reifiedFormOf;
   }
 
   @Override
-  public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
-//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
-//            : super.getBestMatchingMethod(name, parameters);
+  public MetaMethod getBestMatchingMethod(final String name, final Class... parameters) {
     return super.getBestMatchingMethod(name, parameters);
   }
 
   @Override
-  public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
-//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
-//            : super.getBestMatchingMethod(name, parameters);
+  public MetaMethod getBestMatchingMethod(final String name, final MetaClass... parameters) {
     return super.getBestMatchingMethod(name, parameters);
   }
 
   @Override
-  public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
-//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
-//            : super.getBestMatchingStaticMethod(name, parameters);
+  public MetaMethod getBestMatchingStaticMethod(final String name, final Class... parameters) {
     return super.getBestMatchingStaticMethod(name, parameters);
   }
 
   @Override
-  public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
-//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
-//            : super.getBestMatchingStaticMethod(name, parameters);
+  public MetaMethod getBestMatchingStaticMethod(final String name, final MetaClass... parameters) {
     return super.getBestMatchingStaticMethod(name, parameters);
   }
 
   @Override
-  public MetaConstructor getBestMatchingConstructor(Class... parameters) {
-//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
-//            : super.getBestMatchingConstructor(parameters);
+  public MetaConstructor getBestMatchingConstructor(final Class... parameters) {
     return super.getBestMatchingConstructor(parameters);
   }
 
   @Override
-  public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
-//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
-//            : super.getBestMatchingConstructor(parameters);
+  public MetaConstructor getBestMatchingConstructor(final MetaClass... parameters) {
     return super.getBestMatchingConstructor(parameters);
   }
 
-  private MetaMethod findReifiedVersion(MetaMethod formOf) {
-    for (BuildMetaMethod method : methods) {
+  private MetaMethod findReifiedVersion(final MetaMethod formOf) {
+    for (final BuildMetaMethod method : methods) {
       if (method.getReifiedFormOf().equals(formOf)) {
         return method;
       }
@@ -504,8 +503,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return null;
   }
 
-  private MetaConstructor findReifiedVersion(MetaConstructor formOf) {
-    for (BuildMetaConstructor method : constructors) {
+  private MetaConstructor findReifiedVersion(final MetaConstructor formOf) {
+    for (final BuildMetaConstructor method : constructors) {
       if (method.getReifiedFormOf().equals(formOf)) {
         return method;
       }
@@ -515,14 +514,14 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
 
   @Override
-  public MetaClass asArrayOf(int dimensions) {
-    BuildMetaClass copy = shallowCopy();
+  public MetaClass asArrayOf(final int dimensions) {
+    final BuildMetaClass copy = shallowCopy();
     copy.setArray(true);
     copy.setDimensions(dimensions);
     return copy;
   }
 
-  public void setClassComment(String classComment) {
+  public void setClassComment(final String classComment) {
     this.classComment = classComment;
   }
 
@@ -544,7 +543,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public String toJavaString(Context context) {
     if (generatedCache != null) return generatedCache;
 
-    StringBuilder buf = new StringBuilder(512);
+    final StringBuilder buf = new StringBuilder(512);
 
     if (classComment != null) {
       buf.append(new Comment(classComment).generate(null)).append("\n");
@@ -602,10 +601,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
         buf.append(" implements ");
       }
 
-      Iterator<MetaClass> iter = interfacesToRender.iterator();
-      while (iter.hasNext()) {
-        buf.append(LoadClassReference.getClassReference(iter.next(), context));
-        if (iter.hasNext())
+      final Iterator<MetaClass> metaClassIterator = interfacesToRender.iterator();
+      while (metaClassIterator.hasNext()) {
+        buf.append(LoadClassReference.getClassReference(metaClassIterator.next(), context));
+        if (metaClassIterator.hasNext())
           buf.append(", ");
       }
     }
@@ -629,7 +628,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     buf.append(membersToString());
 
-    StringBuilder headerBuffer = new StringBuilder(128);
+    final StringBuilder headerBuffer = new StringBuilder(128);
 
     if (!getPackageName().isEmpty() && !isInner)
       headerBuffer.append("package ").append(getPackageName()).append(";\n");
@@ -638,12 +637,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       headerBuffer.append("\n");
 
     if (!isInner) {
-      for (String cls : context.getRequiredImports()) {
+      for (final String cls : context.getRequiredImports()) {
         if (getFullyQualifiedName().equals(cls)) {
           continue;
         }
         else {
-          String pkg = getPackageName();
+          final String pkg = getPackageName();
           if (cls.startsWith(pkg)) {
             if (cls.substring(pkg.length() + 1).indexOf('.') == -1) {
               continue;
@@ -660,18 +659,18 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   public String membersToString() {
-    StringBuilder buf = new StringBuilder(512);
-    Iterator<? extends Builder> iter = fields.iterator();
-    while (iter.hasNext()) {
-      buf.append(iter.next().toJavaString());
-      if (iter.hasNext())
+    final StringBuilder buf = new StringBuilder(512);
+    Iterator<? extends Builder> fieldIterator = fields.iterator();
+    while (fieldIterator.hasNext()) {
+      buf.append(fieldIterator.next().toJavaString());
+      if (fieldIterator.hasNext())
         buf.append("\n");
     }
 
     if (!fields.isEmpty())
       buf.append("\n");
 
-    Iterator<InnerClass> innerClassIterator = innerClasses.iterator();
+    final Iterator<InnerClass> innerClassIterator = innerClasses.iterator();
     while (innerClassIterator.hasNext()) {
       buf.append(innerClassIterator.next().generate(context));
       if (innerClassIterator.hasNext()) buf.append("\n");
@@ -680,20 +679,20 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!innerClasses.isEmpty())
       buf.append("\n");
 
-    iter = constructors.iterator();
-    while (iter.hasNext()) {
-      buf.append(iter.next().toJavaString());
-      if (iter.hasNext())
+    fieldIterator = constructors.iterator();
+    while (fieldIterator.hasNext()) {
+      buf.append(fieldIterator.next().toJavaString());
+      if (fieldIterator.hasNext())
         buf.append("\n");
     }
 
     if (!constructors.isEmpty())
       buf.append("\n");
 
-    iter = methods.iterator();
-    while (iter.hasNext()) {
-      buf.append(iter.next().toJavaString());
-      if (iter.hasNext())
+    fieldIterator = methods.iterator();
+    while (fieldIterator.hasNext()) {
+      buf.append(fieldIterator.next().toJavaString());
+      if (fieldIterator.hasNext())
         buf.append("\n");
     }
     return buf.toString();
@@ -701,12 +700,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof BuildMetaClass)) return false;
     if (!super.equals(o)) return false;
 
-    BuildMetaClass that = (BuildMetaClass) o;
+    final BuildMetaClass that = (BuildMetaClass) o;
 
     if (dimensions != that.dimensions) return false;
     if (isAbstract != that.isAbstract) return false;

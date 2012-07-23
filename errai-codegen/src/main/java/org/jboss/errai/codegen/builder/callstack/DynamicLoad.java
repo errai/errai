@@ -26,14 +26,16 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DynamicLoad extends AbstractCallElement {
-  private Object value;
+  private final Object value;
 
-  public DynamicLoad(Object value) {
+  public DynamicLoad(final Object value) {
     this.value = value;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer,
+                         final Context context,
+                         final Statement statement) {
     try {
       nextOrReturn(writer, context, GenUtil.generate(context, value));
     }

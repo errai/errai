@@ -16,15 +16,15 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Utility to transform Errai's JSON to a Jackson compatible JSON and vice versa.

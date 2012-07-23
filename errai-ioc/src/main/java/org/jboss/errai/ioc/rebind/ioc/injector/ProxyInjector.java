@@ -16,6 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.newObject;
+
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.ProxyMaker;
@@ -36,12 +42,6 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.util.Stmt.newObject;
 
 /**
  * @author Mike Brock
@@ -80,7 +80,7 @@ public class ProxyInjector extends AbstractInjector {
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
     final IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
-    pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
+    pCtx.append(Stmt.declareFinalVariable(varName, proxyClass, newObject(proxyClass)));
 
     final MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 

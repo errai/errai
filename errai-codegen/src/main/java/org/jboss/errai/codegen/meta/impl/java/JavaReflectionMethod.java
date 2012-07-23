@@ -35,13 +35,12 @@ import java.util.List;
 
 public class JavaReflectionMethod extends MetaMethod {
   private final Method method;
-  private final MetaClass referenceClass;
+  private final MetaClass declaringClass;
   private MetaParameter[] parameters;
-  private MetaClass declaringClass;
   private MetaClass returnType;
 
   JavaReflectionMethod(final MetaClass referenceClass, final Method method) {
-    this.referenceClass = Assert.notNull(referenceClass);
+    this.declaringClass = Assert.notNull(referenceClass);
     this.method = Assert.notNull(method);
   }
 
@@ -60,7 +59,7 @@ public class JavaReflectionMethod extends MetaMethod {
       final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
       for (int i = 0; i < parmTypes.length; i++) {
-        final TypeToken<?> token = TypeToken.of(referenceClass.asClass());
+        final TypeToken<?> token = TypeToken.of(declaringClass.asClass());
         final Class<?> parmType = token.resolveType(genParmTypes[i]).getRawType();
 
         final MetaClass mcParm = MetaClassFactory.get(parmType, genParmTypes[i]);
@@ -110,9 +109,6 @@ public class JavaReflectionMethod extends MetaMethod {
 
   @Override
   public MetaClass getDeclaringClass() {
-    if (declaringClass == null) {
-      declaringClass = MetaClassFactory.get(method.getDeclaringClass());
-    }
     return declaringClass;
   }
 

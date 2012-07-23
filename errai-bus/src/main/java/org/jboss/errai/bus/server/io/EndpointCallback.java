@@ -36,8 +36,10 @@ public class EndpointCallback implements MessageCallback {
   /**
    * Initializes the service and endpoint method
    *
-   * @param genericSvc - the service that delivers the message
-   * @param method     - the endpoint function
+   * @param genericSvc
+   *         - the service that delivers the message
+   * @param method
+   *         - the endpoint function
    */
   public EndpointCallback(final Object genericSvc, final Method method) {
     this.genericSvc = genericSvc;
@@ -47,24 +49,28 @@ public class EndpointCallback implements MessageCallback {
   /**
    * Invokes the endpoint function based on the details of the message
    *
-   * @param message - the message
+   * @param message
+   *         - the message
    */
-  public void callback(Message message) {
-    List<Object> parms = message.get(List.class, "MethodParms");
+  @SuppressWarnings("unchecked")
+  public void callback(final Message message) {
+    final List<Object> parms = message.get(List.class, "MethodParms");
 
     if ((parms == null && targetTypes.length != 0) || (parms.size() != targetTypes.length)) {
       throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
               + (parms == null ? 0 : parms.size()) + "; required: " + targetTypes.length + ")");
     }
-    for (int i = 0; i < parms.size(); i++) {
-      Object p = parms.get(i);
+    else if (parms != null) {
+      for (int i = 0; i < parms.size(); i++) {
+        final Object p = parms.get(i);
 
-      if (p != null && !targetTypes[i].isAssignableFrom(p.getClass())) {
-        if (DataConversion.canConvert(targetTypes[i], p.getClass())) {
-          p = DataConversion.convert(p, targetTypes[i]);
-        }
-        else {
-          throw new MessageDeliveryFailure("type mismatch in method parameters");
+        if (p != null && !targetTypes[i].isAssignableFrom(p.getClass())) {
+          if (DataConversion.canConvert(targetTypes[i], p.getClass())) {
+            parms.set(i, DataConversion.convert(p, targetTypes[i]));
+          }
+          else {
+            throw new MessageDeliveryFailure("type mismatch in method parameters");
+          }
         }
       }
     }

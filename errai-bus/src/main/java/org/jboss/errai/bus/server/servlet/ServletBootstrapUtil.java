@@ -1,24 +1,15 @@
 package org.jboss.errai.bus.server.servlet;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 
 /**
  * @author Mike Brock

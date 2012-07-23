@@ -25,11 +25,17 @@ import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaMappin
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MappingStrategyFactory {
-  static MappingStrategy createStrategy(final boolean gwtTarget, final GeneratorMappingContext context, final MetaClass clazz) {
+  static MappingStrategy createStrategy(final boolean gwtTarget,
+                                        final GeneratorMappingContext context,
+                                        final MetaClass clazz) {
+
     return defaultStrategy(gwtTarget, context, clazz);
   }
 
-  private static MappingStrategy defaultStrategy(final boolean gwtTarget, final GeneratorMappingContext context, final MetaClass clazz) {
+  private static MappingStrategy defaultStrategy(final boolean gwtTarget,
+                                                 final GeneratorMappingContext context,
+                                                 final MetaClass clazz) {
+
     return new DefaultJavaMappingStrategy(gwtTarget, context, clazz);
   }
 }

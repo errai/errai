@@ -101,7 +101,7 @@ public class TransmissionBuffer implements Buffer {
    */
   private volatile long headSequence = STARTING_SEQUENCE;
 
-  private TransmissionBuffer(boolean directBuffer, int segmentSize, int segments) {
+  private TransmissionBuffer(final boolean directBuffer, final int segmentSize, final int segments) {
     this.segmentSize = segmentSize;
     this.bufferSize = segmentSize * segments;
     this.segments = segments;
@@ -145,7 +145,7 @@ public class TransmissionBuffer implements Buffer {
    * @param segments    the total number of segments
    * @return an instance of the transmission buffer
    */
-  public static TransmissionBuffer create(int segmentSize, int segments) {
+  public static TransmissionBuffer create(final int segmentSize, final int segments) {
     return new TransmissionBuffer(false, segmentSize, segments);
   }
 
@@ -157,7 +157,7 @@ public class TransmissionBuffer implements Buffer {
    * @param segments    the total number of segments
    * @return an instance of the transmission buffer
    */
-  public static TransmissionBuffer createDirect(int segmentSize, int segments) {
+  public static TransmissionBuffer createDirect(final int segmentSize, final int segments) {
     return new TransmissionBuffer(true, segmentSize, segments);
   }
 
@@ -170,7 +170,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws IOException
    */
   @Override
-  public void write(InputStream inputStream, BufferColor bufferColor) throws IOException {
+  public void write(final InputStream inputStream, final BufferColor bufferColor) throws IOException {
     write(inputStream.available(), inputStream, bufferColor);
   }
 
@@ -298,7 +298,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws IOException
    */
   @Override
-  public boolean read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence) throws IOException {
+  public boolean read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback, final long sequence) throws IOException {
     // attempt obtain this color's read lock
     if (bufferColor.lock.tryLock()) {
 
@@ -448,7 +448,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
+  public boolean readWait(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException, InterruptedException {
     return readWait(TimeUnit.NANOSECONDS, -1, outputStream, bufferColor, callback);
   }
 
@@ -465,8 +465,8 @@ public class TransmissionBuffer implements Buffer {
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, final BufferColor bufferColor,
-                          BufferCallback callback) throws IOException, InterruptedException {
+  public boolean readWait(final TimeUnit unit, final long time, final OutputStream outputStream, final BufferColor bufferColor,
+                          final BufferCallback callback) throws IOException, InterruptedException {
     final ReentrantLock lock = bufferColor.lock;
     lock.lockInterruptibly();
 
@@ -544,7 +544,7 @@ public class TransmissionBuffer implements Buffer {
     final int color = bufferColor.getColor();
 
     for (; colorSeq < headSeq; colorSeq++) {
-      short seg = getSeg((int) colorSeq % segments);
+      final short seg = getSeg((int) colorSeq % segments);
 
       if (seg == color || seg == Short.MIN_VALUE) {
         return colorSeq;
@@ -594,7 +594,7 @@ public class TransmissionBuffer implements Buffer {
         }
 
         if (readCursor < endRead) {
-          int remaining = endRead - bufferSize;
+          final int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
             outputStream.write(getBuf(i));
           }
@@ -606,7 +606,7 @@ public class TransmissionBuffer implements Buffer {
         }
 
         if (readCursor < endRead) {
-          int remaining = endRead - bufferSize;
+          final int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
             outputStream.write(callback.each(getBuf(i), outputStream));
           }
@@ -625,33 +625,33 @@ public class TransmissionBuffer implements Buffer {
    * @param position the position in the buffer to read the data.
    * @return the size in bytes.
    */
-  private int readChunkSize(int position) {
+  private int readChunkSize(final int position) {
     return ((((int) getBuf(position + 3)) & 0xFF)) +
             ((((int) getBuf(position + 2)) & 0xFF) << 8) +
             ((((int) getBuf(position + 1)) & 0xFF) << 16) +
             ((((int) getBuf(position)) & 0xFF) << 24);
   }
 
-  private void writeChunkSize(int position, int size) {
+  private void writeChunkSize(final int position, final int size) {
     writeBuf(position, (byte) ((size >> 24) & 0xFF));
     writeBuf(position + 1, (byte) ((size >> 16) & 0xFF));
     writeBuf(position + 2, (byte) ((size >> 8) & 0xFF));
     writeBuf(position + 3, (byte) (size & 0xFF));
   }
 
-  private byte getBuf(int idx) {
+  private byte getBuf(final int idx) {
     return _buffer.get(idx);
   }
 
-  private void writeBuf(int idx, byte v) {
+  private void writeBuf(final int idx, final byte v) {
     _buffer.put(idx, v);
   }
 
-  private short getSeg(int idx) {
+  private short getSeg(final int idx) {
     return segmentMap[idx];
   }
 
-  private void writeSeg(int idx, short v) {
+  private void writeSeg(final int idx, final short v) {
     segmentMap[idx] = v;
   }
 
@@ -665,27 +665,27 @@ public class TransmissionBuffer implements Buffer {
    * @param colorSeq the position to check for overflow
    * @throws IOException
    */
-  private void checkOverflow(long colorSeq) throws IOException {
+  private void checkOverflow(final long colorSeq) throws IOException {
     if (headSequence - segments > colorSeq) {
       throw new IOException("buffer overflow");
     }
   }
 
-  public void dumpSegments(PrintWriter writer) {
+  public void dumpSegments(final PrintWriter writer) {
     writer.println();
     writer.println("SEGMENT DUMP");
 
     for (int i = 0; i < segmentMap.length && i < headSequence; i++) {
-      StringBuilder build = new StringBuilder();
+      final StringBuilder build = new StringBuilder();
       int pos = i * segmentSize;
       int length = readChunkSize(pos);
       build.append("Segment ").append(i).append(" <color:")
               .append((int) segmentMap[i]).append(";length:").append(length).append(";location:").append(pos).append(">");
       pos += SEGMENT_HEADER_SIZE;
 
-      byte[] buf = new byte[length];
+      final byte[] buf = new byte[length];
 
-      ByteBuffer dupBuf = _buffer.duplicate();
+      final ByteBuffer dupBuf = _buffer.duplicate();
       dupBuf.position(pos);
       dupBuf.put(buf, 0, length);
 
@@ -693,7 +693,7 @@ public class TransmissionBuffer implements Buffer {
       length += SEGMENT_HEADER_SIZE;
 
       if (length > segmentSize) {
-        int segSpan = (length / segmentSize) + 1;
+        final int segSpan = (length / segmentSize) + 1;
 
         i += segSpan;
       }
@@ -704,7 +704,7 @@ public class TransmissionBuffer implements Buffer {
 
   @SuppressWarnings("UnusedDeclaration")
   public List<String> dumpSegmentsAsList() {
-    List<String> list = new ArrayList<String>();
+    final List<String> list = new ArrayList<String>();
 
     for (int i = 0; i < segmentMap.length && i < headSequence; i++) {
       int pos = i * segmentSize;
@@ -712,9 +712,9 @@ public class TransmissionBuffer implements Buffer {
 
       pos += SEGMENT_HEADER_SIZE;
 
-      byte[] buf = new byte[length];
+      final byte[] buf = new byte[length];
 
-      ByteBuffer dupBuf = _buffer.duplicate();
+      final ByteBuffer dupBuf = _buffer.duplicate();
       dupBuf.position(pos);
       dupBuf.put(buf, 0, length);
 
@@ -723,7 +723,7 @@ public class TransmissionBuffer implements Buffer {
       length += SEGMENT_HEADER_SIZE;
 
       if (length > segmentSize) {
-        int segSpan = (length / segmentSize) + 1;
+        final int segSpan = (length / segmentSize) + 1;
 
         i += segSpan;
       }

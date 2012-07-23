@@ -23,6 +23,7 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class MetaClass implements HasAnnotations, MetaType, MetaGenericDeclaration {
+  @Override
   public abstract String getName();
 
   public abstract String getFullyQualifiedName();
@@ -81,6 +82,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract MetaConstructor[] getConstructors();
 
   public abstract MetaConstructor[] getDeclaredConstructors();
+
+  public abstract MetaClass[] getDeclaredClasses();
 
   public abstract MetaConstructor getConstructor(Class... parameters);
 
@@ -184,4 +187,15 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract boolean isPrimitiveWrapper();
 
   public abstract Class<?> asClass();
+  
+  /**
+   * Searches for the named field in this type, its superinterfaces, and its superclasses.
+   * <p>
+   * The search proceeds as in {@link #getField(String)}, but includes all public, protected, default accessibility, and
+   * private fields. Whether a field is static or not does not affect this search.
+   * 
+   * @param name The name of the field to search for. Not null.
+   * @return The first field with the given name that was encountered by the search.
+   */
+  public abstract MetaField getInheritedField(String name);
 }

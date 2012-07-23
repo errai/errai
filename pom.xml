@@ -102,6 +102,8 @@
         <module>errai-html5</module>
         <module>errai-reflections</module>
         <module>errai-javaee-all</module>
+        <module>errai-config</module>
+        <module>errai-codegen-gwt</module>
     </modules>
 
     <dependencyManagement>

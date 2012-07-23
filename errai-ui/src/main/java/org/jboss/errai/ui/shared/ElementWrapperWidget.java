@@ -2,6 +2,7 @@ package org.jboss.errai.ui.shared;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.Widget;
@@ -13,6 +14,8 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class ElementWrapperWidget extends Widget implements HasHTML {
 
+  private EventListener listener;
+
   public ElementWrapperWidget(Element wrapped) {
     if (wrapped == null) {
       throw new IllegalArgumentException(
@@ -21,7 +24,7 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
     this.setElement(wrapped);
     DOM.setEventListener(this.getElement(), this);
   }
-
+  
   @Override
   public String getText() {
     return getElement().getInnerText();
@@ -40,6 +43,14 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
   @Override
   public void setHTML(String html) {
     getElement().setInnerHTML(html);
+  }
+
+  public void setEventListener(EventListener listener) {
+    this.listener = listener;
+  }
+
+  public void setEventsToSink(int eventsToSink) {
+    sinkEvents(eventsToSink);
   }
 
 }

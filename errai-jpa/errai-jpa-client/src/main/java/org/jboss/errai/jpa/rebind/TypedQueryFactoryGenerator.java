@@ -2,13 +2,10 @@ package org.jboss.errai.jpa.rebind;
 
 
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.persistence.NamedQuery;
-
+import antlr.RecognitionException;
+import antlr.TokenStreamException;
+import antlr.collections.AST;
+import com.google.gwt.json.client.JSONObject;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.hql.internal.antlr.HqlSqlTokenTypes;
 import org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory;
@@ -35,11 +32,11 @@ import org.jboss.errai.jpa.client.local.ErraiParameter;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 
-import antlr.RecognitionException;
-import antlr.TokenStreamException;
-import antlr.collections.AST;
-
-import com.google.gwt.json.client.JSONObject;
+import javax.persistence.EntityManager;
+import javax.persistence.NamedQuery;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Code generator for making TypedQuery instances based on existing typesafe

@@ -22,10 +22,6 @@ import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -42,6 +38,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
@@ -63,6 +60,10 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -182,11 +183,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
               if (constructor.isPublic()) {
                 tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                    .initializeWith(Stmt.newObject(toMap)
-                        .withParameters(constructorParameters.toArray(new Object[constructorParameters.size()]))));
+                    .initializeWith(Stmt.newObject(toMap, constructorParameters.toArray(new Object[constructorParameters.size()]))));
               }
               else {
-                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), constructor);
+                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), constructor);
                 tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
                     .initializeWith(
                         Stmt.invokeStatic(
@@ -205,11 +205,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           else {
             // use default constructor
 
-            tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(
+            tryBuilder._(
+                Stmt.declareVariable(toMap).named("entity").initializeWith(
                 Stmt.nestedCall(Stmt.newObject(toMap))));
           }
 
-          tryBuilder.append(loadVariable("a1").invoke("recordObject",
+          tryBuilder._(loadVariable("a1").invoke("recordObject",
                   loadVariable("objId"), loadVariable("entity")));
         }
 
@@ -258,7 +259,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               }
               else {
                 if (!context.isExposed(field)) {
-                  PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
+                  PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), field);
                   context.markExposed(field);
                 }
 
@@ -384,7 +385,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
 
     builder.append(
-            Stmt.if_(Bool.isNull(loadVariable("a0")))
+            If.isNull(loadVariable("a0"))
                     .append(Stmt.load("null").returnValue()).finish()
         );
 
@@ -401,7 +402,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     string(SerializationParts.OBJECT_ID) + ":\"").append(loadVariable("objId")).append("\"");
 
     builder.append(
-            Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObject", loadVariable("a0"))))
+            If.cond(loadVariable("a1").invoke("hasObject", loadVariable("a0")))
                     .append(declareVariable(String.class).named("objId").initializeWith(loadVariable("a1").invoke("getObject", Stmt.loadVariable("a0"))))
                     .append(Stmt.nestedCall(newStringBuilder(128).append("{"
                             + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
@@ -484,7 +485,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
         else {
           if (!context.isExposed(field)) {
-            PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
+            PrivateAccessUtil.addPrivateAccessStubs(gwtTarget ? "jsni" : "reflection", context.getClassStructureBuilder(), field);
             context.markExposed(field);
           }
 

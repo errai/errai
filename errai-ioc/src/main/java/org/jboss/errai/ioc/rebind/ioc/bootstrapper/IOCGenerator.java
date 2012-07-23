@@ -23,12 +23,16 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvUtil;
 
 import java.io.PrintWriter;
 
 /**
  * The main generator class for the Errai IOC framework.
+ *
+ * <pre>
+ *
+ * </pre>
  *
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>

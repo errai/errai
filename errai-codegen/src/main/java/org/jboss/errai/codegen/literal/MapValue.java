@@ -13,16 +13,16 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class MapValue extends LiteralValue<Map<Object, Object>> {
-  public MapValue(Map<Object, Object> value) {
+  public MapValue(final Map<Object, Object> value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
-    BlockBuilder<AnonymousClassStructureBuilder> initBlock
+  public String getCanonicalString(final Context context) {
+    final BlockBuilder<AnonymousClassStructureBuilder> initBlock
             = ObjectBuilder.newInstanceOf(HashMap.class, context).extend().initialize();
 
-    for (Map.Entry<Object, Object> v : getValue().entrySet()) {
+    for (final Map.Entry<Object, Object> v : getValue().entrySet()) {
       initBlock.append(Stmt.loadVariable("this").invoke("put", LiteralFactory.getLiteral(v.getKey()),
               LiteralFactory.getLiteral(v.getValue())));
     }

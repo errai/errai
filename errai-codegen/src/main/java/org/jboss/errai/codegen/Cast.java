@@ -34,22 +34,28 @@ public class Cast implements Statement {
   private final MetaClass toType;
   private final Statement statement;
 
-  private Cast(MetaClass toType, Statement statement) {
+  private Cast(final MetaClass toType,
+               final Statement statement) {
+
     this.toType = Assert.notNull(toType);
     this.statement = statement;
   }
 
-  public static Statement to(Class<?> cls, Statement stmt) {
+  public static Statement to(final Class<?> cls,
+                             final Statement stmt) {
+
     return to(MetaClassFactory.get(cls), stmt);
   }
 
-  public static Cast to(MetaClass cls, Statement stmt) {
+  public static Cast to(final MetaClass cls,
+                        final Statement stmt) {
+
     return new Cast(cls, stmt);
   }
 
   @Override
-  public String generate(Context context) {
-    String stmt = statement.generate(context);
+  public String generate(final Context context) {
+    final String stmt = statement.generate(context);
 
     if (!toType.isPrimitive() && !toType.isAssignableFrom(statement.getType())
             && !toType.isAssignableTo(statement.getType()) && !toType.isInterface()

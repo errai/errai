@@ -47,6 +47,14 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.mvel2.DataConversion;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+
 /**
  * @author Mike Brock
  */
@@ -59,7 +67,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     this.definition = definition;
   }
 
-  public static void setProperty(Object i, Field f, Object v) {
+  public static void setProperty(final Object i, final Field f, final Object v) {
     try {
       f.setAccessible(true);
       f.set(i, DataConversion.convert(v, f.getType()));
@@ -69,6 +77,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Class<Object> getTypeHandled() {
     return (Class<Object>) definition.getMappingClass().asClass();
@@ -79,8 +88,9 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     return (Object[]) Array.newInstance(getTypeHandled(), 0);
   }
 
+  @SuppressWarnings({"ConstantConditions", "unchecked"})
   @Override
-  public Object demarshall(EJValue o, MarshallingSession ctx) {
+  public Object demarshall(final EJValue o, final MarshallingSession ctx) {
     try {
       if (o.isObject() != null) {
         final EJObject oMap = o.isObject();
@@ -119,7 +129,8 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
             int i = 0;
             for (final Mapping mapping : cMapping.getMappings()) {
-              Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
+              final Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
+              //noinspection unchecked
               parms[i] = DataConversion.convert(
                       marshaller.demarshall(oMap.get(mapping.getKey()), ctx), targetTypes[i++]);
             }
@@ -136,7 +147,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
             ctx.recordObject(objID, newInstance);
           }
 
-          for (MemberMapping mapping : definition.getWritableMemberMappings()) {
+          for (final MemberMapping mapping : definition.getWritableMemberMappings()) {
             final EJValue o1 = oMap.get(mapping.getKey());
 
             if (!o1.isNull()) {
@@ -179,7 +190,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   }
 
   @Override
-  public String marshall(Object o, MarshallingSession ctx) {
+  public String marshall(final Object o, final MarshallingSession ctx) {
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
     try {
       marshall(byteArrayOutputStream, o, ctx);
@@ -192,7 +203,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
 
   @Override
-  public void marshall(final OutputStream outstream, Object o, MarshallingSession mSession) throws IOException {
+  public void marshall(final OutputStream outstream, final Object o, final MarshallingSession mSession) throws IOException {
 
     if (o == null) {
       outstream.write("null".getBytes(UTF_8));
@@ -203,7 +214,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     final Class cls = o.getClass();
 
     if (definition.getMappingClass().isEnum()) {
-      Enum enumer = (Enum) o;
+      final Enum enumer = (Enum) o;
 
       outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\""
               + enumer.getDeclaringClass().getName() + "\""
@@ -233,16 +244,16 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\""
             + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",").getBytes(UTF_8));
 
-    for (MemberMapping mapping : definition.getReadableMemberMappings()) {
+    for (final MemberMapping mapping : definition.getReadableMemberMappings()) {
       if (!first) {
         outstream.write(',');
       }
 
       i++;
-      Object v;
+      final Object v;
 
       if (mapping.getReadingMember() instanceof MetaField) {
-        Field field = ((MetaField) mapping.getReadingMember()).asField();
+        final Field field = ((MetaField) mapping.getReadingMember()).asField();
         field.setAccessible(true);
 
         try {
@@ -253,7 +264,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
         }
       }
       else {
-        Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
+        final Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
         method.setAccessible(true);
 
         try {
@@ -305,7 +316,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     outstream.write('}');
   }
 
-  public static Class getClassReference(EJObject oMap) {
+  public static Class getClassReference(final EJObject oMap) {
     try {
       return Thread.currentThread().getContextClassLoader()
               .loadClass(oMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue());

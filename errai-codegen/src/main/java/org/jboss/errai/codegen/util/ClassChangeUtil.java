@@ -2,11 +2,18 @@ package org.jboss.errai.codegen.util;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import org.eclipse.jdt.core.compiler.CompilationProgress;
+import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.slf4j.Logger;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -19,15 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-
-import org.eclipse.jdt.core.compiler.CompilationProgress;
-import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.slf4j.Logger;
 
 /**
  * @author Mike Brock
@@ -57,12 +55,12 @@ public class ClassChangeUtil {
   public static class JDKCompiler implements CompilerAdapter {
     final JavaCompiler compiler;
 
-    public JDKCompiler(JavaCompiler compiler) {
+    public JDKCompiler(final JavaCompiler compiler) {
       this.compiler = compiler;
     }
 
     @Override
-    public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
+    public int compile(final OutputStream out, final OutputStream errors, final String outputPath, final String toCompile, final String classpath) {
       return compiler.run(null, out, errors, "-classpath", classpath, "-d", outputPath, toCompile);
     }
   }
@@ -78,7 +76,7 @@ public class ClassChangeUtil {
       return BatchCompiler.compile("-classpath \"" + classpath + "\" -d " + outputPath + " -source 1.6 " + toCompile, new PrintWriter(out), new PrintWriter(errors),
               new CompilationProgress() {
                 @Override
-                public void begin(int remainingWork) {
+                public void begin(final int remainingWork) {
                 }
 
                 @Override
@@ -91,24 +89,47 @@ public class ClassChangeUtil {
                 }
 
                 @Override
-                public void setTaskName(String name) {
+                public void setTaskName(final String name) {
                 }
 
                 @Override
-                public void worked(int workIncrement, int remainingWork) {
+                public void worked(final int workIncrement, final int remainingWork) {
                 }
               }) ? 0 : -1;
     }
   }
 
 
-  public static String compileClass(String sourcePath, String packageName, String className, String outputPath) {
-    try {
-      File inFile = new File(sourcePath + File.separator + className + ".java");
+  public static Class compileAndLoad(final String sourcePath,
+                                     final String packageName,
+                                     final String className) throws IOException {
+    final String tempDirectory = RebindUtils.getTempDirectory();
 
-      ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
-      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-      CompilerAdapter adapter;
+    return compileAndLoad(sourcePath, packageName, className, tempDirectory);
+  }
+
+
+  public static Class compileAndLoad(final String sourcePath,
+                                     final String packageName,
+                                     final String className,
+                                     final String outputPath) throws IOException {
+
+    final String outputLocation = compileClass(sourcePath, packageName, className, outputPath);
+    return loadClassDefinition(outputLocation, packageName, className);
+  }
+
+  @SuppressWarnings({"ConstantConditions", "ResultOfMethodCallIgnored"})
+  public static String compileClass(final String sourcePath,
+                                    final String packageName,
+                                    final String className,
+                                    final String outputPath) {
+
+    try {
+      final File inFile = new File(sourcePath + File.separator + className + ".java");
+
+      final ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
+      final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+      final CompilerAdapter adapter;
 
       if (compiler == null || !useNativeJavac) {
         adapter = new JDTCompiler();
@@ -117,14 +138,14 @@ public class ClassChangeUtil {
         adapter = new JDKCompiler(compiler);
       }
 
-      File classOutputDir = new File(outputPath
+      final File classOutputDir = new File(outputPath
               + File.separatorChar + RebindUtils.packageNameToDirName(packageName)
               + File.separatorChar).getAbsoluteFile();
 
       // delete any marshaller classes already there
-      Pattern matcher = Pattern.compile("^" + className + "(\\.|$).*class$");
+      final Pattern matcher = Pattern.compile("^" + className + "(\\.|$).*class$");
       if (classOutputDir.exists()) {
-        for (File file : classOutputDir.listFiles()) {
+        for (final File file : classOutputDir.listFiles()) {
           if (matcher.matcher(file.getName()).matches()) {
             file.delete();
           }
@@ -133,19 +154,20 @@ public class ClassChangeUtil {
 
       final StringBuilder sb = new StringBuilder(4096);
 
-      List<URL> configUrls = MetaDataScanner.getConfigUrls();
-      List<File> classpathElements = new ArrayList<File>(configUrls.size());
+      final List<URL> configUrls = MetaDataScanner.getConfigUrls();
+      final List<File> classpathElements = new ArrayList<File>(configUrls.size());
+      classpathElements.add(new File(outputPath));
 
       log.debug(">>> Searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
-      for (URL url : configUrls) {
-        File file = getFileIfExists(url.getFile());
+      for (final URL url : configUrls) {
+        final File file = getFileIfExists(url.getFile());
         if (file != null) {
           classpathElements.add(file);
         }
       }
       log.debug("<<< Done searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
 
-      for (File file : classpathElements) {
+      for (final File file : classpathElements) {
         sb.append(file.getAbsolutePath()).append(File.pathSeparator);
       }
 
@@ -162,7 +184,7 @@ public class ClassChangeUtil {
         System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
         System.out.println("*** Classpath Used: " + sb.toString());
 
-        for (byte b : errorOutputStream.toByteArray()) {
+        for (final byte b : errorOutputStream.toByteArray()) {
           System.out.print((char) b);
         }
         return null;
@@ -177,21 +199,32 @@ public class ClassChangeUtil {
     }
   }
 
-  public static Class loadClassDefinition(String path, String packageName, String className) throws IOException {
+  @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
+  public static Class loadClassDefinition(final String path,
+                                          final String packageName,
+                                          final String className) throws IOException {
     if (path == null) return null;
 
     FileInputStream inputStream = new FileInputStream(path);
     byte[] classDefinition = new byte[inputStream.available()];
 
-    String classBase = path.substring(0, path.length() - ".class".length());
+    final String classBase = path.substring(0, path.length() - ".class".length());
 
-    BootstrapClassloader clsLoader = new BootstrapClassloader(new File(path).getParentFile().getAbsolutePath(),
+    final BootstrapClassloader clsLoader = new BootstrapClassloader(new File(path).getParentFile().getAbsolutePath(),
             "system".equals(classLoadingMode) ?
                     ClassLoader.getSystemClassLoader() :
                     Thread.currentThread().getContextClassLoader());
 
+    final String fqcn;
+    if ("".equals(packageName)) {
+      fqcn = className;
+    }
+    else {
+      fqcn = packageName + "." + className;
+    }
+
     try {
-      return clsLoader.loadClass(packageName + "." + className);
+      return clsLoader.loadClass(fqcn);
     }
     catch (Throwable t) {
       // fall through
@@ -199,31 +232,31 @@ public class ClassChangeUtil {
 
     inputStream.read(classDefinition);
 
-    for (File file : new File(path).getParentFile().listFiles()) {
+    for (final File file : new File(path).getParentFile().listFiles()) {
       if (file.getName().startsWith(className + "$")) {
         String s = file.getName();
         s = s.substring(s.indexOf('$') + 1, s.lastIndexOf('.'));
 
-        String fqcn = packageName + "." + className + "$" + s;
+        final String nestedClassName = fqcn + "$" + s;
 
         Class cls = null;
         try {
-          cls = clsLoader.loadClass(fqcn);
+          cls = clsLoader.loadClass(nestedClassName);
         }
-        catch (ClassNotFoundException e) {
+        catch (ClassNotFoundException ignored) {
         }
 
         if (cls != null) continue;
 
-        String innerClassBaseName = classBase + "$" + s;
-        File innerClass = new File(innerClassBaseName + ".class");
+        final String innerClassBaseName = classBase + "$" + s;
+        final File innerClass = new File(innerClassBaseName + ".class");
         if (innerClass.exists()) {
           try {
             inputStream = new FileInputStream(innerClass);
             classDefinition = new byte[inputStream.available()];
             inputStream.read(classDefinition);
 
-            clsLoader.defineClassX(fqcn, classDefinition, 0, classDefinition.length);
+            clsLoader.defineClassX(nestedClassName, classDefinition, 0, classDefinition.length);
           }
           finally {
             inputStream.close();
@@ -235,34 +268,34 @@ public class ClassChangeUtil {
       }
     }
 
-    Class<?> mainClass = clsLoader
-            .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
+    final Class<?> mainClass = clsLoader
+            .defineClassX(fqcn, classDefinition, 0, classDefinition.length);
 
     inputStream.close();
 
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
 
-      String fqcn = packageName + "." + className + "$" + i;
+      final String nestedClassName = fqcn + "$" + i;
 
       Class cls = null;
       try {
-        cls = clsLoader.loadClass(fqcn);
+        cls = clsLoader.loadClass(nestedClassName);
       }
-      catch (ClassNotFoundException e) {
+      catch (ClassNotFoundException ignored) {
       }
 
       if (cls != null) continue;
 
 
-      String innerClassBaseName = classBase + "$" + i;
-      File innerClass = new File(innerClassBaseName + ".class");
+      final String innerClassBaseName = classBase + "$" + i;
+      final File innerClass = new File(innerClassBaseName + ".class");
       if (innerClass.exists()) {
         try {
           inputStream = new FileInputStream(innerClass);
           classDefinition = new byte[inputStream.available()];
           inputStream.read(classDefinition);
 
-          clsLoader.defineClassX(fqcn, classDefinition, 0, classDefinition.length);
+          clsLoader.defineClassX(nestedClassName, classDefinition, 0, classDefinition.length);
         }
         finally {
           inputStream.close();
@@ -279,27 +312,28 @@ public class ClassChangeUtil {
   private static class BootstrapClassloader extends ClassLoader {
     private String searchPath;
 
-    private BootstrapClassloader(String searchPath, ClassLoader classLoader) {
+    private BootstrapClassloader(final String searchPath, final ClassLoader classLoader) {
       super(classLoader);
       this.searchPath = searchPath;
     }
 
-    public Class<?> defineClassX(String className, byte[] b, int off, int len) {
+    public Class<?> defineClassX(final String className, final byte[] b, final int off, final int len) {
       return super.defineClass(className, b, off, len);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
       try {
         return super.findClass(name);
       }
       catch (ClassNotFoundException e) {
         try {
           FileInputStream inputStream = null;
-          byte[] classDefinition;
+          final byte[] classDefinition;
 
 
-          File innerClass = new File(searchPath + "/" + name.substring(name.lastIndexOf('.') + 1) + ".class");
+          final File innerClass = new File(searchPath + "/" + name.substring(name.lastIndexOf('.') + 1) + ".class");
           if (innerClass.exists()) {
             try {
               inputStream = new FileInputStream(innerClass);
@@ -328,28 +362,24 @@ public class ClassChangeUtil {
     final StringBuilder cp = new StringBuilder();
     try {
       log.debug(">>> Searching for all jars by " + JarFile.MANIFEST_NAME);
-      Enumeration[] enumers = new Enumeration[]
+      final Enumeration[] enumerations = new Enumeration[]
               {
                       Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME),
                       ClassLoader.getSystemClassLoader().getResources(JarFile.MANIFEST_NAME)
               };
 
-      for (Enumeration resEnum : enumers) {
+      for (final Enumeration resEnum : enumerations) {
         while (resEnum.hasMoreElements()) {
-          InputStream is = null;
           try {
-            URL url = (URL) resEnum.nextElement();
+            final URL url = (URL) resEnum.nextElement();
 
-            File file = getFileIfExists(url.getFile());
+            final File file = getFileIfExists(url.getFile());
             if (file != null) {
               cp.append(File.pathSeparator).append(file.getAbsolutePath());
             }
           }
           catch (Exception e) {
             log.warn("ignoring classpath entry with invalid manifest", e);
-          }
-          finally {
-            if (is != null) is.close();
           }
         }
       }
@@ -371,7 +401,7 @@ public class ClassChangeUtil {
     if (path.startsWith("file:")) {
       path = path.substring(5);
 
-      int outerElement = path.indexOf('!');
+      final int outerElement = path.indexOf('!');
       if (outerElement != -1) {
         path = path.substring(0, outerElement);
       }
@@ -379,13 +409,13 @@ public class ClassChangeUtil {
     else if (path.startsWith("jar:")) {
       path = path.substring(4);
 
-      int outerElement = path.indexOf('!');
+      final int outerElement = path.indexOf('!');
       if (outerElement != -1) {
         path = path.substring(0, outerElement);
       }
     }
 
-    File file = new File(path);
+    final File file = new File(path);
     if (file.exists()) {
       if (log.isDebugEnabled()) {
         log.debug("   EXISTS: " + originalPath + " -> " + file.getAbsolutePath());
@@ -399,15 +429,16 @@ public class ClassChangeUtil {
     return null;
   }
 
-  public static Set<File> findAllMatching(String fileName, File from) {
-    HashSet<File> matching = new HashSet<File>();
+  public static Set<File> findAllMatching(final String fileName, final File from) {
+    final HashSet<File> matching = new HashSet<File>();
     _findAllMatching(matching, fileName, from);
     return matching;
   }
 
-  public static void _findAllMatching(HashSet<File> matching, String fileName, File from) {
+  @SuppressWarnings("ConstantConditions")
+  public static void _findAllMatching(final HashSet<File> matching, final String fileName, final File from) {
     if (from.isDirectory()) {
-      for (File file : from.listFiles()) {
+      for (final File file : from.listFiles()) {
         _findAllMatching(matching, fileName, file);
       }
     }
@@ -418,16 +449,19 @@ public class ClassChangeUtil {
     }
   }
 
-  public static Set<File> findMatchingOutputDirectoryByModel(Map<String, String> toMatch, File from) {
-    HashSet<File> matching = new HashSet<File>();
+  public static Set<File> findMatchingOutputDirectoryByModel(final Map<String, String> toMatch, final File from) {
+    final HashSet<File> matching = new HashSet<File>();
     _findMatchingOutputDirectoryByModel(matching, toMatch, from);
     return matching;
   }
 
-  private static void _findMatchingOutputDirectoryByModel(Set<File> matching, Map<String, String> toMatch, File from) {
+  @SuppressWarnings("ConstantConditions")
+  private static void _findMatchingOutputDirectoryByModel(final Set<File> matching,
+                                                          final Map<String, String> toMatch,
+                                                          final File from) {
     if (from.isDirectory()) {
-      for (File file : from.listFiles()) {
-        int currMatch = matching.size();
+      for (final File file : from.listFiles()) {
+        final int currMatch = matching.size();
         _findMatchingOutputDirectoryByModel(matching, toMatch, file);
         if (matching.size() > currMatch) {
           break;
@@ -437,8 +471,8 @@ public class ClassChangeUtil {
     else {
       String name = from.getName();
       if (name.endsWith(".class") && toMatch.containsKey(name = name.substring(0, name.length() - 6))) {
-        String full = toMatch.get(name);
-        ReverseMatchResult res = reversePathMatch(full, from);
+        final String full = toMatch.get(name);
+        final ReverseMatchResult res = reversePathMatch(full, from);
 
         if (res.isMatch()) {
           matching.add(res.getMatchRoot());
@@ -448,8 +482,8 @@ public class ClassChangeUtil {
   }
 
 
-  private static ReverseMatchResult reversePathMatch(String fqcn, File location) {
-    List<String> stk = new ArrayList<String>(Arrays.asList(fqcn.split("\\.")));
+  private static ReverseMatchResult reversePathMatch(final String fqcn, final File location) {
+    final List<String> stk = new ArrayList<String>(Arrays.asList(fqcn.split("\\.")));
 
     File curr = location;
 
@@ -459,7 +493,7 @@ public class ClassChangeUtil {
     }
 
     while (!stk.isEmpty()) {
-      String el = stk.remove(stk.size() - 1);
+      final String el = stk.remove(stk.size() - 1);
       curr = curr.getParentFile();
       if (curr == null || !curr.getName().equals(el)) {
         break;
@@ -482,7 +516,7 @@ public class ClassChangeUtil {
     private final boolean match;
     private final File matchRoot;
 
-    private ReverseMatchResult(boolean match, File matchRoot) {
+    private ReverseMatchResult(final boolean match, final File matchRoot) {
       this.match = match;
       this.matchRoot = matchRoot;
     }

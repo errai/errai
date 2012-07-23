@@ -32,7 +32,7 @@ import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
-import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
+import org.jboss.errai.marshalling.rebind.MarshallerOutputTarget;
 import org.jboss.errai.marshalling.rebind.MarshallersGenerator;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public abstract class ServerMarshallUtil {
       log.warn("could not read marshaller classes: " + e);
     }
 
-    final String classStr = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
+    final String classStr = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.Java)
             .generate(packageName, className);
 
      final File directory =

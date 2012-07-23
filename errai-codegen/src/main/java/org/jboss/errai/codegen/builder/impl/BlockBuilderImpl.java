@@ -34,25 +34,24 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BlockBuilderImpl<T> implements BlockBuilder<T> {
-  protected BlockStatement blockStatement;
-  protected BuildCallback<T> callback;
+  protected final BlockStatement blockStatement;
+  protected final BuildCallback<T> callback;
 
   public BlockBuilderImpl() {
-    this.blockStatement = new BlockStatement();
+    this(null);
   }
 
-  public BlockBuilderImpl(BuildCallback<T> callback) {
-    this();
-    this.callback = callback;
+  public BlockBuilderImpl(final BuildCallback<T> callback) {
+    this(new BlockStatement(), callback);
   }
 
-  public BlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T> callback) {
+  public BlockBuilderImpl(final BlockStatement blockStatement, final BuildCallback<T> callback) {
     this.blockStatement = blockStatement;
     this.callback = callback;
   }
 
   @Override
-  public void insertBefore(Statement stmt) {
+  public void insertBefore(final Statement stmt) {
     this.blockStatement.insertBefore(stmt);
   }
 
@@ -61,7 +60,7 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
     insertBefore(new Statement() {
 
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         return innerClass.generate(context);
       }
 
@@ -73,7 +72,7 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
   }
 
   @Override
-  public BlockBuilder<T> append(Statement statement) {
+  public BlockBuilder<T> append(final Statement statement) {
     blockStatement.addStatement(statement);
     return this;
   }
@@ -83,7 +82,7 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
     blockStatement.addStatement(new Statement() {
 
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         return innerClass.generate(context);
       }
 
@@ -96,12 +95,12 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
   }
 
   @Override
-  public BlockBuilder<T> _(Statement stmt) {
+  public BlockBuilder<T> _(final Statement stmt) {
     return append(stmt);
   }
 
   @Override
-  public BlockBuilder<T> _(InnerClass innerClass) {
+  public BlockBuilder<T> _(final InnerClass innerClass) {
     return append(innerClass);
   }
 

@@ -31,12 +31,12 @@
 
 package org.jboss.errai.codegen.builder;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -52,6 +52,12 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
   public StatementBuilder declareVariable(String name, MetaClass type, Object initialization);
   public StatementBuilder declareVariable(String name, Class<?> type, Object initialization);
   public StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization);
+
+  public StatementBuilder declareFinalVariable(String name, Class<?> type);
+  public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type);
+  public StatementBuilder declareFinalVariable(String name, MetaClass type, Object initialization);
+  public StatementBuilder declareFinalVariable(String name, Class<?> type, Object initialization);
+  public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type, Object initialization);
 
   public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes);
   public VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes);
@@ -73,7 +79,11 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
   public ObjectBuilder newObject(Class<?> type);
   public ObjectBuilder newObject(MetaClass type);
   public ObjectBuilder newObject(TypeLiteral<?> type);
-  
+
+  public Statement newObject(Class<?> type, Object... parameters);
+  public Statement newObject(MetaClass type, Object... parameters);
+  public Statement newObject(TypeLiteral<?> type, Object... parameters);
+
   public StatementEnd throw_(Class<? extends Throwable> throwableType, Object... parameters);
   public StatementEnd throw_(String exceptionVarName);
   

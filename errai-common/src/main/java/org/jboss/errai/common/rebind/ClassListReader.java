@@ -28,16 +28,16 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class ClassListReader {
-  public static Set<String> getClassSetFromFile(File file) {
+  public static Set<String> getClassSetFromFile(final File file) {
     InputStream inputStream = null;
     try {
       inputStream = new BufferedInputStream(new FileInputStream(file));
 
-      byte[] buf = new byte[1024];
+      final byte[] buf = new byte[1024];
       int read;
 
-      Set<String> classSet = new HashSet<String>();
-      StringBuilder strBuf = new StringBuilder(64);
+      final Set<String> classSet = new HashSet<String>();
+      final StringBuilder strBuf = new StringBuilder(64);
 
       while ((read = inputStream.read(buf)) != -1) {
         for (int i = 0; i < read; i++) {

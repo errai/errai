@@ -5,8 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
@@ -19,7 +22,7 @@ import com.google.gwt.dom.client.Element;
 /**
  * Store all injected {@link DataField} {@link Statement} instances into the
  * aggregate {@link Map} for this composite {@link Template}.
- *
+ * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 @CodeDecorator
@@ -33,19 +36,25 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   public List<? extends Statement> generateDecorator(InjectableInstance<DataField> ctx) {
     ctx.ensureMemberExposed();
     Statement instance = ctx.getValueStatement();
+    String name = getTemplateDataFieldName(ctx.getAnnotation(), ctx.getMemberName());
     if (ctx.getType().isAssignableTo(Element.class)) {
+      if (ctx.isAnnotationPresent(Inject.class)) {
+        throw new GenerationException("@DataField [" + name + "] in class ["
+                + ctx.getEnclosingType().getFullyQualifiedName() + "] is of type ["
+                + ctx.getType().getFullyQualifiedName()
+                + "] which does not support @Inject; this instance must be created manually.");
+      }
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
-    String name = getTemplateDataFieldName(ctx.getAnnotation(), ctx.getMemberName());
-    saveDataField(ctx, name, instance);
+    saveDataField(ctx, ctx.getType(), name, instance);
 
     return new ArrayList<Statement>();
 
   }
 
-  private void saveDataField(InjectableInstance<DataField> ctx, String name, Statement instance) {
-    Map<String, Statement> map = dataFieldMap(ctx, ctx.getEnclosingType());
-    map.put(name, instance);
+  private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, Statement instance) {
+    dataFieldMap(ctx, ctx.getEnclosingType()).put(name, instance);
+    dataFieldTypeMap(ctx, ctx.getEnclosingType()).put(name, type);
   }
 
   private String getTemplateDataFieldName(DataField annotation, String deflt) {
@@ -71,22 +80,61 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   }
 
   /**
+   * Get the map of {@link DataField} names and {@link MetaClass} types.
+   */
+  @SuppressWarnings("unchecked")
+  private static Map<String, MetaClass> dataFieldTypeMap(InjectableInstance<?> ctx, MetaClass templateType) {
+    String dataFieldTypeMapName = dataFieldTypeMapName(templateType);
+
+    Map<String, MetaClass> dataFieldTypes = (Map<String, MetaClass>) ctx.getInjectionContext().getAttribute(
+            dataFieldTypeMapName);
+    if (dataFieldTypes == null) {
+      dataFieldTypes = new LinkedHashMap<String, MetaClass>();
+      ctx.getInjectionContext().setAttribute(dataFieldTypeMapName, dataFieldTypes);
+    }
+
+    return dataFieldTypes;
+  }
+
+  /**
    * Get the aggregate map of {@link DataField} names and {@link Statement}
    * instances for the given {@link MetaClass} type and all ancestors returned
    * by {@link MetaClass#getSuperClass()}.
    */
   @SuppressWarnings("unchecked")
-  public static Map<String, Statement> aggregateDataFieldMap(InjectableInstance<?> ctx, MetaClass templateType) {
+  public static Map<String, Statement> aggregateDataFieldMap(InjectableInstance<?> ctx, MetaClass componentType) {
 
     Map<String, Statement> result = new LinkedHashMap<String, Statement>();
 
-    if (templateType.getSuperClass() != null) {
-      result.putAll(aggregateDataFieldMap(ctx, templateType.getSuperClass()));
+    if (componentType.getSuperClass() != null) {
+      result.putAll(aggregateDataFieldMap(ctx, componentType.getSuperClass()));
     }
 
-    String dataFieldMapName = dataFieldMapName(templateType);
     Map<String, Statement> dataFields = (Map<String, Statement>) ctx.getInjectionContext().getAttribute(
-            dataFieldMapName);
+            dataFieldMapName(componentType));
+    if (dataFields != null) {
+      result.putAll(dataFields);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get the aggregate map of {@link DataField} names and {@link MetaClass}
+   * types for the given {@link MetaClass} component type and all ancestors
+   * returned by {@link MetaClass#getSuperClass()}.
+   */
+  @SuppressWarnings("unchecked")
+  public static Map<String, MetaClass> aggregateDataFieldTypeMap(InjectableInstance<?> ctx, MetaClass componentType) {
+
+    Map<String, MetaClass> result = new LinkedHashMap<String, MetaClass>();
+
+    if (componentType.getSuperClass() != null) {
+      result.putAll(aggregateDataFieldTypeMap(ctx, componentType.getSuperClass()));
+    }
+
+    Map<String, MetaClass> dataFields = (Map<String, MetaClass>) ctx.getInjectionContext().getAttribute(
+            dataFieldTypeMapName(componentType));
     if (dataFields != null) {
       result.putAll(dataFields);
     }
@@ -96,11 +144,18 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
 
   /**
    * Using the given composite {@link Template} type, return the name of the map
-   * of {@link DataField} names and variable {@link Statement} instances for
-   * that type.
+   * of {@link DataField} names and variable {@link Statement} instances.
    */
   private static final String dataFieldMapName(MetaClass composite) {
     return DecoratorDataField.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
+  }
+
+  /**
+   * Using the given composite {@link Template} type, return the name of the map
+   * of {@link DataField} names and variable {@link MetaClass} types.
+   */
+  private static final String dataFieldTypeMapName(MetaClass composite) {
+    return DecoratorDataField.class.getName() + "_DATA_FIELD_TYPE_MAP_" + composite.getName();
   }
 
 }

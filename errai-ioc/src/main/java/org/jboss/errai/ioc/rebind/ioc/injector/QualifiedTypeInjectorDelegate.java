@@ -37,7 +37,9 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   private final MetaClass type;
   private final Injector delegate;
 
-  public QualifiedTypeInjectorDelegate(MetaClass type, Injector delegate, MetaParameterizedType parameterizedType) {
+  public QualifiedTypeInjectorDelegate(final MetaClass type,
+                                       final Injector delegate,
+                                       final MetaParameterizedType parameterizedType) {
     this.type = type;
     this.delegate = delegate;
     this.qualifyingMetadata = delegate.getQualifyingMetadata();
@@ -46,7 +48,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
     delegate.addRegistrationHook(
            new RegistrationHook() {
              @Override
-             public void onRegister(InjectionContext context, Statement beanValue) {
+             public void onRegister(final InjectionContext context, final Statement beanValue) {
                registerWithBeanManager(context, beanValue);
              }
            }
@@ -84,7 +86,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   }
 
   @Override
-  public Statement getBeanInstance(InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     return delegate.getBeanInstance(injectableInstance);
   }
 
@@ -114,12 +116,12 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   }
 
   @Override
-  public void setPostInitCallbackVar(String var) {
+  public void setPostInitCallbackVar(final String var) {
     delegate.setPostInitCallbackVar(var);
   }
 
   @Override
-  public void setPreDestroyCallbackVar(String preDestroyCallbackVar) {
+  public void setPreDestroyCallbackVar(final String preDestroyCallbackVar) {
     delegate.setPreDestroyCallbackVar(preDestroyCallbackVar);
   }
 
@@ -129,7 +131,8 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   }
 
   @Override
-  public void registerWithBeanManager(InjectionContext context, Statement valueRef) {
+  public void registerWithBeanManager(final InjectionContext context,
+                                      final Statement valueRef) {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       QualifyingMetadata md = delegate.getQualifyingMetadata();
       if (md == null) {
@@ -141,7 +144,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
                       .invoke("addBean", type, Refs.get(getCreationalCallbackVarName()),
                               isSingleton() ? valueRef : null , md.render()));
       
-      for (RegistrationHook hook : registrationHooks) {
+      for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
       }
     }

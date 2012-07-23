@@ -16,12 +16,6 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
@@ -35,6 +29,11 @@ import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 
+import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
@@ -44,51 +43,51 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
 
   protected String methodComment;
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
-  protected MethodBuildCallback<T> callback;
+  protected final MethodBuildCallback<T> callback;
   protected DefParameters defParameters;
-  protected DefModifiers modifiers = new DefModifiers();
-  protected List<Annotation> annotations = new ArrayList<Annotation>();
+  protected final DefModifiers modifiers = new DefModifiers();
+  protected final List<Annotation> annotations = new ArrayList<Annotation>();
 
-
-  public MethodBlockBuilderImpl(MethodBuildCallback<T> callback) {
+  public MethodBlockBuilderImpl(final MethodBuildCallback<T> callback) {
+    super(null);
     this.callback = callback;
   }
 
-  public MethodBlockBuilderImpl(BlockStatement blockStatement, MethodBuildCallback<T> callback) {
-    this.blockStatement = blockStatement;
+  public MethodBlockBuilderImpl(final BlockStatement blockStatement, final MethodBuildCallback<T> callback) {
+    super(blockStatement, null);
     this.callback = callback;
   }
 
   @Override
-  public MethodBlockBuilder<T> methodComment(String comment) {
+  public MethodBlockBuilder<T> methodComment(final String comment) {
     methodComment = comment;
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> annotatedWith(Annotation... annotations) {
-    for (Annotation a : annotations) {
+  public MethodBlockBuilder<T> annotatedWith(final Annotation... annotations) {
+    for (final Annotation a : annotations) {
       this.annotations.add(a);
     }
     return this;
   }
 
   @Override
-  public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes) {
+  public BlockBuilder<T> throws_(final Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
     return this;
   }
 
   @Override
-  public BlockBuilder<T> throws_(MetaClass... exceptions) {
+  public BlockBuilder<T> throws_(final MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
     return this;
   }
 
 
   @Override
-  public MethodBlockBuilder<T> modifiers(Modifier... modifiers) {
-    for (Modifier m : modifiers) {
+  public MethodBlockBuilder<T> modifiers(final Modifier... modifiers) {
+    for (final Modifier m : modifiers) {
       switch (m) {
         case Transient:
         case Volatile:
@@ -103,27 +102,27 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(DefParameters parms) {
+  public MethodBlockBuilder<T> parameters(final DefParameters parms) {
     defParameters = parms;
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(Class<?>... parms) {
+  public MethodBlockBuilder<T> parameters(final Class<?>... parms) {
     defParameters = DefParameters.fromTypeArray(MetaClassFactory.fromClassArray(parms)) ;
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(MetaClass... parms) {
+  public MethodBlockBuilder<T> parameters(final MetaClass... parms) {
     defParameters = DefParameters.fromTypeArray(parms);
     return this;
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(Object... parms) {
-    List<MetaClass> p = new ArrayList<MetaClass>();
-    for (Object o : parms) {
+  public MethodBlockBuilder<T> parameters(final Object... parms) {
+    final List<MetaClass> p = new ArrayList<MetaClass>();
+    for (final Object o : parms) {
       LiteralFactory.getLiteral(o);
 
       if (o instanceof MetaClass) {

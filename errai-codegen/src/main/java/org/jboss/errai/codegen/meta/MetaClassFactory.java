@@ -60,6 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class MetaClassFactory {
   private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
   private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
+
   static {
     DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
       @Override
@@ -114,6 +115,7 @@ public final class MetaClassFactory {
     PRIMARY_CLASS_CACHE.put(clazz.getFullyQualifiedName(), clazz);
   }
 
+
   public static MetaClass get(final String fullyQualifiedClassName, final boolean erased) {
     return createOrGet(fullyQualifiedClassName, erased);
   }
@@ -160,7 +162,11 @@ public final class MetaClassFactory {
   }
 
   public static Statement getAsStatement(final Class<?> clazz) {
-    final MetaClass metaClass = createOrGet(clazz.getName(), false);
+     return getAsStatement(createOrGet(clazz.getName(), false));
+  }
+
+
+  public static Statement getAsStatement(final MetaClass metaClass) {
     return new Statement() {
       @Override
       public String generate(final Context context) {

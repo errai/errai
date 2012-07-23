@@ -22,14 +22,14 @@ import org.jboss.errai.codegen.Context;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class StringLiteral extends LiteralValue<String> {
-  public StringLiteral(String value) {
+  public StringLiteral(final String value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
-    StringBuilder builder = new StringBuilder("\"");
-    for (char c : getValue().toCharArray()) {
+  public String getCanonicalString(final Context context) {
+    final StringBuilder builder = new StringBuilder("\"");
+    for (final char c : getValue().toCharArray()) {
       switch (c) {
         case '\\':
         case '"':

@@ -41,22 +41,22 @@ public class BlockStatement extends AbstractStatement {
 
   private final List<Statement> statements = new ArrayList<Statement>();
   
-  public BlockStatement(Statement... statements) {
+  public BlockStatement(final Statement... statements) {
     if (statements != null) {
-      for (Statement statement : statements) {
+      for (final Statement statement : statements) {
         if (statement != null)
           this.statements.add(statement);
       }
     }
   }
 
-  public BlockStatement addStatement(Statement statement) {
+  public BlockStatement addStatement(final Statement statement) {
     if (statement != null)
       statements.add(statement);
     return this;
   }
 
-  public void insertBefore(Statement statement) {
+  public void insertBefore(final Statement statement) {
     if (statement != null) {
       final int pos = statements.size() == 0 ? 0 : statements.size() - 1;
       statements.add(pos, statement);
@@ -66,13 +66,13 @@ public class BlockStatement extends AbstractStatement {
   
   String generatedCache;
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     if (generatedCache != null) return generatedCache;
     
-    StringBuilder buf = new StringBuilder(512);
+    final StringBuilder buf = new StringBuilder(512);
 
     boolean isLastBlock = false;
-    for (Statement statement : statements) {
+    for (final Statement statement : statements) {
       if (buf.length() != 0)
         buf.append("\n");
 

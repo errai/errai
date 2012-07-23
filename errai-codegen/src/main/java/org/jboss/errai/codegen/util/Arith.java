@@ -26,15 +26,15 @@ import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
  */
 public class Arith {
 
-  public static ArithmeticExpression expr(Object lhs, ArithmeticOperator operator, Object rhs) {
+  public static ArithmeticExpression expr(final Object lhs, final ArithmeticOperator operator, final Object rhs) {
     return ArithmeticExpressionBuilder.create(lhs, operator, rhs);
   }
 
-  public static ArithmeticExpression expr(ArithmeticOperator operator, Object rhs) {
+  public static ArithmeticExpression expr(final ArithmeticOperator operator, final Object rhs) {
     return ArithmeticExpressionBuilder.create(operator, rhs);
   }
 
-  public static ArithmeticExpression expr(Statement lhs) {
+  public static ArithmeticExpression expr(final Statement lhs) {
     return ArithmeticExpressionBuilder.create(lhs);
   }
 }

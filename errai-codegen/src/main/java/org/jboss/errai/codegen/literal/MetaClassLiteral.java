@@ -16,27 +16,27 @@
 
 package org.jboss.errai.codegen.literal;
 
-import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+
+import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MetaClassLiteral extends LiteralValue<MetaClass> implements TypeLiteral {
 
-  public MetaClassLiteral(MetaClass value) {
+  public MetaClassLiteral(final MetaClass value) {
     super(value);
   }
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     return getCanonicalString(context);
   }
 
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     if (context == null) {
       return getValue().getFullyQualifiedName() + ".class";
     }

@@ -330,7 +330,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   webSocketURL = "ws://" + request.getHeader("Host") + webSocketPath;
                 }
                 else {
-                  webSocketURL = "ws://" + request.getLocalName() + ":" + webSocketPort + webSocketPath;
+                  webSocketURL = "ws://" + request.getServerName() + ":" + webSocketPort + webSocketPath;
                 }
                 msg.set(MessageParts.WebSocketURL, webSocketURL);
                 msg.set(MessageParts.WebSocketToken, WebSocketTokenManager.getNewOneTimeToken(session));

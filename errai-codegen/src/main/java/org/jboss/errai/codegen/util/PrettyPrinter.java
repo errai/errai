@@ -22,14 +22,14 @@ import org.mvel2.util.ParseTools;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class PrettyPrinter {
-  public static String prettyPrintJava(String input) {
-    StringBuilder out = new StringBuilder(2048);
+  public static String prettyPrintJava(final String input) {
+    final StringBuilder out = new StringBuilder(2048);
     StringBuilder lineBuffer = new StringBuilder(120);
 
-    char[] expr = input.toCharArray();
+    final char[] expr = input.toCharArray();
 
     int indentLevel = 0;
-    int statementIndent = 0;
+    final int statementIndent = 0;
 
     for (int i = 0; i < expr.length; i++) {
       switch (expr[i]) {
@@ -45,7 +45,7 @@ public class PrettyPrinter {
 
         case '"':
         case '\'':
-          int start = i;
+          final int start = i;
           i = ParseTools.balancedCapture(expr, i, expr[i]);
           lineBuffer.append(expr, start, i - start + 1);
           break;
@@ -79,8 +79,8 @@ public class PrettyPrinter {
     return compactinate(out.toString());
   }
 
-  private static void writeToBuffer(StringBuilder out, StringBuilder lineBuffer,
-                                    int indentLevel, int statementIndent) {
+  private static void writeToBuffer(final StringBuilder out, final StringBuilder lineBuffer,
+                                    final int indentLevel, final int statementIndent) {
     final String trimmedLineBuffer = lineBuffer.toString().trim();
 
     if (trimmedLineBuffer.length() == 0) {
@@ -92,13 +92,13 @@ public class PrettyPrinter {
 
   private static String compactinate(final String str) {
     final char[] expr = str.toCharArray();
-    StringBuilder buf = new StringBuilder(expr.length);
+    final StringBuilder buf = new StringBuilder(expr.length);
     boolean newLine = false;
     for (int i = 0; i < expr.length; i++) {
       switch (expr[i]) {
         case '"':
         case '\'':
-          int start = i;
+          final int start = i;
           buf.append(expr, start, (i = ParseTools.balancedCapture(expr, i, expr[i])) - start + 1);
           break;
         case '\n':
@@ -122,17 +122,17 @@ public class PrettyPrinter {
     return buf.toString().trim();
   }
 
-  private static String pad(int amount) {
+  private static String pad(final int amount) {
     if (amount <= 0) return "";
 
-    char[] pad = new char[amount];
+    final char[] pad = new char[amount];
     for (int i = 0; i < amount; i++) {
       pad[i] = ' ';
     }
     return new String(pad);
   }
 
-  public static int skipWhitespace(char[] expr, int cursor) {
+  public static int skipWhitespace(final char[] expr, int cursor) {
     Skip:
     while (cursor != expr.length) {
       switch (expr[cursor]) {

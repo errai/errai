@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;

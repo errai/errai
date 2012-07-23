@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -106,7 +107,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     binder.setModel(model, InitialState.FROM_MODEL);
 
     assertEquals("Button text should not have been changed after intial state synchronization " +
-    		"as the property it is bound to does not exist",
+        "as the property it is bound to does not exist",
         "button", button.getText());
   }
 
@@ -145,10 +146,9 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     DataBinder<Model> binder = new DataBinder<Model>(Model.class);
     TextBox valueTextBox = new TextBox();
     binder.bind(valueTextBox, "value");
-    ;
+
     TextBox nameTextBox = new TextBox();
     binder.bind(nameTextBox, "name");
-    ;
 
     Model model = binder.getModel();
 
@@ -224,5 +224,38 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     textBox.setText("changed name");
     binder.setModel(model, InitialState.FROM_UI);
     assertEquals("Model not properly initialized based on widget's initial state", "changed name", model.getName());
+  }
+
+  @Test
+  public void testBindableProxyToString() {
+    Model model = new Model();
+    model.setName("test");
+
+    DataBinder<Model> binder = new DataBinder<Model>(model);
+    assertEquals(model.toString(), binder.getModel().toString());
+  }
+
+  @Test
+  public void testCustomConverter() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return 1701;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "test";
+      }
+    };
+
+    TextBox textBox = new TextBox();
+    Model model = new DataBinder<Model>(Model.class).bind(textBox, "age", converter);
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
+
+    model.setAge(123);
+    assertEquals("Widget not properly updated using custom converter", "test", textBox.getText());
   }
 }

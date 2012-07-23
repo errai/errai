@@ -16,8 +16,6 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
-import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.Builder;
@@ -27,38 +25,38 @@ import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 
+import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
+
 /**
  * Base class of all {@link StatementBuilder}s
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractStatementBuilder implements Statement, Builder, StatementEnd {
-  protected Context context = null;
-  protected CallElementBuilder callElementBuilder;
+  protected final Context context;
+  protected final CallElementBuilder callElementBuilder;
   protected boolean generated;
 
-  protected AbstractStatementBuilder(Context context) {
+  protected AbstractStatementBuilder(final Context context) {
+    this(context, new CallElementBuilder());
+  }
+
+  protected AbstractStatementBuilder(Context context, final CallElementBuilder callElementBuilder) {
     if (context == null) {
       context = Context.create();
     }
 
     this.context = context;
-    this.callElementBuilder = new CallElementBuilder();
-  }
-
-  protected AbstractStatementBuilder(Context context, CallElementBuilder callElementBuilder) {
-    this(context);
     this.callElementBuilder = callElementBuilder;
   }
-
 
   String generatorCache;
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     if (generatorCache != null) return generatorCache;
 
-    CallWriter writer = new CallWriter();
+    final CallWriter writer = new CallWriter();
     try {
       callElementBuilder.getRootElement().handleCall(writer, context, null);
     }

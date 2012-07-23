@@ -22,9 +22,9 @@ import org.jboss.errai.marshalling.client.api.json.EJString;
  * @author Mike Brock
  */
 public class ErraiJSONString implements EJString {
-  private String str;
+  private final String str;
 
-  public ErraiJSONString(String str) {
+  public ErraiJSONString(final String str) {
     this.str = str;
   }
 

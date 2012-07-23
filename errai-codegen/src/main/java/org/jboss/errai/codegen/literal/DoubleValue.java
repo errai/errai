@@ -23,12 +23,12 @@ import org.jboss.errai.codegen.Context;
  */
 public class DoubleValue extends LiteralValue<Double> {
 
-  public DoubleValue(Double value) {
+  public DoubleValue(final Double value) {
     super(value);
   }
 
   @Override
-  public String getCanonicalString(Context context) {
+  public String getCanonicalString(final Context context) {
     return getValue().toString() + "d";
   }
 }

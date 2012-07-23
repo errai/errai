@@ -37,6 +37,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.mvel2.util.StringAppender;
 
@@ -189,19 +190,19 @@ public class RebindUtils {
   private static Statement generateInterceptorStackProceedMethod(Statement proceed, InterceptedCall interceptedCall) {
     BlockStatement proceedLogic = new BlockStatement();
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
-   
-    BlockBuilder<ElseBlockBuilder> interceptorStack = 
-      Stmt.if_(Bool.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor")));
-    
+
+    BlockBuilder<ElseBlockBuilder> interceptorStack =
+            If.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor"));
+
     for (Class<?> interceptor : interceptedCall.value()) {
-        interceptorStack.append(Stmt.if_(Bool.equals(
+        interceptorStack.append(If.cond(Bool.equals(
             Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
             .append(Stmt.loadVariable("status").invoke("setProceeding", false))
             .append(
                 Stmt.nestedCall(Stmt.newObject(interceptor))
                   .invoke("aroundInvoke", Variable.get("this")))
             .append(
-                Stmt.if_(Bool.notExpr(Stmt.loadVariable("status").invoke("isProceeding")))
+                If.not(Stmt.loadVariable("status").invoke("isProceeding"))
                 .append(
                     Stmt.loadVariable("remoteCallback").invoke("callback",
                         Stmt.loadVariable("this").invoke("getResult")))

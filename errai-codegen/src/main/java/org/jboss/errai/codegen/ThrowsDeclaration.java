@@ -24,17 +24,17 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ThrowsDeclaration extends AbstractStatement {
-  private MetaClass[] exceptionTypes;
+  private final MetaClass[] exceptionTypes;
 
-  private ThrowsDeclaration(MetaClass[] exceptionTypes) {
+  private ThrowsDeclaration(final MetaClass[] exceptionTypes) {
     this.exceptionTypes = exceptionTypes;
   }
 
-  public static ThrowsDeclaration of(Class<? extends Throwable>... exceptionTypes) {
+  public static ThrowsDeclaration of(final Class<? extends Throwable>... exceptionTypes) {
     return new ThrowsDeclaration(MetaClassFactory.fromClassArray(exceptionTypes));
   }
 
-  public static ThrowsDeclaration of(MetaClass... exceptionTypes) {
+  public static ThrowsDeclaration of(final MetaClass... exceptionTypes) {
     return new ThrowsDeclaration(exceptionTypes);
   }
 
@@ -53,9 +53,9 @@ public class ThrowsDeclaration extends AbstractStatement {
   String generatedCache;
 
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     if (generatedCache != null) return generatedCache;
-    StringBuilder buf = new StringBuilder(128);
+    final StringBuilder buf = new StringBuilder(128);
     for (int i = 0; i < exceptionTypes.length; i++) {
       if (i == 0) {
         buf.append("throws ");
