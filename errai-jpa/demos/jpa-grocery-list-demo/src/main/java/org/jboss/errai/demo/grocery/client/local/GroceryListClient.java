@@ -52,8 +52,7 @@ public class GroceryListClient extends Composite {
                 addStoreButton.getAbsoluteTop() + addStoreButton.getOffsetHeight() / 2
                 - popover.getOffsetHeight() / 2, Unit.PX);
 
-        // TODO remove existing children of popoverContent
-
+        popoverContent.clear();
         popoverContent.add(storeForm);
 
         // hide store form when new store is saved
