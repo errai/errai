@@ -3,6 +3,7 @@
 
 <module>
 	<inherits name="com.google.gwt.http.HTTP" />
+	<inherits name="com.google.common.collect.Collect"/>
     
     <generate-with class="org.jboss.errai.enterprise.rebind.JaxrsProxyLoaderGenerator">
         <when-type-assignable

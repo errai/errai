@@ -39,7 +39,8 @@ public class Convert {
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
-   *          The object to convert. Must not be null except in the special case where toType is String.
+   *          The object to convert. Must not be null except in the special case where toType is String (which cause
+   *          null to be represented as an empty String).
    * @return the converted object
    */
   public static Object to(Class<?> toType, Object o) {

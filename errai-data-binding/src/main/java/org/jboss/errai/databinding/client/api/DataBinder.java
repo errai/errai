@@ -79,7 +79,7 @@ public class DataBinder<T> {
    *          The name of the property that should be used for the binding, following Java bean conventions. Must not be
    *          null.
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
+   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
    */
   public T bind(final Widget widget, final String property) {
     return bind(widget, property, null);
@@ -99,7 +99,7 @@ public class DataBinder<T> {
    * @param converter
    *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
+   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T bind(final Widget widget, final String property, @SuppressWarnings("rawtypes") final Converter converter) {
@@ -151,7 +151,7 @@ public class DataBinder<T> {
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
+   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
    */
   public T setModel(T model) {
     return setModel(model, null);
@@ -167,7 +167,7 @@ public class DataBinder<T> {
    *          Specifies the origin of the initial state of both model and UI widget, null if no initial state
    *          synchronization should be carried out.
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be synchronized with the UI (also accessible using {@link #getModel()}).
+   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
