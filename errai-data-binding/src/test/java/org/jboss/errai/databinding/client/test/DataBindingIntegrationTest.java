@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -245,10 +246,10 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
       @Override
       public String toWidgetValue(Integer modelValue) {
-        return "test";
+        return "testCustomConverter";
       }
     };
-
+    
     TextBox textBox = new TextBox();
     Model model = new DataBinder<Model>(Model.class).bind(textBox, "age", converter);
 
@@ -256,6 +257,68 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
 
     model.setAge(123);
-    assertEquals("Widget not properly updated using custom converter", "test", textBox.getText());
+    assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
+  }
+  
+  @Test
+  public void testGlobalDefaultConverter() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return 1701;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "testGlobalDefaultConverter";
+      }
+    };
+    Convert.registerDefaultConverter(Integer.class, String.class, converter);
+    
+    TextBox textBox = new TextBox();
+    Model model = new DataBinder<Model>(Model.class).bind(textBox, "age");
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
+
+    model.setAge(123);
+    assertEquals("Widget not properly updated using custom converter", "testGlobalDefaultConverter", textBox.getText());
+  }
+  
+  @Test
+  public void testOverrideGlobalDefaultConverter() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return 1701;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "testGlobalDefaultConverter";
+      }
+    };
+    Convert.registerDefaultConverter(Integer.class, String.class, converter);
+    
+    Converter<Integer, String> bindingConverter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return 1;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "bindingConverter";
+      }
+    };
+    
+    TextBox textBox = new TextBox();
+    Model model = new DataBinder<Model>(Model.class).bind(textBox, "age", bindingConverter);
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1), model.getAge());
+
+    model.setAge(123);
+    assertEquals("Widget not properly updated using custom converter", "bindingConverter", textBox.getText());
   }
 }

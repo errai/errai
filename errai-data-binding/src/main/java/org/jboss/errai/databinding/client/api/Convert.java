@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
+package org.jboss.errai.databinding.client.api;
 
+import java.awt.Checkbox;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.databinding.client.api.Converter;
+import org.jboss.errai.databinding.client.ConverterRegistrationKey;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Type conversion utility used by the generated {@link Bindable} proxies.
@@ -31,15 +35,20 @@ import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Convert {
+  private static final Map<ConverterRegistrationKey, Converter<?, ?>> defaultConverters =
+      new HashMap<ConverterRegistrationKey, Converter<?, ?>>();
 
   /**
-   * Convert the provided object to the provided type. This method is used in case no {@link Converter} has been
-   * specified for the binding.
+   * Converts the provided object to the provided type.
+   * <p>
+   * This method is used in case no {@link Converter} has been specified for the binding (see
+   * {@link DataBinder#bind(Widget, String, Converter)}) and no default converter has been registered for the
+   * corresponding types (see {@link Convert#registerDefaultConverter(Class, Class, Converter)}).
    * 
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
-   *          The object to convert. Must not be null except in the special case where toType is String (which cause
+   *          The object to convert. Must not be null except in the special case where toType is String (which causes
    *          null to be represented as an empty String).
    * @return the converted object
    */
@@ -85,17 +94,22 @@ public class Convert {
   }
 
   /**
-   * Convert the provided object so it can be used as a widget value.
+   * Converts the provided object so it can be used as a widget value.
    * 
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
    *          The object to convert.
    * @param converter
-   *          The converter to use, null if default conversion should be used (see {@link Convert#to(Class, Object)}
+   *          The converter to use, null if default conversion should be used.
    * @return the converted object
    */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public static Object toWidgetValue(Class<?> toType, Object o, Converter converter) {
+    if (converter == null) {
+      converter = defaultConverters.get(new ConverterRegistrationKey(o.getClass(), toType));
+    }
+
     if (converter != null) {
       return converter.toWidgetValue(o);
     }
@@ -104,21 +118,53 @@ public class Convert {
   }
 
   /**
-   * Convert the provided object to a model value.
+   * Converts the provided object to a model value.
    * 
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
    *          The object to convert.
    * @param converter
-   *          The converter to use, null if default conversion should be used (see {@link Convert#to(Class, Object)}
+   *          The converter to use, null if default conversion should be used.
    * @return the converted object
    */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public static Object toModelValue(Class<?> toType, Object o, Converter converter) {
+    if (converter == null) {
+      converter = defaultConverters.get(new ConverterRegistrationKey(toType, o.getClass()));
+    }
+
     if (converter != null) {
       return converter.toModelValue(o);
     }
 
     return to(toType, o);
+  }
+
+  /**
+   * Registers a {@link Converter} as a default for the provided model and widget types. The default converter will be
+   * used in case no custom converter is provided when binding a model to a widget.
+   * 
+   * @param <M>
+   *          The type of the model value (field type of the model)
+   * @param <W>
+   *          The type of the widget value (e.g. String for a {@link TextBox} (=HasValue&lt;String&gt;) or Boolean for a
+   *          {@link Checkbox} (=HasValue&lt;Boolean&gt;)))
+   * @param modelType
+   *          The model type the provided converter converts to.
+   * @param widgetType
+   *          The widget type the provided converter converts to.
+   * @param converter
+   *          The converter to register as a default for the provided model and widget types.
+   */
+  public static <M, W> void registerDefaultConverter(Class<M> modelType, Class<W> widgetType, Converter<M, W> converter) {
+    defaultConverters.put(new ConverterRegistrationKey(modelType, widgetType), converter);
+  }
+
+  /**
+   * Deletes all registrations of default converters.
+   */
+  public static void deregisterDefaultConverters() {
+    defaultConverters.clear();
   }
 }

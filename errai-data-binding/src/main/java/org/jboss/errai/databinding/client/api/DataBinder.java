@@ -19,7 +19,6 @@ package org.jboss.errai.databinding.client.api;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
-import org.jboss.errai.databinding.client.Convert;
 
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;

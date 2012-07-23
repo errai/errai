@@ -4,14 +4,15 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
 
-import org.jboss.errai.databinding.client.Convert;
+import org.jboss.errai.databinding.client.api.Convert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * Unit tests for the Convert class.
+ * Unit tests for the built-in default conversions in {@link Convert}.
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ConvertUnitTest {
 
