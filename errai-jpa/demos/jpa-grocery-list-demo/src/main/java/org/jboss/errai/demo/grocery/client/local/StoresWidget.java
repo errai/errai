@@ -2,6 +2,7 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -30,6 +31,12 @@ public class StoresWidget extends Composite {
 
   @DataField
   private TableElement table = Document.get().createTableElement();
+
+  @SuppressWarnings("unused")
+  @PostConstruct
+  private void initInstance() {
+    INSTANCE = this;
+  }
 
   public static class StoreListener {
     @PostPersist @PostUpdate @PostRemove

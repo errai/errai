@@ -5,14 +5,17 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.demo.grocery.client.local.StoresWidget;
 
 @Bindable @Entity
+@EntityListeners(StoresWidget.StoreListener.class)
 @NamedQuery(name="allStores", query="SELECT s FROM Store s WHERE 1 = 1")
 public class Store {
 
@@ -46,4 +49,9 @@ public class Store {
 
   // TODO add location
 
+  @Override
+  public String toString() {
+    return "Store [id=" + id + ", name=" + name + ", departments="
+            + departments + "]";
+  }
 }

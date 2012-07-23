@@ -59,7 +59,6 @@ public class StoreForm extends Composite {
 
       @Override
       public void onClick(ClickEvent event) {
-        System.out.println("Save button pressed for " + storeBinder.getModel());
         em.persist(storeBinder.getModel());
         em.flush();
 
