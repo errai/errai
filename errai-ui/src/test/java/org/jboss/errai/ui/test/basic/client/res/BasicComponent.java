@@ -4,10 +4,8 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.jboss.errai.ui.test.common.client.Model;
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -43,9 +41,6 @@ public class BasicComponent extends Composite {
   @Inject
   @DataField
   private Anchor c5;
-
-  @Inject
-  private DataBinder<Model> binder;
 
   @PostConstruct
   public void init() {
