@@ -7,6 +7,7 @@ import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.Key;
 
 import com.google.gwt.json.client.JSONObject;
@@ -142,7 +143,14 @@ public class WebStorageBackend implements StorageBackend {
   public <X> boolean isModified(Key<X, ?> key, X value) {
     ErraiEntityType<X> entityType = key.getEntityType();
     String keyJson = key.toJson();
-    String valueJson = entityType.toJson(em, value).toString();
-    return !valueJson.equals(getImpl(keyJson));
+    JSONValue newValueJson = entityType.toJson(em, value);
+    JSONValue oldValueJson = JSONParser.parseStrict(getImpl(keyJson));
+    boolean modified = !JsonUtil.equals(newValueJson, oldValueJson);
+    if (modified) {
+      System.out.println("Detected modified entity " + key);
+      System.out.println("   Old: " + oldValueJson);
+      System.out.println("   New: " + newValueJson);
+    }
+    return modified;
   }
 }

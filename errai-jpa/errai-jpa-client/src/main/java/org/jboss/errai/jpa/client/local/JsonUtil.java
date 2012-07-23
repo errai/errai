@@ -8,9 +8,11 @@ import java.util.Date;
 
 import org.jboss.errai.common.client.util.Base64Util;
 
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
@@ -178,5 +180,90 @@ public class JsonUtil {
       throw new RuntimeException("I don't know how unJSONify " + jsonValue + " (expected type "+ expectedType + ")");
     }
     return value;
+  }
+
+  /**
+   * Compares two JSON values for equality by value.
+   * <p>
+   * If the actual type of v1 and v2 differs, the values are considered unequal
+   * (that is, type coercion is never performed when doing a comparison).
+   * <p>
+   * This method returns true under the following conditions:
+   * <ul>
+   *  <li>If v1 and v2 are both JSONString, and their String values compare equal;
+   *  <li>If v1 and v2 are both JSONBoolean, and they compare equal;
+   *  <li>If v1 and v2 are both JSONNumber, and their double values compare equal;
+   *  <li>If v1 and v2 are both JSONNull;
+   *  <li>If v1 and v2 are both JSONArray, they have the same length, and recursive
+   *      application of this check to each pair of corresponding elements finds them all equal;
+   *  <li>If v1 and v2 are both JSONObject, they have the same key sets as each other,
+   *      and recursive application of this check to each pair of corresponding
+   *      values finds them all equal;
+   * </ul>
+   *
+   * @param v1
+   *          One of the values to compare. Must not be null (but JSONNull is
+   *          permitted).
+   * @param v2
+   *          The other value to compare. Must not be null (but JSONNull is
+   *          permitted).
+   * @return true if v1 and v2 have identical values according to the above criteria.
+   */
+  public static boolean equals(JSONValue v1, JSONValue v2) {
+    if (v1.equals(v2)) {
+      return true;
+    }
+    else if (v1.getClass() != v2.getClass()) {
+      return false;
+    }
+    else if (v1.isArray() != null) {
+      JSONArray a1 = v1.isArray();
+      JSONArray a2 = v2.isArray();
+      if (a1.size() != a2.size()) {
+        return false;
+      }
+      for (int i = 0, n = a1.size(); i < n; i++) {
+        if (!equals(a1.get(i), a2.get(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    else if (v1.isBoolean() != null) {
+      JSONBoolean b1 = v1.isBoolean();
+      JSONBoolean b2 = v2.isBoolean();
+      return b1.booleanValue() == b2.booleanValue();
+    }
+    else if (v1.isNull() != null) {
+      // this case should never be triggered, because of the getClass() precheck above
+      return v2.isNull() != null;
+    }
+    else if (v1.isNumber() != null) {
+      JSONNumber n1 = v1.isNumber();
+      JSONNumber n2 = v2.isNumber();
+      return n1.doubleValue() == n2.doubleValue();
+    }
+    else if (v1.isObject() != null) {
+      JSONObject o1 = v1.isObject();
+      JSONObject o2 = v2.isObject();
+      if (!o1.keySet().equals(o2.keySet())) {
+        return false;
+      }
+      for (String key : o1.keySet()) {
+        if (!equals(o1.get(key), o2.get(key))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    else if (v1.isString() != null) {
+      JSONString s1 = v1.isString();
+      JSONString s2 = v2.isString();
+      return s1.stringValue().equals(s2.stringValue());
+    }
+    else {
+      throw new AssertionError("Found unexpected subtype of JSONValue: " + v1.getClass());
+    }
+    // NOTREACHED
   }
 }
