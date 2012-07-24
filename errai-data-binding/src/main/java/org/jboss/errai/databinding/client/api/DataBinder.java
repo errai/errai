@@ -33,14 +33,26 @@ import com.google.gwt.user.client.ui.Widget;
 public class DataBinder<T> {
   private T model;
 
+  private DataBinder(Class<T> modelType) {
+    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
+  }
+  
+  private DataBinder(T model) {
+    this(Assert.notNull(model), null);
+  }
+  
+  private DataBinder(T model, InitialState intialState) {
+    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
+  }
+  
   /**
    * Creates a {@link DataBinder} for a newly created model instance of the provided type.
    * 
    * @param modelType
    *          The bindable type, must not be null.
    */
-  public DataBinder(Class<T> modelType) {
-    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
+  public static <T> DataBinder<T> forType(Class<T> modelType) {
+    return new DataBinder<T>(modelType);
   }
 
   /**
@@ -49,8 +61,8 @@ public class DataBinder<T> {
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    */
-  public DataBinder(T model) {
-    this(Assert.notNull(model), null);
+  public static <T> DataBinder<T> forModel(T model) {
+    return new DataBinder<T>(model, null);
   }
 
   /**
@@ -63,8 +75,8 @@ public class DataBinder<T> {
    *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
    *          synchronization should be carried out.
    */
-  public DataBinder(T model, InitialState intialState) {
-    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
+  public static <T> DataBinder<T> forModel(T model, InitialState intialState) {
+    return new DataBinder<T>(model, intialState);
   }
 
   /**

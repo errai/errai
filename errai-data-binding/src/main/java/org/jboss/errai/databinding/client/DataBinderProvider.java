@@ -36,6 +36,6 @@ public class DataBinderProvider implements ContextualTypeProvider<DataBinder> {
   @Override
   @SuppressWarnings("all")
   public DataBinder provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    return new DataBinder(typeargs[0]);
+    return DataBinder.forType(typeargs[0]);
   }
 }
