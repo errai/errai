@@ -60,7 +60,8 @@ public class DataBinder<T> {
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param intialState
-   *          Specifies the origin of the initial state of both model and UI widget.
+   *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
+   *          synchronization should be carried out.
    */
   public DataBinder(T model, InitialState intialState) {
     this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
@@ -163,7 +164,7 @@ public class DataBinder<T> {
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param initialState
-   *          Specifies the origin of the initial state of both model and UI widget, null if no initial state
+   *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
    *          synchronization should be carried out.
    * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
    *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
