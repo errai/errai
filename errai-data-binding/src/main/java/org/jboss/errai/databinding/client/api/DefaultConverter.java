@@ -22,8 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to mark an implementation of {@link Converter} as a global default for converting between the specified model
- * value and widget value type.
+ * Indicates that an implementation of {@link Converter} is to be used as a global default for converting between the
+ * specified model value and widget value type.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
