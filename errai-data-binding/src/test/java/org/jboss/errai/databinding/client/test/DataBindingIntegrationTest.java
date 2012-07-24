@@ -48,6 +48,11 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     return "org.jboss.errai.databinding.DataBindingTestModule";
   }
 
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+  }
+  
   @Test
   public void testBasicBinding() {
     TextBox textBox = new TextBox();
@@ -253,7 +258,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     Model model = new DataBinder<Model>(Model.class).bind(textBox, "age", converter);
 
-    textBox.setValue("UI change", true);
+    textBox.setValue("321", true);
     assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
 
     model.setAge(123);
@@ -278,11 +283,25 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     Model model = new DataBinder<Model>(Model.class).bind(textBox, "age");
 
-    textBox.setValue("UI change", true);
-    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
+    textBox.setValue("321", true);
+    assertEquals("Model not properly updated using global default converter", Integer.valueOf(1701), model.getAge());
 
     model.setAge(123);
-    assertEquals("Widget not properly updated using custom converter", "testGlobalDefaultConverter", textBox.getText());
+    assertEquals("Widget not properly updated using global default converter", 
+        "testGlobalDefaultConverter", textBox.getText());
+  }
+  
+  @Test
+  public void testAutoRegisteredGlobalDefaultConverter() {
+    TextBox textBox = new TextBox();
+    Model model = new DataBinder<Model>(Model.class).bind(textBox, "active");
+
+    textBox.setValue("123", true);
+    assertEquals("Model not properly updated using global default converter", true, model.isActive());
+
+    model.setActive(false);
+    assertEquals("Widget not properly updated using global default converter", 
+        "AutoRegisteredDefaultConverter", textBox.getText());
   }
   
   @Test
@@ -315,7 +334,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     Model model = new DataBinder<Model>(Model.class).bind(textBox, "age", bindingConverter);
 
-    textBox.setValue("UI change", true);
+    textBox.setValue("321", true);
     assertEquals("Model not properly updated using custom converter", Integer.valueOf(1), model.getAge());
 
     model.setAge(123);

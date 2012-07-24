@@ -19,6 +19,8 @@ package org.jboss.errai.databinding.rebind;
 import java.io.File;
 import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -37,6 +39,9 @@ import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.Convert;
+import org.jboss.errai.databinding.client.api.Converter;
+import org.jboss.errai.databinding.client.api.DefaultConverter;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +58,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyLoaderGenerator extends Generator {
-  private Logger log = LoggerFactory.getLogger(BindableProxyLoaderGenerator.class);
+  private final Logger log = LoggerFactory.getLogger(BindableProxyLoaderGenerator.class);
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
@@ -86,7 +91,9 @@ public class BindableProxyLoaderGenerator extends Generator {
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
     String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Bindable.class) || !cacheFile.exists()) {
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Bindable.class)
+        || RebindUtils.hasClasspathChangedForAnnotatedWith(DefaultConverter.class) 
+        || !cacheFile.exists()) {
       log.info("generating bindable proxy loader class.");
       gen = generate(context, logger);
       RebindUtils.writeStringToFile(cacheFile, gen);
@@ -104,6 +111,7 @@ public class BindableProxyLoaderGenerator extends Generator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
 
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
+
     for (Class<?> bindable : scanner.getTypesAnnotatedWith(Bindable.class,
         RebindUtils.findTranslatablePackages(context))) {
 
@@ -114,7 +122,6 @@ public class BindableProxyLoaderGenerator extends Generator {
 
       ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
       loadProxies.append(new InnerClass(bindableProxy.getClassDefinition()));
-
       Statement proxyProvider =
           ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
               .extend()
@@ -130,12 +137,25 @@ public class BindableProxyLoaderGenerator extends Generator {
                       .returnValue())
               .finish()
               .finish();
-
       loadProxies.append(Stmt.invokeStatic(BindableProxyFactory.class, "addBindableProxy", bindable, proxyProvider));
     }
 
+    for (Class<?> converter : scanner.getTypesAnnotatedWith(DefaultConverter.class,
+        RebindUtils.findTranslatablePackages(context))) {
+
+      Type[] interfaces = converter.getGenericInterfaces();
+      for (Type iface : interfaces) {
+        if (iface instanceof ParameterizedType && ((ParameterizedType) iface).getRawType().equals(Converter.class)) {
+          Type[] typeArgs = ((ParameterizedType) iface).getActualTypeArguments();
+          if (typeArgs != null && typeArgs.length == 2) {
+            loadProxies.append(Stmt.invokeStatic(Convert.class, "registerDefaultConverter",
+                typeArgs[0], typeArgs[1], Stmt.newObject(converter)));
+          }
+        }
+      }
+    }
+
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    String s = classBuilder.toJavaString();
-    return s;
+    return classBuilder.toJavaString();
   }
 }
