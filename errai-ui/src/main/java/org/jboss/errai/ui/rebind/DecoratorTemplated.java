@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.shared;
+package org.jboss.errai.ui.rebind;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
@@ -46,6 +46,8 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.BeanMetric;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ui.shared.Template;
+import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;

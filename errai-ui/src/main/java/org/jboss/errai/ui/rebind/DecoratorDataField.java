@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.shared;
+package org.jboss.errai.ui.rebind;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,6 +14,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ui.shared.ElementWrapperWidget;
+import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 
 import com.google.common.base.Strings;
