@@ -16,9 +16,9 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import java.util.List;
-
 import org.jboss.errai.bus.client.framework.MessageBus;
+
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -26,10 +26,10 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 public class ConversationalEventWrapper {
   private Object eventObject;
   private Class eventType;
-  private List<String> qualifierStrings;
+  private Set<String> qualifierStrings;
   private MessageBus bus;
 
-  public ConversationalEventWrapper(Object eventObject, Class eventType, List<String> qualifierStrings, MessageBus bus) {
+  public ConversationalEventWrapper(Object eventObject, Class eventType, Set<String> qualifierStrings, MessageBus bus) {
     this.eventObject = eventObject;
     this.eventType = eventType;
     this.qualifierStrings = qualifierStrings;
@@ -44,7 +44,7 @@ public class ConversationalEventWrapper {
     return eventType;
   }
 
-  public List<String> getQualifierStrings() {
+  public Set<String> getQualifierStrings() {
     return qualifierStrings;
   }
 

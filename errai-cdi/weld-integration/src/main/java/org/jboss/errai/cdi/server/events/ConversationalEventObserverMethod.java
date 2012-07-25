@@ -16,9 +16,7 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
+import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -27,7 +25,9 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 
-import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the
@@ -37,8 +37,11 @@ import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType
  * @author Mike Brock
  */
 public class ConversationalEventObserverMethod extends EventObserverMethod {
-  public ConversationalEventObserverMethod(Class<?> type, MessageBus bus, Annotation... qualifiers) {
-    super(type, bus, qualifiers);
+  public ConversationalEventObserverMethod(final EventRoutingTable eventRoutingTable,
+                                           final Class<?> type,
+                                           final MessageBus bus,
+                                           final Annotation... qualifiers) {
+    super(eventRoutingTable, type, bus, qualifiers);
   }
 
   @Override

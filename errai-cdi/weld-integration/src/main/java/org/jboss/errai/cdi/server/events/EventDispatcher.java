@@ -17,6 +17,7 @@ package org.jboss.errai.cdi.server.events;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
@@ -37,10 +38,13 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.ObserverMethod;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
@@ -53,6 +57,7 @@ public class EventDispatcher implements MessageCallback {
   private static final String CDI_REMOTE_EVENTS_ACTIVE = "cdi.event.active.events";
 
   private final BeanManager beanManager;
+  private final EventRoutingTable eventRoutingTable;
   private final MessageBus messagebus;
   private final Set<String> observedEvents;
   private final Map<String, Annotation> allQualifiers;
@@ -60,12 +65,18 @@ public class EventDispatcher implements MessageCallback {
 
   private final Set<ObserverMethod> activeObserverMethods = new HashSet<ObserverMethod>();
 
+  private final Set<String> activeObserverSignatures
+      = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+
   public EventDispatcher(final BeanManager beanManager,
+                         final EventRoutingTable eventRoutingTable,
                          final MessageBus messageBus,
                          final Set<String> observedEvents,
                          final Map<String, Annotation> qualifiers,
                          final AfterBeanDiscovery afterBeanDiscovery) {
+
     this.beanManager = beanManager;
+    this.eventRoutingTable = eventRoutingTable;
     this.messagebus = messageBus;
     this.observedEvents = observedEvents;
     this.allQualifiers = qualifiers;
@@ -74,38 +85,55 @@ public class EventDispatcher implements MessageCallback {
 
   @SuppressWarnings("unchecked")
   public void callback(final Message message) {
+    /**
+     * If the message didn't not come from a remote, we don't handle it.
+     */
+    if (!message.isFlagSet(RoutingFlag.FromRemote))
+      return;
+
     try {
       ScopeUtil.associateRequestContext(message);
-
-      /**
-       * If the message didn't not come from a remote, we don't handle it.
-       */
-      if (!message.isFlagSet(RoutingFlag.FromRemote))
-        return;
 
       final LocalContext localContext = LocalContext.get(message);
 
       switch (CDICommands.valueOf(message.getCommandType())) {
         case RemoteSubscribe:
           if (afterBeanDiscovery != null) {
+
+            final String signature = getSignatureFromMessage(message);
             final String typeName = message.get(String.class, CDIProtocol.BeanType);
             final Class<?> type = Class.forName(typeName);
-
-            if (type == null || !EnvUtil.isPortableType(type)) {
-              log.warn("client tried to register a non-portable type: " + type);
-              return;
-            }
-
             final Set<String> annotationTypes = message.get(Set.class, CDIProtocol.Qualifiers);
-            final DevEventObserverMethod observerMethod
-                    = new DevEventObserverMethod(messagebus, type, annotationTypes);
 
-            if (!activeObserverMethods.contains(observerMethod)) {
-              afterBeanDiscovery.addObserverMethod(observerMethod);
-              activeObserverMethods.add(observerMethod);
+            if (!activeObserverSignatures.contains(signature)) {
+
+              if (type == null || !EnvUtil.isPortableType(type)) {
+                log.warn("client tried to register a non-portable type: " + type);
+                return;
+              }
+
+              final DynamicEventObserverMethod observerMethod
+                  = new DynamicEventObserverMethod(eventRoutingTable, messagebus, type, annotationTypes);
+
+              if (!activeObserverMethods.contains(observerMethod)) {
+                afterBeanDiscovery.addObserverMethod(observerMethod);
+                activeObserverMethods.add(observerMethod);
+              }
+
+              activeObserverSignatures.add(signature);
             }
+
+            eventRoutingTable.activateRoute(typeName, annotationTypes, message.getResource(QueueSession.class, "Session"));
           }
           break;
+
+        case RemoteUnsubscribe:
+          final String typeName = message.get(String.class, CDIProtocol.BeanType);
+          final Set<String> annotationTypes = message.get(Set.class, CDIProtocol.Qualifiers);
+
+          eventRoutingTable.deactivateRoute(typeName, annotationTypes, message.getResource(QueueSession.class, "Session"));
+          break;
+
         case CDIEvent:
           if (!isRoutable(localContext, message)) {
             return;
@@ -144,8 +172,8 @@ public class EventDispatcher implements MessageCallback {
 
         case AttachRemote:
           MessageBuilder.createConversation(message).toSubject(CDI.CLIENT_DISPATCHER_SUBJECT)
-                  .command(BusCommands.RemoteSubscribe)
-                  .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
+              .command(BusCommands.RemoteSubscribe)
+              .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
 
           localContext.setAttribute(CDI_EVENT_CHANNEL_OPEN, "1");
           break;
@@ -161,6 +189,14 @@ public class EventDispatcher implements MessageCallback {
 
   public boolean isRoutable(final LocalContext localContext, final Message message) {
     return "1".equals(localContext.getAttribute(String.class, CDI_EVENT_CHANNEL_OPEN))
-            && observedEvents.contains(message.get(String.class, CDIProtocol.BeanType));
+        && observedEvents.contains(message.get(String.class, CDIProtocol.BeanType));
+  }
+
+
+  private static String getSignatureFromMessage(final Message message) {
+    final String typeName = message.get(String.class, CDIProtocol.BeanType);
+    final Set<String> annotationTypes = new TreeSet<String>(message.get(Set.class, CDIProtocol.Qualifiers));
+
+    return typeName + annotationTypes;
   }
 }

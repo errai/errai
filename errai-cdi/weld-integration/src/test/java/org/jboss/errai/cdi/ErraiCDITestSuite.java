@@ -2,6 +2,8 @@ package org.jboss.errai.cdi;
 
 import org.jboss.errai.cdi.event.client.test.EventObserverIntegrationTest;
 import org.jboss.errai.cdi.event.client.test.EventProducerIntegrationTest;
+import org.jboss.errai.cdi.event.client.test.EventRoutingIntegrationTest;
+import org.jboss.errai.cdi.event.client.test.LocalEventIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.BeanManagerIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.CyclicDepsIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.DependentScopeIntegrationTest;
@@ -19,17 +21,19 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        BeanManagerIntegrationTest.class,
-        CyclicDepsIntegrationTest.class,
-        PostConstructOrderTest.class,
-        DependentScopeIntegrationTest.class,
-        EventObserverIntegrationTest.class,
-        EventProducerIntegrationTest.class,
-        InjectionIntegrationTest.class,
-        InstanceInjectionIntegrationTest.class,
-        InvalidProducerIntegrationTest.class,
-        ProducerIntegrationTest.class,
-        RpcIntegrationTest.class
+    BeanManagerIntegrationTest.class,
+    CyclicDepsIntegrationTest.class,
+    PostConstructOrderTest.class,
+    DependentScopeIntegrationTest.class,
+    LocalEventIntegrationTest.class,
+    EventObserverIntegrationTest.class,
+    EventProducerIntegrationTest.class,
+    EventRoutingIntegrationTest.class,
+    InjectionIntegrationTest.class,
+    InstanceInjectionIntegrationTest.class,
+    InvalidProducerIntegrationTest.class,
+    ProducerIntegrationTest.class,
+    RpcIntegrationTest.class
 })
 public class ErraiCDITestSuite {
 

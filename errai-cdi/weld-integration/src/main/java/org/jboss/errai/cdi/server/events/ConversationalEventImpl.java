@@ -16,23 +16,23 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.jboss.weld.manager.BeanManagerImpl;
 
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.util.TypeLiteral;
 import javax.inject.Qualifier;
-
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
-import org.jboss.weld.manager.BeanManagerImpl;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -43,7 +43,7 @@ public class ConversationalEventImpl<T> implements ConversationalEvent<T>, Seria
   private final Annotation[] qualifiers;
 
   private Class rawType;
-  private List<String> qualifiersForWire;
+  private Set<String> qualifiersForWire;
   private MessageBus bus;
 
   public static ConversationalEventImpl of(InjectionPoint injectionPoint, BeanManager manager, MessageBus bus) {

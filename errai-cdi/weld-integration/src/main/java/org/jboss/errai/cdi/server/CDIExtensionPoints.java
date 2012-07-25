@@ -19,41 +19,6 @@ package org.jboss.errai.cdi.server;
 import static java.util.ResourceBundle.getBundle;
 import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
@@ -81,6 +46,7 @@ import org.jboss.errai.cdi.server.events.ConversationalEventBean;
 import org.jboss.errai.cdi.server.events.ConversationalEventObserverMethod;
 import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
+import org.jboss.errai.cdi.server.events.EventRoutingTable;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -94,6 +60,40 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Extension points to the CDI container. Makes Errai components available as CDI beans (i.e. the message bus) and
@@ -337,6 +337,7 @@ public class CDIExtensionPoints implements Extension {
   public void afterBeanDiscovery(@Observes final AfterBeanDiscovery abd, final BeanManager bm) {
     final ErraiService service = ErraiServiceSingleton.getService();
     final MessageBus bus = service.getBus();
+    final EventRoutingTable eventRoutingTable = new EventRoutingTable();
 
     if (bus.isSubscribed(CDI.SERVER_DISPATCHER_SUBJECT)) {
       return;
@@ -368,22 +369,14 @@ public class CDIExtensionPoints implements Extension {
               observerPoints) {
         if (org.jboss.errai.config.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
           if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
-            abd.addObserverMethod(new ConversationalEventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
+            abd.addObserverMethod(new ConversationalEventObserverMethod(eventRoutingTable, observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
           }
           else {
-            abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
+            abd.addObserverMethod(new EventObserverMethod(eventRoutingTable, observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
           }
         }
       }
     }
-//        else {
-//          bus.subscribe("cdi.event:DevModeService", new MessageCallback() {
-//            @Override
-//            public void callback(final Message message) {
-//              CDIProtocol.valueOf()
-//            }
-//          });
-//        }
 
     for (final MessageSender ms : messageSenders) {
       abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));
@@ -402,7 +395,7 @@ public class CDIExtensionPoints implements Extension {
     subscribeServices(bm, bus);
 
     final EventDispatcher eventDispatcher
-            = new EventDispatcher(bm, bus, observableEvents,
+            = new EventDispatcher(bm, eventRoutingTable, bus, observableEvents,
             eventQualifiers, MarshallingGenUtil.isUseStaticMarshallers() ? null : abd);
 
     // subscribe event dispatcher

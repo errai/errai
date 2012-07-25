@@ -16,16 +16,16 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
-import java.lang.annotation.Annotation;
-
-import javax.enterprise.event.Event;
-import javax.inject.Singleton;
-
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-@IOCProvider @Singleton
+import javax.enterprise.event.Event;
+import javax.inject.Singleton;
+import java.lang.annotation.Annotation;
+
+@IOCProvider
+@Singleton
 public class EventProvider implements ContextualTypeProvider<Event> {
 
   @Override
@@ -41,34 +41,44 @@ public class EventProvider implements ContextualTypeProvider<Event> {
     * clobbered your errai-javax-enterprise source folder settings. To fix your
     * setup, see the README in the root of errai-javax-enterprise.
     */
-    return new Event<Object>() {
-      private Class<?> eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
-      private Annotation[] _qualifiers = qualifiers;
+    final Class<?> eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
+    return new EventImpl(eventType, qualifiers);
+  }
 
-      public void fire(Object event) {
-        if (event == null)
-          return;
+  private static class EventImpl implements Event<Object> {
+    private final Class<?> eventType;
+    private final Annotation[] _qualifiers;
 
-        CDI.fireEvent(event, _qualifiers);
-      }
+    private EventImpl(final Class<?> eventType,
+                      final Annotation[] _qualifiers) {
 
-      @Override
-      public Event<Object> select(Annotation... qualifiers) {
-        throw new RuntimeException("use of event selectors is unsupported");
-      }
+      this.eventType = eventType;
+      this._qualifiers = _qualifiers;
+    }
 
-      @Override
-      public <U extends Object> Event<U> select(Class<U> subtype, Annotation... qualifiers) {
-        throw new RuntimeException("use of event selectors is unsupported");
-      }
+    public void fire(final Object event) {
+      if (event == null)
+        return;
 
-      public Class getEventType() {
-        return eventType;
-      }
+      CDI.fireEvent(event, _qualifiers);
+    }
 
-      public Annotation[] getQualifiers() {
-        return _qualifiers;
-      }
-    };
+    @Override
+    public Event<Object> select(final Annotation... qualifiers) {
+      return new EventImpl(eventType, qualifiers);
+    }
+
+    @Override
+    public <U extends Object> Event<U> select(final Class<U> subtype, final Annotation... qualifiers) {
+      return (Event<U>) new EventImpl(subtype, qualifiers);
+    }
+
+    public Class getEventType() {
+      return eventType;
+    }
+
+    public Annotation[] getQualifiers() {
+      return _qualifiers;
+    }
   }
 }

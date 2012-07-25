@@ -15,6 +15,9 @@
  */
 package org.jboss.errai.enterprise.rebind;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.Subscription;
@@ -50,9 +53,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-
 /**
  * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>
  * Basically creates a subscription for a CDI event type that invokes on the annotated method.
@@ -78,10 +78,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
- //   final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getBeanInstance(instance);
     final List<Annotation> annotations = InjectUtil.extractQualifiers(instance);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
-    final List<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
+    final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
     AnonymousClassStructureBuilder callBack = Stmt.newObject(AbstractCDIEventCallback.class).extend();
 
@@ -136,7 +135,8 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     for (Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
       final String subscrHandle = InjectUtil.getUniqueVarName();
       statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
-              .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
+              .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
+                  CDI.getSubjectNameByType(cls.getName()),
                       Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
       destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
     }

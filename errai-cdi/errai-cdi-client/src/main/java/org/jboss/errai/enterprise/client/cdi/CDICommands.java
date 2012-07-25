@@ -16,5 +16,5 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 public enum CDICommands {
-  CDIEvent, AttachRemote, RemoteSubscribe
+  CDIEvent, AttachRemote, RemoteSubscribe, RemoteUnsubscribe
 }

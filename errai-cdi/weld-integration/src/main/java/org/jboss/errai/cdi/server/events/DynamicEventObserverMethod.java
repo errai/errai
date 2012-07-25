@@ -15,10 +15,11 @@
  */
 package org.jboss.errai.cdi.server.events;
 
+import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
+
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
@@ -26,13 +27,12 @@ import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.ObserverMethod;
+import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
 /**
  * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the
@@ -43,19 +43,23 @@ import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType
  *
  * @author Mike Brock
  */
-public class DevEventObserverMethod implements ObserverMethod {
+public class DynamicEventObserverMethod implements ObserverMethod {
 
   /**
    * An instance of the MessageBus.
    */
+  protected final EventRoutingTable eventRoutingTable;
   protected final MessageBus bus;
   protected final Class<?> eventType;
   protected final Set<String> annotationTypes;
   protected final Set<Annotation> annotations;
 
-  public DevEventObserverMethod(final MessageBus bus,
-                                final Class<?> eventType,
-                                final Set<String> annotations) throws ClassNotFoundException {
+  public DynamicEventObserverMethod(final EventRoutingTable eventRoutingTable,
+                                    final MessageBus bus,
+                                    final Class<?> eventType,
+                                    final Set<String> annotations) throws ClassNotFoundException {
+
+    this.eventRoutingTable = eventRoutingTable;
     this.bus = bus;
     this.eventType = eventType;
     this.annotationTypes = annotations;
@@ -63,7 +67,9 @@ public class DevEventObserverMethod implements ObserverMethod {
 
     for (String fqcn : annotations) {
       final Class<? extends Annotation> annoType = Class.forName(fqcn).asSubclass(Annotation.class);
-      this.annotations.add(new AnnotationWrapper(annoType));
+      if (annoType.isAnnotationPresent(Qualifier.class)) {
+        this.annotations.add(new AnnotationWrapper(annoType));
+      }
     }
   }
 
@@ -101,8 +107,6 @@ public class DevEventObserverMethod implements ObserverMethod {
       sessionId = null;
     }
 
-    if (!EnvUtil.isPortableType(aClass)) return;
-
     final Map<String, Object> messageParts = new HashMap<String, Object>(10);
     messageParts.put(MessageParts.ToSubject.name(), getSubjectNameByType(aClass.getName()));
     messageParts.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
@@ -114,11 +118,14 @@ public class DevEventObserverMethod implements ObserverMethod {
     }
 
     if (!annotationTypes.isEmpty()) {
-      messageParts.put(CDIProtocol.Qualifiers.name(),
-              annotationTypes);
+      messageParts.put(CDIProtocol.Qualifiers.name(), annotationTypes);
     }
 
-    bus.send(CommandMessage.createWithParts(messageParts));
+    for (final String id : eventRoutingTable.getQueueIdsForRoute(event.getClass().getName(), annotationTypes)) {
+      bus.send(CommandMessage.createWithParts(new RoutingMap(messageParts, id)));
+    }
+
+//    bus.send(CommandMessage.createWithParts(messageParts));
   }
 
   static class AnnotationWrapper implements Annotation {
@@ -137,9 +144,9 @@ public class DevEventObserverMethod implements ObserverMethod {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof DevEventObserverMethod)) return false;
+    if (!(o instanceof DynamicEventObserverMethod)) return false;
 
-    DevEventObserverMethod that = (DevEventObserverMethod) o;
+    DynamicEventObserverMethod that = (DynamicEventObserverMethod) o;
 
     if (annotationTypes != null ? !annotationTypes.equals(that.annotationTypes) : that.annotationTypes != null)
       return false;

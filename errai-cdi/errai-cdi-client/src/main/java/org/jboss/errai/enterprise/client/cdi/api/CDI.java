@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -102,28 +103,36 @@ public class CDI {
    *
    * @return
    */
-  public static List<String> getQualifiersPart(Annotation[] qualifiers) {
-    List<String> qualifiersPart = null;
+  public static Set<String> getQualifiersPart(Annotation[] qualifiers) {
+    Set<String> qualifiersPart = null;
     if (qualifiers != null) {
       for (Annotation qualifier : qualifiers) {
         if (qualifiersPart == null)
-          qualifiersPart = new ArrayList<String>(qualifiers.length);
+          qualifiersPart = new HashSet<String>(qualifiers.length);
 
         qualifiersPart.add(qualifier.annotationType().getName());
       }
     }
-    return qualifiersPart == null ? Collections.<String>emptyList() : qualifiersPart;
+    return qualifiersPart == null ? Collections.<String>emptySet() : qualifiersPart;
   }
 
   public static void fireEvent(final Object payload, final Annotation... qualifiers) {
+    fireEvent(false, payload, qualifiers);
+  }
+
+
+  public static void fireEvent(final boolean local,
+                               final Object payload,
+                               final Annotation... qualifiers) {
+
     if (payload == null) return;
 
-    if (!active) {
+    if (!local && !active) {
       deferredEvents.add(new DeferredEvent(payload, qualifiers));
       return;
     }
 
-    final List<String> qualifiersPart = getQualifiersPart(qualifiers);
+    final Set<String> qualifiersPart = getQualifiersPart(qualifiers);
 
     final Map<String, Object> messageMap = new HashMap<String, Object>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
@@ -136,7 +145,7 @@ public class CDI {
 
     consumeEventFromMessage(CommandMessage.createWithParts(messageMap));
 
-    if (remoteEvents.contains(payload.getClass().getName())) {
+    if (isRemoteCommunicationEnabled() && remoteEvents.contains(payload.getClass().getName())) {
       messageMap.put(MessageParts.ToSubject.name(), SERVER_DISPATCHER_SUBJECT);
       ErraiBus.get().send(CommandMessage.createWithParts(messageMap));
     }
@@ -149,14 +158,14 @@ public class CDI {
     }
     observerCallbacks.add(callback);
 
-    //  if (!GWT.isProdMode()) {
-    MessageBuilder.createMessage()
-            .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
-            .command(CDICommands.RemoteSubscribe)
-            .with(CDIProtocol.BeanType, eventType)
-            .with(CDIProtocol.Qualifiers, callback.getQualifiers())
-            .noErrorHandling().sendNowWith(ErraiBus.get());
-    //  }
+    if (isRemoteCommunicationEnabled()) {
+      MessageBuilder.createMessage()
+          .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+          .command(CDICommands.RemoteSubscribe)
+          .with(CDIProtocol.BeanType, eventType)
+          .with(CDIProtocol.Qualifiers, callback.getQualifiers())
+          .noErrorHandling().sendNowWith(ErraiBus.get());
+    }
 
     return new Subscription() {
       @Override
@@ -166,13 +175,22 @@ public class CDI {
     };
   }
 
-  private static void unsubscribe(final String eventType, final MessageCallback callback) {
+  private static void unsubscribe(final String eventType, final AbstractCDIEventCallback callback) {
     List<MessageCallback> observerCallbacks = eventObservers.get(eventType);
     if (observerCallbacks != null) {
       observerCallbacks.remove(callback);
 
       if (observerCallbacks.isEmpty()) {
         eventObservers.remove(eventType);
+      }
+
+      if (isRemoteCommunicationEnabled()) {
+        MessageBuilder.createMessage()
+            .toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+            .command(CDICommands.RemoteUnsubscribe)
+            .with(CDIProtocol.BeanType, eventType)
+            .with(CDIProtocol.Qualifiers, callback.getQualifiers())
+            .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }
   }
@@ -264,4 +282,9 @@ public class CDI {
       this.annotations = annotations;
     }
   }
+
+  private static boolean isRemoteCommunicationEnabled() {
+    return ((ClientMessageBusImpl) ErraiBus.get()).isRemoteCommunicationEnabled();
+  }
+
 }

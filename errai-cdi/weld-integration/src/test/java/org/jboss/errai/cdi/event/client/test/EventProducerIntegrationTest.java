@@ -1,11 +1,11 @@
 package org.jboss.errai.cdi.event.client.test;
 
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.errai.cdi.event.client.EventProducerTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tests CDI event producers.
@@ -47,10 +47,11 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testEventProducers() {
+    final EventProducerTestModule module = IOC.getBeanManager().lookupBean(EventProducerTestModule.class).getInstance();
+
     final Runnable verifier = new Runnable() {
       @Override
       public void run() {
-        EventProducerTestModule module = IOC.getBeanManager().lookupBean(EventProducerTestModule.class).getInstance();
 
         Map<String, List<String>> actualEvents = module.getReceivedEventsOnServer();
 
@@ -63,11 +64,10 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        EventProducerTestModule module = IOC.getBeanManager().lookupBean(EventProducerTestModule.class).getInstance();
-
         if (module.getBusReadyEventsReceived()) {
           module.setResultVerifier(verifier);
           module.fireAll();
+          System.out.println("FIRE!");
         }
         else {
           fail("Did not receive a BusReadyEvent!");

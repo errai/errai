@@ -15,18 +15,7 @@
  */
 package org.jboss.errai.cdi.server.events;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.event.Reception;
-import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.spi.ObserverMethod;
+import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -35,18 +24,29 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
-import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
+import javax.enterprise.event.Reception;
+import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.spi.ObserverMethod;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the 
+ * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the
  * CDI container. The purpose of this implementation is to observe an event which is exposed to the bus and
  * transmit the event to all clients listening to this event.</p>
- * 
+ * <p/>
  * For the "conversational" version of this, see {@link ConversationalEventObserverMethod}.
- * 
+ *
  * @author Mike Brock
  */
 public class EventObserverMethod implements ObserverMethod {
+
+  protected final EventRoutingTable eventRoutingTable;
 
   /**
    * The type of event handled by this ObserverMethod implementation.
@@ -62,7 +62,7 @@ public class EventObserverMethod implements ObserverMethod {
    * the qualifiers collection to be used for transmitting the data over the wire. This is represented as a List
    * merely for internal wire purposes. It does not connote that ordering matters.
    */
-  protected final List<String> qualifierForWire;
+  protected final Set<String> qualifierForWire;
 
   /**
    * An instance of the MessageBus.
@@ -70,13 +70,17 @@ public class EventObserverMethod implements ObserverMethod {
   protected final MessageBus bus;
 
 
-  public EventObserverMethod(final Class<?> type, final MessageBus bus, final Annotation... qualifiers) {
+  public EventObserverMethod(final EventRoutingTable eventRoutingTable,
+                             final Class<?> type,
+                             final MessageBus bus,
+                             final Annotation... qualifiers) {
+    this.eventRoutingTable = eventRoutingTable;
     this.type = type;
     this.bus = bus;
 
     if (qualifiers == null || qualifiers.length == 0) {
       this.observedQualifiers = Collections.emptySet();
-      this.qualifierForWire = Collections.emptyList();
+      this.qualifierForWire = Collections.emptySet();
     }
     else {
       this.observedQualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(Arrays.asList(qualifiers)));
@@ -117,6 +121,8 @@ public class EventObserverMethod implements ObserverMethod {
       messageParts.put(CDIProtocol.Qualifiers.name(), qualifierForWire);
     }
 
-    bus.send(CommandMessage.createWithParts(messageParts));
+    for (final String id : eventRoutingTable.getQueueIdsForRoute(event.getClass().getName(), qualifierForWire)) {
+      bus.send(CommandMessage.createWithParts(new RoutingMap(messageParts, id)));
+    }
   }
 }

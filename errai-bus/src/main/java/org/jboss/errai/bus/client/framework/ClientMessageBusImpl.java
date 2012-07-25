@@ -1623,7 +1623,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public void _store(final String subject, final Message msg) {
     if (subscriptions.containsKey(subject)) {
-      for (final MessageCallback cb : subscriptions.get(subject)) {
+      final ArrayList<MessageCallback> messageCallbacks = new ArrayList<MessageCallback>(subscriptions.get(subject));
+      for (final MessageCallback cb : messageCallbacks) {
         cb.callback(msg);
       }
     }
