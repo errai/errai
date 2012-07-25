@@ -33,14 +33,36 @@ import com.google.gwt.user.client.ui.Widget;
 public class DataBinder<T> {
   private T model;
 
+  /**
+   * Creates a {@link DataBinder} for a newly created model instance of the provided type (see {@link #forType(Class)}).
+   * 
+   * @param modelType
+   *          The bindable type, must not be null.
+   */
   private DataBinder(Class<T> modelType) {
     this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
   }
 
+  /**
+   * Creates a {@link DataBinder} for the provided model instance (see {@link #forModel(Object)}).
+   * 
+   * @param model
+   *          The instance of a {@link Bindable} type, must not be null.
+   */
   private DataBinder(T model) {
     this(Assert.notNull(model), null);
   }
 
+  /**
+   * Creates a {@link DataBinder} for the provided model instance, initializing either model or UI widgets from the
+   * values defined by {@link InitialState} (see {@link #forModel(Object, InitialState)}).
+   * 
+   * @param model
+   *          The instance of a {@link Bindable} type, must not be null.
+   * @param intialState
+   *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
+   *          synchronization should be carried out.
+   */
   private DataBinder(T model, InitialState intialState) {
     this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
   }
@@ -82,7 +104,7 @@ public class DataBinder<T> {
   /**
    * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
-   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} is thrown.
+   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
    * 
    * @param <T>
    *          The model type
@@ -91,18 +113,17 @@ public class DataBinder<T> {
    * @param property
    *          The name of the model property that should be used for the binding, following Java bean conventions. Must
    *          not be null.
-   * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
-   *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
-   *         {@link #getModel()}).
+   * @return the same {@link DataBinder} instance to support call chaining.
    */
-  public T bind(final Widget widget, final String property) {
-    return bind(widget, property, null);
+  public DataBinder<T> bind(final Widget widget, final String property) {
+    bind(widget, property, null);
+    return this;
   }
 
   /**
    * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
-   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} is thrown.
+   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
    * 
    * @param <T>
    *          The model type
@@ -113,16 +134,16 @@ public class DataBinder<T> {
    *          not be null.
    * @param converter
    *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
-   * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
-   *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
-   *         {@link #getModel()}).
+   * @return the same {@link DataBinder} instance to support call chaining.
    */
   @SuppressWarnings("unchecked")
-  public T bind(final Widget widget, final String property, @SuppressWarnings("rawtypes") final Converter converter) {
+  public DataBinder<T> bind(final Widget widget, final String property,
+      @SuppressWarnings("rawtypes") final Converter converter) {
+
     Assert.notNull(widget);
     Assert.notNull(property);
     ((BindableProxy<T>) this.model).bind(widget, property, converter);
-    return this.model;
+    return this;
   }
 
   /**
@@ -132,29 +153,30 @@ public class DataBinder<T> {
    * @param property
    *          The name of the property to unbind, must not be null.
    * 
-   * @return the model instance with the property unbound.
+   * @return the same {@link DataBinder} instance to support call chaining.
    */
   @SuppressWarnings("unchecked")
-  public T unbind(String property) {
+  public DataBinder<T> unbind(String property) {
     ((BindableProxy<T>) this.model).unbind(property);
-    return this.model;
+    return this;
   }
 
   /**
    * Unbinds the widget and model bound by previous calls to {@link #bind(HasValue, Object, String)}.
    * 
-   * @return the model instance without any bound property.
+   * @return the same {@link DataBinder} instance to support call chaining.
    */
   @SuppressWarnings("unchecked")
-  public T unbind() {
+  public DataBinder<T> unbind() {
     ((BindableProxy<T>) this.model).unbind();
-    return this.model;
+    return this;
   }
 
   /**
    * Returns the proxied model instance.
    * 
-   * @return the bound model instance
+   * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
+   *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI.
    */
   public T getModel() {
     return this.model;

@@ -56,7 +56,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBasicBinding() {
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "value");
+    Model model = DataBinder.forType(Model.class).bind(textBox, "value").getModel();
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getValue());
@@ -83,7 +83,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testHasTextBinding() {
     Label label = new Label();
-    Model model = DataBinder.forType(Model.class).bind(label, "id");
+    Model model = DataBinder.forType(Model.class).bind(label, "id").getModel();
 
     model.setId(1701);
     assertEquals("Widget not properly updated", "1701", label.getText());
@@ -92,7 +92,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testIntegerToStringBinding() {
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age");
+    Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
 
     model.setAge(25);
     assertEquals("Widget not properly updated", "25", textBox.getText());
@@ -107,10 +107,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     button.setText("button");
 
     Model model = new Model();
-
-    DataBinder<Model> binder = DataBinder.forType(Model.class);
-    model = binder.bind(button, "non-existing");
-    binder.setModel(model, InitialState.FROM_MODEL);
+    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(button, "non-existing");
 
     assertEquals("Button text should not have been changed after intial state synchronization " +
         "as the property it is bound to does not exist",
@@ -121,7 +118,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testUnbindingSingleProperty() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox textBox = new TextBox();
-    Model model = binder.bind(textBox, "value");
+    Model model = binder.bind(textBox, "value").getModel();
 
     binder.unbind("value");
 
@@ -136,7 +133,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testUnbindingAll() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox textBox = new TextBox();
-    Model model = binder.bind(textBox, "value");
+    Model model = binder.bind(textBox, "value").getModel();
 
     binder.unbind();
 
@@ -190,7 +187,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBindableProxyMarshalling() {
-    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value");
+    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value").getModel();
 
     String marshalledModel = Marshalling.toJSON(model);
     assertEquals(model, Marshalling.fromJSON(marshalledModel, Model.class));
@@ -198,7 +195,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBindableProxyListMarshalling() {
-    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value");
+    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value").getModel();
 
     List<Model> modelList = new ArrayList<Model>();
     modelList.add(model);
@@ -208,7 +205,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBindableProxyMapMarshalling() {
-    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value");
+    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value").getModel();
 
     Map<Model, Model> modelMap = new HashMap<Model, Model>();
     modelMap.put(model, model);
@@ -256,7 +253,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     };
     
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age", converter);
+    Model model = DataBinder.forType(Model.class).bind(textBox, "age", converter).getModel();
 
     textBox.setValue("321", true);
     assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
@@ -281,7 +278,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     Convert.registerDefaultConverter(Integer.class, String.class, converter);
     
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age");
+    Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
 
     textBox.setValue("321", true);
     assertEquals("Model not properly updated using global default converter", Integer.valueOf(1701), model.getAge());
@@ -294,7 +291,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testAutoRegisteredGlobalDefaultConverter() {
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "active");
+    Model model = DataBinder.forType(Model.class).bind(textBox, "active").getModel();
 
     textBox.setValue("123", true);
     assertEquals("Model not properly updated using global default converter", true, model.isActive());
@@ -332,7 +329,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     };
     
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age", bindingConverter);
+    Model model = DataBinder.forType(Model.class).bind(textBox, "age", bindingConverter).getModel();
 
     textBox.setValue("321", true);
     assertEquals("Model not properly updated using custom converter", Integer.valueOf(1), model.getAge());
