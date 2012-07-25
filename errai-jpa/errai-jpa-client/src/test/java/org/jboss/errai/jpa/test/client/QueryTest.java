@@ -791,4 +791,46 @@ public class QueryTest extends GWTTestCase {
     assertTrue(resultStrings.contains(zentity5.toString()));
   }
 
+  public void testNoWhereClauseSelectsEverything() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Album album = new Album();
+    album.setName("Don't select me!");
+    em.persist(album);
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setBoxedDouble(1.0);
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setBoxedDouble(2.0);
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setBoxedDouble(3.0);
+    em.persist(zentity3);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setBoxedDouble(4.0);
+    em.persist(zentity4);
+
+    Zentity zentity5 = new Zentity();
+    zentity5.setBoxedDouble(5.0);
+    em.persist(zentity5);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityNoWhereClause", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(5, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertTrue(resultStrings.contains(zentity2.toString()));
+    assertTrue(resultStrings.contains(zentity3.toString()));
+    assertTrue(resultStrings.contains(zentity4.toString()));
+    assertTrue(resultStrings.contains(zentity5.toString()));
+  }
+
 }

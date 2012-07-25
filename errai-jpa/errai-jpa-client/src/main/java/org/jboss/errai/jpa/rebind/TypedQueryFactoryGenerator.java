@@ -2,10 +2,13 @@ package org.jboss.errai.jpa.rebind;
 
 
 
-import antlr.RecognitionException;
-import antlr.TokenStreamException;
-import antlr.collections.AST;
-import com.google.gwt.json.client.JSONObject;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.NamedQuery;
+
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.hql.internal.antlr.HqlSqlTokenTypes;
 import org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory;
@@ -33,11 +36,11 @@ import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 import org.mvel2.MVEL;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NamedQuery;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import antlr.RecognitionException;
+import antlr.TokenStreamException;
+import antlr.collections.AST;
+
+import com.google.gwt.json.client.JSONObject;
 
 /**
  * Code generator for making TypedQuery instances based on existing typesafe
@@ -147,7 +150,9 @@ public class TypedQueryFactoryGenerator {
         System.out.println("Skipping node: " + ast);
       }
     }
-    throw new RuntimeException("Didn't find the WHERE clause in the query");
+
+    // Query has no WHERE clause
+    return Stmt.loadLiteral(true);
   }
 
   /**

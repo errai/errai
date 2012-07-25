@@ -83,7 +83,9 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityStringLessThanOrEqualTo", query="SELECT z FROM Zentity z WHERE z.string <= 'hello'"),
 
   @NamedQuery(name="zentityBetween", query="SELECT z FROM Zentity z WHERE z.boxedDouble BETWEEN 2.0 AND 4.0"),
-  @NamedQuery(name="zentityNotBetween", query="SELECT z FROM Zentity z WHERE z.boxedDouble NOT BETWEEN 2.0 AND 4.0")
+  @NamedQuery(name="zentityNotBetween", query="SELECT z FROM Zentity z WHERE z.boxedDouble NOT BETWEEN 2.0 AND 4.0"),
+
+  @NamedQuery(name="zentityNoWhereClause", query="SELECT z FROM Zentity z")
 })
 public class Zentity {
 

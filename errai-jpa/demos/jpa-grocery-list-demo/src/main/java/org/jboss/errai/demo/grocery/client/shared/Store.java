@@ -16,7 +16,7 @@ import org.jboss.errai.demo.grocery.client.local.StoresWidget;
 
 @Bindable @Entity
 @EntityListeners(StoresWidget.StoreListener.class)
-@NamedQuery(name="allStores", query="SELECT s FROM Store s WHERE 1 = 1")
+@NamedQuery(name="allStores", query="SELECT s FROM Store s")
 public class Store {
 
   @Id @GeneratedValue
