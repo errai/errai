@@ -23,7 +23,7 @@ import org.jboss.errai.ioc.client.api.TaskOrder;
 import com.google.gwt.core.client.GWT;
 
 /**
- * Bootstrapper for Errai's data binding module.
+ * Bootstrapper for Errai's data binding module to generate the proxies for bindable types.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

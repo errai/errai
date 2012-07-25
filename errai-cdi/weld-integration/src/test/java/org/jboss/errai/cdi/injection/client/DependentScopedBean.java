@@ -17,8 +17,6 @@
 package org.jboss.errai.cdi.injection.client;
 
 
-import javax.enterprise.context.Dependent;
-
 /**
  * @author Mike Brock
  */

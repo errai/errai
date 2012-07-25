@@ -16,6 +16,9 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -23,16 +26,13 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Utility to transform Errai's JSON to a Jackson compatible JSON and vice versa.
  * <p>
  * Limitations: 
  * <ul>
- * <li>Maps can currently not be transformed</li>
- * <li>Fields using nested parameterized types are not supported</li>
+ * <li>Fields with multiple type parameters are not supported (e.g. Map<K, V>)</li>
+ * <li>Fields with nested parameterized types are not supported (e.g. List<List<String>>)</li>
  * </ul>
  * 
  * @author Christian Sadilek <csadilek@redhat.com>

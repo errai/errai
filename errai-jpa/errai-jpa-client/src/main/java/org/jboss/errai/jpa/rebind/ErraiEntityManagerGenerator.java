@@ -688,8 +688,8 @@ public class ErraiEntityManagerGenerator extends Generator {
       }
       else {
         throw new AssertionError(
-                "JPA properties should only be Field or Method, but this one is " +
-                        getJavaMember(attr) == null ? "null" : getJavaMember(attr).getClass());
+                "JPA properties should only be Field or Method, but this one is "
+                    + getJavaMember(attr) == null ? "null" : getJavaMember(attr).getClass());
       }
     }
   }

@@ -14,44 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.test.common.client;
+package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.Converter;
+import org.jboss.errai.databinding.client.api.DefaultConverter;
 
 /**
- * Simple bindable model for testing purposes.
+ * Global default converter for testing purposes. Converters annotated with {@link DefaultConverter} should be auto
+ * discovered and registered as part of the bootstrap process.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Bindable
-@Portable
-public class Model {
+@DefaultConverter
+public class AutoRegisteredDefaultConverter implements Converter<Boolean, String> {
 
-  private Integer id;
-  private String name;
-
-  public Model() {}
-
-  public Model(Integer id, String name) {
-    this.id = id;
-    this.name = name;
+  @Override
+  public Boolean toModelValue(String widgetValue) {
+    return true;
   }
 
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
+  @Override
+  public String toWidgetValue(Boolean modelValue) {
+    return "AutoRegisteredDefaultConverter";
   }
 
 }

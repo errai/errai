@@ -14,44 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.test.common.client;
+package org.jboss.errai.databinding.client.api;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.databinding.client.api.Bindable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Simple bindable model for testing purposes.
+ * Indicates that an implementation of {@link Converter} is to be used as a global default for converting between the
+ * specified model value and widget value type.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Bindable
-@Portable
-public class Model {
-
-  private Integer id;
-  private String name;
-
-  public Model() {}
-
-  public Model(Integer id, String name) {
-    this.id = id;
-    this.name = name;
-  }
-
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE })
+public @interface DefaultConverter {
 
 }

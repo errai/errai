@@ -16,6 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.load;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -38,13 +45,6 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.load;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
@@ -133,7 +133,7 @@ public class TypeInjector extends AbstractInjector {
     */
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
             = newInstanceOf(creationCallbackRef).extend()
-            .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
+                .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
 
     /*
     render local variables Class::beanType and Annotation[]::qualifiers at the beginning of the getInstance()

@@ -607,7 +607,7 @@ public class ErraiJpaTest extends GWTTestCase {
 
     class AlbumProxy extends Album implements WrappedPortable {
 
-      private Album wrapped;
+      private final Album wrapped;
 
       AlbumProxy(Album wrapme) {
         wrapped = wrapme;
@@ -714,7 +714,7 @@ public class ErraiJpaTest extends GWTTestCase {
     Album album = new Album();
     TextBox box = new TextBox();
 
-    DataBinder<Album> binder = new DataBinder<Album>(album);
+    DataBinder<Album> binder = DataBinder.forModel(album);
     binder.bind(box, "id");
     album = binder.getModel();
     assertEquals("", box.getText());

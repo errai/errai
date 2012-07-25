@@ -144,6 +144,8 @@ public class Variable extends AbstractStatement {
 
   public static VariableReference get(final String name) {
     return new VariableReference() {
+      private MetaClass type;
+
       @Override
       public String getName() {
         return name;
@@ -151,7 +153,27 @@ public class Variable extends AbstractStatement {
 
       @Override
       public Statement getValue() {
-        return null;
+        return new Statement() {
+          @Override
+          public String generate(Context context) {
+            return name;
+          }
+
+          @Override
+          public MetaClass getType() {
+            return type;
+          }
+        };
+      }
+
+      @Override
+      public String generate(Context context) {
+        type = context.getVariable(name).getType();
+        return name;
+      }
+
+      public MetaClass getType() {
+        return type;
       }
 
       @Override

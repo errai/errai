@@ -16,18 +16,19 @@
 
 package org.jboss.errai.common.client.api.extension;
 
+import static org.jboss.errai.common.client.util.LogUtil.log;
+
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.util.TimeUnit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import static org.jboss.errai.common.client.util.LogUtil.log;
 
 /**
  * The <tt>InitVotes</tt> class provides the central algorithm around which disparate services within the Errai
@@ -53,7 +54,10 @@ public final class InitVotes {
   private static volatile AsyncTask initTimeout;
   private static volatile AsyncTask initDelay;
 
-  private static boolean _initWait = false;
+  private static boolean _initWait = false;;
+
+  private static final List<InitFailureListener> initFailureListeners
+      = new ArrayList<InitFailureListener>();
 
   private static final Object lock = new Object();
 
@@ -78,7 +82,7 @@ public final class InitVotes {
    *
    * @param millis milliseconds.
    */
-  public static void setTimeoutMillis(int millis) {
+  public static void setTimeoutMillis(final int millis) {
     timeoutMillis = millis;
   }
 
@@ -189,6 +193,16 @@ public final class InitVotes {
     }
   }
 
+  /**
+   * Registers an {@link InitFailureListener} to monitor for initialization failures of the framework or its
+   * components.
+   *
+   * @param failureListener the instance of the {@link InitFailureListener} to be registered.
+   */
+  public static void registerInitFailureListener(final InitFailureListener failureListener) {
+    initFailureListeners.add(failureListener);
+  }
+
   private static void beginInit() {
     synchronized (lock) {
       if (armed) {
@@ -211,6 +225,9 @@ public final class InitVotes {
               initDelay.cancel(true);
             }
 
+            final Set<String> failedTopics = Collections.unmodifiableSet(new HashSet<String>(waitForSet));
+            _fireFailedInit(failedTopics);
+
             log("components failed to initialize");
             for (String comp : waitForSet) {
               log("   [failed] -> " + comp);
@@ -218,6 +235,12 @@ public final class InitVotes {
           }
         }
       });
+    }
+  }
+
+  private static void _fireFailedInit(final Set<String> failedTopics) {
+    for (final InitFailureListener initFailureListener : initFailureListeners) {
+      initFailureListener.onInitFailure(failedTopics);
     }
   }
 

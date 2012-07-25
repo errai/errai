@@ -23,8 +23,7 @@ import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * API for communicating with REST endpoints based on JAX-RS interfaces.
@@ -46,7 +45,7 @@ public class RestClient {
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
-      int... successCodes) {
+      Integer... successCodes) {
     return create(remoteService, null, callback, null, successCodes);
   }
 
@@ -64,7 +63,7 @@ public class RestClient {
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
-      int... successCodes) {
+      Integer... successCodes) {
     return create(remoteService, baseUrl, callback, null, successCodes);
   }
 
@@ -82,7 +81,7 @@ public class RestClient {
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
-      final ErrorCallback errorCallback, int... successCodes) {
+      final ErrorCallback errorCallback, Integer... successCodes) {
     return create(remoteService, null, callback, errorCallback, successCodes);
   }
 
@@ -102,7 +101,7 @@ public class RestClient {
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
-      final ErrorCallback errorCallback, int... successCodes) {
+      final ErrorCallback errorCallback, Integer... successCodes) {
 
     Assert.notNull(callback);
     if (baseUrl != null && !baseUrl.endsWith("/"))
@@ -110,13 +109,8 @@ public class RestClient {
 
     T proxy = proxyProvider.getRemoteProxy(remoteService);
 
-    // Can't use ArrayUtils (class has to be translatable).
     if (successCodes.length > 0) {
-      List<Integer> codes = new ArrayList<Integer>();
-      for (int code : successCodes) {
-        codes.add(code);
-      }
-      ((JaxrsProxy) proxy).setSuccessCodes(codes);
+      ((JaxrsProxy) proxy).setSuccessCodes(Lists.newArrayList(successCodes));
     }
 
     ((JaxrsProxy) proxy).setRemoteCallback(callback);
