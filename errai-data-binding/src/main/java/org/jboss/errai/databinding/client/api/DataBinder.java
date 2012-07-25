@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * This class can be used to programmatically bind properties of a data model instance (any POJO annotated with
+ * Provides the API to programmatically bind properties of a data model instance (any POJO annotated with
  * {@link Bindable}) to UI fields/widgets. The properties of the model and the UI components will automatically be kept
  * in sync for as long as they are bound.
  * 
@@ -36,15 +36,15 @@ public class DataBinder<T> {
   private DataBinder(Class<T> modelType) {
     this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
   }
-  
+
   private DataBinder(T model) {
     this(Assert.notNull(model), null);
   }
-  
+
   private DataBinder(T model, InitialState intialState) {
     this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
   }
-  
+
   /**
    * Creates a {@link DataBinder} for a newly created model instance of the provided type.
    * 
@@ -80,38 +80,42 @@ public class DataBinder<T> {
   }
 
   /**
-   * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}
-   * instance. If an existing binding for the specified property exists it will be replaced.
+   * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
+   * If an existing binding for the specified property exists it will be replaced. If the provided widget already
+   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} is thrown.
    * 
    * @param <T>
    *          The model type
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
-   *          The name of the property that should be used for the binding, following Java bean conventions. Must not be
-   *          null.
-   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
+   *          The name of the model property that should be used for the binding, following Java bean conventions. Must
+   *          not be null.
+   * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
+   *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
+   *         {@link #getModel()}).
    */
   public T bind(final Widget widget, final String property) {
     return bind(widget, property, null);
   }
 
   /**
-   * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}
-   * instance. If an existing binding for the specified property exists it will be replaced.
+   * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
+   * If an existing binding for the specified property exists it will be replaced. If the provided widget already
+   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} is thrown.
    * 
    * @param <T>
    *          The model type
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
-   *          The name of the property that should be used for the binding, following Java bean conventions. Must not be
-   *          null.
+   *          The name of the model property that should be used for the binding, following Java bean conventions. Must
+   *          not be null.
    * @param converter
    *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
-   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
+   * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
+   *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
+   *         {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T bind(final Widget widget, final String property, @SuppressWarnings("rawtypes") final Converter converter) {
@@ -123,7 +127,7 @@ public class DataBinder<T> {
 
   /**
    * Unbinds the widget from the specified model property, bound by a previous call to
-   * {@link DataBinder#bind(HasValue, Object, String)}.
+   * {@link #bind(HasValue, Object, String)}.
    * 
    * @param property
    *          The name of the property to unbind, must not be null.
@@ -137,7 +141,7 @@ public class DataBinder<T> {
   }
 
   /**
-   * Unbinds the widget and model bound by previous calls to {@link DataBinder#bind(HasValue, Object, String)}.
+   * Unbinds the widget and model bound by previous calls to {@link #bind(HasValue, Object, String)}.
    * 
    * @return the model instance without any bound property.
    */
@@ -162,8 +166,9 @@ public class DataBinder<T> {
    * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
-   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
+   * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
+   *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
+   *         {@link #getModel()}).
    */
   public T setModel(T model) {
     return setModel(model, null);
@@ -178,8 +183,9 @@ public class DataBinder<T> {
    * @param initialState
    *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
    *          synchronization should be carried out.
-   * @return The model instance which has to be used in place of the provided model (see {@link #DataBinder(Object)}) if
-   *         changes should be automatically synchronized with the UI (also accessible using {@link #getModel()}).
+   * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
+   *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
+   *         {@link #getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
