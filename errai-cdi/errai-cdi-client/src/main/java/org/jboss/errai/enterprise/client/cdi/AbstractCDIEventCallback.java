@@ -46,7 +46,17 @@ public abstract class AbstractCDIEventCallback<T> implements MessageCallback {
     if (msgQualifiers == null && !qualifierSet.isEmpty()) {
       // no match.
     }
-    else if (msgQualifiers == null || msgQualifiers.equals(qualifierSet) || qualifierSet.contains(Any.class.getName())) {
+    else if (msgQualifiers == null
+        // if the event was fired from the client, then we apply a containsAll operation rather than an equals() operation.
+        // this is because Weld on the server takes care of identifying the proper observer methods we have registered
+        // to invoke, resulting in potential redundant event propagation. Thus, we only check for exact matches from
+        // the service.
+
+        // TODO: CDI 1.1 allows EventObservers to know what qualifiers were associated with firing the event
+        //       a future version of Errai should be able to use containsAll() from the server as well, when
+        //       Errai switches to CDI 1.1.
+        || (message.hasPart(CDIProtocol.FromClient) ? msgQualifiers.containsAll(qualifierSet): msgQualifiers.equals(qualifierSet))
+        || qualifierSet.contains(Any.class.getName())) {
       GWT.runAsync(new RunAsyncCallback() {
         public void onFailure(final Throwable throwable) {
           throw new RuntimeException("failed to run asynchronously", throwable);
