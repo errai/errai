@@ -67,7 +67,6 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
         if (module.getBusReadyEventsReceived()) {
           module.setResultVerifier(verifier);
           module.fireAll();
-          System.out.println("FIRE!");
         }
         else {
           fail("Did not receive a BusReadyEvent!");

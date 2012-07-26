@@ -42,10 +42,7 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.cdi.server.events.ConversationalEvent;
-import org.jboss.errai.cdi.server.events.ConversationalEventBean;
-import org.jboss.errai.cdi.server.events.ConversationalEventObserverMethod;
 import org.jboss.errai.cdi.server.events.EventDispatcher;
-import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.jboss.errai.cdi.server.events.EventRoutingTable;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.framework.Assert;
@@ -54,10 +51,7 @@ import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import org.jboss.errai.enterprise.client.cdi.internal.ObserverModel;
-import org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension;
 import org.jboss.errai.ioc.client.api.Sender;
-import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -350,34 +344,6 @@ public class CDIExtensionPoints implements Extension {
 
     abd.addBean(new ErraiServiceBean(bm, SecureHashUtil.hashToHexString(randBytes)));
 
-    if (MarshallingGenUtil.isUseStaticMarshallers()) {
-
-      final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints
-              = new HashSet<ObserversMarshallingExtension.ObserverPoint>();
-
-      for (final EventConsumer ec : eventConsumers) {
-        if (ec.getEventBeanType() != null) {
-          abd.addBean(new ConversationalEventBean(ec.getEventBeanType(), (BeanManagerImpl) bm, bus));
-        }
-
-        observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
-      }
-
-      observerPoints.addAll(org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.scanForObserverPointsInClassPath());
-
-      for (final org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
-              observerPoints) {
-        if (org.jboss.errai.config.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
-          if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
-            abd.addObserverMethod(new ConversationalEventObserverMethod(eventRoutingTable, observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
-          }
-          else {
-            abd.addObserverMethod(new EventObserverMethod(eventRoutingTable, observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
-          }
-        }
-      }
-    }
-
     for (final MessageSender ms : messageSenders) {
       abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));
     }
@@ -396,7 +362,7 @@ public class CDIExtensionPoints implements Extension {
 
     final EventDispatcher eventDispatcher
             = new EventDispatcher(bm, eventRoutingTable, bus, observableEvents,
-            eventQualifiers, MarshallingGenUtil.isUseStaticMarshallers() ? null : abd);
+            eventQualifiers, abd);
 
     // subscribe event dispatcher
     bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
