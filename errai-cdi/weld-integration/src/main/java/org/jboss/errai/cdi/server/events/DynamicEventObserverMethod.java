@@ -65,7 +65,7 @@ public class DynamicEventObserverMethod implements ObserverMethod {
     this.annotationTypes = annotations;
     this.annotations = new HashSet<Annotation>();
 
-    for (String fqcn : annotations) {
+    for (final String fqcn : annotations) {
       final Class<? extends Annotation> annoType = Class.forName(fqcn).asSubclass(Annotation.class);
       if (annoType.isAnnotationPresent(Qualifier.class)) {
         this.annotations.add(new AnnotationWrapper(annoType));
@@ -124,14 +124,12 @@ public class DynamicEventObserverMethod implements ObserverMethod {
     for (final String id : eventRoutingTable.getQueueIdsForRoute(event.getClass().getName(), annotationTypes)) {
       bus.send(CommandMessage.createWithParts(new RoutingMap(messageParts, id)));
     }
-
-//    bus.send(CommandMessage.createWithParts(messageParts));
   }
 
   static class AnnotationWrapper implements Annotation {
-    private Class<? extends Annotation> annoType;
+    private final Class<? extends Annotation> annoType;
 
-    AnnotationWrapper(Class<? extends Annotation> annoType) {
+    AnnotationWrapper(final Class<? extends Annotation> annoType) {
       this.annoType = annoType;
     }
 
@@ -142,17 +140,16 @@ public class DynamicEventObserverMethod implements ObserverMethod {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof DynamicEventObserverMethod)) return false;
 
-    DynamicEventObserverMethod that = (DynamicEventObserverMethod) o;
+    final DynamicEventObserverMethod that = (DynamicEventObserverMethod) o;
 
     if (annotationTypes != null ? !annotationTypes.equals(that.annotationTypes) : that.annotationTypes != null)
       return false;
-    if (eventType != null ? !eventType.equals(that.eventType) : that.eventType != null) return false;
 
-    return true;
+    return !(eventType != null ? !eventType.equals(that.eventType) : that.eventType != null);
   }
 
   @Override

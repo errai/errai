@@ -138,6 +138,7 @@ public class CDI {
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
     messageMap.put(CDIProtocol.BeanType.name(), payload.getClass().getName());
     messageMap.put(CDIProtocol.BeanReference.name(), payload);
+    messageMap.put(CDIProtocol.FromClient.name(), "1");
 
     if (!qualifiersPart.isEmpty()) {
       messageMap.put(CDIProtocol.Qualifiers.name(), qualifiersPart);
@@ -195,8 +196,11 @@ public class CDI {
     }
   }
 
+
+
   public static void consumeEventFromMessage(Message message) {
-    final String beanType = message.get(String.class, CDIProtocol.BeanType);
+    final String beanType = message.get(String.class, CDIProtocol.BeanType);;
+
     _fireEvent(beanType, message);
 
     if (lookupTable.containsKey(beanType)) {
@@ -273,15 +277,16 @@ public class CDI {
     return Collections.unmodifiableSet(lookupTable.keySet());
   }
 
-  static class DeferredEvent {
-    final Object eventInstance;
-    final Annotation[] annotations;
+static class DeferredEvent {
+  final Object eventInstance;
+  final Annotation[] annotations;
 
-    DeferredEvent(Object eventInstance, Annotation[] annotations) {
-      this.eventInstance = eventInstance;
-      this.annotations = annotations;
-    }
+  DeferredEvent(Object eventInstance, Annotation[] annotations) {
+    this.eventInstance = eventInstance;
+    this.annotations = annotations;
   }
+
+}
 
   private static boolean isRemoteCommunicationEnabled() {
     return ((ClientMessageBusImpl) ErraiBus.get()).isRemoteCommunicationEnabled();

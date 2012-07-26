@@ -15,21 +15,49 @@
  */
 package org.jboss.errai.enterprise.client.cdi;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 
+import javax.enterprise.inject.Any;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
-public abstract class AbstractCDIEventCallback implements MessageCallback {
+public abstract class AbstractCDIEventCallback<T> implements MessageCallback {
   /**
    * The qualifiers a message must contain to be propagated.
    */
-  protected Set<String> qualifierSet = new HashSet<String>();
+  protected final Set<String> qualifierSet = new HashSet<String>();
 
   public Set<String> getQualifiers() {
     return qualifierSet;
   }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public final void callback(final Message message) {
+    final Set<String> msgQualifiers = message.get(Set.class, CDIProtocol.Qualifiers);
+
+    if (msgQualifiers == null && !qualifierSet.isEmpty()) {
+      // no match.
+    }
+    else if (msgQualifiers == null || msgQualifiers.equals(qualifierSet) || qualifierSet.contains(Any.class.getName())) {
+      GWT.runAsync(new RunAsyncCallback() {
+        public void onFailure(final Throwable throwable) {
+          throw new RuntimeException("failed to run asynchronously", throwable);
+        }
+
+        public void onSuccess() {
+          fireEvent((T) message.get(Object.class, CDIProtocol.BeanReference));
+        }
+      });
+    }
+  }
+
+  protected abstract void fireEvent(T event);
 }

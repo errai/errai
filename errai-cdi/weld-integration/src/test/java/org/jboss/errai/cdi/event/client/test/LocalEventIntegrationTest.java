@@ -41,13 +41,19 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
             = IOC.getBeanManager().lookupBean(LocalEventTestModule.class).getInstance();
 
         final String testText = "ABCDE";
+        final String qualText = "QUAL";
+
 
         testModule.fireEvent(testText);
+        testModule.fireQualified(qualText);
 
         final List<LocalEventA> capturedEvents = testModule.getCapturedEvents();
 
-        assertEquals(1, capturedEvents.size());
+        assertEquals(4, capturedEvents.size());
         assertEquals(testText, capturedEvents.get(0).getMessage());
+        assertEquals(testText + ":Any", capturedEvents.get(1).getMessage());
+        assertEquals(qualText, capturedEvents.get(2).getMessage());
+        assertEquals(qualText + ":Any", capturedEvents.get(3).getMessage());
         finishTest();
       }
     });

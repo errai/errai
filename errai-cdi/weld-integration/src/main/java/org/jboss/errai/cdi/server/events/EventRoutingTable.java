@@ -129,9 +129,7 @@ public class EventRoutingTable {
     }
   }
 
-
   private void updateLaundry(final QueueSession queueSession) {
-
     Boolean routesActive = queueSession.getAttribute(Boolean.class, CDI_EVENT_ROUTES_ACTIVE);
     if (routesActive == null) {
       synchronized (queueSession) {
@@ -148,5 +146,4 @@ public class EventRoutingTable {
       }
     }
   }
-
 }

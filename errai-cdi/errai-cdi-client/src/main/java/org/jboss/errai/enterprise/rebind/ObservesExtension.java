@@ -19,7 +19,6 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
@@ -30,23 +29,19 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
-import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ioc.util.RunAsyncWrapper;
 
 import javax.enterprise.event.Observes;
-import javax.enterprise.util.TypeLiteral;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,10 +77,12 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
     final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
-    AnonymousClassStructureBuilder callBack = Stmt.newObject(AbstractCDIEventCallback.class).extend();
+    MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(parm.getType()));
+
+    AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
 
     BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
-    if (qualifierNames != null) {
+    if (qualifierNames != null && !qualifierNames.isEmpty()) {
       callBackBlock = callBack.initialize();
       for (String qualifierName : qualifierNames) {
         callBackBlock.append(Stmt.loadClassMember("qualifierSet").invoke("add", qualifierName));
@@ -93,20 +90,11 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBack = callBackBlock.finish();
     }
 
-    callBackBlock = callBack.publicOverridesMethod("callback", Parameter.of(Message.class, "message", true))
-            ._(Stmt.declareVariable("msgQualifiers", new TypeLiteral<Set<String>>() {
-            },
-                    Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.Qualifiers)))
-            ._(Stmt
-                    .if_(Bool.or(
-                            Stmt.loadClassMember("qualifierSet").invoke("equals", Refs.get("msgQualifiers")),
-                            Bool.and(Bool.equals(Refs.get("msgQualifiers"), null),
-                                    Stmt.loadClassMember("qualifierSet").invoke("isEmpty"))))
-                    ._(RunAsyncWrapper.wrap(instance.callOrBind(Stmt.loadVariable("message")
-                            .invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference))))
-                    .finish()).finish()
-            .publicOverridesMethod("toString")
-            ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
+    callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(parm, "event"))
+        ._(instance.callOrBind(Refs.get("event")))
+        .finish()
+        .publicOverridesMethod("toString")
+        ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
 
     final List<Statement> statements = new ArrayList<Statement>();
 
@@ -115,34 +103,34 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
 
     final Statement subscribeStatement =
-            Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
-                    .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, "subscribe", parmClassName,
-                            callBackBlock.finish().finish()));
+        Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
+            .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, "subscribe", parmClassName,
+                callBackBlock.finish().finish()));
 
     statements.add(subscribeStatement);
 
     // create the destruction callback to deregister the service when the bean is destroyed.
 
     final MetaClass destructionCallbackType =
-            parameterizedAs(DestructionCallback.class, typeParametersOf(instance.getEnclosingType()));
+        parameterizedAs(DestructionCallback.class, typeParametersOf(instance.getEnclosingType()));
 
     final BlockBuilder<AnonymousClassStructureBuilder> destroyMeth
-            = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
-            .publicOverridesMethod("destroy", Parameter.finalOf(instance.getEnclosingType(), "obj"))
-            .append(Stmt.loadVariable(subscrVar).invoke("remove"));
+        = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
+        .publicOverridesMethod("destroy", Parameter.finalOf(instance.getEnclosingType(), "obj"))
+        .append(Stmt.loadVariable(subscrVar).invoke("remove"));
 
 
     for (Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
       final String subscrHandle = InjectUtil.getUniqueVarName();
       statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
-              .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
-                  CDI.getSubjectNameByType(cls.getName()),
-                      Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
+          .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",
+              CDI.getSubjectNameByType(cls.getName()),
+              Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
       destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
     }
 
     final Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
-            Refs.get(instance.getInjector().getVarName()), destroyMeth.finish().finish());
+        Refs.get(instance.getInjector().getVarName()), destroyMeth.finish().finish());
 
     statements.add(destructionCallback);
 

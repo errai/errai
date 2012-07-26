@@ -16,13 +16,13 @@
 
 package org.jboss.errai.codegen;
 
-import java.lang.annotation.Annotation;
-
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
+
+import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -63,6 +63,13 @@ public class Parameter extends AbstractStatement {
     return of(type, name, true);
   }
 
+  public static Parameter of(MetaParameter metaParameter, String name) {
+    return Parameter.of(metaParameter.getType(), name);
+  }
+  public static Parameter finalOf(MetaParameter metaParameter, String name) {
+    return Parameter.of(metaParameter.getType(), name, true);
+  }
+
   public static Parameter[] of(MetaParameter[] parameters) {
     Parameter[] ps = new Parameter[parameters.length];
     for (int i = 0; i < ps.length; i++) {
@@ -70,12 +77,12 @@ public class Parameter extends AbstractStatement {
       if (name == null) {
         name = "a" + i;
       }
-      
-      ps[i] = Parameter.of(parameters[i].getType(), name);
+
+      ps[i] = of(parameters[i].getType(), name);
     }
     return ps;
   }
-  
+
   String generatedCache;
 
   @Override
