@@ -28,6 +28,9 @@ import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.QualifierEqualityFactory;
+import org.jboss.errai.ioc.client.QualifierEqualityFactoryProvider;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
@@ -36,6 +39,7 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -157,6 +161,23 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
     final IOCClientTestCase iocClientTestCase = (IOCClientTestCase) getInstance();
 
     if (SIMULATED) {
+      QualifierUtil.initFromFactoryProvider(new QualifierEqualityFactoryProvider() {
+        @Override
+        public QualifierEqualityFactory provide() {
+          return new QualifierEqualityFactory() {
+            @Override
+            public boolean isEqual(Annotation a1, Annotation a2) {
+              return a1.equals(a2);
+            }
+
+            @Override
+            public int hashCodeOf(Annotation a1) {
+              return a1.hashCode();
+            }
+          };
+        }
+      });
+
       TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
         ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
 

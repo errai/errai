@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.client;
 
-import com.google.gwt.core.client.GWT;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,7 +11,13 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class QualifierUtil {
-  private static final QualifierEqualityFactory factory = GWT.create(QualifierEqualityFactory.class);
+  private static QualifierEqualityFactoryProvider factoryProvider;
+  private static QualifierEqualityFactory factory;
+
+  public static void init() {
+    if (factory == null)
+      factory = factoryProvider.provide();
+  }
 
   public static boolean isEqual(final Annotation a1, final Annotation a2) {
     return factory.isEqual(a1, a2);
@@ -24,6 +28,7 @@ public class QualifierUtil {
   }
 
   public static int hashCodeOf(final Annotation a1) {
+
     return factory.hashCodeOf(a1);
   }
 
@@ -46,12 +51,18 @@ public class QualifierUtil {
     }
 
     for (final Map.Entry<String, Annotation> entry : allOfMap.entrySet()) {
-       if (!factory.isEqual(entry.getValue(), inMap.get(entry.getKey()))) {
-         return false;
-       }
+      if (!factory.isEqual(entry.getValue(), inMap.get(entry.getKey()))) {
+        return false;
+      }
     }
 
     return true;
+  }
+
+  public static void initFromFactoryProvider(QualifierEqualityFactoryProvider provider) {
+    factoryProvider = provider;
+    factory = null;
+    init();
   }
 
   static int hashValueFor(final int i) {

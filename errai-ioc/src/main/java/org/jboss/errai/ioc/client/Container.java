@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.client;
 
+import static org.jboss.errai.common.client.util.LogUtil.displayDebuggerUtilityTitle;
+import static org.jboss.errai.common.client.util.LogUtil.displaySeparator;
+import static org.jboss.errai.common.client.util.LogUtil.log;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -23,10 +27,6 @@ import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 import java.lang.annotation.Annotation;
-
-import static org.jboss.errai.common.client.util.LogUtil.displayDebuggerUtilityTitle;
-import static org.jboss.errai.common.client.util.LogUtil.displaySeparator;
-import static org.jboss.errai.common.client.util.LogUtil.log;
 
 public class Container implements EntryPoint {
   @Override
@@ -40,6 +40,13 @@ public class Container implements EntryPoint {
   public void bootstrapContainer() {
     try {
       InitVotes.waitFor(Container.class);
+
+      QualifierUtil.initFromFactoryProvider(new QualifierEqualityFactoryProvider() {
+        @Override
+        public QualifierEqualityFactory provide() {
+          return GWT.create(QualifierEqualityFactory.class);
+        }
+      });
 
       new IOCBeanManagerLifecycle().resetBeanManager();
 
