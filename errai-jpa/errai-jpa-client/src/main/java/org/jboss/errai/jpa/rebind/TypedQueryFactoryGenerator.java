@@ -31,6 +31,7 @@ import org.jboss.errai.jpa.client.local.AbstractEntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiParameter;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
+import org.mvel2.MVEL;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NamedQuery;
@@ -283,7 +284,7 @@ public class TypedQueryFactoryGenerator {
       return Stmt.loadLiteral(Boolean.parseBoolean(ast.getText()));
 
     case HqlSqlTokenTypes.JAVA_CONSTANT:
-      return Stmt.loadVariable(ast.getText());
+      return Stmt.loadLiteral(MVEL.eval(ast.getText()));
 
     default:
       throw new UnexpectedTokenException(ast.getType(), "an expression (boolean, literal, JPQL path, or named parameter)");

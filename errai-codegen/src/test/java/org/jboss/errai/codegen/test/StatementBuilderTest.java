@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.VariableReference;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
@@ -34,6 +35,7 @@ import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths;
 import org.jboss.errai.codegen.test.model.Foo;
+import org.jboss.errai.codegen.test.model.TEnum;
 import org.jboss.errai.codegen.util.Bitwise;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Expr;
@@ -642,5 +644,12 @@ public class StatementBuilderTest extends AbstractCodegenTest {
     final String generate = Stmt.newObject(Integer.class).withParameters(bitwiseStatement).generate(Context.create());
 
     assertEquals("new Integer(1 | 2 | (10 & 20))", generate);
+  }
+
+  @Test
+  public void testEnumReference() {
+    final ContextualStatementBuilder statementBuilder = Stmt.loadStatic(TEnum.class, "FIRST");
+
+    assertEquals(TEnum.class.getName() + ".FIRST", statementBuilder.generate(Context.create()));
   }
 }
