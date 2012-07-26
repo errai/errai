@@ -1,9 +1,5 @@
 package org.jboss.errai.cdi.injection.client.test;
 
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Set;
-
 import org.jboss.errai.cdi.injection.client.AbstractBean;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
@@ -32,6 +28,10 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
+
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Mike Brock

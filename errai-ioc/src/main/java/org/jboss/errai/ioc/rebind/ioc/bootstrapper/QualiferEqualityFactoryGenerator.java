@@ -25,7 +25,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.util.Arith;
-import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -53,7 +52,7 @@ public class QualiferEqualityFactoryGenerator extends Generator {
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
     try {
       // get classType and save instance variables
-      GenUtil.setPermissiveMode(true);
+    //  GenUtil.setPermissiveMode(true);
 
       final JClassType classType = context.getTypeOracle().getType(typeName);
       String packageName = classType.getPackage().getName();
@@ -92,6 +91,8 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder = ClassBuilder.define(packageName + "." + className)
             .publicScope().implementsInterface(QualifierEqualityFactory.class)
             .body();
+
+    builder.getClassDefinition().getContext().setPermissiveMode(true);
 
     final MetaClass mapStringAnnoComp
             = parameterizedAs(HashMap.class, typeParametersOf(String.class, AnnotationComparator.class));
@@ -159,8 +160,6 @@ public class QualiferEqualityFactoryGenerator extends Generator {
 
 
     printWriter.append(builder.toJavaString());
-
-
 
     generatorContext.commit(logger, printWriter);
   }

@@ -65,39 +65,39 @@ public class QualifierUtil {
     init();
   }
 
-  static int hashValueFor(final int i) {
+  public static int hashValueFor(final int i) {
     return i;
   }
 
-  static int hashValueFor(final boolean b) {
+  public static int hashValueFor(final boolean b) {
     return b ? 1 : 0;
   }
 
-  static int hashValueFor(final long l) {
+  public static int hashValueFor(final long l) {
     return (int) l;
   }
 
-  static int hashValueFor(final float f) {
+  public static int hashValueFor(final float f) {
     return (int) f * 1000;
   }
 
-  static int hashValueFor(final double d) {
+  public static int hashValueFor(final double d) {
     return (int) d * 1000;
   }
 
-  static int hashValueFor(final char c) {
+  public static int hashValueFor(final char c) {
     return (int) c;
   }
 
-  static int hashValueFor(final byte b) {
+  public static int hashValueFor(final byte b) {
     return (int) b;
   }
 
-  static int hashValueFor(final short s) {
+  public static int hashValueFor(final short s) {
     return (int) s;
   }
 
-  static int hashValueFor(final Object o) {
+  public static int hashValueFor(final Object o) {
     if (o == null) return -1;
     return o.hashCode();
   }
