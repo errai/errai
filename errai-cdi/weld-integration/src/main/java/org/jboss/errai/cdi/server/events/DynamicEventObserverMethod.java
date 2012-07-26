@@ -113,16 +113,19 @@ public class DynamicEventObserverMethod implements ObserverMethod {
     messageParts.put(CDIProtocol.BeanType.name(), aClass.getName());
     messageParts.put(CDIProtocol.BeanReference.name(), event);
 
-    if (sessionId != null) {
-      messageParts.put(MessageParts.SessionID.name(), sessionId);
-    }
 
     if (!annotationTypes.isEmpty()) {
       messageParts.put(CDIProtocol.Qualifiers.name(), annotationTypes);
     }
 
-    for (final String id : eventRoutingTable.getQueueIdsForRoute(event.getClass().getName(), annotationTypes)) {
-      bus.send(CommandMessage.createWithParts(new RoutingMap(messageParts, id)));
+    if (sessionId != null) {
+      messageParts.put(MessageParts.SessionID.name(), sessionId);
+      bus.send(CommandMessage.createWithParts(messageParts));
+    }
+    else {
+      for (final String id : eventRoutingTable.getQueueIdsForRoute(event.getClass().getName(), annotationTypes)) {
+        bus.send(CommandMessage.createWithParts(new RoutingMap(messageParts, id)));
+      }
     }
   }
 
