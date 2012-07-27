@@ -898,7 +898,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   break;
               }
             }
-
             break;
 
           case RemoteMonitorAttach:
@@ -1000,8 +999,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 // end of FinishStateSync Timer
               }
             }.schedule(5);
-
-
             break;
 
           case SessionExpired:
@@ -1024,7 +1021,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             init();
             setReinit(false);
-
             break;
 
           case WebsocketChannelVerify:
@@ -1052,7 +1048,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 InitVotes.voteFor(ClientMessageBus.class);
               }
             }.schedule(50);
-
             break;
 
           case WebsocketNegotiationFailed:
@@ -1467,7 +1462,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         initialPollTimer.schedule(10);
       }
     });
-
   }
 
   /**
@@ -1539,7 +1533,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return decode.append("</tbody></table>").toString();
   }
 
-
   private void logError(final String message, final String additionalDetails, final Throwable e) {
     logAdapter.error(message + " -- Additional Details: " + additionalDetails, e);
   }
@@ -1563,7 +1556,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         errorDialog.addError(message, "", e);
       }
     });
-
 
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
       LogUtil.nativeLog(message);
@@ -1790,7 +1782,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     $wnd.errai_show_error_console = function () {
       @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
     }
-
   }-*/;
 
   /**
@@ -1907,5 +1898,4 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       $wnd.erraiBusApplicationRoot = path;
     }
   }-*/;
-
 }

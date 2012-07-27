@@ -42,18 +42,27 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
 
         final String testText = "ABCDE";
         final String qualText = "QUAL";
+        final String extraQualText = "EXTRAQUAL";
 
 
         testModule.fireEvent(testText);
         testModule.fireQualified(qualText);
+        testModule.fireQualifiedWithExtraQual(extraQualText);
 
         final List<LocalEventA> capturedEvents = testModule.getCapturedEvents();
 
-        assertEquals(4, capturedEvents.size());
-        assertEquals(testText, capturedEvents.get(0).getMessage());
+        assertEquals("wrong number of events", 9, capturedEvents.size());
+        assertEquals(testText + ":None", capturedEvents.get(0).getMessage());
         assertEquals(testText + ":Any", capturedEvents.get(1).getMessage());
-        assertEquals(qualText, capturedEvents.get(2).getMessage());
-        assertEquals(qualText + ":Any", capturedEvents.get(3).getMessage());
+        assertEquals(qualText + ":None", capturedEvents.get(2).getMessage());
+        assertEquals(qualText + ":A", capturedEvents.get(3).getMessage());
+        assertEquals(qualText + ":Any", capturedEvents.get(4).getMessage());
+        assertEquals(extraQualText + ":None", capturedEvents.get(5).getMessage());
+        assertEquals(extraQualText + ":A", capturedEvents.get(6).getMessage());
+        assertEquals(extraQualText + ":AB", capturedEvents.get(7).getMessage());
+        assertEquals(extraQualText + ":Any", capturedEvents.get(8).getMessage());
+
+
         finishTest();
       }
     });

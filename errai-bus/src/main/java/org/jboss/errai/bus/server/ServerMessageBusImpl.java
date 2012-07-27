@@ -16,6 +16,13 @@
 
 package org.jboss.errai.bus.server;
 
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
+import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
+import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
+import static org.slf4j.LoggerFactory.getLogger;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
@@ -75,13 +82,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
-import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
-import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
-import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
-import static org.slf4j.LoggerFactory.getLogger;
-
 /**
  * The <tt>ServerMessageBusImpl</tt> implements the <tt>ServerMessageBus</tt>, making it possible for the server to
  * send and receive messages
@@ -90,7 +90,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
-
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
   private final TransmissionBuffer transmissionbuffer;
 
@@ -255,8 +254,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 closeQueue(queue);
                 session.endSession();
               }
-
               break;
+
             case Resend:
               if (queue == null) return;
 
@@ -364,7 +363,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                           .done().sendNowWith(ServerMessageBusImpl.this, false);
                 }
               }
-
               break;
           }
 
@@ -1137,7 +1135,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
       }
     }
-
   }
 
   private void fireUnsubscribeListeners(final SubscriptionEvent event) {

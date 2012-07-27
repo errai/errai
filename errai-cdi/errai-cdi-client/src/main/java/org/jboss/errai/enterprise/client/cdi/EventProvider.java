@@ -65,13 +65,35 @@ public class EventProvider implements ContextualTypeProvider<Event> {
 
     @Override
     public Event<Object> select(final Annotation... qualifiers) {
-      return new EventImpl(eventType, qualifiers);
+      if (qualifiers == null) return this;
+      return new EventImpl(eventType, concat(_qualifiers, qualifiers));
     }
 
     @Override
     public <U extends Object> Event<U> select(final Class<U> subtype, final Annotation... qualifiers) {
-      return (Event<U>) new EventImpl(subtype, qualifiers);
+      return (Event<U>) new EventImpl(subtype, concat(_qualifiers, qualifiers));
     }
+
+    private static Annotation[] concat(Annotation[] a, Annotation[] b) {
+      if (a == null) {
+        return b;
+      }
+      else if (b == null) {
+        return a;
+      }
+
+      final Annotation[] newQualifiers = new Annotation[a.length + b.length];
+       for (int i = 0; i < a.length; i++) {
+         newQualifiers[i] = a[i];
+       }
+
+       for (int i = 0; i < b.length; i++) {
+         newQualifiers[i + a.length] = b[i];
+       }
+
+      return newQualifiers;
+    }
+
 
     public Class getEventType() {
       return eventType;

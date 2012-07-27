@@ -13,4 +13,11 @@ public class LocalEventA {
   public String getMessage() {
     return message;
   }
+
+  @Override
+  public String toString() {
+    return "LocalEventA{" +
+        "message='" + message + '\'' +
+        '}';
+  }
 }
