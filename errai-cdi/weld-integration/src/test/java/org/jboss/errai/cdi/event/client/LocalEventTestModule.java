@@ -27,16 +27,16 @@ public class LocalEventTestModule {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":None"));
   }
 
+  private void observesAnyLocalEvent(@Observes @Any LocalEventA localEventA) {
+    capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":Any"));
+  }
+
   private void observesLocalEventWithQuals(@Observes @A LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":A"));
   }
 
   private void observesLocalEventWithQualsB(@Observes @A @B LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":AB"));
-  }
-
-  private void observesAnyLocalEvent(@Observes @Any LocalEventA localEventA) {
-    capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":Any"));
   }
 
   public List<LocalEventA> getCapturedEvents() {
