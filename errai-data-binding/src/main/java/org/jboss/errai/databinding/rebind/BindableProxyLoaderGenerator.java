@@ -18,7 +18,6 @@ package org.jboss.errai.databinding.rebind;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -31,10 +30,10 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
@@ -75,7 +74,7 @@ public class BindableProxyLoaderGenerator extends Generator {
       PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       // If code has not already been generated.
       if (printWriter != null) {
-        printWriter.append(generate(context, logger, className));
+        printWriter.append(generate(context, className));
         context.commit(logger, printWriter);
       }
     }
@@ -86,36 +85,25 @@ public class BindableProxyLoaderGenerator extends Generator {
     return packageName + "." + className;
   }
 
-  private String generate(final GeneratorContext context, final TreeLogger logger, final String className) {
+  private String generate(final GeneratorContext context, final String className) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
-    String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Bindable.class)
-        || RebindUtils.hasClasspathChangedForAnnotatedWith(DefaultConverter.class) 
-        || !cacheFile.exists()) {
-      log.info("generating bindable proxy loader class.");
-      gen = generate(context, logger);
-      RebindUtils.writeStringToFile(cacheFile, gen);
-    }
-    else {
-      log.info("nothing has changed. using cached bindable proxy loader class.");
-      gen = RebindUtils.readFileToString(cacheFile);
-    }
+    log.info("generating bindable proxy loader class.");
+    String  gen = generate(context);
+    RebindUtils.writeStringToFile(cacheFile, gen);
 
     return gen;
   }
 
-  private String generate(final GeneratorContext context, final TreeLogger logger) {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+  private String generate(final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
-
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
-    for (Class<?> bindable : scanner.getTypesAnnotatedWith(Bindable.class,
+    for (MetaClass bindable : ClassScanner.getTypesAnnotatedWith(Bindable.class,
         RebindUtils.findTranslatablePackages(context))) {
 
-      if (Modifier.isFinal(bindable.getModifiers())) {
+      if (bindable.isFinal()) {
         log.warn("Ignoring bindable type because it is marked as final:" + bindable.getName());
         continue;
       }
@@ -140,10 +128,10 @@ public class BindableProxyLoaderGenerator extends Generator {
       loadProxies.append(Stmt.invokeStatic(BindableProxyFactory.class, "addBindableProxy", bindable, proxyProvider));
     }
 
-    for (Class<?> converter : scanner.getTypesAnnotatedWith(DefaultConverter.class,
+    for (MetaClass converter : ClassScanner.getTypesAnnotatedWith(DefaultConverter.class,
         RebindUtils.findTranslatablePackages(context))) {
 
-      Type[] interfaces = converter.getGenericInterfaces();
+      Type[] interfaces = converter.asClass().getGenericInterfaces();
       for (Type iface : interfaces) {
         if (iface instanceof ParameterizedType && ((ParameterizedType) iface).getRawType().equals(Converter.class)) {
           Type[] typeArgs = ((ParameterizedType) iface).getActualTypeArguments();

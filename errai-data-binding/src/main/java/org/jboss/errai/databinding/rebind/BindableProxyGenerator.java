@@ -70,16 +70,16 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyGenerator {
-  private final Class<?> bindable;
+  private final MetaClass bindable;
 
-  public BindableProxyGenerator(Class<?> bindable) {
+  public BindableProxyGenerator(MetaClass bindable) {
     this.bindable = bindable;
   }
 
   public ClassStructureBuilder<?> generate() {
     @SuppressWarnings({ "serial", "rawtypes" })
     ClassStructureBuilder<?> classBuilder =
-        ClassBuilder.define(bindable.getSimpleName() + "Proxy", bindable)
+        ClassBuilder.define(bindable.getName() + "Proxy", bindable)
             .packageScope()
             .implementsInterface(BindableProxy.class)
             .body()
@@ -129,7 +129,7 @@ public class BindableProxyGenerator {
 
     BeanInfo beanInfo;
     try {
-      beanInfo = Introspector.getBeanInfo(bindable);
+      beanInfo = Introspector.getBeanInfo(bindable.asClass());
       generateStateSyncMethods(classBuilder);
       generateProxyBindMethod(classBuilder);
       generateProxyUnbindMethods(classBuilder);

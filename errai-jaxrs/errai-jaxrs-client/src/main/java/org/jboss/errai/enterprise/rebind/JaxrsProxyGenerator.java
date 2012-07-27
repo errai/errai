@@ -16,8 +16,12 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.Response;
+import java.lang.annotation.Annotation;
+import java.util.List;
+
+import javax.enterprise.util.TypeLiteral;
+import javax.ws.rs.Path;
+
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.codegen.Parameter;
@@ -25,6 +29,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
@@ -34,10 +39,8 @@ import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 
-import javax.enterprise.util.TypeLiteral;
-import javax.ws.rs.Path;
-import java.lang.annotation.Annotation;
-import java.util.List;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Response;
 
 /**
  * Generates a JAX-RS remote proxy.
@@ -45,20 +48,20 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsProxyGenerator {
-  private Class<?> remote = null;
+  private MetaClass remote = null;
 
   private final JaxrsHeaders headers;
   private final String rootResourcePath;
 
-  public JaxrsProxyGenerator(Class<?> remote) {
+  public JaxrsProxyGenerator(MetaClass remote) {
     this.remote = remote;
-    this.rootResourcePath = MetaClassFactory.get(remote).getAnnotation(Path.class).value();
-    this.headers = JaxrsHeaders.fromClass(MetaClassFactory.get(remote));
+    this.rootResourcePath = remote.getAnnotation(Path.class).value();
+    this.headers = JaxrsHeaders.fromClass(remote);
   }
 
   @SuppressWarnings("serial")
   public ClassStructureBuilder<?> generate() {
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getSimpleName() + "Impl")
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getName() + "Impl")
         .packageScope()
         .implementsInterface(remote)
         .implementsInterface(JaxrsProxy.class)
@@ -106,7 +109,7 @@ public class JaxrsProxyGenerator {
 
     generateErrorHandler(classBuilder);
 
-    for (MetaMethod method : MetaClassFactory.get(remote).getMethods()) {
+    for (MetaMethod method : remote.getMethods()) {
       JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
       new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
     }

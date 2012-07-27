@@ -32,7 +32,7 @@ public interface BindableProxy<T> extends WrappedPortable {
 
   /**
    * Binds the provided widget to the specified property of the model instance associated with this proxy (see
-   * {@link #setTarget(Object, InitialState)}).
+   * {@link #setModel(Object, InitialState)}).
    * 
    * @param widget
    *          the widget to bind, must not be null.

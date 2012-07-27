@@ -29,10 +29,10 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
       PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       // If code has not already been generated.
       if (printWriter != null) {
-        printWriter.append(generate(context, logger, className));
+        printWriter.append(generate(context, className));
         context.commit(logger, printWriter);
       }
     }
@@ -82,31 +82,22 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     return packageName + "." + className;
   }
   
-  private String generate(final GeneratorContext context, final TreeLogger logger, final String className) {
+  private String generate(final GeneratorContext context, final String className) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
     
-    String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Path.class) || !cacheFile.exists()) {
-      log.info("generating jax-rs proxy loader class.");
-      gen = generate(context, logger);
-      RebindUtils.writeStringToFile(cacheFile, gen);
-    } 
-    else {
-      log.info("nothing has changed. using cached jax-rs proxy loader class.");
-      gen = RebindUtils.readFileToString(cacheFile);
-    }
+    log.info("generating jax-rs proxy loader class.");
+    String gen = generate(context);
+    RebindUtils.writeStringToFile(cacheFile, gen);
     
     return gen;
   }
   
-  private String generate(final GeneratorContext context, final TreeLogger logger) {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+  private String generate(final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
-
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
     
-    for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class, RebindUtils.findTranslatablePackages(context))) {
+    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Path.class, RebindUtils.findTranslatablePackages(context))) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
