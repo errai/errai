@@ -19,23 +19,23 @@ import java.util.List;
 @ApplicationScoped
 public class LocalEventTestModule {
   @Inject private Event<LocalEventA> localEventAEvent;
-  @Inject @A private Event<LocalEventA> localEventAEventQual;
+  @Inject @A private Event<LocalEventA> localEventAEventQualifiers;
 
   private final List<LocalEventA> capturedEvents = new ArrayList<LocalEventA>();
 
-  private void observesLocalEventA(@Observes LocalEventA localEventA) {
+  private void observesLocalEventA(@Observes final LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":None"));
   }
 
-  private void observesAnyLocalEvent(@Observes @Any LocalEventA localEventA) {
+  private void observesAnyLocalEvent(@Observes @Any final LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":Any"));
   }
 
-  private void observesLocalEventWithQuals(@Observes @A LocalEventA localEventA) {
+  private void observesLocalEventWithQualifiers(@Observes @A final LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":A"));
   }
 
-  private void observesLocalEventWithQualsB(@Observes @A @B LocalEventA localEventA) {
+  private void observesLocalEventWithQualifiersB(@Observes @A @B final LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":AB"));
   }
 
@@ -48,11 +48,11 @@ public class LocalEventTestModule {
   }
 
   public void fireQualified(final String eventText) {
-     localEventAEventQual.fire(new LocalEventA(eventText));
+     localEventAEventQualifiers.fire(new LocalEventA(eventText));
   }
 
-  public void fireQualifiedWithExtraQual(final String eventText) {
-    localEventAEventQual.select(new B() {
+  public void fireQualifiedWithExtraQualifiers(final String eventText) {
+    localEventAEventQualifiers.select(new B() {
       @Override
       public Class<? extends Annotation> annotationType() {
         return B.class;

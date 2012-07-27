@@ -74,31 +74,46 @@ public class ClassChangeUtil {
                        final String classpath) {
 
       return BatchCompiler.compile("-classpath \"" + classpath + "\" -d " + outputPath + " -source 1.6 " + toCompile, new PrintWriter(out), new PrintWriter(errors),
-              new CompilationProgress() {
-                @Override
-                public void begin(final int remainingWork) {
-                }
+          new CompilationProgress() {
+            @Override
+            public void begin(final int remainingWork) {
+            }
 
-                @Override
-                public void done() {
-                }
+            @Override
+            public void done() {
+            }
 
-                @Override
-                public boolean isCanceled() {
-                  return false;
-                }
+            @Override
+            public boolean isCanceled() {
+              return false;
+            }
 
-                @Override
-                public void setTaskName(final String name) {
-                }
+            @Override
+            public void setTaskName(final String name) {
+            }
 
-                @Override
-                public void worked(final int workIncrement, final int remainingWork) {
-                }
-              }) ? 0 : -1;
+            @Override
+            public void worked(final int workIncrement, final int remainingWork) {
+            }
+          }) ? 0 : -1;
     }
   }
 
+  public static Class compileAndLoad(final File sourceFile,
+                                     final String fullyQualifiedName) throws IOException{
+    final String packageName = getPackageFromFQCN(fullyQualifiedName);
+    final String className = getNameFromFQCN(fullyQualifiedName);
+
+    return compileAndLoad(sourceFile, packageName, className);
+  }
+
+  public static Class compileAndLoad(final File sourceFile,
+                                     final String packageName,
+                                     final String className) throws IOException {
+
+    return compileAndLoad(sourceFile.getParentFile().getAbsolutePath(), packageName, className);
+
+  }
 
   public static Class compileAndLoad(final String sourcePath,
                                      final String packageName,
@@ -139,8 +154,8 @@ public class ClassChangeUtil {
       }
 
       final File classOutputDir = new File(outputPath
-              + File.separatorChar + RebindUtils.packageNameToDirName(packageName)
-              + File.separatorChar).getAbsoluteFile();
+          + File.separatorChar + RebindUtils.packageNameToDirName(packageName)
+          + File.separatorChar).getAbsoluteFile();
 
       // delete any marshaller classes already there
       final Pattern matcher = Pattern.compile("^" + className + "(\\.|$).*class$");
@@ -181,7 +196,7 @@ public class ClassChangeUtil {
        */
       if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), classPath) != 0) {
 
-        System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
+        System.out.println("*** FAILED TO COMPILE CLASS ***");
         System.out.println("*** Classpath Used: " + sb.toString());
 
         for (final byte b : errorOutputStream.toByteArray()) {
@@ -192,7 +207,7 @@ public class ClassChangeUtil {
 
 
       return new File(classOutputDir.getAbsolutePath() + File.separatorChar
-              + className + ".class").getAbsolutePath();
+          + className + ".class").getAbsolutePath();
     }
     catch (Exception e) {
       throw new RuntimeException(e);
@@ -211,9 +226,9 @@ public class ClassChangeUtil {
     final String classBase = path.substring(0, path.length() - ".class".length());
 
     final BootstrapClassloader clsLoader = new BootstrapClassloader(new File(path).getParentFile().getAbsolutePath(),
-            "system".equals(classLoadingMode) ?
-                    ClassLoader.getSystemClassLoader() :
-                    Thread.currentThread().getContextClassLoader());
+        "system".equals(classLoadingMode) ?
+            ClassLoader.getSystemClassLoader() :
+            Thread.currentThread().getContextClassLoader());
 
     final String fqcn;
     if ("".equals(packageName)) {
@@ -269,7 +284,7 @@ public class ClassChangeUtil {
     }
 
     final Class<?> mainClass = clsLoader
-            .defineClassX(fqcn, classDefinition, 0, classDefinition.length);
+        .defineClassX(fqcn, classDefinition, 0, classDefinition.length);
 
     inputStream.close();
 
@@ -363,10 +378,10 @@ public class ClassChangeUtil {
     try {
       log.debug(">>> Searching for all jars by " + JarFile.MANIFEST_NAME);
       final Enumeration[] enumerations = new Enumeration[]
-              {
-                      Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME),
-                      ClassLoader.getSystemClassLoader().getResources(JarFile.MANIFEST_NAME)
-              };
+          {
+              Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME),
+              ClassLoader.getSystemClassLoader().getResources(JarFile.MANIFEST_NAME)
+          };
 
       for (final Enumeration resEnum : enumerations) {
         while (resEnum.hasMoreElements()) {
@@ -527,6 +542,26 @@ public class ClassChangeUtil {
 
     public File getMatchRoot() {
       return matchRoot;
+    }
+  }
+
+  private static String getPackageFromFQCN(final String fqcn) {
+    final int index = fqcn.lastIndexOf('.');
+    if (index == -1) {
+      return "";
+    }
+    else {
+      return fqcn.substring(0, index);
+    }
+  }
+
+  private static String getNameFromFQCN(final String fqcn) {
+    final int index = fqcn.lastIndexOf('.');
+    if (index == -1) {
+      return fqcn;
+    }
+    else {
+      return fqcn.substring(index + 1);
     }
   }
 }

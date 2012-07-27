@@ -4,6 +4,7 @@ import org.jboss.errai.cdi.injection.client.AbstractBean;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
 import org.jboss.errai.cdi.injection.client.CommonInterfaceB;
+import org.jboss.errai.cdi.injection.client.Cow;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
 import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
 import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
@@ -14,6 +15,7 @@ import org.jboss.errai.cdi.injection.client.InterfaceC;
 import org.jboss.errai.cdi.injection.client.InterfaceD;
 import org.jboss.errai.cdi.injection.client.InterfaceRoot;
 import org.jboss.errai.cdi.injection.client.OuterBeanInterface;
+import org.jboss.errai.cdi.injection.client.Pig;
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 import org.jboss.errai.cdi.injection.client.qualifier.QualA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanA;
@@ -272,5 +274,20 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     catch (IOCResolutionException e) {
       assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
     }
+  }
+
+  public void testLookupByName() {
+    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans("animal");
+
+    assertEquals("wrong number of beans", 2, beans.size());
+    assertTrue("should contain a pig", containsInstanceOf(beans, Pig.class));
+    assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
+  }
+
+  private static boolean containsInstanceOf(Collection<IOCBeanDef> defs, Class<?> clazz) {
+    for (IOCBeanDef def : defs) {
+      if (def.getType().equals(clazz)) return true;
+    }
+    return false;
   }
 }

@@ -4,7 +4,6 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
@@ -141,7 +140,7 @@ public interface Injector {
 
   /**
    * Determines whether or not the the bean type this injector producers matches the specified parameterized type
-   * and qualifying metada.
+   * and qualifying metadata.
    *
    * @param parameterizedType the parameterized type to compare against.
    * @param qualifyingMetadata the qualifying metadata to compare against

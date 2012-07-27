@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
+import static java.util.Collections.unmodifiableCollection;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
@@ -54,8 +56,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static java.util.Collections.unmodifiableCollection;
 
 public class InjectionContext {
   private final IOCProcessingContext processingContext;
@@ -210,6 +210,22 @@ public class InjectionContext {
     }
   }
 
+  public boolean isTypeInjectable(final MetaClass type) {
+    final List<Injector> injectorList = injectors.get(type);
+    if (injectorList != null) {
+      for (Injector injector : injectorList) {
+        if (!injector.isRendered()) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   public void recordCycle(final MetaClass from, final MetaClass to) {
     cyclingTypes.put(from, to);
   }
@@ -323,7 +339,7 @@ public class InjectionContext {
     injectorList.add(injector);
   }
 
-  public void registerInjectorsForSuperTypesAndInterfaces(MetaClass type, Injector injector,
+  private void registerInjectorsForSuperTypesAndInterfaces(MetaClass type, Injector injector,
       Set<MetaClass> processedTypes) {
     MetaClass cls = type;
     do {

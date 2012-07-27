@@ -6,7 +6,6 @@ import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
-import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
@@ -25,7 +24,7 @@ import java.util.Map;
  */
 @Dependent
 public class DependentEventObserverTestModule extends EventTestObserverSuperClass {
-  private Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
+  private final Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
 
   private int busReadyEventsReceived = 0;
   private Runnable verifier;

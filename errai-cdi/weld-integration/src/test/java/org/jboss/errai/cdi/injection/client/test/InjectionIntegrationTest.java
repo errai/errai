@@ -1,16 +1,19 @@
 package org.jboss.errai.cdi.injection.client.test;
 
 
+import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
+
+import org.jboss.errai.cdi.injection.client.Amex;
+import org.jboss.errai.cdi.injection.client.CreditCardLover;
 import org.jboss.errai.cdi.injection.client.InjectionTestModule;
 import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanApples;
 import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanOranges;
+import org.jboss.errai.cdi.injection.client.Visa;
 import org.jboss.errai.cdi.injection.client.mvp.Contacts;
 import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanOranges;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-
-import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 
 /**
  * Tests CDI injection.
@@ -59,5 +62,15 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
     assertNotNull("bean is null", instanceB);
     assertTrue("incorrect instance injected",
             getBeanManager().getActualBeanReference(instanceB.getCommonInterfaceB()) instanceof QualParmAppScopeBeanOranges);
+  }
+
+  public void testNamedBasedInjection() {
+    final CreditCardLover creditCardLover
+        = getBeanManager().lookupBean(CreditCardLover.class).getInstance();
+
+    assertNotNull("bean is null", creditCardLover);
+
+    assertTrue("bean should be an Amex", creditCardLover.getAmexCard() instanceof Amex);
+    assertTrue("bean should be a Visa", creditCardLover.getVisaCard() instanceof Visa);
   }
 }

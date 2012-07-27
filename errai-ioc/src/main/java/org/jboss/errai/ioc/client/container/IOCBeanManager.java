@@ -35,23 +35,61 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class IOCBeanManager {
+  private final Map<String, List<IOCBeanDef>> namedBeans
+      = new HashMap<String, List<IOCBeanDef>>();
+
   private final Map<Class<?>, List<IOCBeanDef>> beanMap
-          = new HashMap<Class<?>, List<IOCBeanDef>>();
+      = new HashMap<Class<?>, List<IOCBeanDef>>();
 
   private final Map<Object, CreationalContext> creationalContextMap
-          = new HashMap<Object, CreationalContext>();
+      = new HashMap<Object, CreationalContext>();
 
   private final Map<Object, Object> proxyLookupForManagedBeans
-          = new IdentityHashMap<Object, Object>();
+      = new IdentityHashMap<Object, Object>();
 
-  private void registerSingletonBean(final Class<Object> type, final CreationalCallback<Object> callback,
-                                     final Object instance, final Annotation[] qualifiers) {
-    registerBean(IOCSingletonBean.newBean(this, type, qualifiers, callback, instance));
+  private IOCBeanDef<Object> registerSingletonBean(final Class<Object> type,
+                                                   final CreationalCallback<Object> callback,
+                                                   final Object instance,
+                                                   final Annotation[] qualifiers) {
+    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, qualifiers, callback, instance);
+    registerBean(bean);
+    return bean;
   }
 
-  private void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
-                                     final Annotation[] qualifiers) {
-    registerBean(IOCDependentBean.newBean(this, type, qualifiers, callback));
+  private IOCBeanDef<Object> registerDependentBean(final Class<Object> type,
+                                                   final CreationalCallback<Object> callback,
+                                                   final Annotation[] qualifiers) {
+    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, qualifiers, callback);
+    registerBean(bean);
+    return bean;
+  }
+
+  private void registerSingletonBean(final Class<Object> type,
+                                     final CreationalCallback<Object> callback,
+                                     final Object instance,
+                                     final Annotation[] qualifiers,
+                                     final String beanName) {
+
+
+    _registerNamedBean(beanName, registerSingletonBean(type, callback, instance, qualifiers));
+  }
+
+  private void registerDependentBean(final Class<Object> type,
+                                     final CreationalCallback<Object> callback,
+                                     final Annotation[] qualifiers,
+                                     final String beanName) {
+
+    _registerNamedBean(beanName, registerDependentBean(type, callback, qualifiers));
+  }
+
+  private void _registerNamedBean(final String name,
+                                  final IOCBeanDef beanDef) {
+    List<IOCBeanDef> beans = namedBeans.get(name);
+    if (beans == null) {
+      namedBeans.put(name, beans = new ArrayList<IOCBeanDef>());
+    }
+
+    beans.add(beanDef);
   }
 
   /**
@@ -59,10 +97,14 @@ public class IOCBeanManager {
    * beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
    * the wiring scenario of auto-discovered beans at runtime.
    *
-   * @param type       the bean type
-   * @param callback   the creational callback used to construct the bean
-   * @param instance   the instance reference
-   * @param qualifiers any qualifiers
+   * @param type
+   *     the bean type
+   * @param callback
+   *     the creational callback used to construct the bean
+   * @param instance
+   *     the instance reference
+   * @param qualifiers
+   *     any qualifiers
    */
   public void addBean(final Class<Object> type,
                       final CreationalCallback<Object> callback,
@@ -77,11 +119,42 @@ public class IOCBeanManager {
     }
   }
 
+  /**
+   * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
+   * Adding beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
+   * the wiring scenario of auto-discovered beans at runtime.
+   *
+   * @param type
+   *     the bean type
+   * @param callback
+   *     the creational callback used to construct the bean
+   * @param instance
+   *     the instance reference
+   * @param qualifiers
+   *     any qualifiers
+   * @param name
+   *     the name of the bean
+   */
+  public void addBean(final Class<Object> type,
+                      final CreationalCallback<Object> callback,
+                      final Object instance,
+                      final Annotation[] qualifiers,
+                      final String name) {
+
+    if (instance != null) {
+      registerSingletonBean(type, callback, instance, qualifiers, name);
+    }
+    else {
+      registerDependentBean(type, callback, qualifiers, name);
+    }
+  }
+
 
   /**
    * Destroy a bean and all other beans associated with its creational context in the bean manager.
    *
-   * @param ref the instance reference of the bean
+   * @param ref
+   *     the instance reference of the bean
    */
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
@@ -104,7 +177,9 @@ public class IOCBeanManager {
   /**
    * Indicates whether the referenced object is currently a managed bean.
    *
-   * @param ref the reference to the bean
+   * @param ref
+   *     the reference to the bean
+   *
    * @return returns true if under management
    */
   public boolean isManaged(final Object ref) {
@@ -115,9 +190,12 @@ public class IOCBeanManager {
    * Obtains an instance to the <em>actual</em> bean. If the specified reference is a proxy, this method will
    * return an un-proxied reference to the object.
    *
-   * @param ref the proxied or unproxied reference
+   * @param ref
+   *     the proxied or unproxied reference
+   *
    * @return returns the absolute reference to bean if the specified reference is a proxy. If the specified reference
    *         is not a proxy, the same instance passed to the method is returned.
+   *
    * @see #isProxyReference(Object)
    */
   public Object getActualBeanReference(final Object ref) {
@@ -132,8 +210,11 @@ public class IOCBeanManager {
   /**
    * Determines whether the referenced object is itself a proxy to a managed bean.
    *
-   * @param ref the reference to check
+   * @param ref
+   *     the reference to check
+   *
    * @return returns true if the specified reference is itself a proxy.
+   *
    * @see #getActualBeanReference(Object)
    */
   public boolean isProxyReference(final Object ref) {
@@ -151,7 +232,8 @@ public class IOCBeanManager {
   /**
    * Register a bean with the manager.
    *
-   * @param bean an {@link IOCSingletonBean} reference
+   * @param bean
+   *     an {@link IOCSingletonBean} reference
    */
   public void registerBean(final IOCBeanDef bean) {
     List<IOCBeanDef> beans = beanMap.get(bean.getType());
@@ -163,13 +245,36 @@ public class IOCBeanManager {
   }
 
   /**
+   * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
+   *
+   * @param name
+   *    the name of bean to lookup
+   *
+   * @return
+   *    and unmodifiable list of all beans with the specified name.
+   */
+  public Collection<IOCBeanDef> lookupBeans(final String name) {
+    final List<IOCBeanDef> beans = namedBeans.get(name);
+    if (beans == null) {
+      return Collections.emptyList();
+    }
+    else {
+      return beans;
+    }
+  }
+
+  /**
    * Looks up all beans of the specified type.
    *
-   * @param type The type of the bean
-   * @return A list of all the beans that match the specified type. Returns an empty list if there is
+   * @param type
+   *     The type of the bean
+
+   *
+   * @return An unmodifiable list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
    */
-  public Collection<IOCBeanDef> lookupBeans(final Class<?> type) {
+  @SuppressWarnings("unchecked")
+  public Collection<IOCBeanDef> lookupBeans(final Class type) {
     final List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return Collections.emptyList();
@@ -183,22 +288,24 @@ public class IOCBeanManager {
    * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
    * with the specified
    *
-   * @param type       The type of the bean
-   * @param qualifiers qualifiers to match
-   * @param <T>        The type of the bean
-   * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers. Returns null if there is
-   *         no matching type. Throws an {@link IOCResolutionException} if there is a matching type but none of the
-   *         qualifiers match or if more than one bean  matches.
+   * @param type
+   *     The type of the bean
+   * @param qualifiers
+   *     qualifiers to match
+   *
+   * @return
+   *      An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
+   *      if no beans match. Null if the bean type is unknown.
    */
   @SuppressWarnings("unchecked")
-  public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
-    final List<IOCBeanDef> beanList = beanMap.get(type);
+  public  List<IOCBeanDef> lookupBeans(final Class type, final Annotation... qualifiers) {
+    final List<IOCBeanDef> beanList =  beanMap.get(type);
     if (beanList == null) {
       return null;
     }
 
     if (beanList.size() == 1) {
-      return beanList.get(0);
+      return Collections.unmodifiableList(beanList);
     }
 
     final Set<Annotation> qualSet = new HashSet<Annotation>(qualifiers.length * 2);
@@ -212,18 +319,44 @@ public class IOCBeanManager {
       }
     }
 
-    if (matching.isEmpty()) {
+    return Collections.unmodifiableList(matching);
+  }
+
+  /**
+   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
+   * with the specified
+   *
+   * @param type
+   *     The type of the bean
+   * @param qualifiers
+   *     qualifiers to match
+   * @param <T>
+   *     The type of the bean
+   *
+   * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers. Returns null if there is
+   *         no matching type. Throws an {@link IOCResolutionException} if there is a matching type but none of the
+   *         qualifiers match or if more than one bean  matches.
+   */
+  @SuppressWarnings("unchecked")
+  public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
+    final List<IOCBeanDef> matching = lookupBeans(type, qualifiers);
+
+    if (matching == null) {
+      return null;
+    }
+    else if (matching.isEmpty()) {
       throw new IOCResolutionException("no matching bean instances for: " + type.getName());
     }
     else if (matching.size() > 1) {
       throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
     }
     else {
-      return matching.get(0);
+      return (IOCBeanDef<T>) matching.get(0);
     }
   }
 
   void destroyAllBeans() {
+    namedBeans.clear();
     beanMap.clear();
   }
 }

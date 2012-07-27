@@ -77,7 +77,7 @@ public class InjectUtil {
     final List<InjectionTask> injectionTasks = new ArrayList<InjectionTask>();
 
     final List<MetaConstructor> constructorInjectionPoints
-            = scanForConstructorInjectionPoints(injector, ctx, type, injectionTasks);
+        = scanForConstructorInjectionPoints(injector, ctx, type, injectionTasks);
 
     injectionTasks.addAll(scanForTasks(injector, ctx, type));
 
@@ -94,7 +94,7 @@ public class InjectUtil {
     if (!constructorInjectionPoints.isEmpty()) {
       if (constructorInjectionPoints.size() > 1) {
         throw new InjectionFailure("more than one constructor in "
-                + type.getFullyQualifiedName() + " is marked as the injection point!");
+            + type.getFullyQualifiedName() + " is marked as the injection point!");
       }
 
       final MetaConstructor constructor = constructorInjectionPoints.get(0);
@@ -103,14 +103,14 @@ public class InjectUtil {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
           final Statement[] parameterStatements
-                  = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
+              = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
           if (injector.isSingleton() && injector.isCreated()) return;
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
-                  Stmt.declareFinalVariable(injector.getVarName(), type, Stmt.newObject(type, parameterStatements))
+              Stmt.declareFinalVariable(injector.getVarName(), type, Stmt.newObject(type, parameterStatements))
 
           );
           callback.beanConstructed();
@@ -127,7 +127,7 @@ public class InjectUtil {
       // field injection
       if (!hasDefaultConstructor(type))
         throw new InjectionFailure("there is no public default constructor or suitable injection constructor for type: "
-                + type.getFullyQualifiedName());
+            + type.getFullyQualifiedName());
 
       return new ConstructionStrategy() {
         @Override
@@ -137,10 +137,10 @@ public class InjectUtil {
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
-                  Stmt.declareVariable(type)
-                          .asFinal()
-                          .named(injector.getVarName())
-                          .initializeWith(Stmt.newObject(type))
+              Stmt.declareVariable(type)
+                  .asFinal()
+                  .named(injector.getVarName())
+                  .initializeWith(Stmt.newObject(type))
 
           );
 
@@ -167,9 +167,12 @@ public class InjectUtil {
   /**
    * Render the post construct InitializationCallback
    *
-   * @param ctx                -
-   * @param injector           -
-   * @param postConstructTasks -
+   * @param ctx
+   *     -
+   * @param injector
+   *     -
+   * @param postConstructTasks
+   *     -
    */
   private static void doPostConstruct(final InjectionContext ctx,
                                       final Injector injector,
@@ -178,11 +181,11 @@ public class InjectUtil {
     if (postConstructTasks.isEmpty()) return;
 
     final MetaClass initializationCallbackType =
-            parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
+        parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
 
     final BlockBuilder<AnonymousClassStructureBuilder> initMeth
-            = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
-            .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj", true));
+        = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
+        .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj", true));
 
     final String varName = "init_" + injector.getVarName();
     injector.setPostInitCallbackVar(varName);
@@ -197,19 +200,22 @@ public class InjectUtil {
 //            .initializeWith(classStructureBuilder.finish()));
 
     pc.getBootstrapBuilder()
-            .privateField(varName, initializationCallbackType)
-            .initializesWith(classStructureBuilder.finish()).finish();
+        .privateField(varName, initializationCallbackType)
+        .initializesWith(classStructureBuilder.finish()).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
-            Refs.get(injector.getVarName()), Refs.get(varName)));
+        Refs.get(injector.getVarName()), Refs.get(varName)));
   }
 
   /**
    * Render the pre destroy DestructionCallback
    *
-   * @param ctx             -
-   * @param injector        -
-   * @param preDestroyTasks -
+   * @param ctx
+   *     -
+   * @param injector
+   *     -
+   * @param preDestroyTasks
+   *     -
    */
   private static void doPreDestroy(final InjectionContext ctx,
                                    final Injector injector,
@@ -218,11 +224,11 @@ public class InjectUtil {
     if (preDestroyTasks.isEmpty()) return;
 
     final MetaClass destructionCallbackType =
-            parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
+        parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
 
     final BlockBuilder<AnonymousClassStructureBuilder> initMeth
-            = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
-            .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
+        = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
+        .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
 
     final String varName = "destroy_" + injector.getVarName();
     injector.setPreDestroyCallbackVar(varName);
@@ -237,10 +243,10 @@ public class InjectUtil {
 //            .initializeWith(classStructureBuilder.finish()));
 
     pc.getBootstrapBuilder().privateField(varName, destructionCallbackType)
-            .initializesWith(classStructureBuilder.finish()).finish();
+        .initializesWith(classStructureBuilder.finish()).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
-            Refs.get(injector.getVarName()), Refs.get(varName)));
+        Refs.get(injector.getVarName()), Refs.get(varName)));
   }
 
   private static void renderLifeCycleEvents(Class<? extends Annotation> type, Injector injector,
@@ -254,7 +260,7 @@ public class InjectUtil {
                                                 InjectionContext ctx, BlockBuilder<?> body, MetaMethod meth) {
     if (meth.getParameters().length != 0) {
       throw new InjectionFailure(type.getCanonicalName() + " method must contain no parameters: "
-              + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+          + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
     }
 
     if (!meth.isPublic()) {
@@ -263,7 +269,7 @@ public class InjectUtil {
 
     if (!meth.isPublic()) {
       body.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-              PrivateAccessUtil.getPrivateMethodName(meth), Refs.get("obj")));
+          PrivateAccessUtil.getPrivateMethodName(meth), Refs.get("obj")));
     }
     else {
       body.append(Stmt.loadVariable("obj").invoke(meth.getName()));
@@ -289,7 +295,7 @@ public class InjectUtil {
         if (isInjectionPoint(ctx, field)) {
           if (!field.isPublic()) {
             MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
-                    field.getType());
+                field.getType());
 
             if (meth == null) {
               InjectionTask task = new InjectionTask(injector, field);
@@ -309,7 +315,7 @@ public class InjectUtil {
         ElementType[] elTypes;
         for (Class<? extends Annotation> a : decorators) {
           elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-                  : new ElementType[]{ElementType.FIELD};
+              : new ElementType[]{ElementType.FIELD};
 
           for (ElementType elType : elTypes) {
             switch (elType) {
@@ -330,7 +336,7 @@ public class InjectUtil {
 
         for (Class<? extends Annotation> a : decorators) {
           final ElementType[] elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-                  : new ElementType[]{ElementType.FIELD};
+              : new ElementType[]{ElementType.FIELD};
 
           for (ElementType elType : elTypes) {
             switch (elType) {
@@ -371,7 +377,7 @@ public class InjectUtil {
       ElementType[] elTypes;
       for (Class<? extends Annotation> a : decorators) {
         elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-                : new ElementType[]{ElementType.FIELD};
+            : new ElementType[]{ElementType.FIELD};
 
         for (ElementType elType : elTypes) {
           switch (elType) {
@@ -466,8 +472,8 @@ public class InjectUtil {
         final TypeInjector typeInjector = (TypeInjector) inj;
 
         return Stmt.loadVariable("context").invoke("getInstanceOrNew",
-                Refs.get(typeInjector.getCreationalCallbackVarName()),
-                inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
+            Refs.get(typeInjector.getCreationalCallbackVarName()),
+            inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
       }
 
       return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
@@ -502,8 +508,8 @@ public class InjectUtil {
                 final ProxyInjector producedElementProxy = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
 
                 proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
-                        .invoke("addBean", Stmt.load(inj.getInjectedType()),
-                                qualifyingMetadata.getQualifiers(), inj.getBeanInstance(injectableInstance)));
+                    .invoke("addBean", Stmt.load(inj.getInjectedType()),
+                        qualifyingMetadata.getQualifiers(), inj.getBeanInstance(injectableInstance)));
 
                 proxyInject.getBeanInstance(injectableInstance);
 
@@ -526,7 +532,7 @@ public class InjectUtil {
           else if (inj.isDependent() && (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType()))) {
             if (inj.isCreated() && !inj.isRendered()) {
               throw new InjectionFailure("unresolveable cycle on dependent scoped bean: "
-                      + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");
+                  + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");
             }
 
             return inj.getBeanInstance(injectableInstance);
@@ -537,8 +543,14 @@ public class InjectUtil {
         e.printStackTrace();
       }
 
-      ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
-      return getOrCreateProxy(ctx, clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
+      if (!ctx.isTypeInjectable(clazz)) {
+        ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
+        return getOrCreateProxy(ctx, clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
+      }
+      else {
+        throw new InjectionFailure("cannot resolve injectable bean for type: " + clazz.getFullyQualifiedName()
+            + "; qualified by: " + qualifyingMetadata.toString());
+      }
     }
   }
 
@@ -546,7 +558,7 @@ public class InjectUtil {
     final ProxyInjector proxyInjector;
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (ProxyInjector)
-              ctx.getProxiedInjector(clazz, qualifyingMetadata);
+          ctx.getProxiedInjector(clazz, qualifyingMetadata);
     }
     else {
       proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
@@ -566,18 +578,18 @@ public class InjectUtil {
       Statement stmt;
       try {
         final InjectableInstance injectableInstance = InjectableInstance.getParameterInjectedInstance(
-                parms[i],
-                null,
-                ctx);
+            parms[i],
+            null,
+            ctx);
 
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
-                ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
+            ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
 
         stmt = recordInlineReference(stmt, ctx, parms[i]);
       }
       catch (InjectionFailure e) {
         e.setTarget(method.getDeclaringClass() + "." + method.getName() + DefParameters.from(method)
-                .generate(Context.create()));
+            .generate(Context.create()));
         throw e;
       }
 
@@ -594,14 +606,14 @@ public class InjectUtil {
     final Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++
-            ) {
+        ) {
       Statement stmt;
       try {
         final InjectableInstance injectableInstance
-                = InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx);
+            = InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx);
 
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
-                ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()), true);
+            ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()), true);
 
         stmt = recordInlineReference(stmt, ctx, parms[i]);
 
@@ -610,17 +622,17 @@ public class InjectUtil {
       }
       catch (UnproxyableClassException e) {
         String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
-                "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
-                "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
-                "\t Note          : this issue can be resolved by making "
-                + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+            "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
+            "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
+            "\t Note          : this issue can be resolved by making "
+            + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
 
         throw UnsatisfiedDependenciesException.createWithSingleParameterFailure(parms[i], constructor.getDeclaringClass(),
-                parms[i].getType(), err);
+            parms[i].getType(), err);
       }
       catch (InjectionFailure e) {
         e.setTarget(constructor.getDeclaringClass() + "." + DefParameters.from(constructor)
-                .generate(Context.create()));
+            .generate(Context.create()));
         throw e;
       }
 
@@ -636,7 +648,7 @@ public class InjectUtil {
     final String varName = InjectUtil.getUniqueVarName();
 
     ctx.getProcessingContext()
-            .append(Stmt.declareFinalVariable(varName, parm.getType(), beanCreationStmt));
+        .append(Stmt.declareFinalVariable(varName, parm.getType(), beanCreationStmt));
 
     final Statement stmt = Refs.get(varName);
 
@@ -768,10 +780,14 @@ public class InjectUtil {
   /**
    * Retrieves the value of a private field managed IOC component.
    *
-   * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed.
-   *                          <tt>null</tt> can be provided for static field access.
-   * @param field             the {@link MetaField} which will be privately accessed
+   * @param processingContext
+   *     an instance of the {@link IOCProcessingContext}
+   * @param obj
+   *     a {@link Statement} reference to the bean instance whose field is to be accessed.
+   *     <tt>null</tt> can be provided for static field access.
+   * @param field
+   *     the {@link MetaField} which will be privately accessed
+   *
    * @return a {@link Statement} reference to the value of the field.
    */
   public static Statement getPrivateFieldValue(final IOCProcessingContext processingContext,
@@ -780,22 +796,27 @@ public class InjectUtil {
 
     if (field.isStatic()) {
       return Stmt.invokeStatic(processingContext.getBootstrapClass(),
-              PrivateAccessUtil.getPrivateFieldInjectorName(field));
+          PrivateAccessUtil.getPrivateFieldInjectorName(field));
     }
     else {
       return Stmt.invokeStatic(processingContext.getBootstrapClass(),
-              PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
+          PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
     }
   }
 
   /**
    * Set the value of a private field on a managed IOC component.
    *
-   * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed.
-   *                          <tt>null</tt> can be provided for static field access.
-   * @param field             the {@link MetaField} which will be privately accessed
-   * @param val               the {@link Statement} reference to the value to be set.
+   * @param processingContext
+   *     an instance of the {@link IOCProcessingContext}
+   * @param obj
+   *     a {@link Statement} reference to the bean instance whose field is to be accessed.
+   *     <tt>null</tt> can be provided for static field access.
+   * @param field
+   *     the {@link MetaField} which will be privately accessed
+   * @param val
+   *     the {@link Statement} reference to the value to be set.
+   *
    * @return the {@link Statement} which will perform the writing to the field.
    */
   public static Statement setPrivateFieldValue(final IOCProcessingContext processingContext,
@@ -805,22 +826,27 @@ public class InjectUtil {
 
     if (field.isStatic()) {
       return Stmt.invokeStatic(processingContext.getBootstrapClass(),
-              PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
+          PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
     }
     else {
       return Stmt.invokeStatic(processingContext.getBootstrapClass(),
-              PrivateAccessUtil.getPrivateFieldInjectorName(field), obj, val);
+          PrivateAccessUtil.getPrivateFieldInjectorName(field), obj, val);
     }
   }
 
   /**
    * Invokes a private method on a managed IOC component.
    *
-   * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed.
-   *                          <tt>null</tt> can be provided for static method calls.
-   * @param method            the {@link MetaMethod} to be invoked
-   * @param arguments         the arguments to be passed to the private method
+   * @param processingContext
+   *     an instance of the {@link IOCProcessingContext}
+   * @param obj
+   *     a {@link Statement} reference to the bean instance whose field is to be accessed.
+   *     <tt>null</tt> can be provided for static method calls.
+   * @param method
+   *     the {@link MetaMethod} to be invoked
+   * @param arguments
+   *     the arguments to be passed to the private method
+   *
    * @return the {@link Statement} which represents the return value of the method.
    */
   public static Statement invokePrivateMethod(final IOCProcessingContext processingContext,
@@ -840,16 +866,20 @@ public class InjectUtil {
     }
 
     return Stmt.invokeStatic(processingContext.getBootstrapClass(),
-            PrivateAccessUtil.getPrivateMethodName(method), args);
+        PrivateAccessUtil.getPrivateMethodName(method), args);
   }
 
   /**
    * Read from the specified field, and automatically determine whether to make a public or private read based on the
    * visibility of the specified field.
    *
-   * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed
-   * @param field             the {@link MetaField} which will be privately accessed
+   * @param processingContext
+   *     an instance of the {@link IOCProcessingContext}
+   * @param obj
+   *     a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param field
+   *     the {@link MetaField} which will be privately accessed
+   *
    * @return a {@link Statement} reference to the value of the field.
    */
   public static Statement getPublicOrPrivateFieldValue(final IOCProcessingContext processingContext,
@@ -868,10 +898,15 @@ public class InjectUtil {
    * Write to the specified field, and automatically determine whether to make a public or private write based on the
    * visibility of the specified field.
    *
-   * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed
-   * @param field             the {@link MetaField} which will be privately accessed
-   * @param val               the {@link Statement} reference to the value to be set.
+   * @param processingContext
+   *     an instance of the {@link IOCProcessingContext}
+   * @param obj
+   *     a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param field
+   *     the {@link MetaField} which will be privately accessed
+   * @param val
+   *     the {@link Statement} reference to the value to be set.
+   *
    * @return the {@link Statement} which will perform the writing to the field.
    */
   public static Statement setPublicOrPrivateFieldValue(final IOCProcessingContext processingContext,
@@ -891,10 +926,15 @@ public class InjectUtil {
    * Invoke the specified method, and automatically determine whether to make the invocation public or private based
    * on the visibility of the specified method.
    *
-   * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed
-   * @param method            the {@link MetaMethod} to be invoked
-   * @param arguments         the arguments to be passed to the private method
+   * @param processingContext
+   *     an instance of the {@link IOCProcessingContext}
+   * @param obj
+   *     a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param method
+   *     the {@link MetaMethod} to be invoked
+   * @param arguments
+   *     the arguments to be passed to the private method
+   *
    * @return the {@link Statement} which represents the return value of the method.
    */
   public static Statement invokePublicOrPrivateMethod(final IOCProcessingContext processingContext,

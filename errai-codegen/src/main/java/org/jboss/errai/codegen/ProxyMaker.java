@@ -50,19 +50,22 @@ public class ProxyMaker {
                                          final MetaClass toProxy) {
     final ClassStructureBuilder builder;
 
+    final boolean renderEqualsAndHash;
     if (!toProxy.isInterface()) {
+      renderEqualsAndHash = true;
       if (toProxy.isFinal()) {
         throw new UnproxyableClassException(toProxy, toProxy.getFullyQualifiedName()
-                + " is an unproxiable class because it is final");
+            + " is an unproxiable class because it is final");
       }
       if (!toProxy.isDefaultInstantiable()) {
         throw new UnproxyableClassException(toProxy, toProxy.getFullyQualifiedName() + " must have a default " +
-                "no-arg constructor");
+            "no-arg constructor");
       }
 
       builder = ClassBuilder.define(proxyClassName, toProxy).publicScope().body();
     }
     else {
+      renderEqualsAndHash = false;
       builder = ClassBuilder.define(proxyClassName).publicScope().implementsInterface(toProxy).body();
     }
 
@@ -74,22 +77,22 @@ public class ProxyMaker {
     for (final MetaMethod method : toProxy.getMethods()) {
       final String methodString = GenUtil.getMethodString(method);
       if (renderedMethods.contains(methodString) || method.getName().equals("hashCode")
-              || (method.getName().equals("equals") && method.getParameters().length == 1
-              && method.getParameters()[0].getType().getFullyQualifiedName().equals(Object.class.getName()))) continue;
+          || (method.getName().equals("equals") && method.getParameters().length == 1
+          && method.getParameters()[0].getType().getFullyQualifiedName().equals(Object.class.getName()))) continue;
 
       renderedMethods.add(methodString);
 
       if (!method.isPublic() ||
-              method.isSynthetic() ||
-              method.isFinal() ||
-              method.isStatic() ||
-              method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName()))
+          method.isSynthetic() ||
+          method.isFinal() ||
+          method.isStatic() ||
+          method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName()))
         continue;
 
       final DefParameters defParameters = DefParameters.from(method);
       final BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
-              .parameters(defParameters)
-              .throws_(method.getCheckedExceptions());
+          .parameters(defParameters)
+          .throws_(method.getCheckedExceptions());
 
       final List<Parameter> parms = defParameters.getParameters();
 
@@ -107,33 +110,34 @@ public class ProxyMaker {
       methBody.finish();
     }
 
-    // implement hashCode()
-    builder.publicMethod(int.class, "hashCode").body()
-            ._(
-                    If.isNull(loadVariable(proxyVar))
-                            ._(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
-                            .finish()
-                            .else_()
-                            ._(Stmt.loadVariable(proxyVar).invoke("hashCode").returnValue())
-                            .finish()
-            )
-            .finish();
+    if (renderEqualsAndHash) {
+      // implement hashCode()
+      builder.publicMethod(int.class, "hashCode").body()
+          ._(
+              If.isNull(loadVariable(proxyVar))
+                  ._(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
+                  .finish()
+                  .else_()
+                  ._(Stmt.loadVariable(proxyVar).invoke("hashCode").returnValue())
+                  .finish()
+          )
+          .finish();
 
-    // implements equals()
-    builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o")).body()
-            ._(
-                    If.isNull(loadVariable(proxyVar))
-                            ._(throw_(IllegalStateException.class, "call to equal() on an unclosed proxy."))
-                            .finish()
-                            .else_()
-                            ._(Stmt.loadVariable(proxyVar).invoke("equals", Refs.get("o")).returnValue())
-                            .finish()
-            )
-            .finish();
-
+      // implements equals()
+      builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o")).body()
+          ._(
+              If.isNull(loadVariable(proxyVar))
+                  ._(throw_(IllegalStateException.class, "call to equal() on an unclosed proxy."))
+                  .finish()
+                  .else_()
+                  ._(Stmt.loadVariable(proxyVar).invoke("equals", Refs.get("o")).returnValue())
+                  .finish()
+          )
+          .finish();
+    }
 
     builder.publicMethod(void.class, PROXY_BIND_METHOD).parameters(DefParameters.of(Parameter.of(toProxy, "proxy")))
-            ._(loadVariable(proxyVar).assignValue(loadVariable("proxy"))).finish();
+        ._(loadVariable(proxyVar).assignValue(loadVariable("proxy"))).finish();
 
     return builder.getClassDefinition();
   }

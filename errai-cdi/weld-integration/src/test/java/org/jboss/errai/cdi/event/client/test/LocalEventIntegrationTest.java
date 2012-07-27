@@ -46,7 +46,7 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
 
         testModule.fireEvent(testText);
         testModule.fireQualified(qualText);
-        testModule.fireQualifiedWithExtraQual(extraQualText);
+        testModule.fireQualifiedWithExtraQualifiers(extraQualText);
 
         final List<LocalEventA> capturedEvents = testModule.getCapturedEvents();
 

@@ -24,9 +24,6 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Set;
@@ -92,18 +89,8 @@ public class MockIOCGenerator {
 
       System.out.println("wrote file: " + sourceFile.getAbsolutePath());
 
-      ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
-
-      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-
-      compiler.run(null, null, errorOutputStream, sourceFile.getAbsolutePath());
-
-      for (byte b : errorOutputStream.toByteArray()) {
-        System.out.print((char) b);
-      }
-
-      Class<? extends Bootstrapper> bsClass
-              = ClassChangeUtil.loadClassDefinition(outFile.getAbsolutePath(), packageName, className);
+      Class<? extends Bootstrapper> bsClass =
+          ClassChangeUtil.compileAndLoad(sourceFile, packageName, className);
 
       return bsClass;
 

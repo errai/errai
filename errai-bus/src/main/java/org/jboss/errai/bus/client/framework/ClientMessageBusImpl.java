@@ -1064,6 +1064,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   + message.get(String.class, "Reason"), null);
             }
             break;
+          case ConnectToQueue:
+            break;
+          case Heartbeat:
+            break;
+          case Resend:
+            break;
+          case RemoteMonitorDetach:
+            break;
         }
       }
     }, false);
@@ -1225,7 +1233,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     };
 
-    for (TransportErrorHandler handler : transportErrorHandlers) {
+    for (final TransportErrorHandler handler : transportErrorHandlers) {
       handler.onError(transportError);
     }
 
@@ -1609,7 +1617,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   @Override
-  public void addTransportErrorHandler(TransportErrorHandler errorHandler) {
+  public void addTransportErrorHandler(final TransportErrorHandler errorHandler) {
     transportErrorHandlers.add(errorHandler);
   }
 
@@ -1868,34 +1876,39 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
 
   /**
-   * Returns the application root for the remote message bus endpoints.
-   *
-   * @return path with trailing slash, or empty string if undefined or explicitly set to empty
-   */
-  public static native String getApplicationRoot() /*-{
-    if ($wnd.erraiBusApplicationRoot === undefined || $wnd.erraiBusApplicationRoot.length === 0) {
-      return "";
-    }
-    else {
-      if ($wnd.erraiBusApplicationRoot.substr(-1) !== "/") {
-        return $wnd.erraiBusApplicationRoot + "/";
-      }
-      return $wnd.erraiBusApplicationRoot;
-    }
-  }-*/;
-
-  /**
    * Sets the application root for the remote message bus endpoints.
    *
    * @param path
    *     path to use when sending requests to the JAX-RS endpoint
    */
+  @SuppressWarnings("UnusedDeclaration")
   public static native void setApplicationRoot(String path) /*-{
     if (path == null) {
       $wnd.erraiBusApplicationRoot = undefined;
     }
     else {
       $wnd.erraiBusApplicationRoot = path;
+    }
+  }-*/;
+
+  /**
+   * Returns the application root for the remote message bus endpoints.
+   *
+   * @return path with trailing slash, or empty string if undefined or explicitly set to empty
+   */
+  public static native String getApplicationRoot() /*-{
+    //noinspection JSUnresolvedVariable
+    if ($wnd.erraiBusApplicationRoot === undefined || $wnd.erraiBusApplicationRoot.length === 0) {
+      return "";
+    }
+    else {
+      //noinspection JSUnresolvedVariable
+      if ($wnd.erraiBusApplicationRoot.substr(-1) !== "/") {
+        //noinspection JSUnresolvedVariable
+        return $wnd.erraiBusApplicationRoot + "/";
+      }
+      //noinspection JSUnresolvedVariable
+      return $wnd.erraiBusApplicationRoot;
     }
   }-*/;
 }

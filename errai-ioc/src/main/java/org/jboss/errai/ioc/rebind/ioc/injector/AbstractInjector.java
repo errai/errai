@@ -47,6 +47,8 @@ public abstract class AbstractInjector implements Injector {
 
   protected MetaClass enclosingType;
 
+  protected String beanName;
+
   protected final List<RegistrationHook> registrationHooks = new ArrayList<RegistrationHook>();
 
   @Override
@@ -148,7 +150,7 @@ public abstract class AbstractInjector implements Injector {
     }
 
     final boolean metaDataSatisfied = getQualifyingMetadata() == null || getQualifyingMetadata().doesSatisfy
-            (qualifyingMetadata);
+        (qualifyingMetadata);
 
     return parmTypesSatisfied && metaDataSatisfied;
   }
@@ -205,11 +207,20 @@ public abstract class AbstractInjector implements Injector {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       _registerCache = new RegisterCache(context, valueRef);
 
-      context.getProcessingContext().appendToEnd(
-              loadVariable(context.getProcessingContext().getContextVariableReference())
-                      .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                              isSingleton() ? valueRef : null, qualifyingMetadata.render())
-      );
+      if (beanName == null) {
+        context.getProcessingContext().appendToEnd(
+            loadVariable(context.getProcessingContext().getContextVariableReference())
+                .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                    isSingleton() ? valueRef : null, qualifyingMetadata.render())
+        );
+      }
+      else {
+        context.getProcessingContext().appendToEnd(
+            loadVariable(context.getProcessingContext().getContextVariableReference())
+                .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                    isSingleton() ? valueRef : null, qualifyingMetadata.render(), beanName)
+        );
+      }
 
       for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
@@ -220,6 +231,10 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public String toString() {
     return this.getClass().getName() + ":" + getInjectedType().getFullyQualifiedName() + " " + getQualifyingMetadata();
+  }
+
+  public String getBeanName() {
+    return beanName;
   }
 }
 

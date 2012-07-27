@@ -41,6 +41,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.mvel2.util.NullType;
 
 import javax.enterprise.inject.New;
+import javax.inject.Named;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -69,10 +70,14 @@ public class TypeInjector extends AbstractInjector {
     }
 
     // check to see if this is a singleton and/or alternative bean
-
     this.testmock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
+
+    if (type.isAnnotationPresent(Named.class)) {
+      final Named namedAnnotation = type.getAnnotation(Named.class);
+      this.beanName = namedAnnotation.value().equals("") ? type.getName() : namedAnnotation.value();
+    }
 
     this.varName = InjectUtil.getNewInjectorName() + "_" + type.getName();
 
@@ -177,14 +182,10 @@ public class TypeInjector extends AbstractInjector {
     /* pop the block builder of the stack now that we're done wiring. */
     ctx.popBlockBuilder();
 
-
     /*
     declare a final variable for the CreationalCallback and initialize it with the anonymous class we just
     built.
     */
-//    ctx.globalAppend(declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
-//            .initializeWith(callbackBuilder.finish().finish()));
-
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
             .initializesWith(callbackBuilder.finish().finish()).finish();
 
@@ -195,10 +196,6 @@ public class TypeInjector extends AbstractInjector {
        if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
        method and assign it with CreationalContext.getInstance().
        */
-//      ctx.globalAppend(declareVariable(type).asFinal().named(varName)
-//              .initializeWith(loadVariable(creationalCallbackVarName).invoke("getInstance",
-//                      Refs.get("context"))));
-
       ctx.getBootstrapBuilder().privateField(varName, type).modifiers(Modifier.Final)
               .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
 

@@ -365,7 +365,6 @@ public class MarshallersGenerator extends Generator {
     public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto);
   }
 
-
   private String generateServerMarshallers(final String sourceDir,
                                            final String serverSideClass,
                                            final String outputPath) {
