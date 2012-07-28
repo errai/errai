@@ -35,6 +35,7 @@ import org.junit.Test;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import org.jboss.errai.databinding.client.NonExistingPropertyException;
 
 /**
  * Data binding integration tests.
@@ -336,5 +337,64 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "bindingConverter", textBox.getText());
+  }
+  
+  
+ @Test(expected=NonExistingPropertyException.class)
+  public void testGetProperty(){
+       DataBinder binder = DataBinder.forType(Model.class);
+       Model model = new Model();
+       binder.setModel(model);
+       
+       assertEquals(0, binder.get("id"));
+       assertFalse((Boolean)binder.get("active"));
+       assertEquals(null, binder.get("value"));
+       assertEquals(null, binder.get("name"));
+       
+       model.setId(123);
+       model.setValue("the_value");
+       model.setName("the_name");
+       model.setActive(true);
+       
+       assertEquals(123, binder.get("id"));
+       assertTrue((Boolean)binder.get("active"));
+       assertEquals("the_value", binder.get("value"));
+       assertEquals("the_name", binder.get("name"));
+       
+       
+  }
+  
+  
+  @Test 
+  public void testGetPropertyNotExists(){
+       DataBinder binder = DataBinder.forType(Model.class);
+       
+       boolean caught=false;
+       try{
+        binder.get("notExists");
+       }catch(NonExistingPropertyException e){
+           caught = true;
+       }
+       assertTrue( "Should have thrown NonExistingPropertyException", caught);
+  }
+  
+  
+  @Test
+  public void testGetWidget(){
+       TextBox valueBox = new TextBox();
+       TextBox nameBox = new TextBox();
+       DataBinder binder = DataBinder.forType(Model.class);
+       
+       assertNull(binder.getWidget("name"));
+       assertNull(binder.getWidget("value"));
+       
+       binder.bind(valueBox, "value");
+       binder.bind(nameBox, "name");
+       
+       assertEquals(valueBox, binder.getWidget("value"));
+       assertEquals(nameBox, binder.getWidget("name"));
+       
+       
+       
   }
 }

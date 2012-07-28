@@ -219,4 +219,37 @@ public class DataBinder<T> {
     ((BindableProxy<T>) this.model).setModel(model, initialState);
     return this.model;
   }
+  /**
+   * @param property the name of the model property.
+   * @return the value of the model property for the current target.
+   * @throws  NonExistingPropertyException
+   */
+  @SuppressWarnings("unchecked")
+  public Object get(String property){
+	return  ((BindableProxy<T>) this.model).get(property);
+  }
+
+  /**
+   * Sets the property on the model to the provided value.
+   * @param property the name of the model property.
+   * @param value the value to set.
+   */
+  @SuppressWarnings("unchecked")
+  public void set(String property, Object value){
+	((BindableProxy<T>) this.model).set(property,value);
+  }
+
+  /**
+   * Get the Widget currently bound to the provided property.
+   * @param property the name of the model property;
+   * @return the Widget currently bound to the provided property.
+   * 
+   */
+  @SuppressWarnings("unchecked")
+  public Widget getWidget(String property){
+	return ((BindableProxy<T>) this.model).getWidget(property);
+  }
+  
+
+
 }
