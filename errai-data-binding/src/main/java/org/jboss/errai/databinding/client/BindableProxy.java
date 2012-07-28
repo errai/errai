@@ -74,4 +74,30 @@ public interface BindableProxy<T> extends WrappedPortable {
    * methods on this proxy (and were therefore not visible to this proxy).
    */
   public void updateWidgets();
+
+	
+  /**
+   * @param property the name of the model property.
+   * @return the value of the model property for the current target.
+   * @throws  NonExistingPropertyException
+   */
+  public Object get(String property);
+
+  /**
+   * Sets the property on the model to the provided value.
+   * @param property the name of the model property.
+   * @param value the value to set.
+   */
+  public void set(String property, Object value);
+  
+  
+  /**
+   * Get the Widget currently bound to the provided property.
+   * @param property the name of the model property;
+   * @return the Widget currently bound to the provided property.
+   * 
+   */
+  public Widget getWidget(String property);
+  
+
 }
