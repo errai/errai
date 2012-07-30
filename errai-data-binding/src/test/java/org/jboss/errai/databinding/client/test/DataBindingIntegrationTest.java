@@ -340,4 +340,14 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "bindingConverter", textBox.getText());
   }
+
+  @Test
+  public void testGetWidget() {
+    TextBox textBox = new TextBox();
+    DataBinder<Model> binder = DataBinder.forType(Model.class);
+
+    assertNull(binder.getWidget("value"));
+    binder.bind(textBox, "value");
+    assertEquals("Bound widget not found", textBox, binder.getWidget("value"));
+  }
 }

@@ -211,6 +211,8 @@ public class DataBinder<T> {
    */
   @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
+    Assert.notNull(model);
+
     // Ensure that we do not proxy the model twice
     if (model instanceof BindableProxy) {
       model = (T) ((BindableProxy<?>) model).unwrap();
@@ -219,4 +221,17 @@ public class DataBinder<T> {
     ((BindableProxy<T>) this.model).setModel(model, initialState);
     return this.model;
   }
+
+  /**
+   * Returns the widget currently bound to the provided model property (see {@link #bind(Widget, String)}).
+   * 
+   * @param property
+   *          The name of the model property, must not be null.
+   * @return The widget currently bound to the provided property or null if no widget was bound.
+   */
+  @SuppressWarnings("unchecked")
+  public Widget getWidget(String property) {
+    return ((BindableProxy<T>) this.model).getWidget(Assert.notNull(property));
+  }
+
 }
