@@ -16,6 +16,10 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import static org.jboss.errai.codegen.CallParameters.fromStatements;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.CallParameters;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
@@ -33,10 +37,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.util.GenUtil;
-
-import javax.enterprise.util.TypeLiteral;
-
-import static org.jboss.errai.codegen.CallParameters.fromStatements;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -112,7 +112,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return this;
   }
 
-  // todo: return a builder interface -- not a concrete implementation
   public AnonymousClassStructureBuilder extend() {
     return new AnonymousClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       @Override
@@ -126,6 +125,11 @@ public class ObjectBuilder extends AbstractStatementBuilder {
         return context;
       }
     });
+  }
+  
+  public AnonymousClassStructureBuilder extend(final Object... parameters) {
+    this.parameters = parameters;
+    return extend();
   }
 
   @Override

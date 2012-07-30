@@ -22,6 +22,14 @@ package org.jboss.errai.codegen.test.model;
 public abstract class Bar {
   protected String name;
   
+  public Bar() {
+    
+  }
+  
+  public Bar(String name) {
+    this.name = name;
+  }
+  
   public void setName(String name) {
     
   }

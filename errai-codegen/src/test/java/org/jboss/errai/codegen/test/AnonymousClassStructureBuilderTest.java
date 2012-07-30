@@ -74,6 +74,24 @@ public class AnonymousClassStructureBuilderTest extends AbstractCodegenTest {
   }
 
   @Test
+  public void testAnonymousClassWithConstructor() {
+    String src = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
+        .extend("test")
+        .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
+        .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
+        .finish()
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate anonymous class with overloaded construct",
+        "new Bar(\"test\") {\n" +
+            "public void setName(String name) {\n" +
+            "this.name = name;\n" +
+            "}\n" +
+            "}", src);
+  }
+
+  @Test
   public void testAnonymousClassWithInitializationBlock() {
     String src = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
             .extend()
@@ -101,10 +119,13 @@ public class AnonymousClassStructureBuilderTest extends AbstractCodegenTest {
   public void testAnonymousClassReferencingOuterClass() {
     ClassStructureBuilder<?> outer = ClassBuilder.define("org.foo.Outer").publicScope().body();
 
-    Statement anonInner = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
+    Statement anonInner =
+        ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
             .extend()
             .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
-            .append(Stmt.loadStatic(outer.getClassDefinition(), "this").loadField("outerName").assignValue(Variable.get("name")))
+            .append(
+                Stmt.loadStatic(outer.getClassDefinition(), "this").loadField("outerName").assignValue(
+                    Variable.get("name")))
             .append(Stmt.loadStatic(outer.getClassDefinition(), "this").invoke("setOuterName", Variable.get("name")))
             .finish()
             .finish();
@@ -152,7 +173,6 @@ public class AnonymousClassStructureBuilderTest extends AbstractCodegenTest {
 
     Statement declaration = Stmt.declareVariable(java.lang.annotation.Annotation.class)
             .named("foo").initializeWith(stmt);
-
 
     String cls = declaration.generate(Context.create());
 
