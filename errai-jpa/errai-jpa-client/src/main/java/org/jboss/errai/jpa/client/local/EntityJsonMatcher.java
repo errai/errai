@@ -24,11 +24,4 @@ public interface EntityJsonMatcher {
    */
   boolean matches(JSONObject candidate);
 
-  // XXX see note in AbstractEntityJsonMatcher
-  ErraiTypedQuery<?> getQuery();
-
-  // XXX see note in AbstractEntityJsonMatcher
-  void setQuery(ErraiTypedQuery<?> query);
-
-
 }

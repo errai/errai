@@ -13,21 +13,18 @@ import com.google.common.collect.ImmutableBiMap;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class TypedQueryFactory {
-  private final ErraiEntityManager entityManager;
-  private final Class<?> actualResultType;
-  private final EntityJsonMatcher matcher;
-  private final ImmutableBiMap<String, Parameter<?>> parameters;
+public abstract class TypedQueryFactory {
+  protected final ErraiEntityManager entityManager;
+  protected final Class<?> actualResultType;
+  protected final ImmutableBiMap<String, Parameter<?>> parameters;
 
 
   public TypedQueryFactory(
           ErraiEntityManager entityManager,
           Class<?> actualResultType,
-          EntityJsonMatcher matcher,
           ErraiParameter<?>[] parameters) {
     this.entityManager = Assert.notNull(entityManager);
     this.actualResultType = Assert.notNull(actualResultType);
-    this.matcher = Assert.notNull(matcher);
 
     ImmutableBiMap.Builder<String, Parameter<?>> pb = ImmutableBiMap.builder();
     for (Parameter<?> p : parameters) {
@@ -50,9 +47,20 @@ public class TypedQueryFactory {
    *           if the query's result type is not assignable to the given type.
    */
   public <T> TypedQuery<T> createIfCompatible(Class<T> resultType) {
+    // FIXME this test for exact type should be replaced by a more correct assignability test once we figure out how :)
     if (resultType != actualResultType) {
       throw new IllegalArgumentException("Expected return type " + resultType + " is not assignable from actual return type " + actualResultType);
     }
-    return new ErraiTypedQuery<T>(entityManager, resultType, matcher, parameters);
+    return createQuery();
   }
+
+  /**
+   * Subclasses must implement this method by returning a new instance of
+   * ErraiTypedQuery that implements the query logic for the JPA query handled
+   * by this factory.
+   *
+   * @return a new instance of ErraiTypedQuery.
+   */
+  protected abstract <T> TypedQuery<T> createQuery();
+
 }

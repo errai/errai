@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableBiMap;
  * @param <X> The result type of this query
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class ErraiTypedQuery<X> implements TypedQuery<X> {
+public abstract class ErraiTypedQuery<X> implements TypedQuery<X>, EntityJsonMatcher {
 
   private int maxResults = Integer.MAX_VALUE;
   private int firstResult = 0;
@@ -47,7 +47,6 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
   private LockModeType lockMode = LockModeType.OPTIMISTIC_FORCE_INCREMENT;
   private final ErraiEntityManager em;
   private final Class<X> resultType;
-  private final EntityJsonMatcher matcher;
 
   /**
    *
@@ -56,8 +55,6 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
    * @param actualResultType
    *          The result type of this query. Must be an entity type known to
    *          {@code entityManager}.
-   * @param matcher
-   *          The matcher that chooses which entity instances to accept.
    * @param parameters
    *          The parameters of this query. The iteration order of the
    *          parameters in the map must be their numeric order in the query
@@ -66,12 +63,9 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
   protected ErraiTypedQuery(
           ErraiEntityManager entityManager,
           Class<X> actualResultType,
-          EntityJsonMatcher matcher,
           ImmutableBiMap<String, Parameter<?>> parameters) {
     this.em = Assert.notNull(entityManager);
     this.resultType = Assert.notNull(actualResultType);
-    this.matcher = Assert.notNull(matcher);
-    matcher.setQuery(this); // XXX escaped reference to this partly constructed object
     this.parameters = Assert.notNull(parameters);
   }
 
@@ -207,7 +201,7 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
 
   @Override
   public List<X> getResultList() {
-    return em.findAll(em.getMetamodel().entity(resultType), matcher);
+    return em.findAll(em.getMetamodel().entity(resultType), this);
   }
 
   @Override

@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NamedQuery;
+import javax.persistence.TypedQuery;
 
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.hql.internal.antlr.HqlSqlTokenTypes;
@@ -20,6 +21,7 @@ import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
 import org.jboss.errai.codegen.ArithmeticOperator;
+import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -30,8 +32,8 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.framework.Comparisons;
-import org.jboss.errai.jpa.client.local.AbstractEntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiParameter;
+import org.jboss.errai.jpa.client.local.ErraiTypedQuery;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 import org.mvel2.MVEL;
@@ -91,16 +93,35 @@ public class TypedQueryFactoryGenerator {
   /**
    * Returns a statement that evaluates to a new instance of the TypedQueryFactory implementation.
    */
-  public Statement generate(Statement entityManager) {
+  public Statement generate(Statement entityManager, Context context) {
+    // anonQueryClassBuilder comes out as a statement that looks like this:
+    // new ErraiTypedQuery(entityManager, actualResultType, parameters) {
+    //   public void matches(JSONObject object) { ... }
+    //   public void sort(List<T> resultList) { ... }
+    // }
+    AnonymousClassStructureBuilder anonQueryClassBuilder = ObjectBuilder.newInstanceOf(ErraiTypedQuery.class, context).extend(
+            Stmt.loadVariable("entityManager"),
+            Stmt.loadVariable("actualResultType"),
+            Stmt.loadVariable("parameters"));
+    appendMatchesMethod(anonQueryClassBuilder);
 
-    // build the matcher (anonymous inner class)
-    AnonymousClassStructureBuilder generatedMatcher = ObjectBuilder.newInstanceOf(AbstractEntityJsonMatcher.class).extend();
-    BlockBuilder<?> matchesMethod = generatedMatcher
-            .publicOverridesMethod("matches", Parameter.of(JSONObject.class, "candidate"));
-    fillInMatchesMethod(matchesMethod);
-    matchesMethod.finish();
+    AnonymousClassStructureBuilder factoryBuilder = ObjectBuilder.newInstanceOf(TypedQueryFactory.class, context).extend(
+            entityManager,
+            Stmt.loadLiteral(resultType),
+            Stmt.newArray(ErraiParameter.class).initialize((Object[]) generateQueryParamArray()));
 
-    // build the param list
+    BlockBuilder<AnonymousClassStructureBuilder> createQueryMethod =
+            factoryBuilder.protectedMethod(TypedQuery.class, "createQuery").body();
+    createQueryMethod.append(Stmt.nestedCall(anonQueryClassBuilder.finish()).returnValue());
+    createQueryMethod.finish();
+
+    return factoryBuilder.finish();
+  }
+
+  /**
+   * Creates an array of statements that generates code for the array of named parameters in the query.
+   */
+  private Statement[] generateQueryParamArray() {
     System.out.println("Named parameters: " + query.getParameterTranslations().getNamedParameterNames());
     @SuppressWarnings("unchecked")
     List<ParameterSpecification> parameterSpecifications = query.getSqlAST().getWalker().getParameters();
@@ -115,44 +136,41 @@ public class TypedQueryFactoryGenerator {
               Integer.valueOf(i),
               ps.getExpectedType().getReturnedClass());
     }
-
-    // return the query factory
-    return Stmt.newObject(TypedQueryFactory.class).withParameters(
-            entityManager,
-            Stmt.loadLiteral(resultType),
-            generatedMatcher.finish(),
-            Stmt.newArray(ErraiParameter.class).initialize((Object[]) generatedParamList));
+    return generatedParamList;
   }
 
   /**
-   * Fills in the given method with the logic for matching its argument (a
-   * JSONObject called "candidate") against the where clause in the JPQL query.
+   * Adds the public override method {@code matches(JSONObject candidate)} to
+   * the given class builder. The matching logic is, of course, generated based
+   * on the JPA query this generator was created with.
    *
-   * @param matchesMethod
+   * @param matcherClassBuilder
+   *          The class builder to append the generated matcher method to.
    */
-  private void fillInMatchesMethod(BlockBuilder<?> matchesMethod) {
-    System.out.println("Query spaces are: " + query.getQuerySpaces());
-    AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
-    matchesMethod.append(
-            Stmt.nestedCall(generate(traverser)).returnValue());
-  }
+  private void appendMatchesMethod(AnonymousClassStructureBuilder matcherClassBuilder) {
 
-  private Statement generate(AstInorderTraversal traverser) {
+    AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
+    Statement matchesStmt = null;
     while (traverser.hasNext()) {
       AST ast = traverser.next();
-      switch (ast.getType()) {
-      case HqlSqlTokenTypes.WHERE:
+      if (ast.getType() == HqlSqlTokenTypes.WHERE) {
         if (ast.getNumberOfChildren() != 1) {
           throw new IllegalStateException("WHERE clause has " + ast.getNumberOfChildren() + " children (expected 1)");
         }
-        return generateExpression(traverser);
-      default:
-        System.out.println("Skipping node: " + ast);
+        matchesStmt = generateExpression(traverser);
+        break;
       }
     }
 
-    // Query has no WHERE clause
-    return Stmt.loadLiteral(true);
+    if (matchesStmt == null) {
+      // Query has no WHERE clause, so everything is a match
+      matchesStmt = Stmt.loadLiteral(true);
+    }
+
+    BlockBuilder<?> matchesMethod = matcherClassBuilder
+            .publicOverridesMethod("matches", Parameter.of(JSONObject.class, "candidate"));
+    matchesMethod.append(Stmt.nestedCall(matchesStmt).returnValue());
+    matchesMethod.finish();
   }
 
   /**
@@ -264,7 +282,7 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.NAMED_PARAM:
       ParameterNode paramNode = (ParameterNode) ast;
       NamedParameterSpecification namedParamSpec = (NamedParameterSpecification) paramNode.getHqlParameterSpecification();
-      return Stmt.loadVariable("query").invoke("getParameterValue", namedParamSpec.getName());
+      return Stmt.loadVariable("this").invoke("getParameterValue", namedParamSpec.getName());
 
     case HqlSqlTokenTypes.QUOTED_STRING:
       return Stmt.loadLiteral(SqlUtil.parseStringLiteral(ast.getText()));
