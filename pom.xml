@@ -86,6 +86,7 @@
 
     <modules>
         <module>errai-common</module>
+        <module>errai-javax-enterprise</module>
         <module>errai-ioc</module>
         <module>errai-bus</module>
         <module>errai-bus/demos</module>

@@ -16,11 +16,11 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.weld.Container;
+import org.jboss.weld.injection.CurrentInjectionPoint;
+import org.jboss.weld.manager.BeanManagerImpl;
+import org.jboss.weld.util.collections.Arrays2;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
@@ -29,12 +29,11 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.util.AnnotationLiteral;
-
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.weld.Container;
-import org.jboss.weld.injection.CurrentInjectionPoint;
-import org.jboss.weld.manager.BeanManagerImpl;
-import org.jboss.weld.util.collections.Arrays2;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Mike Brock

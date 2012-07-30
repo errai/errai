@@ -54,6 +54,13 @@
             <version>1</version>
             <!--<scope>provided</scope> -->
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-javax-enterprise</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>jsr250-api</artifactId>

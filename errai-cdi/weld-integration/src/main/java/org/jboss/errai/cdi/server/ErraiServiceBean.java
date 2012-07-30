@@ -15,11 +15,12 @@
  */
 package org.jboss.errai.cdi.server;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
+
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
@@ -31,15 +32,11 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.util.AnnotationLiteral;
-
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceImpl;
-import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableSet;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>

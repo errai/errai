@@ -16,18 +16,20 @@
 
 package org.jboss.errai.ioc.rebind.ioc.metadata;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 
+import javax.enterprise.inject.Default;
 import javax.enterprise.util.Nonbinding;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,13 +44,13 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
 
 
-  public JSR330QualifyingMetadata(Collection<Annotation> qualifiers) {
+  public JSR330QualifyingMetadata(final Collection<Annotation> qualifiers) {
     this.qualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(qualifiers));
   }
 
   @Override
   public Statement render() {
-    if (this == DEFAULT) {
+    if (this == DEFAULT_QUALIFYING_METADATA) {
       return Stmt.loadStatic(BuiltInQualifiers.class, "DEFAULT_QUALIFIERS");
     }
     else {
@@ -57,27 +59,41 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
   }
 
   @Override
-  public boolean doesSatisfy(QualifyingMetadata metadata) {
+  public boolean doesSatisfy(final QualifyingMetadata metadata) {
     if (metadata instanceof JSR330QualifyingMetadata) {
       final JSR330QualifyingMetadata comparable = (JSR330QualifyingMetadata) metadata;
 
-      return ((comparable.qualifiers.size() == 1
-              && comparable.qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE))
-              || qualifiers.size() == 1
-              && qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE)
-              || doQualifiersMatch(qualifiers, comparable.qualifiers));
+      final Set<Annotation> from = new HashSet<Annotation>();
+      addAllExceptDefault(from, qualifiers);
+
+      final Set<Annotation> to = new HashSet<Annotation>();
+      addAllExceptDefault(to, comparable.qualifiers);
+
+      return ((to.size() == 1
+          && to.contains(BuiltInQualifiers.ANY_INSTANCE))
+          || from.size() == 1
+          && from.contains(BuiltInQualifiers.ANY_INSTANCE)
+          || doQualifiersMatch(from, to));
     }
     else return metadata == null;
   }
 
-  private static boolean doQualifiersMatch(Set<Annotation> from, Set<Annotation> to) {
+  private static void addAllExceptDefault(final Set<Annotation> addTo, final Set<Annotation> from) {
+    for (Annotation a : from) {
+      if (!a.annotationType().equals(Default.class)) {
+        addTo.add(a);
+      }
+    }
+  }
+
+  private static boolean doQualifiersMatch(final Set<Annotation> from, final Set<Annotation> to) {
     final Map<String, Annotation> fromAnnos = new HashMap<String, Annotation>();
 
     for (final Annotation a : from) {
       fromAnnos.put(a.annotationType().getName(), a);
     }
 
-    for (Annotation a : to) {
+    for (final Annotation a : to) {
       if (fromAnnos.containsKey(a.annotationType().getName())) {
         if (!annotationMatches(a, fromAnnos.get(a.annotationType().getName()))) return false;
       }
@@ -92,10 +108,10 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
   private static boolean annotationMatches(final Annotation a1, final Annotation a2) {
     final Class<? extends Annotation> anno = a1.annotationType();
 
-    for (Method method : anno.getDeclaredMethods()) {
-      int modifiers = method.getModifiers();
+    for (final Method method : anno.getDeclaredMethods()) {
+      final int modifiers = method.getModifiers();
       if (method.isAnnotationPresent(Nonbinding.class) || Modifier.isPrivate(modifiers)
-              || Modifier.isProtected(modifiers) || method.getName().equals("equals") || method.getName().equals("hashCode"))
+          || Modifier.isProtected(modifiers) || method.getName().equals("equals") || method.getName().equals("hashCode"))
         continue;
 
       try {
@@ -112,25 +128,35 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
     return true;
   }
 
-  public static JSR330QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
+  public static JSR330QualifyingMetadata createFromAnnotations(final Annotation[] annotations) {
     if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
 
-    Set<Annotation> qualifiers = new HashSet<Annotation>();
+    final Set<Annotation> qualifiers = new HashSet<Annotation>();
 
-    for (Annotation a : annotations) {
+    boolean hasNamed = false;
+
+    for (final Annotation a : annotations) {
       if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
         qualifiers.add(a);
       }
+
+      if (a.annotationType().equals(Named.class.getName())) {
+        hasNamed = true;
+      }
+    }
+
+    if (qualifiers.size() == 1 && hasNamed) {
+      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
     }
 
     return qualifiers.isEmpty() ? createDefaultQualifyingMetaData() : new JSR330QualifyingMetadata(qualifiers);
   }
 
-  private static final JSR330QualifyingMetadata DEFAULT = new JSR330QualifyingMetadata(
-          Collections.<Annotation>singleton(BuiltInQualifiers.ANY_INSTANCE));
+  private static final JSR330QualifyingMetadata DEFAULT_QUALIFYING_METADATA = new JSR330QualifyingMetadata(
+      Collections.<Annotation>unmodifiableCollection(Arrays.asList(BuiltInQualifiers.DEFAULT_QUALIFIERS)));
 
   static JSR330QualifyingMetadata createDefaultQualifyingMetaData() {
-    return DEFAULT;
+    return DEFAULT_QUALIFYING_METADATA;
   }
 
   @Override
@@ -140,9 +166,9 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
 
   @Override
   public String toString() {
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
 
-    for (Annotation a : qualifiers) {
+    for (final Annotation a : qualifiers) {
       buf.append(" @").append(a.annotationType().getSimpleName()).append(" ");
     }
 

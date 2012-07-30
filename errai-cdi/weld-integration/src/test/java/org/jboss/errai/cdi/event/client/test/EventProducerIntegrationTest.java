@@ -56,7 +56,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
         Map<String, List<String>> actualEvents = module.getReceivedEventsOnServer();
 
         // assert that the server received all events
-        EventProducerIntegrationTest.this.verifyQualifiedEvents(actualEvents);
+        EventProducerIntegrationTest.this.verifyQualifiedEvents(actualEvents, false);
         finishTest();
       }
     };

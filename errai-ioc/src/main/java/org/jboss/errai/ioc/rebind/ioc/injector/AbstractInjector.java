@@ -149,8 +149,8 @@ public abstract class AbstractInjector implements Injector {
       parmTypesSatisfied = parameterizedType.isAssignableFrom(getQualifyingTypeInformation());
     }
 
-    final boolean metaDataSatisfied = getQualifyingMetadata() == null || getQualifyingMetadata().doesSatisfy
-        (qualifyingMetadata);
+    final boolean metaDataSatisfied = getQualifyingMetadata() == null
+        || getQualifyingMetadata().doesSatisfy(qualifyingMetadata);
 
     return parmTypesSatisfied && metaDataSatisfied;
   }
@@ -233,6 +233,7 @@ public abstract class AbstractInjector implements Injector {
     return this.getClass().getName() + ":" + getInjectedType().getFullyQualifiedName() + " " + getQualifyingMetadata();
   }
 
+  @Override
   public String getBeanName() {
     return beanName;
   }

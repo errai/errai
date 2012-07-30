@@ -15,8 +15,10 @@
  */
 package org.jboss.errai.cdi.server;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
+
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,9 +33,6 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableSet;
 
 /**
  * Basically a bean wrapper that provides CDI meta data.

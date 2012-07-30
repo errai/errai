@@ -202,12 +202,17 @@ public class InjectionContext {
       buf.append("  Note: configure an alternative to take precedence or remove all but one matching bean.");
 
       throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
-              + erased.getFullyQualifiedName() + " " + (metadata == null ? "" : metadata.toString()) + ":\n" +
-              buf.toString());
+          + erased.getFullyQualifiedName() + " " + (metadata == null ? "" : metadata.toString()) + ":\n" +
+          buf.toString());
     }
     else {
       return matching.get(0);
     }
+  }
+
+  public boolean hasInjectorForType(final MetaClass type) {
+    final List<Injector> injectorList = injectors.get(type);
+    return injectorList != null && !injectorList.isEmpty();
   }
 
   public boolean isTypeInjectable(final MetaClass type) {
@@ -304,7 +309,7 @@ public class InjectionContext {
 
     if (injectorList.size() > 1) {
       throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
-              + erased.getFullyQualifiedName());
+          + erased.getFullyQualifiedName());
     }
     if (injectorList.isEmpty()) {
       throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
@@ -340,7 +345,7 @@ public class InjectionContext {
   }
 
   private void registerInjectorsForSuperTypesAndInterfaces(MetaClass type, Injector injector,
-      Set<MetaClass> processedTypes) {
+                                                           Set<MetaClass> processedTypes) {
     MetaClass cls = type;
     do {
       if (cls != type && cls.isPublic() && (cls.isAbstract() || cls.isInterface())) {
@@ -359,7 +364,7 @@ public class InjectionContext {
 
         if (processedTypes.add(iface)) {
           final QualifiedTypeInjectorDelegate injectorDelegate =
-                  new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+              new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
 
           registerInjector(iface, injectorDelegate, processedTypes, false);
         }

@@ -32,7 +32,7 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testLocalEvent() {
-    delayTestFinish(20000);
+    delayTestFinish(60000);
 
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
@@ -40,7 +40,7 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
         final LocalEventTestModule testModule
             = IOC.getBeanManager().lookupBean(LocalEventTestModule.class).getInstance();
 
-        final String testText = "ABCDE";
+        final String testText = "NOQUAL";
         final String qualText = "QUAL";
         final String extraQualText = "EXTRAQUAL";
 

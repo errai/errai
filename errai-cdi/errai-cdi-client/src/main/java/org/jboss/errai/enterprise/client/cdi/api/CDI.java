@@ -113,7 +113,9 @@ public class CDI {
         qualifiersPart.add(qualifier.annotationType().getName());
       }
     }
+  //  return qualifiersPart == null ? Collections.<String>singleton(Any.class.getName()) : qualifiersPart;
     return qualifiersPart == null ? Collections.<String>emptySet() : qualifiersPart;
+
   }
 
   public static void fireEvent(final Object payload, final Annotation... qualifiers) {
@@ -199,7 +201,7 @@ public class CDI {
 
 
   public static void consumeEventFromMessage(Message message) {
-    final String beanType = message.get(String.class, CDIProtocol.BeanType);;
+    final String beanType = message.get(String.class, CDIProtocol.BeanType);
 
     _fireEvent(beanType, message);
 

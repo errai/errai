@@ -67,7 +67,6 @@
         <module>jetty</module>
         <module>errai-cdi-client</module>
         <module>weld-integration</module>
-        <module>errai-javax-enterprise</module>
         <module>demos/errai-cdi-mobile-demo</module>
         <module>demos/errai-cdi-mvp-demo</module>
         <module>demos/errai-cdi-stock-demo</module>
@@ -81,12 +80,6 @@
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-bus</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-widgets</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

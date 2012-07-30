@@ -42,9 +42,11 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -75,20 +77,26 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final String parmClassName = parm.getType().getFullyQualifiedName();
     final List<Annotation> annotations = InjectUtil.extractQualifiers(instance);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
-    final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
+    final Set<String> qualifierNames = new HashSet<String>(CDI.getQualifiersPart(qualifiers));
+
+    if (qualifierNames.contains(Any.class.getName())) {
+      qualifierNames.remove(Any.class.getName());
+    }
 
     MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(parm.getType()));
 
     AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
 
     BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
-    if (qualifierNames != null && !qualifierNames.isEmpty()) {
+
+    if (!qualifierNames.isEmpty()) {
       callBackBlock = callBack.initialize();
       for (String qualifierName : qualifierNames) {
         callBackBlock.append(Stmt.loadClassMember("qualifierSet").invoke("add", qualifierName));
       }
       callBack = callBackBlock.finish();
     }
+
 
     callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(parm, "event"))
         ._(instance.callOrBind(Refs.get("event")))

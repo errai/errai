@@ -29,6 +29,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.AnnotationComparator;
 import org.jboss.errai.ioc.client.QualifierEqualityFactory;
@@ -36,6 +37,7 @@ import org.jboss.errai.ioc.client.QualifierUtil;
 
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
+import java.io.File;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -105,7 +107,6 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Set<Class<?>> typesAnnotatedWith = scanner.getTypesAnnotatedWith(Qualifier.class);
 
-
     for (Class<?> aClass : typesAnnotatedWith) {
       try {
 
@@ -159,7 +160,13 @@ public class QualiferEqualityFactoryGenerator extends Generator {
                     .finish()).finish();
 
 
-    printWriter.append(builder.toJavaString());
+    final String csq = builder.toJavaString();
+
+    final File fileCacheDir = RebindUtils.getErraiCacheDir();
+    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+    RebindUtils.writeStringToFile(cacheFile, csq);
+
+    printWriter.append(csq);
 
     generatorContext.commit(logger, printWriter);
   }

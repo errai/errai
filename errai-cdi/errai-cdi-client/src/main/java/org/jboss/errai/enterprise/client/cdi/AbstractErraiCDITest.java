@@ -16,11 +16,15 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
+import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
 
-import com.google.gwt.junit.client.GWTTestCase;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Abstract base class of all Errai CDI integration tests,
@@ -48,5 +52,21 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
   @Override
   protected void gwtTearDown() throws Exception {
     super.gwtTearDown();
+  }
+
+  public static boolean annotationSetMatches(final Set<Annotation> annotations,
+                                             final Class<? extends Annotation>... annos) {
+
+    final Set<Class<? extends Annotation>> annoClassCompareFrom
+        = new HashSet<Class<? extends Annotation>>(Arrays.asList(annos));
+
+    final Set<Class<? extends Annotation>> annoClassCompareTo
+        = new HashSet<Class<? extends Annotation>>();
+
+    for (Annotation a : annotations) {
+      annoClassCompareTo.add(a.annotationType());
+    }
+
+    return annoClassCompareFrom.equals(annoClassCompareTo);
   }
 }

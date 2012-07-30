@@ -165,4 +165,6 @@ public interface Injector {
    * @param registrationHook a registration hook to be called at registration of the bean with the bean manager.
    */
   void addRegistrationHook(RegistrationHook registrationHook);
+
+  String getBeanName();
 }

@@ -1,15 +1,5 @@
 package org.jboss.errai.cdi.event.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PreDestroy;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-
 import org.jboss.errai.cdi.client.event.FinishEvent;
 import org.jboss.errai.cdi.client.event.StartEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
@@ -17,6 +7,16 @@ import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+
+import javax.annotation.PreDestroy;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Test module used by {@see EventObserverIntegrationTest}.
@@ -69,11 +69,15 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
     startEvent.fire(new StartEvent());
   }
 
-  @SuppressWarnings("unused")
   private void onEvent(@Observes String event) {
     addQualifiedReceivedEvent("", event);
+
   }
-  
+  @SuppressWarnings("unused")
+  private void onEventAny(@Observes @Any String event) {
+    addQualifiedReceivedEvent("Any", event);
+  }
+
   public void onEventA(@Observes @A String event) {
     addQualifiedReceivedEvent("A", event);
   }

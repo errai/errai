@@ -3,11 +3,11 @@ package org.jboss.errai.cdi.event.client;
 import org.jboss.errai.cdi.client.event.LocalEventA;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
-import org.jboss.errai.ioc.client.api.qualifiers.Any;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

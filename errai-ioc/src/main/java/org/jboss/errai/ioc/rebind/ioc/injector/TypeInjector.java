@@ -34,6 +34,7 @@ import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -41,6 +42,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.mvel2.util.NullType;
 
 import javax.enterprise.inject.New;
+import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -74,10 +76,6 @@ public class TypeInjector extends AbstractInjector {
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
-    if (type.isAnnotationPresent(Named.class)) {
-      final Named namedAnnotation = type.getAnnotation(Named.class);
-      this.beanName = namedAnnotation.value().equals("") ? type.getName() : namedAnnotation.value();
-    }
 
     this.varName = InjectUtil.getNewInjectorName() + "_" + type.getName();
 
@@ -85,9 +83,32 @@ public class TypeInjector extends AbstractInjector {
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
+    if (type.isAnnotationPresent(Specializes.class)) {
+      if (type.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
+        throw new InjectionFailure("the specialized bean " + type.getFullyQualifiedName() + " must directly inherit "
+            + "from another bean");
+      }
+
+
+      MetaClass cls = type;
+      while ((cls = cls.getSuperClass()) != null) {
+        if (context.hasInjectorForType(cls)) {
+          final Injector inj = context.getInjector(cls);
+          this.beanName = inj.getBeanName();
+          qualifiers.addAll(Arrays.asList(inj.getQualifyingMetadata().getQualifiers()));
+          break;
+        }
+      }
+    }
+
+    if (type.isAnnotationPresent(Named.class)) {
+      final Named namedAnnotation = type.getAnnotation(Named.class);
+      this.beanName = namedAnnotation.value().equals("") ? type.getName() : namedAnnotation.value();
+    }
+
     if (!qualifiers.isEmpty()) {
       qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory()
-              .createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
+          .createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
 
     }
     else {
@@ -137,17 +158,17 @@ public class TypeInjector extends AbstractInjector {
     and assign its BlockBuilder to a callbackBuilder so we can work with it.
     */
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
-            = newInstanceOf(creationCallbackRef).extend()
-                .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
+        = newInstanceOf(creationCallbackRef).extend()
+        .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
 
     /*
     render local variables Class::beanType and Annotation[]::qualifiers at the beginning of the getInstance()
     method so we can easily refer to them later on.
     */
     callbackBuilder
-            ._(declareVariable(Class.class).named("beanType").initializeWith(load(type)))
-            ._(declareVariable(Annotation[].class).named("qualifiers")
-                    .initializeWith(load(qualifyingMetadata.getQualifiers())));
+        ._(declareVariable(Class.class).named("beanType").initializeWith(load(type)))
+        ._(declareVariable(Annotation[].class).named("qualifiers")
+            .initializeWith(load(qualifyingMetadata.getQualifiers())));
 
 
     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
@@ -163,8 +184,8 @@ public class TypeInjector extends AbstractInjector {
         /* the bean has been constructed, so get a reference to the BeanRef and set it to the 'beanRef' variable. */
 
         callbackBuilder.append(declareVariable(BeanRef.class).named("beanRef")
-                .initializeWith(loadVariable("context").invoke("getBeanReference", Refs.get("beanType"),
-                        Refs.get("qualifiers"))));
+            .initializeWith(loadVariable("context").invoke("getBeanReference", Refs.get("beanType"),
+                Refs.get("qualifiers"))));
 
         /* add the bean to CreationalContext */
         callbackBuilder.append(loadVariable("context").invoke("addBean", Refs.get("beanRef"), Refs.get(varName)));
@@ -187,7 +208,7 @@ public class TypeInjector extends AbstractInjector {
     built.
     */
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
-            .initializesWith(callbackBuilder.finish().finish()).finish();
+        .initializesWith(callbackBuilder.finish().finish()).finish();
 
     Statement retVal;
 
@@ -197,7 +218,7 @@ public class TypeInjector extends AbstractInjector {
        method and assign it with CreationalContext.getInstance().
        */
       ctx.getBootstrapBuilder().privateField(varName, type).modifiers(Modifier.Final)
-              .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
+          .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
 
       /*
        use the variable we just assigned as the return value for this injector.
@@ -218,7 +239,7 @@ public class TypeInjector extends AbstractInjector {
     setRendered(true);
 
     injectableInstance.getInjectionContext().getProcessingContext()
-            .handleDiscoveryOfType(injectableInstance);
+        .handleDiscoveryOfType(injectableInstance);
     /*
       return the reference to this bean to whoever called us.
      */
