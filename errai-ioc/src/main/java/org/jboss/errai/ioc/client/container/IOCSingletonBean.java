@@ -29,10 +29,11 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
   private IOCSingletonBean(final IOCBeanManager beanManager,
                            final Class<T> type,
                            final Annotation[] qualifiers,
+                           final String name,
                            final CreationalCallback<T> callback,
                            final T instance) {
 
-    super(beanManager, type, qualifiers, callback);
+    super(beanManager, type, qualifiers, name, callback);
     this.instance = instance;
   }
 
@@ -40,23 +41,26 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
    * Creates a new IOC Bean reference
    *
    * @param type
-   *         The type of a bean
+   *     The type of a bean
    * @param qualifiers
-   *         The qualifiers of the bean.
+   *     The qualifiers of the bean.
+   * @param name
+   *     The name of the bean
    * @param instance
-   *         The instance of the bean.
+   *     The instance of the bean.
    * @param <T>
-   *         The type of the bean
+   *     The type of the bean
    *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
   public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
                                           final Class<T> type,
                                           final Annotation[] qualifiers,
+                                          final String name,
                                           final CreationalCallback<T> callback,
                                           final T instance) {
 
-    return new IOCSingletonBean<T>(beanManager, type, qualifiers, callback, instance);
+    return new IOCSingletonBean<T>(beanManager, type, qualifiers, name, callback, instance);
   }
 
   @Override

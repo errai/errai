@@ -26,6 +26,7 @@ import java.util.Set;
  * @author Mike Brock
  */
 public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
+  protected String name;
   protected Class<T> type;
   protected Set<Annotation> qualifiers;
 
@@ -36,6 +37,12 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
    */
   public Class<T> getType() {
     return type;
+  }
+
+
+  @Override
+  public String getName() {
+    return name;
   }
 
   /**
@@ -58,4 +65,6 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
   }
   
   public abstract T getInstance();
+
+
 }

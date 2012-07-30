@@ -17,6 +17,12 @@ public interface Injector {
   Statement getBeanInstance(InjectableInstance injectableInstance);
 
   /**
+   * Checks if the injector is enabled, and is eligable for injection consideration.
+   * @return true if the injector is enabled
+   */
+  boolean isEnabled();
+
+  /**
    * Checks if the injector represents a test mock.
    * @return true if the injector is a test mock
    */
@@ -167,4 +173,6 @@ public interface Injector {
   void addRegistrationHook(RegistrationHook registrationHook);
 
   String getBeanName();
+
+  void setEnabled(boolean enabled);
 }

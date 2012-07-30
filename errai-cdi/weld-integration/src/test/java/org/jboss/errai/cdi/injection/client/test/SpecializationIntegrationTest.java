@@ -38,7 +38,6 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
   };
 
   public void testSpecializingBeanHasQualifiersOfSpecializedAndSpecializingBean() {
-
     final Collection<IOCBeanDef> farmerBeans = IOC.getBeanManager().lookupBeans(LazyFarmer.class, LAZY_LITERAL);
     assertEquals("should only have one matching LazyFarmer bean", 1, farmerBeans.size());
 
@@ -46,5 +45,15 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     final Set<Annotation> qualifiers = lazyFarmerBean.getQualifiers();
 
     assertTrue(annotationSetMatches(qualifiers, Landowner.class, Lazy.class, Any.class, Named.class, Default.class));
+  }
+
+  public void testSpecializationBeanHasNameOfSpecializedBean() {
+    final String expectedName = "farmer";
+    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(expectedName);
+
+    assertEquals("should have one matching bean", 1, beans.size());
+
+    final IOCBeanDef farmerBean = beans.iterator().next();
+    assertEquals(expectedName, farmerBean.getName());
   }
 }

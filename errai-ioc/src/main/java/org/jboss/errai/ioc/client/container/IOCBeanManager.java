@@ -47,19 +47,21 @@ public class IOCBeanManager {
   private final Map<Object, Object> proxyLookupForManagedBeans
       = new IdentityHashMap<Object, Object>();
 
-  private IOCBeanDef<Object> registerSingletonBean(final Class<Object> type,
+  private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
                                                    final CreationalCallback<Object> callback,
                                                    final Object instance,
-                                                   final Annotation[] qualifiers) {
-    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, qualifiers, callback, instance);
+                                                   final Annotation[] qualifiers,
+                                                   final String name) {
+    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, qualifiers, name, callback, instance);
     registerBean(bean);
     return bean;
   }
 
-  private IOCBeanDef<Object> registerDependentBean(final Class<Object> type,
+  private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
                                                    final CreationalCallback<Object> callback,
-                                                   final Annotation[] qualifiers) {
-    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, qualifiers, callback);
+                                                   final Annotation[] qualifiers,
+                                                   final String name) {
+    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, qualifiers, name, callback);
     registerBean(bean);
     return bean;
   }
@@ -71,7 +73,7 @@ public class IOCBeanManager {
                                      final String beanName) {
 
 
-    _registerNamedBean(beanName, registerSingletonBean(type, callback, instance, qualifiers));
+    _registerNamedBean(beanName, _registerSingletonBean(type, callback, instance, qualifiers, beanName));
   }
 
   private void registerDependentBean(final Class<Object> type,
@@ -79,7 +81,7 @@ public class IOCBeanManager {
                                      final Annotation[] qualifiers,
                                      final String beanName) {
 
-    _registerNamedBean(beanName, registerDependentBean(type, callback, qualifiers));
+    _registerNamedBean(beanName, _registerDependentBean(type, callback, qualifiers, beanName));
   }
 
   private void _registerNamedBean(final String name,
@@ -112,10 +114,10 @@ public class IOCBeanManager {
                       final Annotation[] qualifiers) {
 
     if (instance != null) {
-      registerSingletonBean(type, callback, instance, qualifiers);
+      registerSingletonBean(type, callback, instance, qualifiers, null);
     }
     else {
-      registerDependentBean(type, callback, qualifiers);
+      registerDependentBean(type, callback, qualifiers, null);
     }
   }
 

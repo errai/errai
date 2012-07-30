@@ -69,4 +69,11 @@ public interface IOCBeanDef<T> {
    * @return returns whether or not the bean matches the set of qualifiers
    */
   public boolean matches(Set<Annotation> annotations);
+
+  /**
+   * Returns the name of the bean.
+   *
+   * @return the name of the bean. If the bean does not have a name, returns null.
+   */
+  public String getName();
 }

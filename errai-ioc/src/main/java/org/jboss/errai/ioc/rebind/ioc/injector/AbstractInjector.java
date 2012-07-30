@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.injector;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.util.Refs;
@@ -36,6 +37,7 @@ public abstract class AbstractInjector implements Injector {
   protected String preDestroyCallbackVar = null;
   protected String creationalCallbackVarName = null;
 
+  protected boolean enabled = true;
   protected boolean testmock;
   protected boolean alternative;
   private boolean created;
@@ -202,25 +204,36 @@ public abstract class AbstractInjector implements Injector {
       registrationHook.onRegister(_registerCache.getInjectionContextForRegister(), _registerCache.getValueRefForRegister());
   }
 
+  private Runnable _disableHook;
+
   public void registerWithBeanManager(final InjectionContext context,
                                       final Statement valueRef) {
+    if (!isEnabled()) {
+      return;
+    }
+
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       _registerCache = new RegisterCache(context, valueRef);
-
+      final ContextualStatementBuilder statement;
       if (beanName == null) {
-        context.getProcessingContext().appendToEnd(
-            loadVariable(context.getProcessingContext().getContextVariableReference())
-                .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                    isSingleton() ? valueRef : null, qualifyingMetadata.render())
-        );
+        statement = loadVariable(context.getProcessingContext().getContextVariableReference())
+            .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                isSingleton() ? valueRef : null, qualifyingMetadata.render());
       }
       else {
-        context.getProcessingContext().appendToEnd(
-            loadVariable(context.getProcessingContext().getContextVariableReference())
-                .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                    isSingleton() ? valueRef : null, qualifyingMetadata.render(), beanName)
-        );
+         statement = loadVariable(context.getProcessingContext().getContextVariableReference())
+            .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                isSingleton() ? valueRef : null, qualifyingMetadata.render(), beanName);
       }
+
+      context.getProcessingContext().appendToEnd(statement);
+
+      _disableHook = new Runnable() {
+        @Override
+        public void run() {
+          context.getProcessingContext().getAppendToEnd().remove(statement);
+        }
+      };
 
       for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
@@ -236,6 +249,17 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public String getBeanName() {
     return beanName;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    if (!(this.enabled = enabled) && _disableHook != null) {
+      _disableHook.run();
+    }
   }
 }
 

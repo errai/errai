@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -44,6 +45,7 @@ import org.mvel2.util.NullType;
 import javax.enterprise.inject.New;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
+import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -76,11 +78,16 @@ public class TypeInjector extends AbstractInjector {
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
-
     this.varName = InjectUtil.getNewInjectorName() + "_" + type.getName();
 
-    Set<Annotation> qualifiers = new HashSet<Annotation>();
+    final Set<Annotation> qualifiers = new HashSet<Annotation>();
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
+
+    if (qualifiers.isEmpty()) {
+      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
+    }
+
+    qualifiers.add(BuiltInQualifiers.ANY_INSTANCE);
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
     if (type.isAnnotationPresent(Specializes.class)) {
@@ -89,22 +96,31 @@ public class TypeInjector extends AbstractInjector {
             + "from another bean");
       }
 
-
+      // boolean hasInherited = false;
       MetaClass cls = type;
-      while ((cls = cls.getSuperClass()) != null) {
+      while ((cls = cls.getSuperClass()) != null && !cls.getFullyQualifiedName().equals(Object.class.getName())) {
         if (context.hasInjectorForType(cls)) {
           final Injector inj = context.getInjector(cls);
-          this.beanName = inj.getBeanName();
+
+          if (this.beanName == null) {
+            this.beanName = inj.getBeanName();
+          }
+
+          inj.setEnabled(false);
           qualifiers.addAll(Arrays.asList(inj.getQualifyingMetadata().getQualifiers()));
-          break;
+
+          //break;
         }
       }
     }
 
     if (type.isAnnotationPresent(Named.class)) {
       final Named namedAnnotation = type.getAnnotation(Named.class);
-      this.beanName = namedAnnotation.value().equals("") ? type.getName() : namedAnnotation.value();
+
+      this.beanName = namedAnnotation.value().equals("")
+          ? Introspector.decapitalize(type.getName()) : namedAnnotation.value();
     }
+
 
     if (!qualifiers.isEmpty()) {
       qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory()

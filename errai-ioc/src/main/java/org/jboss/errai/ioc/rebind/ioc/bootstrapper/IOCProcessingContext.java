@@ -35,7 +35,6 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -193,7 +192,7 @@ public class IOCProcessingContext {
   }
 
   public List<Statement> getAppendToEnd() {
-    return Collections.unmodifiableList(appendToEnd);
+    return appendToEnd;
   }
 
   public BuildMetaClass getBootstrapClass() {

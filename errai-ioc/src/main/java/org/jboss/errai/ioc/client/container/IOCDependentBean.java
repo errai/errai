@@ -26,12 +26,13 @@ import java.util.HashSet;
  * @author Mike Brock
  */
 public class IOCDependentBean<T> extends AbstractIOCBean<T> {
-  protected IOCBeanManager beanManager;
-  protected CreationalCallback<T> creationalCallback;
+  protected final IOCBeanManager beanManager;
+  protected final CreationalCallback<T> creationalCallback;
 
   protected IOCDependentBean(final IOCBeanManager beanManager,
                              final Class<T> type,
                              final Annotation[] qualifiers,
+                             final String name,
                              final CreationalCallback<T> creationalCallback) {
     this.beanManager = beanManager;
     this.type = type;
@@ -39,14 +40,16 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     if (qualifiers != null) {
       Collections.addAll(this.qualifiers, qualifiers);
     }
+    this.name = name;
     this.creationalCallback = creationalCallback;
   }
 
   public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
                                           final Class<T> type,
                                           final Annotation[] qualifiers,
+                                          final String name,
                                           final CreationalCallback<T> callback) {
-    return new IOCDependentBean<T>(beanManager, type, qualifiers, callback);
+    return new IOCDependentBean<T>(beanManager, type, qualifiers, name, callback);
   }
 
   @Override
@@ -69,4 +72,5 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   public T getInstance(final CreationalContext context) {
     return creationalCallback.getInstance(context);
   }
+
 }

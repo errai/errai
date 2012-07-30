@@ -151,7 +151,7 @@ public class InjectionContext {
 
     if (injs != null) {
       for (final Injector inj : injs) {
-        if (inj.matches(type.getParameterizedType(), metadata)) {
+        if (inj.isEnabled() && inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
           if (inj.isAlternative()) {
             alternativeBeans = true;

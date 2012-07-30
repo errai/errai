@@ -31,6 +31,7 @@ import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 
+import javax.enterprise.inject.Any;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Set;
@@ -123,8 +124,8 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     final IOCBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class);
 
     final Set<Annotation> a = bean.getQualifiers();
-    assertEquals("there should be one qualifier", 1, a.size());
-    assertEquals("wrong qualifier", QualA.class, a.iterator().next().annotationType());
+    assertEquals("there should be two qualifiers", 2, a.size());
+    assertTrue("wrong qualifiers", annotationSetMatches(a, QualA.class, Any.class));
 
     assertEquals("unmanaged bean should have no entries", 0, mgr.lookupBeans(String.class).size());
     assertEquals("unmanaged bean should return null bean ref", null, mgr.lookupBean(String.class));
