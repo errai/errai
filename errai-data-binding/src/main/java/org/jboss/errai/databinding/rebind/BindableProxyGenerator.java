@@ -29,6 +29,7 @@ import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -39,6 +40,7 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.BindableProxy;
+import org.jboss.errai.databinding.client.HasProperties;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.Convert;
@@ -82,6 +84,7 @@ public class BindableProxyGenerator {
         ClassBuilder.define(bindable.getName() + "Proxy", bindable)
             .packageScope()
             .implementsInterface(BindableProxy.class)
+            .implementsInterface(HasProperties.class)
             .body()
             .privateField("bindings", MetaClassFactory.get(new TypeLiteral<Map<String, Widget>>() {}))
             .initializesWith(Stmt.newObject(new TypeLiteral<HashMap<String, Widget>>() {}))
@@ -161,17 +164,23 @@ public class BindableProxyGenerator {
                         Stmt.loadClassMember("handlerRegistrations").invoke(
                             "put",
                             Variable.get("property"),
-                            Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke(
-                                "addValueChangeHandler",
+                            Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke("addValueChangeHandler",
                                 Stmt.newObject(ValueChangeHandler.class).extend()
-                                    .publicOverridesMethod("onValueChange",
+                                    .publicOverridesMethod("onValueChange", 
                                         Parameter.of(ValueChangeEvent.class, "event"))
-                                    .append(
-                                        Stmt.loadStatic(classBuilder.getClassDefinition(), "this").invoke("set",
-                                            Variable.get("property"),
-                                            Stmt.nestedCall(Stmt.loadVariable("event").invoke("getValue"))))
+                                    .append(Stmt.try_()    
+                                        .append(
+                                            Stmt.loadStatic(classBuilder.getClassDefinition(), "this").invoke("set",
+                                                Variable.get("property"),
+                                                Stmt.nestedCall(Stmt.loadVariable("event").invoke("getValue"))))
+                                         .finish()       
+                                         .catch_(NonExistingPropertyException.class, "e")
+                                         .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
+                                             .invoke("createErrorMessage", "Cannot update unknown property:")))
+                                         .finish()
+                                    )
                                     .finish()
-                                    .finish()
+                                 .finish()
                                 )
                             )
                     )
@@ -186,7 +195,7 @@ public class BindableProxyGenerator {
 
   private void generateStateSyncMethods(ClassStructureBuilder<?> classBuilder) {
     generateStateSyncForBindings(classBuilder);
-    
+
     classBuilder.privateMethod(void.class, "syncState", Parameter.of(Widget.class, "widget", true),
         Parameter.of(String.class, "property", true), Parameter.of(InitialState.class, "initialState", true))
         .append(
@@ -240,19 +249,19 @@ public class BindableProxyGenerator {
         )
         .finish();
   }
-  
+
   private void generateStateSyncForBindings(ClassStructureBuilder<?> classBuilder) {
     classBuilder.privateMethod(void.class, "syncState", Parameter.of(InitialState.class, "initialState", true))
-    .append(
-        Stmt.loadVariable("bindings").invoke("keySet").foreach("property")
-            .append(
-                Stmt.loadVariable("this")
-                    .invoke("syncState",
-                        Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
-                        Stmt.castTo(String.class, Stmt.loadVariable("property")),
-                        Stmt.loadVariable("initialState")))
-            .finish())
-     .finish();
+        .append(
+            Stmt.loadVariable("bindings").invoke("keySet").foreach("property")
+                .append(
+                    Stmt.loadVariable("this")
+                        .invoke("syncState",
+                            Stmt.loadVariable("bindings").invoke("get", Variable.get("property")),
+                            Stmt.castTo(String.class, Stmt.loadVariable("property")),
+                            Stmt.loadVariable("initialState")))
+                .finish())
+        .finish();
   }
 
   private void generateProxyUnbindMethods(ClassStructureBuilder<?> classBuilder) {
@@ -296,8 +305,10 @@ public class BindableProxyGenerator {
         generateSetter(classBuilder, propertyDescriptor, setMethod);
       }
     }
-    getMethod.append(Stmt.throw_(NonExistingPropertyException.class, Variable.get("property"))).finish();
-    setMethod.finish();
+    
+    Statement nonExistingPropertyException = Stmt.throw_(NonExistingPropertyException.class, Variable.get("property"));
+    getMethod.append(nonExistingPropertyException).finish();
+    setMethod.append(nonExistingPropertyException).finish();
   }
 
   private void generateGetter(ClassStructureBuilder<?> classBuilder, PropertyDescriptor propertyDescriptor,
@@ -335,6 +346,7 @@ public class BindableProxyGenerator {
                                  MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed().asClass(),
                                  Stmt.loadVariable("value"),
                                  Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
+                 .append(Stmt.returnVoid())                
                  .finish()
           );
 

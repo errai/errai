@@ -16,10 +16,11 @@
 
 package org.jboss.errai.databinding.client;
 
+import org.jboss.errai.databinding.client.api.Bindable;
+
 /**
- * Thrown to indicate that the property used when binding a widget to a model instance does not exist in the
- * corresponding model class. This exception is only used internally (in generated code). Bindings to non-existing
- * properties do not cause an exception to be thrown to the user.
+ * Thrown to indicate that a JavaBean property does not exist on the object it was referred to. This exception is thrown
+ * by implementations of {@link HasProperties} (e.g proxies for {@link Bindable} types).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -29,7 +30,7 @@ public class NonExistingPropertyException extends RuntimeException {
   public NonExistingPropertyException(String message) {
     super(message);
   }
-  
+
   public String createErrorMessage(String error) {
     return error + " " + this.getMessage();
   }

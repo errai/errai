@@ -32,7 +32,6 @@ import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.junit.Test;
 
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -52,7 +51,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
   }
-  
+
   @Test
   public void testBasicBinding() {
     TextBox textBox = new TextBox();
@@ -103,15 +102,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testBindingAndSyncOfNonExistingProperty() {
-    Button button = new Button();
-    button.setText("button");
+    TextBox textBox = new TextBox();
+    textBox.setValue("text");
 
     Model model = new Model();
-    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(button, "non-existing");
+    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "non-existing");
 
-    assertEquals("Button text should not have been changed after intial state synchronization " +
+    assertEquals("TextBox should not have been changed after intial state synchronization " +
         "as the property it is bound to does not exist",
-        "button", button.getText());
+        "text", textBox.getText());
+
+    // this call ensures that the value change handler is not throwing an exception when it tries to update a
+    // non-existing property of the model.
+    textBox.setValue("updated", true);
   }
 
   @Test
@@ -251,7 +254,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
         return "testCustomConverter";
       }
     };
-    
+
     TextBox textBox = new TextBox();
     Model model = DataBinder.forType(Model.class).bind(textBox, "age", converter).getModel();
 
@@ -261,7 +264,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
   }
-  
+
   @Test
   public void testGlobalDefaultConverter() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
@@ -276,7 +279,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
       }
     };
     Convert.registerDefaultConverter(Integer.class, String.class, converter);
-    
+
     TextBox textBox = new TextBox();
     Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
 
@@ -284,10 +287,10 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Model not properly updated using global default converter", Integer.valueOf(1701), model.getAge());
 
     model.setAge(123);
-    assertEquals("Widget not properly updated using global default converter", 
+    assertEquals("Widget not properly updated using global default converter",
         "testGlobalDefaultConverter", textBox.getText());
   }
-  
+
   @Test
   public void testAutoRegisteredGlobalDefaultConverter() {
     TextBox textBox = new TextBox();
@@ -297,10 +300,10 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Model not properly updated using global default converter", true, model.isActive());
 
     model.setActive(false);
-    assertEquals("Widget not properly updated using global default converter", 
+    assertEquals("Widget not properly updated using global default converter",
         "AutoRegisteredDefaultConverter", textBox.getText());
   }
-  
+
   @Test
   public void testOverrideGlobalDefaultConverter() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
@@ -315,7 +318,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
       }
     };
     Convert.registerDefaultConverter(Integer.class, String.class, converter);
-    
+
     Converter<Integer, String> bindingConverter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
@@ -327,7 +330,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
         return "bindingConverter";
       }
     };
-    
+
     TextBox textBox = new TextBox();
     Model model = DataBinder.forType(Model.class).bind(textBox, "age", bindingConverter).getModel();
 
