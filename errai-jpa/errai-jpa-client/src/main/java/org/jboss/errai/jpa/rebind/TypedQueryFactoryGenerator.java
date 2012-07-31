@@ -150,20 +150,13 @@ public class TypedQueryFactoryGenerator {
   private void appendMatchesMethod(AnonymousClassStructureBuilder matcherClassBuilder) {
 
     AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
-    Statement matchesStmt = null;
-    while (traverser.hasNext()) {
-      AST ast = traverser.next();
-      if (ast.getType() == HqlSqlTokenTypes.WHERE) {
-        if (ast.getNumberOfChildren() != 1) {
-          throw new IllegalStateException("WHERE clause has " + ast.getNumberOfChildren() + " children (expected 1)");
-        }
-        matchesStmt = generateExpression(traverser);
-        break;
-      }
-    }
+    AST whereClause = traverser.fastForwardTo(HqlSqlTokenTypes.WHERE);
 
-    if (matchesStmt == null) {
-      // Query has no WHERE clause, so everything is a match
+    Statement matchesStmt;
+    if (whereClause != null) {
+      matchesStmt = generateExpression(traverser);
+    }
+    else {
       matchesStmt = Stmt.loadLiteral(true);
     }
 
