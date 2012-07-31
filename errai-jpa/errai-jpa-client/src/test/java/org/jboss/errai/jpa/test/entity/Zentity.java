@@ -87,7 +87,8 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 
   @NamedQuery(name="zentityNoWhereClause", query="SELECT z FROM Zentity z"),
 
-  @NamedQuery(name="zentityOrderByPrimitiveInt", query="SELECT z FROM Zentity z ORDER BY z.primitiveInt")
+  @NamedQuery(name="zentityOrderByPrimitiveInt", query="SELECT z FROM Zentity z ORDER BY z.primitiveInt"),
+  @NamedQuery(name="zentityOrderByPrimitiveIntDesc", query="SELECT z FROM Zentity z ORDER BY z.primitiveInt DESC")
 })
 public class Zentity {
 

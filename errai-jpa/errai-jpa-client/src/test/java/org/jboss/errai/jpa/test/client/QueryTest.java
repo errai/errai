@@ -872,4 +872,42 @@ public class QueryTest extends GWTTestCase {
     assertEquals(resultStrings.get(4), zentity5.toString());
   }
 
+  public void testOrderByPrimitiveIntDesc() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity5 = new Zentity();
+    zentity5.setPrimitiveInt(5);
+    em.persist(zentity5);
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveInt(1);
+    em.persist(zentity1);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setPrimitiveInt(3);
+    em.persist(zentity3);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveInt(2);
+    em.persist(zentity2);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setPrimitiveInt(4);
+    em.persist(zentity4);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityOrderByPrimitiveIntDesc", Zentity.class);
+    List<String> resultStrings = new ArrayList<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(5, resultStrings.size());
+    assertEquals(resultStrings.get(0), zentity5.toString());
+    assertEquals(resultStrings.get(1), zentity4.toString());
+    assertEquals(resultStrings.get(2), zentity3.toString());
+    assertEquals(resultStrings.get(3), zentity2.toString());
+    assertEquals(resultStrings.get(4), zentity1.toString());
+  }
+
 }

@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.Arith;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
@@ -192,8 +193,9 @@ public class TypedQueryFactoryGenerator {
     else {
       JavaDotNodeResolver lhsResolver = new JavaDotNodeResolver("lhs");
       JavaDotNodeResolver rhsResolver = new JavaDotNodeResolver("rhs");
-      Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderBy.getFirstChild()), lhsResolver));
-      Statement rhs = generateExpression(new AstInorderTraversal(orderBy.getFirstChild()), rhsResolver);
+      AST orderNode = orderBy.getFirstChild();
+      Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), lhsResolver));
+      Statement rhs = generateExpression(new AstInorderTraversal(orderNode), rhsResolver);
 
       BlockBuilder<AnonymousClassStructureBuilder> compareMethod = ObjectBuilder.newInstanceOf(Comparator.class).extend()
               .publicOverridesMethod("compare", Parameter.of(Object.class, "o1"), Parameter.of(Object.class, "o2"));
@@ -202,12 +204,22 @@ public class TypedQueryFactoryGenerator {
         compareMethod.append(var);
       }
 
+      ArithmeticOperator ascDescOperator;
+      if (orderNode.getNextSibling() != null && orderNode.getNextSibling().getType() == HqlSqlTokenTypes.DESCENDING) {
+        ascDescOperator = ArithmeticOperator.Subtraction;
+      }
+      else {
+        ascDescOperator = ArithmeticOperator.Addition;
+      }
+
       compareMethod
               .append(Stmt.declareFinalVariable("lhs", resultType, Cast.to(resultType, Stmt.loadVariable("o1"))))
               .append(Stmt.declareFinalVariable("rhs", resultType, Cast.to(resultType, Stmt.loadVariable("o2"))))
               .append(Stmt.declareVariable("result", int.class))
               .append(Stmt.loadVariable("result").assignValue(Stmt.nestedCall(lhs).invoke("compareTo", rhs)))
-              .append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("result"), 0)).append(Stmt.loadVariable("result").returnValue()).finish())
+              .append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("result"), 0))
+                      .append(Stmt.nestedCall(Arith.expr(ascDescOperator, Stmt.loadVariable("result"))).returnValue())
+                      .finish())
               .append(Stmt.loadLiteral(0).returnValue());
 
       comparator = compareMethod.finish().finish();
