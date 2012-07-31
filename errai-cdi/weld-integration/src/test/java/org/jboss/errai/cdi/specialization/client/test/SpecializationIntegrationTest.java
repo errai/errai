@@ -1,8 +1,10 @@
-package org.jboss.errai.cdi.injection.client.test;
+package org.jboss.errai.cdi.specialization.client.test;
 
-import org.jboss.errai.cdi.injection.client.Landowner;
-import org.jboss.errai.cdi.injection.client.Lazy;
-import org.jboss.errai.cdi.injection.client.LazyFarmer;
+import org.jboss.errai.cdi.specialization.client.Expensive;
+import org.jboss.errai.cdi.specialization.client.Landowner;
+import org.jboss.errai.cdi.specialization.client.Lazy;
+import org.jboss.errai.cdi.specialization.client.LazyFarmer;
+import org.jboss.errai.cdi.specialization.client.Sparkly;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
@@ -15,22 +17,29 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
+ * Tests for {@link javax.enterprise.inject.Specializes}
+ *
  * @author Mike Brock
  */
 public class SpecializationIntegrationTest extends AbstractErraiCDITest {
-  @Override
-  public String getModuleName() {
-    return "org.jboss.errai.cdi.injection.InjectionTestModule";
+  {
+    disableBus = false;
   }
 
-  private static Annotation LANDOWNER_LITERAL = new Landowner() {
+  @Override
+  public String getModuleName() {
+    return "org.jboss.errai.cdi.specialization.SpecializationTestModule";
+  }
+
+
+  private static final Annotation LANDOWNER_LITERAL = new Landowner() {
     @Override
     public Class<? extends Annotation> annotationType() {
       return Landowner.class;
     }
   };
 
-  private static Annotation LAZY_LITERAL = new Lazy() {
+  private static final Annotation LAZY_LITERAL = new Lazy() {
     @Override
     public Class<? extends Annotation> annotationType() {
       return Lazy.class;
@@ -44,7 +53,7 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     final IOCBeanDef<LazyFarmer> lazyFarmerBean = farmerBeans.iterator().next();
     final Set<Annotation> qualifiers = lazyFarmerBean.getQualifiers();
 
-    assertTrue(annotationSetMatches(qualifiers, Landowner.class, Lazy.class, Any.class, Named.class, Default.class));
+    assertTrue("wrong qualifiers: " + qualifiers, annotationSetMatches(qualifiers, Landowner.class, Lazy.class, Any.class, Named.class, Default.class));
   }
 
   public void testSpecializationBeanHasNameOfSpecializedBean() {
@@ -56,4 +65,25 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     final IOCBeanDef farmerBean = beans.iterator().next();
     assertEquals(expectedName, farmerBean.getName());
   }
+
+  private static final Annotation EXPENSIVE_LITERAL = new Expensive() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Expensive.class;
+    }
+  };
+
+  private static final Annotation SPARKLY_LITERAL = new Sparkly() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Sparkly.class;
+    }
+  };
+
+//  public void testSpecializingProducerMethod() {
+//    final List<IOCBeanDef> expensiveNecklaceBeans
+//        = IOC.getBeanManager().lookupBeans(Necklace.class, EXPENSIVE_LITERAL);
+//
+//    assertEquals(1, expensiveNecklaceBeans.size());
+//  }
 }

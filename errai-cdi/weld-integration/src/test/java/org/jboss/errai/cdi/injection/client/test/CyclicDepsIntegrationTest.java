@@ -35,6 +35,9 @@ import org.jboss.errai.ioc.client.container.IOC;
  * @author Mike Brock
  */
 public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
 
   @Override
   public String getModuleName() {

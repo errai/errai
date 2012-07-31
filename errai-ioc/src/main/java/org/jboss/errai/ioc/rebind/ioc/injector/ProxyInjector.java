@@ -104,7 +104,7 @@ public class ProxyInjector extends AbstractInjector {
   }
 
   @Override
-  public String getVarName() {
+  public String getInstanceVarName() {
     return varName;
   }
 

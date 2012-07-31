@@ -16,9 +16,6 @@
 
 package org.jboss.errai.cdi.injection.client.test;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBeanB;
 import org.jboss.errai.cdi.injection.client.Bean;
@@ -39,10 +36,16 @@ import org.jboss.errai.cdi.injection.client.UnreferencedDependentRootBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Mike Brock
  */
 public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
 
   @Override
   public String getModuleName() {

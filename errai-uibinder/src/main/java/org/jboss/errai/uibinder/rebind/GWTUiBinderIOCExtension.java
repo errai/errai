@@ -167,7 +167,7 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
             }
 
             @Override
-            public String getVarName() {
+            public String getInstanceVarName() {
               return varName;
             }
 

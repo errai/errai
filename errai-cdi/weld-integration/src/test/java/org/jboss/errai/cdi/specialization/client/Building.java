@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.injection.client;
+package org.jboss.errai.cdi.specialization.client;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;

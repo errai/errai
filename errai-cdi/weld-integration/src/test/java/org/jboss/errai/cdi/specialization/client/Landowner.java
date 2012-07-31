@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.injection.client;
+package org.jboss.errai.cdi.specialization.client;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -11,6 +11,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+
 /**
  * @author Mike Brock
  */
@@ -18,5 +19,5 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Documented
 @Qualifier
-public @interface Expensive {
+public @interface Landowner {
 }

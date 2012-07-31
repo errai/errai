@@ -35,17 +35,13 @@ import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.mvel2.util.NullType;
 
-import javax.enterprise.inject.New;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
-import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -60,7 +56,7 @@ import java.util.Set;
  */
 public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
-  protected String varName;
+  protected String instanceVarName;
 
   public TypeInjector(MetaClass type, InjectionContext context) {
     this(type, context, new Annotation[0]);
@@ -69,16 +65,12 @@ public class TypeInjector extends AbstractInjector {
   public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
     this.type = type;
 
-    if (type.getFullyQualifiedName().equals(NullType.class.getName())) {
-      new Throwable().printStackTrace();
-    }
-
     // check to see if this is a singleton and/or alternative bean
     this.testmock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
-    this.varName = InjectUtil.getNewInjectorName() + "_" + type.getName();
+    this.instanceVarName = InjectUtil.getNewInjectorName() + "_" + type.getName();
 
     final Set<Annotation> qualifiers = new HashSet<Annotation>();
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
@@ -91,34 +83,14 @@ public class TypeInjector extends AbstractInjector {
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
     if (type.isAnnotationPresent(Specializes.class)) {
-      if (type.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
-        throw new InjectionFailure("the specialized bean " + type.getFullyQualifiedName() + " must directly inherit "
-            + "from another bean");
-      }
-
-      // boolean hasInherited = false;
-      MetaClass cls = type;
-      while ((cls = cls.getSuperClass()) != null && !cls.getFullyQualifiedName().equals(Object.class.getName())) {
-        if (context.hasInjectorForType(cls)) {
-          final Injector inj = context.getInjector(cls);
-
-          if (this.beanName == null) {
-            this.beanName = inj.getBeanName();
-          }
-
-          inj.setEnabled(false);
-          qualifiers.addAll(Arrays.asList(inj.getQualifyingMetadata().getQualifiers()));
-
-          //break;
-        }
-      }
+      qualifiers.addAll(makeSpecialized(context));
     }
 
     if (type.isAnnotationPresent(Named.class)) {
       final Named namedAnnotation = type.getAnnotation(Named.class);
 
       this.beanName = namedAnnotation.value().equals("")
-          ? Introspector.decapitalize(type.getName()) : namedAnnotation.value();
+          ? type.getBeanDescriptor().getBeanName() : namedAnnotation.value();
     }
 
 
@@ -141,14 +113,14 @@ public class TypeInjector extends AbstractInjector {
 
   private Statement _getType(final InjectableInstance injectableInstance) {
     // check to see if this injector has already been injected
-    if (isCreated()) {
+    if (isRendered()) {
       if (isSingleton() && !hasNewQualifier(injectableInstance)) {
 
         /*
         if this bean is a singleton bean and there is no @New qualifier on the site we're injecting
         into, we merely return a reference to the singleton instance variable from the bootstrapper.
         */
-        return Refs.get(varName);
+        return Refs.get(instanceVarName);
       }
       else if (creationalCallbackVarName != null) {
 
@@ -159,6 +131,7 @@ public class TypeInjector extends AbstractInjector {
         return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
       }
     }
+
 
     final InjectionContext injectContext = injectableInstance.getInjectionContext();
     final IOCProcessingContext ctx = injectContext.getProcessingContext();
@@ -204,7 +177,7 @@ public class TypeInjector extends AbstractInjector {
                 Refs.get("qualifiers"))));
 
         /* add the bean to CreationalContext */
-        callbackBuilder.append(loadVariable("context").invoke("addBean", Refs.get("beanRef"), Refs.get(varName)));
+        callbackBuilder.append(loadVariable("context").invoke("addBean", Refs.get("beanRef"), Refs.get(instanceVarName)));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
@@ -214,7 +187,7 @@ public class TypeInjector extends AbstractInjector {
     /*
     return the instance of the bean from the creational callback.
     */
-    callbackBuilder.append(loadVariable(varName).returnValue());
+    callbackBuilder.append(loadVariable(instanceVarName).returnValue());
 
     /* pop the block builder of the stack now that we're done wiring. */
     ctx.popBlockBuilder();
@@ -233,13 +206,13 @@ public class TypeInjector extends AbstractInjector {
        if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
        method and assign it with CreationalContext.getInstance().
        */
-      ctx.getBootstrapBuilder().privateField(varName, type).modifiers(Modifier.Final)
+      ctx.getBootstrapBuilder().privateField(instanceVarName, type).modifiers(Modifier.Final)
           .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
 
       /*
        use the variable we just assigned as the return value for this injector.
        */
-      retVal = Refs.get(varName);
+      retVal = Refs.get(instanceVarName);
     }
     else {
       /*
@@ -251,7 +224,6 @@ public class TypeInjector extends AbstractInjector {
     /*
       notify any component waiting for this type that is is ready now.
      */
-
     setRendered(true);
 
     injectableInstance.getInjectionContext().getProcessingContext()
@@ -262,22 +234,15 @@ public class TypeInjector extends AbstractInjector {
     return retVal;
   }
 
-  private static boolean hasNewQualifier(final InjectableInstance instance) {
-    if (instance != null) {
-      for (final Annotation annotation : instance.getQualifiers()) {
-        if (annotation.annotationType().equals(New.class)) return true;
-      }
-    }
-    return false;
-  }
+
 
   public boolean isPseudo() {
     return replaceable;
   }
 
   @Override
-  public String getVarName() {
-    return varName;
+  public String getInstanceVarName() {
+    return instanceVarName;
   }
 
   @Override

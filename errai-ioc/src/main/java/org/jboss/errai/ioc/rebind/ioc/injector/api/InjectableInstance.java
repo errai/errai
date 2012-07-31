@@ -114,7 +114,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case Field:
       case PrivateField:
         return InjectUtil.getPublicOrPrivateFieldValue(injectionContext.getProcessingContext(),
-                Refs.get(getTargetInjector().getVarName()),
+                Refs.get(getTargetInjector().getInstanceVarName()),
                 field);
 
       case PrivateMethod:
@@ -126,7 +126,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
         return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
-                Refs.get(getTargetInjector().getVarName()),
+                Refs.get(getTargetInjector().getInstanceVarName()),
                 method,
                 stmt);
 
@@ -141,7 +141,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
           return inlineStmt;
         }
       case Type:
-        return Refs.get(getTargetInjector().getVarName());
+        return Refs.get(getTargetInjector().getInstanceVarName());
 
       default:
         return LiteralFactory.getLiteral(null);
@@ -174,7 +174,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case Field:
         return InjectUtil.setPublicOrPrivateFieldValue(
                 injectionContext.getProcessingContext(),
-                Refs.get(targetInjector.getVarName()),
+                Refs.get(targetInjector.getInstanceVarName()),
                 field,
                 values[0]);
 
@@ -189,7 +189,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case Method:
       case PrivateMethod:
         return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
-                Refs.get(targetInjector.getVarName()),
+                Refs.get(targetInjector.getInstanceVarName()),
                 meth,
                 values);
 

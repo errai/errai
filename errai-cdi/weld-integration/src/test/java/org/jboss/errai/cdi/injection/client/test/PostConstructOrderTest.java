@@ -13,6 +13,9 @@ import java.util.List;
  * @author Mike Brock
  */
 public class PostConstructOrderTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.injection.InjectionTestModule";

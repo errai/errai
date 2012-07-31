@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.injection.client;
+package org.jboss.errai.cdi.specialization.client;
 
 /**
  * @author Mike Brock

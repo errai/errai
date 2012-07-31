@@ -76,8 +76,8 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   }
 
   @Override
-  public String getVarName() {
-    return delegate.getVarName();
+  public String getInstanceVarName() {
+    return delegate.getInstanceVarName();
   }
 
   @Override

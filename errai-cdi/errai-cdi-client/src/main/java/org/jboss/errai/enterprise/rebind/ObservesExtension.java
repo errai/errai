@@ -138,7 +138,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     final Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
-        Refs.get(instance.getInjector().getVarName()), destroyMeth.finish().finish());
+        Refs.get(instance.getInjector().getInstanceVarName()), destroyMeth.finish().finish());
 
     statements.add(destructionCallback);
 

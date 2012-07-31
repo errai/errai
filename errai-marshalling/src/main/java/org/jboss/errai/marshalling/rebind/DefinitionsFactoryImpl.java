@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -50,8 +52,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
 
 /**
@@ -379,15 +379,15 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
    * Populates the inheritance map with all supertypes (except java.lang.Object) and all directly- and
    * indirectly-implemented interfaces of the given class.
    * 
-   * @param inheritanceMap
    * @param mappingClass
    */
   private void fillInheritanceMap(MetaClass mappingClass) {
     fillInheritanceMap(inheritanceMap, mappingClass, mappingClass);
   }
 
-  /** Recursive subroutine of {@link #fillInheritanceMap(Multimap, MetaClass)}. */
-  private static void fillInheritanceMap(final Multimap<String, String> inheritanceMap, final MetaClass visiting,
+  /** Recursive subroutine of {@link #fillInheritanceMap(org.jboss.errai.codegen.meta.MetaClass)}. */
+  private static void fillInheritanceMap(final Multimap<String, String> inheritanceMap,
+                                         final MetaClass visiting,
       final MetaClass mappingClass) {
     if (visiting == null || visiting.equals(MetaClassFactory.get(Object.class)))
       return;

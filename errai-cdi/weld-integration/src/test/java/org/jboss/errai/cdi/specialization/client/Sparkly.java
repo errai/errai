@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.injection.client;
+package org.jboss.errai.cdi.specialization.client;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -15,5 +15,6 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Documented
 @Qualifier
-public @interface Lazy {
+public @interface Sparkly {
+
 }

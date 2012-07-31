@@ -97,7 +97,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
             .append(Stmt.loadVariable(varName).invoke("remove"));
 
     final Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
-            Refs.get(injectableInstance.getInjector().getVarName()), destroyMeth.finish().finish());
+            Refs.get(injectableInstance.getInjector().getInstanceVarName()), destroyMeth.finish().finish());
 
 
     return Arrays.asList(declareVar, descrCallback);

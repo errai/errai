@@ -34,8 +34,13 @@ import java.util.Set;
  */
 public abstract class AbstractErraiCDITest extends GWTTestCase {
 
+  protected boolean disableBus = false;
+
   @Override
   protected void gwtSetUp() throws Exception {
+    if (disableBus) {
+      setRemoteCommunicationEnabled(false);
+    }
     InitVotes.reset();
     InitVotes.setTimeoutMillis(60000);
     super.gwtSetUp();
@@ -51,6 +56,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
+    setRemoteCommunicationEnabled(true);
     super.gwtTearDown();
   }
 
@@ -69,4 +75,9 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
     return annoClassCompareFrom.equals(annoClassCompareTo);
   }
+
+
+  public native void setRemoteCommunicationEnabled(boolean enabled) /*-{
+    $wnd.erraiBusRemoteCommunicationEnabled = enabled;
+  }-*/;
 }

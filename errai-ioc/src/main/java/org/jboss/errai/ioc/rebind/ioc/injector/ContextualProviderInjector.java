@@ -86,7 +86,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
 
     if (providerInjector.isSingleton() && providerInjector.isRendered()) {
-      return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
+      return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
     else {
       return Stmt.nestedCall(providerInjector.getBeanInstance(injectableInstance))

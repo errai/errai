@@ -22,6 +22,7 @@ import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
  */
 public class InjectionIntegrationTest extends AbstractErraiIOCTest {
 
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.injection.InjectionTestModule";

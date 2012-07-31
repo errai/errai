@@ -16,25 +16,22 @@
 
 package org.jboss.errai.cdi.injection.client.test;
 
-import javax.enterprise.inject.Instance;
+import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBeanA;
 import org.jboss.errai.cdi.injection.client.DependentBeanA;
 import org.jboss.errai.cdi.injection.client.InstanceTestBean;
-import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanApples;
-import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanOranges;
-import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanApples;
-import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanOranges;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.ioc.client.container.IOC;
 
-import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
+import javax.enterprise.inject.Instance;
 
 /**
  * @author Mike Brock
  */
 public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.injection.InjectionTestModule";

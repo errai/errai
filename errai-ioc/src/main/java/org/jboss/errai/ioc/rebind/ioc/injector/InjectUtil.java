@@ -110,7 +110,7 @@ public class InjectUtil {
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
-              Stmt.declareFinalVariable(injector.getVarName(), type, Stmt.newObject(type, parameterStatements))
+              Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements))
 
           );
           callback.beanConstructed();
@@ -139,7 +139,7 @@ public class InjectUtil {
           processingContext.append(
               Stmt.declareVariable(type)
                   .asFinal()
-                  .named(injector.getVarName())
+                  .named(injector.getInstanceVarName())
                   .initializeWith(Stmt.newObject(type))
 
           );
@@ -187,7 +187,7 @@ public class InjectUtil {
         = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
         .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj", true));
 
-    final String varName = "init_" + injector.getVarName();
+    final String varName = "init_" + injector.getInstanceVarName();
     injector.setPostInitCallbackVar(varName);
 
     renderLifeCycleEvents(PostConstruct.class, injector, ctx, initMeth, postConstructTasks);
@@ -204,7 +204,7 @@ public class InjectUtil {
         .initializesWith(classStructureBuilder.finish()).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
-        Refs.get(injector.getVarName()), Refs.get(varName)));
+        Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
   }
 
   /**
@@ -230,7 +230,7 @@ public class InjectUtil {
         = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
         .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
 
-    final String varName = "destroy_" + injector.getVarName();
+    final String varName = "destroy_" + injector.getInstanceVarName();
     injector.setPreDestroyCallbackVar(varName);
 
     renderLifeCycleEvents(PreDestroy.class, injector, ctx, initMeth, preDestroyTasks);
@@ -246,7 +246,7 @@ public class InjectUtil {
         .initializesWith(classStructureBuilder.finish()).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
-        Refs.get(injector.getVarName()), Refs.get(varName)));
+        Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
   }
 
   private static void renderLifeCycleEvents(Class<? extends Annotation> type, Injector injector,
@@ -567,9 +567,16 @@ public class InjectUtil {
     return proxyInjector;
   }
 
-
-  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
+  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms,
+                                                         InjectionContext ctx,
                                                          MetaMethod method) {
+    return resolveInjectionDependencies(parms, ctx, method, true);
+  }
+
+  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms,
+                                                         InjectionContext ctx,
+                                                         MetaMethod method,
+                                                         boolean inlineReference) {
 
     final MetaClass[] parmTypes = parametersToClassTypeArray(parms);
     final Statement[] parmValues = new Statement[parmTypes.length];
@@ -585,7 +592,9 @@ public class InjectUtil {
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
             ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
 
-        stmt = recordInlineReference(stmt, ctx, parms[i]);
+        if (inlineReference) {
+          stmt = recordInlineReference(stmt, ctx, parms[i]);
+        }
       }
       catch (InjectionFailure e) {
         e.setTarget(method.getDeclaringClass() + "." + method.getName() + DefParameters.from(method)

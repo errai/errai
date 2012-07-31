@@ -41,6 +41,9 @@ import java.util.Set;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
 
   @Override
   public String getModuleName() {

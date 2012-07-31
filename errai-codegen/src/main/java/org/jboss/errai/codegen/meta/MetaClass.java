@@ -198,4 +198,6 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
    * @return The first field with the given name that was encountered by the search.
    */
   public abstract MetaField getInheritedField(String name);
+
+  public abstract BeanDescriptor getBeanDescriptor();
 }

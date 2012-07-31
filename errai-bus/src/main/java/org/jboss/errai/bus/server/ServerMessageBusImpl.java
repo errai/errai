@@ -227,7 +227,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               }
               else {
                 remoteSubscribe(session, messageQueues.get(session),
-                        message.get(String.class, MessageParts.Subject));
+                    message.get(String.class, MessageParts.Subject));
               }
 
               break;
@@ -236,7 +236,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               if (queue == null) return;
 
               remoteUnsubscribe(session, queue,
-                      message.get(String.class, MessageParts.Subject));
+                  message.get(String.class, MessageParts.Subject));
               break;
 
             case FinishStateSync:
@@ -289,15 +289,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               }
 
               createConversation(message)
-                      .toSubject(BuiltInServices.ClientBus.name())
-                      .command(BusCommands.RemoteSubscribe)
-                      .with(MessageParts.SubjectsList, new HashSet(globalSubscriptions))
-                      .with(MessageParts.PriorityProcessing, "1")
-                      .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                  .toSubject(BuiltInServices.ClientBus.name())
+                  .command(BusCommands.RemoteSubscribe)
+                  .with(MessageParts.SubjectsList, new HashSet(globalSubscriptions))
+                  .with(MessageParts.PriorityProcessing, "1")
+                  .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
               final Message msg = ConversationMessage.create(message)
-                      .toSubject(BuiltInServices.ClientBus.name())
-                      .command(BusCommands.CapabilitiesNotice);
+                  .toSubject(BuiltInServices.ClientBus.name())
+                  .command(BusCommands.CapabilitiesNotice);
 
               final StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
@@ -340,10 +340,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               send(msg, false);
 
               createConversation(message)
-                      .toSubject(BuiltInServices.ClientBus.name())
-                      .command(BusCommands.FinishStateSync)
-                      .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
-                      .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                  .toSubject(BuiltInServices.ClientBus.name())
+                  .command(BusCommands.FinishStateSync)
+                  .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
+                  .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
               break;
             }
@@ -355,12 +355,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   final LocalContext localContext = LocalContext.get(session);
 
                   localContext.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS,
-                          WebSocketServerHandler.WEBSOCKET_ACTIVE);
+                      WebSocketServerHandler.WEBSOCKET_ACTIVE);
 
                   createConversation(message)
-                          .toSubject(BuiltInServices.ClientBus.name())
-                          .command(BusCommands.WebsocketChannelOpen)
-                          .done().sendNowWith(ServerMessageBusImpl.this, false);
+                      .toSubject(BuiltInServices.ClientBus.name())
+                      .command(BusCommands.WebsocketChannelOpen)
+                      .done().sendNowWith(ServerMessageBusImpl.this, false);
                 }
               }
               break;

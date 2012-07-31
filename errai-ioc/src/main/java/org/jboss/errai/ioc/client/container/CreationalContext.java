@@ -217,7 +217,9 @@ public class CreationalContext {
    * @see #getInstanceOrNew(CreationalCallback, Class, java.lang.annotation.Annotation[])
    */
   public <T> T getSingletonInstanceOrNew(BootstrapperInjectionContext injectionContext,
-                                         CreationalCallback<T> callback, Class<?> beanType, Annotation[] qualifiers) {
+                                         CreationalCallback<T> callback,
+                                         Class<?> beanType,
+                                         Annotation[] qualifiers) {
 
     @SuppressWarnings("unchecked") T inst = (T) getBeanInstance(beanType, qualifiers);
 

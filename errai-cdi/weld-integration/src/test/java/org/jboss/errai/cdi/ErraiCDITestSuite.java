@@ -10,7 +10,7 @@ import org.jboss.errai.cdi.injection.client.test.DependentScopeIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.InjectionIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.InstanceInjectionIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.PostConstructOrderTest;
-import org.jboss.errai.cdi.injection.client.test.SpecializationIntegrationTest;
+import org.jboss.errai.cdi.specialization.client.test.SpecializationIntegrationTest;
 import org.jboss.errai.cdi.invalid.producer.client.test.InvalidProducerIntegrationTest;
 import org.jboss.errai.cdi.producer.client.test.ProducerIntegrationTest;
 import org.jboss.errai.cdi.rpc.client.test.RpcIntegrationTest;

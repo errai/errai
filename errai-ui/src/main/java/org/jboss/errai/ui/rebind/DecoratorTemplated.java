@@ -105,7 +105,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     generateTemplatedInitialization(ctx, builder);
 
     return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
-            Refs.get(ctx.getInjector().getVarName()), builder.finish().finish()));
+            Refs.get(ctx.getInjector().getInstanceVarName()), builder.finish().finish()));
   }
 
   /**
@@ -152,7 +152,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       /*
        * Get a reference to the actual Composite component being created
        */
-      Statement component = Refs.get(ctx.getInjector().getVarName());
+      Statement component = Refs.get(ctx.getInjector().getInstanceVarName());
 
       /*
        * Get all of the data-field Elements from the Template
@@ -384,7 +384,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           dataBinderField = field;
           dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
                   PrivateAccessUtil.getPrivateFieldInjectorName(dataBinderField),
-                  Variable.get(ctx.getInjector().getVarName()));
+                  Variable.get(ctx.getInjector().getInstanceVarName()));
         }
       }
     }

@@ -627,7 +627,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 // Handle it gracefully
                 //noinspection ThrowableInstanceNeverThrown
 
-
                 final TransportIOException tioe
                     = new TransportIOException(response.getText(), response.getStatusCode(),
                     "Failure communicating with server");
@@ -644,7 +643,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
                 return;
               }
-
             }
 
             /**
@@ -689,7 +687,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       txActive = false;
     }
   }
-
 
   private void performPoll() {
     try {
@@ -1777,7 +1774,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-
   private static native void declareDebugFunction() /*-{
     $wnd.errai_status = function () {
       @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayStatusToLog()();
@@ -1874,7 +1870,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }-*/;
 
-
   /**
    * Sets the application root for the remote message bus endpoints.
    *
@@ -1882,7 +1877,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *     path to use when sending requests to the JAX-RS endpoint
    */
   @SuppressWarnings("UnusedDeclaration")
-  public static native void setApplicationRoot(String path) /*-{
+  public static native void setApplicationRoot(final String path) /*-{
     if (path == null) {
       $wnd.erraiBusApplicationRoot = undefined;
     }

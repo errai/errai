@@ -68,9 +68,5 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
       }
     });
   }
-
-  public native void setRemoteCommunicationEnabled(boolean enabled) /*-{
-    $wnd.erraiBusRemoteCommunicationEnabled = enabled;
-  }-*/;
 }
 

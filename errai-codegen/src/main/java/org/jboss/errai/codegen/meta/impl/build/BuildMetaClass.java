@@ -436,11 +436,21 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   public void addMethod(final BuildMetaMethod method) {
     _methodsCache = null;
+
+//    if (getDeclaredMethod(method.getName(), MetaClassFactory.asMetaClassArray(method.getParameters())) != null) {
+//      throw new IllegalStateException("method with same signature [" + method.toString() + "] already exists");
+//    }
+
     methods.add(method);
   }
 
   public void addField(final BuildMetaField field) {
     _fieldsCache = null;
+
+    if (getDeclaredField(field.getName()) != null) {
+      throw new IllegalStateException("field '" + field.getName() + "' already exists");
+    }
+
     fields.add(field);
   }
 

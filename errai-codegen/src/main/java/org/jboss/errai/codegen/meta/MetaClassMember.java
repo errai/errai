@@ -20,6 +20,8 @@ package org.jboss.errai.codegen.meta;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface MetaClassMember extends HasAnnotations {
+  public String getName();
+
   public MetaClass getDeclaringClass();
 
   public abstract boolean isAbstract();

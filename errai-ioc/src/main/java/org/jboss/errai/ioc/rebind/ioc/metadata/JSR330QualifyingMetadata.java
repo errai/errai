@@ -129,7 +129,7 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
   }
 
   public static JSR330QualifyingMetadata createFromAnnotations(final Annotation[] annotations) {
-    if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
+ //   if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
 
     final Set<Annotation> qualifiers = new HashSet<Annotation>();
 
@@ -145,9 +145,11 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
       }
     }
 
-    if (qualifiers.size() == 1 && hasNamed) {
-      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
+    if (qualifiers.isEmpty() && (qualifiers.size() == 1 && hasNamed)) {
+//      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
+      return createDefaultQualifyingMetaData();
     }
+
 
     return qualifiers.isEmpty() ? createDefaultQualifyingMetaData() : new JSR330QualifyingMetadata(qualifiers);
   }

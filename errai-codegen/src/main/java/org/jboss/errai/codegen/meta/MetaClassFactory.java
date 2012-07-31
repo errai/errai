@@ -490,6 +490,14 @@ public final class MetaClassFactory {
     return newClasses;
   }
 
+  public static MetaClass[] asMetaClassArray(final MetaParameter[] parms) {
+    final MetaClass[] type = new MetaClass[parms.length];
+     for (int i = 0; i < parms.length; i++) {
+       type[i] = parms[i].getType();
+     }
+     return type;
+  }
+
   public static Class<?>[] asClassArray(final MetaParameter[] parms) {
     final MetaType[] type = new MetaType[parms.length];
     for (int i = 0; i < parms.length; i++) {

@@ -19,14 +19,7 @@ package org.jboss.errai.codegen.meta.impl;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.jboss.errai.codegen.meta.BeanDescriptor;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -37,6 +30,18 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
+import org.mvel2.util.ReflectionUtil;
+
+import java.beans.Introspector;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -417,7 +422,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     if (isArray() && clazz.isArray()) {
       return getOuterComponentType().equals(clazz.getOuterComponentType())
-              && getArrayDimensions(this) == getArrayDimensions(clazz);
+          && getArrayDimensions(this) == getArrayDimensions(clazz);
     }
 
     final MetaClass sup;
@@ -511,7 +516,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         final String name = getInternalName().replaceAll("/", "\\.");
 
         cls = Class.forName(name, false,
-                Thread.currentThread().getContextClassLoader());
+            Thread.currentThread().getContextClassLoader());
       }
       catch (ClassNotFoundException e) {
         e.printStackTrace();
@@ -664,6 +669,58 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private MetaClass _outerComponentCache;
+
+  @Override
+  public BeanDescriptor getBeanDescriptor() {
+    return new BeanDescriptor() {
+      private final Set<String> properties;
+      private final Map<String, MetaMethod> getterProperties;
+      private final Map<String, MetaMethod> setterProperties;
+
+      {
+        final Set<String> properties = new HashSet<String>();
+        final Map<String, MetaMethod> getterProperties = new HashMap<String, MetaMethod>();
+        final Map<String, MetaMethod> setterProperties = new HashMap<String, MetaMethod>();
+
+        for (final MetaMethod method : getMethods()) {
+          final String property = ReflectionUtil.getPropertyFromAccessor(method.getName());
+
+          if (method.getParameters().length == 0 && method.getName().startsWith("get")) {
+            properties.add(property);
+            getterProperties.put(property, method);
+          }
+          else if (method.getParameters().length == 1 && method.getName().startsWith("set")) {
+            properties.add(property);
+            setterProperties.put(property, method);
+          }
+        }
+
+        this.properties = Collections.unmodifiableSet(properties);
+        this.getterProperties = Collections.unmodifiableMap(getterProperties);
+        this.setterProperties = Collections.unmodifiableMap(setterProperties);
+      }
+
+      @Override
+      public String getBeanName() {
+        return Introspector.decapitalize(getName());
+      }
+
+      @Override
+      public Set<String> getProperties() {
+        return properties;
+      }
+
+      @Override
+      public MetaMethod getReadMethodForProperty(final String propertyName) {
+        return getterProperties.get(propertyName);
+      }
+
+      @Override
+      public MetaMethod getWriteMethodForProperty(final String propertyName) {
+        return setterProperties.get(propertyName);
+      }
+    };
+  }
 
   @Override
   public MetaClass getOuterComponentType() {

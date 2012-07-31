@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import java.lang.annotation.Annotation;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -33,6 +31,8 @@ import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import java.lang.annotation.Annotation;
 
 public class InjectionTask {
   protected final TaskType taskType;
@@ -137,7 +137,7 @@ public class InjectionTask {
                    + field.getDeclaringClass().getFullyQualifiedName() + "." + field.getName());
          }
          else {
-           fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(processingContext, Refs.get(injector.getVarName()), field, val);
+           fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(processingContext, Refs.get(injector.getInstanceVarName()), field, val);
          }
 
          processingContext.append(fieldAccessStmt);
@@ -157,7 +157,7 @@ public class InjectionTask {
 
         processingContext.append(
                 InjectUtil.invokePublicOrPrivateMethod(processingContext,
-                        Refs.get(injector.getVarName()),
+                        Refs.get(injector.getInstanceVarName()),
                         method,
                         args)
         );

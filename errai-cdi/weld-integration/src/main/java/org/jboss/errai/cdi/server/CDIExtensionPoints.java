@@ -151,9 +151,9 @@ public class CDIExtensionPoints implements Extension {
     if (erraiServiceConfig.containsKey(dispatchImplKey)) {
       if (AsyncDispatcher.class.getName().equals(erraiServiceConfig.getString(dispatchImplKey))) {
         throw new ErraiBootstrapFailure("Cannot start Errai CDI. You have have configured the service to use the " +
-                AsyncDispatcher.class.getName()
-                + " dispatcher implementation. Due to limitations of Weld, you must use the " +
-                SimpleDispatcher.class.getName() + " in order to use this module.");
+            AsyncDispatcher.class.getName()
+            + " dispatcher implementation. Due to limitations of Weld, you must use the " +
+            SimpleDispatcher.class.getName() + " in order to use this module.");
       }
     }
   }
@@ -162,9 +162,9 @@ public class CDIExtensionPoints implements Extension {
    * Register managed beans as Errai services
    *
    * @param event
-   *         -
+   *     -
    * @param <T>
-   *         -
+   *     -
    */
   @SuppressWarnings("UnusedDeclaration")
   public <T> void observeResources(@Observes final ProcessAnnotatedType<T> event) {
@@ -207,7 +207,7 @@ public class CDIExtensionPoints implements Extension {
     // veto on client side implementations that contain CDI annotations
     // (i.e. @Observes) Otherwise Weld might try to invoke on them
     if (vetoClasses.contains(type.getJavaClass().getName())
-            || (type.getJavaClass().getPackage().getName().contains("client") && !type.getJavaClass().isInterface())) {
+        || (type.getJavaClass().getPackage().getName().contains("client") && !type.getJavaClass().isInterface())) {
       event.veto();
     }
     /**
@@ -253,14 +253,14 @@ public class CDIExtensionPoints implements Extension {
          */
         for (final Annotation annotation : annotations) {
           if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
-                  && !annotation.annotationType().equals(ObserverModel.class)) {
+              && !annotation.annotationType().equals(ObserverModel.class)) {
             qualifiers.add(annotation);
             eventQualifiers.put(annotation.annotationType().getName(), annotation);
           }
         }
 
         eventConsumers.add(new EventConsumer(observesType.isAnnotationPresent(Conversational.class),
-                null, observesType, qualifiers.toArray(new Annotation[qualifiers.size()])));
+            null, observesType, qualifiers.toArray(new Annotation[qualifiers.size()])));
       }
     }
     else if (ConversationalEvent.class.isAssignableFrom(type)) {
@@ -276,13 +276,13 @@ public class CDIExtensionPoints implements Extension {
          */
         for (final Annotation annotation : annotations) {
           if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
-                  && !annotation.annotationType().equals(ObserverModel.class)) {
+              && !annotation.annotationType().equals(ObserverModel.class)) {
             qualifiers.add(annotation);
             eventQualifiers.put(annotation.annotationType().getName(), annotation);
           }
         }
         eventConsumers.add(new EventConsumer(true, typeParm, observesType,
-                qualifiers.toArray(new Annotation[qualifiers.size()])));
+            qualifiers.toArray(new Annotation[qualifiers.size()])));
       }
     }
     else if (Sender.class.isAssignableFrom(type)) {
@@ -295,7 +295,7 @@ public class CDIExtensionPoints implements Extension {
        */
       for (final Annotation annotation : annotations) {
         if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
-                && !annotation.annotationType().equals(ObserverModel.class)) {
+            && !annotation.annotationType().equals(ObserverModel.class)) {
           qualifiers.add(annotation);
           eventQualifiers.put(annotation.annotationType().getName(), annotation);
         }
@@ -361,8 +361,8 @@ public class CDIExtensionPoints implements Extension {
     subscribeServices(bm, bus);
 
     final EventDispatcher eventDispatcher
-            = new EventDispatcher(bm, eventRoutingTable, bus, observableEvents,
-            eventQualifiers, abd);
+        = new EventDispatcher(bm, eventRoutingTable, bus, observableEvents,
+        eventQualifiers, abd);
 
     // subscribe event dispatcher
     bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
@@ -406,7 +406,7 @@ public class CDIExtensionPoints implements Extension {
         }
 
         final MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager,
-                type.getJavaClass());
+            type.getJavaClass());
 
         registered.remove(type);
 
@@ -468,7 +468,7 @@ public class CDIExtensionPoints implements Extension {
      */
     final ScheduledExecutorService startupScheduler = Executors.newScheduledThreadPool(1);
     startupScheduler.scheduleAtFixedRate(
-            new StartupCallback(beanManager, bus, startupScheduler, 25), 0, 100, TimeUnit.MILLISECONDS);
+        new StartupCallback(beanManager, bus, startupScheduler, 25), 0, 100, TimeUnit.MILLISECONDS);
 
     for (final Class<?> remoteInterfaceType : managedTypes.getRemoteInterfaces()) {
       createRPCScaffolding(remoteInterfaceType, bus, beanManager);
@@ -484,24 +484,24 @@ public class CDIExtensionPoints implements Extension {
       if (RebindUtils.isMethodInInterface(remoteIface, method)) {
 
         epts.put(RebindUtils.createCallSignature(remoteIface, method), new ConversationalEndpointCallback(
-                new ServiceInstanceProvider() {
-                  @SuppressWarnings("unchecked")
-                  @Override
-                  public Object get(final Message message) {
-                    if (message.hasPart(CDIProtocol.Qualifiers)) {
-                      final List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
-                      final Annotation[] qualAnnos = new Annotation[quals.size()];
-                      for (int i = 0; i < quals.size(); i++) {
-                        qualAnnos[i] = beanQualifiers.get(quals.get(i));
-                      }
-                      return lookupRPCBean(beanManager, remoteIface, qualAnnos);
-                    }
-                    else {
-                      return lookupRPCBean(beanManager, remoteIface, null);
-                    }
+            new ServiceInstanceProvider() {
+              @SuppressWarnings("unchecked")
+              @Override
+              public Object get(final Message message) {
+                if (message.hasPart(CDIProtocol.Qualifiers)) {
+                  final List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
+                  final Annotation[] qualAnnos = new Annotation[quals.size()];
+                  for (int i = 0; i < quals.size(); i++) {
+                    qualAnnos[i] = beanQualifiers.get(quals.get(i));
                   }
+                  return lookupRPCBean(beanManager, remoteIface, qualAnnos);
+                }
+                else {
+                  return lookupRPCBean(beanManager, remoteIface, null);
+                }
+              }
 
-                }, method, bus));
+            }, method, bus));
       }
     }
 
@@ -518,7 +518,7 @@ public class CDIExtensionPoints implements Extension {
       @Override
       public <T> T getRemoteProxy(final Class<T> proxyType) {
         throw new RuntimeException(
-                "There is not yet an available Errai RPC implementation for the server-side environment.");
+            "There is not yet an available Errai RPC implementation for the server-side environment.");
       }
     }));
   }

@@ -106,7 +106,7 @@ public interface Injector {
    *
    * @return the unique variable name for a bean in the bootstrapper and CreationalContext.getInstance() method.
    */
-  String getVarName();
+  String getInstanceVarName();
 
   /**
    * The unique variable name for the InitalizationCallback associated with a bean CreationalContext in the
