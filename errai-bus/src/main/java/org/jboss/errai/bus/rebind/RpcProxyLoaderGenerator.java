@@ -82,8 +82,8 @@ public class RpcProxyLoaderGenerator extends Generator {
   private String generate(GeneratorContext context, String className) {
     final File fileCacheDir = RebindUtils.getErraiCacheDir();
     final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+    
     log.info("generating rpc proxy loader class.");
-
     String gen = generate(context);
     RebindUtils.writeStringToFile(cacheFile, gen);
 
@@ -98,6 +98,7 @@ public class RpcProxyLoaderGenerator extends Generator {
 
     for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Remote.class, 
         RebindUtils.findTranslatablePackages(context))) {
+      
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();

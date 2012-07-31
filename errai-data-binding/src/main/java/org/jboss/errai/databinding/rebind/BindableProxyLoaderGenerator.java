@@ -18,8 +18,6 @@ package org.jboss.errai.databinding.rebind;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -31,6 +29,9 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
@@ -90,7 +91,7 @@ public class BindableProxyLoaderGenerator extends Generator {
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
     log.info("generating bindable proxy loader class.");
-    String  gen = generate(context);
+    String gen = generate(context);
     RebindUtils.writeStringToFile(cacheFile, gen);
 
     return gen;
@@ -128,22 +129,39 @@ public class BindableProxyLoaderGenerator extends Generator {
       loadProxies.append(Stmt.invokeStatic(BindableProxyFactory.class, "addBindableProxy", bindable, proxyProvider));
     }
 
-    for (MetaClass converter : ClassScanner.getTypesAnnotatedWith(DefaultConverter.class,
-        RebindUtils.findTranslatablePackages(context))) {
-
-      Type[] interfaces = converter.asClass().getGenericInterfaces();
-      for (Type iface : interfaces) {
-        if (iface instanceof ParameterizedType && ((ParameterizedType) iface).getRawType().equals(Converter.class)) {
-          Type[] typeArgs = ((ParameterizedType) iface).getActualTypeArguments();
-          if (typeArgs != null && typeArgs.length == 2) {
-            loadProxies.append(Stmt.invokeStatic(Convert.class, "registerDefaultConverter",
-                typeArgs[0], typeArgs[1], Stmt.newObject(converter)));
-          }
-        }
-      }
-    }
+    generateDefaultConverterRegistrations(loadProxies, context);
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     return classBuilder.toJavaString();
+  }
+
+  private void generateDefaultConverterRegistrations(final MethodBlockBuilder<?> loadProxies,
+      final GeneratorContext context) {
+
+    for (MetaClass converter : ClassScanner.getTypesAnnotatedWith(DefaultConverter.class,
+        RebindUtils.findTranslatablePackages(context))) {
+
+      Statement registerConverterStatement = null;
+      for (MetaClass iface : converter.getInterfaces()) {
+        if (iface.getErased().equals(MetaClassFactory.get(Converter.class))) {
+          MetaParameterizedType parameterizedInterface = iface.getParameterizedType();
+          if (parameterizedInterface != null) {
+            MetaType[] typeArgs = parameterizedInterface.getTypeParameters();
+            if (typeArgs != null && typeArgs.length == 2) {
+              registerConverterStatement = Stmt.invokeStatic(Convert.class, "registerDefaultConverter",
+                  typeArgs[0], typeArgs[1], Stmt.newObject(converter));
+            }
+          }
+        }
+      }
+
+      if (registerConverterStatement != null) {
+        loadProxies.append(registerConverterStatement);
+      }
+      else {
+        log.warn("Ignoring @DefaultConverter: " + converter
+            + "! Make sure it implements Converter and specifies type arguments for the model and widget type");
+      }
+    }
   }
 }
