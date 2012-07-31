@@ -466,7 +466,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
   }
 
   @Override
-  public <Y> SingularAttribute<? super X, Y> getSingularAttribute(String name,
+  public <Y> ErraiSingularAttribute<? super X, Y> getSingularAttribute(String name,
       Class<Y> type) {
     // TODO Auto-generated method stub
     throw new RuntimeException("Not implemented");
@@ -556,9 +556,19 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
   }
 
   @Override
-  public Attribute<? super X, ?> getAttribute(String name) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+  public ErraiAttribute<? super X, ?> getAttribute(String name) {
+    // XXX would be better to keep attributes in a map
+    for (Attribute<? super X, ?> attr : singularAttributes) {
+      if (attr.getName().equals(name)) {
+        return (ErraiAttribute<? super X, ?>) attr;
+      }
+    }
+    for (Attribute<? super X, ?> attr : pluralAttributes) {
+      if (attr.getName().equals(name)) {
+        return (ErraiAttribute<? super X, ?>) attr;
+      }
+    }
+    return null;
   }
 
   @Override

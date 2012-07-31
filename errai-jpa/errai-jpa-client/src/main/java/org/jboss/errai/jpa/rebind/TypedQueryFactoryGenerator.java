@@ -2,8 +2,10 @@ package org.jboss.errai.jpa.rebind;
 
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -21,17 +23,22 @@ import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
 import org.jboss.errai.codegen.ArithmeticOperator;
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.framework.Comparisons;
+import org.jboss.errai.jpa.client.local.ErraiAttribute;
+import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.ErraiParameter;
 import org.jboss.errai.jpa.client.local.ErraiTypedQuery;
 import org.jboss.errai.jpa.client.local.JsonUtil;
@@ -104,6 +111,7 @@ public class TypedQueryFactoryGenerator {
             Stmt.loadVariable("actualResultType"),
             Stmt.loadVariable("parameters"));
     appendMatchesMethod(anonQueryClassBuilder);
+    appendComparatorMethod(anonQueryClassBuilder);
 
     AnonymousClassStructureBuilder factoryBuilder = ObjectBuilder.newInstanceOf(TypedQueryFactory.class, context).extend(
             entityManager,
@@ -144,27 +152,72 @@ public class TypedQueryFactoryGenerator {
    * the given class builder. The matching logic is, of course, generated based
    * on the JPA query this generator was created with.
    *
-   * @param matcherClassBuilder
+   * @param classBuilder
    *          The class builder to append the generated matcher method to.
    */
-  private void appendMatchesMethod(AnonymousClassStructureBuilder matcherClassBuilder) {
+  private void appendMatchesMethod(AnonymousClassStructureBuilder classBuilder) {
 
     AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
     AST whereClause = traverser.fastForwardTo(HqlSqlTokenTypes.WHERE);
 
     Statement matchesStmt;
     if (whereClause != null) {
-      matchesStmt = generateExpression(traverser);
+      matchesStmt = generateExpression(traverser, new JsonDotNodeResolver());
     }
     else {
       matchesStmt = Stmt.loadLiteral(true);
     }
 
-    BlockBuilder<?> matchesMethod = matcherClassBuilder
+    BlockBuilder<?> matchesMethod = classBuilder
             .publicOverridesMethod("matches", Parameter.of(JSONObject.class, "candidate"));
     matchesMethod.append(Stmt.nestedCall(matchesStmt).returnValue());
     matchesMethod.finish();
   }
+
+  /**
+   * Adds the {@code getComparator()} method to the given class builder.
+   *
+   * @param classBuilder
+   *          The class builder to add the method to. Should be a builder for a
+   *          subclass of ErraiTypedQuery.
+   */
+  private void appendComparatorMethod(AnonymousClassStructureBuilder classBuilder) {
+    AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
+    AST orderBy = traverser.fastForwardTo(HqlSqlTokenTypes.ORDER);
+
+    Statement comparator;
+    if (orderBy == null) {
+      comparator = Stmt.loadLiteral(null);
+    }
+    else {
+      JavaDotNodeResolver lhsResolver = new JavaDotNodeResolver("lhs");
+      JavaDotNodeResolver rhsResolver = new JavaDotNodeResolver("rhs");
+      Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderBy.getFirstChild()), lhsResolver));
+      Statement rhs = generateExpression(new AstInorderTraversal(orderBy.getFirstChild()), rhsResolver);
+
+      BlockBuilder<AnonymousClassStructureBuilder> compareMethod = ObjectBuilder.newInstanceOf(Comparator.class).extend()
+              .publicOverridesMethod("compare", Parameter.of(Object.class, "o1"), Parameter.of(Object.class, "o2"));
+
+      for (Statement var : lhsResolver.getRequiredLocalVariables()) {
+        compareMethod.append(var);
+      }
+
+      compareMethod
+              .append(Stmt.declareFinalVariable("lhs", resultType, Cast.to(resultType, Stmt.loadVariable("o1"))))
+              .append(Stmt.declareFinalVariable("rhs", resultType, Cast.to(resultType, Stmt.loadVariable("o2"))))
+              .append(Stmt.declareVariable("result", int.class))
+              .append(Stmt.loadVariable("result").assignValue(Stmt.nestedCall(lhs).invoke("compareTo", rhs)))
+              .append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("result"), 0)).append(Stmt.loadVariable("result").returnValue()).finish())
+              .append(Stmt.loadLiteral(0).returnValue());
+
+      comparator = compareMethod.finish().finish();
+    }
+
+    classBuilder.protectedMethod(Comparator.class, "getComparator")
+      .append(Stmt.nestedCall(comparator).returnValue())
+      .finish();
+  }
+
 
   /**
    * Consumes the next token from the traverser and returns the equivalent Java
@@ -175,8 +228,11 @@ public class TypedQueryFactoryGenerator {
    *          second-level AST in order. When this method returns, the traverser
    *          will have completely walked the subtree under the starting node.
    *          The traverser will be left on the next node.
+   * @param dotNodeResolver
+   *          the mechanism for resolving a DotNode (that is, a JPQL property
+   *          reference in the query) into an Errai codegen Statement.
    */
-  private Statement generateExpression(AstInorderTraversal traverser) {
+  private Statement generateExpression(AstInorderTraversal traverser, DotNodeResolver dotNodeResolver) {
     AST ast = traverser.next();
     switch (ast.getType()) {
 
@@ -187,65 +243,65 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.EQ:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeEquals",
-              generateExpression(traverser), generateExpression(traverser));
+              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.NE:
       return Bool.notExpr(Stmt.invokeStatic(
               Comparisons.class, "nullSafeEquals",
-              generateExpression(traverser), generateExpression(traverser)));
+              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver)));
 
     case HqlSqlTokenTypes.GT:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeGreaterThan",
-              generateExpression(traverser), generateExpression(traverser));
+              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.GE:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeGreaterThanOrEqualTo",
-              generateExpression(traverser), generateExpression(traverser));
+              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.LT:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeLessThan",
-              generateExpression(traverser), generateExpression(traverser));
+              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.LE:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeLessThanOrEqualTo",
-              generateExpression(traverser), generateExpression(traverser));
+              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.BETWEEN: {
-      Statement middle = generateExpression(traverser);
-      Statement small = generateExpression(traverser);
-      Statement big = generateExpression(traverser);
+      Statement middle = generateExpression(traverser, dotNodeResolver);
+      Statement small = generateExpression(traverser, dotNodeResolver);
+      Statement big = generateExpression(traverser, dotNodeResolver);
       return Bool.and(
               Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", small, middle),
               Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", middle, big));
     }
 
     case HqlSqlTokenTypes.NOT_BETWEEN: {
-      Statement outside = generateExpression(traverser);
-      Statement small = generateExpression(traverser);
-      Statement big = generateExpression(traverser);
+      Statement outside = generateExpression(traverser, dotNodeResolver);
+      Statement small = generateExpression(traverser, dotNodeResolver);
+      Statement big = generateExpression(traverser, dotNodeResolver);
       return Bool.or(
               Stmt.invokeStatic(Comparisons.class, "nullSafeLessThan", outside, small),
               Stmt.invokeStatic(Comparisons.class, "nullSafeGreaterThan", outside, big));
     }
 
     case HqlSqlTokenTypes.IS_NULL:
-      return Bool.isNull(generateExpression(traverser));
+      return Bool.isNull(generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.IS_NOT_NULL:
-      return Bool.isNotNull(generateExpression(traverser));
+      return Bool.isNotNull(generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.OR:
-      return Bool.or(generateExpression(traverser), generateExpression(traverser));
+      return Bool.or(generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.AND:
-      return Bool.and(generateExpression(traverser), generateExpression(traverser));
+      return Bool.and(generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.NOT:
-      return Bool.notExpr(generateExpression(traverser));
+      return Bool.notExpr(generateExpression(traverser, dotNodeResolver));
 
     //
     // VALUE EXPRESSIONS
@@ -254,23 +310,7 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.DOT:
       DotNode dotNode = (DotNode) ast;
       traverser.fastForwardToNextSiblingOf(dotNode);
-      Class<?> requestedType = dotNode.getDataType().getReturnedClass();
-
-      // normalize all numbers except longs and chars to double (literals do the same)
-      // if we did not do this here, Comparisons.nullSafeEquals() would have to do it at runtime
-      if (requestedType == Float.class || requestedType == float.class
-              || requestedType == Integer.class || requestedType == int.class
-              || requestedType == Short.class || requestedType == short.class
-              || requestedType == Byte.class || requestedType == byte.class) {
-        requestedType = Double.class;
-      } else if (requestedType == Character.class || requestedType == char.class) {
-        requestedType = String.class;
-      }
-
-      // FIXME this assumes the property reference is to the candidate entity instance (it could be to another type)
-      return Stmt.invokeStatic(JsonUtil.class, "basicValueFromJson",
-              Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()),
-              requestedType);
+      return dotNodeResolver.resolve(dotNode);
 
     case HqlSqlTokenTypes.NAMED_PARAM:
       ParameterNode paramNode = (ParameterNode) ast;
@@ -281,7 +321,7 @@ public class TypedQueryFactoryGenerator {
       return Stmt.loadLiteral(SqlUtil.parseStringLiteral(ast.getText()));
 
     case HqlSqlTokenTypes.UNARY_MINUS:
-      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateExpression(traverser));
+      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateExpression(traverser, dotNodeResolver));
 
     case HqlSqlTokenTypes.NUM_INT:
     case HqlSqlTokenTypes.NUM_DOUBLE:
@@ -315,6 +355,79 @@ public class TypedQueryFactoryGenerator {
     UnexpectedTokenException(int actual, String expected) {
       super("Encountered unexpected token " +
             HqlSqlWalker._tokenNames[actual] + " (expected " + expected + ")");
+    }
+  }
+
+  /**
+   * Implementations of this interface provide the ability to resolve a HQL/JPQL
+   * DotNode into an Errai codegen Statement that evaluates to an actual value
+   * at runtime.
+   */
+  private interface DotNodeResolver {
+    Statement resolve(DotNode dotNode);
+  }
+
+  /**
+   * Resolves a DotNode to a value by dereferencing a property from a
+   * JSONObject. The returned Statement depends on a JSONObject named
+   * "candidate" being in the local scope.
+   */
+  private static class JsonDotNodeResolver implements DotNodeResolver {
+
+    @Override
+    public Statement resolve(DotNode dotNode) {
+      Class<?> requestedType = dotNode.getDataType().getReturnedClass();
+      // normalize all numbers except longs and chars to double (literals do the same)
+      // if we did not do this here, Comparisons.nullSafeEquals() would have to do it at runtime
+      if (requestedType == Float.class || requestedType == float.class
+              || requestedType == Integer.class || requestedType == int.class
+              || requestedType == Short.class || requestedType == short.class
+              || requestedType == Byte.class || requestedType == byte.class) {
+        requestedType = Double.class;
+      } else if (requestedType == Character.class || requestedType == char.class) {
+        requestedType = String.class;
+      }
+
+      return Stmt.invokeStatic(JsonUtil.class, "basicValueFromJson",
+              Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()),
+              requestedType);
+    }
+  }
+
+  /**
+   * Resolves a DotNode to an actual value by obtaining an ErraiAttribute from
+   * the ErraiEntityManager and invoking {@link ErraiAttribute#get(Object)} on
+   * it. The returned Statement relies on an instance of the Entity type being
+   * in the local scope (the name is your choice; pass it to the constructor).
+   * Additionally, the returned Statement may rely on one or more variable
+   * declarations in its local scope. You are responsible for retrieving these
+   * variable declarations (using the {@link #getRequiredLocalVariables()}
+   * method) and inserting them in your code somewhere before the returned
+   * Statement.
+   */
+  private static class JavaDotNodeResolver implements DotNodeResolver {
+
+    private final String variableName;
+    private final List<Statement> requiredLocalVariables = new ArrayList<Statement>();
+
+    public JavaDotNodeResolver(String variableName) {
+      this.variableName = Assert.notNull(variableName);
+    }
+
+    @Override
+    public Statement resolve(DotNode dotNode) {
+      Class<?> lhsType = dotNode.getLhs().getDataType().getReturnedClass();
+      String attrVarName = dotNode.getPath().replace('.', '_') + "_attr";
+      requiredLocalVariables.add(
+          Stmt.declareVariable(attrVarName, ErraiAttribute.class,
+              Stmt.nestedCall(new StringStatement("getMetamodel()", MetaClassFactory.get(ErraiMetamodel.class)))
+              .invoke("entity", Stmt.loadLiteral(lhsType))
+              .invoke("getAttribute", dotNode.getPropertyPath())));
+      return Stmt.loadVariable(attrVarName).invoke("get", Stmt.loadVariable(variableName));
+    }
+
+    public List<Statement> getRequiredLocalVariables() {
+      return requiredLocalVariables;
     }
   }
 }

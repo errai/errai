@@ -1,5 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -114,6 +116,16 @@ public abstract class ErraiTypedQuery<X> implements TypedQuery<X>, EntityJsonMat
     return checkedParam;
   }
 
+  /**
+   * Returns a comparator that can be used for sorting a list of result objects
+   * based on the ORDER BY clause and the current parameter values of this
+   * query.
+   *
+   * @return A comparator for acheiving the ORDER BY order for this query, or
+   *         null if this query has no ORDER BY clause.
+   */
+  protected abstract Comparator<X> getComparator();
+
   // ========= JPA API below this line
 
   @Override
@@ -201,7 +213,12 @@ public abstract class ErraiTypedQuery<X> implements TypedQuery<X>, EntityJsonMat
 
   @Override
   public List<X> getResultList() {
-    return em.findAll(em.getMetamodel().entity(resultType), this);
+    List<X> results = em.findAll(em.getMetamodel().entity(resultType), this);
+    Comparator<X> cmp = getComparator();
+    if (cmp != null) {
+      Collections.sort(results, cmp);
+    }
+    return results;
   }
 
   @Override

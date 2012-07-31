@@ -2,6 +2,7 @@ package org.jboss.errai.jpa.test.client;
 
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -831,6 +832,44 @@ public class QueryTest extends GWTTestCase {
     assertTrue(resultStrings.contains(zentity3.toString()));
     assertTrue(resultStrings.contains(zentity4.toString()));
     assertTrue(resultStrings.contains(zentity5.toString()));
+  }
+
+  public void testOrderByPrimitiveInt() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity5 = new Zentity();
+    zentity5.setPrimitiveInt(5);
+    em.persist(zentity5);
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setPrimitiveInt(1);
+    em.persist(zentity1);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setPrimitiveInt(3);
+    em.persist(zentity3);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setPrimitiveInt(2);
+    em.persist(zentity2);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setPrimitiveInt(4);
+    em.persist(zentity4);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityOrderByPrimitiveInt", Zentity.class);
+    List<String> resultStrings = new ArrayList<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(5, resultStrings.size());
+    assertEquals(resultStrings.get(0), zentity1.toString());
+    assertEquals(resultStrings.get(1), zentity2.toString());
+    assertEquals(resultStrings.get(2), zentity3.toString());
+    assertEquals(resultStrings.get(3), zentity4.toString());
+    assertEquals(resultStrings.get(4), zentity5.toString());
   }
 
 }
