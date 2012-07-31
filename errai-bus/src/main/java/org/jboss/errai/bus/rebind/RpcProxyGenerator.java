@@ -16,6 +16,10 @@
 
 package org.jboss.errai.bus.rebind;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -36,10 +40,6 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Generates an Errai RPC remote proxy.
@@ -64,17 +64,14 @@ public class RpcProxyGenerator {
         .privateField("errorCallback", ErrorCallback.class)
         .finish()
         .privateField("qualifiers", Annotation[].class)
-        .finish();
-
-    classBuilder.publicMethod(void.class, "setErrorCallback", Parameter.of(ErrorCallback.class, "callback"))
+        .finish()
+        .publicMethod(void.class, "setErrorCallback", Parameter.of(ErrorCallback.class, "callback"))
         .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
-        .finish();
-
-    classBuilder.publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
+        .finish()
+        .publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
         .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
-        .finish();
-
-    classBuilder.publicMethod(void.class, "setQualifiers", Parameter.of(Annotation[].class, "quals"))
+        .finish()
+        .publicMethod(void.class, "setQualifiers", Parameter.of(Annotation[].class, "quals"))
         .append(Stmt.loadClassMember("qualifiers").assignValue(Variable.get("quals")))
         .finish();
 

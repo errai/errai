@@ -44,7 +44,7 @@ import com.google.gwt.http.client.Response;
 
 /**
  * Generates a JAX-RS remote proxy.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsProxyGenerator {
@@ -61,80 +61,73 @@ public class JaxrsProxyGenerator {
 
   @SuppressWarnings("serial")
   public ClassStructureBuilder<?> generate() {
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getName() + "Impl")
-        .packageScope()
-        .implementsInterface(remote)
-        .implementsInterface(JaxrsProxy.class)
-        .body()
-        .privateField("remoteCallback", RemoteCallback.class)
-        .finish()
-        .privateField("errorCallback", ErrorCallback.class)
-        .finish()
-        .privateField("baseUrl", String.class)
-        .finish()
-        .privateField("successCodes", MetaClassFactory.get(new TypeLiteral<List<Integer>>() {
-        }))
-        .finish();
-
-    classBuilder.publicMethod(void.class, "setQualifiers", Parameter.of(Annotation[].class, "annos")).finish();
-
-    classBuilder.publicMethod(void.class, "setErrorCallback", Parameter.of(ErrorCallback.class, "callback"))
-        .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
-        .finish();
-
-    classBuilder.publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
-        .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
-        .finish();
-
-    classBuilder.publicMethod(void.class, "setSuccessCodes",
-        Parameter.of(MetaClassFactory.get(new TypeLiteral<List<Integer>>() {
-        }), "codes"))
-        .append(Stmt.loadClassMember("successCodes").assignValue(Variable.get("codes")))
-        .finish();
-
-    classBuilder.publicMethod(void.class, "setBaseUrl", Parameter.of(String.class, "url"))
-        .append(Stmt.loadClassMember("baseUrl").assignValue(Variable.get("url")))
-        .finish();
-
-    classBuilder.publicMethod(String.class, "getBaseUrl")
-        .append(
-            If.isNotNull(Variable.get("baseUrl"))
-                .append(Stmt.loadVariable("baseUrl").returnValue())
-                .finish()
-                .else_()
-                .append(Stmt.invokeStatic(RestClient.class, "getApplicationRoot").returnValue())
-                .finish()
-        )
-        .finish();
-
+    ClassStructureBuilder<?> classBuilder =
+        ClassBuilder.define(remote.getName() + "Impl")
+            .packageScope()
+            .implementsInterface(remote)
+            .implementsInterface(JaxrsProxy.class)
+            .body()
+            .privateField("remoteCallback", RemoteCallback.class)
+            .finish()
+            .privateField("errorCallback", ErrorCallback.class)
+            .finish()
+            .privateField("baseUrl", String.class)
+            .finish()
+            .privateField("successCodes", MetaClassFactory.get(new TypeLiteral<List<Integer>>() {}))
+            .finish()
+            .publicMethod(void.class, "setQualifiers", Parameter.of(Annotation[].class, "annos"))
+            .finish()
+            .publicMethod(void.class, "setErrorCallback", Parameter.of(ErrorCallback.class, "callback"))
+            .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
+            .finish()
+            .publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
+            .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
+            .finish()
+            .publicMethod(void.class, "setSuccessCodes",
+                Parameter.of(MetaClassFactory.get(new TypeLiteral<List<Integer>>() {}), "codes"))
+            .append(Stmt.loadClassMember("successCodes").assignValue(Variable.get("codes")))
+            .finish()
+            .publicMethod(void.class, "setBaseUrl", Parameter.of(String.class, "url"))
+            .append(Stmt.loadClassMember("baseUrl").assignValue(Variable.get("url")))
+            .finish()
+            .publicMethod(String.class, "getBaseUrl")
+            .append(
+                If.isNotNull(Variable.get("baseUrl"))
+                    .append(Stmt.loadVariable("baseUrl").returnValue())
+                    .finish()
+                    .else_()
+                    .append(Stmt.invokeStatic(RestClient.class, "getApplicationRoot").returnValue())
+                    .finish()
+            )
+            .finish();
+    
     generateErrorHandler(classBuilder);
 
     for (MetaMethod method : remote.getMethods()) {
       JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
       new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
     }
-
     return classBuilder;
   }
 
   private void generateErrorHandler(ClassStructureBuilder<?> classBuilder) {
     Statement errorHandling =
         If.notEquals(Variable.get("errorCallback"), null)
-        .append(Stmt.loadVariable("errorCallback").invoke("error", null, Variable.get("throwable")))
-        .finish()
-        .elseif_(
-            Bool.and(
-                Bool.instanceOf(
-                    Stmt.loadStatic(classBuilder.getClassDefinition(), "this").loadField("remoteCallback"),
-                    ResponseCallback.class),
-                Bool.notEquals(Stmt.loadVariable("response"), null)))
-        .append(Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
-            .loadField("remoteCallback").invoke("callback", Stmt.loadVariable("response")))
-        .finish()
-        .else_()
-        .append(Stmt.invokeStatic(GWT.class, "log",
-            Stmt.loadVariable("throwable").invoke("getMessage"), Variable.get("throwable")))
-        .finish();
+            .append(Stmt.loadVariable("errorCallback").invoke("error", null, Variable.get("throwable")))
+            .finish()
+            .elseif_(
+                Bool.and(
+                    Bool.instanceOf(
+                        Stmt.loadStatic(classBuilder.getClassDefinition(), "this").loadField("remoteCallback"),
+                        ResponseCallback.class),
+                    Bool.notEquals(Stmt.loadVariable("response"), null)))
+            .append(Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
+                .loadField("remoteCallback").invoke("callback", Stmt.loadVariable("response")))
+            .finish()
+            .else_()
+            .append(Stmt.invokeStatic(GWT.class, "log",
+                Stmt.loadVariable("throwable").invoke("getMessage"), Variable.get("throwable")))
+            .finish();
 
     classBuilder.privateMethod(void.class, "handleError",
         Parameter.of(Throwable.class, "throwable"), Parameter.of(Response.class, "response"))
