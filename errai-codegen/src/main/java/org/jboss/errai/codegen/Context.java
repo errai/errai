@@ -19,6 +19,7 @@ package org.jboss.errai.codegen;
 import org.jboss.errai.codegen.control.branch.Label;
 import org.jboss.errai.codegen.control.branch.LabelReference;
 import org.jboss.errai.codegen.exception.OutOfScopeException;
+import org.jboss.errai.codegen.literal.LiteralValue;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -26,20 +27,22 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.client.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 /**
  * This class represents a context in which {@link Statement}s are generated.
- * <p>
+ * <p/>
  * Its main purpose is to support the concept of scopes so that {@link Statement}s can be validated prior to
  * compilation.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
@@ -55,6 +58,8 @@ public class Context {
 
   private final Set<MetaClass> literalizableClasses;
 
+  private List<InterningCallback> interningCallbackList;
+  private Map<Object, Statement> internedValues;
   private Map<String, Map<Object, Object>> renderingCache;
 
   private boolean permissiveMode = GenUtil.isPermissiveMode();
@@ -65,6 +70,8 @@ public class Context {
     classContexts = new HashSet<MetaClass>();
     renderingCache = new HashMap<String, Map<Object, Object>>();
     literalizableClasses = new HashSet<MetaClass>();
+    internedValues = new HashMap<Object, Statement>();
+    interningCallbackList = new ArrayList<InterningCallback>();
   }
 
   private Context(final Context parent) {
@@ -73,11 +80,14 @@ public class Context {
     this.autoImportActive = parent.autoImportActive;
     this.imports = parent.imports;
     this.renderingCache = parent.renderingCache;
+
+    interningCallbackList = parent.interningCallbackList;
+    internedValues = parent.internedValues;
   }
 
   /**
    * Creates a new and empty context.
-   * 
+   *
    * @return empty context
    */
   public static Context create() {
@@ -86,10 +96,10 @@ public class Context {
 
   /**
    * Create a new sub context for the given parent context.
-   * 
+   *
    * @param parent
-   *          the parent context to use.
-   * 
+   *     the parent context to use.
+   *
    * @return Created sub context
    */
   public static Context create(final Context parent) {
@@ -100,9 +110,10 @@ public class Context {
    * Add a variable to the current scope.
    *
    * @param name
-   *          the name of the variable, must not be null.
+   *     the name of the variable, must not be null.
    * @param type
-   *          the type of the variable, must not be null.
+   *     the type of the variable, must not be null.
+   *
    * @return the current context with the variable added.
    */
   public Context addVariable(final String name, final Class<?> type) {
@@ -113,11 +124,12 @@ public class Context {
    * Add a variable to the current scope and initialize it.
    *
    * @param name
-   *          the name of the variable, must not be null.
+   *     the name of the variable, must not be null.
    * @param type
-   *          the type of the variable, must not be null.
+   *     the type of the variable, must not be null.
    * @param initialization
-   *          the {@link Statement} or literal value to initialize the {@link Variable}, can be null.
+   *     the {@link Statement} or literal value to initialize the {@link Variable}, can be null.
+   *
    * @return the current context with the variable added.
    */
   public Context addVariable(final String name, final Class<?> type, final Object initialization) {
@@ -129,7 +141,8 @@ public class Context {
    * Add a {@link Variable} to the current scope.
    *
    * @param variable
-   *          the variable instance to add, must not be null.
+   *     the variable instance to add, must not be null.
+   *
    * @return the current context with the variable added.
    */
   public Context addVariable(final Variable variable) {
@@ -144,7 +157,8 @@ public class Context {
    * Add a {@link Label} to the current scope.
    *
    * @param label
-   *          the label instance to add, must not be null.
+   *     the label instance to add, must not be null.
+   *
    * @return the current context with the label added.
    */
   public Context addLabel(final Label label) {
@@ -185,8 +199,8 @@ public class Context {
    * Imports the given class.
    *
    * @param clazz
-   *          the class to import, must not be null. If it is an array type (of any number of dimensions), its non-array
-   *          component type will be imported.
+   *     the class to import, must not be null. If it is an array type (of any number of dimensions), its non-array
+   *     component type will be imported.
    *
    * @return the current context with the import added.
    */
@@ -211,7 +225,8 @@ public class Context {
    * Checks whether the given class has been imported.
    *
    * @param clazz
-   *          the class to check, must not be null.
+   *     the class to check, must not be null.
+   *
    * @return true if import exists, otherwise false.
    */
   public boolean hasImport(MetaClass clazz) {
@@ -268,10 +283,12 @@ public class Context {
    * Returns a reference to the {@link Variable} with the given name.
    *
    * @param name
-   *          the name of the variable.
+   *     the name of the variable.
+   *
    * @return the {@link VariableReference} found, can not be null.
+   *
    * @throws OutOfScopeException
-   *           if variable with the given name can not be found.
+   *     if variable with the given name can not be found.
    */
   public VariableReference getVariable(final String name) {
     return getVariable(name, false);
@@ -281,10 +298,12 @@ public class Context {
    * Returns a reference to the class member {@link Variable} with the given name.
    *
    * @param name
-   *          the name of the class member variable.
+   *     the name of the class member variable.
+   *
    * @return the {@link VariableReference} found, can not be null.
+   *
    * @throws OutOfScopeException
-   *           if member variable with the given name can not be found.
+   *     if member variable with the given name can not be found.
    */
   public VariableReference getClassMember(final String name) {
     return getVariable(name, true);
@@ -318,10 +337,12 @@ public class Context {
    * Returns the a reference to the {@link Label} with the given name.
    *
    * @param name
-   *          the name of the label.
+   *     the name of the label.
+   *
    * @return the {@link LabelReference} found, can not be null.
+   *
    * @throws OutOfScopeException
-   *           if label with the given name can not be found.
+   *     if label with the given name can not be found.
    */
   public LabelReference getLabel(final String name) {
     Label found = null;
@@ -344,7 +365,8 @@ public class Context {
    * Checks is the given {@link Variable} is in scope.
    *
    * @param variable
-   *          the variable to check.
+   *     the variable to check.
+   *
    * @return true if in scope, otherwise false.
    */
   public boolean isScoped(final Variable variable) {
@@ -361,7 +383,8 @@ public class Context {
    * Checks is the given {@link MetaMethod} is in scope (part of the attached class contexts).
    *
    * @param method
-   *          the method to check.
+   *     the method to check.
+   *
    * @return true if in scope, otherwise false.
    */
   public boolean isInScope(final MetaMethod method) {
@@ -383,7 +406,8 @@ public class Context {
    * Checks is the given {@link MetaField} is in scope (part of the attached class contexts).
    *
    * @param field
-   *          the field to check.
+   *     the field to check.
+   *
    * @return true if in scope, otherwise false.
    */
   public boolean isInScope(final MetaField field) {
@@ -405,7 +429,8 @@ public class Context {
    * Checks if the the given variable name is ambiguous in this scope.
    *
    * @param varName
-   *          the variable name to check.
+   *     the variable name to check.
+   *
    * @return true if ambiguous, otherwise false.
    */
   public boolean isAmbiguous(final String varName) {
@@ -426,7 +451,7 @@ public class Context {
    */
   public Collection<Variable> getDeclaredVariables() {
     if (variables == null)
-      return Collections.<Variable> emptyList();
+      return Collections.<Variable>emptyList();
     return variables.values();
   }
 
@@ -447,7 +472,7 @@ public class Context {
    * reification to code snapshots for this context and all subcontexts. See {@link SnapshotMaker} for further details.
    *
    * @param clazz
-   *          the class, interface or superclass to be considered literalizable.
+   *     the class, interface or superclass to be considered literalizable.
    */
   public void addLiteralizableClass(final Class clazz) {
     addLiteralizableClass(MetaClassFactory.get(clazz));
@@ -458,7 +483,7 @@ public class Context {
    * reification to code snapshots for this context and all subcontexts. See {@link SnapshotMaker} for further details.
    *
    * @param clazz
-   *          the class, interface or superclass to be considered literalizable.
+   *     the class, interface or superclass to be considered literalizable.
    */
   public void addLiteralizableClass(final MetaClass clazz) {
     literalizableClasses.add(clazz.getErased());
@@ -467,10 +492,12 @@ public class Context {
   /**
    * Returns true if the specified class is literalizable.
    *
-   * @see #addLiteralizableClass(Class)
    * @param clazz
-   *          the class, interface or superclass to be tested if literalizable
+   *     the class, interface or superclass to be tested if literalizable
+   *
    * @return true if the specified class is literalizable
+   *
+   * @see #addLiteralizableClass(Class)
    */
   public boolean isLiteralizableClass(final Class clazz) {
     return isLiteralizableClass(MetaClassFactory.get(clazz));
@@ -479,10 +506,12 @@ public class Context {
   /**
    * Returns true if the specified class is literalizable.
    *
-   * @see #addLiteralizableClass(MetaClass)
    * @param clazz
-   *          the class, interface or superclass to be tested if literalizable
+   *     the class, interface or superclass to be tested if literalizable
+   *
    * @return true if the specified class is literalizable
+   *
+   * @see #addLiteralizableClass(MetaClass)
    */
   public boolean isLiteralizableClass(final MetaClass clazz) {
     return getLiteralizableTargetType(clazz) != null;
@@ -494,10 +523,11 @@ public class Context {
    * this method will return a reference to the <tt>java.lang.Class</tt> instance for <tt>com.bar.Foo</tt>
    *
    * @param clazz
-   *          the class, interface or superclass to obtain a literalizable target type for.
-   * @return the literalizable target type that matches
+   *     the class, interface or superclass to obtain a literalizable target type for.
    * @param clazz
-   *          . If there are no matches, returns <tt>null</tt>.
+   *     . If there are no matches, returns <tt>null</tt>.
+   *
+   * @return the literalizable target type that matches
    */
   public Class getLiteralizableTargetType(final Class clazz) {
     return getLiteralizableTargetType(MetaClassFactory.get(clazz));
@@ -509,10 +539,11 @@ public class Context {
    * this method will return a reference to the <tt>java.lang.Class</tt> instance for <tt>com.bar.Foo</tt>
    *
    * @param clazz
-   *          the class, interface or superclass to obtain a literalizable target type for.
-   * @return the literalizable target type that matches
+   *     the class, interface or superclass to obtain a literalizable target type for.
    * @param clazz
-   *          . If there are no matches, returns <tt>null</tt>.
+   *     . If there are no matches, returns <tt>null</tt>.
+   *
+   * @return the literalizable target type that matches
    */
   public Class getLiteralizableTargetType(final MetaClass clazz) {
     Context ctx = this;
@@ -541,16 +572,16 @@ public class Context {
    */
   public Map<String, Variable> getVariables() {
     if (variables == null)
-      return Collections.<String, Variable> emptyMap();
+      return Collections.<String, Variable>emptyMap();
 
-    return Collections.<String, Variable> unmodifiableMap(variables);
+    return Collections.<String, Variable>unmodifiableMap(variables);
   }
 
   /**
    * Attaches a class to the current scope.
    *
    * @param clazz
-   *          class to attach.
+   *     class to attach.
    */
   public void attachClass(final MetaClass clazz) {
     this.classContexts.add(clazz);
@@ -567,6 +598,7 @@ public class Context {
 
   /**
    * Check is permissive mode is active for this context.
+   *
    * @return
    */
   public boolean isPermissiveMode() {
@@ -578,7 +610,7 @@ public class Context {
    *
    * @param permissiveMode
    */
-  public void setPermissiveMode(boolean permissiveMode) {
+  public void setPermissiveMode(final boolean permissiveMode) {
     this.permissiveMode = permissiveMode;
   }
 
@@ -589,6 +621,35 @@ public class Context {
       renderingCache.put(store.getName(), (Map<Object, Object>) (cacheStore = new HashMap<K, V>()));
     }
     return cacheStore;
+  }
+
+  /**
+   * Adds an {@link InterningCallback} to the context. Multiple callbacks can be registered. But, in the event that
+   * multiple callbacks fire and intern the same values, the <em>last</em> callback fired will be the effective
+   * interning behavior.
+   *
+   * @param interningCallback
+   */
+  public void addInterningCallback(final InterningCallback interningCallback) {
+    interningCallbackList.add(interningCallback);
+  }
+
+  public Statement intern(final LiteralValue<?> literalValue) {
+    if (interningCallbackList.isEmpty()) return null;
+
+    Statement internedReference;
+
+    if ((internedReference = internedValues.get(literalValue.getValue())) != null) {
+      return internedReference;
+    }
+
+    for (final InterningCallback interningCallback : interningCallbackList) {
+      internedReference = interningCallback.intern(literalValue);
+      if (internedReference != null) {
+        internedValues.put(literalValue.getValue(), internedReference);
+      }
+    }
+    return internedReference;
   }
 
   @Override

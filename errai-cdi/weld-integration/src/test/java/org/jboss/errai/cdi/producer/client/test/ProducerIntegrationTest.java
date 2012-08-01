@@ -4,6 +4,7 @@ package org.jboss.errai.cdi.producer.client.test;
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumersMultiProducers;
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducer;
+import org.jboss.errai.cdi.producer.client.DepBeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.DependentProducedBeanDependentBean;
 import org.jboss.errai.cdi.producer.client.Fooblie;
 import org.jboss.errai.cdi.producer.client.FooblieDependentBean;
@@ -110,6 +111,14 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(bean);
     assertNotNull(bean.getThing());
     assertNotNull(bean.getThing().getThing());
+  }
+
+  public void testDependentBeanCanConsumerProducerFromItselfThroughConstrCycle() {
+    DepBeanConstrConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(DepBeanConstrConsumesOwnProducer.class).getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getThang());
+    assertNotNull(bean.getThang().getThang());
   }
 
   public void testProducersObserveSingletonScope() {

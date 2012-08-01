@@ -228,7 +228,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (constructors.isEmpty()) {
       // add an empty no-arg constructor
       final BuildMetaConstructor buildMetaConstructor =
-              new BuildMetaConstructor(this, new BlockStatement(), DefParameters.none());
+          new BuildMetaConstructor(this, new BlockStatement(), DefParameters.none());
 
       buildMetaConstructor.setScope(Scope.Public);
       return _constructorsCache = new MetaConstructor[]{buildMetaConstructor};
@@ -665,17 +665,56 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     }
 
     return generatedCache = PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());
+  }
 
+  private List<Builder> diffList(final List<? extends Builder> original,
+                                 final List<? extends Builder> against) {
+
+    final List<Builder> copyList = new ArrayList<Builder>(original);
+    copyList.removeAll(against);
+    return copyList;
   }
 
   public String membersToString() {
     final StringBuilder buf = new StringBuilder(512);
-    Iterator<? extends Builder> fieldIterator = fields.iterator();
-    while (fieldIterator.hasNext()) {
-      buf.append(fieldIterator.next().toJavaString());
-      if (fieldIterator.hasNext())
-        buf.append("\n");
+
+    List<Builder> toBuild = new ArrayList<Builder>(fields);
+    List<Builder> toIterate = new ArrayList<Builder>(toBuild);
+
+    int initialFieldSize;
+
+    final boolean _permissiveMode = GenUtil.isPermissiveMode();
+    GenUtil.setPermissiveMode(true);
+    final StringBuilder fieldRenderBuffer = new StringBuilder(100);
+    do {
+      initialFieldSize = fields.size();
+
+      if (fieldRenderBuffer.length() > 0) {
+        fieldRenderBuffer.delete(0, fieldRenderBuffer.length());
+      }
+
+      final Iterator<Builder> fieldIterator = toIterate.iterator();
+      while (fieldIterator.hasNext()) {
+        fieldRenderBuffer.append(fieldIterator.next().toJavaString());
+        if (fieldIterator.hasNext())
+          fieldRenderBuffer.append("\n");
+      }
+
+      toIterate.addAll(0, diffList(fields, toBuild));
+      toBuild = new ArrayList<Builder>(fields);
     }
+    while (initialFieldSize < fields.size());
+
+    GenUtil.setPermissiveMode(_permissiveMode);
+
+    if (!_permissiveMode) {
+      // verification pass.
+      for (Builder builder : toBuild) {
+        builder.toJavaString();
+      }
+    }
+
+    buf.append(fieldRenderBuffer.toString());
 
     if (!fields.isEmpty())
       buf.append("\n");
@@ -689,20 +728,20 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!innerClasses.isEmpty())
       buf.append("\n");
 
-    fieldIterator = constructors.iterator();
-    while (fieldIterator.hasNext()) {
-      buf.append(fieldIterator.next().toJavaString());
-      if (fieldIterator.hasNext())
+    Iterator<? extends Builder> constructorIterator = constructors.iterator();
+    while (constructorIterator.hasNext()) {
+      buf.append(constructorIterator.next().toJavaString());
+      if (constructorIterator.hasNext())
         buf.append("\n");
     }
 
     if (!constructors.isEmpty())
       buf.append("\n");
 
-    fieldIterator = methods.iterator();
-    while (fieldIterator.hasNext()) {
-      buf.append(fieldIterator.next().toJavaString());
-      if (fieldIterator.hasNext())
+    Iterator<? extends Builder> methodsIterator = methods.iterator();
+    while (methodsIterator.hasNext()) {
+      buf.append(methodsIterator.next().toJavaString());
+      if (methodsIterator.hasNext())
         buf.append("\n");
     }
     return buf.toString();

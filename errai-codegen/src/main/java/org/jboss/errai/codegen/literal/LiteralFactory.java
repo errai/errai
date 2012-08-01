@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.literal;
 
+import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
+
 import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.SnapshotMaker;
@@ -28,8 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 /**
  * The literal factory provides a LiteralValue for the specified object (if possible).
@@ -114,8 +114,8 @@ public class LiteralFactory {
         // avoid caching the null; we don't want that returned from the cache!
         LITERAL_CACHE.put(o, result);
       }
-
     }
+
     return result;
   }
 

@@ -27,12 +27,18 @@ import com.google.gwt.core.ext.typeinfo.JPackage;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.InterningCallback;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.BlockBuilderImpl;
+import org.jboss.errai.codegen.literal.ArrayLiteral;
+import org.jboss.errai.codegen.literal.LiteralFactory;
+import org.jboss.errai.codegen.literal.LiteralValue;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -42,6 +48,7 @@ import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -75,7 +82,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -136,7 +146,7 @@ public class IOCBootstrapGenerator {
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
       gen = _generate(packageName, className);
-      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms " + "(" + MetaClassFactory.getAllCachedClasses().size()  + " beans processed)");
+      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms " + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
 
       RebindUtils.writeStringToFile(cacheFile, gen);
 
@@ -148,21 +158,86 @@ public class IOCBootstrapGenerator {
 
   private String _generate(final String packageName, final String className) {
     final ClassStructureBuilder<?> classStructureBuilder =
-            Implementations.implement(Bootstrapper.class, packageName, className);
+        Implementations.implement(Bootstrapper.class, packageName, className);
 
     logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Generating IOC Bootstrapper " + packageName + "." + className);
 
     final BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
     final Context buildContext = bootStrapClass.getContext();
 
+    final MetaClass Annotation_MC = MetaClassFactory.get(Annotation.class);
+
+    buildContext.addInterningCallback(new InterningCallback() {
+      private Map<Set<Annotation>, String> cachedArrays = new HashMap<Set<Annotation>, String>();
+
+      @Override
+      public Statement intern(final LiteralValue<?> literalValue) {
+        if (literalValue.getValue() == null) {
+          return null;
+        }
+
+        if (literalValue.getValue() instanceof Annotation) {
+          final Annotation annotation = (Annotation) literalValue.getValue();
+
+          final String fieldName = annotation.annotationType().getName()
+              .replaceAll("\\.", "_") + "_"
+              + String.valueOf(literalValue.getValue().hashCode()).replaceAll("\\-", "_");
+
+          classStructureBuilder.privateField(fieldName, annotation.annotationType())
+              .modifiers(Modifier.Final).initializesWith(AnnotationEncoder.encode(annotation))
+              .finish();
+
+          return Refs.get(fieldName);
+        }
+        else if (literalValue.getType().isArray()
+            && Annotation_MC.isAssignableFrom(literalValue.getType().getOuterComponentType())) {
+
+          final Set<Annotation> annotationSet
+              = new HashSet<Annotation>(Arrays.asList((Annotation[]) literalValue.getValue()));
+
+          if (cachedArrays.containsKey(annotationSet)) {
+            return Refs.get(cachedArrays.get(annotationSet));
+          }
+
+          final String fieldName = "arrayOf_" +
+              literalValue.getType().getOuterComponentType().getFullyQualifiedName()
+                  .replaceAll("\\.", "_") + "_"
+              + String.valueOf(literalValue.getValue().hashCode()).replaceAll("\\-", "_");
+
+          // force rendering of literals in this array first.
+          for (Annotation a : annotationSet) {
+            LiteralFactory.getLiteral(a).generate(buildContext);
+          }
+
+          classStructureBuilder.privateField(fieldName, literalValue.getType())
+              .modifiers(Modifier.Final).initializesWith(new Statement() {
+            @Override
+            public String generate(Context context) {
+              final ArrayLiteral arrayLiteral = new ArrayLiteral(literalValue.getValue());
+              return arrayLiteral.getCanonicalString(context);
+            }
+
+            @Override
+            public MetaClass getType() {
+              return literalValue.getType();
+            }
+          }).finish();
+
+          cachedArrays.put(annotationSet, fieldName);
+        }
+
+        return null;
+      }
+    });
+
     final BlockBuilder<?> blockBuilder =
-            classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer")
-                    .methodComment("The main IOC bootstrap method.");
+        classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer")
+            .methodComment("The main IOC bootstrap method.");
 
     final SourceWriter sourceWriter = new StringSourceWriter();
 
     final IOCProcessingContext.Builder iocProcContextBuilder
-            = IOCProcessingContext.Builder.create();
+        = IOCProcessingContext.Builder.create();
 
     iocProcContextBuilder.blockBuilder(blockBuilder);
     iocProcContextBuilder.generatorContext(context);
@@ -173,7 +248,7 @@ public class IOCBootstrapGenerator {
     iocProcContextBuilder.sourceWriter(sourceWriter);
 
     final InjectionContext.Builder injectionContextBuilder
-            = InjectionContext.Builder.create();
+        = InjectionContext.Builder.create();
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Properties props = scanner.getProperties("ErraiApp.properties");
@@ -188,8 +263,8 @@ public class IOCBootstrapGenerator {
 
           try {
             final QualifyingMetadataFactory factory = (QualifyingMetadataFactory)
-                    Class.forName
-                            (fqcnQualifyingMetadataFactory).newInstance();
+                Class.forName
+                    (fqcnQualifyingMetadataFactory).newInstance();
 
             iocProcContextBuilder.qualifyingMetadata(factory);
           }
@@ -219,7 +294,6 @@ public class IOCBootstrapGenerator {
     injectionContextBuilder.processingContext(procContext);
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
-
     defaultConfigureProcessor(context, injectionContext);
 
     // generator constructor source code
@@ -237,12 +311,14 @@ public class IOCBootstrapGenerator {
                                   final SourceWriter sourceWriter,
                                   final ClassStructureBuilder<?> classBuilder,
                                   final BlockBuilder<?> blockBuilder) {
+
+
     classBuilder.privateField(procContext.getContextVariableReference().getName(), procContext.getContextVariableReference().getType())
-            .modifiers(Modifier.Final).initializesWith(Stmt.newObject(BootstrapperInjectionContext.class)).finish();
+        .modifiers(Modifier.Final).initializesWith(Stmt.newObject(BootstrapperInjectionContext.class)).finish();
 
     classBuilder.privateField("context", CreationalContext.class).modifiers(Modifier.Final)
-            .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
-                                .invoke("getRootContext")).finish();
+        .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
+            .invoke("getRootContext")).finish();
 
     final BlockBuilder builder = new BlockBuilderImpl(classBuilder.getClassDefinition().getInstanceInitializer(), null);
 
@@ -301,7 +377,7 @@ public class IOCBootstrapGenerator {
     for (final Class<?> clazz : classes) {
       if (!Runnable.class.isAssignableFrom(clazz)) {
         throw new RuntimeException("annotated @IOCBootstrap task: " + clazz.getName() + " is not of type: "
-                + Runnable.class.getName());
+            + Runnable.class.getName());
       }
 
       blockBuilder.append(Stmt.nestedCall(Stmt.newObject(clazz)).invoke("run"));
@@ -321,7 +397,7 @@ public class IOCBootstrapGenerator {
     * IOCDecoratorExtension.class
     */
     final Set<Class<?>> iocExtensions = scanner
-            .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
+        .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
     final List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
 
     for (final Class<?> clazz : iocExtensions) {
@@ -368,7 +444,7 @@ public class IOCBootstrapGenerator {
         final ParameterizedType pType = (ParameterizedType) t;
         if (IOCDecoratorExtension.class.equals(pType.getRawType())) {
           if (pType.getActualTypeArguments().length == 0
-                  || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
+              || !Annotation.class.isAssignableFrom((Class) pType.getActualTypeArguments()[0])) {
             throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
           }
 
@@ -377,7 +453,7 @@ public class IOCBootstrapGenerator {
         }
 
         injectionContext.registerDecorator(
-                decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
+            decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
@@ -430,7 +506,7 @@ public class IOCBootstrapGenerator {
           for (final Annotation a : type.getAnnotations()) {
             final Class<? extends Annotation> annoClass = a.annotationType();
             if (annoClass.isAnnotationPresent(Scope.class)
-                    || annoClass.isAnnotationPresent(NormalScope.class)) {
+                || annoClass.isAnnotationPresent(NormalScope.class)) {
               continue TypeScan;
             }
           }

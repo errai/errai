@@ -27,7 +27,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 public abstract class LiteralValue<T> implements Statement {
   private final T value;
   protected Class<T> clazz;
-  
+
   public abstract String getCanonicalString(Context context);
 
   protected LiteralValue(final T value) {
@@ -40,7 +40,14 @@ public abstract class LiteralValue<T> implements Statement {
 
   @Override
   public String generate(final Context context) {
-    return getCanonicalString(context);
+    final Statement internedStatement = context.intern(this);
+
+    if (internedStatement != null) {
+      return internedStatement.generate(context);
+    }
+    else {
+      return getCanonicalString(context);
+    }
   }
 
   @Override
