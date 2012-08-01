@@ -121,4 +121,22 @@ public class Comparisons {
             "Can't compare an instance of " + o1.getClass() + " to an instance of " + o2.getClass());
   }
 
+  /**
+   * Compares one potentially null Comparable to another.
+   *
+   * @param c1
+   *          One object to compare. Null is permitted.
+   * @param c2
+   *          The other object to compare. Null is permitted.
+   * @return 0 if c1 and c2 are both null; -1 if c1 is null and c2 is not; 1 if
+   *         c1 is not null and c2 is. Otherwise returns c1.compareTo(c2).
+   */
+  // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
+  public static int nullSafeCompare(Comparable c1, Comparable c2) {
+    if (c1 == null && c2 == null) return 0;
+    if (c1 == null && c2 != null) return -1;
+    if (c1 != null && c2 == null) return 1;
+    return c1.compareTo(c2);
+  }
+
 }

@@ -90,6 +90,8 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityOrderByPrimitiveInt", query="SELECT z FROM Zentity z ORDER BY z.primitiveInt"),
   @NamedQuery(name="zentityOrderByPrimitiveIntDesc", query="SELECT z FROM Zentity z ORDER BY z.primitiveInt DESC"),
 
+  @NamedQuery(name="zentityOrderByBoxedFloat", query="SELECT z FROM Zentity z ORDER BY z.boxedFloat"),
+
   // because of the way the AST works, all three of these tests are needed to protect the code generator from regressions
   @NamedQuery(name="zentityOrderByStringDescThenInt", query="SELECT z FROM Zentity z ORDER BY z.string DESC, z.primitiveInt"),
   @NamedQuery(name="zentityOrderByStringAscThenInt", query="SELECT z FROM Zentity z ORDER BY z.string ASC, z.primitiveInt"),

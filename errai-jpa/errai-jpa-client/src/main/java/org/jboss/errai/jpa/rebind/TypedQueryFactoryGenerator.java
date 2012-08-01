@@ -211,7 +211,7 @@ public class TypedQueryFactoryGenerator {
 
       while (traverser.context().contains(orderByParentNode)) {
         Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), lhsResolver));
-        Statement rhs = generateExpression(new AstInorderTraversal(orderNode), rhsResolver);
+        Statement rhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), rhsResolver));
 
         for (Statement var : lhsResolver.getRequiredLocalVariables()) {
           compareMethod.append(var);
@@ -235,7 +235,7 @@ public class TypedQueryFactoryGenerator {
         }
 
         compareMethod
-            .append(Stmt.loadVariable("result").assignValue(Stmt.nestedCall(lhs).invoke("compareTo", rhs)))
+            .append(Stmt.loadVariable("result").assignValue(Stmt.invokeStatic(Comparisons.class, "nullSafeCompare", lhs, rhs)))
             .append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("result"), 0))
                 .append(Stmt.nestedCall(Arith.expr(ascDescOperator, Stmt.loadVariable("result"))).returnValue())
                 .finish());
