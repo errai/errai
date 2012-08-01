@@ -184,43 +184,67 @@ public class TypedQueryFactoryGenerator {
    */
   private void appendComparatorMethod(AnonymousClassStructureBuilder classBuilder) {
     AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
-    AST orderBy = traverser.fastForwardTo(HqlSqlTokenTypes.ORDER);
+    final AST orderByParentNode = traverser.fastForwardTo(HqlSqlTokenTypes.ORDER);
 
     Statement comparator;
-    if (orderBy == null) {
+    if (orderByParentNode == null) {
       comparator = Stmt.loadLiteral(null);
     }
     else {
-      JavaDotNodeResolver lhsResolver = new JavaDotNodeResolver("lhs");
-      JavaDotNodeResolver rhsResolver = new JavaDotNodeResolver("rhs");
-      AST orderNode = orderBy.getFirstChild();
-      Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), lhsResolver));
-      Statement rhs = generateExpression(new AstInorderTraversal(orderNode), rhsResolver);
-
       BlockBuilder<AnonymousClassStructureBuilder> compareMethod = ObjectBuilder.newInstanceOf(Comparator.class).extend()
               .publicOverridesMethod("compare", Parameter.of(Object.class, "o1"), Parameter.of(Object.class, "o2"));
 
-      for (Statement var : lhsResolver.getRequiredLocalVariables()) {
-        compareMethod.append(var);
-      }
-
-      ArithmeticOperator ascDescOperator;
-      if (orderNode.getNextSibling() != null && orderNode.getNextSibling().getType() == HqlSqlTokenTypes.DESCENDING) {
-        ascDescOperator = ArithmeticOperator.Subtraction;
-      }
-      else {
-        ascDescOperator = ArithmeticOperator.Addition;
-      }
-
+      // create "lhs" and "rhs" local vars of the query's result type; cast and assign Object args
       compareMethod
               .append(Stmt.declareFinalVariable("lhs", resultType, Cast.to(resultType, Stmt.loadVariable("o1"))))
-              .append(Stmt.declareFinalVariable("rhs", resultType, Cast.to(resultType, Stmt.loadVariable("o2"))))
-              .append(Stmt.declareVariable("result", int.class))
-              .append(Stmt.loadVariable("result").assignValue(Stmt.nestedCall(lhs).invoke("compareTo", rhs)))
-              .append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("result"), 0))
-                      .append(Stmt.nestedCall(Arith.expr(ascDescOperator, Stmt.loadVariable("result"))).returnValue())
-                      .finish())
-              .append(Stmt.loadLiteral(0).returnValue());
+              .append(Stmt.declareFinalVariable("rhs", resultType, Cast.to(resultType, Stmt.loadVariable("o2"))));
+
+      // Create resolvers that will generate Statements based on the "lhs" and "rhs" vars
+      JavaDotNodeResolver lhsResolver = new JavaDotNodeResolver("lhs");
+      JavaDotNodeResolver rhsResolver = new JavaDotNodeResolver("rhs");
+
+      // orderNode is the iteration variable that points to the current ORDER BY subclause
+      AST orderNode = traverser.next();
+
+      // result variable to hold the comparison result of each ORDER BY subclause
+      compareMethod.append(Stmt.declareVariable("result", int.class));
+
+      while (traverser.context().contains(orderByParentNode)) {
+        Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), lhsResolver));
+        Statement rhs = generateExpression(new AstInorderTraversal(orderNode), rhsResolver);
+
+        for (Statement var : lhsResolver.getRequiredLocalVariables()) {
+          compareMethod.append(var);
+        }
+        lhsResolver.getRequiredLocalVariables().clear(); // XXX shitty API
+
+        // Determine if this subclause is marked ASCENDING or DESCENDING, and if so, skip over that node
+        traverser.fastForwardToNextSiblingOf(orderNode);
+        AST nextNode = traverser.hasNext() ? traverser.next() : null;
+        ArithmeticOperator ascDescOperator;
+        if (nextNode != null && nextNode.getType() == HqlSqlTokenTypes.DESCENDING) {
+          ascDescOperator = ArithmeticOperator.Subtraction;
+          nextNode = traverser.hasNext() ? traverser.next() : null;
+        }
+        else if (nextNode != null && nextNode.getType() == HqlSqlTokenTypes.ASCENDING) {
+          ascDescOperator = ArithmeticOperator.Addition;
+          nextNode = traverser.hasNext() ? traverser.next() : null;
+        }
+        else {
+          ascDescOperator = ArithmeticOperator.Addition;
+        }
+
+        compareMethod
+            .append(Stmt.loadVariable("result").assignValue(Stmt.nestedCall(lhs).invoke("compareTo", rhs)))
+            .append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("result"), 0))
+                .append(Stmt.nestedCall(Arith.expr(ascDescOperator, Stmt.loadVariable("result"))).returnValue())
+                .finish());
+
+        orderNode = nextNode;
+      }
+
+      // everything compared equal. return 0.
+      compareMethod.append(Stmt.loadLiteral(0).returnValue());
 
       comparator = compareMethod.finish().finish();
     }

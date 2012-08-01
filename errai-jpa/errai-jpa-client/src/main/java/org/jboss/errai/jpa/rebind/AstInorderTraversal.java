@@ -128,6 +128,7 @@ public class AstInorderTraversal implements Iterator<AST> {
     }
     return null;
   }
+
   /**
    * Not implemented.
    *
