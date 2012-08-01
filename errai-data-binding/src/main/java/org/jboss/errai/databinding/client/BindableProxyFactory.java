@@ -68,7 +68,7 @@ public class BindableProxyFactory {
    *          Specifies the origin of the initial state of both model and UI widget.
    * @return proxy that can be used in place of the model instance.
    */
-  public static <T> T getBindableProxy(Class<?> bindableType, InitialState state) {
+  public static <T> T getBindableProxy(Class<T> bindableType, InitialState state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(bindableType);
 
     BindableProxy<?> proxy = proxyProvider.getBindableProxy(state);
