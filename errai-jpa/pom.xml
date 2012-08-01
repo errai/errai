@@ -15,5 +15,6 @@
   
   <modules>
     <module>errai-jpa-client</module>
+    <module>demos/errai-jpa-demo-grocery-list</module>
   </modules>
 </project>
