@@ -132,7 +132,6 @@ public class TypeInjector extends AbstractInjector {
       }
     }
 
-
     final InjectionContext injectContext = injectableInstance.getInjectionContext();
     final IOCProcessingContext ctx = injectContext.getProcessingContext();
 
@@ -221,11 +220,11 @@ public class TypeInjector extends AbstractInjector {
       retVal = loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
     }
 
+    setRendered(true);
+
     /*
       notify any component waiting for this type that is is ready now.
      */
-    setRendered(true);
-
     injectableInstance.getInjectionContext().getProcessingContext()
         .handleDiscoveryOfType(injectableInstance);
     /*

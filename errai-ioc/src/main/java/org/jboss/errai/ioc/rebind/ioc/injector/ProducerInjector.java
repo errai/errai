@@ -101,13 +101,6 @@ public class ProducerInjector extends AbstractInjector {
 
     singletonRendered = true;
 
-//    final Statement retVal = loadVariable("context").invoke("getSingletonInstanceOrNew",
-//        Stmt.loadVariable("injContext"),
-//        Stmt.loadVariable(creationalCallbackVarName),
-//        Stmt.load(injectedType),
-//        Stmt.load(qualifyingMetadata.getQualifiers()));
-
-
     final Statement retVal = loadVariable(instanceVarName);
 
     registerWithBeanManager(injectionContext, retVal);

@@ -205,7 +205,7 @@ public class IOCBootstrapGenerator {
               + String.valueOf(literalValue.getValue().hashCode()).replaceAll("\\-", "_");
 
           // force rendering of literals in this array first.
-          for (Annotation a : annotationSet) {
+          for (final Annotation a : annotationSet) {
             LiteralFactory.getLiteral(a).generate(buildContext);
           }
 
@@ -224,6 +224,8 @@ public class IOCBootstrapGenerator {
           }).finish();
 
           cachedArrays.put(annotationSet, fieldName);
+
+          return Refs.get(fieldName);
         }
 
         return null;
