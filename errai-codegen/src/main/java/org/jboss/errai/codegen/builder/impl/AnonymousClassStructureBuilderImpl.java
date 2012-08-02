@@ -16,6 +16,11 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.AbstractStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
@@ -30,11 +35,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -54,6 +54,7 @@ public class AnonymousClassStructureBuilderImpl
     deferredGenerateCallbacks = new ArrayList<DeferredGenerateCallback>();
   }
 
+  @Override
   public BlockBuilder<AnonymousClassStructureBuilder> initialize() {
     return new BlockBuilderImpl<AnonymousClassStructureBuilder>(
             new BuildCallback<AnonymousClassStructureBuilder>() {
@@ -125,6 +126,7 @@ public class AnonymousClassStructureBuilderImpl
             });
   }
 
+  @Override
   public BlockBuilder<AnonymousClassStructureBuilder> publicOverridesMethod(final String name, final Parameter... args) {
     final List<MetaClass> types = new ArrayList<MetaClass>();
     for (final Parameter arg : args) {
@@ -133,7 +135,8 @@ public class AnonymousClassStructureBuilderImpl
     final MetaMethod method = classDefinition.getSuperClass()
             .getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
     if (method == null)
-      throw new UndefinedMethodException("Method not found:" + name + "(" + types + ")");
+      throw new UndefinedMethodException("Can't override (inherited method not found):"
+              + classDefinition.getFullyQualifiedNameWithTypeParms() + "." + name + "(" + types + ")");
 
     return publicOverridesMethod(method, DefParameters.from(method, args));
   }
@@ -167,11 +170,11 @@ public class AnonymousClassStructureBuilderImpl
         return null;
 
       final Context subContext = Context.create(context);
-      
+
       for (final Variable v : classDefinition.getContext().getDeclaredVariables()) {
         subContext.addVariable(v);
       }
-      
+
       subContext.addVariable(Variable.create("this", getClassDefinition()));
 
       final StringBuilder buf = new StringBuilder(256);
@@ -194,6 +197,7 @@ public class AnonymousClassStructureBuilderImpl
   }
 
 
+  @Override
   public BuildMetaClass getClassDefinition() {
     return classDefinition;
   }
