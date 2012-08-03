@@ -35,6 +35,7 @@ import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -45,6 +46,7 @@ import javax.inject.Named;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -236,6 +238,38 @@ public class TypeInjector extends AbstractInjector {
     return retVal;
   }
 
+  private Set<Annotation> makeSpecialized(final InjectionContext context) {
+    final MetaClass type = getInjectedType();
+
+    if (type.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
+      throw new InjectionFailure("the specialized bean " + type.getFullyQualifiedName() + " must directly inherit "
+          + "from another bean");
+    }
+
+    final Set<Annotation> qualifiers = new HashSet<Annotation>();
+
+    MetaClass cls = type;
+    while ((cls = cls.getSuperClass()) != null && !cls.getFullyQualifiedName().equals(Object.class.getName())) {
+      if (!context.hasInjectorForType(cls)) {
+        context.addType(cls);
+      }
+
+      context.declareOverridden(cls);
+
+      final List<Injector> injs = context.getInjectors(cls);
+
+      for (Injector inj : injs) {
+        if (this.beanName == null) {
+          this.beanName = inj.getBeanName();
+        }
+
+        inj.setEnabled(false);
+        qualifiers.addAll(Arrays.asList(inj.getQualifyingMetadata().getQualifiers()));
+      }
+    }
+
+    return qualifiers;
+  }
 
   public boolean isPseudo() {
     return replaceable;

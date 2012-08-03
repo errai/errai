@@ -75,6 +75,8 @@ public class InjectionContext {
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
 
+  private final Set<Object> overridenTypesAndMembers = new HashSet<Object>();
+
   private final Map<MetaParameter, Statement> inlineBeanReferenceMap = new HashMap<MetaParameter, Statement>();
 
   private final Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
@@ -82,6 +84,9 @@ public class InjectionContext {
 
   private final Map<String, Object> attributeMap = new HashMap<String, Object>();
   private final Set<String> exposedMembers = new HashSet<String>();
+
+  private final Multimap<String, InjectorRegistrationListener> injectionRegistrationListener
+      = HashMultimap.create();
 
   private final GraphBuilder graphBuilder = new GraphBuilder();
 
@@ -160,6 +165,15 @@ public class InjectionContext {
       }
     }
 
+    if (matching.size() > 1 && (!type.isInterface() && !type.isAbstract())) {
+      // perform second pass
+      final Iterator<Injector> secondIter = matching.iterator();
+      while (secondIter.hasNext()) {
+        if (!secondIter.next().getInjectedType().equals(erased))
+          secondIter.remove();
+      }
+    }
+
     if (matching.isEmpty()) {
       throw new InjectionFailure(erased);
     }
@@ -218,7 +232,7 @@ public class InjectionContext {
   public boolean isTypeInjectable(final MetaClass type) {
     final List<Injector> injectorList = injectors.get(type);
     if (injectorList != null) {
-      for (Injector injector : injectorList) {
+      for (final Injector injector : injectorList) {
         if (!injector.isRendered()) {
           return false;
         }
@@ -291,6 +305,14 @@ public class InjectionContext {
     return false;
   }
 
+  public List<Injector> getInjectors(final MetaClass type) {
+    List<Injector> injectorList = injectors.get(type);
+    if (injectorList == null) {
+      injectorList = Collections.emptyList();
+    }
+    return Collections.unmodifiableList(injectorList);
+  }
+
   public Injector getInjector(final Class<?> injectorType) {
     return getInjector(MetaClassFactory.get(injectorType));
   }
@@ -316,9 +338,19 @@ public class InjectionContext {
             }
           }
         }
-        else if (inj.getQualifyingTypeInformation() == null) {
+
+        if (!inj.isEnabled()) {
           iter.remove();
         }
+      }
+    }
+
+    if (injectorList.size() > 1) {
+      // perform second pass
+      final Iterator<Injector> secondIter = injectorList.iterator();
+      while (secondIter.hasNext()) {
+        if (!secondIter.next().getInjectedType().equals(erased))
+          secondIter.remove();
       }
     }
 
@@ -337,7 +369,7 @@ public class InjectionContext {
     registerInjector(injector.getInjectedType(), injector, new HashSet<MetaClass>(), true);
   }
 
-  private void registerInjector(MetaClass type, Injector injector, Set<MetaClass> processedTypes, boolean allowOverride) {
+  private void registerInjector(final MetaClass type, final Injector injector, final Set<MetaClass> processedTypes, final boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
 
     if (injectorList == null) {
@@ -357,13 +389,15 @@ public class InjectionContext {
 
     registerInjectorsForSuperTypesAndInterfaces(type, injector, processedTypes);
     injectorList.add(injector);
+
+    notifyInjectorRegistered(injector);
   }
 
-  private void registerInjectorsForSuperTypesAndInterfaces(MetaClass type, Injector injector,
-                                                           Set<MetaClass> processedTypes) {
+  private void registerInjectorsForSuperTypesAndInterfaces(final MetaClass type, final Injector injector,
+                                                           final Set<MetaClass> processedTypes) {
     MetaClass cls = type;
     do {
-      if (cls != type && cls.isPublic() && (cls.isAbstract() || cls.isInterface())) {
+      if (cls != type && cls.isPublic()) {
         if (processedTypes.add(cls)) {
           final QualifiedTypeInjectorDelegate injectorDelegate =
               new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
@@ -385,7 +419,7 @@ public class InjectionContext {
         }
       }
     }
-    while ((cls = cls.getSuperClass()) != null);
+    while ((cls = cls.getSuperClass()) != null && !cls.getFullyQualifiedName().equals("java.lang.Object"));
   }
 
   public void registerDecorator(final IOCDecoratorExtension<?> iocExtension) {
@@ -444,6 +478,22 @@ public class InjectionContext {
       return;
     }
     privateMethodsToExpose.add(method);
+  }
+
+  public void declareOverridden(final MetaClass type) {
+    overridenTypesAndMembers.add(type);
+  }
+
+  public void declareOverridden(final MetaMethod method) {
+    overridenTypesAndMembers.add(method);
+  }
+
+  public boolean isOverridden(final MetaClass type) {
+    return overridenTypesAndMembers.contains(type);
+  }
+
+  public boolean isOverridden(final MetaMethod method) {
+    return overridenTypesAndMembers.contains(method);
   }
 
   public Map<MetaField, PrivateAccessType> getPrivateFieldsToExpose() {
@@ -552,6 +602,28 @@ public class InjectionContext {
       openProxy = false;
     }
     allowProxyCapture = false;
+  }
+
+  public void addInjectorRegistrationListener(final MetaClass clazz, final InjectorRegistrationListener listener) {
+    injectionRegistrationListener.put(clazz.getFullyQualifiedName(), listener);
+
+    if (injectors.containsKey(clazz)) {
+      final List<Injector> injectors = this.injectors.get(clazz);
+      for (final Injector injector : injectors) {
+        listener.onRegister(clazz, injector);
+      }
+    }
+  }
+
+  private void notifyInjectorRegistered(final Injector injector) {
+    if (injectionRegistrationListener.containsKey(injector.getInjectedType().getFullyQualifiedName())) {
+      final Collection<InjectorRegistrationListener> injectorRegistrationListeners
+          = injectionRegistrationListener.get(injector.getInjectedType().getFullyQualifiedName());
+
+      for (final InjectorRegistrationListener listener : injectorRegistrationListeners) {
+        listener.onRegister(injector.getInjectedType(), injector);
+      }
+    }
   }
 
   public void setAttribute(final String name, final Object value) {

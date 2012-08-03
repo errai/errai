@@ -41,7 +41,7 @@ import java.util.Set;
  * @author Mike Brock .
  */
 public class JSR330QualifyingMetadata implements QualifyingMetadata {
-  private Set<Annotation> qualifiers;
+  private final Set<Annotation> qualifiers;
 
 
   public JSR330QualifyingMetadata(final Collection<Annotation> qualifiers) {

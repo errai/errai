@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
+
 import com.google.gwt.core.ext.TreeLogger.Type;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -64,9 +67,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
-
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
@@ -182,12 +182,12 @@ public class IOCProcessorFactory {
 
                 if (providerInterface == null) {
                   throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
-                          + " must directly implement " + Provider.class.getName());
+                      + " must directly implement " + Provider.class.getName());
                 }
 
                 if (providerInterface.getParameterizedType() == null) {
                   throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
-                          + " must use a parameterized " + Provider.class.getName() + " interface type.");
+                      + " must use a parameterized " + Provider.class.getName() + " interface type.");
                 }
 
                 final MetaType parmType = providerInterface.getParameterizedType().getTypeParameters()[0];
@@ -209,12 +209,12 @@ public class IOCProcessorFactory {
 
                 if (providerInterface == null) {
                   throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
-                          + " must directly implement " + ContextualTypeProvider.class.getName());
+                      + " must directly implement " + ContextualTypeProvider.class.getName());
                 }
 
                 if (providerInterface.getParameterizedType() == null) {
                   throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
-                          + " must use a parameterized " + ContextualTypeProvider.class.getName() + " interface type.");
+                      + " must use a parameterized " + ContextualTypeProvider.class.getName() + " interface type.");
                 }
 
                 final MetaType parmType = providerInterface.getParameterizedType().getTypeParameters()[0];
@@ -229,7 +229,7 @@ public class IOCProcessorFactory {
               }
               else {
                 throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
-                        + " does not implement: " + Provider.class.getName() + " or " + ContextualTypeProvider.class);
+                    + " does not implement: " + Provider.class.getName() + " or " + ContextualTypeProvider.class);
               }
 
               injectionContext.getGraphBuilder().addDependency(providedType, Dependency.on(providerClassType));
@@ -245,7 +245,7 @@ public class IOCProcessorFactory {
               return true;
             }
           }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
-                  injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
+              injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
 
           break;
       }
@@ -284,16 +284,16 @@ public class IOCProcessorFactory {
               }
 
               final ProducerInjector producerInjector
-                      = new ProducerInjector(
-                      injectionContext,
-                      injectedType,
-                      producerMember,
-                      instance.getQualifyingMetadata(),
-                      instance);
+                  = new ProducerInjector(
+                  injectionContext,
+                  injectedType,
+                  producerMember,
+                  instance.getQualifyingMetadata(),
+                  instance);
 
               injectionContext.registerInjector(producerInjector);
 
-              control.masqueradeAs(instance.getEnclosingType());
+              control.masqueradeAs(injectedType);
 
               if (!producerMember.isStatic()) {
                 // if this is a static producer, it does not have a dependency on its parent bean
@@ -305,21 +305,27 @@ public class IOCProcessorFactory {
             public boolean handle(final InjectableInstance instance,
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
+              final List<Injector> injectors = injectionContext.getInjectors(instance.getElementTypeOrMethodReturnType());
+              for (final Injector injector : injectors) {
+                if (injector.isEnabled() && injectionContext.isTypeInjectable(injector.getEnclosingType())) {
+                  injector.getBeanInstance(instance);
+                }
+              }
               return true;
             }
 
           }, Rule.after(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
-                  injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
+              injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
           break;
 
         case DependentBean:
         case SingletonBean:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
-            public boolean handle(final InjectableInstance type,
+            public boolean handle(final InjectableInstance instance,
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
-              injectionContext.getInjector(type.getType()).getBeanInstance(type);
+              injectionContext.getInjector(instance.getType()).getBeanInstance(instance);
               return true;
             }
           });
@@ -344,8 +350,8 @@ public class IOCProcessorFactory {
             @Override
             public ElementType[] value() {
               return new ElementType[]
-                      {ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD,
-                              ElementType.METHOD, ElementType.FIELD};
+                  {ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD,
+                      ElementType.METHOD, ElementType.FIELD};
             }
 
             @Override
@@ -402,10 +408,10 @@ public class IOCProcessorFactory {
     final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/beangraph.gv");
 
     RebindUtils.writeStringToFile(dotFile,
-            "//\n" +
-                    "// Generated IOC bean dependency graph in GraphViz DOT format.\n" +
-                    "//\n\n" +
-                    GraphBuilder.toDOTRepresentation(list));
+        "//\n" +
+            "// Generated IOC bean dependency graph in GraphViz DOT format.\n" +
+            "//\n\n" +
+            GraphBuilder.toDOTRepresentation(list));
 
     for (final SortUnit unit : list) {
       if (unit.isCyclicGraph()) {
@@ -451,7 +457,7 @@ public class IOCProcessorFactory {
       }
     }
     final InjectableInstance injectableInstance
-            = getInjectedInstance(annotation, type, null, injectionContext);
+        = getInjectedInstance(annotation, type, null, injectionContext);
 
     final ProcessingDelegate del = new ProcessingDelegate() {
       @Override
@@ -465,7 +471,7 @@ public class IOCProcessorFactory {
 
         final Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = getInjectedInstance(annotation, type, injector, injectionContext);
+            = getInjectedInstance(annotation, type, injector, injectionContext);
 
         return entry.handler.handle(injectableInstance, annotation, context);
       }
@@ -500,8 +506,8 @@ public class IOCProcessorFactory {
     dependencyControl.masqueradeAs(type);
 
     final InjectableInstance injectableInstance
-            = getMethodInjectedInstance(metaMethod, null,
-            injectionContext);
+        = getMethodInjectedInstance(metaMethod, null,
+        injectionContext);
 
     final ProcessingDelegate del = new ProcessingDelegate() {
       @Override
@@ -515,8 +521,8 @@ public class IOCProcessorFactory {
 
         final Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = getMethodInjectedInstance(metaMethod, injector,
-                injectionContext);
+            = getMethodInjectedInstance(metaMethod, injector,
+            injectionContext);
 
         return entry.handler.handle(injectableInstance, annotation, context);
       }
@@ -554,8 +560,8 @@ public class IOCProcessorFactory {
       @Override
       public void processDependencies() {
         final InjectableInstance injectableInstance
-                = InjectableInstance.getFieldInjectedInstance(metaField, null,
-                injectionContext);
+            = InjectableInstance.getFieldInjectedInstance(metaField, null,
+            injectionContext);
 
         entry.handler.getDependencies(dependencyControl, injectableInstance, annotation, context);
       }
@@ -567,8 +573,8 @@ public class IOCProcessorFactory {
 
         final Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = InjectableInstance.getFieldInjectedInstance(metaField, injector,
-                injectionContext);
+            = InjectableInstance.getFieldInjectedInstance(metaField, injector,
+            injectionContext);
 
         entry.handler.registerMetadata(injectableInstance, annotation, context);
 

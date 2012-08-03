@@ -15,22 +15,33 @@ import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectorRegistrationListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+import org.mvel2.util.ReflectionUtil;
 
 import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Specializes;
+import javax.inject.Named;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -68,13 +79,40 @@ public class ProducerInjector extends AbstractInjector {
 
     this.creationalCallbackVarName = InjectUtil.getNewInjectorName() + "_" + injectedType.getName() + "_creationalCallback";
 
+    final Set<Annotation> qualifiers = new HashSet<Annotation>();
+    qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(producerMember.getAnnotations()));
+
+    if (qualifiers.isEmpty()) {
+      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
+    }
+
+    qualifiers.add(BuiltInQualifiers.ANY_INSTANCE);
+
+    qualifyingMetadata = injectionContext.getProcessingContext().getQualifyingMetadataFactory()
+        .createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
+
+    if (producerMember.isAnnotationPresent(Specializes.class)) {
+      makeSpecialized(injectionContext);
+    }
+
+    if (producerMember.isAnnotationPresent(Named.class)) {
+      final Named namedAnnotation = producerMember.getAnnotation(Named.class);
+
+      this.beanName = namedAnnotation.value().equals("")
+          ? ReflectionUtil.getPropertyFromAccessor(producerMember.getName()) : namedAnnotation.value();
+    }
+
+    if (producerMember instanceof MetaMethod && injectionContext.isOverridden((MetaMethod) producerMember)) {
+      setEnabled(false);
+    }
+
     if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
       setRendered(true);
     }
     else {
       injectionContext.getProcessingContext().registerTypeDiscoveryListener(new TypeDiscoveryListener() {
         @Override
-        public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint) {
+        public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
           if (injectionPoint.getEnclosingType().equals(enclosingType)) {
             setRendered(true);
           }
@@ -84,9 +122,8 @@ public class ProducerInjector extends AbstractInjector {
   }
 
   @Override
-  public Statement getBeanInstance(InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     final InjectionContext injectionContext = injectableInstance.getInjectionContext();
-
 
     if (isDependent()) {
       renderGlobalCreationalContext(injectableInstance, injectionContext);
@@ -124,11 +161,7 @@ public class ProducerInjector extends AbstractInjector {
     return registerDestructorCallback(injectionContext, callbackBuilder, retVal, disposerMethod);
   }
 
-  private boolean hasCompanionDisposer() {
-    return disposerMethod != null;
-  }
-
-  private MetaMethod findDisposerMethod(IOCProcessingContext ctx) {
+  private MetaMethod findDisposerMethod(final IOCProcessingContext ctx) {
     final MetaClass declaringClass = producerMember.getDeclaringClass();
 
     for (final MetaMethod method : declaringClass.getDeclaredMethods()) {
@@ -196,7 +229,7 @@ public class ProducerInjector extends AbstractInjector {
       injectionContext.getInjector(producerMember.getDeclaringClass()).addRenderingHook(
           new RenderingHook() {
             @Override
-            public void onRender(InjectableInstance instance) {
+            public void onRender(final InjectableInstance instance) {
               renderGlobalCreationalContext(injectableInstance, injectionContext);
             }
           }
@@ -238,12 +271,19 @@ public class ProducerInjector extends AbstractInjector {
 
     registerWithBeanManager(injectionContext, null);
 
+    final Injector injector = injectionContext.getInjector(producerMember.getDeclaringClass());
+    if (injector.isDependent()) {
+      injectionContext.getProcessingContext()
+          .appendToEnd(
+              Stmt.loadVariable(injector.getCreationalCallbackVarName()).invoke("getInstance", Refs.get("context"))
+          );
+    }
+
     injectionContext.getProcessingContext().popBlockBuilder();
   }
 
 
-  public Statement getValueStatement(InjectionContext injectionContext, Statement beanRef) {
-
+  public Statement getValueStatement(final InjectionContext injectionContext, final Statement beanRef) {
     if (producerMember instanceof MetaMethod) {
       final MetaMethod producerMethod = (MetaMethod) producerMember;
 
@@ -270,6 +310,73 @@ public class ProducerInjector extends AbstractInjector {
     }
   }
 
+  private void makeSpecialized(final InjectionContext context) {
+    final MetaClass type = getInjectedType();
+
+    if (!(producerMember instanceof MetaMethod)) {
+      throw new InjectionFailure("cannot specialize a field-based producer: " + producerMember);
+    }
+
+    final MetaMethod producerMethod = (MetaMethod) producerMember;
+
+    if (producerMethod.isStatic()) {
+      throw new InjectionFailure("cannot specialize a static producer method: " + producerMethod);
+    }
+
+    if (type.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
+      throw new InjectionFailure("the specialized producer " + producerMember + " must override "
+          + "another producer");
+    }
+
+
+    context.addInjectorRegistrationListener(getInjectedType(),
+        new InjectorRegistrationListener() {
+          @Override
+          public void onRegister(final MetaClass type, final Injector injector) {
+            MetaClass cls = producerMember.getDeclaringClass();
+            while ((cls = cls.getSuperClass()) != null && !cls.getFullyQualifiedName().equals(Object.class.getName())) {
+              if (!context.hasInjectorForType(cls)) {
+                context.addType(cls);
+              }
+
+              final MetaMethod declaredMethod
+                  = cls.getDeclaredMethod(producerMethod.getName(), GenUtil.fromParameters(producerMethod.getParameters()));
+
+              context.declareOverridden(declaredMethod);
+
+              updateQualifiersAndName(producerMethod, context);
+            }
+          }
+        });
+  }
+
+  private void updateQualifiersAndName(final MetaMethod producerMethod, final InjectionContext context) {
+    if (!context.hasInjectorForType(getInjectedType())) return;
+
+    final Set<Annotation> qualifiers = new HashSet<Annotation>();
+    qualifiers.addAll(Arrays.asList(qualifyingMetadata.getQualifiers()));
+
+    for (final Injector injector : context.getInjectors(getInjectedType())) {
+      if (injector != this
+          && injector instanceof ProducerInjector
+          && methodSignatureMaches((MetaMethod) ((ProducerInjector) injector).producerMember, producerMethod)) {
+        if (this.beanName == null) {
+          this.beanName = injector.getBeanName();
+        }
+
+        injector.setEnabled(false);
+        qualifiers.addAll(Arrays.asList(injector.getQualifyingMetadata().getQualifiers()));
+      }
+    }
+
+    qualifyingMetadata = context.getProcessingContext()
+        .getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
+  }
+
+  private static boolean methodSignatureMaches(MetaMethod a, MetaMethod b) {
+    if (!a.getName().equals(b.getName())) return false;
+    return Arrays.equals(GenUtil.fromParameters(a.getParameters()), GenUtil.fromParameters(b.getParameters()));
+  }
 
   @Override
   public boolean isStatic() {

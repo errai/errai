@@ -52,6 +52,17 @@ public class BootstrapperInjectionContext {
     manager.addBean(type, callback, instance, qualifiers, name);
   }
 
+  @SuppressWarnings("unchecked")
+  public void addBean(final Class type,
+                      final CreationalCallback callback,
+                      final Object instance,
+                      final Annotation[] qualifiers,
+                      final String name,
+                      final boolean concrete) {
+
+    manager.addBean(type, callback, instance, qualifiers, name, concrete);
+  }
+
   public CreationalContext getRootContext() {
     return rootContext;
   }

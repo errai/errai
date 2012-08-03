@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,21 +48,26 @@ public class IOCBeanManager {
   private final Map<Object, Object> proxyLookupForManagedBeans
       = new IdentityHashMap<Object, Object>();
 
+  private final Set<String> concreteBeans
+      = new HashSet<String>();
+
   private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
-                                                   final CreationalCallback<Object> callback,
-                                                   final Object instance,
-                                                   final Annotation[] qualifiers,
-                                                   final String name) {
-    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, qualifiers, name, callback, instance);
+                                                    final CreationalCallback<Object> callback,
+                                                    final Object instance,
+                                                    final Annotation[] qualifiers,
+                                                    final String name,
+                                                    final boolean concrete) {
+    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, qualifiers, name, concrete, callback, instance);
     registerBean(bean);
     return bean;
   }
 
   private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
-                                                   final CreationalCallback<Object> callback,
-                                                   final Annotation[] qualifiers,
-                                                   final String name) {
-    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, qualifiers, name, callback);
+                                                    final CreationalCallback<Object> callback,
+                                                    final Annotation[] qualifiers,
+                                                    final String name,
+                                                    final boolean concrete) {
+    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, qualifiers, name, concrete, callback);
     registerBean(bean);
     return bean;
   }
@@ -70,18 +76,20 @@ public class IOCBeanManager {
                                      final CreationalCallback<Object> callback,
                                      final Object instance,
                                      final Annotation[] qualifiers,
-                                     final String beanName) {
+                                     final String beanName,
+                                     final boolean concrete) {
 
 
-    _registerNamedBean(beanName, _registerSingletonBean(type, callback, instance, qualifiers, beanName));
+    _registerNamedBean(beanName, _registerSingletonBean(type, callback, instance, qualifiers, beanName, concrete));
   }
 
   private void registerDependentBean(final Class<Object> type,
                                      final CreationalCallback<Object> callback,
                                      final Annotation[] qualifiers,
-                                     final String beanName) {
+                                     final String beanName,
+                                     final boolean concrete) {
 
-    _registerNamedBean(beanName, _registerDependentBean(type, callback, qualifiers, beanName));
+    _registerNamedBean(beanName, _registerDependentBean(type, callback, qualifiers, beanName, concrete));
   }
 
   private void _registerNamedBean(final String name,
@@ -113,13 +121,9 @@ public class IOCBeanManager {
                       final Object instance,
                       final Annotation[] qualifiers) {
 
-    if (instance != null) {
-      registerSingletonBean(type, callback, instance, qualifiers, null);
-    }
-    else {
-      registerDependentBean(type, callback, qualifiers, null);
-    }
+    addBean(type, callback, instance, qualifiers, null, true);
   }
+
 
   /**
    * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
@@ -143,11 +147,45 @@ public class IOCBeanManager {
                       final Annotation[] qualifiers,
                       final String name) {
 
+    addBean(type, callback, instance, qualifiers, name, true);
+  }
+
+
+  /**
+   * Register a bean with the manager with a name as well as specifying whether the bean should be treated a concrete
+   * type. This is usually called by the generated code to advertise the bean. Adding beans at runtime will make beans
+   * available for lookup through the BeanManager, but will not in any way alter the wiring scenario of auto-discovered
+   * beans at runtime.
+   *
+   * @param type
+   *     the bean type
+   * @param callback
+   *     the creational callback used to construct the bean
+   * @param instance
+   *     the instance reference
+   * @param qualifiers
+   *     any qualifiers
+   * @param name
+   *     the name of the bean
+   * @param concreteType
+   *     true if bean should be treated as concrete (ie. not an interface or abstract type).
+   */
+  public void addBean(final Class<Object> type,
+                      final CreationalCallback<Object> callback,
+                      final Object instance,
+                      final Annotation[] qualifiers,
+                      final String name,
+                      final boolean concreteType) {
+
+    if (concreteType) {
+      concreteBeans.add(type.getName());
+    }
+
     if (instance != null) {
-      registerSingletonBean(type, callback, instance, qualifiers, name);
+      registerSingletonBean(type, callback, instance, qualifiers, name, concreteType);
     }
     else {
-      registerDependentBean(type, callback, qualifiers, name);
+      registerDependentBean(type, callback, qualifiers, name, concreteType);
     }
   }
 
@@ -250,10 +288,9 @@ public class IOCBeanManager {
    * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
    *
    * @param name
-   *    the name of bean to lookup
+   *     the name of bean to lookup
    *
-   * @return
-   *    and unmodifiable list of all beans with the specified name.
+   * @return and unmodifiable list of all beans with the specified name.
    */
   public Collection<IOCBeanDef> lookupBeans(final String name) {
     final List<IOCBeanDef> beans = namedBeans.get(name);
@@ -270,7 +307,6 @@ public class IOCBeanManager {
    *
    * @param type
    *     The type of the bean
-
    *
    * @return An unmodifiable list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
@@ -295,13 +331,12 @@ public class IOCBeanManager {
    * @param qualifiers
    *     qualifiers to match
    *
-   * @return
-   *      An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
-   *      if no beans match. Null if the bean type is unknown.
+   * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
+   *         if no beans match. Null if the bean type is unknown.
    */
   @SuppressWarnings("unchecked")
-  public  List<IOCBeanDef> lookupBeans(final Class type, final Annotation... qualifiers) {
-    final List<IOCBeanDef> beanList =  beanMap.get(type);
+  public List<IOCBeanDef> lookupBeans(final Class type, final Annotation... qualifiers) {
+    final List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return null;
     }
@@ -318,6 +353,15 @@ public class IOCBeanManager {
     for (final IOCBeanDef iocBean : beanList) {
       if (iocBean.matches(qualSet)) {
         matching.add(iocBean);
+      }
+    }
+
+    if (matching.size() > 1 && concreteBeans.contains(type.getName())) {
+      // perform second pass
+      final Iterator<IOCBeanDef> secondIter = matching.iterator();
+      while (secondIter.hasNext()) {
+        if (!secondIter.next().isConcrete())
+          secondIter.remove();
       }
     }
 

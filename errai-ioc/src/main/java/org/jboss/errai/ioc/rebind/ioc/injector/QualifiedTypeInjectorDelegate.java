@@ -133,16 +133,20 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   @Override
   public void registerWithBeanManager(final InjectionContext context,
                                       final Statement valueRef) {
+
+    if (!delegate.isEnabled()) {
+      return;
+    }
+
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       QualifyingMetadata md = delegate.getQualifyingMetadata();
       if (md == null) {
         md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
       }
-
       context.getProcessingContext().appendToEnd(
               Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
                       .invoke("addBean", type, Refs.get(getCreationalCallbackVarName()),
-                              isSingleton() ? valueRef : null , md.render()));
+                              isSingleton() ? valueRef : null, md.render(), null, false));
       
       for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);

@@ -33,6 +33,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
                              final Class<T> type,
                              final Annotation[] qualifiers,
                              final String name,
+                             final boolean concrete,
                              final CreationalCallback<T> creationalCallback) {
     this.beanManager = beanManager;
     this.type = type;
@@ -41,6 +42,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
       Collections.addAll(this.qualifiers, qualifiers);
     }
     this.name = name;
+    this.concrete = concrete;
     this.creationalCallback = creationalCallback;
   }
 
@@ -48,8 +50,9 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
                                           final Class<T> type,
                                           final Annotation[] qualifiers,
                                           final String name,
+                                          final boolean concrete,
                                           final CreationalCallback<T> callback) {
-    return new IOCDependentBean<T>(beanManager, type, qualifiers, name, callback);
+    return new IOCDependentBean<T>(beanManager, type, qualifiers, name, concrete, callback);
   }
 
   @Override

@@ -4,17 +4,21 @@ package org.jboss.errai.cdi.producer.client.test;
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumersMultiProducers;
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducer;
+import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducerB;
 import org.jboss.errai.cdi.producer.client.DepBeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.DependentProducedBeanDependentBean;
 import org.jboss.errai.cdi.producer.client.Fooblie;
 import org.jboss.errai.cdi.producer.client.FooblieDependentBean;
 import org.jboss.errai.cdi.producer.client.FooblieMaker;
+import org.jboss.errai.cdi.producer.client.Kayak;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBeanWithCycle;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.cdi.producer.client.SingletonProducedBeanDependentBean;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
 import java.util.List;
 
@@ -43,36 +47,36 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
 
   public void testInjectionUsingProducerField() {
     assertEquals("Failed to inject produced @A",
-            module.getNumberA(),
-            testBean.getIntegerA());
+        module.getNumberA(),
+        testBean.getIntegerA());
   }
 
   public void testInjectionUsingProducerMethod() {
     assertEquals("Failed to inject produced @B",
-            module.getNumberB(),
-            testBean.getIntegerB());
+        module.getNumberB(),
+        testBean.getIntegerB());
   }
 
   public void testInjectionUsingDependentProducerMethods() {
     assertEquals("Failed to inject produced @C",
-            module.getNumberC(),
-            testBean.getIntegerC());
+        module.getNumberC(),
+        testBean.getIntegerC());
 
     assertEquals("Failed to inject produced String depending on @C",
-            module.getNumberC().toString(),
-            testBean.getProducedString());
+        module.getNumberC().toString(),
+        testBean.getProducedString());
   }
 
   public void testAnyQualifiedInjection() {
     assertEquals("Failed to inject produced @D @E as @Any",
-            module.getFloatDE(),
-            testBean.getUnqualifiedFloat());
+        module.getFloatDE(),
+        testBean.getUnqualifiedFloat());
   }
 
   public void testSubsetQualifiedInjection() {
     assertEquals("Failed to inject produced @D @E as @D",
-            module.getFloatDE(),
-            testBean.getFloatD());
+        module.getFloatDE(),
+        testBean.getFloatD());
   }
 
   public void testCyclicalDependencyWasSatisfied() {
@@ -92,7 +96,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
 
   public void testCycleThroughAProducedInterface() {
     final ProducerDependentTestBeanWithCycle bean = IOC.getBeanManager()
-            .lookupBean(ProducerDependentTestBeanWithCycle.class).getInstance();
+        .lookupBean(ProducerDependentTestBeanWithCycle.class).getInstance();
 
     assertNotNull(bean);
     assertNotNull(bean.getFooface());
@@ -122,28 +126,53 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(bean.getThang().getThang());
   }
 
+  public void testNormalBeanCanConsumeOwnProducerAsFieldInjectionMixedWithConstrInjection() {
+    final BeanConsumesOwnProducerB bean = IOC.getBeanManager().lookupBean(BeanConsumesOwnProducerB.class).getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getFactory());
+    assertNotNull(bean.getThing());
+    assertNotNull(bean.getThung());
+  }
+
   public void testProducersObserveSingletonScope() {
-    final SingletonProducedBeanDependentBean bean = IOC.getBeanManager().lookupBean(SingletonProducedBeanDependentBean.class)
-            .getInstance();
+    final IOCBeanManager beanManager = IOC.getBeanManager();
+
+    final IOCBeanDef<Kayak> kayakBean = beanManager.lookupBean(Kayak.class);
+    assertNotNull(kayakBean);
+
+    final SingletonProducedBeanDependentBean bean = beanManager.lookupBean(SingletonProducedBeanDependentBean.class)
+        .getInstance();
 
     assertNotNull(bean);
     assertNotNull(bean.getKayakA());
     assertNotNull(bean.getKayakB());
     assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), bean.getKayakB().getId());
 
-    final DependentProducedBeanDependentBean beanB = IOC.getBeanManager().lookupBean(DependentProducedBeanDependentBean.class)
-            .getInstance();
+    final DependentProducedBeanDependentBean beanB = beanManager.lookupBean(DependentProducedBeanDependentBean.class)
+        .getInstance();
 
     assertNotNull(beanB);
     assertNotNull(beanB.getKayakA());
     assertNotNull(beanB.getKayakB());
     assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakA().getId());
     assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakB().getId());
+
+    final Kayak kayakBeanInstance = kayakBean.getInstance();
+
+    assertNotNull(kayakBeanInstance);
+    assertEquals("manual lookup should produce the same bean",
+        kayakBeanInstance.getId(), beanB.getKayakA().getId());
+
+    final Kayak newKayak = kayakBean.newInstance();
+
+    assertNotNull(newKayak);
+    assertFalse("new Kayak should have new ID", kayakBeanInstance.getId() == newKayak.getId());
   }
 
   public void testComplexConstructorInjectionScenario() {
     final BeanConstrConsumersMultiProducers bean = IOC.getBeanManager().lookupBean(BeanConstrConsumersMultiProducers.class)
-            .getInstance();
+        .getInstance();
 
     assertNotNull(bean);
     assertNotNull(bean.getGreeting());
@@ -156,9 +185,9 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     final FooblieMaker maker = IOC.getBeanManager().lookupBean(FooblieMaker.class).getInstance();
 
     final FooblieDependentBean fooblieDependentBean1
-            = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
+        = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
     final FooblieDependentBean fooblieDependentBean2
-            = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
+        = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
 
     IOC.getBeanManager().destroyBean(fooblieDependentBean1);
     IOC.getBeanManager().destroyBean(fooblieDependentBean2);

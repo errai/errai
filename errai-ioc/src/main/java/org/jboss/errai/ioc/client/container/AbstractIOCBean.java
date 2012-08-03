@@ -29,6 +29,7 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
   protected String name;
   protected Class<T> type;
   protected Set<Annotation> qualifiers;
+  protected boolean concrete;
 
   /**
    * Returns the absolute type of the bean
@@ -43,6 +44,10 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
   @Override
   public String getName() {
     return name;
+  }
+
+  public boolean isConcrete() {
+    return concrete;
   }
 
   /**

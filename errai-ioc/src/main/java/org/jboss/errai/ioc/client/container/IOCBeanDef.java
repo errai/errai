@@ -76,4 +76,11 @@ public interface IOCBeanDef<T> {
    * @return the name of the bean. If the bean does not have a name, returns null.
    */
   public String getName();
+
+  /**
+   * Returns true if the bean is a concrete bean definition and not an interface or abstract type.
+   *
+   * @return true if concrete.
+   */
+  public boolean isConcrete();
 }

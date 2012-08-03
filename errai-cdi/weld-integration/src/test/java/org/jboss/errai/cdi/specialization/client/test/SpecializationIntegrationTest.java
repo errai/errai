@@ -4,6 +4,8 @@ import org.jboss.errai.cdi.specialization.client.Expensive;
 import org.jboss.errai.cdi.specialization.client.Landowner;
 import org.jboss.errai.cdi.specialization.client.Lazy;
 import org.jboss.errai.cdi.specialization.client.LazyFarmer;
+import org.jboss.errai.cdi.specialization.client.Necklace;
+import org.jboss.errai.cdi.specialization.client.Product;
 import org.jboss.errai.cdi.specialization.client.Sparkly;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -14,6 +16,7 @@ import javax.enterprise.inject.Default;
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -80,10 +83,31 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     }
   };
 
-//  public void testSpecializingProducerMethod() {
-//    final List<IOCBeanDef> expensiveNecklaceBeans
-//        = IOC.getBeanManager().lookupBeans(Necklace.class, EXPENSIVE_LITERAL);
-//
-//    assertEquals(1, expensiveNecklaceBeans.size());
-//  }
+  public void testSpecializingProducerMethod() {
+    final List<IOCBeanDef> expensiveNecklaceBeans
+        = IOC.getBeanManager().lookupBeans(Necklace.class, EXPENSIVE_LITERAL);
+
+    assertEquals(1, expensiveNecklaceBeans.size());
+
+    final IOCBeanDef<Necklace> expensiveNecklaceBean = expensiveNecklaceBeans.iterator().next();
+
+    final Set<Annotation> expensiveNecklaceQualifiers = expensiveNecklaceBean.getQualifiers();
+    assertEquals(4, expensiveNecklaceQualifiers.size());
+    assertTrue(annotationSetMatches(expensiveNecklaceQualifiers, Expensive.class, Sparkly.class, Any.class, Named.class));
+
+    final List<IOCBeanDef> sparklyNecklaceBeans = IOC.getBeanManager().lookupBeans(Necklace.class, SPARKLY_LITERAL);
+    assertEquals(1, sparklyNecklaceBeans.size());
+    IOCBeanDef<Necklace> sparklyBean = sparklyNecklaceBeans.iterator().next();
+    assertEquals("expensiveGift", sparklyBean.getName());
+  }
+
+  public void testSpecializingBeanInjection() {
+    final IOCBeanDef<Product> productBean = IOC.getBeanManager().lookupBean(Product.class, EXPENSIVE_LITERAL);
+    assertNotNull(productBean);
+
+    Product product = productBean.getInstance();
+
+    assertTrue(product instanceof Necklace);
+    assertEquals(product.getPrice(), 10);
+  }
 }

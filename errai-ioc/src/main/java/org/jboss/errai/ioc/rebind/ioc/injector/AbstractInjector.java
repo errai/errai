@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
@@ -33,10 +32,7 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import javax.enterprise.inject.New;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public abstract class AbstractInjector implements Injector {
   protected QualifyingMetadata qualifyingMetadata;
@@ -228,12 +224,12 @@ public abstract class AbstractInjector implements Injector {
       if (beanName == null) {
         statement = loadVariable(context.getProcessingContext().getContextVariableReference())
             .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                isSingleton() ? valueRef : null, qualifyingMetadata.render());
+                isSingleton() ? valueRef : null, qualifyingMetadata.render(), null, true);
       }
       else {
         statement = loadVariable(context.getProcessingContext().getContextVariableReference())
             .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                isSingleton() ? valueRef : null, qualifyingMetadata.render(), beanName);
+                isSingleton() ? valueRef : null, qualifyingMetadata.render(), beanName, true);
       }
 
       context.getProcessingContext().appendToEnd(statement);
@@ -283,34 +279,6 @@ public abstract class AbstractInjector implements Injector {
     }
   }
 
-  protected Set<Annotation> makeSpecialized(final InjectionContext context) {
-    final MetaClass type = getInjectedType();
-
-    if (type.getSuperClass().getFullyQualifiedName().equals(Object.class.getName())) {
-      throw new InjectionFailure("the specialized bean " + type.getFullyQualifiedName() + " must directly inherit "
-          + "from another bean");
-    }
-
-    final Set<Annotation> qualifiers = new HashSet<Annotation>();
-
-    MetaClass cls = type;
-    while ((cls = cls.getSuperClass()) != null && !cls.getFullyQualifiedName().equals(Object.class.getName())) {
-      if (!context.hasInjectorForType(cls)) {
-        context.addType(cls);
-      }
-
-      final Injector inj = context.getInjector(cls);
-
-      if (this.beanName == null) {
-        this.beanName = inj.getBeanName();
-      }
-
-      inj.setEnabled(false);
-      qualifiers.addAll(Arrays.asList(inj.getQualifyingMetadata().getQualifiers()));
-    }
-
-    return qualifiers;
-  }
 
   protected static boolean hasNewQualifier(final InjectableInstance instance) {
     if (instance != null) {
