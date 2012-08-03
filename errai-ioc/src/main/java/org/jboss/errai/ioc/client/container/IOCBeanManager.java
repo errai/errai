@@ -336,7 +336,18 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public List<IOCBeanDef> lookupBeans(final Class type, final Annotation... qualifiers) {
-    final List<IOCBeanDef> beanList = beanMap.get(type);
+    final List<IOCBeanDef> beanList;
+
+    if (type.getName().equals("java.lang.Object")) {
+      beanList = new ArrayList<IOCBeanDef>();
+      for (final List<IOCBeanDef> list : beanMap.values()) {
+        beanList.addAll(list);
+      }
+    }
+    else {
+      beanList = beanMap.get(type);
+    }
+
     if (beanList == null) {
       return null;
     }
