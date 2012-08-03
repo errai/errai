@@ -80,7 +80,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertEquals(testBean.getIntegerA(), testBean.getIntegerA());
     assertEquals(testBean.getIntegerB(), testBean.getIntegerB());
 
-    String val = "TestFieldABC";
+    final String val = "TestFieldABC";
     testBean.setTestField(val);
     assertEquals(val, testBean.getTestField());
   }
@@ -91,7 +91,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testCycleThroughAProducedInterface() {
-    ProducerDependentTestBeanWithCycle bean = IOC.getBeanManager()
+    final ProducerDependentTestBeanWithCycle bean = IOC.getBeanManager()
             .lookupBean(ProducerDependentTestBeanWithCycle.class).getInstance();
 
     assertNotNull(bean);
@@ -100,14 +100,14 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testBeanCanConsumeProducerFromItself() {
-    BeanConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(BeanConsumesOwnProducer.class).getInstance();
+    final BeanConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(BeanConsumesOwnProducer.class).getInstance();
 
     assertNotNull(bean);
     assertNotNull("bean did not inject its own producer", bean.getMagic());
   }
 
   public void testBeanCanConsumerProducerFromItselfThroughConstrCycle() {
-    BeanConstrConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class).getInstance();
+    final BeanConstrConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class).getInstance();
 
     assertNotNull(bean);
     assertNotNull(bean.getThing());
@@ -115,7 +115,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testDependentBeanCanConsumerProducerFromItselfThroughConstrCycle() {
-    DepBeanConstrConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(DepBeanConstrConsumesOwnProducer.class).getInstance();
+    final DepBeanConstrConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(DepBeanConstrConsumesOwnProducer.class).getInstance();
 
     assertNotNull(bean);
     assertNotNull(bean.getThang());
@@ -123,7 +123,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testProducersObserveSingletonScope() {
-    SingletonProducedBeanDependentBean bean = IOC.getBeanManager().lookupBean(SingletonProducedBeanDependentBean.class)
+    final SingletonProducedBeanDependentBean bean = IOC.getBeanManager().lookupBean(SingletonProducedBeanDependentBean.class)
             .getInstance();
 
     assertNotNull(bean);
@@ -131,7 +131,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(bean.getKayakB());
     assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), bean.getKayakB().getId());
 
-    DependentProducedBeanDependentBean beanB = IOC.getBeanManager().lookupBean(DependentProducedBeanDependentBean.class)
+    final DependentProducedBeanDependentBean beanB = IOC.getBeanManager().lookupBean(DependentProducedBeanDependentBean.class)
             .getInstance();
 
     assertNotNull(beanB);
@@ -142,7 +142,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testComplexConstructorInjectionScenario() {
-    BeanConstrConsumersMultiProducers bean = IOC.getBeanManager().lookupBean(BeanConstrConsumersMultiProducers.class)
+    final BeanConstrConsumersMultiProducers bean = IOC.getBeanManager().lookupBean(BeanConstrConsumersMultiProducers.class)
             .getInstance();
 
     assertNotNull(bean);
