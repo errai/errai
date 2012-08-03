@@ -26,14 +26,21 @@ import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -73,6 +80,17 @@ public class ProxyMaker {
 
     final Set<String> renderedMethods = new HashSet<String>();
 
+    final Map<String, MetaType> typeVariableMap = new HashMap<String, MetaType>();
+    final MetaParameterizedType metaParameterizedType = toProxy.getParameterizedType();
+
+    if (metaParameterizedType != null) {
+      int i = 0;
+      for (final MetaTypeVariable metaTypeVariable : toProxy.getTypeParameters()) {
+        typeVariableMap.put(metaTypeVariable.getName(), metaParameterizedType.getTypeParameters()[i++]);
+      }
+    }
+
+
     builder.privateField(proxyVar, toProxy).finish();
     for (final MetaMethod method : toProxy.getMethods()) {
       final String methodString = GenUtil.getMethodString(method);
@@ -89,7 +107,30 @@ public class ProxyMaker {
           method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName()))
         continue;
 
-      final DefParameters defParameters = DefParameters.from(method);
+      final List<Parameter> methodParms = new ArrayList<Parameter>();
+      final MetaParameter[] parameters = method.getParameters();
+      final MetaType[] genericParmTypes = method.getGenericParameterTypes();
+
+      if (genericParmTypes != null && genericParmTypes.length == parameters.length) {
+        for (int i = 0, genericParmTypesLength = genericParmTypes.length; i < genericParmTypesLength; i++) {
+          MetaType type = genericParmTypes[i];
+          MetaClass parmType = parameters[i].getType();
+          if (type instanceof MetaTypeVariable) {
+            final MetaTypeVariable typeVariable = (MetaTypeVariable) type;
+            if (typeVariableMap.containsKey(typeVariable.getName())) {
+              final MetaType typeVar = typeVariableMap.get(typeVariable.getName());
+              if (typeVar instanceof MetaClass) {
+                parmType = (MetaClass) typeVar;
+              }
+            }
+          }
+
+          methodParms.add(Parameter.of(parmType, "a" + i));
+        }
+      }
+
+
+      final DefParameters defParameters = DefParameters.fromParameters(methodParms);
       final BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
           .parameters(defParameters)
           .throws_(method.getCheckedExceptions());

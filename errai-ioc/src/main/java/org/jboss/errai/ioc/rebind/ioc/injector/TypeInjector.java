@@ -221,18 +221,20 @@ public class TypeInjector extends AbstractInjector {
     }
 
     setRendered(true);
+    markRendered(injectableInstance);
 
     /*
       notify any component waiting for this type that is is ready now.
      */
     injectableInstance.getInjectionContext().getProcessingContext()
         .handleDiscoveryOfType(injectableInstance);
+
+    injectContext.markProxyClosedIfNeeded(getInjectedType(), getQualifyingMetadata());
     /*
       return the reference to this bean to whoever called us.
      */
     return retVal;
   }
-
 
 
   public boolean isPseudo() {

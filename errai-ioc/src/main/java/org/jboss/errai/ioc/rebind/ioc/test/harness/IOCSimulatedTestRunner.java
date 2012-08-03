@@ -90,7 +90,6 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
                 finally {
                   System.setProperty("errai.simulatedClient", "false");
                 }
-
               }
               else {
                 iocClientTestCase.setName(method.getName());
@@ -104,7 +103,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
               notifier.fireTestFailure(new Failure(description, e.getTargetException()));
               return;
             }
-            catch (Exception e) {
+            catch (Throwable e) {
               notifier.fireTestFailure(new Failure(description, e));
               return;
             }

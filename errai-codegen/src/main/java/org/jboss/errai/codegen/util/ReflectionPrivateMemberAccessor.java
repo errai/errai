@@ -249,7 +249,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
       tryBuilder._(statementBuilder);
     }
     else {
-      tryBuilder._(statementBuilder.returnValue());
+      tryBuilder._(Stmt.castTo(method.getReturnType(), statementBuilder).returnValue());
     }
 
     body._(tryBuilder

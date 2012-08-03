@@ -33,30 +33,30 @@ import java.util.Set;
  */
 public class MockIOCGenerator {
 
-  private Set<String> packages;
+  private final Set<String> packages;
 
-  public MockIOCGenerator(Set<String> packages) {
+  public MockIOCGenerator(final Set<String> packages) {
     this.packages = Assert.notNull(packages);
   }
 
   public Class<? extends Bootstrapper> generate() {
-    String packageName = Bootstrapper.class.getPackage().getName();
-    String className = "MockBootstrapperImpl";
+    final String packageName = Bootstrapper.class.getPackage().getName();
+    final String className = "MockBootstrapperImpl";
 
     final IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator(null,
             new TreeLogger() {
                   @Override
-                  public TreeLogger branch(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+                  public TreeLogger branch(final Type type, final String msg, final Throwable caught, final HelpInfo helpInfo) {
                     return null;
                   }
 
                   @Override
-                  public boolean isLoggable(Type type) {
+                  public boolean isLoggable(final Type type) {
                     return false;
                   }
 
                   @Override
-                  public void log(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+                  public void log(final Type type, final String msg, final Throwable caught, final HelpInfo helpInfo) {
                     System.out.println(type.getLabel() + ": " + msg);
                     if (caught != null) {
                       caught.printStackTrace();
@@ -67,12 +67,17 @@ public class MockIOCGenerator {
 
     final String classStr = bootstrapGenerator.generate(packageName, className);
 
+    final File fileCacheDir = RebindUtils.getErraiCacheDir();
+    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+
+    RebindUtils.writeStringToFile(cacheFile, classStr);
+
     try {
-      File directory =
+      final File directory =
               new File(RebindUtils.getTempDirectory() + "/ioc/classes/" + packageName.replaceAll("\\.", "/"));
 
-      File sourceFile = new File(directory.getAbsolutePath() + "/" + className + ".java");
-      File outFile = new File(directory.getAbsolutePath() + "/" + className + ".class");
+      final File sourceFile = new File(directory.getAbsolutePath() + "/" + className + ".java");
+      final File outFile = new File(directory.getAbsolutePath() + "/" + className + ".class");
 
       if (sourceFile.exists()) {
         sourceFile.delete();
@@ -81,7 +86,7 @@ public class MockIOCGenerator {
 
       directory.mkdirs();
 
-      FileOutputStream outputStream = new FileOutputStream(sourceFile);
+      final FileOutputStream outputStream = new FileOutputStream(sourceFile);
 
       outputStream.write(classStr.getBytes("UTF-8"));
       outputStream.flush();
@@ -89,7 +94,7 @@ public class MockIOCGenerator {
 
       System.out.println("wrote file: " + sourceFile.getAbsolutePath());
 
-      Class<? extends Bootstrapper> bsClass =
+      final Class<? extends Bootstrapper> bsClass =
           ClassChangeUtil.compileAndLoad(sourceFile, packageName, className);
 
       return bsClass;
@@ -101,11 +106,11 @@ public class MockIOCGenerator {
   }
 
   private static class BootstrapClassloader extends ClassLoader {
-    private BootstrapClassloader(ClassLoader classLoader) {
+    private BootstrapClassloader(final ClassLoader classLoader) {
       super(classLoader);
     }
 
-    public Class<?> defineClassX(String className, byte[] b, int off, int len) {
+    public Class<?> defineClassX(final String className, final byte[] b, final int off, final int len) {
       return super.defineClass(className, b, off, len);
     }
   }

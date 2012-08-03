@@ -27,6 +27,7 @@ import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import javax.enterprise.inject.New;
@@ -59,6 +60,7 @@ public abstract class AbstractInjector implements Injector {
   protected String beanName;
 
   protected final List<RegistrationHook> registrationHooks = new ArrayList<RegistrationHook>();
+  protected final List<RenderingHook> renderingHooks = new ArrayList<RenderingHook>();
 
   @Override
   public boolean isTestmock() {
@@ -201,6 +203,7 @@ public abstract class AbstractInjector implements Injector {
     }
   }
 
+
   private RegisterCache _registerCache;
 
   @Override
@@ -245,6 +248,17 @@ public abstract class AbstractInjector implements Injector {
       for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
       }
+    }
+  }
+
+  @Override
+  public void addRenderingHook(RenderingHook renderingHook) {
+    renderingHooks.add(renderingHook);
+  }
+
+  protected void markRendered(final InjectableInstance injectableInstance) {
+    for (final RenderingHook renderingHook : renderingHooks) {
+      renderingHook.onRender(injectableInstance);
     }
   }
 

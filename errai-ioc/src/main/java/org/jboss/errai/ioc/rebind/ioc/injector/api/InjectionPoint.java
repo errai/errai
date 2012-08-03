@@ -16,20 +16,19 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.PrivateAccessType;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -220,13 +219,15 @@ public class InjectionPoint<T> {
   private Boolean _isProxyCache;
 
   public boolean isProxy() {
-    if (_isProxyCache != null)
-      return _isProxyCache;
-    try {
-      return _isProxyCache = injectionContext.isProxiedInjectorRegistered(getEnclosingType(), getQualifyingMetadata());
-    } catch (InjectionFailure e) {
-      return _isProxyCache = false;
-    }
+    return injectionContext.isProxiedInjectorRegistered(getEnclosingType(), getQualifyingMetadata());
+
+//    if (_isProxyCache != null)
+//      return _isProxyCache;
+//    try {
+//      return _isProxyCache = injectionContext.isProxiedInjectorRegistered(getEnclosingType(), getQualifyingMetadata());
+//    } catch (InjectionFailure e) {
+//      return _isProxyCache = false;
+//    }
   }
 
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {

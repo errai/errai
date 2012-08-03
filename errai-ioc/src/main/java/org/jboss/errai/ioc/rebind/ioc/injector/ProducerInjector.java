@@ -12,6 +12,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.PrivateAccessType;
@@ -24,6 +25,7 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
@@ -38,8 +40,8 @@ public class ProducerInjector extends AbstractInjector {
   private final MetaClassMember producerMember;
   private final InjectableInstance producerInjectableInstance;
   private final MetaMethod disposerMethod;
-  private boolean singletonRendered = false;
-  private final String instanceVarName;
+
+  private boolean creationalCallbackRendered = false;
 
   public ProducerInjector(final InjectionContext injectionContext,
                           final MetaClass injectedType,
@@ -64,9 +66,7 @@ public class ProducerInjector extends AbstractInjector {
 
     this.disposerMethod = findDisposerMethod(injectionContext.getProcessingContext());
 
-    creationalCallbackVarName = InjectUtil.getNewInjectorName() + "_" + injectedType.getName() + "_creationalCallback";
-    this.instanceVarName = InjectUtil.getNewInjectorName() + "_" + injectedType.getName();
-
+    this.creationalCallbackVarName = InjectUtil.getNewInjectorName() + "_" + injectedType.getName() + "_creationalCallback";
 
     if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
       setRendered(true);
@@ -87,29 +87,15 @@ public class ProducerInjector extends AbstractInjector {
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
     final InjectionContext injectionContext = injectableInstance.getInjectionContext();
 
-    final BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
 
     if (isDependent()) {
-      callbackBuilder.append(Stmt.codeComment("dependent producer injection"));
+      renderGlobalCreationalContext(injectableInstance, injectionContext);
       return registerDestructorCallback(injectionContext, injectionContext.getProcessingContext().getBlockBuilder(),
           producerInjectableInstance.getValueStatement(), disposerMethod);
     }
 
-    if (!singletonRendered) {
-      renderCreationalContext(injectionContext);
-    }
+    final BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
 
-    singletonRendered = true;
-
-    final Statement retVal = loadVariable(instanceVarName);
-
-    registerWithBeanManager(injectionContext, retVal);
-
-    callbackBuilder.append(Stmt.codeComment("singleton producer injection"));
-    return registerDestructorCallback(injectionContext, callbackBuilder, retVal, disposerMethod);
-  }
-
-  private void renderCreationalContext(InjectionContext injectionContext) {
     final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
         typeParametersOf(injectedType));
 
@@ -127,17 +113,15 @@ public class ProducerInjector extends AbstractInjector {
         ._(Stmt.loadVariable(var).returnValue())
         .finish().finish();
 
-    injectionContext.getProcessingContext().getBootstrapBuilder()
-        .privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
-        .initializesWith(producerCreationalCallback).finish();
+    callbackBuilder.append(Stmt.declareFinalVariable(var, creationCallbackRef, producerCreationalCallback));
 
+    final Statement retVal = loadVariable("context").invoke("getSingletonInstanceOrNew",
+        Stmt.loadVariable("injContext"),
+        Stmt.loadVariable(var),
+        Stmt.load(injectedType),
+        Stmt.load(qualifyingMetadata.getQualifiers()));
 
-    injectionContext.getProcessingContext().getBootstrapBuilder()
-        .privateField(instanceVarName, injectedType).modifiers(Modifier.Final)
-        .initializesWith(
-            Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))
-        ).finish();
-    //  return producerCreationalCallback;
+    return registerDestructorCallback(injectionContext, callbackBuilder, retVal, disposerMethod);
   }
 
   private boolean hasCompanionDisposer() {
@@ -206,6 +190,86 @@ public class ProducerInjector extends AbstractInjector {
 
     return Refs.get(varName);
   }
+
+  private void renderGlobalCreationalContext(final InjectableInstance injectableInstance, final InjectionContext injectionContext) {
+    if (!injectionContext.isTypeInjectable(producerMember.getDeclaringClass())) {
+      injectionContext.getInjector(producerMember.getDeclaringClass()).addRenderingHook(
+          new RenderingHook() {
+            @Override
+            public void onRender(InjectableInstance instance) {
+              renderGlobalCreationalContext(injectableInstance, injectionContext);
+            }
+          }
+      );
+      return;
+    }
+
+    if (creationalCallbackRendered) {
+      return;
+    }
+
+    creationalCallbackRendered = true;
+
+    final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
+        typeParametersOf(injectedType));
+
+    final String var = InjectUtil.getUniqueVarName();
+
+    final BlockBuilder<AnonymousClassStructureBuilder> statements = ObjectBuilder.newInstanceOf(creationCallbackRef)
+        .extend()
+        .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "pContext"));
+
+    injectionContext.getProcessingContext().pushBlockBuilder(statements);
+
+    final Statement producerCreationalCallback = statements
+        ._(Stmt.declareVariable(injectedType)
+            .named(var).initializeWith(getValueStatement(injectionContext,
+                injectionContext.getInjector(producerMember.getDeclaringClass()).getBeanInstance(injectableInstance))))
+        ._(loadVariable("context").invoke("addBean",
+            loadVariable("context").invoke("getBeanReference",
+                Stmt.load(injectedType),
+                Stmt.load(qualifyingMetadata.getQualifiers())), Refs.get(var)))
+        ._(Stmt.loadVariable(var).returnValue())
+        .finish().finish();
+
+    injectionContext.getProcessingContext().getBootstrapBuilder()
+        .privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
+        .initializesWith(producerCreationalCallback).finish();
+
+    registerWithBeanManager(injectionContext, null);
+
+    injectionContext.getProcessingContext().popBlockBuilder();
+  }
+
+
+  public Statement getValueStatement(InjectionContext injectionContext, Statement beanRef) {
+
+    if (producerMember instanceof MetaMethod) {
+      final MetaMethod producerMethod = (MetaMethod) producerMember;
+
+      if (producerMethod.getReturnType().isVoid()) {
+        return Stmt.load(Void.class);
+      }
+
+      final Statement[] stmt = InjectUtil.resolveInjectionDependencies(
+          producerMethod.getParameters(),
+          injectionContext,
+          producerMethod,
+          false);
+
+
+      return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
+          beanRef,
+          producerMethod,
+          stmt);
+    }
+    else {
+      return InjectUtil.getPublicOrPrivateFieldValue(injectionContext.getProcessingContext(),
+          beanRef,
+          (MetaField) producerMember);
+    }
+  }
+
 
   @Override
   public boolean isStatic() {

@@ -5,6 +5,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 /**
@@ -171,6 +172,8 @@ public interface Injector {
    * @param registrationHook a registration hook to be called at registration of the bean with the bean manager.
    */
   void addRegistrationHook(RegistrationHook registrationHook);
+
+  void addRenderingHook(RenderingHook renderingHook);
 
   String getBeanName();
 

@@ -23,6 +23,7 @@ import java.util.List;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+//@RunWith(IOCSimulatedTestRunner.class)
 public class ProducerIntegrationTest extends IOCClientTestCase {
 
   @Override
@@ -149,7 +150,6 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(bean.getParting());
     assertNotNull(bean.getResponse());
     assertNotNull(bean.getTestEvent());
-    assertNotNull(bean.getPanel());
   }
 
   public void testDisposerMethod() {

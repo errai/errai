@@ -168,7 +168,7 @@ public class IOCBootstrapGenerator {
     final MetaClass Annotation_MC = MetaClassFactory.get(Annotation.class);
 
     buildContext.addInterningCallback(new InterningCallback() {
-      private Map<Set<Annotation>, String> cachedArrays = new HashMap<Set<Annotation>, String>();
+      private final Map<Set<Annotation>, String> cachedArrays = new HashMap<Set<Annotation>, String>();
 
       @Override
       public Statement intern(final LiteralValue<?> literalValue) {
@@ -181,7 +181,7 @@ public class IOCBootstrapGenerator {
 
           final String fieldName = annotation.annotationType().getName()
               .replaceAll("\\.", "_") + "_"
-              + String.valueOf(literalValue.getValue().hashCode()).replaceAll("\\-", "_");
+              + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
 
           classStructureBuilder.privateField(fieldName, annotation.annotationType())
               .modifiers(Modifier.Final).initializesWith(AnnotationEncoder.encode(annotation))

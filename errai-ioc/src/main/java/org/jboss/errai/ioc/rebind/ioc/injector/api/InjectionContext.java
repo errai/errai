@@ -243,6 +243,21 @@ public class InjectionContext {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
 
+  public void markProxyClosedIfNeeded(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+    if (proxiedInjectors.containsKey(injectorType.getErased())) {
+      final Collection<Injector> collection = proxiedInjectors.get(injectorType.getErased());
+      final Iterator<Injector> iterator = collection.iterator();
+      while (iterator.hasNext()) {
+        if (iterator.next().matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+          iterator.remove();
+        }
+      }
+      if (collection.isEmpty()) {
+        proxiedInjectors.removeAll(injectorType.getErased());
+      }
+    }
+  }
+
   public boolean isProxiedInjectorRegistered(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : proxiedInjectors.get(injectorType.getErased())) {

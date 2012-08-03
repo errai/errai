@@ -1,11 +1,8 @@
 package org.jboss.errai.cdi.producer.client;
 
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -16,10 +13,9 @@ import javax.inject.Inject;
 @EntryPoint
 public class BeanConstrConsumersMultiProducers {
   private Event<String> testEvent;
-  private RootPanel panel;
-  private Label response;
-  private Label greeting;
-  private Label parting;
+  private TestLabel response;
+  private TestLabel greeting;
+  private TestLabel parting;
 
   private boolean postConstrCalled = false;
 
@@ -27,10 +23,9 @@ public class BeanConstrConsumersMultiProducers {
   }
 
   @Inject
-  public BeanConstrConsumersMultiProducers(Event<String> testEvent, RootPanel panel, @Response Label response,
-                                           @Greets Label greeting, @Parts Label parting) {
+  public BeanConstrConsumersMultiProducers(Event<String> testEvent, @Response TestLabel response,
+                                           @Greets TestLabel greeting, @Parts TestLabel parting) {
     this.testEvent = testEvent;
-    this.panel = panel;
     this.response = response;
     this.greeting = greeting;
     this.parting = parting;
@@ -44,18 +39,18 @@ public class BeanConstrConsumersMultiProducers {
 
   @Produces
   @Response
-  private Label produceResponseLabel() {
-    return new Label("<No Response!!!>");
+  private TestLabel produceResponseLabel() {
+    return new TestLabel("<No Response!!!>");
   }
 
   @Produces @Greets
-  private static Label produceGreeting() {
-    return new Label("Hello, there!!!");
+  private static TestLabel produceGreeting() {
+    return new TestLabel("Hello, there!!!");
   }
 
   @Produces @Parts
-  private static Label produceParting() {
-    return new Label("Goodbye, there!!!");
+  private static TestLabel produceParting() {
+    return new TestLabel("Goodbye, there!!!");
   }
 
 
@@ -63,19 +58,15 @@ public class BeanConstrConsumersMultiProducers {
     return testEvent;
   }
 
-  public RootPanel getPanel() {
-    return panel;
-  }
-
-  public Label getResponse() {
+  public TestLabel getResponse() {
     return response;
   }
 
-  public Label getGreeting() {
+  public TestLabel getGreeting() {
     return greeting;
   }
 
-  public Label getParting() {
+  public TestLabel getParting() {
     return parting;
   }
 
