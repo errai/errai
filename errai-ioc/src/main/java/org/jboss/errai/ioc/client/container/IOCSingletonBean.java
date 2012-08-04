@@ -28,13 +28,14 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
 
   private IOCSingletonBean(final IOCBeanManager beanManager,
                            final Class<T> type,
+                           final Class<?> beanType,
                            final Annotation[] qualifiers,
                            final String name,
                            final boolean concrete,
                            final CreationalCallback<T> callback,
                            final T instance) {
 
-    super(beanManager, type, qualifiers, name, concrete, callback);
+    super(beanManager, type, beanType, qualifiers, name, concrete, callback);
     this.instance = instance;
   }
 
@@ -56,13 +57,14 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
    */
   public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
                                           final Class<T> type,
+                                          final Class<?> beanType,
                                           final Annotation[] qualifiers,
                                           final String name,
                                           final boolean concrete,
                                           final CreationalCallback<T> callback,
                                           final T instance) {
 
-    return new IOCSingletonBean<T>(beanManager, type, qualifiers, name, concrete, callback, instance);
+    return new IOCSingletonBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback, instance);
   }
 
   @Override

@@ -31,12 +31,14 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   protected IOCDependentBean(final IOCBeanManager beanManager,
                              final Class<T> type,
+                             final Class<?> beanType,
                              final Annotation[] qualifiers,
                              final String name,
                              final boolean concrete,
                              final CreationalCallback<T> creationalCallback) {
     this.beanManager = beanManager;
     this.type = type;
+    this.beanType = beanType;
     this.qualifiers = new HashSet<Annotation>();
     if (qualifiers != null) {
       Collections.addAll(this.qualifiers, qualifiers);
@@ -48,11 +50,12 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
                                           final Class<T> type,
+                                          final Class<?> beanType,
                                           final Annotation[] qualifiers,
                                           final String name,
                                           final boolean concrete,
                                           final CreationalCallback<T> callback) {
-    return new IOCDependentBean<T>(beanManager, type, qualifiers, name, concrete, callback);
+    return new IOCDependentBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback);
   }
 
   @Override

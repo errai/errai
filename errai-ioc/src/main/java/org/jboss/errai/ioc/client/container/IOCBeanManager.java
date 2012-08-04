@@ -52,27 +52,30 @@ public class IOCBeanManager {
       = new HashSet<String>();
 
   private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
+                                                    final Class<?> beanType,
                                                     final CreationalCallback<Object> callback,
                                                     final Object instance,
                                                     final Annotation[] qualifiers,
                                                     final String name,
                                                     final boolean concrete) {
-    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, qualifiers, name, concrete, callback, instance);
+    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, instance);
     registerBean(bean);
     return bean;
   }
 
   private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
+                                                    final Class<?> beanType,
                                                     final CreationalCallback<Object> callback,
                                                     final Annotation[] qualifiers,
                                                     final String name,
                                                     final boolean concrete) {
-    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, qualifiers, name, concrete, callback);
+    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback);
     registerBean(bean);
     return bean;
   }
 
   private void registerSingletonBean(final Class<Object> type,
+                                     final Class<?> beanType,
                                      final CreationalCallback<Object> callback,
                                      final Object instance,
                                      final Annotation[] qualifiers,
@@ -80,16 +83,17 @@ public class IOCBeanManager {
                                      final boolean concrete) {
 
 
-    _registerNamedBean(beanName, _registerSingletonBean(type, callback, instance, qualifiers, beanName, concrete));
+    _registerNamedBean(beanName, _registerSingletonBean(type, beanType, callback, instance, qualifiers, beanName, concrete));
   }
 
   private void registerDependentBean(final Class<Object> type,
+                                     final Class<?> beanType,
                                      final CreationalCallback<Object> callback,
                                      final Annotation[] qualifiers,
                                      final String beanName,
                                      final boolean concrete) {
 
-    _registerNamedBean(beanName, _registerDependentBean(type, callback, qualifiers, beanName, concrete));
+    _registerNamedBean(beanName, _registerDependentBean(type, beanType, callback, qualifiers, beanName, concrete));
   }
 
   private void _registerNamedBean(final String name,
@@ -109,6 +113,8 @@ public class IOCBeanManager {
    *
    * @param type
    *     the bean type
+   * @param beanType
+   *     the actual type of the bean
    * @param callback
    *     the creational callback used to construct the bean
    * @param instance
@@ -117,11 +123,12 @@ public class IOCBeanManager {
    *     any qualifiers
    */
   public void addBean(final Class<Object> type,
+                      final Class<?> beanType,
                       final CreationalCallback<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers) {
 
-    addBean(type, callback, instance, qualifiers, null, true);
+    addBean(type, beanType, callback, instance, qualifiers, null, true);
   }
 
 
@@ -132,6 +139,8 @@ public class IOCBeanManager {
    *
    * @param type
    *     the bean type
+   * @param beanType
+   *     the actual type of the bean
    * @param callback
    *     the creational callback used to construct the bean
    * @param instance
@@ -142,12 +151,13 @@ public class IOCBeanManager {
    *     the name of the bean
    */
   public void addBean(final Class<Object> type,
+                      final Class<?> beanType,
                       final CreationalCallback<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name) {
 
-    addBean(type, callback, instance, qualifiers, name, true);
+    addBean(type, beanType, callback, instance, qualifiers, name, true);
   }
 
 
@@ -159,6 +169,8 @@ public class IOCBeanManager {
    *
    * @param type
    *     the bean type
+   * @param beanType
+   *     the actual type of the bean
    * @param callback
    *     the creational callback used to construct the bean
    * @param instance
@@ -171,6 +183,7 @@ public class IOCBeanManager {
    *     true if bean should be treated as concrete (ie. not an interface or abstract type).
    */
   public void addBean(final Class<Object> type,
+                      final Class<?> beanType,
                       final CreationalCallback<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers,
@@ -182,10 +195,10 @@ public class IOCBeanManager {
     }
 
     if (instance != null) {
-      registerSingletonBean(type, callback, instance, qualifiers, name, concreteType);
+      registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType);
     }
     else {
-      registerDependentBean(type, callback, qualifiers, name, concreteType);
+      registerDependentBean(type, beanType, callback, qualifiers, name, concreteType);
     }
   }
 
@@ -312,14 +325,15 @@ public class IOCBeanManager {
    *         no matching type.
    */
   @SuppressWarnings("unchecked")
-  public Collection<IOCBeanDef> lookupBeans(final Class type) {
+  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type) {
     final List<IOCBeanDef> beanList = beanMap.get(type);
-    if (beanList == null) {
-      return Collections.emptyList();
+
+    final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
+    for (final IOCBeanDef<T> beanDef : beanList) {
+      matching.add(beanDef);
     }
-    else {
-      return Collections.unmodifiableList(beanList);
-    }
+
+    return Collections.unmodifiableList(matching);
   }
 
   /**
@@ -335,7 +349,7 @@ public class IOCBeanManager {
    *         if no beans match. Null if the bean type is unknown.
    */
   @SuppressWarnings("unchecked")
-  public List<IOCBeanDef> lookupBeans(final Class type, final Annotation... qualifiers) {
+  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
     final List<IOCBeanDef> beanList;
 
     if (type.getName().equals("java.lang.Object")) {
@@ -351,15 +365,16 @@ public class IOCBeanManager {
     if (beanList == null) {
       return null;
     }
-
-    if (beanList.size() == 1) {
-      return Collections.unmodifiableList(beanList);
+    else if (beanList.size() == 1) {
+      return Collections.singletonList((IOCBeanDef<T>) beanList.iterator().next());
     }
+
+    final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
+
+
 
     final Set<Annotation> qualSet = new HashSet<Annotation>(qualifiers.length * 2);
     Collections.addAll(qualSet, qualifiers);
-
-    final List<IOCBeanDef> matching = new ArrayList<IOCBeanDef>();
 
     for (final IOCBeanDef iocBean : beanList) {
       if (iocBean.matches(qualSet)) {
@@ -367,9 +382,13 @@ public class IOCBeanManager {
       }
     }
 
+    if (matching.size() == 1) {
+      return Collections.unmodifiableList(matching);
+    }
+
     if (matching.size() > 1 && concreteBeans.contains(type.getName())) {
       // perform second pass
-      final Iterator<IOCBeanDef> secondIter = matching.iterator();
+      final Iterator<IOCBeanDef<T>> secondIter = matching.iterator();
       while (secondIter.hasNext()) {
         if (!secondIter.next().isConcrete())
           secondIter.remove();
@@ -396,7 +415,7 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
-    final List<IOCBeanDef> matching = lookupBeans(type, qualifiers);
+    final Collection<IOCBeanDef<T>> matching = lookupBeans(type, qualifiers);
 
     if (matching == null) {
       return null;
@@ -408,7 +427,7 @@ public class IOCBeanManager {
       throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
     }
     else {
-      return (IOCBeanDef<T>) matching.get(0);
+      return matching.iterator().next();
     }
   }
 

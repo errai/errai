@@ -26,11 +26,20 @@ import java.util.Set;
  */
 public interface IOCBeanDef<T> {
   /**
-   * Returns the actual type of the bean.
+   * Returns the type of the bean.
    *
+   * @see #getBeanClass()
    * @return the type of the bean.
    */
   public Class<T> getType();
+
+
+  /**
+   * Returns the actual bean class represented by this bean.
+   *
+   * @return the actual type of the bean.
+   */
+  public Class<?> getBeanClass();
 
   /**
    * Returns an instance of the bean within the active scope.

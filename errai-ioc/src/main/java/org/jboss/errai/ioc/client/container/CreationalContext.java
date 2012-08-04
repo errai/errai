@@ -228,7 +228,7 @@ public class CreationalContext {
     }
     else {
       inst = callback.getInstance(this);
-      injectionContext.addBean(beanType, callback, inst, qualifiers);
+      injectionContext.addBean(beanType, beanType, callback, inst, qualifiers);
       return inst;
     }
   }

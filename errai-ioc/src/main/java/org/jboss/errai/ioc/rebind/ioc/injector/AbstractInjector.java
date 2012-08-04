@@ -223,12 +223,12 @@ public abstract class AbstractInjector implements Injector {
       final ContextualStatementBuilder statement;
       if (beanName == null) {
         statement = loadVariable(context.getProcessingContext().getContextVariableReference())
-            .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
                 isSingleton() ? valueRef : null, qualifyingMetadata.render(), null, true);
       }
       else {
         statement = loadVariable(context.getProcessingContext().getContextVariableReference())
-            .invoke("addBean", getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+            .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
                 isSingleton() ? valueRef : null, qualifyingMetadata.render(), beanName, true);
       }
 

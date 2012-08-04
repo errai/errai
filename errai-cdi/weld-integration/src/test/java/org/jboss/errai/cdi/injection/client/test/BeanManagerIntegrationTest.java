@@ -110,16 +110,16 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   
   public void testBeanManagerLookupForExtendedInterfaceType() {
     // This should find ApplicationScopedBeanA, ApplicationScopedBeanB and ApplicationScopedBeanC
-    Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
+    Collection<IOCBeanDef<InterfaceRoot>> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
     assertEquals("did not find all managed implementations of " + InterfaceRoot.class.getName(), 3, beans.size());
 
     // This should find ApplicationScopedBeanA and ApplicationScopedBeanB (InterfaceB extends InterfaceA)
-    beans = IOC.getBeanManager().lookupBeans(InterfaceA.class);
-    assertEquals("did not find both managed implementations of " + InterfaceA.class.getName(), 2, beans.size());
+    Collection<IOCBeanDef<InterfaceA>> beansB = IOC.getBeanManager().lookupBeans(InterfaceA.class);
+    assertEquals("did not find both managed implementations of " + InterfaceA.class.getName(), 2, beansB.size());
 
     // This should find only ApplicationScopedBeanB
-    beans = IOC.getBeanManager().lookupBeans(InterfaceB.class);
-    assertEquals("did not find exactly one managed implementation of " + InterfaceB.class.getName(), 1, beans.size());
+    Collection<IOCBeanDef<InterfaceB>> beansC = IOC.getBeanManager().lookupBeans(InterfaceB.class);
+    assertEquals("did not find exactly one managed implementation of " + InterfaceB.class.getName(), 1, beansC.size());
   }
 
   public void testBeanManagerAPIs() {
@@ -149,7 +149,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
     };
 
-    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
+    final Collection<IOCBeanDef<CommonInterface>> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
     assertEquals("wrong number of beans", 2, beans.size());
 
     final IOCBeanDef<CommonInterface> beanA = IOC.getBeanManager().lookupBean(CommonInterface.class, qualA);
@@ -196,7 +196,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
     };
 
-    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
+    final Collection<IOCBeanDef<CommonInterfaceB>> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
     assertEquals("wrong number of beans", 2, beans.size());
 
     final IOCBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualApples);
@@ -243,7 +243,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       }
     };
 
-    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
+    final Collection<IOCBeanDef<CommonInterfaceB>> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
     assertEquals("wrong number of beans", 2, beans.size());
 
     final IOCBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualOrange);

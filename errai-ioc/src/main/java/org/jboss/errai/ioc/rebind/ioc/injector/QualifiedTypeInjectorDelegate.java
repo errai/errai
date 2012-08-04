@@ -145,7 +145,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
       }
       context.getProcessingContext().appendToEnd(
               Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                      .invoke("addBean", type, Refs.get(getCreationalCallbackVarName()),
+                      .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
                               isSingleton() ? valueRef : null, md.render(), null, false));
       
       for (final RegistrationHook hook : registrationHooks) {
