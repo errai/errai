@@ -178,4 +178,6 @@ public interface Injector {
   String getBeanName();
 
   void setEnabled(boolean enabled);
+
+  void addDisablingCallback(Runnable runnable);
 }

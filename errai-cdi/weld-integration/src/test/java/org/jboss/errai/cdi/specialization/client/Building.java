@@ -8,7 +8,6 @@ import javax.enterprise.inject.Produces;
  */
 @Dependent
 public class Building {
-
   protected String getClassName() {
     return Building.class.getName();
   }

@@ -102,6 +102,19 @@ public class ProducerInjector extends AbstractInjector {
           ? ReflectionUtil.getPropertyFromAccessor(producerMember.getName()) : namedAnnotation.value();
     }
 
+    injectionContext.addInjectorRegistrationListener(producerMember.getDeclaringClass(),
+        new InjectorRegistrationListener() {
+          @Override
+          public void onRegister(final MetaClass type, final Injector injector) {
+            injector.addDisablingCallback(new Runnable() {
+              @Override
+              public void run() {
+                setEnabled(false);
+              }
+            });
+          }
+        });
+
     if (producerMember instanceof MetaMethod && injectionContext.isOverridden((MetaMethod) producerMember)) {
       setEnabled(false);
     }
@@ -327,7 +340,6 @@ public class ProducerInjector extends AbstractInjector {
       throw new InjectionFailure("the specialized producer " + producerMember + " must override "
           + "another producer");
     }
-
 
     context.addInjectorRegistrationListener(getInjectedType(),
         new InjectorRegistrationListener() {

@@ -7,12 +7,12 @@ public class Waste {
   private String from;
 
   public String getFrom() {
-      return from;
+    return from;
   }
 
   public Waste(String from) {
-      super();
-      this.from = from;
+    super();
+    this.from = from;
   }
-
 }
+

@@ -95,7 +95,6 @@ public class TypeInjector extends AbstractInjector {
           ? type.getBeanDescriptor().getBeanName() : namedAnnotation.value();
     }
 
-
     if (!qualifiers.isEmpty()) {
       qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory()
           .createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));

@@ -57,6 +57,7 @@ public abstract class AbstractInjector implements Injector {
 
   protected final List<RegistrationHook> registrationHooks = new ArrayList<RegistrationHook>();
   protected final List<RenderingHook> renderingHooks = new ArrayList<RenderingHook>();
+  protected final List<Runnable> disablingCallback = new ArrayList<Runnable>();
 
   @Override
   public boolean isTestmock() {
@@ -210,7 +211,6 @@ public abstract class AbstractInjector implements Injector {
       registrationHook.onRegister(_registerCache.getInjectionContextForRegister(), _registerCache.getValueRefForRegister());
   }
 
-  private Runnable _disableHook;
 
   public void registerWithBeanManager(final InjectionContext context,
                                       final Statement valueRef) {
@@ -234,12 +234,12 @@ public abstract class AbstractInjector implements Injector {
 
       context.getProcessingContext().appendToEnd(statement);
 
-      _disableHook = new Runnable() {
+      addDisablingCallback(new Runnable() {
         @Override
         public void run() {
           context.getProcessingContext().getAppendToEnd().remove(statement);
         }
-      };
+      });
 
       for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
@@ -248,7 +248,7 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public void addRenderingHook(RenderingHook renderingHook) {
+  public void addRenderingHook(final RenderingHook renderingHook) {
     renderingHooks.add(renderingHook);
   }
 
@@ -273,12 +273,22 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public void setEnabled(boolean enabled) {
-    if (!(this.enabled = enabled) && _disableHook != null) {
-      _disableHook.run();
+  public void setEnabled(final boolean enabled) {
+    if (!(this.enabled = enabled)) {
+      _runDisablingCallbacks();
     }
   }
 
+  @Override
+  public void addDisablingCallback(final Runnable runnable) {
+    disablingCallback.add(runnable);
+  }
+
+  private void _runDisablingCallbacks() {
+    for (final Runnable run : disablingCallback) {
+      run.run();
+    }
+  }
 
   protected static boolean hasNewQualifier(final InjectableInstance instance) {
     if (instance != null) {

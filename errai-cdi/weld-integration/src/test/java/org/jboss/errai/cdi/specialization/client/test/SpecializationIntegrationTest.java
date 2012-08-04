@@ -9,9 +9,11 @@ import org.jboss.errai.cdi.specialization.client.LazyFarmer;
 import org.jboss.errai.cdi.specialization.client.Necklace;
 import org.jboss.errai.cdi.specialization.client.Product;
 import org.jboss.errai.cdi.specialization.client.Sparkly;
+import org.jboss.errai.cdi.specialization.client.Waste;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
@@ -60,6 +62,17 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     assertEquals(lazyFarmerBean.getBeanClass(), humanBeans.iterator().next().getBeanClass());
   }
 
+  public void testSpecializingBeanInjection1() {
+    final IOCBeanDef<Farmer> farmerBean = IOC.getBeanManager().lookupBean(Farmer.class);
+    assertNotNull(farmerBean);
+
+    final Farmer farmer = farmerBean.getInstance();
+    assertNotNull(farmer);
+
+    assertEquals(farmer.getClassName(), LazyFarmer.class.getName());
+  }
+
+
   public void testSpecializingBeanHasQualifiersOfSpecializedAndSpecializingBean() {
     final Collection<IOCBeanDef<LazyFarmer>> farmerBeans
         = IOC.getBeanManager().lookupBeans(LazyFarmer.class, LAZY_LITERAL);
@@ -79,6 +92,19 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
 
     final IOCBeanDef farmerBean = beans.iterator().next();
     assertEquals(expectedName, farmerBean.getName());
+  }
+
+  public void testProducerMethodOnSpecializedBeanNotCalled() {
+    assertEquals(IOC.getBeanManager().lookupBeans(Waste.class).size(), 0);
+
+    try {
+      IOC.getBeanManager().lookupBean(Waste.class);
+    }
+    catch (IOCResolutionException e) {
+      return;
+    }
+
+    fail("should have thrown lookup exception");
   }
 
   private static final Annotation EXPENSIVE_LITERAL = new Expensive() {
@@ -113,7 +139,7 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     assertEquals("expensiveGift", sparklyBean.getName());
   }
 
-  public void testSpecializingBeanInjection() {
+  public void testSpecializingBeanInjection2() {
     final IOCBeanDef<Product> productBean = IOC.getBeanManager().lookupBean(Product.class, EXPENSIVE_LITERAL);
     assertNotNull(productBean);
 

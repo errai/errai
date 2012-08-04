@@ -329,8 +329,11 @@ public class IOCBeanManager {
     final List<IOCBeanDef> beanList = beanMap.get(type);
 
     final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
-    for (final IOCBeanDef<T> beanDef : beanList) {
-      matching.add(beanDef);
+
+    if (beanList != null) {
+      for (final IOCBeanDef<T> beanDef : beanList) {
+        matching.add(beanDef);
+      }
     }
 
     return Collections.unmodifiableList(matching);
@@ -346,7 +349,7 @@ public class IOCBeanManager {
    *     qualifiers to match
    *
    * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
-   *         if no beans match. Null if the bean type is unknown.
+   *         if no beans match.
    */
   @SuppressWarnings("unchecked")
   public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
@@ -363,15 +366,13 @@ public class IOCBeanManager {
     }
 
     if (beanList == null) {
-      return null;
+      return Collections.emptyList();
     }
     else if (beanList.size() == 1) {
       return Collections.singletonList((IOCBeanDef<T>) beanList.iterator().next());
     }
 
     final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
-
-
 
     final Set<Annotation> qualSet = new HashSet<Annotation>(qualifiers.length * 2);
     Collections.addAll(qualSet, qualifiers);
@@ -409,18 +410,15 @@ public class IOCBeanManager {
    * @param <T>
    *     The type of the bean
    *
-   * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers. Returns null if there is
-   *         no matching type. Throws an {@link IOCResolutionException} if there is a matching type but none of the
+   * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers.
+   *         Throws an {@link IOCResolutionException} if there is a matching type but none of the
    *         qualifiers match or if more than one bean  matches.
    */
   @SuppressWarnings("unchecked")
   public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
     final Collection<IOCBeanDef<T>> matching = lookupBeans(type, qualifiers);
 
-    if (matching == null) {
-      return null;
-    }
-    else if (matching.isEmpty()) {
+   if (matching == null || matching.isEmpty()) {
       throw new IOCResolutionException("no matching bean instances for: " + type.getName());
     }
     else if (matching.size() > 1) {
