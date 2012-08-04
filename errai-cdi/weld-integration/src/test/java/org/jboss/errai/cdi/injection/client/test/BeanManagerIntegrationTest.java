@@ -107,7 +107,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     final IOCBeanDef<InterfaceD> beanD = IOC.getBeanManager().lookupBean(InterfaceD.class);
     assertNotNull("did not find any beans matching", beanD);
   }
-  
+
   public void testBeanManagerLookupForExtendedInterfaceType() {
     // This should find ApplicationScopedBeanA, ApplicationScopedBeanB and ApplicationScopedBeanC
     Collection<IOCBeanDef<InterfaceRoot>> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
@@ -130,8 +130,8 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertEquals("there should be two qualifiers", 2, a.size());
     assertTrue("wrong qualifiers", annotationSetMatches(a, QualA.class, Any.class));
 
-   // assertEquals("unmanaged bean should have no entries", 0, mgr.lookupBeans(String.class).size());
-  //  assertEquals("unmanaged bean should return null bean ref", null, mgr.lookupBean(String.class));
+    // assertEquals("unmanaged bean should have no entries", 0, mgr.lookupBeans(String.class).size());
+    //  assertEquals("unmanaged bean should return null bean ref", null, mgr.lookupBean(String.class));
   }
 
   public void testQualifiedLookup() {
@@ -268,7 +268,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       fail("should have thrown an exception, but got: " + bean);
     }
     catch (IOCResolutionException e) {
-      assertTrue("wrong exception thrown", e.getMessage().contains("multiple matching"));
+      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("multiple matching"));
     }
 
     try {
@@ -286,6 +286,26 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertEquals("wrong number of beans", 2, beans.size());
     assertTrue("should contain a pig", containsInstanceOf(beans, Pig.class));
     assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
+  }
+
+  public void testLookupAllBeans() {
+    final Collection<IOCBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class);
+
+    assertTrue(!beans.isEmpty());
+  }
+
+  private final QualA QUAL_A = new QualA() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return QualA.class;
+    }
+  };
+
+  public void testLookupAllBeansQualified() {
+    final Collection<IOCBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class, QUAL_A);
+
+    assertEquals(1, beans.size());
+    assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
   }
 
   private static boolean containsInstanceOf(Collection<IOCBeanDef> defs, Class<?> clazz) {

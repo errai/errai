@@ -51,6 +51,12 @@ public class IOCBeanManager {
   private final Set<String> concreteBeans
       = new HashSet<String>();
 
+  public IOCBeanManager() {
+    // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose of
+    // lookups. This modifies the lookup behavior to exclude other non-concrete types from qualified matching.
+    concreteBeans.add("java.lang.Object");
+  }
+
   private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
                                                     final Class<?> beanType,
                                                     final CreationalCallback<Object> callback,
@@ -326,7 +332,17 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type) {
-    final List<IOCBeanDef> beanList = beanMap.get(type);
+    final List<IOCBeanDef> beanList;
+
+    if (type.getName().equals("java.lang.Object")) {
+      beanList = new ArrayList<IOCBeanDef>();
+      for (final List<IOCBeanDef> list : beanMap.values()) {
+        beanList.addAll(list);
+      }
+    }
+    else {
+      beanList = beanMap.get(type);
+    }
 
     final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
 
@@ -387,12 +403,21 @@ public class IOCBeanManager {
       return Collections.unmodifiableList(matching);
     }
 
-    if (matching.size() > 1 && concreteBeans.contains(type.getName())) {
+    if (matching.size() > 1) {
       // perform second pass
       final Iterator<IOCBeanDef<T>> secondIter = matching.iterator();
-      while (secondIter.hasNext()) {
-        if (!secondIter.next().isConcrete())
-          secondIter.remove();
+
+      if (concreteBeans.contains(type.getName())) {
+        while (secondIter.hasNext()) {
+          if (!secondIter.next().isConcrete())
+            secondIter.remove();
+        }
+      }
+      else {
+        while (secondIter.hasNext()) {
+          if (!concreteBeans.contains(secondIter.next().getBeanClass().getName()))
+            secondIter.remove();
+        }
       }
     }
 
@@ -418,16 +443,17 @@ public class IOCBeanManager {
   public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
     final Collection<IOCBeanDef<T>> matching = lookupBeans(type, qualifiers);
 
-   if (matching == null || matching.isEmpty()) {
-      throw new IOCResolutionException("no matching bean instances for: " + type.getName());
-    }
-    else if (matching.size() > 1) {
-      throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
-    }
-    else {
+    if (matching.size() == 1) {
       return matching.iterator().next();
     }
+    else if (matching.isEmpty()) {
+      throw new IOCResolutionException("no matching bean instances for: " + type.getName());
+    }
+    else {
+      throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
+    }
   }
+
 
   void destroyAllBeans() {
     namedBeans.clear();
