@@ -13,9 +13,9 @@ import javax.inject.Inject;
 @EntryPoint
 public class BeanConstrConsumersMultiProducers {
   private Event<String> testEvent;
-  private TestLabel response;
-  private TestLabel greeting;
-  private TestLabel parting;
+  private FooLabel response;
+  private FooLabel greeting;
+  private FooLabel parting;
 
   private boolean postConstrCalled = false;
 
@@ -23,8 +23,8 @@ public class BeanConstrConsumersMultiProducers {
   }
 
   @Inject
-  public BeanConstrConsumersMultiProducers(Event<String> testEvent, @Response TestLabel response,
-                                           @Greets TestLabel greeting, @Parts TestLabel parting) {
+  public BeanConstrConsumersMultiProducers(Event<String> testEvent, @Response FooLabel response,
+                                           @Greets FooLabel greeting, @Parts FooLabel parting) {
     this.testEvent = testEvent;
     this.response = response;
     this.greeting = greeting;
@@ -39,18 +39,18 @@ public class BeanConstrConsumersMultiProducers {
 
   @Produces
   @Response
-  private TestLabel produceResponseLabel() {
-    return new TestLabel("<No Response!!!>");
+  private FooLabel produceResponseLabel() {
+    return new FooLabel("<No Response!!!>");
   }
 
   @Produces @Greets
-  private static TestLabel produceGreeting() {
-    return new TestLabel("Hello, there!!!");
+  private static FooLabel produceGreeting() {
+    return new FooLabel("Hello, there!!!");
   }
 
   @Produces @Parts
-  private static TestLabel produceParting() {
-    return new TestLabel("Goodbye, there!!!");
+  private static FooLabel produceParting() {
+    return new FooLabel("Goodbye, there!!!");
   }
 
 
@@ -58,15 +58,15 @@ public class BeanConstrConsumersMultiProducers {
     return testEvent;
   }
 
-  public TestLabel getResponse() {
+  public FooLabel getResponse() {
     return response;
   }
 
-  public TestLabel getGreeting() {
+  public FooLabel getGreeting() {
     return greeting;
   }
 
-  public TestLabel getParting() {
+  public FooLabel getParting() {
     return parting;
   }
 

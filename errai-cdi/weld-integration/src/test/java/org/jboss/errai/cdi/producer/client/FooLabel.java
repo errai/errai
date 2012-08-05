@@ -3,13 +3,13 @@ package org.jboss.errai.cdi.producer.client;
 /**
  * @author Mike Brock
  */
-public class TestLabel {
+public class FooLabel {
   private String text;
 
-  public TestLabel() {
+  public FooLabel() {
   }
 
-  public TestLabel(String text) {
+  public FooLabel(String text) {
     this.text = text;
   }
 
