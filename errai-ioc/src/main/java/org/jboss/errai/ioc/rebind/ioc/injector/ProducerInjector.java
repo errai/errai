@@ -300,9 +300,6 @@ public class ProducerInjector extends AbstractInjector {
     if (producerMember instanceof MetaMethod) {
       final MetaMethod producerMethod = (MetaMethod) producerMember;
 
-      if (producerMethod.getReturnType().isVoid()) {
-        return Stmt.load(Void.class);
-      }
 
       final Statement[] stmt = InjectUtil.resolveInjectionDependencies(
           producerMethod.getParameters(),
