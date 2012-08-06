@@ -52,6 +52,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
+import javax.enterprise.inject.Stereotype;
 import javax.inject.Provider;
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -81,7 +82,7 @@ public class IOCProcessorFactory {
   public void registerHandler(final Class<? extends Annotation> annotation,
                               final AnnotationHandler handler) {
 
-    getProcessingTasksSet().add(new ProcessingEntry(annotation, handler));
+    registerHandler(annotation, handler, null);
   }
 
   public void registerHandler(final Class<? extends Annotation> annotation,
@@ -375,6 +376,19 @@ public class IOCProcessorFactory {
               }
 
               for (final MetaClass clazz : classes) {
+                if (clazz.isAnnotation()) {
+                  if (clazz.isAnnotationPresent(Stereotype.class)) {
+                    final Class<? extends Annotation> stereoType = clazz.asClass().asSubclass(Annotation.class);
+                    for (final MetaClass stereoTypedClass :
+                        ClassScanner.getTypesAnnotatedWith(stereoType)) {
+                      handleType(entry, dependencyControl, stereoTypedClass, annoClass, context);
+                    }
+                  }
+
+                  //TODO: recurse and handle stereotypes
+                  continue;
+                }
+
                 handleType(entry, dependencyControl, clazz, annoClass, context);
               }
             }
@@ -599,18 +613,15 @@ public class IOCProcessorFactory {
     private AnnotationHandler handler;
     private Set<RuleDef> rules;
 
-    private ProcessingEntry(final Class<? extends Annotation> annotationClass, final AnnotationHandler handler) {
-      this.annotationClass = annotationClass;
-      this.handler = handler;
-    }
-
     private ProcessingEntry(final Class<? extends Annotation> annotationClass,
                             final AnnotationHandler handler,
                             final List<RuleDef> rule) {
 
       this.annotationClass = annotationClass;
       this.handler = handler;
-      this.rules = new HashSet<RuleDef>(rule);
+      if (rule != null) {
+        this.rules = new HashSet<RuleDef>(rule);
+      }
     }
 
     @Override

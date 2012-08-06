@@ -54,6 +54,7 @@ import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -74,6 +75,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Stereotype;
 import javax.inject.Inject;
 import javax.inject.Scope;
 import javax.inject.Singleton;
@@ -478,6 +480,10 @@ public class IOCBootstrapGenerator {
 
     injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
 
+    for (final MetaClass mc : ClassScanner.getTypesAnnotatedWith(Stereotype.class)) {
+      processStereoType(injectionContext, mc.asClass().asSubclass(Annotation.class));
+    }
+
     injectionContext.mapElementType(WiringElementType.TopLevelProvider, IOCProvider.class);
 
     injectionContext.mapElementType(WiringElementType.InjectionPoint, Inject.class);
@@ -485,6 +491,27 @@ public class IOCBootstrapGenerator {
 
     injectionContext.mapElementType(WiringElementType.AlternativeBean, Alternative.class);
     injectionContext.mapElementType(WiringElementType.TestMockBean, TestMock.class);
+  }
+
+  private static boolean processStereoType(final InjectionContext injectionContext,
+                                        final Class<? extends  Annotation> anno) {
+    boolean defaultScope = true;
+
+    for (final Annotation a : anno.getAnnotations()) {
+      if (a.annotationType().isAnnotationPresent(Stereotype.class)) {
+        defaultScope = processStereoType(injectionContext, a.annotationType());
+      }
+      if (injectionContext.isElementType(WiringElementType.SingletonBean, a.annotationType())
+          || injectionContext.isElementType(WiringElementType.DependentBean, a.annotationType())) {
+        defaultScope = false;
+      }
+    }
+
+    if (defaultScope) {
+      injectionContext.mapElementType(WiringElementType.DependentBean, anno);
+    }
+
+    return defaultScope;
   }
 
   private static void computeDependentScope(final GeneratorContext context, final InjectionContext injectionContext) {

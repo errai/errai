@@ -60,11 +60,7 @@ public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
   protected String instanceVarName;
 
-  public TypeInjector(MetaClass type, InjectionContext context) {
-    this(type, context, new Annotation[0]);
-  }
-
-  public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
+  public TypeInjector(final MetaClass type, final InjectionContext context) {
     this.type = type;
 
     // check to see if this is a singleton and/or alternative bean
@@ -82,7 +78,6 @@ public class TypeInjector extends AbstractInjector {
     }
 
     qualifiers.add(BuiltInQualifiers.ANY_INSTANCE);
-    qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
     if (type.isAnnotationPresent(Specializes.class)) {
       qualifiers.addAll(makeSpecialized(context));
@@ -199,7 +194,7 @@ public class TypeInjector extends AbstractInjector {
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
         .initializesWith(callbackBuilder.finish().finish()).finish();
 
-    Statement retVal;
+    final Statement retVal;
 
     if (isSingleton()) {
       /*
@@ -257,7 +252,7 @@ public class TypeInjector extends AbstractInjector {
 
       final List<Injector> injs = context.getInjectors(cls);
 
-      for (Injector inj : injs) {
+      for (final Injector inj : injs) {
         if (this.beanName == null) {
           this.beanName = inj.getBeanName();
         }

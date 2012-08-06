@@ -20,9 +20,12 @@ import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCBeanDef;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,15 +72,21 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
     final Set<Class<? extends Annotation>> annoClassCompareTo
         = new HashSet<Class<? extends Annotation>>();
 
-    for (Annotation a : annotations) {
+    for (final Annotation a : annotations) {
       annoClassCompareTo.add(a.annotationType());
     }
 
     return annoClassCompareFrom.equals(annoClassCompareTo);
   }
 
-
   public native void setRemoteCommunicationEnabled(boolean enabled) /*-{
     $wnd.erraiBusRemoteCommunicationEnabled = enabled;
   }-*/;
+
+  protected <T> Collection<IOCBeanDef<T>> getBeans(final Class<T> type,
+                                                   final Annotation... annotations) {
+    return IOC.getBeanManager().lookupBeans(type, annotations);
+  }
+
+
 }

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
@@ -79,4 +80,8 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     return creationalCallback.getInstance(context);
   }
 
+  @Override
+  public Class<? extends Annotation> getScope() {
+    return Dependent.class;
+  }
 }

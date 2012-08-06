@@ -42,10 +42,15 @@ import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Qualifier;
+import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -548,6 +553,11 @@ public class InjectionContext {
     return getMatchingAnnotationForElementType(type, hasAnnotations) != null;
   }
 
+  public boolean isElementType(final WiringElementType type, final Class<? extends Annotation> annotation) {
+    return getAnnotationsForElementType(type).contains(annotation);
+  }
+
+
   /**
    * Overloaded version to check GWT's JClassType classes.
    *
@@ -557,8 +567,9 @@ public class InjectionContext {
    * @return
    */
   public boolean isElementType(final WiringElementType type, final com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
+    final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
     for (final Annotation a : hasAnnotations.getAnnotations()) {
-      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
+      if (annotationsForElementType.contains(a.annotationType())) {
         return true;
       }
     }
@@ -566,12 +577,33 @@ public class InjectionContext {
   }
 
   public Annotation getMatchingAnnotationForElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
-    for (final Annotation a : hasAnnotations.getAnnotations()) {
-      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
+    final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
+    final Set<Annotation> annotationSet
+        = new HashSet<Annotation>(Arrays.asList(hasAnnotations.getAnnotations()));
+
+    fillInStereotypes(annotationSet, hasAnnotations.getAnnotations());
+
+    for (final Annotation a : annotationSet) {
+      if (annotationsForElementType.contains(a.annotationType())) {
         return a;
       }
     }
     return null;
+  }
+
+  private static void fillInStereotypes(final Set<Annotation> annotationSet, final Annotation[] from) {
+    for (final Annotation a : from) {
+      final Class<? extends Annotation> aClass = a.annotationType();
+      if (aClass.isAnnotationPresent(Stereotype.class)) {
+        fillInStereotypes(annotationSet, aClass.getAnnotations());
+      }
+      else if (aClass.isAnnotationPresent(Scope.class) ||
+          aClass.isAnnotationPresent(NormalScope.class) ||
+          aClass.isAnnotationPresent(Qualifier.class)
+          ) {
+        annotationSet.add(a);
+      }
+    }
   }
 
   public Collection<Map.Entry<WiringElementType, Class<? extends Annotation>>> getAllElementMappings() {

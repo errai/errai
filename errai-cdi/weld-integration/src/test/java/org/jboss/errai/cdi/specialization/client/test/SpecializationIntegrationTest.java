@@ -37,7 +37,6 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.specialization.SpecializationTestModule";
   }
 
-
   private static final Annotation LANDOWNER_LITERAL = new Landowner() {
     @Override
     public Class<? extends Annotation> annotationType() {
@@ -54,11 +53,11 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
 
   public void testIndirectSpecialization() {
     // LazyFarmer specializes directly Farmer and indirectly Human
-    Collection<IOCBeanDef<Human>> humanBeans = IOC.getBeanManager().lookupBeans(Human.class);
+    final Collection<IOCBeanDef<Human>> humanBeans = IOC.getBeanManager().lookupBeans(Human.class);
     assertEquals(humanBeans.size(), 1);
-    Collection<IOCBeanDef<Farmer>> farmerBeans = IOC.getBeanManager().lookupBeans(Farmer.class, LANDOWNER_LITERAL);
+    final Collection<IOCBeanDef<Farmer>> farmerBeans = IOC.getBeanManager().lookupBeans(Farmer.class, LANDOWNER_LITERAL);
     assertEquals(farmerBeans.size(), 1);
-    IOCBeanDef<Farmer> lazyFarmerBean = farmerBeans.iterator().next();
+    final IOCBeanDef<Farmer> lazyFarmerBean = farmerBeans.iterator().next();
     assertEquals(lazyFarmerBean.getBeanClass(), humanBeans.iterator().next().getBeanClass());
   }
 
@@ -72,7 +71,6 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     assertEquals(farmer.getClassName(), LazyFarmer.class.getName());
   }
 
-
   public void testSpecializingBeanHasQualifiersOfSpecializedAndSpecializingBean() {
     final Collection<IOCBeanDef<LazyFarmer>> farmerBeans
         = IOC.getBeanManager().lookupBeans(LazyFarmer.class, LAZY_LITERAL);
@@ -81,7 +79,8 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     final IOCBeanDef<LazyFarmer> lazyFarmerBean = farmerBeans.iterator().next();
     final Set<Annotation> qualifiers = lazyFarmerBean.getQualifiers();
 
-    assertTrue("wrong qualifiers: " + qualifiers, annotationSetMatches(qualifiers, Landowner.class, Lazy.class, Any.class, Named.class, Default.class));
+    assertTrue("wrong qualifiers: " + qualifiers,
+        annotationSetMatches(qualifiers, Landowner.class, Lazy.class, Any.class, Named.class, Default.class));
   }
 
   public void testSpecializationBeanHasNameOfSpecializedBean() {
@@ -133,9 +132,10 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     assertEquals(4, expensiveNecklaceQualifiers.size());
     assertTrue(annotationSetMatches(expensiveNecklaceQualifiers, Expensive.class, Sparkly.class, Any.class, Named.class));
 
-    final Collection<IOCBeanDef<Necklace>> sparklyNecklaceBeans = IOC.getBeanManager().lookupBeans(Necklace.class, SPARKLY_LITERAL);
+    final Collection<IOCBeanDef<Necklace>> sparklyNecklaceBeans
+        = IOC.getBeanManager().lookupBeans(Necklace.class, SPARKLY_LITERAL);
     assertEquals(1, sparklyNecklaceBeans.size());
-    IOCBeanDef<Necklace> sparklyBean = sparklyNecklaceBeans.iterator().next();
+    final IOCBeanDef<Necklace> sparklyBean = sparklyNecklaceBeans.iterator().next();
     assertEquals("expensiveGift", sparklyBean.getName());
   }
 
@@ -143,7 +143,7 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
     final IOCBeanDef<Product> productBean = IOC.getBeanManager().lookupBean(Product.class, EXPENSIVE_LITERAL);
     assertNotNull(productBean);
 
-    Product product = productBean.getInstance();
+    final Product product = productBean.getInstance();
 
     assertTrue(product instanceof Necklace);
     assertEquals(product.getPrice(), 10);

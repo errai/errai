@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 
 /**
@@ -75,6 +76,11 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
   @Override
   public T getInstance() {
     return getInstance(null);
+  }
+
+  @Override
+  public Class<? extends Annotation> getScope() {
+    return ApplicationScoped.class;
   }
 
   @Override

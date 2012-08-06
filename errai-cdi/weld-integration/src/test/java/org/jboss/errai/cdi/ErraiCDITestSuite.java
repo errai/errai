@@ -14,6 +14,7 @@ import org.jboss.errai.cdi.specialization.client.test.SpecializationIntegrationT
 import org.jboss.errai.cdi.invalid.producer.client.test.InvalidProducerIntegrationTest;
 import org.jboss.errai.cdi.producer.client.test.ProducerIntegrationTest;
 import org.jboss.errai.cdi.rpc.client.test.RpcIntegrationTest;
+import org.jboss.errai.cdi.stereotypes.client.test.StereotypesIntegrationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -27,6 +28,7 @@ import org.junit.runners.Suite;
     PostConstructOrderTest.class,
     DependentScopeIntegrationTest.class,
     SpecializationIntegrationTest.class,
+    StereotypesIntegrationTest.class,
     LocalEventIntegrationTest.class,
     EventObserverIntegrationTest.class,
     EventProducerIntegrationTest.class,

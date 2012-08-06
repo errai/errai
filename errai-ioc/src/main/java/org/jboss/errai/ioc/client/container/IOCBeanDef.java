@@ -42,6 +42,13 @@ public interface IOCBeanDef<T> {
   public Class<?> getBeanClass();
 
   /**
+   * Returns the scope of the bean.
+   *
+   * @returns the annotation type representing the scope of the bean.
+   */
+  public Class<? extends Annotation> getScope();
+
+  /**
    * Returns an instance of the bean within the active scope.
    *
    * @return The bean instance.
