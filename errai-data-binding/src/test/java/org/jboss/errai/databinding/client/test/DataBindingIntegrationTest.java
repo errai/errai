@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.TextBox;
  * Data binding integration tests.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author David Cracauer <dcracauer@gmail.com>
  */
 public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
@@ -349,5 +350,28 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertNull(binder.getWidget("value"));
     binder.bind(textBox, "value");
     assertEquals("Bound widget not found", textBox, binder.getWidget("value"));
+  }
+  
+  @Test
+  public void testPropertyChangeHandling() {
+    MockHandler handler = new MockHandler();
+
+    TextBox textBox = new TextBox();
+    DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "value");
+    binder.addPropertyChangeHandler(handler);
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
+    assertEquals("Should have received excatly one property change event", 1, handler.events.size());
+    assertEquals("Wrong property name in event", "value", handler.getEvents().get(0).getPropertyName());
+    assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
+    assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
+
+    binder.getModel().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+    assertEquals("Should have received excatly two property change event", 2, handler.events.size());
+    assertEquals("Wrong property name in event", "value", handler.getEvents().get(1).getPropertyName());
+    assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
+    assertEquals("Wrong previous value in event", "UI change", handler.getEvents().get(1).getOldValue());
   }
 }

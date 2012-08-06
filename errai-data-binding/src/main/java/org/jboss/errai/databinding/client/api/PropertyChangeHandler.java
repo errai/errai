@@ -13,35 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.databinding.client;
+package org.jboss.errai.databinding.client.api;
 
 /**
- * Dispatched when a bound property has changed.
+ * A PropertyChangeEvent gets dispatched when any property of a bound bean is changed.
+ * 
  * @author David Cracauer <dcracauer@gmail.com>
  */
-public class PropertyChangeEvent {
-    
-    private String propertyName;
-    private Object oldValue;
-    private Object newValue;
+public interface PropertyChangeHandler {
 
-    public PropertyChangeEvent(String propertyName, Object oldValue, Object newValue) {
-        this.propertyName = propertyName;
-        this.oldValue = oldValue;
-        this.newValue = newValue;
-    }
+  /**
+   * Called when {@link PropertyChangeEvent} is dispatched.
+   * 
+   * @param event
+   *          the {@link PropertyChangeEvent} that was dispatched.
+   */
+  public void onPropertyChange(PropertyChangeEvent event);
 
-    public Object getNewValue() {
-        return newValue;
-    }
-
-    public Object getOldValue() {
-        return oldValue;
-    }
-
-    public String getPropertyName() {
-        return propertyName;
-    }
-    
-    
 }

@@ -19,6 +19,7 @@ package org.jboss.errai.databinding.client.api;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
+import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
@@ -30,7 +31,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class DataBinder<T> {
+public class DataBinder<T> implements HasPropertyChangeHandlers {
   private T model;
 
   /**
@@ -232,6 +233,16 @@ public class DataBinder<T> {
   @SuppressWarnings("unchecked")
   public Widget getWidget(String property) {
     return ((BindableProxy<T>) this.model).getWidget(Assert.notNull(property));
+  }
+
+  @Override
+  public void addPropertyChangeHandler(PropertyChangeHandler handler) {
+    ((HasPropertyChangeHandlers) this.model).addPropertyChangeHandler(handler);
+  }
+
+  @Override
+  public void removePropertyChangeHandler(PropertyChangeHandler handler) {
+    ((HasPropertyChangeHandlers) this.model).removePropertyChangeHandler(handler);
   }
 
 }

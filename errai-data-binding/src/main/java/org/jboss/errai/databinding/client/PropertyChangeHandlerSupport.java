@@ -17,63 +17,75 @@ package org.jboss.errai.databinding.client;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang.ObjectUtils;
+
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
 /**
- *
+ * This is a utility class that can be used by implementations of {@link HasPropertyChangeHandlers}. It manages a list
+ * of handlers and dispatches {@link PropertyChangeEvent}s.
+ * 
  * @author David Cracauer <dcracauer@gmail.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PropertyChangeHandlerSupport {
-    
-    private List<PropertyChangeHandler> handlers = new ArrayList<PropertyChangeHandler>();
-    
-    /**
-     * 
-     * Adds a {@link  PropertyChangeHandler} to the list of handlers.
-     * @param handler the {@link PropertyChangeHandler} to add.
-     */
-    public void addPropertyChangeHandler(PropertyChangeHandler handler){
-        handlers.add(handler);
+
+  private final List<PropertyChangeHandler> handlers = new ArrayList<PropertyChangeHandler>();
+
+  /**
+   * Adds a {@link PropertyChangeHandler} to the list of handlers. Multiple handlers can be registered. If the same
+   * handler instance is passed multiple times, it will be notified multiple times.
+   * 
+   * @param handler
+   *          The {@link PropertyChangeHandler} to add, must not be null.
+   */
+  public void addPropertyChangeHandler(PropertyChangeHandler handler) {
+    handlers.add(Assert.notNull(handler));
+  }
+
+  /**
+   * Removes a {@link PropertyChangeHandler} from the list of handlers. If the handler was added more than once to the
+   * same event source, it will be notified one less time after being removed. If listener is null, or was never added,
+   * no exception is thrown and no action is taken.
+   * 
+   * @param handler
+   *          The {@link PropertyChangeHandler} to remove.
+   */
+  public void removePropertyChangeHandler(PropertyChangeHandler handler) {
+    handlers.remove(handler);
+  }
+
+  /**
+   * Notify registered {@link PropertyChangeHandlers} of a {@link PropertyChangeEvent}. Will only dispatch events that
+   * represent a change. If oldValue and newValue are equal, the event will be ignored.
+   * 
+   * @param event
+   *          {@link the PropertyChangeEvent} to provide to handlers.
+   */
+  public void notifyHandlers(PropertyChangeEvent event) {
+    if (!acceptEvent(event)) {
+      return;
     }
-    /**
-     * 
-     * Removes a {@link  PropertyChangeHandler} from the list of handlers.
-     * @param handler the {@link PropertyChangeHandler} to remove.
-     */
-    public void removePropertyChangeHandler(PropertyChangeHandler handler){
-        handlers.remove(handler);
+
+    for (PropertyChangeHandler handler : handlers) {
+      handler.onPropertyChange(event);
     }
-    
-    /**
-     * Notify registered {@link PropertyChangeHandlers} of a {@link PropertyChangeEvent}.
-     * Will only dispatch events that represent a change; If oldValue and newValue are equal, the event will be ignored.
-     * @param event {@link the PropertyChangeEvent} to provide to handlers.
-     */
-    public void notifyHandlers(PropertyChangeEvent event){
-        if(!acceptEvent(event)){
-            return;
-        }
-    
-        for(PropertyChangeHandler handler : handlers){
-            handler.onPropertyChange(event);
-        }
+  }
+
+  private boolean acceptEvent(PropertyChangeEvent event) {
+    if (event == null) {
+      return false;
     }
-    
-    private boolean acceptEvent(PropertyChangeEvent event){
-        if(event == null){
-            return false;
-        }
-        
-        if(event.getOldValue() == null){
-            return event.getNewValue() != null;
-        }
-        
-        if(event.getNewValue()==null){
-            return event.getOldValue() != null;
-        }
-        
-        return !event.getOldValue().equals(event.getNewValue());
-        
+
+    if (event.getOldValue() == null) {
+      return event.getNewValue() != null;
     }
-    
+
+    if (event.getNewValue() == null) {
+      return event.getOldValue() != null;
+    }
+
+    return !event.getOldValue().equals(event.getNewValue());
+  }
 }

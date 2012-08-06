@@ -17,26 +17,24 @@ package org.jboss.errai.databinding.client.test;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jboss.errai.databinding.client.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.PropertyChangeHandler;
+
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
 /**
- *
- * @author dcracauer
+ * {@link PropertyChangeHandler} for testing purposes.
+ * 
+ * @author David Cracauer <dcracauer@gmail.com>
  */
 public class MockHandler implements PropertyChangeHandler {
-    List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
-  
+  List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
 
- 
+  @Override
+  public void onPropertyChange(PropertyChangeEvent event) {
+    events.add(event);
+  }
 
-    @Override
-    public void onPropertyChange(PropertyChangeEvent event) {
-        events.add(event);
-    }
-
-    public List<PropertyChangeEvent> getEvents() {
-        return events;
-    }
-    
+  public List<PropertyChangeEvent> getEvents() {
+    return events;
+  }
 }

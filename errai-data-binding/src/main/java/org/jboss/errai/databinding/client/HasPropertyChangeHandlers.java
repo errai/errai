@@ -15,13 +15,35 @@
  */
 package org.jboss.errai.databinding.client;
 
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+
 /**
- * Implementors of HasPropertyChangeHandlers are a source of {@link PropertyChangeEvent} events.
+ * Implementations are a source of {@link PropertyChangeEvent}s.
+ * 
  * @author David Cracauer <dcracauer@gmail.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface HasPropertyChangeHandlers {
-    
-    public void addPropertyChangeHandler(PropertyChangeHandler handler);
-    public void removePropertyChangeHandler(PropertyChangeHandler handler);
-    
+
+  /**
+   * Adds a {@link PropertyChangeHandler} that will be notified when a property of the underlying event source changes.
+   * Multiple handlers can be registered. If the same handler instance is passed multiple times, it will be notified
+   * multiple times.
+   * 
+   * @param handler
+   *          The {@link PropertyChangeHandler} instance, must not be null.
+   */
+  public void addPropertyChangeHandler(PropertyChangeHandler handler);
+
+  /**
+   * Removes a {@link PropertyChangeHandler}, previously registered by a call to
+   * {@link #addPropertyChangeHandler(PropertyChangeHandler)}. If the handler was added more than once to the same event
+   * source, it will be notified one less time after being removed. If the provided handler is null, or was never added,
+   * no exception is thrown and no action is taken.
+   * 
+   * @param handler
+   *          the {@link PropertyChangeHandler} instance
+   */
+  public void removePropertyChangeHandler(PropertyChangeHandler handler);
 }
