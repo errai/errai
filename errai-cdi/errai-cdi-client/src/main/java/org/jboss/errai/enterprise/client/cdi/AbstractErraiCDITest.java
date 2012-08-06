@@ -20,6 +20,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 
@@ -86,6 +87,14 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
   protected <T> Collection<IOCBeanDef<T>> getBeans(final Class<T> type,
                                                    final Annotation... annotations) {
     return IOC.getBeanManager().lookupBeans(type, annotations);
+  }
+
+  protected boolean assertContains(final Collection<Annotation> annotationCollection,
+                                   final Annotation toCompare) {
+    for (final Annotation a : annotationCollection) {
+      if (QualifierUtil.isEqual(a, toCompare)) return true;
+    }
+    return false;
   }
 
 

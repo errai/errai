@@ -581,7 +581,7 @@ public class InjectionContext {
     final Set<Annotation> annotationSet
         = new HashSet<Annotation>(Arrays.asList(hasAnnotations.getAnnotations()));
 
-    fillInStereotypes(annotationSet, hasAnnotations.getAnnotations());
+    fillInStereotypes(annotationSet, hasAnnotations.getAnnotations(), false);
 
     for (final Annotation a : annotationSet) {
       if (annotationsForElementType.contains(a.annotationType())) {
@@ -591,18 +591,32 @@ public class InjectionContext {
     return null;
   }
 
-  private static void fillInStereotypes(final Set<Annotation> annotationSet, final Annotation[] from) {
+  private static void fillInStereotypes(final Set<Annotation> annotationSet,
+                                        final Annotation[] from,
+                                        boolean filterScopes) {
+
+    final List<Class<? extends Annotation>> stereotypes
+        = new ArrayList<Class<? extends Annotation>>();
+
     for (final Annotation a : from) {
       final Class<? extends Annotation> aClass = a.annotationType();
       if (aClass.isAnnotationPresent(Stereotype.class)) {
-        fillInStereotypes(annotationSet, aClass.getAnnotations());
+        stereotypes.add(aClass);
       }
-      else if (aClass.isAnnotationPresent(Scope.class) ||
+      else if (!filterScopes &&
           aClass.isAnnotationPresent(NormalScope.class) ||
-          aClass.isAnnotationPresent(Qualifier.class)
-          ) {
+          aClass.isAnnotationPresent(Scope.class)) {
+        filterScopes = true;
+
         annotationSet.add(a);
       }
+      else if (aClass.isAnnotationPresent(Qualifier.class)) {
+        annotationSet.add(a);
+      }
+    }
+
+    for (final Class<? extends Annotation> stereotype : stereotypes) {
+      fillInStereotypes(annotationSet, stereotype.getAnnotations(), filterScopes);
     }
   }
 
