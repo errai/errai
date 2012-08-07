@@ -90,7 +90,6 @@ public class ProxyMaker {
       }
     }
 
-
     builder.privateField(proxyVar, toProxy).finish();
     for (final MetaMethod method : toProxy.getMethods()) {
       final String methodString = GenUtil.getMethodString(method);
