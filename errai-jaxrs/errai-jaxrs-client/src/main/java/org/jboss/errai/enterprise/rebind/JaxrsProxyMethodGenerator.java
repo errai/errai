@@ -28,7 +28,8 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Cookies;
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.client.framework.CallContextStatus;
-import org.jboss.errai.bus.rebind.RebindUtils;
+import org.jboss.errai.bus.rebind.RPCProxyUtil;
+import org.jboss.errai.config.rebind.RebindUtils;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
@@ -206,7 +207,7 @@ public class JaxrsProxyMethodGenerator {
     }
 
     Statement callContext =
-        RebindUtils.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
+        RPCProxyUtil.generateProxyMethodCallContext(RestCallContext.class, declaringClass,
             resourceMethod.getMethod(), generateInterceptedRequest(), interceptedCall)
             .publicOverridesMethod("setParameters", Parameter.of(Object[].class, "parameters"))
             .append(new StringStatement("super.setParameters(parameters)"))

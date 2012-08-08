@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -350,7 +351,13 @@ public class RebindUtils {
       final StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
       final Field field = StandardGeneratorContext.class.getDeclaredField("module");
       field.setAccessible(true);
-      final ModuleDef moduleDef = (ModuleDef) field.get(stdContext);
+      final Object o = field.get(stdContext);
+
+      final ModuleDef moduleDef = (ModuleDef) o;
+
+      if (moduleDef == null) {
+        return Collections.emptySet();
+      }
 
       // moduleName looks like "com.foo.xyz.MyModule" and we just want the package part
       // for tests .JUnit is appended to the module name by GWT
@@ -382,4 +389,6 @@ public class RebindUtils {
 
     return packages;
   }
+
+
 }

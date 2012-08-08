@@ -96,6 +96,4 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
     }
     return false;
   }
-
-
 }

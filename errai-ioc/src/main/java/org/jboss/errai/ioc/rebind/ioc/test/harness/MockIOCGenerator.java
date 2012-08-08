@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.test.harness;
 
 
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.dev.javac.testing.GeneratorContextBuilder;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -43,7 +44,7 @@ public class MockIOCGenerator {
     final String packageName = Bootstrapper.class.getPackage().getName();
     final String className = "MockBootstrapperImpl";
 
-    final IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator(null,
+    final IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator(GeneratorContextBuilder.newCoreBasedBuilder().buildGeneratorContext(),
             new TreeLogger() {
                   @Override
                   public TreeLogger branch(final Type type, final String msg, final Throwable caught, final HelpInfo helpInfo) {

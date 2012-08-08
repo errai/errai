@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.injector;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -30,8 +31,14 @@ public class ProviderInjector extends TypeInjector {
 
   public ProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
     super(type, context);
+
+    if (EnvUtil.isProdMode()) {
+      setEnabled(context.isReachable(type) || context.isReachable(providerType));
+    }
+
     this.providerInjector = new TypeInjector(providerType, context);
     context.registerInjector(providerInjector);
+    providerInjector.setEnabled(isEnabled());
 
     this.testmock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);

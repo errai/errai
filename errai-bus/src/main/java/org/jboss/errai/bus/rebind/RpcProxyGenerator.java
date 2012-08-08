@@ -16,10 +16,6 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -40,6 +36,11 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.rebind.RebindUtils;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Generates an Errai RPC remote proxy.
@@ -125,7 +126,7 @@ public class RpcProxyGenerator {
       interceptedCall = remote.getAnnotation(InterceptedCall.class);
     }
 
-    Statement callContext = RebindUtils.generateProxyMethodCallContext(RemoteCallContext.class,
+    Statement callContext = RPCProxyUtil.generateProxyMethodCallContext(RemoteCallContext.class,
             classBuilder.getClassDefinition(), method, requestLogic, interceptedCall).finish();
 
     return Stmt.try_()
@@ -172,4 +173,5 @@ public class RpcProxyGenerator {
                 .invoke("sendNowWith", Stmt.loadVariable("bus")))
         .finish();
   }
+
 }

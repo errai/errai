@@ -40,6 +40,7 @@ import java.util.Set;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTUtil {
+
   public static MetaTypeVariable[] fromTypeVariable(final TypeOracle oracle,
                                                     final JTypeParameter[] typeParameters) {
     final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
@@ -148,6 +149,7 @@ public class GWTUtil {
     if (typeOracle != null) {
       final Set<String> translatable = RebindUtils.findTranslatablePackages(context);
       translatable.remove("java.lang");
+      translatable.remove("java.lang.annotation");
 
       for (final JClassType type : typeOracle.getTypes()) {
         if (!translatable.contains(type.getPackage().getName())) {
@@ -155,7 +157,7 @@ public class GWTUtil {
           continue;
         }
 
-        if (type.isAnnotation() != null) {
+        if (type.isAnnotation() != null || type.getQualifiedSourceName().equals("java.lang.annotation.Annotation")) {
           logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
 
           if (!MetaClassFactory.canLoadClass(type.getQualifiedBinaryName()))  {

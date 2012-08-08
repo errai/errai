@@ -16,20 +16,26 @@
 
 package org.jboss.errai.config.rebind;
 
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.QuickDeps;
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.util.ClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +59,7 @@ public abstract class EnvUtil {
 
     for (StackTraceElement el : new Throwable().getStackTrace()) {
       if (el.getClassName().startsWith("com.google.gwt.junit.client.")
-              || el.getClassName().startsWith("org.junit")) {
+          || el.getClassName().startsWith("org.junit")) {
         return _isJUnitTest = Boolean.TRUE;
       }
     }
@@ -117,7 +123,7 @@ public abstract class EnvUtil {
 
     try {
       erraiAppProperties = Thread.currentThread().getContextClassLoader()
-              .getResources("ErraiApp.properties");
+          .getResources("ErraiApp.properties");
     }
     catch (IOException e) {
       throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
@@ -235,7 +241,7 @@ public abstract class EnvUtil {
   public static boolean isPortableType(Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
     if (cls.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(mc)
-            || getEnvironmentConfig().getPortableSuperTypes().contains(mc)) {
+        || getEnvironmentConfig().getPortableSuperTypes().contains(mc)) {
       return true;
     }
     else {
@@ -278,5 +284,49 @@ public abstract class EnvUtil {
 
   public static void clearCaches() {
     _environmentConfigCache = null;
+  }
+
+  private static volatile GeneratorContext _lastContext;
+  private static volatile Set<String> _reachableCache;
+
+  public static Set<String> getAllReachableClasses(final GeneratorContext context) {
+    if (_lastContext == context && _reachableCache != null) {
+      return _reachableCache;
+    }
+
+    final Set<String> packages = RebindUtils.findTranslatablePackagesInModule(context);
+
+    final Set<String> allDeps = new HashSet<String>();
+    final Collection<MetaClass> allCachedClasses = MetaClassFactory.getAllCachedClasses();
+    try {
+      for (final MetaClass mc : allCachedClasses) {
+        if (!packages.contains(mc.getPackageName())) continue;
+
+        final String name = mc.getFullyQualifiedName().replaceAll("\\.", "/") + ".java";
+
+        final URL resource = EnvUtil.class.getClassLoader().getResource(name);
+
+        if (resource != null) {
+          final File file = new File(resource.getFile());
+
+          if (file.exists()) {
+            allDeps.addAll(QuickDeps.getQuickTypeDependencyList(
+                com.google.gwt.thirdparty.guava.common.io.Files.toString(file, Charset.forName("UTF-8")), null));
+          }
+        }
+      }
+    }
+    catch (Throwable e) {
+      e.printStackTrace();
+    }
+
+    System.out.println("*** REACHABILITY ANALYSIS (production mode: " + EnvUtil.isProdMode() + ") ***");
+    for (String s : allDeps) {
+      System.out.println(" -> " + s);
+    }
+    System.out.println("*** END OF REACHABILITY ANALYSIS *** ");
+
+    _lastContext = context;
+    return _reachableCache = allDeps;
   }
 }

@@ -326,7 +326,10 @@ public class IOCProcessorFactory {
             public boolean handle(final InjectableInstance instance,
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
-              injectionContext.getInjector(instance.getType()).getBeanInstance(instance);
+              final Injector injector = injectionContext.getInjector(instance.getType());
+              if (injector.isEnabled()) {
+                injector.getBeanInstance(instance);
+              }
               return true;
             }
           });

@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.Arith;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
@@ -126,8 +127,9 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     // finish constructor
     constrBuilder.finish();
 
+    final MetaClass annotationClazz = JavaReflectionClass.newUncachedInstance(Annotation.class);
     builder.publicMethod(boolean.class, "isEqual",
-            Parameter.of(Annotation.class, "a1"), Parameter.of(Annotation.class, "a2"))
+            Parameter.of(annotationClazz, "a1"), Parameter.of(annotationClazz, "a2"))
             .body()
             ._(If.cond(invokeStatic(QualifierUtil.class, "isSameType", Refs.get("a1"), Refs.get("a2")))
                     ._(

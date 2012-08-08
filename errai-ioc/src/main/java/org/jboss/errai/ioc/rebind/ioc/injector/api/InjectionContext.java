@@ -74,6 +74,7 @@ public class InjectionContext {
   private final Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
   private final Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
   private final Set<String> knownTypesWithCycles = new HashSet<String>();
+  private final Set<String> reachableTypes;
 
   private final Set<String> enabledAlternatives;
 
@@ -101,11 +102,19 @@ public class InjectionContext {
   private InjectionContext(final Builder builder) {
     this.processingContext = builder.processingContext;
     this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(builder.enabledAlternatives));
+    if (builder.reachableTypes == null) {
+      reachableTypes = Collections.emptySet();
+    }
+    else {
+      reachableTypes = builder.reachableTypes;
+    }
   }
 
   public static class Builder {
     private IOCProcessingContext processingContext;
+    private Set<String> reachableTypes;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
+
 
     public static Builder create() {
       return new Builder();
@@ -118,6 +127,11 @@ public class InjectionContext {
 
     public Builder enabledAlternative(final String fqcn) {
       enabledAlternatives.add(fqcn);
+      return this;
+    }
+
+    public Builder reachableTypes(final Set<String> reachableTypes) {
+      this.reachableTypes = reachableTypes;
       return this;
     }
 
@@ -670,6 +684,14 @@ public class InjectionContext {
         listener.onRegister(injector.getInjectedType(), injector);
       }
     }
+  }
+
+  public boolean isReachable(final MetaClass clazz) {
+    return isReachable(clazz.getFullyQualifiedName());
+  }
+
+  public boolean isReachable(final String fqnc) {
+    return reachableTypes.isEmpty() || reachableTypes.contains(fqnc);
   }
 
   public void setAttribute(final String name, final Object value) {

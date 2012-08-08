@@ -26,7 +26,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
-import org.jboss.errai.bus.rebind.RebindUtils;
+import org.jboss.errai.config.rebind.RebindUtils;
 import org.jboss.errai.bus.server.AsyncDispatcher;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;

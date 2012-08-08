@@ -57,7 +57,7 @@ import java.util.Set;
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
  * classes annotated with the {@link Portable} annotation, and custom mappings annotated with {@link CustomMapping}.
- * 
+ *
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
@@ -71,7 +71,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Map<String, MappingDefinition> MAPPING_DEFINITIONS = new HashMap<String, MappingDefinition>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
-  
+
   // key = all types, value = list of all types which inherit from.
   private final Multimap<String, String> inheritanceMap = HashMultimap.create();
 
@@ -113,7 +113,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     if (!fqcn.equals(internalName) && definition.getMappingClass().isArray()
-            && definition.getMappingClass().getOuterComponentType().isPrimitive()) {
+        && definition.getMappingClass().getOuterComponentType().isPrimitive()) {
       putDefinitionIfAbsent(internalName, definition);
     }
 
@@ -124,9 +124,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private void putDefinitionIfAbsent(final String key, final MappingDefinition value) {
     if (MAPPING_DEFINITIONS.containsKey(key)) {
       throw new IllegalStateException(
-              "Mapping definition collision for " + key +
-                      "\nAlready have: " + MAPPING_DEFINITIONS.get(key) +
-                      "\nAttempted to add: " + value);
+          "Mapping definition collision for " + key +
+              "\nAlready have: " + MAPPING_DEFINITIONS.get(key) +
+              "\nAttempted to add: " + value);
     }
     MAPPING_DEFINITIONS.put(key, value);
   }
@@ -162,7 +162,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
         if (log.isDebugEnabled())
           log.debug("loaded custom mapping class: " + cls.getName() + " (for mapping: "
-                  + definition.getMappingClass().getFullyQualifiedName() + ")");
+              + definition.getMappingClass().getFullyQualifiedName() + ")");
 
         if (cls.isAnnotationPresent(InheritedMappings.class)) {
           final InheritedMappings inheritedMappings = cls.getAnnotation(InheritedMappings.class);
@@ -218,7 +218,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
       else {
         throw new RuntimeException("class annotated with " + ClientMarshaller.class.getCanonicalName()
-                + " does not implement " + Marshaller.class.getName());
+            + " does not implement " + Marshaller.class.getName());
       }
     }
 
@@ -265,7 +265,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
       else {
         throw new RuntimeException("class annotated with " + ServerMarshaller.class.getCanonicalName()
-                + " does not implement " + Marshaller.class.getName());
+            + " does not implement " + Marshaller.class.getName());
       }
     }
 
@@ -301,7 +301,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     for (final MetaClass enumType : enums) {
       if (!hasDefinition(enumType)) {
         final MappingDefinition enumDef = DefaultJavaDefinitionMapper
-                .map(MetaClassFactory.get(enumType.asClass()), this);
+            .map(MetaClassFactory.get(enumType.asClass()), this);
         enumDef.setMarshallerInstance(new DefaultDefinitionMarshaller(enumDef));
         addDefinition(enumDef);
         exposedClasses.add(MetaClassFactory.get(enumType.asClass()));
@@ -324,11 +324,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       final MappingDefinition def = getDefinition(entry.getValue());
       if (def == null) {
         throw new InvalidMappingException("cannot alias type " + entry.getKey().getName()
-                + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
+            + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
       }
 
       final MappingDefinition aliasDef = new MappingDefinition(
-              def.getMarshallerInstance(),entry.getKey(), false
+          def.getMarshallerInstance(), entry.getKey(), false
       );
       if (def.getMarshallerInstance() instanceof DefaultDefinitionMarshaller) {
         aliasDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasDef));
@@ -363,7 +363,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         }
       }
     }
-
     log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
@@ -378,17 +377,19 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   /**
    * Populates the inheritance map with all supertypes (except java.lang.Object) and all directly- and
    * indirectly-implemented interfaces of the given class.
-   * 
+   *
    * @param mappingClass
    */
   private void fillInheritanceMap(MetaClass mappingClass) {
     fillInheritanceMap(inheritanceMap, mappingClass, mappingClass);
   }
 
-  /** Recursive subroutine of {@link #fillInheritanceMap(org.jboss.errai.codegen.meta.MetaClass)}. */
+  /**
+   * Recursive subroutine of {@link #fillInheritanceMap(org.jboss.errai.codegen.meta.MetaClass)}.
+   */
   private static void fillInheritanceMap(final Multimap<String, String> inheritanceMap,
                                          final MetaClass visiting,
-      final MetaClass mappingClass) {
+                                         final MetaClass mappingClass) {
     if (visiting == null || visiting.equals(MetaClassFactory.get(Object.class)))
       return;
 
@@ -431,15 +432,15 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         final InstantiationMapping instantiationMapping = def.getInstantiationMapping();
 
         if (instantiationMapping instanceof ConstructorMapping &&
-                def.getInstantiationMapping().getMappings().length == 0 &&
-                def.getMappingClass().getDeclaredConstructor(toMerge.getInstantiationMapping().getSignature()) != null) {
+            def.getInstantiationMapping().getMappings().length == 0 &&
+            def.getMappingClass().getDeclaredConstructor(toMerge.getInstantiationMapping().getSignature()) != null) {
 
           final ConstructorMapping parentConstructorMapping = (ConstructorMapping) toMerge.getInstantiationMapping();
           final MetaClass mergingClass = def.getMappingClass();
 
           if (parentConstructorMapping instanceof SimpleConstructorMapping) {
             final ConstructorMapping newMapping = ((SimpleConstructorMapping) parentConstructorMapping)
-                    .getCopyForInheritance();
+                .getCopyForInheritance();
             newMapping.setMappingClass(mergingClass);
             def.setInheritedInstantiationMapping(newMapping);
           }

@@ -28,7 +28,7 @@ import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.rebind.RebindUtils;
+import org.jboss.errai.config.rebind.RebindUtils;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;

@@ -16,9 +16,11 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.io.File;
-import java.io.PrintWriter;
-
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
@@ -38,11 +40,8 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import java.io.File;
+import java.io.PrintWriter;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
@@ -80,7 +79,7 @@ public class RpcProxyLoaderGenerator extends Generator {
   }
 
   private String generate(GeneratorContext context, String className) {
-    final File fileCacheDir = RebindUtils.getErraiCacheDir();
+    final File fileCacheDir = org.jboss.errai.common.metadata.RebindUtils.getErraiCacheDir();
     final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
     
     log.info("generating rpc proxy loader class.");

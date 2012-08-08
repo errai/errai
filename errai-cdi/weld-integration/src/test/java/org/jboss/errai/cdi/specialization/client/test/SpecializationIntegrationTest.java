@@ -53,9 +53,9 @@ public class SpecializationIntegrationTest extends AbstractErraiCDITest {
 
   public void testIndirectSpecialization() {
     // LazyFarmer specializes directly Farmer and indirectly Human
-    final Collection<IOCBeanDef<Human>> humanBeans = IOC.getBeanManager().lookupBeans(Human.class);
+    final Collection<IOCBeanDef<Human>> humanBeans = getBeans(Human.class);
     assertEquals(humanBeans.size(), 1);
-    final Collection<IOCBeanDef<Farmer>> farmerBeans = IOC.getBeanManager().lookupBeans(Farmer.class, LANDOWNER_LITERAL);
+    final Collection<IOCBeanDef<Farmer>> farmerBeans = getBeans(Farmer.class, LANDOWNER_LITERAL);
     assertEquals(farmerBeans.size(), 1);
     final IOCBeanDef<Farmer> lazyFarmerBean = farmerBeans.iterator().next();
     assertEquals(lazyFarmerBean.getBeanClass(), humanBeans.iterator().next().getBeanClass());

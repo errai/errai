@@ -145,6 +145,8 @@ public class IOCBootstrapGenerator {
         GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
       }
 
+
+
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
       gen = _generate(packageName, className);
@@ -159,6 +161,15 @@ public class IOCBootstrapGenerator {
   }
 
   private String _generate(final String packageName, final String className) {
+    final Set<String> allDeps = EnvUtil.getAllReachableClasses(context);
+
+    System.out.println("*** REACHABILITY ANALYSIS (production mode: " + EnvUtil.isProdMode() + ") ***");
+    for (String s : allDeps) {
+      System.out.println(" -> " + s);
+    }
+    System.out.println("*** END OF REACHABILITY ANALYSIS *** ");
+
+
     final ClassStructureBuilder<?> classStructureBuilder =
         Implementations.implement(Bootstrapper.class, packageName, className);
 
@@ -297,6 +308,7 @@ public class IOCBootstrapGenerator {
     final IOCProcessingContext procContext = iocProcContextBuilder.build();
 
     injectionContextBuilder.processingContext(procContext);
+    injectionContextBuilder.reachableTypes(allDeps);
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
     defaultConfigureProcessor(context, injectionContext);
@@ -494,7 +506,7 @@ public class IOCBootstrapGenerator {
   }
 
   private static boolean processStereoType(final InjectionContext injectionContext,
-                                        final Class<? extends  Annotation> anno) {
+                                           final Class<? extends Annotation> anno) {
     boolean defaultScope = true;
 
     for (final Annotation a : anno.getAnnotations()) {

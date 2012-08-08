@@ -128,7 +128,6 @@ public class ProxyMaker {
         }
       }
 
-
       final DefParameters defParameters = DefParameters.fromParameters(methodParms);
       final BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
           .parameters(defParameters)

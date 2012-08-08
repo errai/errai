@@ -17,12 +17,28 @@
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-codegen</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.jboss.errai</groupId>-->
+            <!--<artifactId>errai-codegen-gwt</artifactId>-->
+            <!--<version>${project.version}</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
+
 
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
             <version>1.0-SP3</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

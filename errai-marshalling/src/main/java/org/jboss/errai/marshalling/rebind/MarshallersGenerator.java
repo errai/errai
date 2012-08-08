@@ -351,7 +351,8 @@ public class MarshallersGenerator extends Generator {
       }
 
       return _clientMarshallerCache
-              = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.GWT).generate(packageName, className);
+              = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.GWT, EnvUtil.getAllReachableClasses(context))
+          .generate(packageName, className);
     }
   }
 
