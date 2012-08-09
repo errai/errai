@@ -18,34 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import static java.util.Collections.unmodifiableCollection;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.meta.HasAnnotations;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.util.PrivateAccessType;
-import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
-import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Qualifier;
-import javax.inject.Scope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -62,6 +34,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Qualifier;
+import javax.inject.Scope;
+
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.config.rebind.ReachableTypes;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
+import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
+import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+
 public class InjectionContext {
   private final IOCProcessingContext processingContext;
 
@@ -74,7 +77,7 @@ public class InjectionContext {
   private final Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
   private final Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
   private final Set<String> knownTypesWithCycles = new HashSet<String>();
-  private final Set<String> reachableTypes;
+  private final ReachableTypes reachableTypes;
 
   private final Set<String> enabledAlternatives;
 
@@ -102,17 +105,12 @@ public class InjectionContext {
   private InjectionContext(final Builder builder) {
     this.processingContext = builder.processingContext;
     this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(builder.enabledAlternatives));
-    if (builder.reachableTypes == null) {
-      reachableTypes = Collections.emptySet();
-    }
-    else {
-      reachableTypes = builder.reachableTypes;
-    }
+    this.reachableTypes = Assert.notNull(builder.reachableTypes);
   }
 
   public static class Builder {
     private IOCProcessingContext processingContext;
-    private Set<String> reachableTypes;
+    private ReachableTypes reachableTypes = ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
 
 
@@ -130,7 +128,7 @@ public class InjectionContext {
       return this;
     }
 
-    public Builder reachableTypes(final Set<String> reachableTypes) {
+    public Builder reachableTypes(final ReachableTypes reachableTypes) {
       this.reachableTypes = reachableTypes;
       return this;
     }

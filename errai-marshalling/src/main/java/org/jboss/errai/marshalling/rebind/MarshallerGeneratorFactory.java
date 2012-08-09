@@ -24,6 +24,17 @@ import static org.jboss.errai.codegen.util.Implementations.implement;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -39,6 +50,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -56,24 +68,13 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.util.TypeLiteral;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MarshallerGeneratorFactory {
   private static final String MARSHALLERS_VAR = "marshallers";
   private final MarshallerOutputTarget target;
-  private final Set<String> reachableTypes;
+  private final ReachableTypes reachableTypes;
 
   private GeneratorMappingContext mappingContext;
 
@@ -88,12 +89,11 @@ public class MarshallerGeneratorFactory {
   long startTime;
 
 
-  private MarshallerGeneratorFactory(final MarshallerOutputTarget target, final Set<String> reachableTypes) {
+  private MarshallerGeneratorFactory(final MarshallerOutputTarget target, final ReachableTypes reachableTypes) {
     this.target = target;
 
-    if (!reachableTypes.isEmpty()) {
-      this.reachableTypes = new HashSet<String>(reachableTypes);
-
+    this.reachableTypes = reachableTypes;
+    if (reachableTypes.isBasedOnReachabilityAnalysis()) {
       this.reachableTypes.add(Object.class.getName());
       this.reachableTypes.add(Map.class.getName());
       this.reachableTypes.add(Set.class.getName());
@@ -120,16 +120,13 @@ public class MarshallerGeneratorFactory {
       this.reachableTypes.add("byte");
       this.reachableTypes.add("short");
     }
-    else {
-      this.reachableTypes = Collections.emptySet();
-    }
   }
 
   public static MarshallerGeneratorFactory getFor(final MarshallerOutputTarget target) {
-    return new MarshallerGeneratorFactory(target, Collections.<String>emptySet());
+    return new MarshallerGeneratorFactory(target, ReachableTypes.EVERYTHING_REACHABLE_INSTANCE);
   }
 
-  public static MarshallerGeneratorFactory getFor(final MarshallerOutputTarget target, final Set<String> reachableTypes) {
+  public static MarshallerGeneratorFactory getFor(final MarshallerOutputTarget target, final ReachableTypes reachableTypes) {
     return new MarshallerGeneratorFactory(target, reachableTypes);
   }
 

@@ -16,20 +16,6 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.util.QuickDeps;
-import org.jboss.errai.common.client.api.annotations.NonPortable;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.config.util.ClassScanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +30,21 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.QuickDeps;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.util.ClassScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.core.ext.GeneratorContext;
+
 /**
  * @author Mike Brock
  */
@@ -51,6 +52,8 @@ public abstract class EnvUtil {
   public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
   public static final String CONFIG_ERRAI_NONSERIALIZABLE_TYPE = "errai.marshalling.nonserializableTypes";
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
+
+  public static final String SYSPROP_USE_REACHABILITY_ANALYSIS = "errai.compile.perf.perform_reachability_analysis";
 
   private static volatile Boolean _isJUnitTest;
 
@@ -287,9 +290,15 @@ public abstract class EnvUtil {
   }
 
   private static volatile GeneratorContext _lastContext;
-  private static volatile Set<String> _reachableCache;
+  private static volatile ReachableTypes _reachableCache;
 
-  public static Set<String> getAllReachableClasses(final GeneratorContext context) {
+  public static ReachableTypes getAllReachableClasses(final GeneratorContext context) {
+    if (!Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
+      System.out.println("Reachability analysis disabled. Errai may generate unnecessary code.");
+      System.out.println("Enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
+      return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
+    }
+
     if (_lastContext == context && _reachableCache != null) {
       return _reachableCache;
     }
@@ -327,6 +336,6 @@ public abstract class EnvUtil {
     System.out.println("*** END OF REACHABILITY ANALYSIS *** ");
 
     _lastContext = context;
-    return _reachableCache = allDeps;
+    return _reachableCache = new ReachableTypes(allDeps, true);
   }
 }

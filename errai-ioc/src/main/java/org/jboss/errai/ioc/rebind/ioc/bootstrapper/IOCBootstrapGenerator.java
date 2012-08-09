@@ -19,13 +19,28 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JPackage;
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.StringSourceWriter;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Inject;
+import javax.inject.Scope;
+import javax.inject.Singleton;
+
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
@@ -54,6 +69,7 @@ import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
@@ -72,26 +88,13 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Inject;
-import javax.inject.Scope;
-import javax.inject.Singleton;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JPackage;
+import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.StringSourceWriter;
 
 /**
  * Generator for the Bootstrapper class generated to wire an application at runtime.
@@ -161,14 +164,7 @@ public class IOCBootstrapGenerator {
   }
 
   private String _generate(final String packageName, final String className) {
-    final Set<String> allDeps = EnvUtil.getAllReachableClasses(context);
-
-    System.out.println("*** REACHABILITY ANALYSIS (production mode: " + EnvUtil.isProdMode() + ") ***");
-    for (String s : allDeps) {
-      System.out.println(" -> " + s);
-    }
-    System.out.println("*** END OF REACHABILITY ANALYSIS *** ");
-
+    final ReachableTypes allDeps = EnvUtil.getAllReachableClasses(context);
 
     final ClassStructureBuilder<?> classStructureBuilder =
         Implementations.implement(Bootstrapper.class, packageName, className);
