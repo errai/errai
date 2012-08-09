@@ -1,6 +1,5 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -9,10 +8,10 @@ import javax.persistence.EntityManager;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
@@ -50,24 +49,16 @@ public class StoreForm extends Composite {
     return storeBinder.getModel();
   }
 
-  @PostConstruct
-  private void init() {
+  // TODO (after ERRAI-366): make this method package-private
+  @EventHandler("saveButton")
+  public void onSaveButtonClicked(ClickEvent event) {
+    em.persist(storeBinder.getModel());
+    em.flush();
 
-    // TODO (errai-ui): I want to get events with an annotated method (like GWT's @UiHandler)
-    //                  rather than programmatically subscribing a listener
-    saveButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        em.persist(storeBinder.getModel());
-        em.flush();
-
-        if (afterSaveAction != null) {
-          afterSaveAction.run();
-        }
-        System.out.println("Click handler finished for " + storeBinder.getModel());
-      }
-    });
+    if (afterSaveAction != null) {
+      afterSaveAction.run();
+    }
+    System.out.println("Click handler finished for " + storeBinder.getModel());
   }
 
   @PreDestroy
