@@ -63,9 +63,9 @@ public class TypeInjector extends AbstractInjector {
   public TypeInjector(final MetaClass type, final InjectionContext context) {
     this.type = type;
 
-    // if (EnvUtil.isProdMode()) {
-      setEnabled(context.isReachable(type));
-    // }
+    if (!context.isReachable(type)) {
+      disableSoftly();
+    }
 
     // check to see if this is a singleton and/or alternative bean
     this.testmock = context.isElementType(WiringElementType.TestMockBean, type);

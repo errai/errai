@@ -230,38 +230,4 @@ public class QuickDeps {
       return null;
     }
   }
-
-  public static void main(String[] args) {
-    getQuickTypeDependencyList("package org.jbw2012.client.local;\n" +
-        "\n" +
-        "import org.jboss.errai.bus.client.framework.MessageBus;\n" +
-        "import org.jboss.errai.ioc.client.container.IOCBeanDef;\n" +
-        "import org.jboss.errai.ioc.client.container.IOCBeanManager;\n" +
-        "\n" +
-        "import javax.annotation.PostConstruct;\n" +
-        "import javax.enterprise.context.ApplicationScoped;\n" +
-        "import javax.inject.Inject;\n" +
-        "import java.util.Collection;\n" +
-        "\n" +
-        "/**\n" +
-        " * @author Mike Brock\n" +
-        " */\n" +
-        "@ApplicationScoped\n" +
-        "public class HelloWorld {\n" +
-        "  @Inject IOCBeanManager beanManager;\n" +
-        "\n" +
-        "  @PostConstruct\n" +
-        "  public void onLoad() {\n" +
-        "    final Collection<IOCBeanDef<Talker>> iocBeanDefs\n" +
-        "        = beanManager.lookupBeans(Talker.class);\n" +
-        "\n" +
-        "    beanManager.lookupBean(MessageBus. /* foo */ class);\n" +
-        "\n" +
-        "    for (IOCBeanDef<Talker> beanDef : iocBeanDefs) {\n" +
-        "      beanDef.getInstance().talk();\n" +
-        "    }\n" +
-        "  }\n" +
-        "}\n", null);
-  }
-
 }

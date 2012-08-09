@@ -18,10 +18,19 @@ public interface Injector {
   Statement getBeanInstance(InjectableInstance injectableInstance);
 
   /**
-   * Checks if the injector is enabled, and is eligable for injection consideration.
+   * Checks if the injector is enabled, and is eligible for injection consideration.
    * @return true if the injector is enabled
    */
   boolean isEnabled();
+
+  /**
+   * Checks if the injector is soft disabled. This is an optimization flag, allowing for the code optimizers to
+   * indicate they'd like to remove the underlying bean. Soft disabled injectors will always report as not being
+   * enabled, but are subject to reactivation if they are requested for injection.
+   *
+   * @return true if the injector is soft disabled.
+   */
+  boolean isSoftDisabled();
 
   /**
    * Checks if the injector represents a test mock.

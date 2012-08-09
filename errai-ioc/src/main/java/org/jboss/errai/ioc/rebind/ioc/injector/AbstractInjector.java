@@ -42,6 +42,7 @@ public abstract class AbstractInjector implements Injector {
   protected String creationalCallbackVarName = null;
 
   protected boolean enabled = true;
+  protected boolean softDisabled = false;
   protected boolean testmock;
   protected boolean alternative;
   private boolean created;
@@ -270,6 +271,20 @@ public abstract class AbstractInjector implements Injector {
 
   public boolean isEnabled() {
     return enabled;
+  }
+
+  @Override
+  public boolean isSoftDisabled() {
+    return softDisabled;
+  }
+
+  public void setSoftDisabled(final boolean softDisabled) {
+    this.softDisabled = softDisabled;
+  }
+
+  void disableSoftly() {
+    this.enabled = false;
+    this.softDisabled = true;
   }
 
   @Override
