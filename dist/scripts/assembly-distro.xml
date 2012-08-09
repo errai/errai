@@ -43,6 +43,7 @@
                 <include>org.jboss.errai:errai-tools</include>
                 <include>org.jboss.errai:errai-marshalling</include>
                 <include>org.jboss.errai:errai-codegen</include>
+                <include>org.jboss.errai:errai-codegen-gwt</include>
                 <include>org.jboss.errai:errai-cdi-client</include>
                 <include>org.jboss.errai:errai-javax-enterprise</include>
                 <include>org.jboss.errai:errai-weld-integration</include>
@@ -52,6 +53,9 @@
                 <include>org.jboss.errai:errai-uibinder</include>
                 <include>org.jboss.errai:errai-data-binding</include>
                 <include>org.jboss.errai:errai-jpa-client</include>
+                <include>org.jboss.errai:errai-config</include>
+                <include>org.jboss.errai:errai-ui</include>
+                <include>org.jboss.errai:errai-js</include>
             </includes>
         </dependencySet>
         <dependencySet>
