@@ -50,29 +50,6 @@
          <listitem>
             <para>
             The
-            <code>@Disposes</code>
-            annotation is unsupported.
-          </para>
-         </listitem>
-         <listitem>
-            <para>
-            The
-            <code>@Specializes</code>
-            annotation is unsupported.
-          </para>
-         </listitem>
-         <listitem>
-            <para>
-            Qualifier attributes are not currently supported. (eg.
-            <code>@MyQualifier(foo=BAR)</code>
-            and
-            <code>@MyQualifier(foo=FOO)</code>
-            will be considered equivalent in the client).
-          </para>
-         </listitem>
-         <listitem>
-            <para>
-            The
             <code>@Interceptor</code>
             annotation is unsupported.
           </para>

@@ -314,7 +314,7 @@ MessageBuilder.createMessage()
       </informalexample>
    </section>
    <section id="sid-5931284">
-      <title>Single-Response Conversations &amp; Psuedo-Synchronous Messaging</title>
+      <title>Single-Response Conversations &amp; Pseudo-Synchronous Messaging</title>
       <para>
         It is possible to contruct a message and a default response handler as part of the
         <code>MessageBuilder</code>
@@ -868,7 +868,7 @@ MessageBuilder.createMessage()
           . But it is not possible to address messages to
           <emphasis role="italics">ServiceC</emphasis>
           . Conversely,
-          <emphasis role="italics">Client A</emphasis>
+          <emphasis role="italics">Client B</emphasis>
           can address messages to
           <emphasis role="italics">ServiceC</emphasis>
           and

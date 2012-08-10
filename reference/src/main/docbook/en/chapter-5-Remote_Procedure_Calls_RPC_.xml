@@ -116,6 +116,65 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
         .
       </para>
    </section>
+   <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-ClientsideInterceptors">
+      <title>Client-side Interceptors</title>
+      <para>Client-side remote call interceptors provide the ability to manipulate or bypass the remote call before it's being sent. This is useful for implementing crosscutting concerns like caching e.g. when the remote call should be avoided if the data is already cached locally.</para>
+      <para>
+        To have a remote call intercepted, either an interface method or the remote interface type has to be annotated with
+        <code>@InterceptedCall</code>
+        . If the type is annotated, all interface methods will be intercepted.
+      </para>
+      <informalexample>
+         <programlisting language="java">@Remote
+public interface CustomerService {
+
+  @InterceptedCall(MyCacheInterceptor.class)
+  public Customer retrieveCustomerById(long id);
+}</programlisting>
+      </informalexample>
+      <para>Note that an ordered list of interceptors can be used for specifying an interceptor chain e.g.</para>
+      <informalexample>
+         <programlisting language="java">@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
+public Customer retrieveCustomerById(long id);</programlisting>
+      </informalexample>
+      <para>Implementing an interceptor is easy:</para>
+      <informalexample>
+         <programlisting language="java">public class MyCacheInterceptor implements RpcInterceptor {
+
+  @Override
+  public void aroundInvoke(final RemoteCallContext context) {
+    // e.g check if the result is cached and carry out the actual call only in case it's not.
+    context.proceed() // executes the next interceptor in the chain or the actual remote call.
+    // context.setResult() // sets the result directly without carrying out the remote call.
+  }
+}</programlisting>
+      </informalexample>
+      <para>
+        The
+        <code>RemoteCallContext</code>
+        passed to the
+        <code>aroundInvoke</code>
+        method provides access to the intercepted method's name and read/write access to the parameter values provided at the call site.
+      </para>
+      <para>
+        Calling proceed executes the next interceptor in the chain or the actual remote call if all interceptors have been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of this method accepting a
+        <code>RemoteCallback</code>
+        has to be used.
+      </para>
+      <para>
+        The result of the remote call can be manipulated by calling
+        <code>RemoteCallContext.setResult()</code>
+      </para>
+      <para>
+        Not calling
+        <code>proceed</code>
+        in the interceptor bypasses the actual remote call, passing
+        <code>RestCallContext.getResult()</code>
+        to the
+        <code>RemoteCallBack</code>
+        provided at the call site.
+      </para>
+   </section>
    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-SessionandrequestobjectsinRPCendpoints">
       <title>Session and request objects in RPC endpoints</title>
       <para>

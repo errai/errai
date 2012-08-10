@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="sid-51282340">
+   <title>Data Binding</title>
+   <para>Errai's data binding module provides the ability to bind model objects to UI fields/widgets. The bound properties of the model and the UI components will automatically be kept in sync for as long as they are bound. So, there is no need to write code for UI updates in response to model changes and no need to register listeners to update the model in response to UI changes.</para>
+   <para>The data binding module is directly integrated with Errai UI and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Data Binding GWT module:</para>
+   <example>
+      <title>App.gwt.xml</title>
+      <programlisting language="xml">&lt;inherits name="org.jboss.errai.databinding.DataBinding" /&gt;</programlisting>
+   </example>
+   <section id="sid-51282340_DataBinding-BindableObjects">
+      <title>Bindable Objects</title>
+      <para>
+        Objects that should participate in data bindings have to be marked as
+        <code>@Bindable</code>
+        and must follow Java bean conventions. All editable properties of these objects are then bindable to UI widgets.
+      </para>
+      <example>
+         <title>Customer.java</title>
+         <programlisting language="java">@Bindable
+public class Customer {
+  ...
+  private String name;
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+  ...
+}</programlisting>
+      </example>
+   </section>
+   <section id="sid-51282340_DataBinding-InitializingaDataBinder">
+      <title>Initializing a DataBinder</title>
+      <para>
+        An instance of
+        <code>DataBinder</code>
+        is required to create bindings. It can either be
+      </para>
+      <para>injected into a client-side bean:</para>
+      <informalexample>
+         <programlisting language="java">public class CustomerView {
+  @Inject
+  private DataBinder&lt;Customer&gt; dataBinder;
+}</programlisting>
+      </informalexample>
+      <para>or created manually:</para>
+      <informalexample>
+         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forType(Customer.class);</programlisting>
+      </informalexample>
+      <para>
+        In both cases above, the
+        <code>DataBinder</code>
+        instance is associated with a new instance of the model (e.g. a new
+        <code>Customer</code>
+        object). A
+        <code>DataBinder</code>
+        can also be associated with an already existing object:
+      </para>
+      <informalexample>
+         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject);</programlisting>
+      </informalexample>
+      <para>In case there is existing state in either the model object or the UI components before the they are bound, initial state synchronization can be carried out to align the model and the corresponding UI fields.</para>
+      <para>For using the model object's state to set the initial values in the UI:</para>
+      <informalexample>
+         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject, InitialState.FROM_MODEL);</programlisting>
+      </informalexample>
+      <para>For using the UI values to set the initial state in the model object:</para>
+      <informalexample>
+         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject, InitialState.FROM_UI);</programlisting>
+      </informalexample>
+   </section>
+   <section id="sid-51282340_DataBinding-CreatingBindings">
+      <title>Creating Bindings</title>
+      <para>
+        Bindings can be created by calling the
+        <code>bind</code>
+        method on a
+        <code>DataBinder</code>
+        instance, thereby specifying which widgets should be bound to which properties of the model. Note that when using Errai UI these bindings are created automatically based on matching data-field and model property names.
+      </para>
+      <informalexample>
+         <programlisting language="java">public class CustomerView {
+  @Inject
+  private DataBinder&lt;Customer&gt; dataBinder;
+
+  private Customer customer;
+  private TextBox nameTextBox = new TextBox();
+  // more UI widgets...
+
+  @PostConstruct
+  private void init() {
+    customer = dataBinder
+        .bind(nameTextBox, "name")
+        .bind(idLabel, "id")
+        .getModel();
+  }
+}</programlisting>
+      </informalexample>
+      <para>
+        After the call to
+        <code>dataBinder.bind()</code>
+        in the example above, the customer object's name property and the
+        <code>nameTextBox</code>
+        are kept in sync until either the
+        <code>dataBinder.unbind()</code>
+        method is called or the
+        <code>CustomerView</code>
+        bean is destroyed.
+      </para>
+      <para>
+        That means that a call to
+        <code>customer.setName()</code>
+        will automatically update the value of the TextBox and any change to the TextBox's value in the browser will update the customer object's name property. So,
+        <code>customer.getName()</code>
+        will always reflect the currently displayed value of the
+        <code>TextBox</code>
+        .
+      </para>
+      <note>
+         <para>It's important to retrieve the model instance using dataBinder.getModel() before making changes to it as the data binder will provide a proxy to the model to ensure that changes will update the corresponding UI components.</para>
+      </note>
+   </section>
+   <section id="sid-51282340_DataBinding-SpecifyingConverters">
+      <title>Specifying Converters</title>
+      <para>Errai has built-in conversion support for all Number types as well as Boolean and Date to java.lang.String and vice versa. However, in some cases it will be necessary to provide custom converters (e.g. if a custom date format is desired). This can be done on two levels.</para>
+      <section id="sid-51282340_DataBinding-Registeringaglobaldefaultconverter">
+         <title>Registering a global default converter</title>
+         <informalexample>
+            <programlisting language="java">@DefaultConverter
+public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
+
+  private static final String DATE_FORMAT = "YY_DD_MM";
+
+  @Override
+  public Date toModelValue(String widgetValue) {
+    return DateTimeFormat.getFormat(DATE_FORMAT).parse(widgetValue);
+  }
+
+  @Override
+  public String toWidgetValue(Date modelValue) {
+    return DateTimeFormat.getFormat(DATE_FORMAT).format((Date) modelValue);
+  }
+}</programlisting>
+         </informalexample>
+         <para>
+          All converters annotated with
+          <code>@DefaultConverter</code>
+          will be registered as global defaults calling
+          <code>Convert.registerDefaultConverter()</code>
+          . Note that the
+          <code>Converter</code>
+          interface specifies two type parameters. The first one represents the type of the model field, the second one the type held by the widget (e.g.
+          <code>String</code>
+          for widgets implementing
+          <code>HasValue&lt;String&gt;</code>
+          ). These default converters will be used for all bindings with matching model and widget types.
+        </para>
+      </section>
+      <section id="sid-51282340_DataBinding-Providingabindingspecificconverter">
+         <title>Providing a binding-specific converter</title>
+         <para>
+          Alternatively, converter instances can be passed to the
+          <code>dataBinder.bind()</code>
+          calls.
+        </para>
+         <informalexample>
+            <programlisting language="java">dataBinder.bind(textBox, "name", customConverter);</programlisting>
+         </informalexample>
+         <para>Converters specified on the binding level take precedence over global default converters with matching types.</para>
+      </section>
+   </section>
+</chapter>

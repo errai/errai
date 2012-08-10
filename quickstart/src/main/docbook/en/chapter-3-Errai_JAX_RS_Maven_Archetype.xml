@@ -8,7 +8,7 @@
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=jaxrs-quickstart \
--DarchetypeVersion=2.0.2.Final \
+-DarchetypeVersion=2.1.0.Beta1 \
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
     </informalexample>
     <para>Customize the build properties according to your needs.</para>

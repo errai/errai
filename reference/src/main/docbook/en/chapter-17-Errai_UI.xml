@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="sid-51806600">
+   <title>Errai UI</title>
+   <informaltable>
+      <tgroup cols="2">
+         <tbody>
+            <row>
+               <entry>
+                  <para>Concepts</para>
+                  <para>One of the primary complaints of GWT to date has been that it is  difficult to use "pure HTML" when building and skinning widgets.  Inevitably one must turn to Java-based configuration in order to finish  the job. Errai, however, strives to remove the need for Java styling.  HTML template files are placed in the project source tree, and  referenced from custom "Composite components" (Errai UI Widgets) in  Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency  injection is supported in all custom components. Errai UI provides rapid  prototyping and HTML5 templating for GWT.</para>
+               </entry>
+               <entry>
+                  <para>
+                     <ulink url="http://get.adobe.com/flashplayer/">
+                        <figure float="0">
+                           <title>TODO Gliffy image title empty</title>
+                           <mediaobject>
+                              <imageobject>
+                                 <imagedata fileref="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif"/>
+                              </imageobject>
+                           </mediaobject>
+                        </figure>
+                     </ulink>
+                  </para>
+               </entry>
+            </row>
+         </tbody>
+      </tgroup>
+   </informaltable>
+   <section id="sid-51806600_ErraiUI-Getstarted">
+      <title>Get started</title>
+      <para>
+        The Errai UI module is directly integrated with
+        <xref linkend="sid-51282340"/>
+        and Errai  JPA but can also be used as a standalone project in any GWT client  application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using
+        <link linkend="sid-19398999">Errai CDI's @Inject</link>
+        to instantiate your widgets:
+      </para>
+      <section id="sid-51806600_ErraiUI-App.gwt.xml">
+         <title>App.gwt.xml</title>
+         <informalexample>
+            <programlisting language="xml">&lt;inherits name="org.jboss.errai.ui.UI" /&gt;</programlisting>
+         </informalexample>
+      </section>
+   </section>
+   <section id="sid-51806600_ErraiUI-UseErraiUICompositecomponents">
+      <title>Use Errai UI Composite components</title>
+      <para>
+        Before explaining how to create Errai UI components, it should be noted that these components behave no differently from any other GWT Widget once built. The primary difference is in A) their construction, and B) their instantiation. As with most other features of Errai, dependency injection with CDI is the programming model of choice, so when interacting with components defined using Errai UI, you should always
+        <code>@Inject</code>
+        references to your Composite components.
+      </para>
+      <section id="sid-51806600_ErraiUI-Injectasingleinstance">
+         <title>Inject a single instance</title>
+         <informalexample>
+            <programlisting language="java">@EntryPoint
+public class Application {
+   @Inject
+   private ColorComponent comp;
+
+   @PostConstruct
+   public void init() {
+      comp.setColor("blue");
+      RootPanel.get().add(comp);
+   }
+}</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-Injectmultipleinstances%28foriteration%29">
+         <title>Inject multiple instances (for iteration)</title>
+         <informalexample>
+            <programlisting language="java">@EntryPoint
+public class Application {
+   private String[] colors = new String[]{"Blue", "Yellow", "Red"};
+ 
+   @Inject
+   private Instance&lt;ColorComponent&gt; instance;
+ 
+   @PostConstruct
+   public void init() {
+      for( String color: colors ) {
+         ColorComponent comp = instance.get();
+         comp.setColor(c);
+         RootPanel.get().add();
+      }
+   }
+}</programlisting>
+         </informalexample>
+      </section>
+   </section>
+   <section id="sid-51806600_ErraiUI-Createa@TemplatedCompositecomponent">
+      <title>Create a @Templated Composite component</title>
+      <para>
+        Custom components in Errai UI are single classes extending from
+        <code>com.google.gwt.user.client.ui.Composite</code>
+        , and must be annotated with @Templated.
+      </para>
+      <section id="sid-51806600_ErraiUI-Basiccomponent">
+         <title>Basic component</title>
+         <informalexample>
+            <programlisting language="java">@Templated
+public class LoginForm extends Composite {
+   /* looks for LoginForm.html in LoginForm's package */
+}</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-Customtemplatenames">
+         <title>Custom template names</title>
+         <para>
+          With default values, @Templated informs Errai UI to look in the current package for a parallel
+          <code>".html"</code>
+          template next to the Composite component Class; however, the template name may be overridden by passing a String into the @Templated annotation, like so:
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated("my-template.html")
+public class LoginForm extends Composite {
+   /* looks for my-template.html in LoginForm's package */
+}</programlisting>
+         </informalexample>
+         <para>Fully qualified template paths are also supported, but must begin with a leading '/':</para>
+         <informalexample>
+            <programlisting language="java">@Templated("/org/example/my-template.html")
+public class LoginForm extends Composite {
+   /* looks for my-template.html in package org.example */
+}</programlisting>
+         </informalexample>
+      </section>
+   </section>
+   <section id="sid-51806600_ErraiUI-CreateanHTMLtemplate">
+      <title>Create an HTML template</title>
+      <para>
+        Templates in Errai UI may be designed either as an HTML snippit, or as a full HTML document. You may even take an existing HTML page and use it as a template. With either approach, the
+        <code>"data-field"</code>
+        annotation is used to identify fragments (by name) in the template, which are used in the Composite component to add behavior, and use additional components to add functionality to the template. There is no limit to how many component classes may share a given HTML template.
+      </para>
+      <para>
+        We will begin by creating a simple HTML login form to accompany our
+        <code>@Templated LoginForm</code>
+        composite component.
+      </para>
+      <informalexample>
+         <programlisting language="xml">&lt;form&gt;
+  &lt;legend&gt;Log in to your account&lt;/legend&gt;
+
+  &lt;label for="username"&gt;Username&lt;/label&gt;
+  &lt;input id="username" type="text" placeholder="Username"&gt;
+
+  &lt;label for="password"&gt;Password&lt;/label&gt;
+  &lt;input id="password" type="password" placeholder="Password"&gt;
+
+  &lt;button&gt;Log in&lt;/button&gt;
+  &lt;button&gt;Cancel&lt;/button&gt;
+&lt;/form&gt;</programlisting>
+      </informalexample>
+      <section id="sid-51806600_ErraiUI-SelectatemplatefromalargerHTMLfile">
+         <title>Select a template from a larger HTML file</title>
+         <para>
+          Or as a full HTML document which may be more easily previewed during design without running the application; however, in this case we must also specify the location of our root component DOM Element using a
+          <code>"data-field"</code>
+          matching the value of the @Templated annotation. There is no limit to how many component classes may share a given HTML template.
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated("my-template.html#login-form")
+public class LoginForm extends Composite {
+   /* Specifies that &lt;... data-field="login-form"&gt; be used as the root Element of this Widget  */
+}</programlisting>
+         </informalexample>
+         <para>
+          Notice the corresponding HTML data-field attribute in the form Element below, and also note that multiple components may use the same template provided that they specify a corresponding
+          <code>data-field</code>
+          attribute. Also note that two or more components may share the same template
+          <code>data-field</code>
+          DOM elements; there is no conflict since components each receive a unique copy of the template DOM from the designated
+          <code>data-field</code>
+          at runtime (or from the root element if a fragment is not specified.)
+        </para>
+         <informalexample>
+            <programlisting language="xml">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;title&gt;A full HTML snippit&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;
+       &lt;form data-field="login-form"&gt;
+          &lt;legend&gt;Log in to your account&lt;/legend&gt;
+                
+          &lt;label for="username"&gt;Username&lt;/label&gt;
+          &lt;input id="username" type="text" placeholder="Username"&gt;
+                
+          &lt;label for="username"&gt;Password&lt;/label&gt;
+          &lt;input id="password" type="password" placeholder="Password"&gt;
+                
+          &lt;button&gt;Log in&lt;/button&gt;
+          &lt;button&gt;Cancel&lt;/button&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+
+    &lt;hr&gt;
+    &lt;footer data-field="theme-footer"&gt;
+        &lt;p&gt;© Company 2012&lt;/p&gt;
+    &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;</programlisting>
+         </informalexample>
+         <para>For example's sake, the component below could also use the same template. All it needs to do is reference the template name, and specify a fragment.</para>
+         <informalexample>
+            <programlisting language="java">@Templated("my-template.html#theme-footer")
+public class Footer extends Composite {
+   /* Specifies that &lt;... data-field="theme-footer"&gt; be used as the root Element of this Widget  */
+}</programlisting>
+         </informalexample>
+      </section>
+   </section>
+   <section id="sid-51806600_ErraiUI-UseotherWidgetsinacompositecomponent">
+      <title>Use other Widgets in a composite component</title>
+      <para>Now that we have created the @Templated Composite component and an HTML template, we can start wiring in functionality and behavior; this is done by annotating fields and methods to replace specific sub-elements of the template DOM with other Widgets. We can even replace portions of the template with other Errai UI Widgets!</para>
+      <section id="sid-51806600_ErraiUI-AnnotateWidgetsinthetemplatewith@DataField">
+         <title>Annotate Widgets in the template with @DataField</title>
+         <para>
+          In order to composite Widgets into the template DOM, you must annotate fields in your @Templated Composite component with @DataField, and mark the HTML template Element with a corresponding
+          <code>data-field</code>
+          attribute. This informs Errai UI that the contents of the field should replace the element marked by data-field in the template; thus, fields annotated with @DataField must either be @Inject or initialize valid Widget or Element instances.
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated
+public class LoginForm extends Composite {
+   // This element must be initialized manually because Element is not @Inject-able*/
+   @DataField  
+   private Element form = DOM.createForm();
+
+   // If not otherwise specified, the data-field name defaults to the name of the field; in this case, the data-field name would be "username"
+   @Inject  
+   @DataField   
+   private TextBox username;
+ 
+   // The data-field name may also be specified manually
+   @Inject   
+   @DataField("pass")
+   private PasswordTextBox password;
+  
+   // We can also choose to instantiate our own Widgets. Injection is not required.
+   @DataField    
+   private Button submit = new Button();
+}</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-Addcorrespondingdatafieldattributes">
+         <title>Add corresponding data-field attributes</title>
+         <para>We must also add data-field attributes to the corresponding locations in our template HTML file. This, combined with the @DataField annotation in our Composite component allow Errai UI to determine where and what should be composited when creating component instances.</para>
+         <informalexample>
+            <programlisting language="xml">&lt;form data-field="form"&gt;
+  &lt;legend&gt;Log in to your account&lt;/legend&gt;
+
+  &lt;label for="username"&gt;Username&lt;/label&gt;
+  &lt;input data-field="username" id="username" type="text" placeholder="Username"&gt;
+
+  &lt;label for="password"&gt;Password&lt;/label&gt;
+  &lt;input data-field="pass" id="password" type="password" placeholder="Password"&gt;
+
+  &lt;button data-field="submit"&gt;Log in&lt;/button&gt;
+  &lt;button&gt;Cancel&lt;/button&gt;
+&lt;/form&gt;</programlisting>
+         </informalexample>
+         <para>Now, when we run our application, we will be able to interact with these fields in our Widget.</para>
+      </section>
+   </section>
+   <section id="sid-51806600_ErraiUI-HowHTMLtemplatesaremergedwithComponents">
+      <title>How HTML templates are merged with Components</title>
+      <para>Three things are merged or modified when Errai UI creates a new Composite component instance:</para>
+      <orderedlist inheritnum="ignore" continuation="restarts">
+         <listitem>
+            <para>Element attributes are merged from the template to the component</para>
+         </listitem>
+         <listitem>
+            <para>DOM Elements are merged from the component to the template</para>
+         </listitem>
+         <listitem>
+            <para>
+            Template element inner text and inner HTML are preserved when the given
+            <code>@DataField</code>
+               <code>Widget</code>
+            implements
+            <code>HasText</code>
+            or
+            <code>HasHTML</code>
+            </para>
+         </listitem>
+      </orderedlist>
+      <section id="sid-51806600_ErraiUI-Example">
+         <title>Example</title>
+         <section id="sid-51806600_ErraiUI-Compositecomponentclass%3A">
+            <title>Composite component class:</title>
+            <informalexample>
+               <programlisting language="java">@Templated
+public class StyledComponent extends Composite {
+   @Inject
+   @DataField("field-1")
+   private Label div = new Label();
+
+   public StyledComponent() {
+      div.getElement().setAttribute("style", "position: fixed; top: 0; left: 0;");
+      this.getElement().setId("outer-id");
+   }
+}</programlisting>
+            </informalexample>
+         </section>
+         <section id="sid-51806600_ErraiUI-Template%3A">
+            <title>Template:</title>
+            <informalexample>
+               <programlisting language="xml">&lt;form&gt;
+  &lt;span data-field="field-1" style="display:inline;"&gt; This element will become a div &lt;/span&gt;
+&lt;/form&gt;
+
+This text will be ignored.</programlisting>
+            </informalexample>
+         </section>
+         <section id="sid-51806600_ErraiUI-Output%2Fresult%3A">
+            <title>Output / result:</title>
+            <informalexample>
+               <programlisting language="xml">&lt;form id="outer-id"&gt;
+   &lt;div data-field="field-1" style="display:inline;"&gt; This element will become a div &lt;/div&gt;
+&lt;/form&gt;</programlisting>
+            </informalexample>
+            <para>But why does the output look the way it does? Some things happened that may be unsettling at first, but we find that once you understand why these things occur, you'll find the mechanisms extremely powerful.</para>
+         </section>
+      </section>
+      <section id="sid-51806600_ErraiUI-Elementattributes%28templatewins%29">
+         <title>Element attributes (template wins)</title>
+         <para>
+          When styling your templates, you should keep in mind that all  attributes defined in the template file will take precedence over any  preset attributes in your Widgets. This "attribute merge" occurs only when  the components are instantiated; subsequent changes to any attributes  after Widget construction will function normally. In the example we defined a Composite component that applied  several styles to a child Widget in its constructor, but we can see from  the output that the styles from the template have overridden them.  If styles must be applied in Java, instead of the template,
+          <code>@PostConstruct</code>
+          or other methods should be favored over constructors to apply styles to  fully-constructed Composite components.
+        </para>
+      </section>
+      <section id="sid-51806600_ErraiUI-DOMElements%28componentfieldwins%29">
+         <title>DOM Elements (component field wins)</title>
+         <para>
+          Element composition, however, functions inversely from attribute merging, and the
+          <code>&lt;span&gt;</code>
+          defined in our template was actually be replaced by the
+          <code>&lt;div&gt;</code>
+          Label in our Composite component field. This does not, however, change the behavior of the attribute merge - the new
+          <code>&lt;div&gt;</code>
+          was still be rendered inline, because we have specified this style in our template, and the template always wins in competition with attributes set programatically before composition occurs. In short, whatever is in the
+          <code>@DataField</code>
+          in your class will replace the
+          <code>data-field</code>
+          in your template.
+        </para>
+      </section>
+      <section id="sid-51806600_ErraiUI-InnertextandinnerHTML%28preservedwhencomponentimplementsHasTextorHasHTML%29">
+         <title>Inner text and inner HTML (preserved when component implements HasText or HasHTML)</title>
+         <para>
+          Additionally, because
+          <code>Label</code>
+          implements both
+          <code>HasText</code>
+          and
+          <code>HasHTML</code>
+          (only one is required,) the contents of this &lt;span&gt; "field-1" Element in the template were preserved; however, this would not have been the case if the
+          <code>@DataField</code>
+          specified for the element did not implement
+          <code>HasText</code>
+          or
+          <code>HasHTML</code>
+          . In short, if you wish to preserve text or HTML contents of an element in your template, you can do one of two things: do not composite that Element with a
+          <code>@DataField</code>
+          reference, or ensure that the Widget being composited implements
+          <code>HasText</code>
+          or
+          <code>HasHTML</code>
+          .
+        </para>
+      </section>
+   </section>
+   <section id="sid-51806600_ErraiUI-Eventhandlers">
+      <title>Event handlers</title>
+      <para>Dealing with User and DOM Events is a reality in rich web development, and Errai UI provides several approaches for dealing with all types of browser events using its "quick handler" functionality. It is possible to handle:</para>
+      <orderedlist inheritnum="ignore" continuation="restarts">
+         <listitem>
+            <para>GWT events on Widgets</para>
+         </listitem>
+         <listitem>
+            <para>GWT events on DOM Elements</para>
+         </listitem>
+         <listitem>
+            <para>Native DOM events on Elements</para>
+         </listitem>
+      </orderedlist>
+      <para>It is not possible to handle Native DOM events on Widgets because GWT overrides native event handlers when Widgets are added to the DOM. You must programatically configure such handlers after the Widget has been added to the DOM.</para>
+      <section id="sid-51806600_ErraiUI-Concepts">
+         <title>Concepts</title>
+         <para>
+          Each of the three supported approaches for event handling function on the same basic programming model. Event handler methods, annotated with
+          <code>@EventHandler("my-data-field")</code>
+          , are created and dynamically wired to the corresponding
+          <code>@DataField("my-data-field")</code>
+          in the same component.
+        </para>
+      </section>
+      <section id="sid-51806600_ErraiUI-GWTeventsonWidgets">
+         <title>GWT events on Widgets</title>
+         <para>
+          Probably the simplest and most common use-case, this approach handles GWT Event classes for Widgets that explicitly handle the given event type. In the case that a Widget does not handle the Event type given in the
+          <code>@EventHandler</code>
+          method signature, the application will fail to compile and appropriate errors will be displayed.
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated
+public class WidgetHandlerComponent extends Composite { 
+
+   @Inject
+   @DataField("b1") 
+   private Button button; 
+
+   @EventHandler("b1") 
+   public void doSomethingC1(ClickEvent e)
+   {
+      // do something 
+   }
+}</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-GWTeventsonDOMElements">
+         <title>GWT events on DOM Elements</title>
+         <para>
+          It is also possible to handle GWT events on Elements which are specified as a
+          <code>@DataField</code>
+          in the component class. This is useful when a full GWT Widget is not available for a given Element, or for GWT events that might not normally be available on a given Element type. This could occur, for instance, when clicking on a
+          <code>&lt;div&gt;</code>
+          , which would normally not have the ability to receive the GWT
+          <code>ClickEvent</code>
+          , and would otherwise require creating a custom DIV Widget to handle such an event.
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated
+public class ElementHandlerComponent extends Composite { 
+
+   @DataField("div-1") 
+   private DivElement button = DOM.createDiv(); 
+
+   @EventHandler("div-1") 
+   public void doSomethingC1(ClickEvent e)
+   {
+      // do something 
+   }
+}</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-NativeDOMeventsonElements">
+         <title>Native DOM events on Elements</title>
+         <para>
+          The last approach is handles the case where native DOM events must be handled, but no such GWT event handler exists for the given event type. Alternatively, it can also be used for situations where Elements in the template should receive events, but no handle to the Element the component class is necessary (aside from the event handling itself.) Native DOM events do not require a corresponding
+          <code>@DataField</code>
+          be configured in the class; only the HTML
+          <code>data-field</code>
+          template attribute is required.
+        </para>
+         <informalexample>
+            <programlisting language="xml">&lt;div&gt;
+   &lt;a data-field="link" href="/page"
+   &lt;div data-field="div"&gt; Some content &lt;/div&gt;
+&lt;/div&gt;</programlisting>
+         </informalexample>
+         <para>
+          The
+          <code>@SyncNative</code>
+          annotation is used to select native events (as a bit mask) of which the method should handle; this sink behaves the same as when using
+          <code>DOM.sinkEvents(Element e, int bits)</code>
+          . Note that a
+          <code>@DataField</code>
+          reference in the component class is optional.
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated
+public class QuickHandlerComponent extends Composite {
+ 
+  @DataField
+  private AnchorElement link = DOM.createAnchor().cast();
+
+  @EventHandler("link")
+  @SinkNative(Event.ONCLICK | Event.ONMOUSEOVER)
+  public void doSomething(Event e) {
+    // do something
+  }
+
+  @EventHandler("div")
+  @SinkNative(Event.ONMOUSEOVER)
+  public void doSomethingElse(Event e) {
+    // do something else
+  }
+}</programlisting>
+         </informalexample>
+      </section>
+   </section>
+   <section id="sid-51806600_ErraiUI-Databinding">
+      <title>binding</title>
+      <para>[christian?]</para>
+   </section>
+   <section id="sid-51806600_ErraiUI-NestCompositecomponents">
+      <title>Nest Composite components</title>
+      <para>
+        Using Composite components to build up a hierarchy of widgets functions exactly the same as when building hierarchies of GWT widgets. The only distinction might be that with Errai UI,
+        <code>@Inject</code>
+        is preferred to manual instantiation.
+      </para>
+      <informalexample>
+         <programlisting language="java">@Templated
+public class ComponentOne extends Composite { 
+
+   @Inject
+   @DataField("other-comp") 
+   private ComponentTwo two; 
+}</programlisting>
+      </informalexample>
+   </section>
+   <section id="sid-51806600_ErraiUI-ExtendCompositecomponents">
+      <title>Extend Composite components</title>
+      <para>
+        Templating would not be complete without the ability to inherit from parent templates, and Errai UI also makes this possible using simple Java inheritance. The only additional requirement is that Composite components extending from a parent Composite component must also be annotated with @Templated, and the path to the template file must also be specified in the child component's annotation. Child components may specify
+        <code>@DataField</code>
+        references that were omitted in the parent class, and they may also override
+        <code>@DataField</code>
+        references (by using the same
+        <code>data-field</code>
+        name) that were already specified in the parent component.
+      </para>
+      <section id="sid-51806600_ErraiUI-Template">
+         <title>Template</title>
+         <para>Extension templating is particularly useful for creating reusable page layouts with some shared content (navigation menus, side-bars, footers, etc...,) where certain sections will be filled with unique content for each page that extends from the base template; this is commonly seen when combined with the MVP design pattern traditionally used in GWT applications.</para>
+         <informalexample>
+            <programlisting language="xml">&lt;div class="container"&gt;
+   &lt;div data-field="header"&gt; Default header &lt;/div&gt;
+   &lt;div data-field="content"&gt; Default content &lt;/div&gt;   &lt;div data-field="footer"&gt; Default footer &lt;/div&gt;
+&lt;/div&gt;</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-Parentcomponent">
+         <title>Parent component</title>
+         <para>This component provides the common features of our page layout, including header and footer, but does not specify any content. The missing data-field will be supplied with unique content by the individual page components extending from this parent component.</para>
+         <informalexample>
+            <programlisting language="java">@Templated
+public class PageLayout extends Composite { 
+
+   @Inject
+   @DataField
+   private HeaderComponent header;
+
+   @Inject
+   @DataField
+   private FooterComponent footer;
+
+   @PostConstruct
+   public final void init() {
+      // do some setup
+   }
+}</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-51806600_ErraiUI-Childcomponent">
+         <title>Child component</title>
+         <para>
+          We are free to fill in the missing "content"
+          <code>data-field</code>
+          with a Widget of our choosing. Note that it is not required to fill in all omitted data-field references.
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated("PageLayout.html")
+public class LoginLayout extends PageLayout { 
+
+   @Inject
+   @DataField
+   private LoginForm content;
+
+}</programlisting>
+         </informalexample>
+         <para>
+          We could also have chosen to override one or more
+          <code>@DataField</code>
+          references defined in the parent component, simply by specifying a
+          <code>@DataField</code>
+          with the same name in the child component, as is done with the "footer"
+          <code>data-field</code>
+          below.
+        </para>
+         <informalexample>
+            <programlisting language="java">@Templated("PageLayout.html")
+public class LoginLayout extends PageLayout { 
+
+   @Inject
+   @DataField
+   private LoginForm content;
+
+   /* Override footer defined in PageLayout */
+   @Inject
+   @DataField
+   private CustomFooter footer;
+
+}</programlisting>
+         </informalexample>
+      </section>
+   </section>
+</chapter>

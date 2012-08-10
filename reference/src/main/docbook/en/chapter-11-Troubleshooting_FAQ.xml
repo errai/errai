@@ -33,4 +33,15 @@
 &lt;/resources&gt;</programlisting>
       </informalexample>
    </section>
+   <section id="sid-32473113_Troubleshooting%26FAQ-WhyamIgetting%22java.lang.ClassFormatError%3AIllegalmethodname%22%3Cinit%3E%24%22inclassorg%2Fxyz%2Fpackage%2FMyClass%22%3F">
+      <title>Why am I getting "java.lang.ClassFormatError: Illegal method name "&lt;init&gt;$" in class org/xyz/package/MyClass"?</title>
+      <para>
+        <emphasis role="strong">Answer:</emphasis>
+        This error message means that your project has a (direct or indirect) subclass of JavaScriptObject that lacks a protected no-args constructor. All subtypes of JavaScriptObject (also known as
+        <emphasis role="italics">overlay types</emphasis>
+        ) must declare a protected no-args constructor, but the error message could be much clearer. There is an issue filed in the GWT project's bug tracker for improving the error message:
+        <ulink url="http://code.google.com/p/google-web-toolkit/issues/detail?id=3383">GWT issue 3383</ulink>
+        .
+      </para>
+   </section>
 </chapter>

@@ -1,17 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="sid-19398997">
    <title>Errai JAX-RS</title>
+   <para>JAX-RS (Java API for RESTful Web Services) is a Java EE standard (JSR-311) for implementing REST-based Web services in Java. Errai JAX-RS brings this standard to the browser and simplifies the integration of REST-based services in GWT client applications. Errai can generate proxies based on JAX-RS interfaces which will handle all the underlying communication and serialization logic. All that's left to do is to invoke a Java method.</para>
+   <para>Errai's JAX-RS support consists of the following:</para>
+   <itemizedlist>
+      <listitem>
+         <para>
+          The
+          <code>Caller&lt;T&gt;</code>
+          interface (the same interface used in Errai RPC)
+        </para>
+      </listitem>
+      <listitem>
+         <para>A client-side API to communicate with JAX-RS endpoints</para>
+      </listitem>
+      <listitem>
+         <para>A code generator that runs at your project's build time, providing proxy implementations for each JAX-RS resource class visible within the GWT module</para>
+      </listitem>
+      <listitem>
+         <para>
+          Errai IoC and CDI providers that allow you to
+          <code>@Inject</code>
+          instances of
+          <code>Caller&lt;T&gt;</code>
+        </para>
+      </listitem>
+      <listitem>
+         <para>Integration with either Errai Marshalling or Jackson to translate request and response data between Java object and a string-based wire format</para>
+      </listitem>
+   </itemizedlist>
    <para>
-      JAX-RS (Java API for RESTful Web Services) is a Java EE standard (JSR-311) for implementing REST-based Web services in Java. Errai JAX-RS brings this standard to the browser and simplifies the integration of REST-based services in GWT client applications. Errai can generate proxies based on JAX-RS interfaces which will handle all the underlying communication and serialization logic. All that's left to do is to invoke a Java method. We have provided a Maven archetype which will create a fully function CRUD application using JAX-RS. See the
+      If you want to get started right away with a working Errai JAX-RS CRUD application, use our Maven archetype to get started. See the
       <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5833096">Quickstart Guide</ulink>
       for details.
     </para>
-   <section id="sid-9470107">
-      <title>Creating Requests</title>
-      <para>Assuming the following simple JAX-RS interface should be used:</para>
-      <example>
-         <title>CustomerService.java</title>
-         <programlisting language="java">@Path("customers")
+   <section id="sid-47972396">
+      <title>Server-Side Prerequisites</title>
+      <section id="sid-47972396_Server-SidePrerequisites-ServerSideJAXRSProvider">
+         <title>Server-Side JAX-RS Provider</title>
+         <para>Errai's JAX-RS support consists mostly of features that make the client side easier and more reliable to maintain. You will need to use an existing third-party JAX-RS implementation on the server side. All Java EE 6 application servers include such a module out-of-the-box. If you are developing an application that you intend to deploy on a plain servlet container, you will have to choose a JAX-RS implementation (for example, RestEasy) and configure it properly in your web.xml.</para>
+         <para>Alternatively, you could keep your REST resource layer in a completely separate web application hosted on the same server (perhaps build an Errai JAX-RS client against an existing REST service you developed previously). In this case, you could factor out the shared JAX-RS interface into a shared library, leaving the implementation in the non-Errai application.</para>
+         <para>Finally, you can take advantage of the cross-origin resource sharing (CoRS) feature in modern browsers and use Errai JAX-RS to send requests to a third-party server. The third-party server would have to be configured to allow cross-domain requests. In this case, you would write a JAX-RS-Annotated interface describing the remote REST resources, but you would not create an implementation of that interface.</para>
+      </section>
+      <section id="sid-47972396_Server-SidePrerequisites-SharedJAXRSInterface">
+         <title>Shared JAX-RS Interface</title>
+         <para>For Errai's JAX-RS support to work, an interface that bears the JAX-RS annotations must be contained within a GWT module in your project. You will also want these interfaces visible to server-side code so that your JAX-RS resource classes can implement them. This keeps the whole setup typesafe, and reduces duplication to the bare minimum. The natural solution, then is to put the JAX-RS interfaces under the client.shared package within your GWT module:</para>
+         <itemizedlist>
+            <listitem>
+               <para>project</para>
+               <itemizedlist>
+                  <listitem>
+                     <para>src</para>
+                     <itemizedlist>
+                        <listitem>
+                           <para>main</para>
+                           <itemizedlist>
+                              <listitem>
+                                 <para>java</para>
+                                 <itemizedlist>
+                                    <listitem>
+                                       <para>com.mycompany.myapp</para>
+                                       <itemizedlist>
+                                          <listitem>
+                                             <para>
+                                  MyApp.gwt.xml
+                                  <emphasis role="italics">[the app's GWT module]</emphasis>
+                                             </para>
+                                          </listitem>
+                                       </itemizedlist>
+                                    </listitem>
+                                    <listitem>
+                                       <para>com.mycompany.myapp.client.local</para>
+                                       <itemizedlist>
+                                          <listitem>
+                                             <para>
+                                  MyAppClientStuff.java
+                                  <emphasis role="italics">[code that @Injects Caller&lt;MyAppRestResource&gt;]</emphasis>
+                                             </para>
+                                          </listitem>
+                                       </itemizedlist>
+                                    </listitem>
+                                    <listitem>
+                                       <para>com.mycompany.myapp.client.shared</para>
+                                       <itemizedlist>
+                                          <listitem>
+                                             <para>
+                                  CustomerService.java
+                                  <emphasis role="italics">[the JAX-RS interface]</emphasis>
+                                             </para>
+                                          </listitem>
+                                       </itemizedlist>
+                                    </listitem>
+                                    <listitem>
+                                       <para>com.mycompany.myapp.server</para>
+                                       <itemizedlist>
+                                          <listitem>
+                                             <para>
+                                  CustomerServiceImpl.java
+                                  <emphasis role="italics">[the server-side JAX-RS resource implementation]</emphasis>
+                                             </para>
+                                          </listitem>
+                                       </itemizedlist>
+                                    </listitem>
+                                 </itemizedlist>
+                              </listitem>
+                           </itemizedlist>
+                        </listitem>
+                     </itemizedlist>
+                  </listitem>
+               </itemizedlist>
+            </listitem>
+         </itemizedlist>
+         <para>The contents of the server-side files would be as follows:</para>
+         <example>
+            <title>CustomerService.java</title>
+            <programlisting language="java">@Path("customers")
 public interface CustomerService {
   @GET
   @Produces("application/json")
@@ -22,7 +125,42 @@ public interface CustomerService {
   @Produces("text/plain")
   public long createCustomer(Customer customer);
 }</programlisting>
-      </example>
+         </example>
+         <para>The above interface is visible both to server-side code and to client-side code. It is used by client-side code to describe the available operations, their parameter types, and their return types. If you use your IDE's refactoring tools to modify this interface, both the server-side and client-side code will be updated automatically.</para>
+         <example>
+            <title>CustomerServiceImpl.java</title>
+            <programlisting language="java">public class CustomerServiceImpl implements CustomerService {
+
+  @Override
+  public List&lt;Customer&gt; listAllCustomers() {
+    // Use a database API to look up all customers in back-end data store
+    // Return the resulting list
+  }
+
+  @Override
+  public long createCustomer(Customer customer) {
+    // Store new Customer instance in back-end data store
+  }
+}</programlisting>
+         </example>
+         <para>The above class implements the shared interface. Since it performs database and/or filesystem operations to manipulate the persistent data store, it is not GWT translatable, and it's therefore kept in a package that is not part of the GWT module.</para>
+         <important>
+            <title>Save typing and reduce duplication</title>
+            <para>
+            Note that all JAX-RS annotations (
+            <code>@Path</code>
+            ,
+            <code>@GET</code>
+            ,
+            <code>@Consumes</code>
+            , and so on) can be inherited from the interface. You do not need to repeat these annotations in your resource implementation classes.
+          </para>
+         </important>
+      </section>
+   </section>
+   <section id="sid-9470107">
+      <title>Creating Requests</title>
+      <para>This section assumes you have already set up the CustomerService JAX-RS endpoint as described in the previous section.</para>
       <para>
         To create a request on the client, all that needs to be done is to invoke
         <code>RestClient.create()</code>
@@ -143,38 +281,143 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
 };</programlisting>
       </informalexample>
    </section>
+   <section id="sid-50233520">
+      <title>Client-side Interceptors</title>
+      <para>Client-side remote call interceptors provide the ability to manipulate or bypass the request before it's being sent. This is useful for implementing crosscutting concerns like caching or security features e.g:</para>
+      <itemizedlist>
+         <listitem>
+            <para>avoiding the request when the data is cached locally</para>
+         </listitem>
+         <listitem>
+            <para>adding special HTTP headers or parameters to the request</para>
+         </listitem>
+      </itemizedlist>
+      <para>
+        To have a JAX-RS remote call intercepted, either an interface method or the remote interface type has to be annotated with
+        <code>@InterceptedCall</code>
+        . If the type is annotated, all interface methods will be intercepted.
+      </para>
+      <informalexample>
+         <programlisting language="java">@Path("customers")
+public interface CustomerService {
+
+  @GET
+  @Path("/{id}")
+  @Produces("application/json")
+  @InterceptedCall(MyCacheInterceptor.class)
+  public Customer retrieveCustomerById(@PathParam("id") long id);
+}</programlisting>
+      </informalexample>
+      <para>Note that an ordered list of interceptors can be used for specifying an interceptor chain e.g.</para>
+      <informalexample>
+         <programlisting language="java">@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
+public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
+      </informalexample>
+      <para>Implementing an interceptor is easy:</para>
+      <informalexample>
+         <programlisting language="java">public class MyCacheInterceptor implements RestClientInterceptor {
+
+  @Override
+  public void aroundInvoke(final RestCallContext context) {
+    RequestBuilder builder = context.getRequestBuilder();
+    builder.setHeader("headerName", "value");
+    context.proceed();
+  }
+}</programlisting>
+      </informalexample>
+      <para>
+        The
+        <code>RestCallContext</code>
+        passed to the
+        <code>aroundInvoke</code>
+        method provides access to the context of the intercepted JAX-RS (REST) remote call. It allows to read and write the parameter values provided at the call site and provides read/write access to the
+        <code>RequestBuilder</code>
+        instance which has the URL, HTTP headers and parameters set.
+      </para>
+      <para>
+        Calling
+        <code>proceed</code>
+        executes the next interceptor in the chain or the actual remote call if all interceptors have been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of this method accepting a
+        <code>RemoteCallback</code>
+        has to be used.
+      </para>
+      <para>
+        The result of the remote call can be manipulated by calling
+        <code>RestCallContext.setResult()</code>
+      </para>
+      <para>
+        Not calling
+        <code>proceed</code>
+        in the interceptor bypasses the actual remote call, passing
+        <code>RestCallContext.getResult()</code>
+        to the
+        <code>RemoteCallBack</code>
+        provided at the call site.
+      </para>
+   </section>
    <section id="sid-9470133">
       <title>Wire Format</title>
       <para>
         Errai's JSON format will be used to serialize/deserialize your custom types. See
         <xref linkend="sid-5931328"/>
-        for details. A future extension to Errai's marshaller capabilities will support pluggable/custom serializers. So in the near future you will have the flexibility to use your own wire format.
+        for details.
+      </para>
+      <para>
+        Alternatively, a Jackson compatible JSON format can be used on the wire. See
+        <xref linkend="sid-9470135"/>
+        for details on how to enable Jackson marshalling.
       </para>
    </section>
    <section id="sid-9470135">
       <title>Errai JAX-RS Configuration</title>
-      <para>
-        All paths specified using the
-        <code>@Path</code>
-        annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application's context path.
-      </para>
-      <para>To configure a relative or absolute root path, the following JavaScript variable can be set in either</para>
-      <para>the host HTML page</para>
-      <informalexample>
-         <programlisting language="xml">&lt;script type="text/javascript"&gt;
+      <section id="sid-9470135_ErraiJAX-RSConfiguration-ConfiguringthedefaultrootpathofJAXRSendpoints">
+         <title>Configuring the default root path of JAX-RS endpoints</title>
+         <para>
+          All paths specified using the
+          <code>@Path</code>
+          annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application's context path.
+        </para>
+         <para>To configure a relative or absolute root path, the following JavaScript variable can be set in either</para>
+         <para>the host HTML page</para>
+         <informalexample>
+            <programlisting language="xml">&lt;script type="text/javascript"&gt;
   erraiJaxRsApplicationRoot = "/MyJaxRsEndpointPath";
 &lt;/script&gt;</programlisting>
-      </informalexample>
-      <para>or by using a JSNI method:</para>
-      <informalexample>
-         <programlisting language="java">private native void setMyJaxRsAppRoot(String path) /*-{
+         </informalexample>
+         <para>or by using a JSNI method:</para>
+         <informalexample>
+            <programlisting language="java">private native void setMyJaxRsAppRoot(String path) /*-{
   $wnd.erraiJaxRsApplicationRoot = path;
 }-*/;</programlisting>
-      </informalexample>
-      <para>or by simply invoking:</para>
-      <informalexample>
-         <programlisting language="java">RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
-      </informalexample>
-      <para>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</para>
+         </informalexample>
+         <para>or by simply invoking:</para>
+         <informalexample>
+            <programlisting language="java">RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
+         </informalexample>
+         <para>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</para>
+      </section>
+      <section id="sid-9470135_ErraiJAX-RSConfiguration-EnablingJacksonmarshalling">
+         <title>Enabling Jackson marshalling</title>
+         <para>
+          The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The
+          <code>errai-jaxrs-provider.jar</code>
+          does not have to be deployed on the server in this case!
+        </para>
+         <informalexample>
+            <programlisting language="xml">&lt;script type="text/javascript"&gt;
+  erraiJaxRsJacksonMarshallingActive = true;
+&lt;/script&gt;</programlisting>
+         </informalexample>
+         <para>or by using a JSNI method:</para>
+         <informalexample>
+            <programlisting language="java">private native void setJacksonMarshallingActive(boolean active) /*-{
+  $wnd.erraiJaxRsJacksonMarshallingActive = active;
+}-*/;</programlisting>
+         </informalexample>
+         <para>or by simply invoking:</para>
+         <informalexample>
+            <programlisting language="java">RestClient.setJacksonMarshallingActive(true);</programlisting>
+         </informalexample>
+      </section>
    </section>
 </chapter>
