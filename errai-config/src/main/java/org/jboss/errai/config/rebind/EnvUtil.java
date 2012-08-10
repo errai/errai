@@ -151,7 +151,7 @@ public abstract class EnvUtil {
                 }
               }
 
-              break;
+              continue;
             }
 
             if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
@@ -164,7 +164,7 @@ public abstract class EnvUtil {
                 }
               }
 
-              break;
+              continue;
             }
 
             if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
@@ -185,7 +185,7 @@ public abstract class EnvUtil {
                   throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
                 }
               }
-              break;
+              continue;
             }
           }
         }
