@@ -166,13 +166,13 @@ public class InjectionContext {
 
   public Injector getQualifiedInjector(final MetaClass type, final QualifyingMetadata metadata) {
     final MetaClass erased = type.getErased();
-    final List<Injector> injs = injectors.get(erased);
+    final List<Injector> injectors = this.injectors.get(erased);
     final List<Injector> matching = new ArrayList<Injector>();
 
     boolean alternativeBeans = false;
 
-    if (injs != null) {
-      for (final Injector inj : injs) {
+    if (injectors != null) {
+      for (final Injector inj : injectors) {
         if (inj.matches(type.getParameterizedType(), metadata)) {
 
           if (!inj.isEnabled()) {

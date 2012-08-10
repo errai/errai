@@ -16,12 +16,15 @@
 
 package org.jboss.errai.config.rebind;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +32,12 @@ import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import com.google.gwt.thirdparty.guava.common.io.Files;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.QuickDeps;
@@ -44,6 +52,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
+
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * @author Mike Brock
@@ -60,7 +70,7 @@ public abstract class EnvUtil {
   public static boolean isJUnitTest() {
     if (_isJUnitTest != null) return _isJUnitTest;
 
-    for (StackTraceElement el : new Throwable().getStackTrace()) {
+    for (final StackTraceElement el : new Throwable().getStackTrace()) {
       if (el.getClassName().startsWith("com.google.gwt.junit.client.")
           || el.getClassName().startsWith("org.junit")) {
         return _isJUnitTest = Boolean.TRUE;
@@ -74,7 +84,7 @@ public abstract class EnvUtil {
   public static boolean isDevMode() {
     if (_isDevMode != null) return _isDevMode;
 
-    for (StackTraceElement el : new Throwable().getStackTrace()) {
+    for (final StackTraceElement el : new Throwable().getStackTrace()) {
       if (el.getClassName().startsWith("com.google.gwt.dev.shell.OophmSessionHandler")) {
         return _isDevMode = Boolean.TRUE;
       }
@@ -96,11 +106,10 @@ public abstract class EnvUtil {
     isProdMode();
   }
 
-
   private static Logger log = LoggerFactory.getLogger(EnvUtil.class);
 
   private static EnviromentConfig loadConfiguredPortableTypes() {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Map<String, String> frameworkProps = new HashMap<String, String>();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
@@ -110,8 +119,8 @@ public abstract class EnvUtil {
     final Set<MetaClass> exposedFromScanner = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Portable.class));
     nonportableClasses.addAll(ClassScanner.getTypesAnnotatedWith(NonPortable.class));
 
-    for (MetaClass cls : exposedFromScanner) {
-      for (MetaClass decl : cls.getDeclaredClasses()) {
+    for (final MetaClass cls : exposedFromScanner) {
+      for (final MetaClass decl : cls.getDeclaredClasses()) {
         if (decl.isSynthetic()) {
           continue;
         }
@@ -145,13 +154,13 @@ public abstract class EnvUtil {
         final ResourceBundle props = new PropertyResourceBundle(inputStream);
         if (props != null) {
 
-          for (Object o : props.keySet()) {
-            String key = (String) o;
+          for (final Object o : props.keySet()) {
+            final String key = (String) o;
 
             frameworkProps.put(key, props.getString(key));
 
             if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-              for (String s : props.getString(key).split(" ")) {
+              for (final String s : props.getString(key).split(" ")) {
                 try {
                   exposedClasses.add(MetaClassFactory.get(s.trim()));
                 }
@@ -164,7 +173,7 @@ public abstract class EnvUtil {
             }
 
             if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
-              for (String s : props.getString(key).split(" ")) {
+              for (final String s : props.getString(key).split(" ")) {
                 try {
                   nonportableClasses.add(MetaClassFactory.get(s.trim()));
                 }
@@ -177,16 +186,16 @@ public abstract class EnvUtil {
             }
 
             if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
-              for (String s : props.getString(key).split(" ")) {
+              for (final String s : props.getString(key).split(" ")) {
                 try {
-                  String[] mapping = s.split("->");
+                  final String[] mapping = s.split("->");
 
                   if (mapping.length != 2) {
                     throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
                   }
 
-                  Class<?> fromMapping = Class.forName(mapping[0].trim());
-                  Class<?> toMapping = Class.forName(mapping[1].trim());
+                  final Class<?> fromMapping = Class.forName(mapping[0].trim());
+                  final Class<?> toMapping = Class.forName(mapping[1].trim());
 
                   mappingAliases.put(fromMapping.getName(), toMapping.getName());
                 }
@@ -217,15 +226,15 @@ public abstract class EnvUtil {
     // must do this before filling in interfaces and supertypes!
     exposedClasses.removeAll(nonportableClasses);
 
-    for (MetaClass cls : exposedClasses) {
+    for (final MetaClass cls : exposedClasses) {
       fillInInterfacesAndSuperTypes(portableNonExposed, cls);
     }
 
     return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed, frameworkProps);
   }
 
-  private static void fillInInterfacesAndSuperTypes(Set<MetaClass> set, MetaClass type) {
-    for (MetaClass iface : type.getInterfaces()) {
+  private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
+    for (final MetaClass iface : type.getInterfaces()) {
       set.add(iface);
       fillInInterfacesAndSuperTypes(set, iface);
     }
@@ -241,7 +250,7 @@ public abstract class EnvUtil {
     return _environmentConfigCache;
   }
 
-  public static boolean isPortableType(Class<?> cls) {
+  public static boolean isPortableType(final Class<?> cls) {
     final MetaClass mc = MetaClassFactory.get(cls);
     if (cls.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(mc)
         || getEnvironmentConfig().getPortableSuperTypes().contains(mc)) {
@@ -261,7 +270,7 @@ public abstract class EnvUtil {
       portableSubtypes.add(clazz);
     }
 
-    for (Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
+    for (final Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
       if (isPortableType(subType)) {
         portableSubtypes.add(subType);
       }
@@ -276,7 +285,7 @@ public abstract class EnvUtil {
       portableSubtypes.add(clazz);
     }
 
-    for (Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
+    for (final Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
       if (clazz.isInterface() || isPortableType(subType)) {
         portableSubtypes.add(subType);
       }
@@ -293,34 +302,53 @@ public abstract class EnvUtil {
   private static volatile ReachableTypes _reachableCache;
 
   public static ReachableTypes getAllReachableClasses(final GeneratorContext context) {
+    if (_lastContext == context && _reachableCache != null) {
+      return _reachableCache;
+    }
+
     if (!Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
       System.out.println("Reachability analysis disabled. Errai may generate unnecessary code.");
       System.out.println("Enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
       return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     }
 
-    if (_lastContext == context && _reachableCache != null) {
-      return _reachableCache;
-    }
-
     final Set<String> packages = RebindUtils.findTranslatablePackagesInModule(context);
 
-    final Set<String> allDeps = new HashSet<String>();
+    final Set<String> allDeps = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(100));
     final Collection<MetaClass> allCachedClasses = MetaClassFactory.getAllCachedClasses();
+    final ClassLoader classLoader = EnvUtil.class.getClassLoader();
+
+    final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
     try {
+
       for (final MetaClass mc : allCachedClasses) {
         if (!packages.contains(mc.getPackageName())) continue;
 
-        final String name = mc.getFullyQualifiedName().replaceAll("\\.", "/") + ".java";
-
-        final URL resource = EnvUtil.class.getClassLoader().getResource(name);
+        final URL resource = classLoader.getResource(mc.getFullyQualifiedName().replaceAll("\\.", "/") + ".java");
 
         if (resource != null) {
-          final File file = new File(resource.getFile());
+          InputStream stream = null;
+          try {
+            stream = new BufferedInputStream(resource.openStream());
+            final byte[] readBuffer = new byte[stream.available()];
+            stream.read(readBuffer);
 
-          if (file.exists()) {
-            allDeps.addAll(QuickDeps.getQuickTypeDependencyList(
-                com.google.gwt.thirdparty.guava.common.io.Files.toString(file, Charset.forName("UTF-8")), null));
+            executor.execute(new Runnable() {
+              @Override
+              public void run() {
+                allDeps.addAll(QuickDeps.getQuickTypeDependencyList(new String(readBuffer), null));
+              }
+            });
+
+          }
+          catch (IOException e) {
+            System.err.println("WARNING: Could not open resource: " + resource.getFile());
+          }
+          finally {
+            if (stream != null) {
+              stream.close();
+            }
           }
         }
       }
@@ -329,8 +357,16 @@ public abstract class EnvUtil {
       e.printStackTrace();
     }
 
+    try {
+      executor.shutdown();
+      executor.awaitTermination(60, TimeUnit.MINUTES);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
     System.out.println("*** REACHABILITY ANALYSIS (production mode: " + EnvUtil.isProdMode() + ") ***");
-    for (String s : allDeps) {
+    for (final String s : allDeps) {
       System.out.println(" -> " + s);
     }
     System.out.println("*** END OF REACHABILITY ANALYSIS *** ");

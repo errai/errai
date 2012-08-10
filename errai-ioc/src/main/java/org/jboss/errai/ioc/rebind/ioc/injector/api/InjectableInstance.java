@@ -82,10 +82,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
               ((MetaMethod) parm.getDeclaringMember()), null, parm.getDeclaringMember().getDeclaringClass(),
               parm, injector, context);
     }
-
-
   }
-
 
   public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(MetaField field,
                                                                                       Injector injector,

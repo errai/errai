@@ -44,7 +44,7 @@ public class InjectionTask {
   protected final MetaClass type;
   protected final MetaParameter parm;
 
-  public InjectionTask(Injector injector, MetaField field) {
+  public InjectionTask(final Injector injector, final MetaField field) {
     this.taskType = !field.isPublic() ? TaskType.PrivateField : TaskType.Field;
     this.injector = injector;
     this.field = field;
@@ -54,7 +54,7 @@ public class InjectionTask {
     this.type = null;
   }
 
-  public InjectionTask(Injector injector, MetaMethod method) {
+  public InjectionTask(final Injector injector, final MetaMethod method) {
     this.taskType = !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method;
     this.injector = injector;
     this.method = method;
@@ -64,7 +64,7 @@ public class InjectionTask {
     this.type = null;
   }
 
-  public InjectionTask(Injector injector, MetaParameter parm) {
+  public InjectionTask(final Injector injector, final MetaParameter parm) {
     this.taskType = TaskType.Parameter;
     this.injector = injector;
     this.parm = parm;
@@ -81,7 +81,7 @@ public class InjectionTask {
     }
   }
 
-  public InjectionTask(Injector injector, MetaClass type) {
+  public InjectionTask(final Injector injector, final MetaClass type) {
     this.taskType = TaskType.Type;
     this.injector = injector;
     this.type = type;
@@ -92,14 +92,14 @@ public class InjectionTask {
   }
 
   @SuppressWarnings({"unchecked"})
-  public boolean doTask(InjectionContext ctx) {
-    IOCProcessingContext processingContext = ctx.getProcessingContext();
+  public boolean doTask(final InjectionContext ctx) {
+    final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-    InjectableInstance injectableInstance = getInjectableInstance(ctx);
+    final InjectableInstance injectableInstance = getInjectableInstance(ctx);
 
-    QualifyingMetadata qualifyingMetadata = processingContext.getQualifyingMetadataFactory()
+    final QualifyingMetadata qualifyingMetadata = processingContext.getQualifyingMetadataFactory()
             .createFrom(injectableInstance.getQualifiers());
-    Statement val;
+    final Statement val;
 
     ctx.allowProxyCapture();
 
@@ -120,11 +120,13 @@ public class InjectionTask {
                    field.getType(), e.getMessage());
          }
          catch (UnproxyableClassException e) {
-           String err = "your object graph may have cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+           final String err = "your object graph may have cyclical dependencies and the cycle could not be proxied. " +
+               "use of the @Dependent scope and @New qualifier may not " +
                    "produce properly initalized objects for: " + getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
                    "\t Offending node: " + toString() + "\n" +
                    "\t Note          : this issue can be resolved by making "
-                   + e.getUnproxyableClass().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+                   + e.getUnproxyableClass().getFullyQualifiedName() + " proxyable. Introduce a default" +
+               " no-arg constructor and make sure the class is non-final.";
 
            throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
                    field.getType(), err);
@@ -148,7 +150,7 @@ public class InjectionTask {
         ctx.addExposedMethod(method);
 
       case Method:
-        for (MetaParameter parm : method.getParameters()) {
+        for (final MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
                   new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
         }
@@ -169,8 +171,8 @@ public class InjectionTask {
     return true;
   }
 
-  private InjectableInstance getInjectableInstance(InjectionContext ctx) {
-    InjectableInstance<? extends Annotation> injectableInstance
+  private InjectableInstance getInjectableInstance(final InjectionContext ctx) {
+    final InjectableInstance<? extends Annotation> injectableInstance
             = new InjectableInstance(null, taskType, constructor, method, field, type, parm, injector, ctx);
 
     switch (taskType) {
@@ -204,5 +206,4 @@ public class InjectionTask {
 
     return null;
   }
-
 }

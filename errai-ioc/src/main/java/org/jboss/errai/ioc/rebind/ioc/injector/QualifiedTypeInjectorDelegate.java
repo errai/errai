@@ -42,6 +42,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
                                        final MetaParameterizedType parameterizedType) {
     this.type = type;
     this.delegate = delegate;
+
     this.qualifyingTypeInformation = parameterizedType;
     this.qualifyingMetadata = delegate.getQualifyingMetadata();
 

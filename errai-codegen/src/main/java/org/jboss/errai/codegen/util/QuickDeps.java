@@ -94,11 +94,11 @@ public class QuickDeps {
 
     final IdentifierTokenizer identifierTokenizer = new IdentifierTokenizer(javaSource);
 
-    final Map<String, String> imports = new HashMap<String, String>();
-    final Set<String> wildcardPackages = new HashSet<String>();
+    final Map<String, String> imports = new HashMap<String, String>(32);
+    final Set<String> wildcardPackages = new HashSet<String>(32);
     wildcardPackages.add("java.lang");
 
-    final Set<String> usedTypes = new HashSet<String>();
+    final Set<String> usedTypes = new HashSet<String>(100);
 
     String token;
     while ((token = identifierTokenizer.nextToken()) != null) {
