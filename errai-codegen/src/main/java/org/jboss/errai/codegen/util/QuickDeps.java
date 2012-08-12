@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.util;
 
+import org.mvel2.CompileException;
 import org.mvel2.util.ParseTools;
 
 import java.net.URL;
@@ -147,7 +148,9 @@ public class QuickDeps {
                                     final Set<String> usedTypes,
                                     final String name) {
 
+
     for (final String pkg : wildcardPackages) {
+
       final String fqcn = pkg + "." + name;
       final String slashified = fqcn.replaceAll("\\.", "/");
       final String source = slashified + ".java";
@@ -159,62 +162,61 @@ public class QuickDeps {
 
         final String urlFile = url.getFile();
         if (urlFile.endsWith(source) || urlFile.endsWith(clazz)) {
-          try {
-            classLoader.loadClass(fqcn);
-            imports.put(fqcn, fqcn);
-            imports.put(name, fqcn);
-            usedTypes.add(fqcn);
-          }
-          catch (Throwable ignored) {
-          }
+          imports.put(fqcn, fqcn);
+          imports.put(name, fqcn);
+          usedTypes.add(fqcn);
+          return;
         }
       }
     }
   }
 
   private static class IdentifierTokenizer {
-    private final char[] expr;
+    private final String expr;
     private int i;
     private int startToken;
     private boolean tokenCapture;
 
     private IdentifierTokenizer(final String expr) {
-      this.expr = expr.toCharArray();
+      this.expr = expr;
     }
 
     public String nextToken() {
-      for (; i < expr.length; i++) {
-        switch (expr[i]) {
+      for (; i < expr.length(); i++) {
+        char c = expr.charAt(i);
+        switch (c) {
           case '"':
           case '\'':
-            if (i < expr.length) {
-              i = ParseTools.captureStringLiteral(expr[i], expr, i, expr.length) + 1;
+            if (i < expr.length()) {
+              i = captureStringLiteral(c, expr, i, expr.length()) + 1;
             }
             break;
 
           case '/':
             if (tokenCapture) {
               tokenCapture = false;
-              return new String(expr, startToken, i - startToken).trim();
+              return expr.substring(startToken, i).trim();
             }
 
-            if (i < expr.length && expr[i + 1] == '*') {
+            if (i < expr.length() && expr.charAt(i + 1) == '*') {
               i += 2;
-              while (i < expr.length && !(expr[i] == '*' && expr[i + 1] == '/')) {
-                i++;
+              while (i < expr.length() && !(c == '*' && expr.charAt(i + 1) == '/')) {
+                c = expr.charAt(++i);
               }
               i++;
             }
-            else if (expr[i + 1] == '/') {
-              while (i < expr.length && expr[i] != '\n') {
-                i++;
+            else if (expr.charAt(i + 1) == '/') {
+              while (i < expr.length() && c != '\n') {
+                c = expr.charAt(++i);
               }
             }
             break;
 
           default:
-            if (ParseTools.isIdentifierPart(expr[i]) || expr[i] == '.' ||
-                (expr[i] == '*' && expr[i - 1] == '.')) {
+            if (ParseTools.isIdentifierPart(c)
+                || c == '.'
+                || (c == '*' && expr.charAt(i - 1) == '.')) {
+
               if (!tokenCapture) {
                 startToken = i;
                 tokenCapture = true;
@@ -222,12 +224,24 @@ public class QuickDeps {
             }
             else if (tokenCapture) {
               tokenCapture = false;
-              return new String(expr, startToken, i - startToken);
+              return expr.substring(startToken, i);
             }
         }
       }
 
       return null;
     }
+  }
+
+  public static int captureStringLiteral(final char type, final String expr, int cursor, final int end) {
+    while (++cursor < end && expr.charAt(cursor) != type) {
+      if (expr.charAt(cursor) == '\\') cursor++;
+    }
+
+    if (cursor >= end || expr.charAt(cursor) != type) {
+      throw new RuntimeException("unterminated string literal");
+    }
+
+    return cursor;
   }
 }

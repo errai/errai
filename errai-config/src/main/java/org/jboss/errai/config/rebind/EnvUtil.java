@@ -312,6 +312,8 @@ public abstract class EnvUtil {
       return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     }
 
+    long time = System.currentTimeMillis();
+
     final Set<String> packages = RebindUtils.findTranslatablePackagesInModule(context);
 
     final Set<String> allDeps = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(100));
@@ -321,7 +323,6 @@ public abstract class EnvUtil {
     final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     try {
-
       for (final MetaClass mc : allCachedClasses) {
         if (!packages.contains(mc.getPackageName())) continue;
 
@@ -334,13 +335,7 @@ public abstract class EnvUtil {
             final byte[] readBuffer = new byte[stream.available()];
             stream.read(readBuffer);
 
-            executor.execute(new Runnable() {
-              @Override
-              public void run() {
-                allDeps.addAll(QuickDeps.getQuickTypeDependencyList(new String(readBuffer), null));
-              }
-            });
-
+            executor.execute(new ReachabilityRunnable(readBuffer, allDeps));
           }
           catch (IOException e) {
             System.err.println("WARNING: Could not open resource: " + resource.getFile());
@@ -369,9 +364,27 @@ public abstract class EnvUtil {
     for (final String s : allDeps) {
       System.out.println(" -> " + s);
     }
-    System.out.println("*** END OF REACHABILITY ANALYSIS *** ");
+
+    time = System.currentTimeMillis() - time;
+
+    System.out.println("*** END OF REACHABILITY ANALYSIS (" + time + "ms) *** ");
 
     _lastContext = context;
     return _reachableCache = new ReachableTypes(allDeps, true);
+  }
+
+  private static class ReachabilityRunnable implements Runnable {
+    private final byte[] sourceBuffer;
+    private final Set<String> results;
+
+    private ReachabilityRunnable(byte[] sourceBuffer, Set<String> results) {
+      this.sourceBuffer = sourceBuffer;
+      this.results = results;
+    }
+
+    @Override
+    public void run() {
+      results.addAll(QuickDeps.getQuickTypeDependencyList(new String(sourceBuffer), null));
+    }
   }
 }
