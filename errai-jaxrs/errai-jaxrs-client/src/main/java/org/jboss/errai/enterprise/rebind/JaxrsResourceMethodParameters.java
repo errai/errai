@@ -44,6 +44,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.api.MultivaluedMapImpl;
+import org.jboss.errai.enterprise.client.jaxrs.api.PathSegmentImpl;
 
 /**
  * Represents parameters of a JAX-RS resource method.
@@ -145,10 +146,11 @@ public class JaxrsResourceMethodParameters {
         @Override
         public String generate(Context context) {
           if (param instanceof Parameter) {
-            return Stmt.loadVariable(((Parameter) param).getName()).invoke("getPath").generate(context);
+            return Stmt.castTo(PathSegmentImpl.class, Stmt.loadVariable(((Parameter) param).getName()))
+              .invoke("getEncodedPathWithParameters").generate(context);
           }
           else {
-            return Stmt.nestedCall(param).invoke("getPath").generate(context);
+            return Stmt.castTo(PathSegmentImpl.class, param).invoke("getEncodedPathWithParameters").generate(context);
           }
         }
 
@@ -240,5 +242,14 @@ public class JaxrsResourceMethodParameters {
     }
 
     return pathParamNames;
+  }
+
+  public boolean needsEncoding(String paramName) {
+    // PathSegments are encoded in PathSegmentImpl
+    if ((MetaClassFactory.get(PathSegment.class).equals(getParameterByName(PathParam.class, paramName).getType()))) {
+      return false;
+    }
+      
+    return true;
   }
 }

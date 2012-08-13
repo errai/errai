@@ -88,12 +88,20 @@ public class TypeMarshaller {
     }
 
     private static Statement marshal(MetaClass type, Statement statement) {
+      if (type.equals(statement.getType())) {
+        return statement;
+      }
       return Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement)).invoke("toString");
     }
 
     private static Statement demarshal(MetaClass type, Statement statement) {
-      if (MetaClassFactory.get(void.class).equals(type))
+      if (type.equals(statement.getType())) {
+        return statement;
+      }
+      
+      if (MetaClassFactory.get(void.class).equals(type)) {
         return Stmt.load(null);
+      }
 
       return Stmt.invokeStatic(type.asBoxed(), "valueOf", statement);
     }

@@ -45,7 +45,7 @@ public interface PathParamTestService {
   
   @GET 
   @Path("/t3/{id}")
-  public String getWithWithPathSegmentPathParam(@PathParam("id") PathSegment id);
+  public String getWithPathSegmentPathParam(@PathParam("id") PathSegment id);
   
   @GET 
   @Path("/{id1}/{id2}")

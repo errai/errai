@@ -67,7 +67,7 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   }
 
   @Override
-  public String getWithWithPathSegmentPathParam(PathSegment id) {
-    return id.getPath();
+  public String getWithPathSegmentPathParam(PathSegment id) {
+    return id.getMatrixParameters().getFirst("name")+"/"+id.getMatrixParameters().getFirst("author");
   }
 }

@@ -50,18 +50,19 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
     RestClient.create(PathParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @PathParam failed",
         pathWithSpecialChars)).getWithStringPathParam(pathWithSpecialChars);
   }
-  
+
   @Test
   public void testGetWithPathSegmentPathParam() {
-   PathSegment ps = new PathSegmentImpl("path;name=nameValue;author=authorValue;empty=");
-   assertEquals("nameValue", ps.getMatrixParameters().getFirst("name"));
-   assertEquals("authorValue", ps.getMatrixParameters().getFirst("author"));
-   assertEquals("", ps.getMatrixParameters().getFirst("empty"));
-    
-   RestClient.create(PathParamTestService.class, new AssertionCallback<String>("@GET with @PathParam failed", "path"))
-        .getWithWithPathSegmentPathParam(new PathSegmentImpl("path"));
+    PathSegment ps = new PathSegmentImpl("path;name=nameValue;author=authorValue;empty=");
+    assertEquals("nameValue", ps.getMatrixParameters().getFirst("name"));
+    assertEquals("authorValue", ps.getMatrixParameters().getFirst("author"));
+    assertEquals("", ps.getMatrixParameters().getFirst("empty"));
+
+    RestClient.create(PathParamTestService.class,
+        new AssertionCallback<String>("@GET with @PathParam failed", "nameValue/authorValue"))
+        .getWithPathSegmentPathParam(ps);
   }
-  
+
   @Test
   public void testGetWithMultiplePathParams() {
     RestClient.create(PathParamTestService.class,

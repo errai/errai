@@ -19,17 +19,12 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Cookies;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.client.framework.CallContextStatus;
 import org.jboss.errai.bus.rebind.RPCProxyUtil;
-import org.jboss.errai.config.rebind.RebindUtils;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
@@ -45,12 +40,18 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.rebind.RebindUtils;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Cookies;
 
 /**
  * Generates a JAX-RS remote proxy method.
@@ -108,8 +109,11 @@ public class JaxrsProxyMethodGenerator {
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
 
     for (String pathParamName : JaxrsResourceMethodParameters.getPathParameterNames(path)) {
-      pathValue = pathValue.invoke("replace", "{" + pathParamName + "}",
-          encodePath(marshal(params.getPathParameter(pathParamName))));
+      Statement pathParam = marshal(params.getPathParameter(pathParamName));
+      if (params.needsEncoding(pathParamName)) {
+        pathParam = encodePath(pathParam);
+      }
+      pathValue = pathValue.invoke("replace", "{" + pathParamName + "}", pathParam);
     }
 
     if (params.getMatrixParameters() != null) {

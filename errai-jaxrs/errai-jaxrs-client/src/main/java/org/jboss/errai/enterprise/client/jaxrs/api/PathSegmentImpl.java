@@ -19,6 +19,8 @@ package org.jboss.errai.enterprise.client.jaxrs.api;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 
+import com.google.gwt.http.client.URL;
+
 /**
  * GWT-translatable implementation of {@link PathSegment}.
  * 
@@ -27,11 +29,11 @@ import javax.ws.rs.core.PathSegment;
 public class PathSegmentImpl implements PathSegment {
   private final MultivaluedMap<String, String> matrixParameters = new MultivaluedMapImpl<String, String>();
   private final String path;
-  
+
   public PathSegmentImpl(String segment) {
-    this.path = segment;
-    
-    String[] matrixParams = path.split(";");
+    this.path = segment.contains(";") ? segment.substring(0, segment.indexOf(";")) : segment;
+
+    String[] matrixParams = segment.split(";");
     if (matrixParams.length > 1) {
       for (String matrixParam : matrixParams) {
         String[] param = matrixParam.split("=");
@@ -51,9 +53,25 @@ public class PathSegmentImpl implements PathSegment {
   public String getPath() {
     return path;
   }
-
+  
   @Override
   public MultivaluedMap<String, String> getMatrixParameters() {
     return matrixParameters;
   }
+
+  public String getEncodedPathWithParameters() {
+    StringBuilder builder = new StringBuilder(URL.encodePathSegment(path));
+    for (String matrixParamName : matrixParameters.keySet()) {
+      builder
+        .append(";" + matrixParamName + "=")
+        .append(URL.encodePathSegment(matrixParameters.getFirst(matrixParamName)));
+    }
+    
+    return builder.toString();
+  }
+  
+  @Override
+  public String toString() {
+    return getEncodedPathWithParameters();
+  }  
 }
