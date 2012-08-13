@@ -54,9 +54,11 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithPathSegmentPathParam() {
     PathSegment ps = new PathSegmentImpl("path;name=nameValue;author=authorValue;empty=");
+    assertEquals("path", ps.getPath());
     assertEquals("nameValue", ps.getMatrixParameters().getFirst("name"));
     assertEquals("authorValue", ps.getMatrixParameters().getFirst("author"));
     assertEquals("", ps.getMatrixParameters().getFirst("empty"));
+    assertNull(ps.getMatrixParameters().getFirst("path"));
 
     RestClient.create(PathParamTestService.class,
         new AssertionCallback<String>("@GET with @PathParam failed", "nameValue/authorValue"))

@@ -31,13 +31,14 @@ public class PathSegmentImpl implements PathSegment {
   private final String path;
 
   public PathSegmentImpl(String segment) {
-    this.path = segment.contains(";") ? segment.substring(0, segment.indexOf(";")) : segment;
+    int semiColonPos = segment.indexOf(";");
+    if (semiColonPos > -1) {
+      this.path = segment.substring(0, semiColonPos);
 
-    String[] matrixParams = segment.split(";");
-    if (matrixParams.length > 1) {
+      String[] matrixParams = segment.substring(semiColonPos + 1).split(";");
       for (String matrixParam : matrixParams) {
         String[] param = matrixParam.split("=");
-        if (param != null && param.length > 0) {
+        if (param.length > 0) {
           String name = param[0];
           String value = "";
           if (param.length > 1) {
@@ -47,13 +48,16 @@ public class PathSegmentImpl implements PathSegment {
         }
       }
     }
+    else {
+      this.path = segment;
+    }
   }
 
   @Override
   public String getPath() {
     return path;
   }
-  
+
   @Override
   public MultivaluedMap<String, String> getMatrixParameters() {
     return matrixParameters;
@@ -63,15 +67,15 @@ public class PathSegmentImpl implements PathSegment {
     StringBuilder builder = new StringBuilder(URL.encodePathSegment(path));
     for (String matrixParamName : matrixParameters.keySet()) {
       builder
-        .append(";" + matrixParamName + "=")
-        .append(URL.encodePathSegment(matrixParameters.getFirst(matrixParamName)));
+          .append(";" + matrixParamName + "=")
+          .append(URL.encodePathSegment(matrixParameters.getFirst(matrixParamName)));
     }
-    
+
     return builder.toString();
   }
-  
+
   @Override
   public String toString() {
     return getEncodedPathWithParameters();
-  }  
+  }
 }
