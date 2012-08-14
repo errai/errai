@@ -11,8 +11,10 @@ import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 
 /**
- * Indicates that a {@link DataField} is automatically bound to a property of the data model associated with an
- * enclosing {@link DataBinder} (see {@link AutoBound}).
+ * Indicates that a {@link DataField} is automatically bound to a property of a data model associated with a
+ * {@link DataBinder} (see {@link AutoBound}).
+ * <p>
+ * If no property is specified, the {@link DataField} is bound to the data model property with matching name.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -33,5 +35,6 @@ public @interface Bound {
    * The {@link Converter} to use when setting values on the model or widget.
    */
   Class<? extends Converter> converter() default NO_CONVERTER.class;
+
   static abstract class NO_CONVERTER implements Converter {}
 }

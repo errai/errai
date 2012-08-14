@@ -19,6 +19,17 @@ package org.jboss.errai.codegen.meta.impl;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
+import java.beans.Introspector;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.BeanDescriptor;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -31,17 +42,6 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
 import org.mvel2.util.ReflectionUtil;
-
-import java.beans.Introspector;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -101,7 +101,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           if (parmTypes.length == 0) {
             score = 1;
             MetaClass retType = method.getReturnType();
-            while ((retType = retType.getSuperClass()) != null) score++;
+            while ((retType = retType.getSuperClass()) != null)
+              score++;
           }
           else {
             for (int i = 0; i < parmTypes.length; i++) {
@@ -248,7 +249,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     MetaMethod[] getMethods();
   }
 
-  private MetaMethod getBestMatchingMethod(final GetMethodsCallback methodsCallback, final String name, final MetaClass... parameters) {
+  private MetaMethod getBestMatchingMethod(final GetMethodsCallback methodsCallback, final String name,
+      final MetaClass... parameters) {
     MetaMethod meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
     if (meth == null) {
       meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
@@ -348,10 +350,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaField getInheritedField(String name) {
     MetaField f = getDeclaredField(name);
-    if (f != null) return f;
+    if (f != null)
+      return f;
     for (MetaClass iface : getInterfaces()) {
       f = iface.getInheritedField(name);
-      if (f != null) return f;
+      if (f != null)
+        return f;
     }
     if (getSuperClass() != null) {
       return getSuperClass().getInheritedField(name);
@@ -418,7 +422,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     // XXX not sure if this is uncached on purpose.
     // FIXME there are no tests or documentation for this case
-    if (!isPrimitive() && NULL_TYPE.equals(clazz)) return true;
+    if (!isPrimitive() && NULL_TYPE.equals(clazz))
+      return true;
 
     if (isArray() && clazz.isArray()) {
       return getOuterComponentType().equals(clazz.getOuterComponentType())
@@ -436,7 +441,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     else if (_hasInterface(clazz.getInterfaces(), this.getErased())) {
       assignable = true;
     }
-    else assignable = (sup = clazz.getSuperClass()) != null && isAssignableFrom(sup);
+    else
+      assignable = (sup = clazz.getSuperClass()) != null && isAssignableFrom(sup);
 
     ASSIGNABLE_CACHE.put(clazz, assignable);
     return assignable;
@@ -467,7 +473,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public boolean isAssignableTo(final Class clazz) {
     return isAssignableTo(MetaClassFactory.get(clazz));
   }
-
 
   @Override
   public boolean isDefaultInstantiable() {
@@ -535,12 +540,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _asClassCache = cls;
   }
 
-
   private MetaClass _boxedCache;
 
   @Override
   public MetaClass asBoxed() {
-    if (_boxedCache != null) return _boxedCache;
+    if (_boxedCache != null)
+      return _boxedCache;
     return _boxedCache = GenUtil.getPrimitiveWrapper(this);
   }
 
@@ -548,7 +553,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaClass asUnboxed() {
-    if (_unboxedCache != null) return _unboxedCache;
+    if (_unboxedCache != null)
+      return _unboxedCache;
     return _unboxedCache = GenUtil.getUnboxedFromWrapper(this);
   }
 
@@ -575,7 +581,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public String getInternalName() {
-    if (_internalNameCache != null) return _internalNameCache;
+    if (_internalNameCache != null)
+      return _internalNameCache;
 
     String name = getFullyQualifiedName();
 
@@ -685,7 +692,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         for (final MetaMethod method : getMethods()) {
           final String property = ReflectionUtil.getPropertyFromAccessor(method.getName());
 
-          if (method.getParameters().length == 0 && method.getName().startsWith("get")) {
+          if (method.getParameters().length == 0
+              && (method.getName().startsWith("get") || method.getName().startsWith("is"))) {
             properties.add(property);
             getterProperties.put(property, method);
           }
@@ -724,7 +732,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaClass getOuterComponentType() {
-    if (_outerComponentCache != null) return _outerComponentCache;
+    if (_outerComponentCache != null)
+      return _outerComponentCache;
 
     MetaClass c = this;
     while (c.isArray()) {

@@ -16,6 +16,27 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.jboss.errai.codegen.DefModifiers;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.builder.impl.Scope;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
+
 import com.google.gwt.core.ext.typeinfo.JArrayType;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
@@ -29,25 +50,6 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.codegen.DefModifiers;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.builder.impl.Scope;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
-import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
-import org.jboss.errai.codegen.util.GenUtil;
-import org.jboss.errai.codegen.util.PrivateAccessUtil;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -212,6 +214,10 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return meths;
   }
 
+  // TODO report this to be fixed in GWT: getClass() in java.lang.Object is reported as non-final method.
+  private static final List<MetaMethod> overrideMethods = 
+      Arrays.asList(MetaClassFactory.get(Object.class).getMethods());
+  
   @Override
   public MetaMethod[] getMethods() {
     final Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
@@ -233,8 +239,9 @@ public class GWTClass extends AbstractMetaClass<JType> {
         meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, interfaceType).getMethods()));
       }
     }
-    while ((type = type.getSuperclass()) != null);
-
+    while ((type = type.getSuperclass()) != null && !type.getQualifiedSourceName().equals("java.lang.Object"));
+    meths.addAll(overrideMethods);
+    
     return meths.toArray(new MetaMethod[meths.size()]);
   }
 
