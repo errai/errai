@@ -28,6 +28,7 @@ public class QuickHandlerComponent extends Composite {
 
   private boolean c0EventFired = false;
   private boolean c1EventFired = false;
+  private boolean c1_dupEventFired = false;
   private boolean c2EventFired = false;
 
   private boolean c0EventFired2 = false;
@@ -47,15 +48,14 @@ public class QuickHandlerComponent extends Composite {
     c0EventFired = true;
   }
 
-//  @EventHandler("c0")
-//  @SinkNative(Event.ONFOCUS)
-//  public void doSomethingC0_shouldNotFire(Event e) {
-//    c0EventFired2  = true;
-//  }
-
   @EventHandler("c1")
   public void doSomethingC1(ClickEvent e) {
     c1EventFired = true;
+  }
+
+  @EventHandler("c1")
+  public void doSomethingC1_dup(ClickEvent e) {
+    c1_dupEventFired = true;
   }
 
   @EventHandler("c2")
@@ -73,6 +73,10 @@ public class QuickHandlerComponent extends Composite {
 
   public boolean isC1EventFired() {
     return c1EventFired;
+  }
+
+  public boolean isC1_dupEventFired() {
+    return c1_dupEventFired;
   }
 
   public boolean isC2EventFired() {

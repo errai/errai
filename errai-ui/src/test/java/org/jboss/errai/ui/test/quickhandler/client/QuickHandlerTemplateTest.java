@@ -36,9 +36,11 @@ public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
     assertTrue(app.getComponent().isC0EventFired());
     assertFalse(app.getComponent().isC0EventFired2());
 
+    assertFalse(app.getComponent().isC1_dupEventFired());
     assertFalse(app.getComponent().isC1EventFired());
     c1.dispatchEvent(generateClickEvent());
     assertTrue(app.getComponent().isC1EventFired());
+    assertTrue(app.getComponent().isC1_dupEventFired());
 
     assertFalse(app.getComponent().isC2EventFired());
     c2.click();
