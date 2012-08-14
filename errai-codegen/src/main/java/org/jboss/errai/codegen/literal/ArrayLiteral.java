@@ -115,6 +115,4 @@ public class ArrayLiteral extends LiteralValue<Object> {
   public MetaClass getType() {
     return mArrayType;
   }
-
-
 }

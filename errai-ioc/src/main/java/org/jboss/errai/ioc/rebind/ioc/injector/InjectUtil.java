@@ -239,9 +239,6 @@ public class InjectUtil {
 
     final IOCProcessingContext pc = ctx.getProcessingContext();
 
-//    pc.globalInsertBefore(Stmt.declareVariable(destructionCallbackType).asFinal().named(varName)
-//            .initializeWith(classStructureBuilder.finish()));
-
     pc.getBootstrapBuilder().privateField(varName, destructionCallbackType)
         .initializesWith(classStructureBuilder.finish()).finish();
 

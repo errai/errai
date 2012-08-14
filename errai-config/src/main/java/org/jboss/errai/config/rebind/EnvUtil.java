@@ -141,7 +141,6 @@ public abstract class EnvUtil {
       throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
     }
 
-
     while (erraiAppProperties.hasMoreElements()) {
       InputStream inputStream = null;
       try {
@@ -315,6 +314,8 @@ public abstract class EnvUtil {
     long time = System.currentTimeMillis();
 
     final Set<String> packages = RebindUtils.findTranslatablePackagesInModule(context);
+
+    System.out.println(packages);
 
     final Set<String> allDeps = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(100));
     final Collection<MetaClass> allCachedClasses = MetaClassFactory.getAllCachedClasses();

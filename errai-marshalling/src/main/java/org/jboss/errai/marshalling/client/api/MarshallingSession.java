@@ -46,7 +46,7 @@ public interface MarshallingSession {
    * @param instance
    *          the instance of the entity.
    */
-  public void recordObject(String hashCode, Object instance);
+  public <T> T recordObject(String hashCode, T instance);
 
   /**
    * Checks if the object is already in the context based on the object reference.

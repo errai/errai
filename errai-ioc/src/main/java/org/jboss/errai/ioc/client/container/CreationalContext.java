@@ -61,7 +61,7 @@ public class CreationalContext {
     this.scopeName = scopeName;
   }
 
-  public CreationalContext(boolean immutableContext, final IOCBeanManager beanManager, final String scopeName) {
+  public CreationalContext(final boolean immutableContext, final IOCBeanManager beanManager, final String scopeName) {
     this.immutableContext = immutableContext;
     this.beanManager = beanManager;
     this.scopeName = scopeName;
@@ -76,7 +76,7 @@ public class CreationalContext {
    * @param callback
    *     the instance of the {@link InitializationCallback}
    */
-  public void addInitializationCallback(Object beanInstance, InitializationCallback callback) {
+  public void addInitializationCallback(final Object beanInstance, final InitializationCallback callback) {
     initializationCallbacks.add(Tuple.of(beanInstance, callback));
   }
 
@@ -90,7 +90,7 @@ public class CreationalContext {
    * @param callback
    *     the instance of the {@link DestructionCallback}
    */
-  public void addDestructionCallback(Object beanInstance, DestructionCallback callback) {
+  public void addDestructionCallback(final Object beanInstance, final DestructionCallback callback) {
     destructionCallbacks.add(Tuple.of(beanInstance, callback));
   }
 
@@ -104,7 +104,7 @@ public class CreationalContext {
    *     the reference to the actual bean instance which the proxy wraps
    */
   @SuppressWarnings("UnusedDeclaration") // used by generated code
-  public void addProxyReference(Object proxyRef, Object realRef) {
+  public void addProxyReference(final Object proxyRef, final Object realRef) {
     beanManager.addProxyReference(proxyRef, realRef);
   }
 
@@ -252,10 +252,10 @@ public class CreationalContext {
    * @see #getInstanceOrNew(CreationalCallback, Class, java.lang.annotation.Annotation[])
    */
 
-  public <T> T getSingletonInstanceOrNew(BootstrapperInjectionContext injectionContext,
-                                         CreationalCallback<T> callback,
-                                         Class<?> beanType,
-                                         Annotation[] qualifiers) {
+  public <T> T getSingletonInstanceOrNew(final BootstrapperInjectionContext injectionContext,
+                                         final CreationalCallback<T> callback,
+                                         final Class<?> beanType,
+                                         final Annotation[] qualifiers) {
 
     @SuppressWarnings("unchecked") T inst = (T) getBeanInstance(beanType, qualifiers);
 
@@ -292,12 +292,11 @@ public class CreationalContext {
 
     final BeanRef ref = getBeanReference(beanType, qualifiers);
 
-    List<ProxyResolver> resolverList = unresolvedProxies.get(ref);
-    if (resolverList == null) {
-      unresolvedProxies.put(ref, resolverList = new ArrayList<ProxyResolver>());
+    if (!unresolvedProxies.containsKey(ref)) {
+      unresolvedProxies.put(ref, new ArrayList<ProxyResolver>());
     }
 
-    resolverList.add(proxyResolver);
+    unresolvedProxies.get(ref).add(proxyResolver);
   }
 
   /**
@@ -312,7 +311,7 @@ public class CreationalContext {
 
   @SuppressWarnings("unchecked")
   private void fireAllInitCallbacks() {
-    for (Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
+    for (final Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
       entry.getValue().init(entry.getKey());
     }
   }
@@ -327,27 +326,24 @@ public class CreationalContext {
     final int initialSize = unresolvedProxies.size();
 
     while (unresolvedIterator.hasNext()) {
-      Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
+      final Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
       if (wired.containsKey(entry.getKey())) {
-        for (ProxyResolver pr : entry.getValue()) {
+        for (final ProxyResolver pr : entry.getValue()) {
           pr.resolve(wired.get(entry.getKey()));
         }
 
         unresolvedIterator.remove();
       }
       else {
-        IOCBeanDef<?> iocBeanDef = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
+        final IOCBeanDef<?> iocBeanDef =
+            IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
 
         if (iocBeanDef != null) {
-          Object beanInstance = iocBeanDef.getInstance(this);
-
-          if (beanInstance != null) {
-            if (!wired.containsKey(entry.getKey())) {
-              addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), beanInstance);
-            }
-
-            beansResolved = true;
+          if (!wired.containsKey(entry.getKey())) {
+            addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), iocBeanDef.getInstance(this));
           }
+
+          beansResolved = true;
         }
       }
     }
@@ -361,7 +357,7 @@ public class CreationalContext {
   }
 
   private void registerAllBeans() {
-    for (Object ref : getAllCreatedBeanInstances()) {
+    for (final Object ref : getAllCreatedBeanInstances()) {
       beanManager.addBeanToContext(ref, this);
     }
   }
@@ -371,7 +367,7 @@ public class CreationalContext {
       throw new IllegalStateException("scope [" + scopeName + "] is an immutable scope and cannot be destroyed");
     }
 
-    for (Tuple<Object, DestructionCallback> tuple : destructionCallbacks) {
+    for (final Tuple<Object, DestructionCallback> tuple : destructionCallbacks) {
       tuple.getValue().destroy(tuple.getKey());
     }
   }

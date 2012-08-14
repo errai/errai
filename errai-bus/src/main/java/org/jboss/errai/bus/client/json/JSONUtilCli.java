@@ -187,10 +187,9 @@ public class JSONUtilCli {
 
 
   public static Message decodeCommandMessage(final Object value) {
-    final CommandMessage msg = CommandMessage.createWithParts(decodePayload(value));
-    msg.setResource(RequestDispatcher.class.getName(), requestDispatcherProvider);
-    msg.setResource("Session", clientSession);
-    return msg;
+    return CommandMessage.createWithParts(decodePayload(value))
+        .setResource(RequestDispatcher.class.getName(), requestDispatcherProvider)
+        .setResource("Session", clientSession);
   }
 
   public static void setAutoDemarshall(boolean autoDemarshall1) {

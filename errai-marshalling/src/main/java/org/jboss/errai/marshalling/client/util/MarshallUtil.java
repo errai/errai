@@ -32,23 +32,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallUtil {
-  private static final Set<Class<?>> primitiveWrappers = new HashSet<Class<?>>();
-
-  static {
-    primitiveWrappers.add(Integer.class);
-    primitiveWrappers.add(Double.class);
-    primitiveWrappers.add(Float.class);
-    primitiveWrappers.add(Short.class);
-    primitiveWrappers.add(Long.class);
-    primitiveWrappers.add(Character.class);
-    primitiveWrappers.add(Byte.class);
-    primitiveWrappers.add(Boolean.class);
-  }
-
-  public static boolean isPrimitiveWrapper(Class<?> cls) {
-    return primitiveWrappers.contains(cls);
-  }
-
   public static Marshaller<Object> getQualifiedNumberMarshaller(Object o) {
     final Class<Object> type = (Class<Object>) o.getClass();
 

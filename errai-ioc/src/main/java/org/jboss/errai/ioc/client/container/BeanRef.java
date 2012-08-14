@@ -51,15 +51,12 @@ public final class BeanRef {
    * or the {@param annotation} parameter may be null.
    *
    * @param clazz
-   *         the bean type.
+   *     the bean type.
    * @param annotations
-   *         an array of qualifiers associated with this bean.
+   *     an array of qualifiers associated with this bean.
    */
   public BeanRef(final Class<?> clazz,
                  final Annotation[] annotations) {
-    Assert.notNull(clazz);
-    Assert.notNull(annotations);
-
     this.clazz = clazz;
     this.annotations = new HashSet<Annotation>(Arrays.asList(annotations));
     this.hashConsistentAnnotations = wrapAnnotations(this.annotations);
@@ -93,25 +90,19 @@ public final class BeanRef {
 
   private static class AnnotationHashWrapper implements Annotation {
     private final Annotation _delegate;
-    private final Class<?> type;
     private final int hashCode;
 
     private AnnotationHashWrapper(final Annotation _delegate) {
-      Assert.notNull(_delegate);
-
       this._delegate = _delegate;
-      this.type = _delegate.annotationType();
       this.hashCode = QualifierUtil.hashCodeOf(_delegate);
     }
 
     @Override
     public boolean equals(final Object o) {
-      if (this == o) return true;
-      if (!(o instanceof AnnotationHashWrapper)) return false;
-
-      final AnnotationHashWrapper that = (AnnotationHashWrapper) o;
-
-      return !(type != null ? !type.equals(that.type) : that.type != null);
+      return this == o || o instanceof AnnotationHashWrapper
+          && !(annotationType() != null ?
+          !annotationType().equals(((AnnotationHashWrapper) o).annotationType()) :
+          ((AnnotationHashWrapper) o).annotationType() != null);
     }
 
     @Override
@@ -132,14 +123,10 @@ public final class BeanRef {
 
   @Override
   public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (!(o instanceof BeanRef)) return false;
-
-    final BeanRef beanRef = (BeanRef) o;
-
-    return !(hashConsistentAnnotations != null ?
-            !hashConsistentAnnotations.equals(beanRef.hashConsistentAnnotations) : beanRef.hashConsistentAnnotations != null)
-            && !(clazz != null ? !clazz.equals(beanRef.clazz) : beanRef.clazz != null);
+    return this == o || o instanceof BeanRef
+        && !(hashConsistentAnnotations != null ?
+        !hashConsistentAnnotations.equals(((BeanRef) o).hashConsistentAnnotations) : ((BeanRef) o).hashConsistentAnnotations != null)
+        && !(clazz != null ? !clazz.equals(((BeanRef) o).clazz) : ((BeanRef) o).clazz != null);
   }
 
   @Override
@@ -151,9 +138,6 @@ public final class BeanRef {
 
   @Override
   public String toString() {
-    return "BeanRef{" +
-            "clazz=" + clazz +
-            ", annotations=" + annotations +
-            '}';
+    return clazz + "[" + annotations + "]";
   }
 }

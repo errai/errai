@@ -179,12 +179,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public String getPackageName() {
-    final String className = getEnclosedMetaObject().getQualifiedBinaryName();
-    final int idx = className.lastIndexOf(".");
-    if (idx != -1) {
-      return className.substring(0, idx);
-    }
-    return "";
+    return getEnclosedMetaObject().isClassOrInterface().getPackage().getName();
   }
 
   private static MetaMethod[] fromMethodArray(final TypeOracle oracle, final JMethod[] methods) {
@@ -202,11 +197,9 @@ public class GWTClass extends AbstractMetaClass<JType> {
     final JEnumType type = getEnclosedMetaObject().isEnum();
 
     if (type != null) {
-
       meths.add(new GWTSpecialMethod(this, DefModifiers.none(), Scope.Public, String.class, "name"));
       meths.add(new GWTSpecialMethod(this, DefModifiers.none(), Scope.Public, Enum.class, "valueOf", Parameter.of(String.class, "p").getMetaParameter()));
       meths.add(new GWTSpecialMethod(this, DefModifiers.none(), Scope.Public, Enum[].class, "values"));
-
     }
 
     return meths;
@@ -282,7 +275,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-
     final JField field = type.getField(name);
 
     if (field == null) {
@@ -321,8 +313,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
   public MetaConstructor[] getDeclaredConstructors() {
     return getConstructors();
   }
-
-
 
   @Override
   public MetaClass[] getDeclaredClasses() {
@@ -430,7 +420,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return getEnclosedMetaObject().isClass() != null && getEnclosedMetaObject().isClass().isAbstract();
   }
 
-
   @Override
   public boolean isEnum() {
     return getEnclosedMetaObject().isEnum() != null;
@@ -470,7 +459,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
     return getEnclosedMetaObject().isClassOrInterface() != null &&
             getEnclosedMetaObject().isClassOrInterface().isStatic();
   }
-
 
   @Override
   public boolean isSynthetic() {

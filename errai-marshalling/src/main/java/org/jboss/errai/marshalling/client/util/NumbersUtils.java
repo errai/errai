@@ -61,7 +61,7 @@ public class NumbersUtils {
 
   private final static String quote = "\"";
 
-  public static String qualifiedNumericEncoding(Object o) {
+  public static String qualifiedNumericEncoding(final Object o) {
     final String typeName;
 
     if (o == null) {

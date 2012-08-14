@@ -51,6 +51,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.ReachableTypes;
+import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -145,7 +146,13 @@ public class MarshallerGeneratorFactory {
       System.out.println(gen);
     }
 
-    RebindUtils.writeStringToFile(cacheFile, gen);
+    ThreadUtil.execute(new Runnable() {
+      @Override
+      public void run() {
+        RebindUtils.writeStringToFile(cacheFile, gen);
+      }
+    });
+
 
     return gen;
   }
@@ -386,10 +393,9 @@ public class MarshallerGeneratorFactory {
             .append(Stmt.load(null).returnValue())
             .finish()
             .else_()
-            .append(Stmt.declareVariable(EJArray.class).named("arr")
-                .initializeWith(Stmt.loadVariable("a0").invoke("isArray")))
+
             .append(Stmt.nestedCall(Stmt.loadVariable("this")).invoke("_demarshall" + dimensions,
-                loadVariable("arr"), loadVariable("a1")).returnValue())
+                Stmt.loadVariable("a0").invoke("isArray"), loadVariable("a1")).returnValue())
             .finish());
     bBuilder.finish();
 

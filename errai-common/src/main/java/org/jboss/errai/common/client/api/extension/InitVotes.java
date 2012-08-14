@@ -54,7 +54,8 @@ public final class InitVotes {
   private static volatile AsyncTask initTimeout;
   private static volatile AsyncTask initDelay;
 
-  private static boolean _initWait = false;;
+  private static boolean _initWait = false;
+  ;
 
   private static final List<InitFailureListener> initFailureListeners
       = new ArrayList<InitFailureListener>();
@@ -80,7 +81,8 @@ public final class InitVotes {
    * to have failed to satisfy, and thus an error is rendered to the browser console. The default value is
    * 5000 milliseconds.
    *
-   * @param millis milliseconds.
+   * @param millis
+   *     milliseconds.
    */
   public static void setTimeoutMillis(final int millis) {
     timeoutMillis = millis;
@@ -95,7 +97,9 @@ public final class InitVotes {
    * begins the startup process. This starts the timer window (see {@link #setTimeoutMillis(int)}) for which
    * all components being waited on are expected to report back that they're ready.
    *
-   * @param clazz a class reference.
+   * @param clazz
+   *     a class reference.
+   *
    * @see #voteFor(Class)
    */
   public static void waitFor(final Class<?> clazz) {
@@ -121,7 +125,8 @@ public final class InitVotes {
    * process has been armed and this vote releases the final dependency, the initialization process will be triggered,
    * calling all the registered initialization callbacks. See: {@link #registerInitCallback(Runnable)}
    *
-   * @param clazz a class reference
+   * @param clazz
+   *     a class reference
    */
   public static void voteFor(final Class<?> clazz) {
     voteFor(clazz.getName());
@@ -146,21 +151,19 @@ public final class InitVotes {
     if (_initWait) return;
     _initWait = true;
 
-    final Runnable tryInit = new Runnable() {
+    _scheduleFinish(new Runnable() {
       @Override
-       public void run() {
-         if (armed && waitForSet.isEmpty()) {
-           cancelFailTimer();
-           finishInit();
-           _initWait = false;
-         }
-         else {
-           _scheduleFinish(this);
-         }
-       }
-    };
-
-    _scheduleFinish(tryInit);
+      public void run() {
+        if (armed && waitForSet.isEmpty()) {
+          cancelFailTimer();
+          finishInit();
+          _initWait = false;
+        }
+        else {
+          _scheduleFinish(this);
+        }
+      }
+    });
   }
 
   private static void _scheduleFinish(Runnable runnable) {
@@ -172,7 +175,8 @@ public final class InitVotes {
    * will be persistent <em>across</em> multiple initializations, and will not be cleared out even if {@link #reset()}
    * is called. If this is not desirable, see: {@link #registerOneTimeInitCallback};
    *
-   * @param runnable a callback to execute
+   * @param runnable
+   *     a callback to execute
    */
   public static void registerInitCallback(final Runnable runnable) {
     synchronized (lock) {
@@ -185,7 +189,8 @@ public final class InitVotes {
    * {@link #registerInitCallback(Runnable)} Callback(Runnable)}, callbacks registered with this method will only
    * be executed once and will never be used again if framework services are re-initialized.
    *
-   * @param runnable a callback to execute
+   * @param runnable
+   *     a callback to execute
    */
   public static void registerOneTimeInitCallback(final Runnable runnable) {
     synchronized (lock) {
@@ -197,7 +202,8 @@ public final class InitVotes {
    * Registers an {@link InitFailureListener} to monitor for initialization failures of the framework or its
    * components.
    *
-   * @param failureListener the instance of the {@link InitFailureListener} to be registered.
+   * @param failureListener
+   *     the instance of the {@link InitFailureListener} to be registered.
    */
   public static void registerInitFailureListener(final InitFailureListener failureListener) {
     initFailureListeners.add(failureListener);

@@ -65,7 +65,7 @@ public class CDI {
 
   public static final MessageCallback ROUTING_CALLBACK = new MessageCallback() {
     @Override
-    public void callback(Message message) {
+    public void callback(final Message message) {
       consumeEventFromMessage(message);
     }
   };
@@ -78,7 +78,7 @@ public class CDI {
    * Should only be called by bootstrapper for testing purposes.
    */
   public void __resetSubsystem() {
-    for (String eventType : new HashSet<String>(((ClientMessageBus) ErraiBus.get()).getAllRegisteredSubjects())) {
+    for (final String eventType : new HashSet<String>(((ClientMessageBus) ErraiBus.get()).getAllRegisteredSubjects())) {
       if (eventType.startsWith(CDI_SUBJECT_PREFIX)) {
         ErraiBus.get().unsubscribeAll(eventType);
       }
@@ -103,17 +103,16 @@ public class CDI {
    *
    * @return
    */
-  public static Set<String> getQualifiersPart(Annotation[] qualifiers) {
+  public static Set<String> getQualifiersPart(final Annotation[] qualifiers) {
     Set<String> qualifiersPart = null;
     if (qualifiers != null) {
-      for (Annotation qualifier : qualifiers) {
+      for (final Annotation qualifier : qualifiers) {
         if (qualifiersPart == null)
           qualifiersPart = new HashSet<String>(qualifiers.length);
 
         qualifiersPart.add(qualifier.annotationType().getName());
       }
     }
-  //  return qualifiersPart == null ? Collections.<String>singleton(Any.class.getName()) : qualifiersPart;
     return qualifiersPart == null ? Collections.<String>emptySet() : qualifiersPart;
 
   }
@@ -134,16 +133,14 @@ public class CDI {
       return;
     }
 
-    final Set<String> qualifiersPart = getQualifiersPart(qualifiers);
-
     final Map<String, Object> messageMap = new HashMap<String, Object>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
     messageMap.put(CDIProtocol.BeanType.name(), payload.getClass().getName());
     messageMap.put(CDIProtocol.BeanReference.name(), payload);
     messageMap.put(CDIProtocol.FromClient.name(), "1");
 
-    if (!qualifiersPart.isEmpty()) {
-      messageMap.put(CDIProtocol.Qualifiers.name(), qualifiersPart);
+    if (qualifiers != null && qualifiers.length > 0) {
+      messageMap.put(CDIProtocol.Qualifiers.name(), getQualifiersPart(qualifiers));
     }
 
     consumeEventFromMessage(CommandMessage.createWithParts(messageMap));
@@ -155,11 +152,10 @@ public class CDI {
   }
 
   public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback callback) {
-    List<MessageCallback> observerCallbacks = eventObservers.get(eventType);
-    if (observerCallbacks == null) {
-      eventObservers.put(eventType, observerCallbacks = new ArrayList<MessageCallback>());
+    if (!eventObservers.containsKey(eventType)) {
+      eventObservers.put(eventType, new ArrayList<MessageCallback>());
     }
-    observerCallbacks.add(callback);
+    eventObservers.get(eventType).add(callback);
 
     if (isRemoteCommunicationEnabled()) {
       MessageBuilder.createMessage()
@@ -179,11 +175,9 @@ public class CDI {
   }
 
   private static void unsubscribe(final String eventType, final AbstractCDIEventCallback callback) {
-    List<MessageCallback> observerCallbacks = eventObservers.get(eventType);
-    if (observerCallbacks != null) {
-      observerCallbacks.remove(callback);
-
-      if (observerCallbacks.isEmpty()) {
+    if (eventObservers.containsKey(eventType)) {
+      eventObservers.get(eventType).remove(callback);
+      if (eventObservers.get(eventType).isEmpty()) {
         eventObservers.remove(eventType);
       }
 
@@ -199,23 +193,21 @@ public class CDI {
   }
 
 
-
-  public static void consumeEventFromMessage(Message message) {
+  public static void consumeEventFromMessage(final Message message) {
     final String beanType = message.get(String.class, CDIProtocol.BeanType);
 
     _fireEvent(beanType, message);
 
     if (lookupTable.containsKey(beanType)) {
-      for (String superType : lookupTable.get(beanType)) {
+      for (final String superType : lookupTable.get(beanType)) {
         _fireEvent(superType, message);
       }
     }
   }
 
-  private static void _fireEvent(String beanType, Message message) {
-    List<MessageCallback> eventCallbacks = eventObservers.get(beanType);
-    if (eventCallbacks != null) {
-      for (MessageCallback callback : eventCallbacks) {
+  private static void _fireEvent(final String beanType, final Message message) {
+    if (eventObservers.containsKey(beanType)) {
+      for (final MessageCallback callback : eventObservers.get(beanType)) {
         fireIfNotFired(callback, message);
       }
     }
@@ -223,28 +215,27 @@ public class CDI {
 
   @SuppressWarnings("unchecked")
   private static void fireIfNotFired(final MessageCallback callback, final Message message) {
-    Map<Object, Object> alreadyFired = message.getResource(Map.class, CLIENT_ALREADY_FIRED_RESOURCE);
-    if (alreadyFired == null) {
-      message.setResource(CLIENT_ALREADY_FIRED_RESOURCE, alreadyFired = new IdentityHashMap<Object, Object>());
+    if (!message.hasResource(CLIENT_ALREADY_FIRED_RESOURCE)) {
+      message.setResource(CLIENT_ALREADY_FIRED_RESOURCE, new IdentityHashMap<Object, Object>());
     }
 
-    if (!alreadyFired.containsKey(callback)) {
+    if (!message.getResource(Map.class, CLIENT_ALREADY_FIRED_RESOURCE).containsKey(callback)) {
       callback.callback(message);
-      alreadyFired.put(callback, "");
+      message.getResource(Map.class, CLIENT_ALREADY_FIRED_RESOURCE).put(callback, "");
     }
   }
 
-  public static void addRemoteEventType(String remoteEvent) {
+  public static void addRemoteEventType(final String remoteEvent) {
     remoteEvents.add(remoteEvent);
   }
 
-  public static void addRemoteEventTypes(String[] remoteEvent) {
-    for (String s : remoteEvent) {
+  public static void addRemoteEventTypes(final String[] remoteEvent) {
+    for (final String s : remoteEvent) {
       addRemoteEventType(s);
     }
   }
 
-  public static void addPostInitTask(Runnable runnable) {
+  public static void addPostInitTask(final Runnable runnable) {
     if (active) {
       runnable.run();
     }
@@ -260,11 +251,11 @@ public class CDI {
   public static void activate() {
     if (!active) {
       active = true;
-      for (DeferredEvent o : deferredEvents) {
+      for (final DeferredEvent o : deferredEvents) {
         fireEvent(o.eventInstance, o.annotations);
       }
 
-      for (Runnable r : postInitTasks) {
+      for (final Runnable r : postInitTasks) {
         r.run();
       }
 
@@ -275,23 +266,18 @@ public class CDI {
     InitVotes.voteFor(CDI.class);
   }
 
-  public static Set<String> getAllObservedTypes() {
-    return Collections.unmodifiableSet(lookupTable.keySet());
+
+  static class DeferredEvent {
+    final Object eventInstance;
+    final Annotation[] annotations;
+
+    DeferredEvent(final Object eventInstance, final Annotation[] annotations) {
+      this.eventInstance = eventInstance;
+      this.annotations = annotations;
+    }
   }
-
-static class DeferredEvent {
-  final Object eventInstance;
-  final Annotation[] annotations;
-
-  DeferredEvent(Object eventInstance, Annotation[] annotations) {
-    this.eventInstance = eventInstance;
-    this.annotations = annotations;
-  }
-
-}
 
   private static boolean isRemoteCommunicationEnabled() {
     return ((ClientMessageBusImpl) ErraiBus.get()).isRemoteCommunicationEnabled();
   }
-
 }

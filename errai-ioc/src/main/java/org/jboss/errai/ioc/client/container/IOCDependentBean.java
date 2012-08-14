@@ -62,17 +62,23 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   @Override
   public T newInstance() {
     final CreationalContext context = new CreationalContext(beanManager, "javax.enterprise.context.Dependent");
-    final T t = creationalCallback.getInstance(context);
-    context.finish();
-    return t;
+    try {
+      return creationalCallback.getInstance(context);
+    }
+    finally {
+      context.finish();
+    }
   }
 
   @Override
   public T getInstance() {
     final CreationalContext context = new CreationalContext(beanManager, "javax.enterprise.context.Dependent");
-    final T t = getInstance(context);
-    context.finish();
-    return t;
+    try {
+      return getInstance(context);
+    }
+    finally {
+      context.finish();
+    }
   }
 
   @Override

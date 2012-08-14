@@ -203,11 +203,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getSendBuilder() {
-    final String endpoint = getApplicationRoot() + OUT_SERVICE_ENTRY_POINT;
-
     final RequestBuilder builder = new RequestBuilder(
         RequestBuilder.POST,
-        URL.encode(endpoint) + "?z=" + getNextRequestNumber()
+        URL.encode(getApplicationRoot() + OUT_SERVICE_ENTRY_POINT) + "?z=" + getNextRequestNumber()
     );
 
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -217,11 +215,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getReceiveBuilder() {
-    final String endpoint = getApplicationRoot() + IN_SERVICE_ENTRY_POINT;
-
     final RequestBuilder builder = new RequestBuilder(
         RequestBuilder.GET,
-        URL.encode(endpoint) + "?z=" + getNextRequestNumber()
+        URL.encode(getApplicationRoot() + IN_SERVICE_ENTRY_POINT) + "?z=" + getNextRequestNumber()
     );
 
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -434,9 +430,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void send(final Message message) {
-    message.setResource(RequestDispatcher.class.getName(), dispatcherProvider);
-    message.setResource("Session", JSONUtilCli.getClientSession());
-    message.commit();
+    message.setResource(RequestDispatcher.class.getName(), dispatcherProvider)
+        .setResource("Session", JSONUtilCli.getClientSession()).commit();
 
     try {
       if (message.hasPart(MessageParts.ToSubject)) {
@@ -650,7 +645,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
              * in response to our send, handle them now.
              */
             try {
-              procIncomingPayload(response);
+              processIncomingPayload(response);
             }
             catch (AssertionFailedError e) {
               throw e;
@@ -868,9 +863,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             LogUtil.log("received capabilities notice from server. supported capabilities of remote: "
                 + message.get(String.class, MessageParts.CapabilitiesFlags));
 
-            final String[] capabilities = message.get(String.class, MessageParts.CapabilitiesFlags).split(",");
-
-            for (final String capability : capabilities) {
+            for (final String capability : message.get(String.class, MessageParts.CapabilitiesFlags).split(",")) {
               switch (Capabilities.valueOf(capability)) {
                 case WebSockets:
                   webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
@@ -1255,19 +1248,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     try {
       LogUtil.log("sending initial handshake to remote bus");
 
-      final String initialMessage =
-          "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
-              " \"PriorityProcessing\":\"1\"}";
-
       final RequestBuilder initialRequest = getSendBuilder();
 
       initialRequest.setHeader("phase", "connection");
-      initialRequest.sendRequest(initialMessage, new RequestCallback() {
+      initialRequest.sendRequest("{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
+          " \"PriorityProcessing\":\"1\"}", new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {
           try {
             LogUtil.log("received response from initial handshake.");
-            procIncomingPayload(response);
+            processIncomingPayload(response);
             initializeMessagingBus();
           }
           catch (Exception e) {
@@ -1393,7 +1383,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       try {
-        procIncomingPayload(response);
+        processIncomingPayload(response);
         schedule();
       }
       catch (Throwable e) {
@@ -1453,18 +1443,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           return;
         }
 
-        final RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
-        loader.loadProxies(ClientMessageBusImpl.this);
+        ((RpcProxyLoader) GWT.create(RpcProxyLoader.class)).loadProxies(ClientMessageBusImpl.this);
+
         InitVotes.voteFor(RpcProxyLoader.class);
 
-        final Timer initialPollTimer = new Timer() {
+        new Timer() {
           @Override
           public void run() {
             performPoll();
           }
-        };
-
-        initialPollTimer.schedule(10);
+        }.schedule(10);
       }
     });
   }
@@ -1576,7 +1564,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws Exception
    *     -
    */
-  private void procIncomingPayload(final Response response) throws Exception {
+  private void processIncomingPayload(final Response response) throws Exception {
     procPayload(response.getText());
   }
 
@@ -1792,43 +1780,41 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Debugging functions.
    */
   private static void _displayStatusToLog() {
-    final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     LogUtil.displayDebuggerUtilityTitle("ErraiBus Status");
 
-    LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
+    LogUtil.nativeLog("Bus State              : " + (((ClientMessageBusImpl) ErraiBus.get()).initialized ? "Online/Federated" : "Disconnected"));
     LogUtil.nativeLog("");
-    LogUtil.nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
-    LogUtil.nativeLog("  Endpoint (RX)        : " + (bus.getReceiveBuilder().getUrl()));
-    LogUtil.nativeLog("  Endpoint (TX)        : " + (bus.getSendBuilder().getUrl()));
+    LogUtil.nativeLog("Comet Channel          : " + (((ClientMessageBusImpl) ErraiBus.get()).cometChannelOpen ? "Active" : "Offline"));
+    LogUtil.nativeLog("  Endpoint (RX)        : " + (((ClientMessageBusImpl) ErraiBus.get()).getReceiveBuilder().getUrl()));
+    LogUtil.nativeLog("  Endpoint (TX)        : " + (((ClientMessageBusImpl) ErraiBus.get()).getSendBuilder().getUrl()));
     LogUtil.nativeLog("");
-    LogUtil.nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
-    LogUtil.nativeLog("  Endpoint (RX/TX)     : " + (bus.webSocketUrl));
+    LogUtil.nativeLog("WebSocket Channel      : " + (((ClientMessageBusImpl) ErraiBus.get()).webSocketOpen ? "Active" : "Offline"));
+    LogUtil.nativeLog("  Endpoint (RX/TX)     : " + (((ClientMessageBusImpl) ErraiBus.get()).webSocketUrl));
     LogUtil.nativeLog("");
-    LogUtil.nativeLog("Total TXs              : " + (bus.txNumber));
-    LogUtil.nativeLog("Total RXs              : " + (bus.rxNumber));
+    LogUtil.nativeLog("Total TXs              : " + (((ClientMessageBusImpl) ErraiBus.get()).txNumber));
+    LogUtil.nativeLog("Total RXs              : " + (((ClientMessageBusImpl) ErraiBus.get()).rxNumber));
     LogUtil.nativeLog("");
     LogUtil.nativeLog("Endpoints");
-    LogUtil.nativeLog("  Remote (total)       : " + (bus.remotes.size()));
-    LogUtil.nativeLog("  Local (total)        : " + (bus.subscriptions.size()));
+    LogUtil.nativeLog("  Remote (total)       : " + (((ClientMessageBusImpl) ErraiBus.get()).remotes.size()));
+    LogUtil.nativeLog("  Local (total)        : " + (((ClientMessageBusImpl) ErraiBus.get()).subscriptions.size()));
 
     LogUtil.displaySeparator();
   }
 
   private static void _listAvailableServicesToLog() {
-    final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     LogUtil.displayDebuggerUtilityTitle("Service and Routing Table");
     LogUtil.nativeLog("[REMOTES]");
 
-    for (final String remoteName : bus.remotes.keySet()) {
+    for (final String remoteName : ((ClientMessageBusImpl) ErraiBus.get()).remotes.keySet()) {
       LogUtil.nativeLog(remoteName);
     }
 
     LogUtil.nativeLog("[LOCALS]");
 
-    for (final String localName : bus.subscriptions.keySet()) {
-      LogUtil.nativeLog(localName + " (" + bus.subscriptions.get(localName).size() + ")");
+    for (final String localName : ((ClientMessageBusImpl) ErraiBus.get()).subscriptions.keySet()) {
+      LogUtil.nativeLog(localName + " (" + ((ClientMessageBusImpl) ErraiBus.get()).subscriptions.get(localName).size() + ")");
     }
 
     LogUtil.displaySeparator();
@@ -1843,9 +1829,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       @Override
       public void onSuccess() {
-        final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
-        bus.ensureInitErrorDialog();
-        bus.errorDialog.show();
+        ((ClientMessageBusImpl) ErraiBus.get()).ensureInitErrorDialog();
+        ((ClientMessageBusImpl) ErraiBus.get()).errorDialog.show();
       }
     });
   }

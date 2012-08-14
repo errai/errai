@@ -44,281 +44,279 @@ package org.jboss.errai.common.client.util;
  */
 public enum TimeUnit {
   NANOSECONDS {
-    public long toNanos(long d) {
+    public long toNanos(final long d) {
       return d;
     }
 
-    public long toMicros(long d) {
-      return d / (C1 / C0);
+    public long toMicros(final long d) {
+      return d / (C1);
     }
 
-    public long toMillis(long d) {
-      return d / (C2 / C0);
+    public long toMillis(final long d) {
+      return d / (C2);
     }
 
-    public long toSeconds(long d) {
-      return d / (C3 / C0);
+    public long toSeconds(final long d) {
+      return d / (C3);
     }
 
-    public long toMinutes(long d) {
-      return d / (C4 / C0);
+    public long toMinutes(final long d) {
+      return d / (C4);
     }
 
-    public long toHours(long d) {
-      return d / (C5 / C0);
+    public long toHours(final long d) {
+      return d / (C5);
     }
 
-    public long toDays(long d) {
-      return d / (C6 / C0);
+    public long toDays(final long d) {
+      return d / (C6);
     }
 
-    public long convert(long d, TimeUnit u) {
+    public long convert(final long d, final TimeUnit u) {
       return u.toNanos(d);
     }
 
-    int excessNanos(long d, long m) {
+    int excessNanos(final long d, final long m) {
       return (int) (d - (m * C2));
     }
   },
   MICROSECONDS {
-    public long toNanos(long d) {
-      return x(d, C1 / C0, MAX / (C1 / C0));
+    public long toNanos(final long d) {
+      return x(d, C1, Long.MAX_VALUE / (C1));
     }
 
-    public long toMicros(long d) {
+    public long toMicros(final long d) {
       return d;
     }
 
-    public long toMillis(long d) {
+    public long toMillis(final long d) {
       return d / (C2 / C1);
     }
 
-    public long toSeconds(long d) {
+    public long toSeconds(final long d) {
       return d / (C3 / C1);
     }
 
-    public long toMinutes(long d) {
+    public long toMinutes(final long d) {
       return d / (C4 / C1);
     }
 
-    public long toHours(long d) {
+    public long toHours(final long d) {
       return d / (C5 / C1);
     }
 
-    public long toDays(long d) {
+    public long toDays(final long d) {
       return d / (C6 / C1);
     }
 
-    public long convert(long d, TimeUnit u) {
+    public long convert(final long d, final TimeUnit u) {
       return u.toMicros(d);
     }
 
-    int excessNanos(long d, long m) {
+    int excessNanos(final long d, final long m) {
       return (int) ((d * C1) - (m * C2));
     }
   },
   MILLISECONDS {
-    public long toNanos(long d) {
-      return x(d, C2 / C0, MAX / (C2 / C0));
+    public long toNanos(final long d) {
+      return x(d, C2, Long.MAX_VALUE / (C2));
     }
 
-    public long toMicros(long d) {
-      return x(d, C2 / C1, MAX / (C2 / C1));
+    public long toMicros(final long d) {
+      return x(d, C2 / C1, Long.MAX_VALUE / (C2 / C1));
     }
 
-    public long toMillis(long d) {
+    public long toMillis(final long d) {
       return d;
     }
 
-    public long toSeconds(long d) {
+    public long toSeconds(final long d) {
       return d / (C3 / C2);
     }
 
-    public long toMinutes(long d) {
+    public long toMinutes(final long d) {
       return d / (C4 / C2);
     }
 
-    public long toHours(long d) {
+    public long toHours(final long d) {
       return d / (C5 / C2);
     }
 
-    public long toDays(long d) {
+    public long toDays(final long d) {
       return d / (C6 / C2);
     }
 
-    public long convert(long d, TimeUnit u) {
+    public long convert(final long d, final TimeUnit u) {
       return u.toMillis(d);
     }
 
-    int excessNanos(long d, long m) {
+    int excessNanos(final long d, final long m) {
       return 0;
     }
   },
   SECONDS {
-    public long toNanos(long d) {
-      return x(d, C3 / C0, MAX / (C3 / C0));
+    public long toNanos(final long d) {
+      return x(d, C3, Long.MAX_VALUE / (C3));
     }
 
-    public long toMicros(long d) {
-      return x(d, C3 / C1, MAX / (C3 / C1));
+    public long toMicros(final long d) {
+      return x(d, C3 / C1, Long.MAX_VALUE / (C3 / C1));
     }
 
-    public long toMillis(long d) {
-      return x(d, C3 / C2, MAX / (C3 / C2));
+    public long toMillis(final long d) {
+      return x(d, C3 / C2, Long.MAX_VALUE / (C3 / C2));
     }
 
-    public long toSeconds(long d) {
+    public long toSeconds(final long d) {
       return d;
     }
 
-    public long toMinutes(long d) {
+    public long toMinutes(final long d) {
       return d / (C4 / C3);
     }
 
-    public long toHours(long d) {
+    public long toHours(final long d) {
       return d / (C5 / C3);
     }
 
-    public long toDays(long d) {
+    public long toDays(final long d) {
       return d / (C6 / C3);
     }
 
-    public long convert(long d, TimeUnit u) {
+    public long convert(final long d, final TimeUnit u) {
       return u.toSeconds(d);
     }
 
-    int excessNanos(long d, long m) {
+    int excessNanos(final long d, final long m) {
       return 0;
     }
   },
   MINUTES {
-    public long toNanos(long d) {
-      return x(d, C4 / C0, MAX / (C4 / C0));
+    public long toNanos(final long d) {
+      return x(d, C4, Long.MAX_VALUE / (C4));
     }
 
-    public long toMicros(long d) {
-      return x(d, C4 / C1, MAX / (C4 / C1));
+    public long toMicros(final long d) {
+      return x(d, C4 / C1, Long.MAX_VALUE / (C4 / C1));
     }
 
-    public long toMillis(long d) {
-      return x(d, C4 / C2, MAX / (C4 / C2));
+    public long toMillis(final long d) {
+      return x(d, C4 / C2, Long.MAX_VALUE / (C4 / C2));
     }
 
-    public long toSeconds(long d) {
-      return x(d, C4 / C3, MAX / (C4 / C3));
+    public long toSeconds(final long d) {
+      return x(d, C4 / C3, Long.MAX_VALUE / (C4 / C3));
     }
 
-    public long toMinutes(long d) {
+    public long toMinutes(final long d) {
       return d;
     }
 
-    public long toHours(long d) {
+    public long toHours(final long d) {
       return d / (C5 / C4);
     }
 
-    public long toDays(long d) {
+    public long toDays(final long d) {
       return d / (C6 / C4);
     }
 
-    public long convert(long d, TimeUnit u) {
+    public long convert(final long d, final TimeUnit u) {
       return u.toMinutes(d);
     }
 
-    int excessNanos(long d, long m) {
+    int excessNanos(final long d, final long m) {
       return 0;
     }
   },
   HOURS {
-    public long toNanos(long d) {
-      return x(d, C5 / C0, MAX / (C5 / C0));
+    public long toNanos(final long d) {
+      return x(d, C5, Long.MAX_VALUE / (C5));
     }
 
-    public long toMicros(long d) {
-      return x(d, C5 / C1, MAX / (C5 / C1));
+    public long toMicros(final long d) {
+      return x(d, C5 / C1, Long.MAX_VALUE / (C5 / C1));
     }
 
-    public long toMillis(long d) {
-      return x(d, C5 / C2, MAX / (C5 / C2));
+    public long toMillis(final long d) {
+      return x(d, C5 / C2, Long.MAX_VALUE / (C5 / C2));
     }
 
-    public long toSeconds(long d) {
-      return x(d, C5 / C3, MAX / (C5 / C3));
+    public long toSeconds(final long d) {
+      return x(d, C5 / C3, Long.MAX_VALUE / (C5 / C3));
     }
 
-    public long toMinutes(long d) {
-      return x(d, C5 / C4, MAX / (C5 / C4));
+    public long toMinutes(final long d) {
+      return x(d, C5 / C4, Long.MAX_VALUE / (C5 / C4));
     }
 
-    public long toHours(long d) {
+    public long toHours(final long d) {
       return d;
     }
 
-    public long toDays(long d) {
+    public long toDays(final long d) {
       return d / (C6 / C5);
     }
 
-    public long convert(long d, TimeUnit u) {
+    public long convert(final long d, final TimeUnit u) {
       return u.toHours(d);
     }
 
-    int excessNanos(long d, long m) {
+    int excessNanos(final long d, final long m) {
       return 0;
     }
   },
   DAYS {
-    public long toNanos(long d) {
-      return x(d, C6 / C0, MAX / (C6 / C0));
+    public long toNanos(final long d) {
+      return x(d, C6, Long.MAX_VALUE / (C6));
     }
 
-    public long toMicros(long d) {
-      return x(d, C6 / C1, MAX / (C6 / C1));
+    public long toMicros(final long d) {
+      return x(d, C6 / C1, Long.MAX_VALUE / (C6 / C1));
     }
 
-    public long toMillis(long d) {
-      return x(d, C6 / C2, MAX / (C6 / C2));
+    public long toMillis(final long d) {
+      return x(d, C6 / C2, Long.MAX_VALUE / (C6 / C2));
     }
 
-    public long toSeconds(long d) {
-      return x(d, C6 / C3, MAX / (C6 / C3));
+    public long toSeconds(final long d) {
+      return x(d, C6 / C3, Long.MAX_VALUE / (C6 / C3));
     }
 
-    public long toMinutes(long d) {
-      return x(d, C6 / C4, MAX / (C6 / C4));
+    public long toMinutes(final long d) {
+      return x(d, C6 / C4, Long.MAX_VALUE / (C6 / C4));
     }
 
-    public long toHours(long d) {
-      return x(d, C6 / C5, MAX / (C6 / C5));
+    public long toHours(final long d) {
+      return x(d, C6 / C5, Long.MAX_VALUE / (C6 / C5));
     }
 
-    public long toDays(long d) {
+    public long toDays(final long d) {
       return d;
     }
 
-    public long convert(long d, TimeUnit u) {
+    public long convert(final long d, final TimeUnit u) {
       return u.toDays(d);
     }
 
-    int excessNanos(long d, long m) {
+    int excessNanos(final long d, final long m) {
       return 0;
     }
   };
 
   // Handy constants for conversion methods
-  static final long C0 = 1L;
-  static final long C1 = C0 * 1000L;
+  static final long C1 = 1000L;
   static final long C2 = C1 * 1000L;
   static final long C3 = C2 * 1000L;
   static final long C4 = C3 * 60L;
   static final long C5 = C4 * 60L;
   static final long C6 = C5 * 24L;
 
-  static final long MAX = Long.MAX_VALUE;
 
   /**
    * Scale d by m, checking for overflow.
    * This has a short name to make above code more readable.
    */
-  static long x(long d, long m, long over) {
+  static long x(final long d, final long m, final long over) {
     if (d > over) return Long.MAX_VALUE;
     if (d < -over) return Long.MIN_VALUE;
     return d * m;
@@ -348,7 +346,7 @@ public enum TimeUnit {
    *         or <tt>Long.MIN_VALUE</tt> if conversion would negatively
    *         overflow, or <tt>Long.MAX_VALUE</tt> if it would positively overflow.
    */
-  public long convert(long sourceDuration, TimeUnit sourceUnit) {
+  public long convert(final long sourceDuration, final TimeUnit sourceUnit) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -361,7 +359,7 @@ public enum TimeUnit {
    *         overflow, or <tt>Long.MAX_VALUE</tt> if it would positively overflow.
    * @see #convert
    */
-  public long toNanos(long duration) {
+  public long toNanos(final long duration) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -374,7 +372,7 @@ public enum TimeUnit {
    *         overflow, or <tt>Long.MAX_VALUE</tt> if it would positively overflow.
    * @see #convert
    */
-  public long toMicros(long duration) {
+  public long toMicros(final long duration) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -387,7 +385,7 @@ public enum TimeUnit {
    *         overflow, or <tt>Long.MAX_VALUE</tt> if it would positively overflow.
    * @see #convert
    */
-  public long toMillis(long duration) {
+  public long toMillis(final long duration) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -400,7 +398,7 @@ public enum TimeUnit {
    *         overflow, or <tt>Long.MAX_VALUE</tt> if it would positively overflow.
    * @see #convert
    */
-  public long toSeconds(long duration) {
+  public long toSeconds(final long duration) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -414,7 +412,7 @@ public enum TimeUnit {
    * @see #convert
    * @since 1.6
    */
-  public long toMinutes(long duration) {
+  public long toMinutes(final long duration) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -428,7 +426,7 @@ public enum TimeUnit {
    * @see #convert
    * @since 1.6
    */
-  public long toHours(long duration) {
+  public long toHours(final long duration) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -440,7 +438,7 @@ public enum TimeUnit {
    * @see #convert
    * @since 1.6
    */
-  public long toDays(long duration) {
+  public long toDays(final long duration) {
     throw new RuntimeException("abstract method not implemented");
   }
 
@@ -461,9 +459,7 @@ public enum TimeUnit {
    * @param timeout
    * @throws InterruptedException
    */
-  public void timedWait(Object obj, long timeout) {
+  public void timedWait(final Object obj, final long timeout) {
     throw new RuntimeException("not supported");
   }
-
-
 }
