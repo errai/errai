@@ -34,7 +34,7 @@ public class BindingTemplate extends Composite {
   private TextBox date;
 
   private final Model model;
-
+  
   @Inject
   public BindingTemplate(@AutoBound DataBinder<Model> binder) {
     model = binder.getModel();

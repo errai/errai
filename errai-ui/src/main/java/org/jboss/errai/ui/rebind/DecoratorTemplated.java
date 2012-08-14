@@ -360,14 +360,16 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * In case of constructor injection, search for the data binder parameter annotated with @AutoBound
      */
     Statement dataBinderRef = null;
+    MetaClass dataModelType = null;
     BeanMetric beanMetric = InjectUtil.analyzeBean(ctx.getInjectionContext(), ctx.getEnclosingType());
     MetaConstructor mc = beanMetric.getInjectorConstructor();
     if (mc != null) {
       for (MetaParameter mp : mc.getParameters()) {
         if (mp.getType().getErased().isAssignableTo(MetaClassFactory.get(DataBinder.class))
             && mp.isAnnotationPresent(AutoBound.class)) {
+          dataModelType = (MetaClass) mp.getType().getParameterizedType().getTypeParameters()[0];
           if (dataBinderRef != null) {
-            throw new GenerationException("Multiple @AutoBound data binders found in constructor of " + 
+            throw new GenerationException("Multiple @AutoBound data binders found in constructor of " +
                 mc.getDeclaringClass());
           }
           dataBinderRef = ctx.getInjectionContext().getInlineBeanReference(mp);
@@ -376,22 +378,26 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
 
     /*
-     * Search for data binder fields annotated with @AutoBound, in case no data binder was injected into the constructor
+     * Search for data binder fields annotated with @AutoBound
      */
-    if (dataBinderRef == null) {
-      MetaField dataBinderField = null;
-      for (MetaField field : ctx.getInjector().getInjectedType().getFields()) {
-        if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))
+    MetaField dataBinderField = null;
+    for (MetaField field : ctx.getInjector().getInjectedType().getFields()) {
+      if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))
             && field.isAnnotationPresent(AutoBound.class)) {
-          if (dataBinderField != null) {
-            throw new GenerationException("Multiple @AutoBound data binder fields found in class " 
+        if (dataBinderField != null) {
+          throw new GenerationException("Multiple @AutoBound data binder fields found in class "
                 + ctx.getInjector().getInjectedType());
-          }
-          dataBinderField = field;
-          dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
+        }
+        if (dataBinderRef != null) {
+          throw new GenerationException(
+              "Multiple @AutoBound data binders found (check constructors and fields) in class "
+                  + ctx.getInjector().getInjectedType());
+        }
+        dataModelType = (MetaClass) field.getType().getParameterizedType().getTypeParameters()[0];
+        dataBinderField = field;
+        dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
                   PrivateAccessUtil.getPrivateFieldInjectorName(dataBinderField),
                   Variable.get(ctx.getInjector().getInstanceVarName()));
-        }
       }
     }
 
@@ -424,18 +430,32 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     /*
      * Bind each widget if data binder is found and has been initialized.
      */
-    if (dataBinderRef != null) {
-      BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
-      for (Entry<String, Statement> dataField : dataFields.entrySet()) {
-        MetaField field = ctx.getType().getField(dataField.getKey());
-        if (field.isAnnotationPresent(Bound.class)) {
-           Bound bound = field.getAnnotation(Bound.class); 
-           String property = bound.property().equals("") ? dataField.getKey() : bound.property();
-           Statement converter = 
-             bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
-           binderBlock.append(Stmt.loadVariable("binder").invoke("bind", dataField.getValue(), property, converter));
+    BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
+    for (Entry<String, Statement> dataField : dataFields.entrySet()) {
+      MetaField field = ctx.getType().getField(dataField.getKey());
+      if (field.isAnnotationPresent(Bound.class)) {
+        Bound bound = field.getAnnotation(Bound.class);
+        if (dataBinderRef != null) {
+          String property = bound.property().equals("") ? dataField.getKey() : bound.property();
+          // Check if bound property exists in data model type
+          if (!dataModelType.getBeanDescriptor().getProperties().contains(property)) {
+            throw new GenerationException("Invalid binding of DataField " + dataField.getKey() + " in class "
+                + ctx.getInjector().getInjectedType() + "! Property with name " + property + " not found in class "
+                + dataModelType);
+          }
+
+          Statement converter =
+              bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
+          binderBlock.append(Stmt.loadVariable("binder").invoke("bind", dataField.getValue(), property, converter));
+        }
+        else {
+          throw new GenerationException("No @AutoBound data binder found for @Bound @DataField " + dataField.getKey()
+              + " in class " + ctx.getInjector().getInjectedType());
         }
       }
+    }
+
+    if (dataBinderRef != null) {
       builder.append(binderBlock
               .finish()
               .else_()
