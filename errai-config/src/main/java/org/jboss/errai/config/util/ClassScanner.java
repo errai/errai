@@ -9,8 +9,11 @@ import org.jboss.errai.config.rebind.EnvUtil;
 import org.mvel2.util.NullType;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 
@@ -61,16 +64,34 @@ public final class ClassScanner {
     else {
       excludePattern = null;
     }
+    final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    final Set<MetaClass> result = new HashSet<MetaClass>();
-    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-      if (metaClass.isAnnotationPresent(annotation)) {
-        _addIfMatches(result, metaClass, packages, excludePattern);
+    final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
+      @Override
+      public void run() {
+
+        for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+          if (metaClass.isAnnotationPresent(annotation)) {
+            _addIfMatches(result, metaClass, packages, excludePattern);
+          }
+        }
       }
-    }
+    });
 
-    for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-      _addIfMatches(result, MetaClassFactory.get(cls), packages, excludePattern);
+    final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
+      @Override
+      public void run() {
+        for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
+          _addIfMatches(result, MetaClassFactory.get(cls), packages, excludePattern);
+        }
+      }
+    });
+
+    try {
+      factoryFuture.get();
+      reflectionsFuture.get();
+    }
+    catch (Exception ignored) {
     }
 
     return result;
@@ -106,24 +127,46 @@ public final class ClassScanner {
 
   public static Set<MetaClass> getSubTypesOf(final MetaClass metaClass) {
     final MetaClass root = metaClass.getErased();
-    final Set<MetaClass> result = new HashSet<MetaClass>();
-    for (final MetaClass mc : MetaClassFactory.getAllCachedClasses()) {
-      if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
+    final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
+
+    final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
+      @Override
+      public void run() {
+        for (final MetaClass mc : MetaClassFactory.getAllCachedClasses()) {
+          if (!NullType.class.getName().equals(mc.getFullyQualifiedName())
               && !root.getFullyQualifiedName().equals(mc.getFullyQualifiedName())
               && root.isAssignableFrom(mc)) {
-        result.add(mc.getErased());
-      }
-    }
-
-    if (EnvUtil.isProdMode()) {
-      final Class<?> cls = root.asClass();
-      if (cls != null && !cls.equals(NullType.class)) {
-        for (final Class<?> c : ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls)) {
-          if (!c.isAnonymousClass() && !c.isSynthetic()) {
-            result.add(MetaClassFactory.get(c));
+            result.add(mc.getErased());
           }
         }
       }
+    });
+
+    if (EnvUtil.isProdMode()) {
+      final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
+        @Override
+        public void run() {
+          final Class<?> cls = root.asClass();
+          if (cls != null && !cls.equals(NullType.class)) {
+            for (final Class<?> c : ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls)) {
+              if (!c.isAnonymousClass() && !c.isSynthetic()) {
+                result.add(MetaClassFactory.get(c));
+              }
+            }
+          }
+        }
+      });
+      try {
+        reflectionsFuture.get();
+      }
+      catch (Exception ignored) {
+      }
+    }
+
+    try {
+      factoryFuture.get();
+    }
+    catch (Exception ignored) {
     }
 
     return result;

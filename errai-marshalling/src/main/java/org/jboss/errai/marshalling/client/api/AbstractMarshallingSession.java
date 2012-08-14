@@ -21,6 +21,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
@@ -33,17 +34,41 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   private final Map<String, Object> objectMap = new HashMap<String, Object>();
   private String assumedElementType = null;
   
-  protected AbstractMarshallingSession(MappingContext context) {
+  protected AbstractMarshallingSession(final MappingContext context) {
     this.context = Assert.notNull(context);
   }
 
+  private static final Marshaller<Object> NULL_MARSHALLER = new Marshaller<Object>() {
+    @Override
+    public Class<Object> getTypeHandled() {
+      return Object.class;
+    }
+
+    @Override
+    public Object demarshall(final EJValue o, final MarshallingSession ctx) {
+      return null;
+    }
+
+    @Override
+    public String marshall(final Object o, final MarshallingSession ctx) {
+      return "null";
+    }
+
+    @Override
+    public Object[] getEmptyArray() {
+      return new Object[0];
+    }
+  };
+
   @Override
-  public Marshaller<Object> getMarshallerInstance(String fqcn) {
+  public Marshaller<Object> getMarshallerInstance(final String fqcn) {
     Marshaller<Object> marshaller = context.getMarshaller(fqcn);
     if (marshaller == null) {
+      if (fqcn == null) {
+        return NULL_MARSHALLER;
+      }
       if (fqcn.startsWith("[")) {
-        String componentClassName = MarshallUtil.getComponentClassName(fqcn);
-        marshaller = context.getMarshaller(componentClassName);
+        marshaller = context.getMarshaller(MarshallUtil.getComponentClassName(fqcn));
         if (marshaller != null) {
           marshaller = new ArrayMarshallerWrapper(marshaller);
         }
@@ -58,41 +83,39 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   @Override
-  public boolean hasObject(String hashCode) {
+  public boolean hasObject(final String hashCode) {
     return objectMap.containsKey(hashCode);
   }
 
   @Override
-  public boolean hasObject(Object reference) {
+  public boolean hasObject(final Object reference) {
     return reference != null && objects.containsKey(reference);
   }
 
   @Override
-  public <T> T getObject(Class<T> type, String hashCode) {
+  public <T> T getObject(final Class<T> type, final String hashCode) {
     return (T) objectMap.get(hashCode);
   }
 
   @Override
-  public void recordObject(String hashCode, Object instance) {
-    if ("-1".equals(hashCode)) return;
+  public <T> T recordObject(final String hashCode, final T instance) {
+    if ("-1".equals(hashCode)) return instance;
 
     objectMap.put(hashCode, instance);
+
+    return instance;
   }
 
   @Override
-  public String getObject(Object reference) {
+  public String getObject(final Object reference) {
     Integer i = objects.get(reference);
-    String s;
 
     if (i == null) {
       objects.put(reference, (i = objects.size() + 1));
-      recordObject(s = i.toString(), reference);
-    }
-    else {
-      s = i.toString();
+      recordObject(i.toString(), reference);
     }
 
-    return s;
+    return i.toString();
   }
 
   @Override
@@ -101,7 +124,7 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   @Override
-  public void setAssumedElementType(String assumendElementType) {
+  public void setAssumedElementType(final String assumendElementType) {
      this.assumedElementType = assumendElementType;
   }
 }

@@ -28,16 +28,13 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 /**
  * This class is used to handle untyped Objects on the wire.
- * 
+ *
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ClientMarshaller
 @ServerMarshaller
 public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
-
-  private static final Object[] EMPTY_ARRAY = new Object[0];
-
   @Override
   public Class<Object> getTypeHandled() {
     return Object.class;
@@ -45,7 +42,7 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
 
   @Override
   public Object[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new Object[0];
   }
 
   public final Object demarshall(final Class<?> targetType, final EJValue o, final MarshallingSession ctx) {
@@ -53,7 +50,6 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
       return null;
     }
 
-    Marshaller<Object> marshaller = null;
     if (o.isObject() != null) {
       final EJObject jsObject = o.isObject();
       final EJValue ejEncType = jsObject.get(SerializationParts.ENCODED_TYPE);
@@ -66,11 +62,8 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
         if (targetType == null) {
           return MapMarshaller.INSTANCE.demarshall(o, ctx);
         }
-        else {
-          marshaller = ctx.getMarshallerInstance(targetType.getName());
-          if (marshaller != null) {
-            return marshaller.demarshall(o, ctx);
-          }
+        else if (ctx.getMarshallerInstance(targetType.getName()) != null) {
+          return ctx.getMarshallerInstance(targetType.getName()).demarshall(o, ctx);
         }
       }
 
@@ -78,13 +71,11 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
         return NumbersUtils.getNumber(encodedType, jsObject.get(SerializationParts.NUMERIC_VALUE));
       }
 
-      marshaller = ctx.getMarshallerInstance(encodedType);
-
-      if (marshaller == null) {
+      if (ctx.getMarshallerInstance(encodedType) == null) {
         throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + encodedType);
       }
 
-      return marshaller.demarshall(o, ctx);
+      return ctx.getMarshallerInstance(encodedType).demarshall(o, ctx);
     }
     else if (o.isArray() != null) {
       return new ListMarshaller().demarshall(o, ctx);
@@ -107,13 +98,11 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
       return NumbersUtils.qualifiedNumericEncoding(o);
     }
 
-    final Marshaller<Object> marshaller = MarshallUtil.getMarshaller(o, ctx);
-
-    if (marshaller == null) {
+    if (MarshallUtil.getMarshaller(o, ctx) == null) {
       throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + o.getClass().getName());
     }
 
-    return marshaller.marshall(o, ctx);
+    return MarshallUtil.getMarshaller(o, ctx).marshall(o, ctx);
   }
 
 }

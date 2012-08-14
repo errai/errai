@@ -61,8 +61,6 @@ public class IOCGenerator extends Generator {
 
       logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
-      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-
       // Generate class source code
       generateIOCBootstrapClass(logger, context);
     }

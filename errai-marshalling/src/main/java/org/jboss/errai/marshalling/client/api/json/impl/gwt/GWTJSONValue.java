@@ -25,29 +25,28 @@ import org.jboss.errai.marshalling.client.api.json.*;
 public class GWTJSONValue implements EJValue {
   final JSONValue value;
 
-  final static EJNull NULL_INSTANCE = new EJNull() {
-  };
-
-  public GWTJSONValue(JSONValue value) {
+  public GWTJSONValue(final JSONValue value) {
     this.value = value;
   }
 
   @Override
   public EJArray isArray() {
-    JSONArray array = value.isArray();
-    if (array != null) {
-      return new GWTJSONArray(array);
+    if (value.isArray() == null) {
+      return null;
     }
-    return null;
+    else {
+      return new GWTJSONArray(value.isArray());
+    }
   }
 
   @Override
   public EJNumber isNumber() {
-    JSONNumber num = value.isNumber();
-    if (num != null) {
-      return new GWTJSONNumber(num);
+    if (value.isNumber() == null) {
+      return null;
     }
-    return null;
+    else {
+      return new GWTJSONNumber(value.isNumber());
+    }
   }
 
   @Override
@@ -57,29 +56,32 @@ public class GWTJSONValue implements EJValue {
 
   @Override
   public EJObject isObject() {
-    JSONObject obj = value.isObject();
-    if (obj != null) {
-      return new GWTJSONObject(obj);
+    if (value.isObject() == null) {
+      return null;
     }
-    return null;
+    else {
+      return new GWTJSONObject(value.isObject());
+    }
   }
 
   @Override
   public EJBoolean isBoolean() {
-    JSONBoolean bool = value.isBoolean();
-    if (bool != null) {
-      return new GWTJSONBoolean(bool);
+    if (value.isBoolean() == null) {
+      return null;
     }
-    return null;
+    else {
+      return new GWTJSONBoolean(value.isBoolean());
+    }
   }
 
   @Override
   public EJString isString() {
-    JSONString str = value.isString();
-    if (str != null) {
-      return new GWTJSONString(str);
+    if (value.isString() == null) {
+      return null;
     }
-    return null;
+    else {
+      return new GWTJSONString(value.isString());
+    }
   }
 
   @Override

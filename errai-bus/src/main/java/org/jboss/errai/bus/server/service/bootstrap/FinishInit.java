@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.types.handlers.collections;
+package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.common.client.types.TypeHandler;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.util.ThreadUtil;
 
-import java.util.Collection;
-
-public class CollectionToDoubleArray implements TypeHandler<Collection, Double[]> {
-  public Double[] getConverted(Collection in) {
-    if (in == null) return null;
-    final Double[] newArray = new Double[in.size()];
-
-    int i = 0;
-    for (final Object o : in) {
-      newArray[i++] = ((Number) o).doubleValue();
-    }
-
-    return newArray;
+/**
+ * @author Mike Brock
+ */
+public class FinishInit implements BootstrapExecution {
+  @Override
+  public void execute(final BootstrapContext context) {
+//    if (EnvUtil.isProdMode()) {
+//      ThreadUtil.stopExecutor();
+//    }
   }
 }

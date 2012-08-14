@@ -64,9 +64,8 @@ public class IOCBeanManager {
                                                     final Annotation[] qualifiers,
                                                     final String name,
                                                     final boolean concrete) {
-    final IOCBeanDef<Object> bean = IOCSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, instance);
-    registerBean(bean);
-    return bean;
+
+    return registerBean(IOCSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, instance));
   }
 
   private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
@@ -75,9 +74,8 @@ public class IOCBeanManager {
                                                     final Annotation[] qualifiers,
                                                     final String name,
                                                     final boolean concrete) {
-    final IOCBeanDef<Object> bean = IOCDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback);
-    registerBean(bean);
-    return bean;
+
+    return registerBean(IOCDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback));
   }
 
   private void registerSingletonBean(final Class<Object> type,
@@ -104,12 +102,10 @@ public class IOCBeanManager {
 
   private void _registerNamedBean(final String name,
                                   final IOCBeanDef beanDef) {
-    List<IOCBeanDef> beans = namedBeans.get(name);
-    if (beans == null) {
-      namedBeans.put(name, beans = new ArrayList<IOCBeanDef>());
+    if (!namedBeans.containsKey(name)) {
+      namedBeans.put(name, new ArrayList<IOCBeanDef>());
     }
-
-    beans.add(beanDef);
+    namedBeans.get(name).add(beanDef);
   }
 
   /**
@@ -217,8 +213,7 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
-    final Object _target = getActualBeanReference(ref);
-    final CreationalContext creationalContext = creationalContextMap.get(_target);
+    final CreationalContext creationalContext = creationalContextMap.get(getActualBeanReference(ref));
 
     if (creationalContext == null) {
       return;
@@ -294,13 +289,12 @@ public class IOCBeanManager {
    * @param bean
    *     an {@link IOCSingletonBean} reference
    */
-  public void registerBean(final IOCBeanDef bean) {
-    List<IOCBeanDef> beans = beanMap.get(bean.getType());
-    if (beans == null) {
-      beanMap.put(bean.getType(), beans = new ArrayList<IOCBeanDef>());
+  public <T> IOCBeanDef<T> registerBean(final IOCBeanDef<T> bean) {
+    if (!beanMap.containsKey(bean.getType())) {
+      beanMap.put(bean.getType(), new ArrayList<IOCBeanDef>());
     }
-
-    beans.add(bean);
+    beanMap.get(bean.getType()).add(bean);
+    return bean;
   }
 
   /**
@@ -312,12 +306,11 @@ public class IOCBeanManager {
    * @return and unmodifiable list of all beans with the specified name.
    */
   public Collection<IOCBeanDef> lookupBeans(final String name) {
-    final List<IOCBeanDef> beans = namedBeans.get(name);
-    if (beans == null) {
+    if (!namedBeans.containsKey(name)) {
       return Collections.emptyList();
     }
     else {
-      return beans;
+      return namedBeans.get(name);
     }
   }
 

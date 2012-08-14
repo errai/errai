@@ -71,6 +71,7 @@ import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -148,14 +149,17 @@ public class IOCBootstrapGenerator {
         GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
       }
 
-
-
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
       gen = _generate(packageName, className);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms " + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
 
-      RebindUtils.writeStringToFile(cacheFile, gen);
+      ThreadUtil.execute(new Runnable() {
+        @Override
+        public void run() {
+          RebindUtils.writeStringToFile(cacheFile, gen);
+        }
+      });
 
       log.info("using IOC bootstrapping code at: " + cacheFile.getAbsolutePath());
 
@@ -222,9 +226,8 @@ public class IOCBootstrapGenerator {
           classStructureBuilder.privateField(fieldName, literalValue.getType())
               .modifiers(Modifier.Final).initializesWith(new Statement() {
             @Override
-            public String generate(Context context) {
-              final ArrayLiteral arrayLiteral = new ArrayLiteral(literalValue.getValue());
-              return arrayLiteral.getCanonicalString(context);
+            public String generate(final Context context) {
+              return new ArrayLiteral(literalValue.getValue()).getCanonicalString(context);
             }
 
             @Override
@@ -367,13 +370,13 @@ public class IOCBootstrapGenerator {
 
 
     final Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
-    for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
+    for (final Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
       PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs ? "jsni" : "reflection", classBuilder, f.getKey());
     }
 
     final Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
 
-    for (MetaMethod m : privateMethods) {
+    for (final MetaMethod m : privateMethods) {
       PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs ? "jsni" : "reflection", classBuilder, m);
     }
 

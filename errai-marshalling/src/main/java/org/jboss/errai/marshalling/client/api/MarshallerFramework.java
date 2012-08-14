@@ -82,7 +82,6 @@ public class MarshallerFramework implements EntryPoint {
   }
 
   public static class JSONMarshallingSession extends AbstractMarshallingSession {
-
     public JSONMarshallingSession() {
       super(new MappingContext() {
         @Override
@@ -104,10 +103,8 @@ public class MarshallerFramework implements EntryPoint {
 
     @Override
     public String determineTypeFor(String formatType, Object o) {
-      EJValue jsonValue = (EJValue) o;
-
-      if (jsonValue.isObject() != null) {
-        EJObject jsonObject = jsonValue.isObject();
+      if (((EJValue) o).isObject() != null) {
+        EJObject jsonObject = ((EJValue) o).isObject();
         if (jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
           return jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
         }
@@ -115,19 +112,19 @@ public class MarshallerFramework implements EntryPoint {
           return Map.class.getName();
         }
       }
-      else if (jsonValue.isString() != null) {
+      else if (((EJValue) o).isString() != null) {
         return String.class.getName();
       }
-      else if (jsonValue.isNumber() != null) {
+      else if (((EJValue) o).isNumber() != null) {
         return Double.class.getName();
       }
-      else if (jsonValue.isBoolean() != null) {
+      else if (((EJValue) o).isBoolean() != null) {
         return Boolean.class.getName();
       }
-      else if (jsonValue.isArray() != null) {
+      else if (((EJValue) o).isArray() != null) {
         return List.class.getName();
       }
-      else if (jsonValue.isNull()) {
+      else if (((EJValue) o).isNull()) {
         return null;
       }
       throw new RuntimeException("unknown type: cannot reverse map value to concrete Java type: " + o);

@@ -50,19 +50,16 @@ public class Container implements EntryPoint {
 
       new IOCBeanManagerLifecycle().resetBeanManager();
 
-      final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-
       log("IOC bootstrapper successfully initialized.");
 
-      final BootstrapperInjectionContext ctx = bootstrapper.bootstrapContainer();
+      injectionContext = ((Bootstrapper) GWT.create(Bootstrapper.class)).bootstrapContainer();
+
       log("IOC container bootstrapped.");
 
-      ctx.getRootContext().finish();
-      log(ctx.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
+      injectionContext.getRootContext().finish();
+      log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
 
       InitVotes.voteFor(Container.class);
-
-      injectionContext = ctx;
 
       declareDebugFunction();
 

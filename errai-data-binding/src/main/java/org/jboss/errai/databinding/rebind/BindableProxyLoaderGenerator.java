@@ -35,6 +35,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
@@ -87,12 +88,19 @@ public class BindableProxyLoaderGenerator extends Generator {
   }
 
   private String generate(final GeneratorContext context, final String className) {
-    File fileCacheDir = RebindUtils.getErraiCacheDir();
-    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+    final File fileCacheDir = RebindUtils.getErraiCacheDir();
+    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
     log.info("generating bindable proxy loader class.");
-    String gen = generate(context);
-    RebindUtils.writeStringToFile(cacheFile, gen);
+    final String gen = generate(context);
+
+    ThreadUtil.execute(new Runnable() {
+      @Override
+      public void run() {
+        RebindUtils.writeStringToFile(cacheFile, gen);
+      }
+    });
+
 
     return gen;
   }

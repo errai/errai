@@ -182,9 +182,9 @@ public class QuickDeps {
     }
 
     public String nextToken() {
+      char c;
       for (; i < expr.length(); i++) {
-        char c = expr.charAt(i);
-        switch (c) {
+        switch (c = expr.charAt(i)) {
           case '"':
           case '\'':
             if (i < expr.length()) {

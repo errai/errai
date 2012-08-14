@@ -50,7 +50,6 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
   public T doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     final EJObject obj = o.isObject();
     
-    T val = null;
     if (obj != null) {
       final String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
       if (ctx.hasObject(objId)) {
@@ -58,31 +57,29 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
         return (T) ctx.getObject(Object.class, objId);
       }
 
-      val = delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
-      ctx.recordObject(objId, val);
+      return ctx.recordObject(objId, delegate.demarshall(obj.get(SerializationParts.QUALIFIED_VALUE), ctx));
     }
     else {
       // This is only to support Jackson's char[] and byte[] representations
       if (o.isString() != null) {
         if (getTypeHandled().equals(byte.class)) {
-          val = (T) Base64Util.decode(o.isString().stringValue());
+          return (T) Base64Util.decode(o.isString().stringValue());
         }
         else if (getTypeHandled().equals(char.class)) {
-          val = (T) o.isString().stringValue().toCharArray();
+          return (T) o.isString().stringValue().toCharArray();
         }
       }
     }
-    return val;
+    return null;
   }
 
   @Override
   public String doNotNullMarshall(final T o, final MarshallingSession ctx) {
     final boolean isNew = !ctx.hasObject(o);
-    final String objId = ctx.getObject(o);
 
     final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
             .append(o.getClass().getName()).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")
-            .append(objId).append("\"");
+            .append(ctx.getObject(o)).append("\"");
 
     if (!isNew) {
       return buf.append("}").toString();

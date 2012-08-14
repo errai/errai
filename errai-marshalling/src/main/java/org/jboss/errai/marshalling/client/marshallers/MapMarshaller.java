@@ -64,10 +64,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
   }
 
   protected T doDemarshall(final T impl, final EJValue o, final MarshallingSession ctx) {
-    final EJObject jsonObject = o.isObject();
-
-    Object demarshalledKey, demarshalledValue;
-    for (final String key : jsonObject.keySet()) {
+    Object demarshalledKey;
+    for (final String key : o.isObject().keySet()) {
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
         final EJValue val = ParserFactory.get().parse(key.substring(SerializationParts.EMBEDDED_JSON.length()));
         demarshalledKey = ctx.getMarshallerInstance(ctx.determineTypeFor(null, val)).demarshall(val, ctx);
@@ -76,14 +74,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         demarshalledKey = key;
       }
 
-      final EJValue v = jsonObject.get(key);
-      if (!v.isNull()) {
-        demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
-      }
-      else {
-        demarshalledValue = null;
-      }
-      impl.put(demarshalledKey, demarshalledValue);
+      final EJValue v = o.isObject().get(key);
+      impl.put(demarshalledKey, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
     }
     return impl;
   }
@@ -93,47 +85,44 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
   public String marshall(final T o, final MarshallingSession ctx) {
     final StringBuilder buf = new StringBuilder();
     buf.append("{");
-    Object key, val;
     int i = 0;
     for (final Map.Entry<Object, Object> entry : o.entrySet()) {
       if (i++ > 0) {
         buf.append(",");
       }
-      key = entry.getKey();
-      val = entry.getValue();
 
       final Marshaller<Object> keyMarshaller;
       final Marshaller<Object> valueMarshaller;
-      if (key instanceof String) {
-        buf.append("\"").append(key).append("\"");
+      if (entry.getKey() instanceof String) {
+        buf.append("\"").append(entry.getKey()).append("\"");
       }
-      else if (key != null) {
-        if (key instanceof Number || key instanceof Boolean || key instanceof Character) {
-          keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(key);
+      else if (entry.getKey() != null) {
+        if (entry.getKey() instanceof Number || entry.getKey() instanceof Boolean || entry.getKey() instanceof Character) {
+          keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getKey());
         }
         else {
-          keyMarshaller = MarshallUtil.getMarshaller(key, ctx);
+          keyMarshaller = MarshallUtil.getMarshaller(entry.getKey(), ctx);
         }
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-                .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(key, ctx)))
+                .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(entry.getKey(), ctx)))
                 .append("\"");
       }
 
       buf.append(":");
 
-      if (val == null) {
+      if (entry.getValue() == null) {
         buf.append("null");
       }
       else {
-        if ((val instanceof Number && !(val instanceof BigInteger || val instanceof BigDecimal))
-                || val instanceof Boolean || val instanceof Character) {
+        if ((entry.getValue() instanceof Number && !(entry.getValue() instanceof BigInteger || entry.getValue() instanceof BigDecimal))
+                || entry.getValue() instanceof Boolean || entry.getValue() instanceof Character) {
 
-          valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(val);
+          valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getValue());
         }
         else {
-          valueMarshaller = MarshallUtil.getMarshaller(val, ctx);
+          valueMarshaller = MarshallUtil.getMarshaller(entry.getValue(), ctx);
         }
-        buf.append(valueMarshaller.marshall(val, ctx));
+        buf.append(valueMarshaller.marshall(entry.getValue(), ctx));
       }
     }
 

@@ -43,11 +43,11 @@ public class BusTools {
     RESERVED_SERVICES = Collections.unmodifiableSet(s);
   }
 
-  public static boolean isReservedName(String name) {
+  public static boolean isReservedName(final String name) {
     return RESERVED_SERVICES.contains(name);
   }
   
-  public static String encodeMessage(Message message) {
+  public static String encodeMessage(final Message message) {
     if (message instanceof HasEncoded) {
       return ((HasEncoded) message).getEncoded();
     }
@@ -56,8 +56,8 @@ public class BusTools {
     }
   }
   
-  public static String encodeMessages(Queue<Message> messages) {
-    StringBuilder sbuf = new StringBuilder("[");
+  public static String encodeMessages(final Queue<Message> messages) {
+    final StringBuilder sbuf = new StringBuilder("[");
     boolean first = true;
     Message m;
     while ((m = messages.poll()) != null) {

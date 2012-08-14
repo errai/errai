@@ -31,7 +31,7 @@ public class TypeHandlerFactory {
     /**
      * Declare all the default coercion handlers.
      */
-    Map<Class, TypeHandler> collectionHandlers = new HashMap<Class, TypeHandler>();
+    final Map<Class, TypeHandler> collectionHandlers = new HashMap<Class, TypeHandler>();
     collectionHandlers.put(Object[].class, new CollectionToObjArray());
     collectionHandlers.put(String[].class, new CollectionToStringArray());
     collectionHandlers.put(Integer[].class, new CollectionToIntArray());
@@ -45,7 +45,7 @@ public class TypeHandlerFactory {
 
     handlers.put(Collection.class, collectionHandlers);
 
-    Map<Class, TypeHandler> numberHandlers = new HashMap<Class, TypeHandler>();
+    final Map<Class, TypeHandler> numberHandlers = new HashMap<Class, TypeHandler>();
     numberHandlers.put(Integer.class, new NumberToInt());
     numberHandlers.put(Long.class, new NumberToLong());
     numberHandlers.put(Short.class, new NumberToShort());
@@ -78,18 +78,19 @@ public class TypeHandlerFactory {
     inheritanceMap.put(List.class, Collection.class);
 
     addHandler(String.class, Character.class, new TypeHandler<String, Character>() {
-      public Character getConverted(String in) {
+      public Character getConverted(final String in) {
         return in.charAt(0);
       }
     });
   }
 
-  public static Map<Class, TypeHandler> getHandler(Class from) {
-    Map<Class, TypeHandler> toHandlers = handlers.get(from);
-    if (toHandlers == null && inheritanceMap.containsKey(from)) {
-      toHandlers = getHandler(inheritanceMap.get(from));
+  public static Map<Class, TypeHandler> getHandler(final Class from) {
+    if (!handlers.containsKey(from) && inheritanceMap.containsKey(from)) {
+      return getHandler(inheritanceMap.get(from));
     }
-    return toHandlers;
+    else {
+      return handlers.get(from);
+    }
   }
 
   public static <T> T convert(final Object value, final Class<T> to) {
@@ -99,26 +100,26 @@ public class TypeHandlerFactory {
 
   public static <T> T convert(final Class from, final Class<T> to, final Object value) {
     if (value.getClass() == to) return (T) value;
-    Map<Class, TypeHandler> toHandlers = getHandler(from);
+    final Map<Class, TypeHandler> toHandlers = getHandler(from);
     if (toHandlers == null) {
       if (value instanceof String) {
         /**
          * We assume that this may be an enum type.  It may not be, but we try to decode it
          * as such.
          */
-        TypeHandler<String, T> th = new TypeHandler<String, T>() {
-          public T getConverted(String in) {
-            return (T) Enum.valueOf((Class<? extends Enum>) to, in);
-          }
-        };
         try {
-          T val = th.getConverted(String.valueOf(value));
+          T val = (T) Enum.valueOf((Class<? extends Enum>) to, (String) value);
 
           /**
            * If we successfully decoded an enum, then we cache this handler for future
            * use.
            */
-          addHandler(from, to, th);
+          addHandler(from, to, new TypeHandler<String, T>() {
+            public T getConverted(final String in) {
+              return (T) Enum.valueOf((Class<? extends Enum>) to, in);
+            }
+          });
+
           return val;
         }
         catch (Exception e) {
@@ -131,50 +132,16 @@ public class TypeHandlerFactory {
 
       return (T) value;
     }
-    TypeHandler handler = toHandlers.get(to);
-    if (handler == null) {
+
+    if (toHandlers.containsKey(to)) {
+      return (T) toHandlers.get(to).getConverted(value);
+    }
+    else {
       return (T) value;
     }
-    return (T) handler.getConverted(value);
   }
 
-  private static final Map<Class, Map<Class, Boolean>> assignableCache = new HashMap<Class, Map<Class, Boolean>>();
-
-  public static Boolean checkCache(Class from, Class to) {
-    synchronized (assignableCache) {
-      Map<Class, Boolean> assignableTable = assignableCache.get(from);
-      if (assignableTable != null) {
-        return assignableTable.get(to);
-      }
-      else {
-        return null;
-      }
-    }
-  }
-
-  public static boolean recordCache(Class from, Class to, boolean result) {
-    synchronized (assignableCache) {
-      Map<Class, Boolean> assignableTable = assignableCache.get(from);
-      if (assignableTable == null) {
-        assignableCache.put(from, assignableTable = new HashMap<Class, Boolean>());
-      }
-      assignableTable.put(to, result);
-      return result;
-    }
-  }
-
-  public static boolean gwtSafe_IsAssignableFrom(Class from, Class to) {
-    Boolean cache = checkCache(from, to);
-    if (cache != null) return cache;
-
-    do {
-      if (from == to) return recordCache(from, to, true);
-    } while ((from = from.getSuperclass()) != null);
-
-    return recordCache(from, to, false);
-  }
-
-  public static void addHandler(Class from, Class to, TypeHandler handler) {
+  public static void addHandler(final Class from, final Class to, final TypeHandler handler) {
     if (!handlers.containsKey(from)) {
       handlers.put(from, new HashMap<Class, TypeHandler>());
     }

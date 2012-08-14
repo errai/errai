@@ -30,7 +30,7 @@ public class ClientTaskManager implements TaskManager {
   public void execute(final Runnable task) {
     GWT.runAsync(new RunAsyncCallback() {
       @Override
-      public void onFailure(Throwable reason) {
+      public void onFailure(final Throwable reason) {
         GWT.log("failed async execution", reason);
       }
 
@@ -42,14 +42,14 @@ public class ClientTaskManager implements TaskManager {
   }
 
   @Override
-  public AsyncTask scheduleRepeating(TimeUnit unit, int interval, final Runnable userTask) {
+  public AsyncTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable userTask) {
     final TaskManagerTimer timer = new TaskManagerTimer(userTask);
     timer.scheduleRepeating((int) unit.toMillis(interval));
     return timer.asyncTask;
   }
 
   @Override
-  public AsyncTask schedule(TimeUnit unit, int interval, final Runnable userTask) {
+  public AsyncTask schedule(final TimeUnit unit, final int interval, final Runnable userTask) {
     final TaskManagerTimer timer = new TaskManagerTimer(userTask);
     timer.schedule((int) unit.toMillis(interval));
     return timer.asyncTask;
@@ -101,8 +101,8 @@ public class ClientTaskManager implements TaskManager {
      * @param timer The timer that will execute class. Not null.
      * @return A new AsyncTask that relates to {@code task}.
      */
-    public static ClientAsyncTask create(Runnable task, TaskManagerTimer timer) {
-      ClientAsyncTask t = new ClientAsyncTask(task, timer);
+    public static ClientAsyncTask create(final Runnable task, final TaskManagerTimer timer) {
+      final ClientAsyncTask t = new ClientAsyncTask(task, timer);
       if (task instanceof HasAsyncTaskRef) {
         ((HasAsyncTaskRef) task).setAsyncTask(t);
       }
@@ -110,13 +110,13 @@ public class ClientTaskManager implements TaskManager {
     }
 
     @Override
-    public void cancel(boolean interrupt) {
+    public void cancel(final boolean interrupt) {
       timer.cancel();
       finishUp();
     }
 
     @Override
-    public void setExitHandler(Runnable runnable) {
+    public void setExitHandler(final Runnable runnable) {
       if (exitHandler != null) {
         throw new IllegalStateException("Exit handler is already set to " + exitHandler);
       }
@@ -161,14 +161,14 @@ public class ClientTaskManager implements TaskManager {
   private final class TaskManagerTimer extends Timer {
 
     private SchedulingMode mode;
-    private ClientAsyncTask asyncTask;
+    private final ClientAsyncTask asyncTask;
 
-    TaskManagerTimer(Runnable userTask) {
+    TaskManagerTimer(final Runnable userTask) {
       asyncTask = ClientAsyncTask.create(userTask, this);
     }
 
     @Override
-    public void schedule(int delayMillis) {
+    public void schedule(final int delayMillis) {
       if (mode != null) {
         throw new IllegalStateException("This timer has already been scheduled.");
       }
@@ -177,7 +177,7 @@ public class ClientTaskManager implements TaskManager {
     }
 
     @Override
-    public void scheduleRepeating(int periodMillis) {
+    public void scheduleRepeating(final int periodMillis) {
       if (mode != null) {
         throw new IllegalStateException("This timer has already been scheduled.");
       }
