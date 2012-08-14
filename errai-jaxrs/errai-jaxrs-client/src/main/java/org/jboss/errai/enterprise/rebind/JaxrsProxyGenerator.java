@@ -104,8 +104,10 @@ public class JaxrsProxyGenerator {
     generateErrorHandler(classBuilder);
 
     for (MetaMethod method : remote.getMethods()) {
-      JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
-      new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
+      if (!method.isFinal()) {
+        JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
+        new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
+      }
     }
     return classBuilder;
   }
