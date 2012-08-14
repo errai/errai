@@ -6,6 +6,7 @@
 .metadata/*
 .gwt-tmp/
 target/
+bin/
 classes/
 deploy/
 .errai/
