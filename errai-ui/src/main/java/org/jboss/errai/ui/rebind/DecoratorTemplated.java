@@ -1,17 +1,16 @@
 package org.jboss.errai.ui.rebind;
 
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.DomEvent.Type;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
-import com.google.gwt.resources.client.TextResource;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -48,20 +47,25 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.BeanMetric;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.api.annotations.AutoBound;
+import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.util.TypeLiteral;
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates the code required for {@link Templated} classes.
@@ -159,7 +163,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        */
       String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
-      }, Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
+          }, Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
 
       /*
        * Attach Widget field children Elements to the Template DOM
@@ -171,8 +175,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * The Map<String, Widget> to store actual component field references.
        */
       builder.append(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {
-      }, Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
-      })));
+          }, Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
+          })));
       Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
 
       generateComponentCompositions(ctx, builder, component, rootTemplateElement,
@@ -353,33 +357,35 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           Statement dataFieldElements, Statement fieldsMap) {
 
     /*
-     * In case of constructor injection, search for the data binder parameter
+     * In case of constructor injection, search for the data binder parameter annotated with @AutoBound
      */
     Statement dataBinderRef = null;
     BeanMetric beanMetric = InjectUtil.analyzeBean(ctx.getInjectionContext(), ctx.getEnclosingType());
     MetaConstructor mc = beanMetric.getInjectorConstructor();
     if (mc != null) {
       for (MetaParameter mp : mc.getParameters()) {
-        if (mp.getType().getErased().isAssignableTo(MetaClassFactory.get(DataBinder.class))) {
+        if (mp.getType().getErased().isAssignableTo(MetaClassFactory.get(DataBinder.class))
+            && mp.isAnnotationPresent(AutoBound.class)) {
+          if (dataBinderRef != null) {
+            throw new GenerationException("Multiple @AutoBound data binders found in constructor of " + 
+                mc.getDeclaringClass());
+          }
           dataBinderRef = ctx.getInjectionContext().getInlineBeanReference(mp);
-          break;
         }
       }
     }
 
     /*
-     * Search for data binder fields, in case no data binder was injected into
-     * the constructor
+     * Search for data binder fields annotated with @AutoBound, in case no data binder was injected into the constructor
      */
     if (dataBinderRef == null) {
       MetaField dataBinderField = null;
       for (MetaField field : ctx.getInjector().getInjectedType().getFields()) {
-        if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))) {
+        if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))
+            && field.isAnnotationPresent(AutoBound.class)) {
           if (dataBinderField != null) {
-            System.out.println("Multiple data binders found in class:" + ctx.getInjector().getInjectedType()
-                    + " - skipping automatic binding generation!");
-            dataBinderField = null;
-            break;
+            throw new GenerationException("Multiple @AutoBound data binder fields found in class " 
+                + ctx.getInjector().getInjectedType());
           }
           dataBinderField = field;
           dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
@@ -416,14 +422,21 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
 
     /*
-     * Bind each widget if data-binder is found and has been initialized.
+     * Bind each widget if data binder is found and has been initialized.
      */
     if (dataBinderRef != null) {
-      BlockBuilder<ElseBlockBuilder> binderBlockBuilder = If.isNotNull(Variable.get("binder"));
-      for (Entry<String, Statement> field : dataFields.entrySet()) {
-        binderBlockBuilder.append(Stmt.loadVariable("binder").invoke("bind", field.getValue(), field.getKey()));
+      BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
+      for (Entry<String, Statement> dataField : dataFields.entrySet()) {
+        MetaField field = ctx.getType().getField(dataField.getKey());
+        if (field.isAnnotationPresent(Bound.class)) {
+           Bound bound = field.getAnnotation(Bound.class); 
+           String property = bound.property().equals("") ? dataField.getKey() : bound.property();
+           Statement converter = 
+             bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
+           binderBlock.append(Stmt.loadVariable("binder").invoke("bind", dataField.getValue(), property, converter));
+        }
       }
-      builder.append(binderBlockBuilder
+      builder.append(binderBlock
               .finish()
               .else_()
               .append(Stmt.invokeStatic(GWT.class, "log", "DataBinder in class "
@@ -441,8 +454,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   }
 
   /**
-   * Create an inner interface for the given {@link Template} class and its HTML
-   * corresponding resource
+   * Create an inner interface for the given {@link Template} class and its HTML corresponding resource
    */
   private void generateTemplateResourceInterface(InjectableInstance<Templated> ctx, final MetaClass type) {
     ClassStructureBuilder<?> componentTemplateResource = ClassBuilder.define(getTemplateTypeName(type)).publicScope()
@@ -488,16 +500,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
    */
 
   /**
-   * Get the name of the {@link Template} class of the given {@link MetaClass}
-   * type
+   * Get the name of the {@link Template} class of the given {@link MetaClass} type
    */
   private String getTemplateTypeName(MetaClass type) {
     return type.getFullyQualifiedName().replaceAll("\\.", "_") + "TemplateResource";
   }
 
   /**
-   * Get the name of the {@link Template} HTML file of the given
-   * {@link MetaClass} component type
+   * Get the name of the {@link Template} HTML file of the given {@link MetaClass} component type
    */
   private String getTemplateFileName(MetaClass type) {
     String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
@@ -517,8 +527,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   }
 
   /**
-   * Get the name of the {@link Template} HTML fragment (Element subtree) to be
-   * used as the template root of the given {@link MetaClass} component type
+   * Get the name of the {@link Template} HTML fragment (Element subtree) to be used as the template root of the given
+   * {@link MetaClass} component type
    */
   private String getTemplateFragmentName(MetaClass type) {
     String fragment = "";

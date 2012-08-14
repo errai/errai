@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ui.test.common.client;
 
+import java.util.Date;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
@@ -30,12 +32,14 @@ public class Model {
 
   private Integer id;
   private String name;
+  private Date lastChanged;
 
   public Model() {}
 
   public Model(Integer id, String name) {
     this.id = id;
     this.name = name;
+    this.lastChanged = new Date();
   }
 
   public Integer getId() {
@@ -52,6 +56,14 @@ public class Model {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Date getLastChanged() {
+    return lastChanged;
+  }
+
+  public void setLastChanged(Date lastChanged) {
+    this.lastChanged = lastChanged;
   }
 
 }
