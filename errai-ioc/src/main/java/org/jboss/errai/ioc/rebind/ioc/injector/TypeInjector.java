@@ -149,16 +149,6 @@ public class TypeInjector extends AbstractInjector {
         = newInstanceOf(creationCallbackRef).extend()
         .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
 
-    /*
-    render local variables Class::beanType and Annotation[]::qualifiers at the beginning of the getInstance()
-    method so we can easily refer to them later on.
-    */
-    callbackBuilder
-        ._(declareVariable(Class.class).named("beanType").initializeWith(load(type)))
-        ._(declareVariable(Annotation[].class).named("qualifiers")
-            .initializeWith(load(qualifyingMetadata.getQualifiers())));
-
-
     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
     ctx.pushBlockBuilder(callbackBuilder);
 
@@ -171,12 +161,9 @@ public class TypeInjector extends AbstractInjector {
       public void beanConstructed() {
         /* the bean has been constructed, so get a reference to the BeanRef and set it to the 'beanRef' variable. */
 
-        callbackBuilder.append(declareVariable(BeanRef.class).named("beanRef")
-            .initializeWith(loadVariable("context").invoke("getBeanReference", Refs.get("beanType"),
-                Refs.get("qualifiers"))));
-
         /* add the bean to CreationalContext */
-        callbackBuilder.append(loadVariable("context").invoke("addBean", Refs.get("beanRef"), Refs.get(instanceVarName)));
+        callbackBuilder.append(loadVariable("context").invoke("addBean",loadVariable("context").invoke("getBeanReference", load(type),
+                        load(qualifyingMetadata.getQualifiers())), Refs.get(instanceVarName)));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
