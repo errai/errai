@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -102,20 +103,15 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingAndSyncOfNonExistingProperty() {
-    TextBox textBox = new TextBox();
-    textBox.setValue("text");
-
-    Model model = new Model();
-    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "non-existing");
-
-    assertEquals("TextBox should not have been changed after intial state synchronization " +
-        "as the property it is bound to does not exist",
-        "text", textBox.getText());
-
-    // this call ensures that the value change handler is not throwing an exception when it tries to update a
-    // non-existing property of the model.
-    textBox.setValue("updated", true);
+  public void testBindingOfNonExistingProperty() {
+    try {
+      DataBinder.forType(Model.class).bind(new TextBox(), "non-existing");
+      fail("Expected NonExistingPropertyException!");
+    }
+    catch (NonExistingPropertyException nepe) {
+      // expected
+      assertEquals("Exception message contains wrong property name", "non-existing", nepe.getMessage());
+    }
   }
 
   @Test
@@ -351,7 +347,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     binder.bind(textBox, "value");
     assertEquals("Bound widget not found", textBox, binder.getWidget("value"));
   }
-  
+
   @Test
   public void testPropertyChangeHandling() {
     MockHandler handler = new MockHandler();

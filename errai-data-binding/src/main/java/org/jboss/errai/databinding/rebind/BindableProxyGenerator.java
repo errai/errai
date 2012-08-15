@@ -47,7 +47,6 @@ import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -156,6 +155,10 @@ public class BindableProxyGenerator {
     BlockBuilder<?> bindMethodBuilder =
         classBuilder.publicMethod(void.class, "bind", Parameter.of(Widget.class, "widget", true),
             Parameter.of(String.class, "property", true), Parameter.of(Converter.class, "converter", true))
+             .append(
+                // This call make sure an exception is thrown for bindings to non existing properties.
+                // Reusing this method for this purpose helps to keep the generated code size smaller.
+                Stmt.loadVariable("this").invoke("get", Variable.get("property")))
             .append(
                 Stmt.loadVariable("this").invoke("unbind", Variable.get("property")))
             .append(
@@ -177,17 +180,11 @@ public class BindableProxyGenerator {
                                 Stmt.newObject(ValueChangeHandler.class).extend()
                                     .publicOverridesMethod("onValueChange",
                                         Parameter.of(ValueChangeEvent.class, "event"))
-                                    .append(Stmt.try_()
                                         .append(
                                             Stmt.loadStatic(classBuilder.getClassDefinition(), "this").invoke("set",
                                                 Variable.get("property"),
                                                 Stmt.nestedCall(Stmt.loadVariable("event").invoke("getValue"))))
-                                         .finish()
-                                         .catch_(NonExistingPropertyException.class, "e")
-                                         .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
-                                             .invoke("createErrorMessage", "Cannot update unknown property:")))
-                                         .finish()
-                                    ).finish()
+                                    .finish()
                                     .finish()
                                 )
                             )
@@ -207,56 +204,48 @@ public class BindableProxyGenerator {
         Parameter.of(String.class, "property", true), Parameter.of(InitialState.class, "initialState", true))
         .append(
             If.isNotNull(Variable.get("initialState"))
+                .append(Stmt.declareVariable("value", Object.class, null))
                 .append(
-                    Stmt.try_()
-                        .append(Stmt.declareVariable("value", Object.class, null))
+                    If.instanceOf(Variable.get("widget"), HasValue.class)
                         .append(
-                            If.instanceOf(Variable.get("widget"), HasValue.class)
-                                .append(
-                                    Stmt.declareVariable("hasValue", HasValue.class,
-                                        Stmt.castTo(HasValue.class, Stmt.loadVariable("widget"))))
-                                .append(
-                                    Stmt.loadVariable("value").assignValue(
-                                        Stmt.loadVariable("initialState").invoke("getInitialValue",
-                                            Stmt.loadVariable("this").invoke("get", Variable.get("property")),
-                                            Stmt.loadVariable("hasValue").invoke("getValue"))))
-                                .append(
-                                    Stmt.loadVariable("hasValue").invoke(
-                                        "setValue",
-                                        Stmt.invokeStatic(Convert.class, "toWidgetValue",
-                                            Stmt.castTo(HasValue.class,
-                                                Stmt.loadVariable("widget")).invoke("getValue").invoke("getClass"),
-                                            Stmt.loadVariable("value"),
-                                            Stmt.loadVariable("converters").invoke("get", Variable.get("property")))))
-                                .finish()
-                                .elseif_(
-                                    Bool.instanceOf(Variable.get("widget"), HasText.class))
-                                .append(
-                                    Stmt.declareVariable("hasText", HasText.class,
-                                        Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))))
-                                .append(
-                                    Stmt.loadVariable("value").assignValue(
-                                        Stmt.loadVariable("initialState").invoke("getInitialValue",
-                                            Stmt.loadVariable("this").invoke("get", Variable.get("property")),
-                                            Stmt.loadVariable("hasText").invoke("getText"))))
-                                .append(
-                                    Stmt.loadVariable("hasText").invoke(
-                                        "setText",
-                                        Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "toWidgetValue",
-                                            String.class,
-                                            Stmt.loadVariable("value"),
-                                            Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
-                                .finish()
-                        )
+                            Stmt.declareVariable("hasValue", HasValue.class,
+                                Stmt.castTo(HasValue.class, Stmt.loadVariable("widget"))))
                         .append(
-                            Stmt.loadVariable("this").invoke("set", Variable.get("property"), Variable.get("value")))
+                            Stmt.loadVariable("value").assignValue(
+                                Stmt.loadVariable("initialState").invoke("getInitialValue",
+                                    Stmt.loadVariable("this").invoke("get", Variable.get("property")),
+                                    Stmt.loadVariable("hasValue").invoke("getValue"))))
+                        .append(
+                            Stmt.loadVariable("hasValue").invoke(
+                                "setValue",
+                                Stmt.invokeStatic(Convert.class, "toWidgetValue",
+                                    Stmt.castTo(HasValue.class,
+                                        Stmt.loadVariable("widget")).invoke("getValue").invoke("getClass"),
+                                    Stmt.loadVariable("value"),
+                                    Stmt.loadVariable("converters").invoke("get", Variable.get("property")))))
                         .finish()
-                        .catch_(NonExistingPropertyException.class, "e")
-                        .append(Stmt.invokeStatic(GWT.class, "log", Stmt.loadVariable("e")
-                            .invoke("createErrorMessage", "Skipping state synchronization for unknown property:")))
-                        .finish())
-                .finish()
-        )
+                        .elseif_(
+                            Bool.instanceOf(Variable.get("widget"), HasText.class))
+                        .append(
+                            Stmt.declareVariable("hasText", HasText.class,
+                                Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))))
+                        .append(
+                            Stmt.loadVariable("value").assignValue(
+                                Stmt.loadVariable("initialState").invoke("getInitialValue",
+                                    Stmt.loadVariable("this").invoke("get", Variable.get("property")),
+                                    Stmt.loadVariable("hasText").invoke("getText"))))
+                        .append(
+                            Stmt.loadVariable("hasText").invoke(
+                                "setText",
+                                Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "toWidgetValue",
+                                    String.class,
+                                    Stmt.loadVariable("value"),
+                                    Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
+                        .finish()
+                )
+                .append(
+                    Stmt.loadVariable("this").invoke("set", Variable.get("property"), Variable.get("value")))
+                .finish())
         .finish();
   }
 
@@ -398,15 +387,15 @@ public class BindableProxyGenerator {
                                           Stmt.invokeStatic(Convert.class, "toWidgetValue", String.class,
                                               Stmt.castTo(paramType.asBoxed(), Stmt.loadVariable(property)),
                                               Stmt.loadVariable("converters").invoke("get", property)
+                                              )
                                           )
-                                       )
                                   )
                           )
                           .finish()
                   ).finish())
             .append(
                 Stmt.declareVariable("event", PropertyChangeEvent.class,
-                    Stmt.newObject(PropertyChangeEvent.class, property, 
+                    Stmt.newObject(PropertyChangeEvent.class, property,
                         Stmt.loadVariable("oldValue"), Stmt.loadVariable(property))
                     ))
             .append(

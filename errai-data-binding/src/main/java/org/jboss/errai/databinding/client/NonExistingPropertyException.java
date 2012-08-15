@@ -31,7 +31,4 @@ public class NonExistingPropertyException extends RuntimeException {
     super(message);
   }
 
-  public String createErrorMessage(String error) {
-    return error + " " + this.getMessage();
-  }
 }
