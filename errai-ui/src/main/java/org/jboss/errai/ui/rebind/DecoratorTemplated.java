@@ -468,9 +468,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      */
     BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
     for (Entry<String, Statement> dataField : dataFields.entrySet()) {
-      MetaField field = ctx.getType().getField(dataField.getKey());
-      if (field.isAnnotationPresent(Bound.class)) {
-        Bound bound = field.getAnnotation(Bound.class);
+      Bound bound = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType()).get(dataField.getKey());
+      if (bound != null) {
         if (dataBinderRef != null) {
           String property = bound.property().equals("") ? dataField.getKey() : bound.property();
           // Check if bound property exists in data model type

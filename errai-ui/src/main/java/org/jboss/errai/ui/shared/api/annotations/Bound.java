@@ -2,7 +2,6 @@ package org.jboss.errai.ui.shared.api.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -18,7 +17,6 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Inherited
 @Documented
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)

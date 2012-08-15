@@ -16,6 +16,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.ElementWrapperWidget;
 import org.jboss.errai.ui.shared.Template;
+import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 
 import com.google.common.base.Strings;
@@ -26,6 +27,7 @@ import com.google.gwt.dom.client.Element;
  * aggregate {@link Map} for this composite {@link Template}.
  * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
 public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
@@ -48,14 +50,15 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
       }
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
-    saveDataField(ctx, ctx.getType(), name, instance);
+    saveDataField(ctx, ctx.getType(), name, ctx.getAnnotation(Bound.class), instance);
 
     return new ArrayList<Statement>();
 
   }
 
-  private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, Statement instance) {
+  private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, Bound bound, Statement instance) {
     dataFieldMap(ctx, ctx.getEnclosingType()).put(name, instance);
+    dataFieldBoundMap(ctx, ctx.getEnclosingType()).put(name, bound);
     dataFieldTypeMap(ctx, ctx.getEnclosingType()).put(name, type);
   }
 
@@ -81,6 +84,23 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
     return dataFields;
   }
 
+  /**
+   * Get the map of {@link DataField} names and {@link Bound} instances.
+   */
+  @SuppressWarnings("unchecked")
+  private static Map<String, Bound> dataFieldBoundMap(InjectableInstance<?> ctx, MetaClass templateType) {
+    String mapName = dataFieldBoundMapName(templateType);
+
+    Map<String, Bound> bindings = (Map<String, Bound>) ctx.getInjectionContext().getAttribute(
+            mapName);
+    if (bindings == null) {
+      bindings = new LinkedHashMap<String, Bound>();
+      ctx.getInjectionContext().setAttribute(mapName, bindings);
+    }
+
+    return bindings;
+  }
+  
   /**
    * Get the map of {@link DataField} names and {@link MetaClass} types.
    */
@@ -120,6 +140,27 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
 
     return result;
   }
+  
+  /**
+   * Get the aggregate map of {@link DataField} names to {@link Bound} instances.
+   */
+  @SuppressWarnings("unchecked")
+  public static Map<String, Bound> aggregateDataFieldBoundMap(InjectableInstance<?> ctx, MetaClass componentType) {
+
+    Map<String, Bound> result = new LinkedHashMap<String, Bound>();
+
+    if (componentType.getSuperClass() != null) {
+      result.putAll(aggregateDataFieldBoundMap(ctx, componentType.getSuperClass()));
+    }
+
+    Map<String, Bound> dataFields = (Map<String, Bound>) ctx.getInjectionContext().getAttribute(
+            dataFieldBoundMapName(componentType));
+    if (dataFields != null) {
+      result.putAll(dataFields);
+    }
+
+    return result;
+  }
 
   /**
    * Get the aggregate map of {@link DataField} names and {@link MetaClass}
@@ -150,6 +191,14 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    */
   private static final String dataFieldMapName(MetaClass composite) {
     return DecoratorDataField.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
+  }
+  
+  /**
+   * Using the given composite {@link Template} type, return the name of the map
+   * of {@link DataField} names and {@link Bound} instances.
+   */
+  private static final String dataFieldBoundMapName(MetaClass composite) {
+    return DecoratorDataField.class.getName() + "_DATA_FIELD_BOUND_MAP_" + composite.getName();
   }
 
   /**
