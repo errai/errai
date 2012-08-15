@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ui.shared.api.annotations.AutoBound;
+import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -30,9 +32,9 @@ public class StoreForm extends Composite {
   // injecting this data binder causes automatic binding between
   // the properties of Store and the like-named @DataField members in this class
   // Example: property "store.name" tracks the value in the TextBox "name"
-  @Inject private DataBinder<Store> storeBinder;
+  @Inject @AutoBound private DataBinder<Store> storeBinder;
 
-  @Inject @DataField private TextBox name;
+  @Inject @Bound @DataField private TextBox name;
   @Inject @DataField private Button saveButton;
 
   private Runnable afterSaveAction;
