@@ -20,6 +20,7 @@ import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
+import org.jboss.errai.databinding.client.NonExistingPropertyException;
 
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
@@ -115,6 +116,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The name of the model property that should be used for the binding, following Java bean conventions. Must
    *          not be null.
    * @return the same {@link DataBinder} instance to support call chaining.
+   * @throws NonExistingPropertyException
+   *           If <T> does not have a property with the given name.
    */
   public DataBinder<T> bind(final Widget widget, final String property) {
     bind(widget, property, null);
@@ -136,6 +139,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @param converter
    *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
    * @return the same {@link DataBinder} instance to support call chaining.
+   * @throws NonExistingPropertyException
+   *           If <T> does not have a property with the given name.
    */
   @SuppressWarnings("unchecked")
   public DataBinder<T> bind(final Widget widget, final String property,
