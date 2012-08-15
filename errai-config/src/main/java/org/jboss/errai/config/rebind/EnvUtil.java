@@ -65,6 +65,8 @@ public abstract class EnvUtil {
 
   public static final String SYSPROP_USE_REACHABILITY_ANALYSIS = "errai.compile.perf.perform_reachability_analysis";
 
+  private static final Logger logger = LoggerFactory.getLogger("Env");
+
   private static volatile Boolean _isJUnitTest;
 
   public static boolean isJUnitTest() {
@@ -305,17 +307,17 @@ public abstract class EnvUtil {
       return _reachableCache;
     }
 
-    if (!Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
-      System.out.println("Reachability analysis disabled. Errai may generate unnecessary code.");
-      System.out.println("Enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
+    if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) != null
+        && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
+
+      log.warn("reachability analysis disabled. errai may generate unnecessary code.");
+      log.warn("enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
       return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     }
 
     long time = System.currentTimeMillis();
 
     final Set<String> packages = RebindUtils.findTranslatablePackagesInModule(context);
-
-    System.out.println(packages);
 
     final Set<String> allDeps = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(100));
     final Collection<MetaClass> allCachedClasses = MetaClassFactory.getAllCachedClasses();
@@ -339,7 +341,7 @@ public abstract class EnvUtil {
             executor.execute(new ReachabilityRunnable(readBuffer, allDeps));
           }
           catch (IOException e) {
-            System.err.println("WARNING: Could not open resource: " + resource.getFile());
+            log.warn("could not open resource: " + resource.getFile());
           }
           finally {
             if (stream != null) {
@@ -361,14 +363,16 @@ public abstract class EnvUtil {
       e.printStackTrace();
     }
 
-    System.out.println("*** REACHABILITY ANALYSIS (production mode: " + EnvUtil.isProdMode() + ") ***");
-    for (final String s : allDeps) {
-      System.out.println(" -> " + s);
+    if (log.isDebugEnabled()) {
+      log.debug("*** REACHABILITY ANALYSIS (production mode: " + EnvUtil.isProdMode() + ") ***");
+      for (final String s : allDeps) {
+        log.debug(" -> " + s);
+      }
+
+      time = System.currentTimeMillis() - time;
+
+      log.debug("*** END OF REACHABILITY ANALYSIS (" + time + "ms) *** ");
     }
-
-    time = System.currentTimeMillis() - time;
-
-    System.out.println("*** END OF REACHABILITY ANALYSIS (" + time + "ms) *** ");
 
     _lastContext = context;
     return _reachableCache = new ReachableTypes(allDeps, true);
