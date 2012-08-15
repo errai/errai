@@ -1,5 +1,15 @@
 package org.jboss.errai.codegen;
 
+import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -11,16 +21,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Stmt;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Set;
-
-import static org.jboss.errai.codegen.util.PrettyPrinter.prettyPrintJava;
 
 //import com.google.gwt.dev.util.collect.IdentityHashSet;
 
@@ -268,6 +268,8 @@ public final class SnapshotMaker {
             .extend();
         unfinishedSnapshots.add(o);
         for (MetaMethod method : sortedMethods) {
+          if (method.isFinal() || method.getName().equals("toString")) continue;
+          
           System.out.println("  method " + method.getName());
           System.out.println("    return type " + method.getReturnType());
 
