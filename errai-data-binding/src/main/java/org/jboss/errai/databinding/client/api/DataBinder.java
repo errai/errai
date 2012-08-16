@@ -179,7 +179,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the proxied model instance.
+   * Returns the model instance associated with this {@link DataBinder}.
    * 
    * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
    *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI.

@@ -10,7 +10,7 @@ import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 
 /**
- * Indicates that a {@link DataField} is automatically bound to a property of a data model associated with a
+ * Indicates that a {@link DataField} should automatically be bound to a property of a data model associated with a
  * {@link DataBinder} (see {@link AutoBound}).
  * <p>
  * If no property is specified, the {@link DataField} is bound to the data model property with matching name.
