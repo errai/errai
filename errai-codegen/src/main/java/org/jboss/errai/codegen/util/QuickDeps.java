@@ -101,6 +101,11 @@ public class QuickDeps {
 
     final Set<String> usedTypes = new HashSet<String>(100);
 
+    boolean firstClass = true;
+    String clazzName = null;
+    String packageName = "";
+
+
     String token;
     while ((token = identifierTokenizer.nextToken()) != null) {
       if (RESERVED_KEYWORDS.contains(token)) {
@@ -116,7 +121,20 @@ public class QuickDeps {
           }
         }
         else if ("package".equals(token)) {
-          wildcardPackages.add(identifierTokenizer.nextToken());
+          wildcardPackages.add(token = identifierTokenizer.nextToken());
+          packageName = token + ".";
+        }
+        else if ("class".equals(token)) {
+          if (firstClass) {
+            firstClass = false;
+            clazzName = identifierTokenizer.nextToken();
+            usedTypes.add(packageName + clazzName);
+          }
+          else {
+            final String innerClassName = packageName + clazzName + "$" + (token = identifierTokenizer.nextToken());
+            usedTypes.add(innerClassName);
+            imports.put(token, innerClassName);
+          }
         }
         continue;
       }
@@ -147,7 +165,6 @@ public class QuickDeps {
                                     final Set<String> wildcardPackages,
                                     final Set<String> usedTypes,
                                     final String name) {
-
 
     for (final String pkg : wildcardPackages) {
 
