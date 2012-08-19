@@ -340,9 +340,7 @@ public class IOCBootstrapGenerator {
 
     _doRunnableTasks(beforeTasks, builder);
 
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-
-    procFactory.process(scanner, procContext);
+    procFactory.process(procContext);
 
     int i = 0;
     int beanDeclrMethod = 0;

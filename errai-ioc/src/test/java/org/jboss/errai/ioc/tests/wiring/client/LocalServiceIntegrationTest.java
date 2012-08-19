@@ -43,7 +43,7 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCTest {
     static boolean received = false;
 
     @Override
-    public void callback(Message message) {
+    public void callback(final Message message) {
       received = true;
     }
   }
@@ -54,7 +54,7 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCTest {
     static boolean worked = false;
 
     @Override
-    public void callback(Message message) {
+    public void callback(final Message message) {
       worked = true;
     }
   }

@@ -28,7 +28,6 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
@@ -58,8 +57,6 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -169,7 +166,6 @@ public class IOCProcessorFactory {
               final MetaClass providerClassType = instance.getType();
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
               final MetaClass MC_ContextualTypeProvider = MetaClassFactory.get(ContextualTypeProvider.class);
-
 
               MetaClass providerInterface = null;
               final MetaClass providedType;
@@ -339,7 +335,7 @@ public class IOCProcessorFactory {
   }
 
   @SuppressWarnings({"unchecked"})
-  public void process(final MetaDataScanner scanner, final IOCProcessingContext context) {
+  public void process(final IOCProcessingContext context) {
     inferHandlers();
     /**
      * Let's accumulate all the processing tasks.
@@ -370,7 +366,7 @@ public class IOCProcessorFactory {
 
           switch (elementType) {
             case TYPE: {
-              final Set<MetaClass> classes;
+              final Collection<MetaClass> classes;
               if (entry.handler instanceof ProvidedClassAnnotationHandler) {
                 classes = ((ProvidedClassAnnotationHandler) entry.handler).getClasses();
               }
@@ -398,18 +394,14 @@ public class IOCProcessorFactory {
             break;
 
             case METHOD: {
-              final Set<Method> methods = scanner.getMethodsAnnotatedWith(annoClass, context.getPackages());
-
-              for (final Method method : methods) {
+              for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(annoClass, context.getPackages())) {
                 handleMethod(entry, dependencyControl, method, annoClass, context);
               }
             }
             break;
 
             case FIELD: {
-              final Set<Field> fields = scanner.getFieldsAnnotatedWith(annoClass, context.getPackages());
-
-              for (final Field field : fields) {
+              for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(annoClass, context.getPackages())) {
                 handleField(entry, dependencyControl, field, annoClass, context);
               }
             }
@@ -444,7 +436,6 @@ public class IOCProcessorFactory {
         injectionContext.addKnownTypesWithCycles(knownCycles);
       }
     }
-
 
     for (final SortUnit unit : list) {
       for (final Object item : unit.getItems()) {
@@ -511,14 +502,14 @@ public class IOCProcessorFactory {
   @SuppressWarnings("unchecked")
   private void handleMethod(final ProcessingEntry entry,
                             final DependencyControl dependencyControl,
-                            final Method method,
+                            final MetaMethod metaMethod,
                             final Class<? extends Annotation> annotationClass,
                             final IOCProcessingContext context) {
 
-    final Annotation annotation = method.getAnnotation(annotationClass);
-    final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
+    final Annotation annotation = metaMethod.getAnnotation(annotationClass);
+    final MetaClass type = metaMethod.getDeclaringClass();
 
-    final MetaMethod metaMethod = MetaClassFactory.get(method);
+    //final MetaMethod metaMethod = MetaClassFactory.get(method);
 
     dependencyControl.masqueradeAs(type);
 
@@ -561,14 +552,12 @@ public class IOCProcessorFactory {
 
   private void handleField(final ProcessingEntry entry,
                            final DependencyControl dependencyControl,
-                           final Field field,
+                           final MetaField metaField,
                            final Class<? extends Annotation> annotationClass,
                            final IOCProcessingContext context) {
 
-    final Annotation annotation = field.getAnnotation(annotationClass);
-    final MetaClass type = MetaClassFactory.get(field.getDeclaringClass());
-
-    final MetaField metaField = MetaClassFactory.get(field);
+    final Annotation annotation = metaField.getAnnotation(annotationClass);
+    final MetaClass type = metaField.getDeclaringClass();
 
     dependencyControl.masqueradeAs(type);
 

@@ -2,6 +2,7 @@ package org.jboss.errai.config.util;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.metadata.ScannerSingleton;
@@ -9,8 +10,10 @@ import org.jboss.errai.config.rebind.EnvUtil;
 import org.mvel2.util.NullType;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -24,47 +27,36 @@ public final class ClassScanner {
   private ClassScanner() {
   }
 
-  public static Set<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                              final Set<String> packages) {
-    final Set<MetaParameter> result = new HashSet<MetaParameter>();
+  public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
+                                                                     final Set<String> packages) {
+
+    long tm = System.currentTimeMillis();
+
+    final Collection<MetaParameter> result = new HashSet<MetaParameter>();
     for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
       for (final MetaMethod method : metaClass.getDeclaredMethods()) {
         for (final MetaParameter parameter : method.getParameters()) {
           if (parameter.isAnnotationPresent(annotation)) {
-            _addIfMatches(result, parameter, packages);
+            result.add(parameter);
           }
         }
       }
     }
 
-    return result;
+    filterResultsParameter(result, packages, null);
+
+    return Collections.unmodifiableCollection(result);
   }
 
-  public static Set<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
+  public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation) {
     return getParametersAnnotatedWith(annotation, null);
   }
 
-  public static void _addIfMatches(final Set<MetaParameter> result,
-                                   final MetaParameter param,
-                                   final Set<String> packages) {
-    if (packages == null || packages.contains(param.getDeclaringMember().getDeclaringClass().getPackageName())) {
-      result.add(param);
-    }
-  }
+  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
+                                                            final Set<String> packages,
+                                                            final String excludeRegEx) {
 
-
-  public static Set<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                     final Set<String> packages,
-                                                     final String excludeRegEx) {
-
-    final Pattern excludePattern;
-    if (excludeRegEx != null) {
-      excludePattern = Pattern.compile(excludeRegEx);
-    }
-    else {
-      excludePattern = null;
-    }
-    final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
+    final Collection<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
     final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
       @Override
@@ -72,7 +64,7 @@ public final class ClassScanner {
 
         for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
           if (metaClass.isAnnotationPresent(annotation)) {
-            _addIfMatches(result, metaClass, packages, excludePattern);
+            result.add(metaClass);
           }
         }
       }
@@ -82,7 +74,7 @@ public final class ClassScanner {
       @Override
       public void run() {
         for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-          _addIfMatches(result, MetaClassFactory.get(cls), packages, excludePattern);
+          result.add(MetaClassFactory.get(cls));
         }
       }
     });
@@ -94,38 +86,59 @@ public final class ClassScanner {
     catch (Exception ignored) {
     }
 
-    return result;
+    filterResultsClass(result, packages, excludeRegEx);
+
+    return Collections.unmodifiableCollection(result);
   }
 
-  public static Set<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation) {
+  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation) {
     return getTypesAnnotatedWith(annotation, null, null);
   }
 
-  public static Set<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
-                                                     final Set<String> packages) {
+  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
+                                                            final Set<String> packages) {
     return getTypesAnnotatedWith(annotation, packages, null);
   }
 
-
-  public static Set<MetaClass> getTypesAnnotatedWithExcluding(final Class<? extends Annotation> annotation,
-                                                              final String excludeRegex) {
+  public static Collection<MetaClass> getTypesAnnotatedWithExcluding(final Class<? extends Annotation> annotation,
+                                                                     final String excludeRegex) {
     return getTypesAnnotatedWith(annotation, null, excludeRegex);
   }
 
-
-  public static void _addIfMatches(final Set<MetaClass> result,
-                                   final MetaClass clazz,
-                                   final Set<String> packages,
-                                   final Pattern excludePattern) {
-    if (packages == null || packages.contains(clazz.getPackageName())) {
-      if (excludePattern != null && excludePattern.matcher(clazz.getName()).matches()) {
-        return;
+  public static Collection<MetaMethod> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation,
+                                                               final Set<String> packages) {
+    final Collection<MetaMethod> result = new HashSet<MetaMethod>(50);
+    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+      for (final MetaMethod metaMethod : metaClass.getDeclaredMethods()) {
+        if (metaMethod.isAnnotationPresent(annotation)) {
+          result.add(metaMethod);
+        }
       }
-      result.add(clazz);
     }
+
+    filterResultsMethod(result, packages, null);
+
+    return Collections.unmodifiableCollection(result);
   }
 
-  public static Set<MetaClass> getSubTypesOf(final MetaClass metaClass) {
+  public static Collection<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation,
+                                                             final Set<String> packages) {
+    final Collection<MetaField> result = new HashSet<MetaField>(50);
+
+    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+      for (final MetaField metaField : metaClass.getDeclaredFields()) {
+        if (metaField.isAnnotationPresent(annotation)) {
+          result.add(metaField);
+        }
+      }
+    }
+
+    filterResultsField(result, packages, null);
+
+    return Collections.unmodifiableCollection(result);
+  }
+
+  public static Collection<MetaClass> getSubTypesOf(final MetaClass metaClass) {
     final MetaClass root = metaClass.getErased();
     final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
@@ -170,5 +183,93 @@ public final class ClassScanner {
     }
 
     return result;
+  }
+
+  private static void filterResultsClass(final Collection<MetaClass> result,
+                                         final Set<String> packages,
+                                         final String excludeRegEx) {
+
+    final Pattern excludePattern;
+    if (excludeRegEx != null) {
+      excludePattern = Pattern.compile(excludeRegEx);
+    }
+    else {
+      excludePattern = null;
+    }
+
+    final Iterator<MetaClass> filterIterator = result.iterator();
+    while (filterIterator.hasNext()) {
+      _removeIfNotMatches(filterIterator, filterIterator.next(), packages, excludePattern);
+    }
+  }
+
+  private static void filterResultsMethod(final Collection<MetaMethod> result,
+                                          final Set<String> packages,
+                                          final String excludeRegEx) {
+
+    final Pattern excludePattern;
+    if (excludeRegEx != null) {
+      excludePattern = Pattern.compile(excludeRegEx);
+    }
+    else {
+      excludePattern = null;
+    }
+
+    final Iterator<MetaMethod> filterIterator = result.iterator();
+    while (filterIterator.hasNext()) {
+      _removeIfNotMatches(filterIterator, filterIterator.next().getDeclaringClass(), packages, excludePattern);
+    }
+  }
+
+  private static void filterResultsField(final Collection<MetaField> result,
+                                         final Set<String> packages,
+                                         final String excludeRegEx) {
+
+    final Pattern excludePattern;
+    if (excludeRegEx != null) {
+      excludePattern = Pattern.compile(excludeRegEx);
+    }
+    else {
+      excludePattern = null;
+    }
+
+    final Iterator<MetaField> filterIterator = result.iterator();
+    while (filterIterator.hasNext()) {
+      _removeIfNotMatches(filterIterator, filterIterator.next().getDeclaringClass(), packages, excludePattern);
+    }
+  }
+
+  private static void filterResultsParameter(final Collection<MetaParameter> result,
+                                             final Set<String> packages,
+                                             final String excludeRegEx) {
+
+    final Pattern excludePattern;
+    if (excludeRegEx != null) {
+      excludePattern = Pattern.compile(excludeRegEx);
+    }
+    else {
+      excludePattern = null;
+    }
+
+    final Iterator<MetaParameter> filterIterator = result.iterator();
+    while (filterIterator.hasNext()) {
+      _removeIfNotMatches(filterIterator, filterIterator.next().getDeclaringMember().getDeclaringClass(),
+          packages, excludePattern);
+    }
+  }
+
+  private static void _removeIfNotMatches(final Iterator<?> iterator,
+                                          final MetaClass type,
+                                          final Set<String> packages,
+                                          final Pattern excludePattern) {
+
+    if (packages == null || packages.contains(type.getPackageName())) {
+      if (excludePattern != null && excludePattern.matcher(type.getFullyQualifiedName()).matches()) {
+        iterator.remove();
+      }
+    }
+    else {
+      iterator.remove();
+    }
   }
 }

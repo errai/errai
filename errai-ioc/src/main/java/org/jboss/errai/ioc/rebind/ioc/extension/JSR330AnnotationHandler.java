@@ -31,6 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.mvel2.util.NullType;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -104,7 +105,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     }
 
     if (cls.isInterface()) {
-      final Set<MetaClass> subTypes = ClassScanner.getSubTypesOf(cls);
+      final Collection<MetaClass> subTypes = ClassScanner.getSubTypesOf(cls);
       final Set<MetaClass> deps = new HashSet<MetaClass>();
       for (final MetaClass c : subTypes) {
         if (c.isSynthetic() || c.isAnonymousClass()) continue;
