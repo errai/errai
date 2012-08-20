@@ -64,7 +64,7 @@ public class LoadField extends AbstractCallElement {
 
       @Override
       public String getName() {
-        return field.getName();
+        return fieldName;
       }
 
       @Override
@@ -78,8 +78,7 @@ public class LoadField extends AbstractCallElement {
         if (!currCallString.isEmpty()) {
           buf.append(".");
         }
-        buf.append(getName());
-        return buf.toString();
+        return buf.append(getName()).toString();
       }
 
       @Override
