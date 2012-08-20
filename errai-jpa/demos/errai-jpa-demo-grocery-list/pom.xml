@@ -803,8 +803,8 @@
           <logLevel>INFO</logLevel>
           <runTarget>index.jsp</runTarget>
           <extraJvmArgs>
-            -Xmx1g -XX:MaxPermSize=128m
-            <!-- -Derrai.codegen.permissive=true -Derrai.codegen.printOut=true -->
+            -Xmx1g -XX:MaxPermSize=128m -XX:+AggressiveOpts -XX:CompileThreshold=100 -XX:+UseNUMA \
+            -Derrai.codegen.permissive=true -Derrai.codegen.printOut=true
           </extraJvmArgs>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>

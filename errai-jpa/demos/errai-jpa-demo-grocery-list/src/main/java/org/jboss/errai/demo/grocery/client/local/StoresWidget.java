@@ -11,20 +11,28 @@ import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 
 import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.TableElement;
 import com.google.gwt.dom.client.TableRowElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 
 @Dependent
-@Templated("GroceryListClient.html#storesWidget")
+@Templated
 public class StoresWidget extends Composite {
 
   // XXX need a better way of getting at this instance from the StoreListener
   private static StoresWidget INSTANCE;
+
+  @Inject
+  private IOCBeanManager beanManager;
 
   @Inject
   private EntityManager em;
@@ -32,10 +40,14 @@ public class StoresWidget extends Composite {
   @DataField
   private TableElement table = Document.get().createTableElement();
 
+  @Inject @DataField
+  private Button addStoreButton;
+
   @SuppressWarnings("unused")
   @PostConstruct
   private void initInstance() {
     INSTANCE = this;
+    refreshFromDb();
   }
 
   public static class StoreListener {
@@ -56,5 +68,29 @@ public class StoresWidget extends Composite {
   private void addStore(Store store) {
     TableRowElement row = table.insertRow(-1);
     row.insertCell(-1).setInnerText(store.getName());
+  }
+
+  /**
+   * Shows the store form in a popup when the "+" button is pressed.
+   *
+   * @param event the click event (ignored)
+   */
+  @EventHandler("addStoreButton")
+  public void onStoreAddButtonClick(ClickEvent event) {
+    final StoreForm storeForm = beanManager.lookupBean(StoreForm.class).getInstance();
+    final PopoverContainer popover = beanManager.lookupBean(PopoverContainer.class).getInstance();
+    popover.setTitleHtml(new SafeHtmlBuilder().appendEscaped("New Store").toSafeHtml());
+    popover.setBodyWidget(storeForm);
+    popover.show(addStoreButton);
+
+    // hide store form when new store is saved
+    storeForm.setAfterSaveAction(new Runnable() {
+      @Override
+      public void run() {
+        popover.hide();
+        beanManager.destroyBean(popover);
+        beanManager.destroyBean(storeForm);
+      }
+    });
   }
 }

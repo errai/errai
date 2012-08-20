@@ -71,7 +71,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates the code required for {@link Templated} classes.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -301,7 +301,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             throw new GenerationException(
                     "The type " + declaringClass.getFullyQualifiedName() + " looks like a client-side" +
                     " @Templated class, but it is not known to GWT. This probably means that " +
-                    declaringClass.getName() + " or one of its supertypes contains non-translatable code.");
+                    declaringClass.getName() + " or one of its supertypes contains non-translatable code.", e);
           }
           throw e;
         }
@@ -358,7 +358,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * take advantage of this information to get the associated handler. Ex:
      * com.google.gwt.event.dom.client.ClickEvent --->
      * com.google.gwt.event.dom.client.ClickHandler
-     * 
+     *
      * com.google.gwt.event.dom.client.BlurEvent --->
      * com.google.gwt.event.dom.client.BlurHandler
      */
@@ -389,11 +389,17 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                   + "] returns void.");
     }
 
+    System.out.println("eventType: " + eventType.getClass() + " -- " + eventType);
+    System.out.println("method: " + method.getClass() + " -- " + method);
+    System.out.println("returnType: " + returnType.getClass() + " -- " + returnType);
+
     MetaParameterizedType parameterizedType = returnType.getParameterizedType();
     if (parameterizedType == null) {
       throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
                   + "] does not return Type<? extends EventHandler>..");
     }
+
+    System.out.println("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
 
     MetaType[] argTypes = parameterizedType.getTypeParameters();
     if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass
