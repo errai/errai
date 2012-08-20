@@ -27,7 +27,7 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 public interface HasPropertyChangeHandlers {
 
   /**
-   * Adds a {@link PropertyChangeHandler} that will be notified when a property of the underlying event source changes.
+   * Adds a {@link PropertyChangeHandler} that will be notified when a property of the underlying object changes.
    * Multiple handlers can be registered. If the same handler instance is passed multiple times, it will be notified
    * multiple times.
    * 
