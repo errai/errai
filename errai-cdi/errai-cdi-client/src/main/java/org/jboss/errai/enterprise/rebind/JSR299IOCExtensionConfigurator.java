@@ -83,12 +83,10 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       knownObserverTypes.add(parameter.getType());
     }
 
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-
     final Set<MetaClass> knownTypesWithSuperTypes = new HashSet<MetaClass>(knownObserverTypes);
     for (MetaClass cls : knownObserverTypes) {
-      for (Class subClass : scanner.getSubTypesOf(cls.asClass())) {
-        knownTypesWithSuperTypes.add(MetaClassFactory.get(subClass));
+      for (MetaClass subClass : ClassScanner.getSubTypesOf(cls)) {
+        knownTypesWithSuperTypes.add(subClass);
       }
     }
 

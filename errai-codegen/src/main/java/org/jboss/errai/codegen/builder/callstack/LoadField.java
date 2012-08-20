@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.VariableReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.exception.UndefinedFieldException;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaField;
 
@@ -41,14 +42,19 @@ public class LoadField extends AbstractCallElement {
     if (fieldName.equals("this")) {
       // TODO this is a workaround to access the enclosing instance of a type
       field = new BuildMetaField(null, null, Scope.Private, statement.getType(), "this");
-    } 
+    }
     else {
       field = statement.getType().getInheritedField(fieldName);
     }
 
     if (field == null) {
-      UndefinedFieldException ufe = new UndefinedFieldException(fieldName, statement.getType());
-      blameAndRethrow(ufe);
+      final UndefinedFieldException ufe = new UndefinedFieldException(fieldName, statement.getType());
+      if (context.isPermissiveMode()) {
+         ufe.printStackTrace();
+      }
+      else {
+        blameAndRethrow(ufe);
+      }
     }
 
     final String currCallString = writer.getCallString();
@@ -78,7 +84,7 @@ public class LoadField extends AbstractCallElement {
 
       @Override
       public MetaClass getType() {
-        return field.getType();
+        return field == null ? MetaClassFactory.get(Object.class) : field.getType();
       }
     };
 

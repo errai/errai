@@ -209,8 +209,7 @@ public class IOCBootstrapGenerator {
               = new HashSet<Annotation>(Arrays.asList((Annotation[]) literalValue.getValue()));
 
           if (cachedArrays.containsKey(annotationSet)) {
-            final String name = cachedArrays.get(annotationSet);
-            return Refs.get(name);
+            return Refs.get(cachedArrays.get(annotationSet));
           }
 
           final String fieldName = "arrayOf_" +
