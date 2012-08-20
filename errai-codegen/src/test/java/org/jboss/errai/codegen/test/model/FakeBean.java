@@ -26,8 +26,5 @@ public class FakeBean {
   @Inject Bwah bwahBean;
 
   @Inject Instance<Bar> instanceBar;
-
-  public Bar getBar() {
-    return instanceBar.get();
-  }
 }
+
