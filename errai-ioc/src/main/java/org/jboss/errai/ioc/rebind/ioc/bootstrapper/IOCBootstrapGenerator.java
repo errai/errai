@@ -192,8 +192,9 @@ public class IOCBootstrapGenerator {
         if (literalValue.getValue() instanceof Annotation) {
           final Annotation annotation = (Annotation) literalValue.getValue();
 
-          final String fieldName = annotation.annotationType().getSimpleName() + "_"
-              + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
+          final Class<? extends Annotation> aClass = annotation.annotationType();
+          final String fieldName = PrivateAccessUtil.condensify(aClass.getPackage().getName()) +
+              aClass.getSimpleName() + "_" + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
 
           classStructureBuilder.privateField(fieldName, annotation.annotationType())
               .modifiers(Modifier.Final).initializesWith(AnnotationEncoder.encode(annotation))
@@ -211,9 +212,9 @@ public class IOCBootstrapGenerator {
             return Refs.get(cachedArrays.get(annotationSet));
           }
 
-          final String fieldName = "arrayOf_" +
-              literalValue.getType().getOuterComponentType().getName()
-                  .replaceAll("\\.", "_") + "_"
+          final MetaClass type = literalValue.getType().getOuterComponentType();
+          final String fieldName = "arrayOf" + PrivateAccessUtil.condensify(type.getPackageName()) +
+              type.getName().replaceAll("\\.", "_") + "_"
               + String.valueOf(literalValue.getValue().hashCode()).replaceAll("\\-", "_");
 
           // force rendering of literals in this array first.

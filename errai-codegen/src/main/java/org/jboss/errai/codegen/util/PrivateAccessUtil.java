@@ -191,7 +191,7 @@ public class PrivateAccessUtil {
     privateMemberAccessor.makeMethodAccessible(classBuilder, m, modifiers);
   }
 
-  private static String condensify(final String packagePrefix) {
+  public static String condensify(final String packagePrefix) {
     return "_" + String.valueOf(packagePrefix.hashCode()).replaceFirst("\\-", "\\$");
   }
 
