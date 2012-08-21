@@ -192,8 +192,7 @@ public class IOCBootstrapGenerator {
         if (literalValue.getValue() instanceof Annotation) {
           final Annotation annotation = (Annotation) literalValue.getValue();
 
-          final String fieldName = annotation.annotationType().getName()
-              .replaceAll("\\.", "_") + "_"
+          final String fieldName = annotation.annotationType().getSimpleName() + "_"
               + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
 
           classStructureBuilder.privateField(fieldName, annotation.annotationType())
@@ -213,7 +212,7 @@ public class IOCBootstrapGenerator {
           }
 
           final String fieldName = "arrayOf_" +
-              literalValue.getType().getOuterComponentType().getFullyQualifiedName()
+              literalValue.getType().getOuterComponentType().getName()
                   .replaceAll("\\.", "_") + "_"
               + String.valueOf(literalValue.getValue().hashCode()).replaceAll("\\-", "_");
 
