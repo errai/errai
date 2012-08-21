@@ -46,6 +46,15 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,6 +63,20 @@ import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 /**
  * The working prototype ErraiBus Websocket Server.
@@ -95,7 +118,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
     // Handshake
     WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
-            this.getWebSocketLocation(req), null, false);
+        this.getWebSocketLocation(req), null, false);
     this.handshaker = wsFactory.newHandshaker(req);
     if (this.handshaker == null) {
       wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.getChannel());
@@ -120,7 +143,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
     if (!(frame instanceof TextWebSocketFrame)) {
       throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass()
-              .getName()));
+          .getName()));
     }
 
     @SuppressWarnings("unchecked") EJObject val = JSONDecoder.decode(((TextWebSocketFrame) frame).getText()).isObject();
@@ -129,7 +152,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
     // this is not an active channel.
     if (!activeChannels.containsKey(ctx.getChannel())) {
-      String commandType =  val.get(MessageParts.CommandType.name()).isString().stringValue();
+      String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
       if (BusCommands.ConnectToQueue.name().equals(commandType)) {
@@ -140,7 +163,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
           LocalContext localContext = LocalContext.get(session);
 
           if (localContext.hasAttribute(SESSION_ATTR_WS_STATUS) &&
-                  WEBSOCKET_ACTIVE.equals(localContext.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
+              WEBSOCKET_ACTIVE.equals(localContext.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
 
             // open the channel
             activeChannels.put(ctx.getChannel(), session);
@@ -188,7 +211,11 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
       // this is an active session. send the message.
 
       session = activeChannels.get(ctx.getChannel());
-      Message msg = MessageFactory.createCommandMessage(session, ((TextWebSocketFrame) frame).getText());
+
+      final Message msg = MessageFactory.createCommandMessage(session, ((TextWebSocketFrame) frame).getText());
+
+      msg.setResource(HttpServletRequest.class.getName(), new SyntheticHttpServletRequest());
+
       svc.store(msg);
     }
   }
@@ -224,24 +251,386 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
   private static String getFailedNegotiation(String error) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-            + BusCommands.WebsocketNegotiationFailed.name() + "\"," +
-            "\"" + MessageParts.ErrorMessage.name() + "\":\"" + error + "\"}]";
+        + BusCommands.WebsocketNegotiationFailed.name() + "\"," +
+        "\"" + MessageParts.ErrorMessage.name() + "\":\"" + error + "\"}]";
   }
 
   private static String getSuccessfulNegotiation() {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-            + BusCommands.WebsocketChannelOpen.name() + "\"}]";
+        + BusCommands.WebsocketChannelOpen.name() + "\"}]";
   }
 
   private static String getReverseChallenge(String token) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-            + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
-            token + "\"}]";
+        + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
+        token + "\"}]";
   }
-  
+
   public void stop() {
     for (Channel channel : activeChannels.keySet()) {
       channel.close();
+    }
+  }
+
+  private static class SyntheticHttpServletRequest implements HttpServletRequest {
+    private final Map<String, Object> attributes = new HashMap<String, Object>();
+    private final Map<String, String[]> parameters = new HashMap<String, String[]>();
+
+    @Override
+    public Object getAttribute(String name) {
+      return attributes.get(name);
+    }
+
+    @Override
+    public Enumeration<String> getAttributeNames() {
+      return new Enumeration<String>() {
+        private final Iterator<String> stringIterator = attributes.keySet().iterator();
+
+        @Override
+        public boolean hasMoreElements() {
+          return stringIterator.hasNext();
+        }
+
+        @Override
+        public String nextElement() {
+          return stringIterator.next();
+        }
+      };
+    }
+
+    @Override
+    public String getCharacterEncoding() {
+      return "UTF-8";
+    }
+
+    @Override
+    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+    }
+
+    @Override
+    public int getContentLength() {
+      return 0;
+    }
+
+    @Override
+    public String getContentType() {
+      return null;
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+      return null;
+    }
+
+    @Override
+    public String getParameter(String name) {
+      final String[] parms = parameters.get(name);
+      if (parms == null) {
+        return null;
+      }
+      else {
+        return parms[0];
+      }
+    }
+
+    @Override
+    public Enumeration<String> getParameterNames() {
+      return new Enumeration<String>() {
+        private final Iterator<String> stringIterator = parameters.keySet().iterator();
+
+        @Override
+        public boolean hasMoreElements() {
+          return stringIterator.hasNext();
+        }
+
+        @Override
+        public String nextElement() {
+          return stringIterator.next();
+        }
+      };
+    }
+
+    @Override
+    public String[] getParameterValues(String name) {
+      return parameters.get(name);
+    }
+
+    @Override
+    public Map<String, String[]> getParameterMap() {
+      return parameters;
+    }
+
+    @Override
+    public String getProtocol() {
+      return null;
+    }
+
+    @Override
+    public String getScheme() {
+      return null;
+    }
+
+    @Override
+    public String getServerName() {
+      return null;
+    }
+
+    @Override
+    public int getServerPort() {
+      return 0;
+    }
+
+    @Override
+    public BufferedReader getReader() throws IOException {
+      return null;
+    }
+
+    @Override
+    public String getRemoteAddr() {
+      return null;
+    }
+
+    @Override
+    public String getRemoteHost() {
+      return null;
+    }
+
+    @Override
+    public void setAttribute(String name, Object o) {
+      attributes.put(name, o);
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+      attributes.remove(name);
+    }
+
+    @Override
+    public Locale getLocale() {
+      return null;
+    }
+
+    @Override
+    public Enumeration<Locale> getLocales() {
+      return null;
+    }
+
+    @Override
+    public boolean isSecure() {
+      return false;
+    }
+
+    @Override
+    public RequestDispatcher getRequestDispatcher(String path) {
+      return null;
+    }
+
+    @Override
+    public String getRealPath(String path) {
+      return null;
+    }
+
+    @Override
+    public int getRemotePort() {
+      return 0;
+    }
+
+    @Override
+    public String getLocalName() {
+      return null;
+    }
+
+    @Override
+    public String getLocalAddr() {
+      return null;
+    }
+
+    @Override
+    public int getLocalPort() {
+      return 0;
+    }
+
+    @Override
+    public ServletContext getServletContext() {
+      return null;
+    }
+
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+      return null;
+    }
+
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+      return null;
+    }
+
+    @Override
+    public boolean isAsyncStarted() {
+      return false;
+    }
+
+    @Override
+    public boolean isAsyncSupported() {
+      return false;
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() {
+      return null;
+    }
+
+    @Override
+    public DispatcherType getDispatcherType() {
+      return null;
+    }
+
+    @Override
+    public String getAuthType() {
+      return null;
+    }
+
+    @Override
+    public Cookie[] getCookies() {
+      return new Cookie[0];
+    }
+
+    @Override
+    public long getDateHeader(String name) {
+      return 0;
+    }
+
+    @Override
+    public String getHeader(String name) {
+      return null;
+    }
+
+    @Override
+    public Enumeration<String> getHeaders(String name) {
+      return null;
+    }
+
+    @Override
+    public Enumeration<String> getHeaderNames() {
+      return null;
+    }
+
+    @Override
+    public int getIntHeader(String name) {
+      return 0;
+    }
+
+    @Override
+    public String getMethod() {
+      return null;
+    }
+
+    @Override
+    public String getPathInfo() {
+      return null;
+    }
+
+    @Override
+    public String getPathTranslated() {
+      return null;
+    }
+
+    @Override
+    public String getContextPath() {
+      return null;
+    }
+
+    @Override
+    public String getQueryString() {
+      return null;
+    }
+
+    @Override
+    public String getRemoteUser() {
+      return null;
+    }
+
+    @Override
+    public boolean isUserInRole(String role) {
+      return false;
+    }
+
+    @Override
+    public Principal getUserPrincipal() {
+      return null;
+    }
+
+    @Override
+    public String getRequestedSessionId() {
+      return null;
+    }
+
+    @Override
+    public String getRequestURI() {
+      return null;
+    }
+
+    @Override
+    public StringBuffer getRequestURL() {
+      return null;
+    }
+
+    @Override
+    public String getServletPath() {
+      return null;
+    }
+
+    @Override
+    public HttpSession getSession(boolean create) {
+      return null;
+    }
+
+    @Override
+    public HttpSession getSession() {
+      return null;
+    }
+
+    @Override
+    public boolean isRequestedSessionIdValid() {
+      return false;
+    }
+
+    @Override
+    public boolean isRequestedSessionIdFromCookie() {
+      return false;
+    }
+
+    @Override
+    public boolean isRequestedSessionIdFromURL() {
+      return false;
+    }
+
+    @Override
+    public boolean isRequestedSessionIdFromUrl() {
+      return false;
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+      return false;
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {
+    }
+
+    @Override
+    public void logout() throws ServletException {
+    }
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+      return null;
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+      return null;
     }
   }
 }

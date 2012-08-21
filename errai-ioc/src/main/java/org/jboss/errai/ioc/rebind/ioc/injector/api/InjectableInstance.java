@@ -28,30 +28,29 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
 
 import java.lang.annotation.Annotation;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
 
-  public InjectableInstance(T annotation, TaskType taskType, MetaConstructor constructor, MetaMethod method,
-                            MetaField field, MetaClass type, MetaParameter parm, Injector injector, InjectionContext injectionContext) {
+  public InjectableInstance(final T annotation, final TaskType taskType, final MetaConstructor constructor, final MetaMethod method,
+                            final MetaField field, final MetaClass type, final MetaParameter parm, final Injector injector, final InjectionContext injectionContext) {
 
     super(annotation, taskType, constructor, method, field, type, parm, injector, injectionContext);
   }
 
-  public static <T extends Annotation> InjectableInstance<T> getInjectedInstance(T annotation,
-                                                                                 MetaClass type,
-                                                                                 Injector injector,
-                                                                                 InjectionContext context) {
+  public static <T extends Annotation> InjectableInstance<T> getInjectedInstance(final T annotation,
+                                                                                 final MetaClass type,
+                                                                                 final Injector injector,
+                                                                                 final InjectionContext context) {
     return new InjectableInstance<T>(annotation, TaskType.Type, null, null, null, type,
             null, injector, context);
 
   }
 
-  public static <T extends Annotation> InjectableInstance<T> getMethodInjectedInstance(MetaMethod method,
-                                                                                       Injector injector,
-                                                                                       InjectionContext context) {
+  public static <T extends Annotation> InjectableInstance<T> getMethodInjectedInstance(final MetaMethod method,
+                                                                                       final Injector injector,
+                                                                                       final InjectionContext context) {
 
     //noinspection unchecked
     return new InjectableInstance(
@@ -63,9 +62,9 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   }
 
-  public static <T extends Annotation> InjectableInstance<T> getParameterInjectedInstance(MetaParameter parm,
-                                                                                          Injector injector,
-                                                                                          InjectionContext context) {
+  public static <T extends Annotation> InjectableInstance<T> getParameterInjectedInstance(final MetaParameter parm,
+                                                                                          final Injector injector,
+                                                                                          final InjectionContext context) {
 
     if (parm.getDeclaringMember() instanceof MetaConstructor) {
 
@@ -85,9 +84,9 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     }
   }
 
-  public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(MetaField field,
-                                                                                      Injector injector,
-                                                                                      InjectionContext context) {
+  public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(final MetaField field,
+                                                                                      final Injector injector,
+                                                                                      final InjectionContext context) {
 
     //noinspection unchecked
     return new InjectableInstance(context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
@@ -103,7 +102,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
    * Returns an instance of a {@link Statement} which represents the value associated for injection at this
    * InjectionPoint.
    *
-   * @return
+   * @return a statement representing the value of the injection point.
    */
   public Statement getValueStatement() {
 
@@ -122,8 +121,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     switch (taskType) {
       case Field:
       case PrivateField:
-
-
         return InjectUtil.getPublicOrPrivateFieldValue(injectionContext.getProcessingContext(),
                 val,
                 field);
@@ -178,7 +175,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     return targetInjector;
   }
 
-  public Statement callOrBind(Statement... values) {
+  public Statement callOrBind(final Statement... values) {
     final Injector targetInjector = injector;
 
     MetaMethod meth = method;
@@ -186,10 +183,10 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case PrivateField:
       case Field:
         return InjectUtil.setPublicOrPrivateFieldValue(
-                injectionContext.getProcessingContext(),
-                Refs.get(targetInjector.getInstanceVarName()),
-                field,
-                values[0]);
+            injectionContext.getProcessingContext(),
+            Refs.get(targetInjector.getInstanceVarName()),
+            field,
+            values[0]);
 
       case Parameter:
         if (parm.getDeclaringMember() instanceof MetaMethod) {
@@ -202,10 +199,11 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case Method:
       case PrivateMethod:
         return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
-                Refs.get(targetInjector.getInstanceVarName()),
-                meth,
-                values);
+            Refs.get(targetInjector.getInstanceVarName()),
+            meth,
+            values);
 
+      case Type:
       default:
         throw new RuntimeException("cannot call tasktype: " + taskType);
     }
