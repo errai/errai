@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
 
 import java.lang.annotation.Annotation;
 
@@ -106,12 +107,25 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
    */
   public Statement getValueStatement() {
 
-    Statement[] stmt;
+    final Statement[] stmt;
+    final Statement val;
+
+    if (getTargetInjector().getInjectedType().equals(getEnclosingType()) &&
+        getTargetInjector().getQualifyingMetadata().equals(getQualifyingMetadata())) {
+
+      val = Refs.get(getInjector().getInstanceVarName());
+    }
+    else {
+      val = Refs.get(getTargetInjector().getInstanceVarName());
+    }
+
     switch (taskType) {
       case Field:
       case PrivateField:
+
+
         return InjectUtil.getPublicOrPrivateFieldValue(injectionContext.getProcessingContext(),
-                Refs.get(getTargetInjector().getInstanceVarName()),
+                val,
                 field);
 
       case PrivateMethod:
@@ -123,7 +137,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
         return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
-                Refs.get(getTargetInjector().getInstanceVarName()),
+                val,
                 method,
                 stmt);
 
@@ -138,7 +152,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
           return inlineStmt;
         }
       case Type:
-        return Refs.get(getTargetInjector().getInstanceVarName());
+        return val;
 
       default:
         return LiteralFactory.getLiteral(null);
