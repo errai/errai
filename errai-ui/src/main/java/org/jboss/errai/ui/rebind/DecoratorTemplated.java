@@ -34,6 +34,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
@@ -288,7 +289,23 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                         + DomEvent.class.getName() + "]");
         }
 
-        MetaClass handlerType = getHandlerForEvent(eventType);
+        MetaClass handlerType;
+        try {
+          handlerType = getHandlerForEvent(eventType);
+        } catch (GenerationException e) {
+          /*
+           *  see ERRAI-373 for details on this crazy inference (without this message, the cause of the
+           *  problem is nearly impossible to diagnose)
+           */
+          if (declaringClass.getClass() == JavaReflectionClass.class) {
+            throw new GenerationException(
+                    "The type " + declaringClass.getFullyQualifiedName() + " looks like a client-side" +
+                    " @Templated class, but it is not known to GWT. This probably means that " +
+                    declaringClass.getName() + " or one of its supertypes contains non-translatable code.");
+          }
+          throw e;
+        }
+
         BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType)
                      .extend()
                      .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
