@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 
-public class NestedTemplateTest extends AbstractErraiCDITest {
+public class NestedCyclicTemplateTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {

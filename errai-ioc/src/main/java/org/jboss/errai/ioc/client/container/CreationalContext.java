@@ -328,8 +328,18 @@ public class CreationalContext {
     while (unresolvedIterator.hasNext()) {
       final Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
       if (wired.containsKey(entry.getKey())) {
+        final Object wiredInst = wired.get(entry.getKey());
         for (final ProxyResolver pr : entry.getValue()) {
-          pr.resolve(wired.get(entry.getKey()));
+          pr.resolve(wiredInst);
+        }
+
+        final Iterator<Tuple<Object, InitializationCallback>> initCallbacks = initializationCallbacks.iterator();
+        while (initCallbacks.hasNext()) {
+          final Tuple<Object, InitializationCallback> tuple = initCallbacks.next();
+          if (tuple.getKey() == wiredInst) {
+            tuple.getValue().init(tuple.getKey());
+            initCallbacks.remove();
+          }
         }
 
         unresolvedIterator.remove();

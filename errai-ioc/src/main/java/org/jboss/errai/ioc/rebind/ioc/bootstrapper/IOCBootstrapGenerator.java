@@ -260,6 +260,7 @@ public class IOCBootstrapGenerator {
     iocProcContextBuilder.bootstrapBuilder(classStructureBuilder);
     iocProcContextBuilder.logger(logger);
     iocProcContextBuilder.sourceWriter(sourceWriter);
+    iocProcContextBuilder.gwtTarget(!useReflectionStubs);
 
     final InjectionContext.Builder injectionContextBuilder
         = InjectionContext.Builder.create();

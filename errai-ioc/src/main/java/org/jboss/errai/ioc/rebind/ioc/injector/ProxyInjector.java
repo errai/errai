@@ -68,7 +68,7 @@ public class ProxyInjector extends AbstractInjector {
 
     this.closeStatements = new ArrayList<Statement>();
 
-    this.proxyClass = ProxyMaker.makeProxy(proxyClassName, proxiedType);
+    this.proxyClass = ProxyMaker.makeProxy(proxyClassName, proxiedType, context.isGwtTarget() ? "jsni" : "reflection");
     this.proxyClass.setStatic(true);
     this.proxyClass.setScope(Scope.Package);
 

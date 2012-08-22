@@ -65,6 +65,8 @@ public class IOCProcessingContext {
 
   protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
+  protected final boolean gwtTarget;
+
   private IOCProcessingContext(final Builder builder) {
     this.treeLogger = builder.treeLogger;
     this.generatorContext = builder.generatorContext;
@@ -80,6 +82,7 @@ public class IOCProcessingContext {
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
     this.packages = builder.packages;
     this.qualifyingMetadataFactory = builder.qualifyingMetadataFactory;
+    this.gwtTarget = builder.gwtTarget;
   }
 
   public static class Builder {
@@ -92,6 +95,7 @@ public class IOCProcessingContext {
     private BlockBuilder<?> blockBuilder;
     private Set<String> packages;
     private QualifyingMetadataFactory qualifyingMetadataFactory;
+    private boolean gwtTarget;
 
     public static Builder create() {
       return new Builder();
@@ -139,6 +143,11 @@ public class IOCProcessingContext {
 
     public Builder qualifyingMetadata(QualifyingMetadataFactory qualifyingMetadataFactory) {
       this.qualifyingMetadataFactory = qualifyingMetadataFactory;
+      return this;
+    }
+
+    public Builder gwtTarget(boolean gwtTarget) {
+      this.gwtTarget = gwtTarget;
       return this;
     }
 
@@ -222,6 +231,10 @@ public class IOCProcessingContext {
 
   public VariableReference getContextVariableReference() {
     return contextVariable.getReference();
+  }
+
+  public boolean isGwtTarget() {
+    return gwtTarget;
   }
 
   public QualifyingMetadataFactory getQualifyingMetadataFactory() {

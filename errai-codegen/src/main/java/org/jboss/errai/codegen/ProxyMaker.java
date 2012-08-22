@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.If;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 
@@ -47,14 +48,27 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class ProxyMaker {
+
   public static BuildMetaClass makeProxy(final String proxyClassName, final Class cls) {
-    return makeProxy(proxyClassName, MetaClassFactory.get(cls));
+    return makeProxy(proxyClassName, cls, "reflection");
+  }
+
+  public static BuildMetaClass makeProxy(final String proxyClassName,
+                                         final Class cls,
+                                         final String privateAccessorType) {
+    return makeProxy(proxyClassName, MetaClassFactory.get(cls), privateAccessorType);
   }
 
   public static final String PROXY_BIND_METHOD = "__$setProxiedInstance$";
 
   public static BuildMetaClass makeProxy(final String proxyClassName,
                                          final MetaClass toProxy) {
+    return makeProxy(proxyClassName, toProxy, "reflection");
+  }
+
+  public static BuildMetaClass makeProxy(final String proxyClassName,
+                                         final MetaClass toProxy,
+                                         final String privateAccessorType) {
     final ClassStructureBuilder builder;
 
     final boolean renderEqualsAndHash;
@@ -99,7 +113,7 @@ public class ProxyMaker {
 
       renderedMethods.add(methodString);
 
-      if (!method.isPublic() ||
+      if ((!method.isPublic() && !method.isProtected()) ||
           method.isSynthetic() ||
           method.isFinal() ||
           method.isStatic() ||
@@ -140,12 +154,33 @@ public class ProxyMaker {
         statementVars[i] = loadVariable(parms.get(i).getName());
       }
 
-      if (method.getReturnType().isVoid()) {
-        methBody._(loadVariable(proxyVar).invoke(method, statementVars));
+
+      if (!method.isPublic()) {
+        PrivateAccessUtil.addPrivateAccessStubs(privateAccessorType, builder, method, new Modifier[0]);
+
+        final Statement[] privateAccessStmts = new Statement[statementVars.length + 1];
+        privateAccessStmts[0] = Refs.get(proxyVar);
+        for (int i = 0; i < statementVars.length; i++) {
+          privateAccessStmts[i + 1] = statementVars[i];
+        }
+
+        if (method.getReturnType().isVoid()) {
+          methBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts));
+        }
+        else {
+          methBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts).returnValue());
+        }
       }
       else {
-        methBody._(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
+        if (method.getReturnType().isVoid()) {
+          methBody._(loadVariable(proxyVar).invoke(method, statementVars));
+        }
+        else {
+          methBody._(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
+        }
       }
+
+
       methBody.finish();
     }
 
