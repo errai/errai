@@ -237,7 +237,6 @@ public final class MetaClassFactory {
 
       if (!ERASED_CLASS_CACHE.containsKey(cls.getName())) {
         final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
-
         addLookups(cls, javaReflectionClass);
         return javaReflectionClass;
       }
@@ -267,7 +266,7 @@ public final class MetaClassFactory {
   }
 
   private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz,
-      final MetaParameterizedType parameterizedType) {
+                                                      final MetaParameterizedType parameterizedType) {
     final BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create(), clazz.getFullyQualifiedName());
 
     buildMetaClass.setReifiedFormOf(clazz);
@@ -292,7 +291,7 @@ public final class MetaClassFactory {
 
     for (final MetaField field : clazz.getDeclaredFields()) {
       final BuildMetaField bmf = new ShadowBuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(field), field.getType(), field.getName(), field);
+          GenUtil.scopeOf(field), field.getType(), field.getName(), field);
 
       bmf.setFinal(field.isFinal());
       bmf.setStatic(field.isStatic());
@@ -304,8 +303,8 @@ public final class MetaClassFactory {
 
     for (final MetaConstructor c : clazz.getDeclaredConstructors()) {
       final BuildMetaConstructor newConstructor = new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(c),
-              DefParameters.from(c));
+          GenUtil.scopeOf(c),
+          DefParameters.from(c));
       newConstructor.setReifiedFormOf(c);
 
       buildMetaClass.addConstructor(newConstructor);
@@ -345,9 +344,9 @@ public final class MetaClassFactory {
       }
 
       final BuildMetaMethod newMethod = new ShadowBuildMetaMethod(buildMetaClass, BlockStatement.EMPTY_BLOCK,
-              GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
-              method.getGenericReturnType(),
-              DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()), method);
+          GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
+          method.getGenericReturnType(),
+          DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()), method);
 
       newMethod.setReifiedFormOf(method);
 
@@ -413,10 +412,6 @@ public final class MetaClassFactory {
     ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
   }
 
-  private static void addLookups(final String encName, final MetaClass metaClass) {
-    ERASED_CLASS_CACHE.put(encName, metaClass);
-  }
-
   public static Map<String, Class<?>> PRIMITIVE_LOOKUP = Collections.unmodifiableMap(new HashMap<String, Class<?>>() {
     {
       put("void", void.class);
@@ -441,7 +436,7 @@ public final class MetaClassFactory {
     }
     catch (ClassNotFoundException e) {
       final URL url = MetaClassFactory.class.getClassLoader()
-              .getResource(fullyQualifiedName.replaceAll("\\.", "/") + ".java");
+          .getResource(fullyQualifiedName.replaceAll("\\.", "/") + ".java");
 
       if (url != null) {
         final File sourceFile = new File(url.getFile()).getAbsoluteFile();
@@ -451,16 +446,14 @@ public final class MetaClassFactory {
           final String packageName = fullyQualifiedName.substring(0, fullyQualifiedName.lastIndexOf('.'));
           final String className = fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf('.') + 1);
 
-          final String temp = RebindUtils.getTempDirectory() + "/hotload/";
-
           final String location = ClassChangeUtil.compileClass(directory.getAbsolutePath(),
-                  packageName,
-                  className,
-                  temp);
+              packageName,
+              className,
+              RebindUtils.getTempDirectory() + "/hotload/");
 
           try {
             return ClassChangeUtil.loadClassDefinition(location,
-                    packageName, className);
+                packageName, className);
           }
           catch (Exception e2) {
             throw new RuntimeException("Could not load class: " + fullyQualifiedName, e2);
@@ -492,10 +485,10 @@ public final class MetaClassFactory {
 
   public static MetaClass[] asMetaClassArray(final MetaParameter[] parms) {
     final MetaClass[] type = new MetaClass[parms.length];
-     for (int i = 0; i < parms.length; i++) {
-       type[i] = parms[i].getType();
-     }
-     return type;
+    for (int i = 0; i < parms.length; i++) {
+      type[i] = parms[i].getType();
+    }
+    return type;
   }
 
   public static Class<?>[] asClassArray(final MetaParameter[] parms) {

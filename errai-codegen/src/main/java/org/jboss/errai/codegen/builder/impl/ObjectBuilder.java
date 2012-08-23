@@ -126,7 +126,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
       }
     });
   }
-  
+
   public AnonymousClassStructureBuilder extend(final Object... parameters) {
     this.parameters = parameters;
     return extend();
@@ -150,7 +150,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
           writer.reset();
 
           final CallParameters callParameters = (parameters != null) ?
-                  fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
+              fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
 
           if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null) {
             if (context.isPermissiveMode()) {

@@ -124,8 +124,6 @@ public class Variable extends AbstractStatement {
     return new Variable(name, MetaClassFactory.get(type));
   }
 
-
-
   public static Variable create(final String name, final MetaClass type) {
     return new Variable(name, type);
   }

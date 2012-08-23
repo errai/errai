@@ -84,9 +84,9 @@ public class InjectUtil {
     final List<MetaMethod> postConstructTasks = scanForPostConstruct(type);
     final List<MetaMethod> preDestroyTasks = scanForPreDestroy(type);
 
-    for (Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
+    for (final Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
       if (type.isAnnotationPresent(a)) {
-        DecoratorTask task = new DecoratorTask(injector, type, ctx.getDecorator(a));
+        final DecoratorTask task = new DecoratorTask(injector, type, ctx.getDecorator(a));
         injectionTasks.add(task);
       }
     }
@@ -101,7 +101,7 @@ public class InjectUtil {
 
       return new ConstructionStrategy() {
         @Override
-        public void generateConstructor(ConstructionStatusCallback callback) {
+        public void generateConstructor(final ConstructionStatusCallback callback) {
           final Statement[] parameterStatements
               = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
@@ -131,7 +131,7 @@ public class InjectUtil {
 
       return new ConstructionStrategy() {
         @Override
-        public void generateConstructor(ConstructionStatusCallback callback) {
+        public void generateConstructor(final ConstructionStatusCallback callback) {
           if (injector.isSingleton() && injector.isCreated()) return;
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
@@ -155,9 +155,9 @@ public class InjectUtil {
     }
   }
 
-  private static void handleInjectionTasks(InjectionContext ctx,
-                                           List<InjectionTask> tasks) {
-    for (InjectionTask task : tasks) {
+  private static void handleInjectionTasks(final InjectionContext ctx,
+                                           final List<InjectionTask> tasks) {
+    for (final InjectionTask task : tasks) {
       if (!task.doTask(ctx)) {
         throw new InjectionFailure("could perform injection task: " + task);
       }
@@ -196,9 +196,6 @@ public class InjectUtil {
 
     final IOCProcessingContext pc = ctx.getProcessingContext();
 
-//    pc.globalInsertBefore(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
-//            .initializeWith(classStructureBuilder.finish()));
-
     pc.getBootstrapBuilder()
         .privateField(varName, initializationCallbackType)
         .initializesWith(classStructureBuilder.finish()).finish();
@@ -235,26 +232,24 @@ public class InjectUtil {
 
     renderLifeCycleEvents(PreDestroy.class, injector, ctx, initMeth, preDestroyTasks);
 
-    final AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
-
     final IOCProcessingContext pc = ctx.getProcessingContext();
 
     pc.getBootstrapBuilder().privateField(varName, destructionCallbackType)
-        .initializesWith(classStructureBuilder.finish()).finish();
+        .initializesWith(initMeth.finish().finish()).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
   }
 
-  private static void renderLifeCycleEvents(Class<? extends Annotation> type, Injector injector,
-                                            InjectionContext ctx, BlockBuilder<?> body, List<MetaMethod> methods) {
-    for (MetaMethod meth : methods) {
+  private static void renderLifeCycleEvents(final Class<? extends Annotation> type, final Injector injector,
+                                            final InjectionContext ctx, final BlockBuilder<?> body, final List<MetaMethod> methods) {
+    for (final MetaMethod meth : methods) {
       renderLifeCycleMethodCall(type, injector, ctx, body, meth);
     }
   }
 
-  private static void renderLifeCycleMethodCall(Class<? extends Annotation> type, Injector injector,
-                                                InjectionContext ctx, BlockBuilder<?> body, MetaMethod meth) {
+  private static void renderLifeCycleMethodCall(final Class<? extends Annotation> type, final Injector injector,
+                                                final InjectionContext ctx, final BlockBuilder<?> body, final MetaMethod meth) {
     if (meth.getParameters().length != 0) {
       throw new InjectionFailure(type.getCanonicalName() + " method must contain no parameters: "
           + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
@@ -279,7 +274,7 @@ public class InjectUtil {
     final List<InjectionTask> accumulator = new LinkedList<InjectionTask>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
-    for (Class<? extends Annotation> decorator : decorators) {
+    for (final Class<? extends Annotation> decorator : decorators) {
       if (type.isAnnotationPresent(decorator)) {
         accumulator.add(new InjectionTask(injector, type));
       }
@@ -291,18 +286,17 @@ public class InjectUtil {
       for (final MetaField field : visit.getDeclaredFields()) {
         if (isInjectionPoint(ctx, field)) {
           if (!field.isPublic()) {
-            MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
+            final MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
                 field.getType());
 
             if (meth == null) {
-              InjectionTask task = new InjectionTask(injector, field);
+              final InjectionTask task = new InjectionTask(injector, field);
               accumulator.add(task);
             }
             else {
-              InjectionTask task = new InjectionTask(injector, meth);
+              final InjectionTask task = new InjectionTask(injector, meth);
               accumulator.add(task);
             }
-
           }
           else {
             accumulator.add(new InjectionTask(injector, field));
@@ -310,11 +304,11 @@ public class InjectUtil {
         }
 
         ElementType[] elTypes;
-        for (Class<? extends Annotation> a : decorators) {
+        for (final Class<? extends Annotation> a : decorators) {
           elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
               : new ElementType[]{ElementType.FIELD};
 
-          for (ElementType elType : elTypes) {
+          for (final ElementType elType : elTypes) {
             switch (elType) {
               case FIELD:
                 if (field.isAnnotationPresent(a)) {
@@ -326,16 +320,16 @@ public class InjectUtil {
         }
       }
 
-      for (MetaMethod meth : visit.getDeclaredMethods()) {
+      for (final MetaMethod meth : visit.getDeclaredMethods()) {
         if (isInjectionPoint(ctx, meth)) {
           accumulator.add(new InjectionTask(injector, meth));
         }
 
-        for (Class<? extends Annotation> a : decorators) {
+        for (final Class<? extends Annotation> a : decorators) {
           final ElementType[] elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
               : new ElementType[]{ElementType.FIELD};
 
-          for (ElementType elType : elTypes) {
+          for (final ElementType elType : elTypes) {
             switch (elType) {
               case METHOD:
                 if (meth.isAnnotationPresent(a)) {
@@ -343,9 +337,9 @@ public class InjectUtil {
                 }
                 break;
               case PARAMETER:
-                for (MetaParameter parameter : meth.getParameters()) {
+                for (final MetaParameter parameter : meth.getParameters()) {
                   if (parameter.isAnnotationPresent(a)) {
-                    DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                    final DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
                     accumulator.add(task);
                   }
                 }
@@ -366,17 +360,17 @@ public class InjectUtil {
     final List<MetaConstructor> accumulator = new LinkedList<MetaConstructor>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
-    for (MetaConstructor cns : type.getConstructors()) {
+    for (final MetaConstructor cns : type.getConstructors()) {
       if (isInjectionPoint(ctx, cns)) {
         accumulator.add(cns);
       }
 
       ElementType[] elTypes;
-      for (Class<? extends Annotation> a : decorators) {
+      for (final Class<? extends Annotation> a : decorators) {
         elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
             : new ElementType[]{ElementType.FIELD};
 
-        for (ElementType elType : elTypes) {
+        for (final ElementType elType : elTypes) {
           switch (elType) {
             case CONSTRUCTOR:
               if (cns.isAnnotationPresent(a)) {
@@ -384,9 +378,9 @@ public class InjectUtil {
               }
               break;
             case PARAMETER:
-              for (MetaParameter parameter : cns.getParameters()) {
+              for (final MetaParameter parameter : cns.getParameters()) {
                 if (parameter.isAnnotationPresent(a)) {
-                  DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                  final DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
                   tasks.add(task);
                 }
               }
@@ -398,20 +392,20 @@ public class InjectUtil {
     return accumulator;
   }
 
-  private static List<MetaMethod> scanForPostConstruct(MetaClass type) {
+  private static List<MetaMethod> scanForPostConstruct(final MetaClass type) {
     return scanForAnnotatedMethod(type, PostConstruct.class);
   }
 
-  private static List<MetaMethod> scanForPreDestroy(MetaClass type) {
+  private static List<MetaMethod> scanForPreDestroy(final MetaClass type) {
     return scanForAnnotatedMethod(type, PreDestroy.class);
   }
 
-  public static List<MetaMethod> scanForAnnotatedMethod(MetaClass type, Class<? extends Annotation> annoClass) {
+  public static List<MetaMethod> scanForAnnotatedMethod(final MetaClass type, final Class<? extends Annotation> annoClass) {
     final List<MetaMethod> accumulator = new LinkedList<MetaMethod>();
 
     MetaClass clazz = type;
     do {
-      for (MetaMethod meth : clazz.getDeclaredMethods()) {
+      for (final MetaMethod meth : clazz.getDeclaredMethods()) {
         if (meth.isAnnotationPresent(annoClass)) {
           accumulator.add(meth);
         }
@@ -430,32 +424,32 @@ public class InjectUtil {
   }
 
 
-  private static boolean hasDefaultConstructor(MetaClass type) {
+  private static boolean hasDefaultConstructor(final MetaClass type) {
     return type.getConstructor(new MetaClass[0]) != null;
   }
 
-  private static MetaClass[] parametersToClassTypeArray(MetaParameter[] parms) {
-    MetaClass[] newArray = new MetaClass[parms.length];
+  private static MetaClass[] parametersToClassTypeArray(final MetaParameter[] parms) {
+    final MetaClass[] newArray = new MetaClass[parms.length];
     for (int i = 0; i < parms.length; i++) {
       newArray[i] = parms[i].getType();
     }
     return newArray;
   }
 
-  public static Statement getInjectorOrProxy(InjectionContext ctx,
-                                             InjectableInstance injectableInstance,
-                                             MetaClass clazz,
-                                             QualifyingMetadata qualifyingMetadata) {
+  public static Statement getInjectorOrProxy(final InjectionContext ctx,
+                                             final InjectableInstance injectableInstance,
+                                             final MetaClass clazz,
+                                             final QualifyingMetadata qualifyingMetadata) {
 
     return getInjectorOrProxy(ctx, injectableInstance, clazz, qualifyingMetadata, false);
   }
 
 
-  public static Statement getInjectorOrProxy(InjectionContext ctx,
-                                             InjectableInstance injectableInstance,
-                                             MetaClass clazz,
-                                             QualifyingMetadata qualifyingMetadata,
-                                             boolean alwaysProxyDependent) {
+  public static Statement getInjectorOrProxy(final InjectionContext ctx,
+                                             final InjectableInstance injectableInstance,
+                                             final MetaClass clazz,
+                                             final QualifyingMetadata qualifyingMetadata,
+                                             final boolean alwaysProxyDependent) {
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
@@ -466,10 +460,8 @@ public class InjectUtil {
        * ensure only one instance of each bean is created.
        */
       if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
-        final TypeInjector typeInjector = (TypeInjector) inj;
-
         return Stmt.loadVariable("context").invoke("getInstanceOrNew",
-            Refs.get(typeInjector.getCreationalCallbackVarName()),
+            Refs.get(inj.getCreationalCallbackVarName()),
             inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
       }
 
@@ -551,7 +543,7 @@ public class InjectUtil {
     }
   }
 
-  public static ProxyInjector getOrCreateProxy(InjectionContext ctx, MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+  public static ProxyInjector getOrCreateProxy(final InjectionContext ctx, final MetaClass clazz, final QualifyingMetadata qualifyingMetadata) {
     final ProxyInjector proxyInjector;
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (ProxyInjector)
@@ -564,16 +556,16 @@ public class InjectUtil {
     return proxyInjector;
   }
 
-  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms,
-                                                         InjectionContext ctx,
-                                                         MetaMethod method) {
+  public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
+                                                         final InjectionContext ctx,
+                                                         final MetaMethod method) {
     return resolveInjectionDependencies(parms, ctx, method, true);
   }
 
-  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms,
-                                                         InjectionContext ctx,
-                                                         MetaMethod method,
-                                                         boolean inlineReference) {
+  public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
+                                                         final InjectionContext ctx,
+                                                         final MetaMethod method,
+                                                         final boolean inlineReference) {
 
     final MetaClass[] parmTypes = parametersToClassTypeArray(parms);
     final Statement[] parmValues = new Statement[parmTypes.length];
@@ -613,21 +605,26 @@ public class InjectUtil {
 
     for (int i = 0; i < parmTypes.length; i++
         ) {
-      Statement stmt;
+      final Statement stmt;
       try {
-        final InjectableInstance injectableInstance
-            = InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx);
-
-        stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
-            ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()), true);
-
-        stmt = recordInlineReference(stmt, ctx, parms[i]);
+        stmt = recordInlineReference(
+            getInjectorOrProxy(
+                ctx,
+                InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx),
+                parmTypes[i],
+                ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(
+                    parms[i].getAnnotations()
+                ),
+                true
+            ),
+            ctx,
+            parms[i]
+        );
 
         ctx.closeProxyIfOpen();
-
       }
       catch (UnproxyableClassException e) {
-        String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+        final String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
             "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
             "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
             "\t Note          : this issue can be resolved by making "
@@ -648,7 +645,7 @@ public class InjectUtil {
     return parmValues;
   }
 
-  private static final Statement recordInlineReference(final Statement beanCreationStmt,
+  private static Statement recordInlineReference(final Statement beanCreationStmt,
                                                        final InjectionContext ctx,
                                                        final MetaParameter parm) {
     final String varName = InjectUtil.getUniqueVarName();
@@ -688,7 +685,7 @@ public class InjectUtil {
 
   public static List<Annotation> getQualifiersFromAnnotations(final Annotation[] annotations) {
     final List<Annotation> quals = new ArrayList<Annotation>();
-    for (Annotation a : annotations) {
+    for (final Annotation a : annotations) {
       if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
         quals.add(a);
       }
@@ -711,7 +708,7 @@ public class InjectUtil {
 
   public static BeanMetric analyzeBean(final InjectionContext context, final MetaClass clazz) {
     MetaConstructor injectConstructor = null;
-    for (MetaConstructor constructor : clazz.getDeclaredConstructors()) {
+    for (final MetaConstructor constructor : clazz.getDeclaredConstructors()) {
       if (isInjectionPoint(context, constructor)) {
         injectConstructor = constructor;
         break;
@@ -723,13 +720,13 @@ public class InjectUtil {
 
     MetaClass toScan = clazz;
     do {
-      for (MetaField field : toScan.getDeclaredFields()) {
+      for (final MetaField field : toScan.getDeclaredFields()) {
         if (isInjectionPoint(context, field)) {
           fields.add(field);
         }
       }
 
-      for (MetaMethod method : toScan.getDeclaredMethods()) {
+      for (final MetaMethod method : toScan.getDeclaredMethods()) {
         if (isInjectionPoint(context, method)) {
           methods.add(method);
         }
@@ -765,7 +762,7 @@ public class InjectUtil {
    *
    * @return -
    */
-  public static Set<Injector> getBeanInjectionTrackStore(InjectionContext context) {
+  public static Set<Injector> getBeanInjectionTrackStore(final InjectionContext context) {
     @SuppressWarnings("unchecked") Set<Injector> store = (Set<Injector>) context.getAttribute(BEAN_INJECTOR_STORE);
     if (store == null) {
       context.setAttribute(BEAN_INJECTOR_STORE, store = new HashSet<Injector>());
@@ -860,7 +857,7 @@ public class InjectUtil {
                                               final MetaMethod method,
                                               final Statement... arguments) {
 
-    Statement[] args;
+    final Statement[] args;
     if (method.isStatic()) {
       args = new Statement[arguments.length];
       System.arraycopy(arguments, 0, args, 0, arguments.length);

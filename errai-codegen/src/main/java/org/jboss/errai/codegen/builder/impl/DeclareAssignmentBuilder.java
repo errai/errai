@@ -27,13 +27,13 @@ import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DeclareAssignmentBuilder extends AssignmentBuilder {
-  public DeclareAssignmentBuilder(boolean isFinal, VariableReference reference, Statement statement) {
+  public DeclareAssignmentBuilder(final boolean isFinal, final VariableReference reference, final Statement statement) {
     super(isFinal, AssignmentOperator.Assignment, reference, statement);
   }
 
   @Override
-  public String generate(Context context) {
-    String type = LoadClassReference.getClassReference(reference.getType(), context, true);
+  public String generate(final Context context) {
+    final String type = LoadClassReference.getClassReference(reference.getType(), context, true);
     if (statement != null) {
       return (isFinal ? "final " : "") + type + " " + super.generate(context);
     }

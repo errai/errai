@@ -372,6 +372,7 @@ public class CreationalContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
   void destroyContext() {
     if (immutableContext) {
       throw new IllegalStateException("scope [" + scopeName + "] is an immutable scope and cannot be destroyed");

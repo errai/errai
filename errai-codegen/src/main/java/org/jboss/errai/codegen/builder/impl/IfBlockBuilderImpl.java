@@ -123,8 +123,7 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
 
   @Override
   public BlockBuilder<ElseBlockBuilder> elseif_(Statement lhs, BooleanOperator op, Object rhs) {
-    Statement rhsStatement = GenUtil.generate(context, rhs);
-    return elseif_(lhs, op, rhsStatement);
+    return elseif_(lhs, op, GenUtil.generate(context, rhs));
   }
 
   private BlockBuilder<ElseBlockBuilder> elseif_(final IfBlock elseIfBlock) {

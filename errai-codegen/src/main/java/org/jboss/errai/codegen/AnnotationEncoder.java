@@ -48,9 +48,7 @@ public class AnnotationEncoder {
                 = ObjectBuilder.newInstanceOf(annotationClass, context)
                 .extend();
 
-        final Class<? extends Annotation> annotationClass = annotation.getClass();
-
-        final List<Method> sortedMethods = Arrays.asList(annotationClass.getDeclaredMethods());
+        final List<Method> sortedMethods = Arrays.asList(annotation.getClass().getDeclaredMethods());
         Collections.sort(sortedMethods, new Comparator<Method>() {
                     @Override
                     public int compare(final Method m1, final Method m2) {

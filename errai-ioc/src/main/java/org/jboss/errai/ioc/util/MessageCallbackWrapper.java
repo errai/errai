@@ -25,5 +25,4 @@ public final class MessageCallbackWrapper {
   public static Statement wrapMessageCallbackInAsync(Statement statement) {
     return wrap(RunAsyncWrapper.wrap(Stmt.nestedCall(statement).invoke("callback", Refs.get("$_message_$"))), "$_message_$");
   }
-
 }

@@ -100,7 +100,7 @@ public class ClassChangeUtil {
   }
 
   public static Class compileAndLoad(final File sourceFile,
-                                     final String fullyQualifiedName) throws IOException{
+                                     final String fullyQualifiedName) throws IOException {
     final String packageName = getPackageFromFQCN(fullyQualifiedName);
     final String className = getNameFromFQCN(fullyQualifiedName);
 
@@ -140,7 +140,6 @@ public class ClassChangeUtil {
                                     final String outputPath) {
 
     try {
-      final File inFile = new File(sourcePath + File.separator + className + ".java");
 
       final ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
       final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -168,7 +167,6 @@ public class ClassChangeUtil {
       }
 
       final StringBuilder sb = new StringBuilder(4096);
-
       final List<URL> configUrls = MetaDataScanner.getConfigUrls();
       final List<File> classpathElements = new ArrayList<File>(configUrls.size());
       classpathElements.add(new File(outputPath));
@@ -194,7 +192,8 @@ public class ClassChangeUtil {
       /**
        * Attempt to run the compiler without any classpath specified.
        */
-      if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), classPath) != 0) {
+      if (adapter.compile(System.out, errorOutputStream, outputPath,
+          new File(sourcePath + File.separator + className + ".java").getAbsolutePath(), classPath) != 0) {
 
         System.out.println("*** FAILED TO COMPILE CLASS ***");
         System.out.println("*** Classpath Used: " + sb.toString());
@@ -386,9 +385,7 @@ public class ClassChangeUtil {
       for (final Enumeration resEnum : enumerations) {
         while (resEnum.hasMoreElements()) {
           try {
-            final URL url = (URL) resEnum.nextElement();
-
-            final File file = getFileIfExists(url.getFile());
+            final File file = getFileIfExists(((URL) resEnum.nextElement()).getFile());
             if (file != null) {
               cp.append(File.pathSeparator).append(file.getAbsolutePath());
             }
@@ -495,7 +492,6 @@ public class ClassChangeUtil {
       }
     }
   }
-
 
   private static ReverseMatchResult reversePathMatch(final String fqcn, final File location) {
     final List<String> stk = new ArrayList<String>(Arrays.asList(fqcn.split("\\.")));

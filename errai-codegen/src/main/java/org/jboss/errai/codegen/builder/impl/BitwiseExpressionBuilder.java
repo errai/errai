@@ -31,7 +31,8 @@ import org.jboss.errai.codegen.util.GenUtil;
 public class BitwiseExpressionBuilder extends ExpressionBuilder<BitwiseOperator> {
   private boolean negated;
 
-  public BitwiseExpressionBuilder() {}
+  public BitwiseExpressionBuilder() {
+  }
 
   public BitwiseExpressionBuilder(final Statement rhs, final BitwiseOperator operator) {
     super(rhs, operator);
@@ -44,7 +45,7 @@ public class BitwiseExpressionBuilder extends ExpressionBuilder<BitwiseOperator>
   public BitwiseExpressionBuilder(final Object lhs, final Object rhs, final BitwiseOperator operator) {
     super(lhs, rhs, operator);
   }
-  
+
   public static Expression<BitwiseOperator> create(final Statement lhs) {
     return new BitwiseExpressionBuilder(lhs, null, null);
   }
@@ -60,7 +61,7 @@ public class BitwiseExpressionBuilder extends ExpressionBuilder<BitwiseOperator>
   public static Expression<BitwiseOperator> createUnqualifying(final Object lhs, final BitwiseOperator operator, final Object rhs) {
     final BitwiseExpressionBuilder bitwiseExpressionBuilder = new BitwiseExpressionBuilder(lhs, rhs, operator);
     bitwiseExpressionBuilder.qualifyingBrackets = false;
-    return  bitwiseExpressionBuilder;
+    return bitwiseExpressionBuilder;
   }
 
   @Override

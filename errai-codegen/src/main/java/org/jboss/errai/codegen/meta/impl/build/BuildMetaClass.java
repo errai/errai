@@ -550,7 +550,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return toJavaString(this.context);
   }
 
-  public String toJavaString(Context context) {
+  public String toJavaString(final Context context) {
     if (generatedCache != null) return generatedCache;
 
     final StringBuilder buf = new StringBuilder(512);
@@ -561,11 +561,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     context.addVariable(Variable.create("this", this));
 
-    for (BuildMetaField buildMetaField : fields) {
+    for (final BuildMetaField buildMetaField : fields) {
       context.addVariable(Variable.create(buildMetaField.getName(), buildMetaField.getType()));
     }
 
-    for (Annotation a : annotations) {
+    for (final Annotation a : annotations) {
       buf.append(new AnnotationLiteral(a).getCanonicalString(context));
       buf.append(" ");
     }
@@ -679,7 +679,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     final StringBuilder buf = new StringBuilder(512);
 
     List<Builder> toBuild = new ArrayList<Builder>(fields);
-    List<Builder> toIterate = new ArrayList<Builder>(toBuild);
+    final List<Builder> toIterate = new ArrayList<Builder>(toBuild);
 
     int initialFieldSize;
 
@@ -709,7 +709,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     if (!_permissiveMode) {
       // verification pass.
-      for (Builder builder : toBuild) {
+      for (final Builder builder : toBuild) {
         builder.toJavaString();
       }
     }
@@ -728,7 +728,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!innerClasses.isEmpty())
       buf.append("\n");
 
-    Iterator<? extends Builder> constructorIterator = constructors.iterator();
+    final Iterator<? extends Builder> constructorIterator = constructors.iterator();
     while (constructorIterator.hasNext()) {
       buf.append(constructorIterator.next().toJavaString());
       if (constructorIterator.hasNext())
@@ -738,7 +738,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!constructors.isEmpty())
       buf.append("\n");
 
-    Iterator<? extends Builder> methodsIterator = methods.iterator();
+    final Iterator<? extends Builder> methodsIterator = methods.iterator();
     while (methodsIterator.hasNext()) {
       buf.append(methodsIterator.next().toJavaString());
       if (methodsIterator.hasNext())

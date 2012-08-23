@@ -105,7 +105,6 @@ public class QuickDeps {
     String clazzName = null;
     String packageName = "";
 
-
     String token;
     while ((token = identifierTokenizer.nextToken()) != null) {
       if (RESERVED_KEYWORDS.contains(token)) {
@@ -260,10 +259,5 @@ public class QuickDeps {
     }
 
     return cursor;
-  }
-
-  public static void main(String[] args) {
-
-
   }
 }

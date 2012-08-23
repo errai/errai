@@ -348,11 +348,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public MetaField getInheritedField(String name) {
+  public MetaField getInheritedField(final String name) {
     MetaField f = getDeclaredField(name);
     if (f != null)
       return f;
-    for (MetaClass iface : getInterfaces()) {
+    for (final MetaClass iface : getInterfaces()) {
       f = iface.getInheritedField(name);
       if (f != null)
         return f;
@@ -518,9 +518,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     else if (isArray()) {
       try {
-        final String name = getInternalName().replaceAll("/", "\\.");
-
-        cls = Class.forName(name, false,
+        cls = Class.forName(getInternalName().replaceAll("/", "\\."), false,
             Thread.currentThread().getContextClassLoader());
       }
       catch (ClassNotFoundException e) {

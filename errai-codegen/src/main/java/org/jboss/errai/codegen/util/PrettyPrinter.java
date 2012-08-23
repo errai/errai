@@ -83,7 +83,7 @@ public class PrettyPrinter {
                                     final int indentLevel, final int statementIndent) {
     final String trimmedLineBuffer = lineBuffer.toString().trim();
 
-    if (trimmedLineBuffer.length() == 0) {
+    if (trimmedLineBuffer.isEmpty()) {
       return;
     }
 

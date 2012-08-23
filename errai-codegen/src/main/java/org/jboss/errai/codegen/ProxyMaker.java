@@ -180,7 +180,6 @@ public class ProxyMaker {
         }
       }
 
-
       methBody.finish();
     }
 

@@ -134,69 +134,58 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 
   @Override
   public StatementBuilder declareVariable(String name, Class<?> type) {
-    Variable v = Variable.create(name, type);
-    return declareVariable(v);
+    return declareVariable(Variable.create(name, type));
   }
 
   @Override
   public StatementBuilder declareVariable(String name, TypeLiteral<?> type) {
-    Variable v = Variable.create(name, type);
-    return declareVariable(v);
+    return declareVariable(Variable.create(name, type));
   }
 
   @Override
   public StatementBuilder declareVariable(String name, Object initialization) {
-    Variable v = Variable.create(name, initialization);
-    return declareVariable(v);
+    return declareVariable(Variable.create(name, initialization));
   }
 
   @Override
   public StatementBuilder declareVariable(String name, MetaClass type, Object initialization) {
-    Variable v = Variable.create(name, type, initialization);
-    return declareVariable(v);
+    return declareVariable(Variable.create(name, type, initialization));
   }
 
   @Override
   public StatementBuilder declareVariable(String name, Class<?> type, Object initialization) {
-    Variable v = Variable.create(name, type, initialization);
-    return declareVariable(v);
+    return declareVariable(Variable.create(name, type, initialization));
   }
 
   @Override
   public StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization) {
-    Variable v = Variable.create(name, type, initialization);
-    return declareVariable(v);
+    return declareVariable(Variable.create(name, type, initialization));
   }
 
 
   @Override
   public StatementBuilder declareFinalVariable(String name, Class<?> type) {
-    Variable v = Variable.createFinal(name, type);
-    return declareVariable(v);
+    return declareVariable(Variable.createFinal(name, type));
   }
 
   @Override
   public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type) {
-    Variable v = Variable.createFinal(name, type);
-    return declareVariable(v);
+    return declareVariable(Variable.createFinal(name, type));
   }
 
   @Override
   public StatementBuilder declareFinalVariable(String name, MetaClass type, Object initialization) {
-    Variable v = Variable.createFinal(name, type, initialization);
-    return declareVariable(v);
+    return declareVariable(Variable.createFinal(name, type, initialization));
   }
 
   @Override
   public StatementBuilder declareFinalVariable(String name, Class<?> type, Object initialization) {
-    Variable v = Variable.createFinal(name, type, initialization);
-    return declareVariable(v);
+    return declareVariable(Variable.createFinal(name, type, initialization));
   }
 
   @Override
   public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type, Object initialization) {
-    Variable v = Variable.createFinal(name, type, initialization);
-    return declareVariable(v);
+    return declareVariable(Variable.createFinal(name, type, initialization));
   }
 
   private StatementBuilder declareVariable(Variable v) {

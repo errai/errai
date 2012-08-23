@@ -51,7 +51,7 @@ public class AfterInitializationExtension extends IOCDecoratorExtension<AfterIni
 
     Statement callbackStmt = Stmt.newObject(Runnable.class).extend()
             .publicOverridesMethod("run")
-            .append(RunAsyncWrapper.wrap(instance.callOrBind()))
+            .append(instance.callOrBind())
             .finish()
             .finish();
 

@@ -44,10 +44,9 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
   @Override
   public String getCanonicalString(final Context context) {
     final Class<? extends Annotation> annotationClass = getValue().annotationType();
-    final String ref = LoadClassReference.getClassReference(MetaClassFactory.get(annotationClass), context);
     final StringBuilder builder = new StringBuilder();
 
-    builder.append("@").append(ref);
+    builder.append("@").append(LoadClassReference.getClassReference(MetaClassFactory.get(annotationClass), context));
 
     final List<Method> sortedMethods = Arrays.asList(annotationClass.getDeclaredMethods());
     Collections.sort(sortedMethods, new Comparator<Method>() {

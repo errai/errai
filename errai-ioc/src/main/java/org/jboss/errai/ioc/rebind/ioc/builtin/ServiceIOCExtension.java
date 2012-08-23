@@ -78,11 +78,11 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
 
     if (local) {
       subscribeStatement = Stmt.invokeStatic(ErraiBus.class, "get")
-              .invoke("subscribeLocal", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
+              .invoke("subscribeLocal", svcName, injectableInstance.getValueStatement());
     }
     else {
       subscribeStatement = Stmt.invokeStatic(ErraiBus.class, "get")
-              .invoke("subscribe", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
+              .invoke("subscribe", svcName, injectableInstance.getValueStatement());
     }
 
     final Statement declareVar = Stmt.declareFinalVariable(varName, Subscription.class, subscribeStatement);

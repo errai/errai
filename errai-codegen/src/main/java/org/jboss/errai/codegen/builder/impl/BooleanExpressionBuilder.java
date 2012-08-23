@@ -65,13 +65,11 @@ public class BooleanExpressionBuilder extends ExpressionBuilder<BooleanOperator>
       lhs = GenUtil.convert(context, lhs, MetaClassFactory.get(Boolean.class));
     }
 
-    final String expr = super.generate(context);
-
     if (negated) {
-      return UnaryOperator.Complement.getCanonicalString()  + "(" + expr + ")";
+      return UnaryOperator.Complement.getCanonicalString()  + "(" + super.generate(context) + ")";
     }
     
-    return expr;
+    return super.generate(context);
   }
 
   @Override
