@@ -34,10 +34,6 @@ public interface MarshallingSession {
 
   public String determineTypeFor(String formatType, Object o);
 
-  public String getAssumedElementType();
-
-  public void setAssumedElementType(String assumedElementType);
-
   /**
    * Records a new object to the session with the specified <tt>hashCode</tt> identifier.
    * 
@@ -89,4 +85,16 @@ public interface MarshallingSession {
    * @return the instance of the entity or null if not present
    */
   public <T> T getObject(Class<T> type, String hashCode);
+  
+  public String getAssumedElementType();
+
+  public void setAssumedElementType(String assumedElementType);
+
+  public String getAssumedMapKeyType();
+
+  public void setAssumedMapKeyType(String assumedMapKeyType);
+
+  public String getAssumedMapValueType();
+
+  public void setAssumedMapValueType(String assumedMapValueType);
 }

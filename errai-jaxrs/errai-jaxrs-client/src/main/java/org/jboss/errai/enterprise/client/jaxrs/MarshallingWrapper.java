@@ -16,11 +16,11 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
-import org.jboss.errai.marshalling.client.Marshalling;
-
 import java.util.List;
 import java.util.Map;
+
+import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
+import org.jboss.errai.marshalling.client.Marshalling;
 
 /**
  * Wrapper around {@link Marshalling} to provide a hook for format transformations.
@@ -40,12 +40,12 @@ public class MarshallingWrapper {
     return _toJSON(Marshalling.toJSON(arr));
   }
 
-  private static String _toJSON(final String erraiJson) {
+  private static String _toJSON(final String json) {
     if (RestClient.isJacksonMarshallingActive()) {
-      return JacksonTransformer.toJackson(erraiJson);
+      return JacksonTransformer.toJackson(json);
     }
 
-    return erraiJson;
+    return json;
   }
 
   public static <T> T fromJSON(final String json, final Class<T> type) {
@@ -60,11 +60,11 @@ public class MarshallingWrapper {
     return Marshalling.fromJSON(_fromJSON(json), Object.class);
   }
 
-  private static String _fromJSON(final String erraiJson) {
+  private static String _fromJSON(final String json) {
     if (RestClient.isJacksonMarshallingActive()) {
-      return JacksonTransformer.fromJackson(erraiJson);
+      return JacksonTransformer.fromJackson(json);
     }
 
-    return erraiJson;
+    return json;
   }
 }

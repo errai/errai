@@ -16,8 +16,16 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
+import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
+import static org.jboss.errai.common.client.protocols.SerializationParts.ENUM_STRING_VALUE;
+import static org.jboss.errai.common.client.protocols.SerializationParts.NUMERIC_VALUE;
+import static org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID;
+import static org.jboss.errai.common.client.protocols.SerializationParts.QUALIFIED_VALUE;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jboss.errai.common.client.protocols.SerializationParts;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
@@ -29,21 +37,14 @@ import com.google.gwt.json.client.JSONValue;
 /**
  * Utility to transform Errai's JSON to a Jackson compatible JSON and vice versa.
  * <p>
- * Limitations: 
+ * Limitations:
  * <ul>
- * <li>Fields with multiple type parameters are not supported (e.g. Map<K, V>)</li>
  * <li>Fields with nested parameterized types are not supported (e.g. List<List<String>>)</li>
  * </ul>
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JacksonTransformer {
-  private static final String ENCODED_TYPE = "^EncodedType";
-  private static final String VALUE = "^Value";
-  private static final String OBJECT_ID = "^ObjectID";
-  private static final String ENUM_STRING_VALUE = "^EnumStringValue";
-  private static final String NUM_VALUE = "^NumVal";
-
   private JacksonTransformer() {};
 
   /**
@@ -65,14 +66,16 @@ public class JacksonTransformer {
    * <ul>
    * <li>For all JSON objects, recursively remove the Errai specific OBJECT_ID and ENCODED_TYPE values</li>
    * <li>Keep a reference to the removed OBJECT_IDs, so back-references can be resolved</li>
-   * <li>If an array is encountered, process all its elements, then remove the Errai specific VALUE key, by associating
-   * its actual value with the object's key directly: "list": {"^Value": ["e1","e2"]} becomes "list": ["e1","e2"]</li>
+   * <li>If an array is encountered, process all its elements, then remove the Errai specific QUALIFIED_VALUE key, by
+   * associating its actual value with the object's key directly: "list": {"^Value": ["e1","e2"]} becomes "list":
+   * ["e1","e2"]</li>
    * <li>If an enum is encountered, remove the Errai specific ENUM_STRING_VALUE key, by associating its actual value
    * with the object's key directly: "gender": {"^EnumStringValue": "MALE"} becomes "gender": "MALE"</li>
-   * <li>If a number is encountered, remove the Errai specific NUM_VALUE key, by associating its actual value with the
-   * object's key directly and turning it into a JSON number, if required: "id": {"^NumValue": "1"} becomes "id": 1</li>
-   * <li>If a date is encountered, remove the Errai specific VALUE key, by associating its actual value with the
-   * object's key directly and turning it into a JSON number</li>
+   * <li>If a number is encountered, remove the Errai specific NUMERIC_VALUE key, by associating its actual value with
+   * the object's key directly and turning it into a JSON number, if required: "id": {"^NumValue": "1"} becomes "id": 1</li>
+   * <li>If a date is encountered, remove the Errai specific QUALIFIED_VALUE key, by associating its actual value with
+   * the object's key directly and turning it into a JSON number</li>
+   * <li>If EMBEDDED_JSON is encountered, turn in into standard json</li>
    * </ul>
    * 
    * @param val
@@ -101,7 +104,7 @@ public class JacksonTransformer {
           }
         }
       }
-      
+
       JSONValue encType = obj.get(ENCODED_TYPE);
       obj.put(OBJECT_ID, null);
       obj.put(ENCODED_TYPE, null);
@@ -110,11 +113,11 @@ public class JacksonTransformer {
         JSONArray arr;
         if ((arr = obj.get(k).isArray()) != null) {
           for (int i = 0; i < arr.size(); i++) {
-            if (arr.get(i).isObject() != null && arr.get(i).isObject().get(NUM_VALUE) != null) {
-              arr.set(i, arr.get(i).isObject().get(NUM_VALUE));
+            if (arr.get(i).isObject() != null && arr.get(i).isObject().get(NUMERIC_VALUE) != null) {
+              arr.set(i, arr.get(i).isObject().get(NUMERIC_VALUE));
             }
             else {
-              toJackson(arr.get(i), VALUE, obj, objectCache);
+              toJackson(arr.get(i), QUALIFIED_VALUE, obj, objectCache);
             }
           }
           if (parent != null) {
@@ -132,7 +135,7 @@ public class JacksonTransformer {
             return val;
           }
         }
-        else if (k.equals(NUM_VALUE)) {
+        else if (k.equals(NUMERIC_VALUE)) {
           if (parent != null) {
             if (obj.get(k).isString() != null) {
               String numValue = obj.get(k).isString().stringValue();
@@ -143,7 +146,7 @@ public class JacksonTransformer {
             }
           }
         }
-        else if (k.equals(VALUE)) {
+        else if (k.equals(QUALIFIED_VALUE)) {
           if (encType.isString().stringValue().equals("java.util.Date")) {
             String dateValue = obj.get(k).isString().stringValue();
             parent.put(key, new JSONNumber(Double.parseDouble(dateValue)));
@@ -152,8 +155,27 @@ public class JacksonTransformer {
             parent.put(key, obj.get(k));
           }
         }
+        else if (k.startsWith(SerializationParts.EMBEDDED_JSON)) {
+          final JSONValue newKey = JSONParser.parseStrict((k.substring(SerializationParts.EMBEDDED_JSON.length())));
+          JSONValue value = obj.get(k);
+          JSONObject tmpObject = new JSONObject();
+          toJackson(newKey, QUALIFIED_VALUE, tmpObject, objectCache);
+          obj.put(tmpObject.get(QUALIFIED_VALUE).toString(), value);
+        }
 
         toJackson(obj.get(k), k, obj, objectCache);
+      }
+    }
+   
+    return cleanUpEmbeddedJson(obj);
+  }
+  
+  private static JSONObject cleanUpEmbeddedJson(JSONObject obj) {
+    if (obj != null) {
+      for (String k : obj.keySet()) {
+        if (k.startsWith(SerializationParts.EMBEDDED_JSON)) {
+          obj.put(k, null);
+        }
       }
     }
     return obj;
@@ -177,8 +199,8 @@ public class JacksonTransformer {
    * The transformation from Jackson's JSON to Errai JSON contains the following steps:
    * <ul>
    * <li>Recursively add an incremented OBJECT_ID to every JSON object</li>
-   * <li>If a number is encountered, wrap it in a new JSON object with an OBJECT_ID and NUM_VALUE property</li>
-   * <li>If an array is encountered, wrap it in a new JSON object with an OBJECT_ID and VALUE property</li>
+   * <li>If a number is encountered, wrap it in a new JSON object with an OBJECT_ID and NUMERIC_VALUE property</li>
+   * <li>If an array is encountered, wrap it in a new JSON object with an OBJECT_ID and QUALIFIED_VALUE property</li>
    * </ul>
    * 
    * @param val
@@ -195,7 +217,7 @@ public class JacksonTransformer {
     JSONObject obj;
     JSONNumber num;
     JSONArray arr;
-    
+
     if ((obj = val.isObject()) != null) {
       obj.put(OBJECT_ID, new JSONString(new Integer(++objectId[0]).toString()));
 
@@ -206,7 +228,7 @@ public class JacksonTransformer {
     else if ((num = val.isNumber()) != null) {
       JSONObject numObject = new JSONObject();
       numObject.put(OBJECT_ID, new JSONString(new Integer(++objectId[0]).toString()));
-      numObject.put(NUM_VALUE, num);
+      numObject.put(NUMERIC_VALUE, num);
       if (parent != null) {
         parent.put(key, numObject);
       }
@@ -217,7 +239,7 @@ public class JacksonTransformer {
     else if ((arr = val.isArray()) != null) {
       JSONObject arrayObject = new JSONObject();
       arrayObject.put(OBJECT_ID, new JSONString(new Integer(++objectId[0]).toString()));
-      arrayObject.put(VALUE, arr);
+      arrayObject.put(QUALIFIED_VALUE, arr);
       if (parent != null) {
         parent.put(key, arrayObject);
       }
@@ -226,7 +248,7 @@ public class JacksonTransformer {
       }
 
       for (int i = 0; i < arr.size(); i++) {
-        arr.set(i, fromJackson(arr.get(i), VALUE, null, objectId));
+        arr.set(i, fromJackson(arr.get(i), QUALIFIED_VALUE, null, objectId));
       }
     }
 

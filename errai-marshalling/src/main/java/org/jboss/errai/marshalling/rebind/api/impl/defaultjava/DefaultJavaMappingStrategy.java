@@ -22,6 +22,10 @@ import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -60,10 +64,6 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -284,14 +284,27 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                   Bool.notExpr(loadVariable("obj").invoke("get", memberMapping.getKey()).invoke("isNull"))));
 
           final MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(memberMapping.getType());
+          final MetaClass mapKeyType = MarshallingGenUtil.getConcreteMapKeyType(memberMapping.getType());
+          
           if (elementType != null) {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
           }
-
+          else {
+            if (mapKeyType != null) {
+              ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", mapKeyType.getFullyQualifiedName()));
+              final MetaClass mapValueType = MarshallingGenUtil.getConcreteMapValueType(memberMapping.getType());
+              ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", mapValueType.getFullyQualifiedName()));  
+            }
+          }
+          
           ifBlockBuilder.append(bindingStatement);
 
           if (elementType != null) {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", (String) null));
+          }
+          else if (mapKeyType != null) {
+            ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", (String) null));
+            ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", (String) null));
           }
 
           tryBuilder.append(ifBlockBuilder.finish());

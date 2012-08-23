@@ -42,7 +42,7 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       return null;
     }
   }
-  
+
   @Override
   public String postJacksonList(String jackson) {
     ObjectMapper mapper = new ObjectMapper();
@@ -55,7 +55,7 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       return null;
     }
   }
-  
+
   @Override
   public String postJacksonListOfBytes(String jackson) {
     ObjectMapper mapper = new ObjectMapper();
@@ -68,7 +68,7 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       return null;
     }
   }
-  
+
   @Override
   public String postJacksonPortableWithByteArray(String jackson) {
     ObjectMapper mapper = new ObjectMapper();

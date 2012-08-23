@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.client.marshallers;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractMap;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,6 @@ import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
@@ -64,20 +64,71 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
   }
 
   protected T doDemarshall(final T impl, final EJValue o, final MarshallingSession ctx) {
+    if (o.isObject() == null)
+      return impl;
+
     Object demarshalledKey;
+    String assumedKeyType = ctx.getAssumedMapKeyType();
+    String assumedValueType = ctx.getAssumedMapValueType();
     for (final String key : o.isObject().keySet()) {
+      final EJValue ejValue = o.isObject().get(key);
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
-        final EJValue val = ParserFactory.get().parse(key.substring(SerializationParts.EMBEDDED_JSON.length()));
-        demarshalledKey = ctx.getMarshallerInstance(ctx.determineTypeFor(null, val)).demarshall(val, ctx);
+        final EJValue ejKey = ParserFactory.get().parse(key.substring(SerializationParts.EMBEDDED_JSON.length()));
+        demarshalledKey = ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejKey)).demarshall(ejKey, ctx);
+        impl.put(demarshalledKey,
+            ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
       }
       else {
-        demarshalledKey = key;
-      }
+        if (assumedKeyType != null) {
+          if (key.startsWith(SerializationParts.OBJECT_ID)) {
+            continue;
+          }
+          demarshalledKey = convertKey(assumedKeyType, key);
 
-      final EJValue v = o.isObject().get(key);
-      impl.put(demarshalledKey, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
+          String valueType = (assumedValueType != null) ? assumedValueType : ctx.determineTypeFor(null, ejValue);
+          Object demarshalledValue = ctx.getMarshallerInstance(valueType).demarshall(ejValue, ctx);
+          impl.put(demarshalledKey, demarshalledValue);
+        }
+        else {
+          demarshalledKey = key;
+          impl.put(demarshalledKey,
+              ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
+        }
+      }
     }
     return impl;
+  }
+
+  // This only exists to support demarshalling of maps using Jackson. The Jackson payload doesn't contain our
+  // EMBEDDED_JSON or any type information, so we have to convert the key (which is always a String) to it's actual
+  // type. We only support primitive wrapper types as key types. Other types require a custom
+  // Key(De)serializer in Jackson anyway which would be unknown to Errai.
+  private Object convertKey(String toType, String key) {
+    if (toType.equals(Integer.class.getName())) {
+      return Integer.parseInt(key);
+    }
+    else if (toType.equals(Long.class.getName())) {
+      return Long.parseLong(key);
+    }
+    else if (toType.equals(Float.class.getName())) {
+      return Float.parseFloat(key);
+    }
+    else if (toType.equals(Double.class.getName())) {
+      return Double.parseDouble(key);
+    }
+    else if (toType.equals(Short.class.getName())) {
+      return Short.parseShort(key);
+    }
+    else if (toType.equals(Boolean.class.getName())) {
+      return Boolean.parseBoolean(key);
+    }
+    else if (toType.equals(Date.class.getName())) {
+      return new Date(Long.parseLong(key));
+    }
+    else if (toType.equals(Character.class.getName())) {
+      return new Character(key.charAt(0));
+    }
+    return key;
   }
 
   @SuppressWarnings("unchecked")
@@ -97,7 +148,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         buf.append("\"").append(entry.getKey()).append("\"");
       }
       else if (entry.getKey() != null) {
-        if (entry.getKey() instanceof Number || entry.getKey() instanceof Boolean || entry.getKey() instanceof Character) {
+        if (entry.getKey() instanceof Number || entry.getKey() instanceof Boolean
+            || entry.getKey() instanceof Character) {
           keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getKey());
         }
         else {

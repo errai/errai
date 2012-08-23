@@ -33,6 +33,8 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   private final Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
   private final Map<String, Object> objectMap = new HashMap<String, Object>();
   private String assumedElementType = null;
+  private String assumedMapKeyType = null;
+  private String assumedMapValueType = null;
   
   protected AbstractMarshallingSession(final MappingContext context) {
     this.context = Assert.notNull(context);
@@ -127,4 +129,25 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   public void setAssumedElementType(final String assumendElementType) {
      this.assumedElementType = assumendElementType;
   }
+
+  @Override
+  public String getAssumedMapKeyType() {
+    return this.assumedMapKeyType;
+  }
+
+  @Override
+  public void setAssumedMapKeyType(String assumedMapKeyType) {
+    this.assumedMapKeyType = assumedMapKeyType;
+  }
+
+  @Override
+  public String getAssumedMapValueType() {
+    return this.assumedMapValueType;
+  }
+
+  @Override
+  public void setAssumedMapValueType(String assumedMapValueType) {
+    this.assumedMapValueType = assumedMapValueType;
+  }
+  
 }

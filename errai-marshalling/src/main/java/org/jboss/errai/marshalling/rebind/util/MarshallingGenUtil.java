@@ -16,6 +16,12 @@
 
 package org.jboss.errai.marshalling.rebind.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -23,12 +29,6 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.config.rebind.EnvUtil;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -127,26 +127,67 @@ public class MarshallingGenUtil {
    *         fails.
    */
   public static MetaClass getConcreteElementType(MetaClass toType) {
+    return getConcreteTypeParameter(toType, 0, 1);
+  }
+
+  /**
+   * Returns the map key type of the given metaclass under the following conditions:
+   * <ul>
+   * <li>toType is a {@link Map} 
+   * <li>toType's key type is not a wildcard
+   * <li>toType's key type is a non-abstract (concrete) type
+   * </ul>
+   *
+   * @param toType The type to check for a known concrete map key type.
+   * @return The concrete map key type meeting all above-mentioned criteria, or null if one or more of the criteria
+   *         fails.
+   */
+  public static MetaClass getConcreteMapKeyType(MetaClass toType) {
+    if (toType.isAssignableTo(Map.class)) {
+      return getConcreteTypeParameter(toType, 0, 2);
+    }
+    return null;
+  }
+  
+  /**
+   * Returns the map key value of the given metaclass under the following conditions:
+   * <ul>
+   * <li>toType is a {@link Map} 
+   * <li>toType's value type is not a wildcard
+   * <li>toType's value type is a non-abstract (concrete) type
+   * </ul>
+   *
+   * @param toType The type to check for a known concrete map key type.
+   * @return The concrete map value type meeting all above-mentioned criteria, or null if one or more of the criteria
+   *         fails.
+   */
+  public static MetaClass getConcreteMapValueType(MetaClass toType) {
+    if (toType.isAssignableTo(Map.class)) {
+      return getConcreteTypeParameter(toType, 1, 2);
+    }
+    return null;
+  }
+  
+  private static MetaClass getConcreteTypeParameter(MetaClass toType, int typeParamIndex, int typeParamsSize) {
     if (toType.getParameterizedType() != null) {
       MetaType[] typeParms = toType.getParameterizedType().getTypeParameters();
-      if (typeParms != null && typeParms.length == 1) {
+      if (typeParms != null && typeParms.length == typeParamsSize) {
 
         MetaClass typeParameter = null;
-        if (typeParms[0] instanceof MetaParameterizedType) {
-          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParms[0];
+        if (typeParms[typeParamIndex] instanceof MetaParameterizedType) {
+          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParms[typeParamIndex];
           typeParameter = (MetaClass) parameterizedTypeParemeter.getRawType();
         }
-        else if (typeParms[0] instanceof MetaClass) {
-          typeParameter = (MetaClass) typeParms[0];
+        else if (typeParms[typeParamIndex] instanceof MetaClass) {
+          typeParameter = (MetaClass) typeParms[typeParamIndex];
         }
 
-        if (!MetaClassFactory.get(Object.class).equals(typeParameter))
-          return typeParameter;
+       return typeParameter;
       }
     }
     return null;
   }
-
+  
   public static Collection<MetaClass> getDefaultArrayMarshallers() {
     final List<MetaClass> l = new ArrayList<MetaClass>();
 

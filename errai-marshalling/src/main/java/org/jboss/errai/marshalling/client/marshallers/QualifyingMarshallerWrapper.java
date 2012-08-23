@@ -57,7 +57,11 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
         return (T) ctx.getObject(Object.class, objId);
       }
 
-      return ctx.recordObject(objId, delegate.demarshall(obj.get(SerializationParts.QUALIFIED_VALUE), ctx));
+      EJValue val = obj.get(SerializationParts.QUALIFIED_VALUE);
+      if (val.isNull()) {
+        val = o;
+      }
+      return ctx.recordObject(objId, delegate.demarshall(val, ctx));
     }
     else {
       // This is only to support Jackson's char[] and byte[] representations
