@@ -11,9 +11,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 
-// XXX this class exists only as a way to provide a header and footer around the content hosted by Navigation.
-// Probably a better idea would be to build in header/footer/surrounding-whatever feature into Navigation.
-
+/**
+ * Entry point into the Grocery List. This page's HTML template provides the
+ * header and footer content that is present on every page of the app, and also
+ * situates the navigation system's content panel into the main body of the
+ * page. The navigation system takes responsibility for filling the content
+ * panel with the appropriate body content based on the current history token in
+ * the page URL.
+ */
 @Templated("#main")
 @EntryPoint
 public class GroceryListClient extends Composite {
