@@ -85,8 +85,12 @@
 
                 <!-- Weld -->
                 <dependency>
+                    <groupId>org.jboss.weld.se</groupId>
+                    <artifactId>weld-se-core</artifactId>
+                </dependency>
+                <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>
-                    <artifactId>weld-servlet</artifactId>
+                    <artifactId>weld-servlet-core</artifactId>
                 </dependency>
 
                 <dependency>
