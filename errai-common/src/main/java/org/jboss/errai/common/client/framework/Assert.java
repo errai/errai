@@ -36,7 +36,7 @@ public class Assert {
    * @throws NullPointerException if value is null.
    * @return
    */
-  public static <V> V notNull(String errorMessage, V value) {
+  public static <V> V notNull(final String errorMessage, final V value) {
     if (value == null) {
       throw new NullPointerException(errorMessage);
     }
@@ -51,7 +51,7 @@ public class Assert {
    * @throws NullPointerException if value is null.
    * @return
    */
-  public static <V> V notNull(V value) {
+  public static <V> V notNull(final V value) {
     if (value == null) {
       throw new NullPointerException();
     }

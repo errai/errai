@@ -1373,7 +1373,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             break;
           default:
             cometChannelOpen = false;
-            onError(request, new TransportIOException("unexpected response code: " + statusCode, statusCode, response.getStatusText()));
+            onError(request, new TransportIOException("unexpected response code: " + statusCode, statusCode,
+                response.getStatusText()));
             return;
         }
       }

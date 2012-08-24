@@ -30,7 +30,7 @@ public interface ClientMessageBus extends MessageBus {
   public static final String REMOTE_QUEUE_ID_HEADER = "RemoteQueueID";
 
   /**
-   * Add a {@link Runnable} initialization task to be executed after the bus has successfuly finished it's
+   * Add a {@link Runnable} initialization task to be executed after the bus has successfully finished it's
    * initialization and is now communicating with the remote bus.
    *
    * @param run a {@link Runnable} task.
@@ -51,8 +51,6 @@ public interface ClientMessageBus extends MessageBus {
    * @param listener  listener to add, must not be null
    */
   public void addPreInitializationListener(PreInitializationListener listener);
-
-  //public void voteForInit();
 
   public void init();
 
