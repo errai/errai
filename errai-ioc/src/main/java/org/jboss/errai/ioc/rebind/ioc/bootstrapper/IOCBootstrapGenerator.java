@@ -108,8 +108,8 @@ public class IOCBootstrapGenerator {
   private final Set<String> packages;
   private final boolean useReflectionStubs;
 
-  private final List<Class<?>> beforeTasks = new ArrayList<Class<?>>();
-  private final List<Class<?>> afterTasks = new ArrayList<Class<?>>();
+  private final List<MetaClass> beforeTasks = new ArrayList<MetaClass>();
+  private final List<MetaClass> afterTasks = new ArrayList<MetaClass>();
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String ENABLED_ALTERNATIVES_PROPERTY = "errai.ioc.enabled.alternatives";
@@ -387,9 +387,9 @@ public class IOCBootstrapGenerator {
     sourceWriter.print(classBuilder.toJavaString());
   }
 
-  private static void _doRunnableTasks(final Collection<Class<?>> classes, final BlockBuilder<?> blockBuilder) {
-    for (final Class<?> clazz : classes) {
-      if (!Runnable.class.isAssignableFrom(clazz)) {
+  private static void _doRunnableTasks(final Collection<MetaClass> classes, final BlockBuilder<?> blockBuilder) {
+    for (final MetaClass clazz : classes) {
+      if (!clazz.isAssignableTo(Runnable.class)) {
         throw new RuntimeException("annotated @IOCBootstrap task: " + clazz.getName() + " is not of type: "
             + Runnable.class.getName());
       }
@@ -402,8 +402,8 @@ public class IOCBootstrapGenerator {
                                        final IOCProcessingContext procContext,
                                        final InjectionContext injectionContext,
                                        final IOCProcessorFactory procFactory,
-                                       final List<Class<?>> beforeTasks,
-                                       final List<Class<?>> afterTasks) {
+                                       final List<MetaClass> beforeTasks,
+                                       final List<MetaClass> afterTasks) {
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
@@ -430,8 +430,8 @@ public class IOCBootstrapGenerator {
 
     computeDependentScope(context, injectionContext);
 
-    final Set<Class<?>> bootstrappers = scanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
-    for (final Class<?> clazz : bootstrappers) {
+    final Collection<MetaClass> bootstrappers = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
+    for (final MetaClass clazz : bootstrappers) {
       final IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
         beforeTasks.add(clazz);
