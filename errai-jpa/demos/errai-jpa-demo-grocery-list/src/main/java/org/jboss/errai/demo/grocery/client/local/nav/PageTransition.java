@@ -18,8 +18,8 @@ import org.jboss.errai.demo.grocery.client.local.Navigation;
 public final class PageTransition<P extends Page> {
 
   private final Navigation navigation;
-  private final Page fromPage;
-  private final P toPage;
+  private final Class<? extends Page> fromPage;
+  private final Class<P> toPage;
   private final String reason;
 
   /**
@@ -28,9 +28,9 @@ public final class PageTransition<P extends Page> {
    * @param navigation
    *          The navigation system this page transition participates in.
    * @param fromPage
-   *          The page this transition starts at. Not null.
+   *          The page type this transition starts at. Not null.
    * @param toPage
-   *          The page this transition goes to. Not null.
+   *          The page type this transition goes to. Not null.
    * @param reason
    *          The label that should be given to this transition; the reason the
    *          user is moving from the {@link #fromPage()} to the
@@ -38,7 +38,7 @@ public final class PageTransition<P extends Page> {
    * @throws NullPointerException
    *           if any of the arguments are null.
    */
-  PageTransition(Navigation navigation, Page fromPage, P toPage, String reason) {
+  PageTransition(Navigation navigation, Class<? extends Page> fromPage, Class<P> toPage, String reason) {
     this.navigation = Assert.notNull(navigation);
     this.fromPage = Assert.notNull(fromPage);
     this.toPage = Assert.notNull(toPage);
@@ -48,14 +48,14 @@ public final class PageTransition<P extends Page> {
   /**
    * The page this transition starts at.
    */
-  public Page fromPage() {
+  public Class<? extends Page> fromPage() {
     return fromPage;
   }
 
   /**
    * The page this transition goes to.
    */
-  public P toPage() {
+  public Class<P> toPage() {
     return toPage;
   }
 
@@ -71,7 +71,7 @@ public final class PageTransition<P extends Page> {
    * Transitions the application's view from the current page (whatever it is)
    * to the {@code toPage} of this transition.
    */
-  public void go() {
-    navigation.goTo(toPage);
+  public void go(String ... pathParams) {
+    navigation.goTo(toPage, pathParams);
   }
 }

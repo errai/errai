@@ -1,16 +1,12 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 import org.jboss.errai.demo.grocery.client.local.nav.NavigationGraph;
 import org.jboss.errai.demo.grocery.client.local.nav.Page;
+import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -33,24 +29,10 @@ public class Navigation {
   private Panel contentPanel = new SimplePanel();
 
   @Inject
+  private IOCBeanManager bm;
+
+  @Inject
   private NavigationGraph navGraph;
-
-  /** TEMPORARY handcoded method, until a code generator provides the nav graph impl. */
-  @Produces
-  static NavigationGraph getNavigationGraph(Instance<WelcomePage> welcomePage, Instance<ItemListPage> itemListPage) {
-    final Map<String, Instance<? extends Page>> pages = new HashMap<String, Instance<? extends Page>>();
-
-    pages.put("", welcomePage); // this is the default page
-    pages.put("WelcomePage", welcomePage);
-    pages.put("ItemListPage", itemListPage);
-
-    return new NavigationGraph() {
-      @Override
-      public Page getPage(String name) {
-        return pages.get(name).get();
-      }
-    };
-  }
 
   @PostConstruct
   private void init() {
@@ -70,9 +52,18 @@ public class Navigation {
     goTo(initialPage);
   }
 
-  public void goTo(Page page) {
-    makePageVisible(page);
-    History.newItem(page.name(), false);
+  /**
+   * Goes to
+   * @param toPage
+   */
+  public void goTo(Class<? extends Page> toPage, String ... pathParams) {
+    Page toPageInstance = navGraph.getPage(toPage);
+    goTo(toPageInstance, pathParams);
+  }
+
+  public void goTo(Page toPage, String ... pathParams) {
+    makePageVisible(toPage);
+    History.newItem(toPage.name(), false);
   }
 
   /**
@@ -92,7 +83,10 @@ public class Navigation {
    * panel will be updated by the navigation system in response to
    * PageTransition requests, as well as changes to the GWT navigation system.
    *
-   * @return
+   * @return The content panel of this Navigation instance. It is not
+   *         recommended that client code modifies the contents of this panel,
+   *         because this Navigation instance may replace its contents at any
+   *         time.
    */
   public Widget getContentPanel() {
     return contentPanel;

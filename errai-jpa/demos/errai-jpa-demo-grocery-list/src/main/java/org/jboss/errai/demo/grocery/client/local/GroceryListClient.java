@@ -22,6 +22,9 @@ public class GroceryListClient extends Composite {
   private Navigation navigation;
 
   @Inject @DataField
+  private NavBar navbar;
+
+  @Inject @DataField
   private SimplePanel content;
 
   @PostConstruct

@@ -1,53 +1,31 @@
 package org.jboss.errai.demo.grocery.client.local.nav;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
- * An interface whose implementation is usually generated at compile-time by scanning for page classes.
+ * The NavigationGraph is responsible for creating or retrieving instances of
+ * Page and PageTransition objects. It is also the central repository for
+ * structural information about the interpage navigation in the app (this
+ * information is defined in a decentralized way, by classes that implement
+ * {@link Page} and contain injected {@link PageTransition} fields.
+ * <p>
+ * The implementation of this interface is usually generated at compile-time by
+ * scanning for page classes.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public interface NavigationGraph {
 
+  /**
+   * Returns an instance of the given page type. If the page is an
+   * ApplicationScoped bean, the singleton instance of the page will be
+   * returned; otherwise (for Dependent-scoped beans) a new instance will be
+   * returned.
+   *
+   * @param name The page name, as defined by the implementation of page.
+   * @return The appropriate instance of the page.
+   */
   public Page getPage(String name);
 
-  // a page and all its outbound transitions. this type is probably only needed at rebind time (not on the client)
-  static class PageNode {
-    private final Page page;
-    private final List<PageTransition<?>> transitions = new ArrayList<PageTransition<?>>();
-
-    public PageNode(Page page) {
-      super();
-      this.page = page;
-    }
-
-    /**
-     * Adds a transition from this page to another.
-     *
-     * @param toPage
-     *          The target page of the transition.
-     * @param reason
-     *          The label that should be given to this transition; the reason the
-     *          user is moving from the {@link #fromPage()} to the
-     *          {@link #toPage()}. Not null.
-     * @return This PageNode, so calls can be chained.
-     */
-    public PageNode addTransition(Page toPage, String reason) {
-      throw new UnsupportedOperationException();
-      //transitions.add(new PageTransition<Page>(page, toPage, reason));
-//      return this;
-    }
-
-    /**
-     * Returns the available transitions away from this page.
-     *
-     * @return Outbound transitions from this page. Never null, but may be empty. Do not attempt to modify the returned list.
-     */
-    public List<PageTransition<?>> pageTransitions() {
-      return Collections.unmodifiableList(transitions);
-    }
-  }
+  // XXX not sure I want this
+  Page getPage(Class<? extends Page> type);
 
 }

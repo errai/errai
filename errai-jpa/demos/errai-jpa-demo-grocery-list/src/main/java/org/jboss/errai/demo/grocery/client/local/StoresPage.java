@@ -3,6 +3,7 @@ package org.jboss.errai.demo.grocery.client.local;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -10,6 +11,7 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 
+import org.jboss.errai.demo.grocery.client.local.nav.CompositePage;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -22,14 +24,13 @@ import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 
 @Dependent
-@Templated
-public class StoresWidget extends Composite {
+@Templated("#root")
+public class StoresPage extends CompositePage {
 
   // XXX need a better way of getting at this instance from the StoreListener
-  private static StoresWidget INSTANCE;
+  private static StoresPage INSTANCE;
 
   @Inject
   private IOCBeanManager beanManager;
@@ -50,10 +51,19 @@ public class StoresWidget extends Composite {
     refreshFromDb();
   }
 
+  @PreDestroy
+  private void deInitInstance() {
+    INSTANCE = null;
+  }
+
+  // in a word, this JPA listener stuff is "yuck."
+  // TODO make a bridge from JPA lifecycle events to CDI events
   public static class StoreListener {
     @PostPersist @PostUpdate @PostRemove
     public void onStoreListChange(Store s) {
-      INSTANCE.refreshFromDb();
+      if (INSTANCE != null) {
+        INSTANCE.refreshFromDb();
+      }
     }
   }
 

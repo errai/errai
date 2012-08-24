@@ -26,7 +26,7 @@ public class WelcomePage extends CompositePage {
   @Inject PageTransition<ItemListPage> startButtonClicked;
 
   @EventHandler("startButton")
-  public void onStartButtonPress(ClickEvent e) {
+  void onStartButtonPress(ClickEvent e) {
     startButtonClicked.go();
   }
 }

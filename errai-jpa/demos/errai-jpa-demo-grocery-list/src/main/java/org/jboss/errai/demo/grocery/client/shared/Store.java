@@ -12,10 +12,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.demo.grocery.client.local.StoresWidget;
+import org.jboss.errai.demo.grocery.client.local.StoresPage;
 
 @Bindable @Entity
-@EntityListeners(StoresWidget.StoreListener.class)
+@EntityListeners(StoresPage.StoreListener.class)
 @NamedQuery(name="allStores", query="SELECT s FROM Store s ORDER BY s.name")
 public class Store {
 
