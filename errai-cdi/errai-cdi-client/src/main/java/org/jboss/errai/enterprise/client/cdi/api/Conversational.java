@@ -31,6 +31,9 @@ import java.lang.annotation.Target;
  * addition to being marked conversational, in order for the event to be transmittable across buses.
  * <p>
  * Events marked conversational are <em>always</em> conversational and may not never be used for broadcasting.
+ * <p>
+ * Unlike {@code @Portable}, this annotation is not inherited by subclasses. Each conversational event type must be
+ * explicitly marked with this annotation.
  *
  * @author Mike Brock
  */
