@@ -30,18 +30,33 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
 
   public void testInjections() {
     final InjectionTestModule module = IOC.getBeanManager()
-            .lookupBean(InjectionTestModule.class).getInstance();
+        .lookupBean(InjectionTestModule.class).getInstance();
 
     assertNotNull("Field injection of BeanA failed", module.getBeanA());
     assertNotNull("Field injection of BeanB in BeanA failed", module.getBeanA().getBeanB());
-
     assertNotNull("Field injection of BeanC failed", module.getBeanC());
-    assertNotNull("Field injection of BeanB in BeanC failed", module.getBeanC().getBeanB());
-    assertNotNull("Constructor injection of BeanD in BeanC", module.getBeanC().getBeanD());
+  }
 
-    assertFalse("BeanC1 should be @New instance", module.getBeanC() == module.getBeanC1());
+  public void testPostConstructFired() {
+    final InjectionTestModule module = IOC.getBeanManager()
+        .lookupBean(InjectionTestModule.class).getInstance();
 
     assertTrue("PostConstruct on InjectionTestModule did not fire", module.isPostConstructFired());
+  }
+
+  public void testNewSemantics() {
+    final InjectionTestModule module = IOC.getBeanManager()
+        .lookupBean(InjectionTestModule.class).getInstance();
+
+    assertFalse("BeanC1 should be @New instance", module.getBeanC() == module.getBeanC1());
+  }
+
+  public void testMixedInjectionTypes() {
+    final InjectionTestModule module = IOC.getBeanManager()
+        .lookupBean(InjectionTestModule.class).getInstance();
+
+    assertNotNull("Field injection of BeanB in BeanC failed", module.getBeanC().getBeanB());
+    assertNotNull("Constructor injection of BeanD in BeanC", module.getBeanC().getBeanD());
   }
 
   public void testMvpInjections() {
@@ -51,18 +66,18 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
 
   public void testQualifierBasedInjection() {
     final QaulParamDependentBeanApples instanceA
-            = getBeanManager().lookupBean(QaulParamDependentBeanApples.class).getInstance();
+        = getBeanManager().lookupBean(QaulParamDependentBeanApples.class).getInstance();
 
     assertNotNull("bean is null", instanceA);
     assertTrue("incorrect instance injected",
-            getBeanManager().getActualBeanReference(instanceA.getCommonInterfaceB()) instanceof QualParmAppScopeBeanApples);
+        getBeanManager().getActualBeanReference(instanceA.getCommonInterfaceB()) instanceof QualParmAppScopeBeanApples);
 
     final QaulParamDependentBeanOranges instanceB
-            = getBeanManager().lookupBean(QaulParamDependentBeanOranges.class).getInstance();
+        = getBeanManager().lookupBean(QaulParamDependentBeanOranges.class).getInstance();
 
     assertNotNull("bean is null", instanceB);
     assertTrue("incorrect instance injected",
-            getBeanManager().getActualBeanReference(instanceB.getCommonInterfaceB()) instanceof QualParmAppScopeBeanOranges);
+        getBeanManager().getActualBeanReference(instanceB.getCommonInterfaceB()) instanceof QualParmAppScopeBeanOranges);
   }
 
   public void testNamedBasedInjection() {

@@ -45,6 +45,13 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     disableBus = true;
   }
 
+  private final QualA QUAL_A = new QualA() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return QualA.class;
+    }
+  };
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.injection.InjectionTestModule";
@@ -110,15 +117,15 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
   public void testBeanManagerLookupForExtendedInterfaceType() {
     // This should find ApplicationScopedBeanA, ApplicationScopedBeanB and ApplicationScopedBeanC
-    Collection<IOCBeanDef<InterfaceRoot>> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
+    final Collection<IOCBeanDef<InterfaceRoot>> beans = IOC.getBeanManager().lookupBeans(InterfaceRoot.class);
     assertEquals("did not find all managed implementations of " + InterfaceRoot.class.getName(), 3, beans.size());
 
     // This should find ApplicationScopedBeanA and ApplicationScopedBeanB (InterfaceB extends InterfaceA)
-    Collection<IOCBeanDef<InterfaceA>> beansB = IOC.getBeanManager().lookupBeans(InterfaceA.class);
+    final Collection<IOCBeanDef<InterfaceA>> beansB = IOC.getBeanManager().lookupBeans(InterfaceA.class);
     assertEquals("did not find both managed implementations of " + InterfaceA.class.getName(), 2, beansB.size());
 
     // This should find only ApplicationScopedBeanB
-    Collection<IOCBeanDef<InterfaceB>> beansC = IOC.getBeanManager().lookupBeans(InterfaceB.class);
+    final Collection<IOCBeanDef<InterfaceB>> beansC = IOC.getBeanManager().lookupBeans(InterfaceB.class);
     assertEquals("did not find exactly one managed implementation of " + InterfaceB.class.getName(), 1, beansC.size());
   }
 
@@ -129,9 +136,6 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     final Set<Annotation> a = bean.getQualifiers();
     assertEquals("there should be two qualifiers", 2, a.size());
     assertTrue("wrong qualifiers", annotationSetMatches(a, QualA.class, Any.class));
-
-    // assertEquals("unmanaged bean should have no entries", 0, mgr.lookupBeans(String.class).size());
-    //  assertEquals("unmanaged bean should return null bean ref", null, mgr.lookupBean(String.class));
   }
 
   public void testQualifiedLookup() {
@@ -294,13 +298,6 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertTrue(!beans.isEmpty());
   }
 
-  private final QualA QUAL_A = new QualA() {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return QualA.class;
-    }
-  };
-
   public void testLookupAllBeansQualified() {
     final Collection<IOCBeanDef<Object>> beans = IOC.getBeanManager().lookupBeans(Object.class, QUAL_A);
 
@@ -308,8 +305,8 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
   }
 
-  private static boolean containsInstanceOf(Collection<IOCBeanDef> defs, Class<?> clazz) {
-    for (IOCBeanDef def : defs) {
+  private static boolean containsInstanceOf(final Collection<IOCBeanDef> defs, final Class<?> clazz) {
+    for (final IOCBeanDef def : defs) {
       if (def.getType().equals(clazz)) return true;
     }
     return false;
