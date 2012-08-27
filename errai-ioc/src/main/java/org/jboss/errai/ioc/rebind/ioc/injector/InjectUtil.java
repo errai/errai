@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -876,8 +877,8 @@ public class InjectUtil {
    * Read from the specified field, and automatically determine whether to make a public or private read based on the
    * visibility of the specified field.
    *
-   * @param processingContext
-   *     an instance of the {@link IOCProcessingContext}
+   * @param context
+   *     an instance of the {@link InjectionContext}
    * @param obj
    *     a {@link Statement} reference to the bean instance whose field is to be accessed
    * @param field
@@ -885,12 +886,14 @@ public class InjectUtil {
    *
    * @return a {@link Statement} reference to the value of the field.
    */
-  public static Statement getPublicOrPrivateFieldValue(final IOCProcessingContext processingContext,
+  public static Statement getPublicOrPrivateFieldValue(final InjectionContext context,
                                                        final Statement obj,
                                                        final MetaField field) {
 
     if (!field.isPublic()) {
-      return getPrivateFieldValue(processingContext, obj, field);
+      context.addExposedField(field, PrivateAccessType.Read);
+
+      return getPrivateFieldValue(context.getProcessingContext(), obj, field);
     }
     else {
       return Stmt.nestedCall(obj).loadField(field);
@@ -901,8 +904,8 @@ public class InjectUtil {
    * Write to the specified field, and automatically determine whether to make a public or private write based on the
    * visibility of the specified field.
    *
-   * @param processingContext
-   *     an instance of the {@link IOCProcessingContext}
+   * @param context
+   *     an instance of the {@link InjectionContext}
    * @param obj
    *     a {@link Statement} reference to the bean instance whose field is to be accessed
    * @param field
@@ -912,13 +915,15 @@ public class InjectUtil {
    *
    * @return the {@link Statement} which will perform the writing to the field.
    */
-  public static Statement setPublicOrPrivateFieldValue(final IOCProcessingContext processingContext,
+  public static Statement setPublicOrPrivateFieldValue(final InjectionContext context,
                                                        final Statement obj,
                                                        final MetaField field,
                                                        final Statement val) {
 
     if (!field.isPublic()) {
-      return setPrivateFieldValue(processingContext, obj, field, val);
+      context.addExposedField(field, PrivateAccessType.Write);
+
+      return setPrivateFieldValue(context.getProcessingContext(), obj, field, val);
     }
     else {
       return Stmt.nestedCall(obj).loadField(field).assignValue(val);
@@ -929,8 +934,8 @@ public class InjectUtil {
    * Invoke the specified method, and automatically determine whether to make the invocation public or private based
    * on the visibility of the specified method.
    *
-   * @param processingContext
-   *     an instance of the {@link IOCProcessingContext}
+   * @param context
+   *     an instance of the {@link InjectionContext}
    * @param obj
    *     a {@link Statement} reference to the bean instance whose field is to be accessed
    * @param method
@@ -940,13 +945,15 @@ public class InjectUtil {
    *
    * @return the {@link Statement} which represents the return value of the method.
    */
-  public static Statement invokePublicOrPrivateMethod(final IOCProcessingContext processingContext,
+  public static Statement invokePublicOrPrivateMethod(final InjectionContext context,
                                                       final Statement obj,
                                                       final MetaMethod method,
                                                       final Statement... arguments) {
 
     if (!method.isPublic()) {
-      return invokePrivateMethod(processingContext, obj, method, arguments);
+      context.addExposedMethod(method);
+
+      return invokePrivateMethod(context.getProcessingContext(), obj, method, arguments);
     }
     else {
       return Stmt.nestedCall(obj).invoke(method, arguments);

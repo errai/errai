@@ -121,7 +121,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     switch (taskType) {
       case Field:
       case PrivateField:
-        return InjectUtil.getPublicOrPrivateFieldValue(injectionContext.getProcessingContext(),
+        return InjectUtil.getPublicOrPrivateFieldValue(injectionContext,
                 val,
                 field);
 
@@ -133,7 +133,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
-        return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
+        return InjectUtil.invokePublicOrPrivateMethod(injectionContext,
                 val,
                 method,
                 stmt);
@@ -183,7 +183,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case PrivateField:
       case Field:
         return InjectUtil.setPublicOrPrivateFieldValue(
-            injectionContext.getProcessingContext(),
+            injectionContext,
             Refs.get(targetInjector.getInstanceVarName()),
             field,
             values[0]);
@@ -198,7 +198,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
       case Method:
       case PrivateMethod:
-        return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
+        return InjectUtil.invokePublicOrPrivateMethod(injectionContext,
             Refs.get(targetInjector.getInstanceVarName()),
             meth,
             values);

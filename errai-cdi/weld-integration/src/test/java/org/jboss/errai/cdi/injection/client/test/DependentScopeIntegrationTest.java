@@ -55,7 +55,6 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   @Override
   protected void gwtSetUp() throws Exception {
     DependentBeanCycleB.instanceCount = 1;
-
     super.gwtSetUp();
   }
 
@@ -82,24 +81,24 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull("outer bean was null", outBean);
 
-    Bean testBean = outBean.getTestBean();
+    final Bean testBean = outBean.getTestBean();
     assertNotNull("outBean.getTestBean() returned null", testBean);
 
-    ServiceA serviceA = testBean.getServiceA();
-    ServiceB serviceB = testBean.getServiceB();
-    ServiceC serviceC = testBean.getServiceC();
+    final ServiceA serviceA = testBean.getServiceA();
+    final ServiceB serviceB = testBean.getServiceB();
+    final ServiceC serviceC = testBean.getServiceC();
 
     assertNotNull("serviceA is null", serviceA);
     assertNotNull("serviceB is null", serviceB);
     assertNotNull("serviceC is null", serviceC);
 
-    ServiceC serviceC1 = serviceA.getServiceC();
-    ServiceC serviceC2 = serviceB.getServiceC();
+    final ServiceC serviceC1 = serviceA.getServiceC();
+    final ServiceC serviceC2 = serviceB.getServiceC();
 
     assertNotNull("serviceC in serviceA is null", serviceC1);
     assertNotNull("serviceC in serviceB is null", serviceC2);
 
-    Set<String> testDependentScope = new HashSet<String>();
+    final Set<String> testDependentScope = new HashSet<String>();
     testDependentScope.add(serviceC.getName());
     testDependentScope.add(serviceC1.getName());
     testDependentScope.add(serviceC2.getName());
@@ -119,7 +118,6 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
     assertEquals("ApplicationScopedBean should be same instance even in dependent scoped",
             applicationScopedBean.getBeanId(), serviceC.getBean().getBeanId());
-
   }
 
   /**
@@ -136,7 +134,6 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testDependentBeanCycleFromApplicationScopedRoot() {
-
     final ApplicationScopedBeanB bean = IOC.getBeanManager()
             .lookupBean(ApplicationScopedBeanB.class).getInstance();
 
@@ -147,7 +144,6 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
             bean.getDependentBeanCycleA().getDependentBeanCycleB());
     assertEquals("there should have been only one instantiation of DependentBeanCycleB",
             1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-
   }
 
   public void testDependentBeanCycleFromDependentRoot() {
@@ -176,20 +172,17 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
             beanA.getDependentBeanCycleB().getDependentBeanCycleA());
     assertEquals("there should have been only two instantiations of DependentBeanCycleB",
             1, beanA.getDependentBeanCycleB().getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-
   }
 
 
   public void testDependentBeanCycleWithPreDestroy() {
-
     final DestroyA bean = IOC.getBeanManager()
             .lookupBean(DestroyA.class).getInstance();
 
     IOC.getBeanManager().destroyBean(bean);
 
-    assertTrue("predestroy method not called!", bean.isDestroyed());
-    assertTrue("predestroy method not called", bean.getTestDestroyB().isDestroyed());
-
+    assertTrue("pre-destroy method not called!", bean.isDestroyed());
+    assertTrue("pre-destroy method not called", bean.getTestDestroyB().isDestroyed());
   }
 
   public void testDependentBeanWithProducerDependency() {
@@ -212,7 +205,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     IOC.getBeanManager().destroyBean(bean);
 
     assertTrue("pre-destroy method not called", bean.isPreDestroyCalled());
-    assertFalse("ApplicationScopedBean's predestruct method must NOT be called",
+    assertFalse("ApplicationScopedBean's pre-destruct method must NOT be called",
             bean.getApplicationScopedBean().isPreDestroyCalled());
 
     assertFalse("bean should no longer be managed", IOC.getBeanManager().isManaged(bean));

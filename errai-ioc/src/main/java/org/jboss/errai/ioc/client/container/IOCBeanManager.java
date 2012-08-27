@@ -383,11 +383,11 @@ public class IOCBeanManager {
 
     final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
 
-    final Set<Annotation> qualSet = new HashSet<Annotation>(qualifiers.length * 2);
-    Collections.addAll(qualSet, qualifiers);
+    final Set<Annotation> qualifierSet = new HashSet<Annotation>(qualifiers.length * 2);
+    Collections.addAll(qualifierSet, qualifiers);
 
     for (final IOCBeanDef iocBean : beanList) {
-      if (iocBean.matches(qualSet)) {
+      if (iocBean.matches(qualifierSet)) {
         matching.add(iocBean);
       }
     }
@@ -398,18 +398,18 @@ public class IOCBeanManager {
 
     if (matching.size() > 1) {
       // perform second pass
-      final Iterator<IOCBeanDef<T>> secondIter = matching.iterator();
+      final Iterator<IOCBeanDef<T>> secondIterator = matching.iterator();
 
       if (concreteBeans.contains(type.getName())) {
-        while (secondIter.hasNext()) {
-          if (!secondIter.next().isConcrete())
-            secondIter.remove();
+        while (secondIterator.hasNext()) {
+          if (!secondIterator.next().isConcrete())
+            secondIterator.remove();
         }
       }
       else {
-        while (secondIter.hasNext()) {
-          if (!concreteBeans.contains(secondIter.next().getBeanClass().getName()))
-            secondIter.remove();
+        while (secondIterator.hasNext()) {
+          if (!concreteBeans.contains(secondIterator.next().getBeanClass().getName()))
+            secondIterator.remove();
         }
       }
     }

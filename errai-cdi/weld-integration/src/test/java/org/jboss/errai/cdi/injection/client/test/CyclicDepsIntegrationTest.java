@@ -45,7 +45,6 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBasicDependencyCycle() {
-
     final CycleNodeA nodeA = getBeanManager()
         .lookupBean(CycleNodeA.class).getInstance();
 
@@ -95,7 +94,6 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testCyclingBeanDestroyViaProxy() {
-
     final DependentBeanInjectSelf beanA = getBeanManager()
         .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
@@ -108,11 +106,9 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
     assertFalse("bean.self should no longer be recognized as proxy",
         getBeanManager().isProxyReference(beanA.getSelf()));
-
   }
 
   public void testDependentBeanInjectsIntoSelf() {
-
     final DependentBeanInjectSelf beanA = getBeanManager()
         .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
@@ -123,11 +119,9 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
     assertSame("unwrapped proxy should be the same as outer instance", beanA, getBeanManager()
         .getActualBeanReference(beanA.getSelf()));
-
   }
 
   public void testCycleOnProducerBeans() {
-
     final ConsumerBeanA consumerBeanA = getBeanManager()
         .lookupBean(ConsumerBeanA.class).getInstance();
 
@@ -148,7 +142,6 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testHashcodeAndEqualsWorkThroughProxies() {
-
     final EquHashCheckCycleA equHashCheckCycleA = getBeanManager()
         .lookupBean(EquHashCheckCycleA.class).getInstance();
 
@@ -184,5 +177,4 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     assertNotNull("air is null", air);
     assertNotNull("air.getBird() returned null", air.getBird());
   }
-
 }
