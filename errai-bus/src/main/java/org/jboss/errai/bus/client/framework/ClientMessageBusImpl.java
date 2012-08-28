@@ -382,7 +382,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-
   /**
    * Globally send message to all receivers.
    *
