@@ -7,10 +7,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
+import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
@@ -19,6 +22,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -29,6 +33,12 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Generates the GeneratedNavigationGraph class based on {@code @Page} and
+ * {@code @DefaultPage} annotations.
+ *
+ * @author Jonathan Fuerth <jfuerth@gmail.com>
+ */
 public class NavigationGraphGenerator extends Generator {
 
   @Override
@@ -39,24 +49,51 @@ public class NavigationGraphGenerator extends Generator {
     final ClassStructureBuilder<?> classBuilder =
             Implementations.extend(NavigationGraph.class, "GeneratedNavigationGraph");
 
+    final Collection<MetaClass> defaultPages = ClassScanner.getTypesAnnotatedWith(DefaultPage.class);
+    if (defaultPages.size() == 0) {
+      throw new GenerationException(
+              "No @Page classes are annotated with @DefaultPage. Exactly one page class" +
+              " must have the @DefaultPage annotation.");
+    }
+    if (defaultPages.size() > 1) {
+      StringBuilder defaultPageList = new StringBuilder();
+      for (MetaClass mc : defaultPages) {
+        defaultPageList.append("\n  ").append(mc.getFullyQualifiedName());
+      }
+      throw new GenerationException(
+              "Found more than one @DefaultPage: " + defaultPageList +
+              "\nExactly one page class must have the @DefaultPage annotation.");
+    }
+    MetaClass defaultPageClass = defaultPages.iterator().next();
+    if (defaultPageClass.getAnnotation(Page.class) == null) {
+      throw new GenerationException(
+              "Class " + defaultPageClass + " has the @DefaultPage annotation but not the @Page annotation." +
+              " The default page must be a page.");
+    }
+
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
     for (MetaClass pageClass : pages) {
       Page annotation = pageClass.getAnnotation(Page.class);
       List<String> template = parsePageUriTemplate(pageClass, annotation.value());
       String pageName = template.get(0);
+      Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
+      if (pageClass == defaultPageClass) {
+        // need to assign the page impl to a variable and add it to the map twice
+        ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
+        pageImplStmt = Variable.get("defaultPage");
+        ctor.append(
+                Stmt.nestedCall(new StringStatement("pagesByName", MetaClassFactory.get(Map.class)))
+                .invoke("put", "", pageImplStmt));
+      }
+      else if (pageName.equals("")) {
+        throw new GenerationException(
+                "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
+                " page annotated with @DefaultPage is permitted to have an empty path.");
+      }
       ctor.append(
               Stmt.nestedCall(new StringStatement("pagesByName", MetaClassFactory.get(Map.class)))
-              .invoke("put", pageName, ObjectBuilder.newInstanceOf(PageNode.class).extend()
-                  .publicMethod(String.class, "name")
-                      .append(Stmt.loadLiteral(pageName).returnValue()).finish()
-                  .publicMethod(Class.class, "contentType")
-                      .append(Stmt.loadLiteral(pageClass).returnValue()).finish()
-                  .publicMethod(Widget.class, "content")
-                      .append(Stmt.nestedCall(new StringStatement("bm", MetaClassFactory.get(IOCBeanManager.class)))
-                              .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish()
-                  .finish()
-              ));
+              .invoke("put", pageName, pageImplStmt));
     }
     ctor.finish();
 
@@ -86,6 +123,28 @@ public class NavigationGraphGenerator extends Generator {
 
     return classBuilder.getClassDefinition().getFullyQualifiedName();
 
+  }
+
+  /**
+   * Generates a new instance of an anonymous inner class that implements the
+   * PageNode interface.
+   *
+   * @param pageClass
+   *          The class providing the widget content for the page.
+   * @param pageName
+   *          The name of the page (normally obtained by a call to
+   *          {@link #parsePageUriTemplate(MetaClass, String)}).
+   */
+  private ObjectBuilder generateNewInstanceOfPageImpl(MetaClass pageClass, String pageName) {
+    return ObjectBuilder.newInstanceOf(PageNode.class).extend()
+        .publicMethod(String.class, "name")
+            .append(Stmt.loadLiteral(pageName).returnValue()).finish()
+        .publicMethod(Class.class, "contentType")
+            .append(Stmt.loadLiteral(pageClass).returnValue()).finish()
+        .publicMethod(Widget.class, "content")
+            .append(Stmt.nestedCall(new StringStatement("bm", MetaClassFactory.get(IOCBeanManager.class)))
+                    .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish()
+        .finish();
   }
 
   static List<String> parsePageUriTemplate(MetaClass pageType, String uriTemplate) {
