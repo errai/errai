@@ -44,12 +44,12 @@ public class QuickHandlerComponent extends Composite {
 
   @EventHandler("c0")
   @SinkNative(Event.ONCLICK | Event.ONFOCUS)
-  public void doSomethingC0(Event e) {
+  private void doSomethingC0(Event e) {
     c0EventFired = true;
   }
 
   @EventHandler("c1")
-  public void doSomethingC1(ClickEvent e) {
+  private void doSomethingC1(ClickEvent e) {
     c1EventFired = true;
   }
 

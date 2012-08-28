@@ -43,7 +43,7 @@ public class MarshallerFramework implements EntryPoint {
 
     ParserFactory.registerParser(new Parser() {
       @Override
-      public EJValue parse(String input) {
+      public EJValue parse(final String input) {
         return GWTJSON.wrap(JSONParser.parseStrict(input));
       }
     });
@@ -69,12 +69,12 @@ public class MarshallerFramework implements EntryPoint {
         }
 
         @Override
-        public boolean hasMarshaller(String fqcn) {
+        public boolean hasMarshaller(final String fqcn) {
           return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn) != null;
         }
 
         @Override
-        public Marshaller getMarshaller(String fqcn) {
+        public Marshaller getMarshaller(final String fqcn) {
           return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn);
         }
       });
@@ -85,26 +85,26 @@ public class MarshallerFramework implements EntryPoint {
     public JSONMarshallingSession() {
       super(new MappingContext() {
         @Override
-        public Marshaller<Object> getMarshaller(String clazz) {
+        public Marshaller<Object> getMarshaller(final String clazz) {
           return marshallerFactory.getMarshaller("json", clazz);
         }
 
         @Override
-        public boolean hasMarshaller(String clazzName) {
+        public boolean hasMarshaller(final String clazzName) {
           return marshallerFactory.getMarshaller(clazzName, "json") != null;
         }
 
         @Override
-        public boolean canMarshal(String cls) {
+        public boolean canMarshal(final String cls) {
           return marshallerFactory.getMarshaller("json", cls) != null;
         }
       });
     }
 
     @Override
-    public String determineTypeFor(String formatType, Object o) {
+    public String determineTypeFor(final String formatType, final Object o) {
       if (((EJValue) o).isObject() != null) {
-        EJObject jsonObject = ((EJValue) o).isObject();
+        final EJObject jsonObject = ((EJValue) o).isObject();
         if (jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
           return jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
         }

@@ -28,7 +28,6 @@ import java.util.zip.ZipInputStream;
  * @author Heiko Braun
  */
 public abstract class AbstractConfigBase {
-  public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
   protected static final Logger log = LoggerFactory.getLogger(AbstractConfigBase.class);
   protected static Map<String, File> scanAreas = new HashMap<String, File>();
   protected static Map<String, List<String>> scanCache = new HashMap<String, List<String>>();
@@ -281,9 +280,6 @@ public abstract class AbstractConfigBase {
             else {
               loadedTargets.add(FQCN);
             }
-
-            //     Class<?> loadClass = Class.forName(FQCN);
-
 
             visitor.visit(FQCN);
             recordCache(root.getPath(), FQCN);

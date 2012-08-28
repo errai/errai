@@ -55,7 +55,6 @@ public final class InitVotes {
   private static volatile AsyncTask initDelay;
 
   private static boolean _initWait = false;
-  ;
 
   private static final List<InitFailureListener> initFailureListeners
       = new ArrayList<InitFailureListener>();
@@ -106,7 +105,7 @@ public final class InitVotes {
     waitFor(clazz.getName());
   }
 
-  private static void waitFor(String topic) {
+  private static void waitFor(final String topic) {
     synchronized (lock) {
       if (waitForSet.contains(topic)) return;
 
@@ -132,7 +131,7 @@ public final class InitVotes {
     voteFor(clazz.getName());
   }
 
-  private static void voteFor(String topic) {
+  private static void voteFor(final String topic) {
     synchronized (lock) {
       if (waitForSet.remove(topic)) {
         log("vote For: " + topic);
@@ -166,7 +165,7 @@ public final class InitVotes {
     });
   }
 
-  private static void _scheduleFinish(Runnable runnable) {
+  private static void _scheduleFinish(final Runnable runnable) {
     initDelay = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 250, runnable);
   }
 
@@ -235,7 +234,7 @@ public final class InitVotes {
             _fireFailedInit(failedTopics);
 
             log("components failed to initialize");
-            for (String comp : waitForSet) {
+            for (final String comp : waitForSet) {
               log("   [failed] -> " + comp);
             }
           }
@@ -255,17 +254,17 @@ public final class InitVotes {
       armed = false;
       cancelFailTimer();
 
-      Iterator<Runnable> iter = oneTimeInitCallbacks.iterator();
-      while (iter.hasNext()) {
+      final Iterator<Runnable> iterator = oneTimeInitCallbacks.iterator();
+      while (iterator.hasNext()) {
         try {
-          iter.next().run();
+          iterator.next().run();
         }
         finally {
-          iter.remove();
+          iterator.remove();
         }
       }
 
-      for (Runnable callback : initCallbacks) {
+      for (final Runnable callback : initCallbacks) {
         callback.run();
       }
     }

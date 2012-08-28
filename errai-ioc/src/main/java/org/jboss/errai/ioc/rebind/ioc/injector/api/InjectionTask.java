@@ -139,7 +139,7 @@ public class InjectionTask {
                    + field.getDeclaringClass().getFullyQualifiedName() + "." + field.getName());
          }
          else {
-           fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(processingContext, Refs.get(injector.getInstanceVarName()), field, val);
+           fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(ctx, Refs.get(injector.getInstanceVarName()), field, val);
          }
 
          processingContext.append(fieldAccessStmt);
@@ -158,7 +158,7 @@ public class InjectionTask {
         final Statement[] args = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
 
         processingContext.append(
-                InjectUtil.invokePublicOrPrivateMethod(processingContext,
+                InjectUtil.invokePublicOrPrivateMethod(ctx,
                         Refs.get(injector.getInstanceVarName()),
                         method,
                         args)

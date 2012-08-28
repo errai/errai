@@ -188,7 +188,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         buffer = TransmissionBuffer.createDirect(segmentSize, segmentCount);
       }
       catch (OutOfMemoryError e) {
-        log.warn("could not allocate direct memory buffer. insufficient direct memory. increase the direct memory buffer size with the JVM argument: -XX:MaxDirectMemorySize=<size>");
+        log.warn("could not allocate direct memory buffer. insufficient direct memory. increase the direct memory " +
+            "buffer size with the JVM argument: -XX:MaxDirectMemorySize=<size>");
         log.warn("falling back to a heap allocated buffer.");
         buffer = TransmissionBuffer.create(segmentSize, segmentCount);
       }
@@ -323,7 +324,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                 final String webSocketURL;
 
-                final HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
+                final HttpServletRequest request
+                    = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
 
                 if (webSocketServlet) {
                   webSocketURL = "ws://" + request.getHeader("Host") + webSocketPath;
@@ -693,13 +695,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   public void send(final Message message, final boolean fireListeners) {
     message.commit();
     if (!message.hasResource(Resources.Session.name())) {
-      handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
+      handleMessageDeliveryFailure(this, message,
+          "cannot automatically route message. no session contained in message.", null, false);
     }
 
     final MessageQueue queue = getQueue(getSession(message));
 
     if (queue == null) {
-      handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
+      handleMessageDeliveryFailure(this, message,
+          "cannot automatically route message. no session contained in message.", null, false);
     }
 
     send(message.hasPart(MessageParts.SessionID) ? getQueueBySession(message.get(String.class, MessageParts.SessionID)) :
@@ -910,7 +914,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     final DeliveryPlan plan = createOrAddDeliveryPlan(toSubscribe, receiver);
 
-    fireSubscribeListeners(new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", toSubscribe));
+    fireSubscribeListeners(
+        new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", toSubscribe)
+    );
 
     return new Subscription() {
       @Override
@@ -988,7 +994,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       }
     }
 
-    fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), isNew, subject));
+    fireSubscribeListeners(
+        new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), isNew, subject)
+    );
   }
 
   public class RemoteMessageCallback implements MessageCallback {
@@ -1055,7 +1063,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   /**
-   * Unsubscribes a remote subsciption and fires the appropriate listeners
+   * Unsubscribes a remote subscription and fires the appropriate listeners
    *
    * @param sessionContext
    *     - session context of queue
@@ -1312,7 +1320,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
     this.busMonitor = monitor;
 
-
     for (final Map.Entry<QueueSession, MessageQueue> entry : messageQueues.entrySet()) {
       busMonitor.notifyQueueAttached(entry.getKey().getSessionId(), entry.getValue());
     }
@@ -1322,7 +1329,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
     for (final Map.Entry<String, RemoteMessageCallback> entry : remoteSubscriptions.entrySet()) {
       for (final MessageQueue queue : entry.getValue().getQueues()) {
-        busMonitor.notifyNewSubscriptionEvent(new SubscriptionEvent(true, queue.getSession().getSessionId(), 1, false, entry.getKey()));
+        busMonitor.notifyNewSubscriptionEvent(
+            new SubscriptionEvent(true, queue.getSession().getSessionId(), 1, false, entry.getKey())
+        );
       }
     }
 

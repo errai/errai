@@ -219,7 +219,7 @@ public class ProducerInjector extends AbstractInjector {
       injectionContext.addExposedMethod(disposerMethod);
     }
 
-    final Statement disposerInvoke = InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
+    final Statement disposerInvoke = InjectUtil.invokePublicOrPrivateMethod(injectionContext,
         Refs.get(producerInjectableInstance.getTargetInjector().getInstanceVarName()),
         disposerMethod,
         Refs.get("obj"));
@@ -298,7 +298,7 @@ public class ProducerInjector extends AbstractInjector {
     if (producerMember instanceof MetaMethod) {
       final MetaMethod producerMethod = (MetaMethod) producerMember;
 
-      return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
+      return InjectUtil.invokePublicOrPrivateMethod(injectionContext,
           beanRef,
           producerMethod,
           InjectUtil.resolveInjectionDependencies(
@@ -308,7 +308,7 @@ public class ProducerInjector extends AbstractInjector {
               false));
     }
     else {
-      return InjectUtil.getPublicOrPrivateFieldValue(injectionContext.getProcessingContext(),
+      return InjectUtil.getPublicOrPrivateFieldValue(injectionContext,
           beanRef,
           (MetaField) producerMember);
     }
