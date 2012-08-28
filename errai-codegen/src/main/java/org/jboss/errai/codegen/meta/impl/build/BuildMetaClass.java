@@ -561,6 +561,17 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     context.addVariable(Variable.create("this", this));
 
+    MetaClass sCls = getSuperClass();
+    if (sCls != null) {
+      do {
+        for (final MetaField metaField : sCls.getFields()) {
+          if (!metaField.isPrivate()) {
+            context.addVariable(Variable.create(metaField.getName(), metaField.getType()));
+          }
+        }
+      } while ((sCls = sCls.getSuperClass()) != null && !sCls.getName().equals("java.lang.Object"));
+    }
+
     for (final BuildMetaField buildMetaField : fields) {
       context.addVariable(Variable.create(buildMetaField.getName(), buildMetaField.getType()));
     }
