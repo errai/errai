@@ -5,23 +5,20 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
@@ -83,7 +80,7 @@ public class NavigationGraphGenerator extends Generator {
         ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
         pageImplStmt = Variable.get("defaultPage");
         ctor.append(
-                Stmt.nestedCall(new StringStatement("pagesByName", MetaClassFactory.get(Map.class)))
+                Stmt.nestedCall(Refs.get("pagesByName"))
                 .invoke("put", "", pageImplStmt));
       }
       else if (pageName.equals("")) {
@@ -92,7 +89,7 @@ public class NavigationGraphGenerator extends Generator {
                 " page annotated with @DefaultPage is permitted to have an empty path.");
       }
       ctor.append(
-              Stmt.nestedCall(new StringStatement("pagesByName", MetaClassFactory.get(Map.class)))
+              Stmt.nestedCall(Refs.get("pagesByName"))
               .invoke("put", pageName, pageImplStmt));
     }
     ctor.finish();
@@ -142,7 +139,7 @@ public class NavigationGraphGenerator extends Generator {
         .publicMethod(Class.class, "contentType")
             .append(Stmt.loadLiteral(pageClass).returnValue()).finish()
         .publicMethod(Widget.class, "content")
-            .append(Stmt.nestedCall(new StringStatement("bm", MetaClassFactory.get(IOCBeanManager.class)))
+            .append(Stmt.nestedCall(Refs.get("bm"))
                     .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish()
         .finish();
   }

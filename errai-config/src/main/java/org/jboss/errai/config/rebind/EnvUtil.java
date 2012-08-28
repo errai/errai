@@ -111,7 +111,6 @@ public abstract class EnvUtil {
   private static Logger log = LoggerFactory.getLogger(EnvUtil.class);
 
   private static EnviromentConfig loadConfiguredPortableTypes() {
-    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Map<String, String> frameworkProps = new HashMap<String, String>();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
