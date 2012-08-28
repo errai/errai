@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen;
 
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.builder.impl.DeclareAssignmentBuilder;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.literal.LiteralFactory;
@@ -23,8 +25,7 @@ import org.jboss.errai.codegen.literal.LiteralValue;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.GenUtil;
-
-import javax.enterprise.util.TypeLiteral;
+import org.jboss.errai.codegen.util.Stmt;
 
 /**
  * This class represents a variable.
@@ -76,38 +77,108 @@ public class Variable extends AbstractStatement {
     return inferredType;
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareFinalVariable(String, Class)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable createFinal(final String name, final Class<?> type) {
     return createFinal(name, MetaClassFactory.get(type));
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareFinalVariable(String, TypeLiteral)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable createFinal(final String name, final TypeLiteral<?> type) {
     final Variable variable = create(name, type);
     variable.isFinal = true;
     return variable;
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareFinalVariable(String, MetaClass)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable createFinal(final String name, final MetaClass type) {
     final Variable variable = create(name, type);
     variable.isFinal = true;
     return variable;
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareFinalVariable(String, Class, Object)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable createFinal(final String name, final Class<?> type, final Object initialization) {
     return createFinal(name, MetaClassFactory.get(type), initialization);
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareFinalVariable(String, MetaClass, Object)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable createFinal(final String name, final MetaClass type, final Object initialization) {
     final Variable variable = create(name, type, initialization);
     variable.isFinal = true;
     return variable;
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareFinalVariable(String, TypeLiteral, Object)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable createFinal(final String name, final TypeLiteral<?> type, final Object initialization) {
     final Variable variable = create(name, type, initialization);
     variable.isFinal = true;
     return variable;
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareVariable(String, Object)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable create(final String name, final Object initialization) {
     return new Variable(name, null, initialization);
   }
@@ -116,26 +187,86 @@ public class Variable extends AbstractStatement {
     return new Variable(ref.getName(), ref.getType());
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareVariable(String, Class)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable create(final String name, final Class<?> type) {
     return new Variable(name, MetaClassFactory.get(type));
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareVariable(String, TypeLiteral)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable create(final String name, final TypeLiteral<?> type) {
     return new Variable(name, MetaClassFactory.get(type));
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareVariable(String, MetaClass)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable create(final String name, final MetaClass type) {
     return new Variable(name, type);
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareVariable(String, Class, Object)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable create(final String name, final Class<?> type, final Object initialization) {
     return new Variable(name, MetaClassFactory.get(type), initialization);
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareVariable(String, TypeLiteral, Object)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable create(final String name, final TypeLiteral<?> type, final Object initialization) {
     return new Variable(name, MetaClassFactory.get(type), initialization);
   }
 
+  /**
+   * Creates a variable, but does not assign it to a scope. If you are trying to
+   * declare a variable, see {@link Stmt#declareVariable(String, MetaClass, Object)}.
+   *
+   * @param name
+   *          The variable name
+   * @param type
+   *          The variable reference type
+   * @return A newly created variable that is not (yet) referencable.
+   */
   public static Variable create(final String name, final MetaClass type, final Object initialization) {
     return new Variable(name, type, initialization);
   }
@@ -170,6 +301,7 @@ public class Variable extends AbstractStatement {
         return name;
       }
 
+      @Override
       public MetaClass getType() {
         return type;
       }
