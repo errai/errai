@@ -90,7 +90,7 @@
         <module>errai-ioc</module>
         <module>errai-bus</module>
         <module>errai-bus/demos</module>
-        <module>errai-tools</module>                                       ˚
+        <module>errai-tools</module>
         <module>errai-codegen</module>
         <module>errai-marshalling</module>
         <module>errai-js</module>
