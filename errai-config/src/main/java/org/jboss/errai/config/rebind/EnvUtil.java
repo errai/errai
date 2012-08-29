@@ -388,7 +388,7 @@ public abstract class EnvUtil {
     private final byte[] sourceBuffer;
     private final Set<String> results;
 
-    private ReachabilityRunnable(byte[] sourceBuffer, Set<String> results) {
+    private ReachabilityRunnable(final byte[] sourceBuffer, final Set<String> results) {
       this.sourceBuffer = sourceBuffer;
       this.results = results;
     }
