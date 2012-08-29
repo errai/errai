@@ -188,7 +188,7 @@ public class InjectUtil {
         = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
         .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj", true));
 
-    final String varName = "init_" + injector.getInstanceVarName();
+    final String varName = "init_".concat(injector.getInstanceVarName());
     injector.setPostInitCallbackVar(varName);
 
     renderLifeCycleEvents(PostConstruct.class, injector, ctx, initMeth, postConstructTasks);
@@ -228,7 +228,7 @@ public class InjectUtil {
         = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
         .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
 
-    final String varName = "destroy_" + injector.getInstanceVarName();
+    final String varName = "destroy_".concat(injector.getInstanceVarName());
     injector.setPreDestroyCallbackVar(varName);
 
     renderLifeCycleEvents(PreDestroy.class, injector, ctx, initMeth, preDestroyTasks);
@@ -242,15 +242,21 @@ public class InjectUtil {
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
   }
 
-  private static void renderLifeCycleEvents(final Class<? extends Annotation> type, final Injector injector,
-                                            final InjectionContext ctx, final BlockBuilder<?> body, final List<MetaMethod> methods) {
+  private static void renderLifeCycleEvents(final Class<? extends Annotation> type,
+                                            final Injector injector,
+                                            final InjectionContext ctx,
+                                            final BlockBuilder<?> body,
+                                            final List<MetaMethod> methods) {
     for (final MetaMethod meth : methods) {
       renderLifeCycleMethodCall(type, injector, ctx, body, meth);
     }
   }
 
-  private static void renderLifeCycleMethodCall(final Class<? extends Annotation> type, final Injector injector,
-                                                final InjectionContext ctx, final BlockBuilder<?> body, final MetaMethod meth) {
+  private static void renderLifeCycleMethodCall(final Class<? extends Annotation> type,
+                                                final Injector injector,
+                                                final InjectionContext ctx,
+                                                final BlockBuilder<?> body,
+                                                final MetaMethod meth) {
     if (meth.getParameters().length != 0) {
       throw new InjectionFailure(type.getCanonicalName() + " method must contain no parameters: "
           + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
@@ -401,13 +407,14 @@ public class InjectUtil {
     return scanForAnnotatedMethod(type, PreDestroy.class);
   }
 
-  public static List<MetaMethod> scanForAnnotatedMethod(final MetaClass type, final Class<? extends Annotation> annoClass) {
+  public static List<MetaMethod> scanForAnnotatedMethod(final MetaClass type,
+                                                        final Class<? extends Annotation> annotationType) {
     final List<MetaMethod> accumulator = new LinkedList<MetaMethod>();
 
     MetaClass clazz = type;
     do {
       for (final MetaMethod meth : clazz.getDeclaredMethods()) {
-        if (meth.isAnnotationPresent(annoClass)) {
+        if (meth.isAnnotationPresent(annotationType)) {
           accumulator.add(meth);
         }
       }
@@ -493,9 +500,11 @@ public class InjectUtil {
             boolean pushedProxy = false;
 
             try {
-              if (injectableInstance.getTaskType() == TaskType.Parameter && injectableInstance.getConstructor() != null) {
+              if (injectableInstance.getTaskType() == TaskType.Parameter
+                  && injectableInstance.getConstructor() != null) {
                 // eek! a producer element is produced by this bean and injected into it's own constructor!
-                final ProxyInjector producedElementProxy = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
+                final ProxyInjector producedElementProxy
+                    = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
 
                 proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
                     .invoke("addBean", Stmt.load(inj.getInjectedType()),
@@ -519,7 +528,10 @@ public class InjectUtil {
             }
 
           }
-          else if (inj.isSoftDisabled() || (inj.isDependent() && (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType())))) {
+          else if (inj.isSoftDisabled()
+              || (inj.isDependent() &&
+              (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType())))) {
+
             inj.setEnabled(true);
             if (inj.isCreated() && !inj.isRendered()) {
               throw new InjectionFailure("unresolveable cycle on dependent scoped bean: "
@@ -545,7 +557,9 @@ public class InjectUtil {
     }
   }
 
-  public static ProxyInjector getOrCreateProxy(final InjectionContext ctx, final MetaClass clazz, final QualifyingMetadata qualifyingMetadata) {
+  public static ProxyInjector getOrCreateProxy(final InjectionContext ctx,
+                                               final MetaClass clazz,
+                                               final QualifyingMetadata qualifyingMetadata) {
     final ProxyInjector proxyInjector;
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (ProxyInjector)
@@ -626,11 +640,13 @@ public class InjectUtil {
         ctx.closeProxyIfOpen();
       }
       catch (UnproxyableClassException e) {
-        final String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+        final String err = "your object graph has cyclical dependencies and the cycle could not be proxied. " +
+            "use of the @Dependent scope and @New qualifier may not " +
             "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
             "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
             "\t Note          : this issue can be resolved by making "
-            + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+            + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the " +
+            "class is non-final.";
 
         throw UnsatisfiedDependenciesException.createWithSingleParameterFailure(parms[i], constructor.getDeclaringClass(),
             parms[i].getType(), err);
@@ -648,8 +664,8 @@ public class InjectUtil {
   }
 
   private static Statement recordInlineReference(final Statement beanCreationStmt,
-                                                       final InjectionContext ctx,
-                                                       final MetaParameter parm) {
+                                                 final InjectionContext ctx,
+                                                 final MetaParameter parm) {
     final String varName = InjectUtil.getUniqueVarName();
 
     ctx.getProcessingContext()
@@ -663,11 +679,11 @@ public class InjectUtil {
   }
 
   public static String getNewInjectorName() {
-    return "inj" + injectorCounter.addAndGet(1);
+    return "inj".concat(String.valueOf(injectorCounter.addAndGet(1)));
   }
 
   public static String getUniqueVarName() {
-    return "var" + uniqueCounter.addAndGet(1);
+    return "var".concat(String.valueOf(uniqueCounter.addAndGet(1)));
   }
 
   public static List<Annotation> extractQualifiers(final InjectableInstance<? extends Annotation> injectableInstance) {
@@ -686,18 +702,18 @@ public class InjectUtil {
   }
 
   public static List<Annotation> getQualifiersFromAnnotations(final Annotation[] annotations) {
-    final List<Annotation> quals = new ArrayList<Annotation>();
+    final List<Annotation> qualifiers = new ArrayList<Annotation>();
     for (final Annotation a : annotations) {
       if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
-        quals.add(a);
+        qualifiers.add(a);
       }
     }
-    return Collections.unmodifiableList(quals);
+    return Collections.unmodifiableList(qualifiers);
   }
 
   public static Annotation[] getQualifiersFromAnnotationsAsArray(final Annotation[] annotations) {
-    final List<Annotation> quals = getQualifiersFromAnnotations(annotations);
-    return quals.toArray(new Annotation[quals.size()]);
+    final List<Annotation> qualifiers = getQualifiersFromAnnotations(annotations);
+    return qualifiers.toArray(new Annotation[qualifiers.size()]);
   }
 
   public static interface BeanMetric {
@@ -709,48 +725,47 @@ public class InjectUtil {
   }
 
   public static BeanMetric analyzeBean(final InjectionContext context, final MetaClass clazz) {
-    MetaConstructor injectConstructor = null;
-    for (final MetaConstructor constructor : clazz.getDeclaredConstructors()) {
-      if (isInjectionPoint(context, constructor)) {
-        injectConstructor = constructor;
-        break;
-      }
-    }
-
-    final Collection<MetaField> fields = new ArrayList<MetaField>();
-    final Collection<MetaMethod> methods = new ArrayList<MetaMethod>();
-
-    MetaClass toScan = clazz;
-    do {
-      for (final MetaField field : toScan.getDeclaredFields()) {
-        if (isInjectionPoint(context, field)) {
-          fields.add(field);
-        }
-      }
-
-      for (final MetaMethod method : toScan.getDeclaredMethods()) {
-        if (isInjectionPoint(context, method)) {
-          methods.add(method);
-        }
-      }
-    }
-    while ((toScan = toScan.getSuperClass()) != null);
-
-    final MetaConstructor constructor = injectConstructor;
-
     return new BeanMetric() {
       @Override
       public MetaConstructor getInjectorConstructor() {
-        return constructor;
+        for (final MetaConstructor constructor : clazz.getDeclaredConstructors()) {
+          if (isInjectionPoint(context, constructor)) {
+            return constructor;
+          }
+        }
+        return null;
       }
 
       @Override
       public Collection<MetaField> getFieldInjectors() {
+        final Collection<MetaField> fields = new ArrayList<MetaField>();
+
+        MetaClass toScan = clazz;
+        do {
+          for (final MetaField field : toScan.getDeclaredFields()) {
+            if (isInjectionPoint(context, field)) {
+              fields.add(field);
+            }
+          }
+        }
+        while ((toScan = toScan.getSuperClass()) != null);
+
         return fields;
       }
 
       @Override
       public Collection<MetaMethod> getMethodInjectors() {
+        final Collection<MetaMethod> methods = new ArrayList<MetaMethod>();
+
+        MetaClass toScan = clazz;
+        do {
+          for (final MetaMethod method : toScan.getDeclaredMethods()) {
+            if (isInjectionPoint(context, method)) {
+              methods.add(method);
+            }
+          }
+        }
+        while ((toScan = toScan.getSuperClass()) != null);
         return methods;
       }
     };

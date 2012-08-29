@@ -30,7 +30,7 @@ public class TernaryStatement extends AbstractStatement {
       returnType = falseStatement.getType();
     }
 
-    return conditionString + " ? " + trueString + " : " + falseString;
+    return conditionString.concat(" ? ").concat(trueString).concat(" : ").concat(falseString);
   }
 
   @Override

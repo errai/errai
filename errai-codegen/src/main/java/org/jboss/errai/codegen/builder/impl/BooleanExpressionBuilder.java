@@ -66,7 +66,7 @@ public class BooleanExpressionBuilder extends ExpressionBuilder<BooleanOperator>
     }
 
     if (negated) {
-      return UnaryOperator.Complement.getCanonicalString()  + "(" + super.generate(context) + ")";
+      return UnaryOperator.Complement.getCanonicalString().concat("(") + super.generate(context).concat(")");
     }
     
     return super.generate(context);

@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
+import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
 
 /**
@@ -38,6 +39,7 @@ import org.jboss.errai.marshalling.server.ServerMappingContext;
  */
 public class GeneratorMappingContext implements ServerMappingContext {
 
+  private final MarshallerGeneratorFactory marshallerGeneratorFactory;
   private final DefinitionsFactory definitionsFactory = DefinitionsFactorySingleton.get();
 
   private final Set<String> generatedMarshallers = new HashSet<String>();
@@ -51,42 +53,48 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   private final Set<String> exposedMembers = new HashSet<String>();
 
-  public GeneratorMappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
-                                 ClassStructureBuilder<?> classStructureBuilder,
-                                 ArrayMarshallerCallback callback) {
+  public GeneratorMappingContext(final MarshallerGeneratorFactory marshallerGeneratorFactory,
+                                 final Context codegenContext,
+                                 final MetaClass generatedBootstrapClass,
+                                 final ClassStructureBuilder<?> classStructureBuilder,
+                                 final ArrayMarshallerCallback callback) {
 
+    this.marshallerGeneratorFactory = marshallerGeneratorFactory;
     this.codegenContext = codegenContext;
     this.generatedBootstrapClass = generatedBootstrapClass;
     this.classStructureBuilder = classStructureBuilder;
     this.arrayMarshallerCallback = callback;
   }
 
+  public MarshallerGeneratorFactory getMarshallerGeneratorFactory() {
+    return marshallerGeneratorFactory;
+  }
 
   @Override
   public DefinitionsFactory getDefinitionsFactory() {
     return definitionsFactory;
   }
 
-  public void registerGeneratedMarshaller(String clazzName) {
+  public void registerGeneratedMarshaller(final String clazzName) {
     generatedMarshallers.add(clazzName);
   }
 
   @Override
-  public boolean hasMarshaller(String clazzName) {
+  public boolean hasMarshaller(final String clazzName) {
     return definitionsFactory.hasDefinition(clazzName);
   }
 
   @Override
-  public Marshaller<Object> getMarshaller(String clazz) {
+  public Marshaller<Object> getMarshaller(final String clazz) {
     return null;
   }
 
-  private boolean hasGeneratedMarshaller(String clazzName) {
+  private boolean hasGeneratedMarshaller(final String clazzName) {
     return generatedMarshallers.contains(clazzName);
   }
 
   @Override
-  public boolean canMarshal(String clazz) {
+  public boolean canMarshal(final String clazz) {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }
 
@@ -94,8 +102,12 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return codegenContext;
   }
 
-  public void markRendered(String className) {
-    renderedMarshallers.add(className);
+  public void markRendered(final MetaClass metaClass) {
+    renderedMarshallers.add(metaClass.asBoxed().getFullyQualifiedName());
+  }
+
+  public boolean isRendered(final MetaClass metaClass) {
+    return renderedMarshallers.contains(metaClass.asBoxed().getFullyQualifiedName());
   }
 
   public MetaClass getGeneratedBootstrapClass() {
@@ -110,7 +122,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return arrayMarshallerCallback;
   }
 
-  private static String getPrivateMemberName(MetaClassMember member) {
+  private static String getPrivateMemberName(final MetaClassMember member) {
     if (member instanceof MetaField) {
       return PrivateAccessUtil.getPrivateFieldInjectorName((MetaField) member);
     }
@@ -119,11 +131,11 @@ public class GeneratorMappingContext implements ServerMappingContext {
     }
   }
 
-  public void markExposed(MetaClassMember member) {
+  public void markExposed(final MetaClassMember member) {
     exposedMembers.add(getPrivateMemberName(member));
   }
 
-  public boolean isExposed(MetaClassMember member) {
+  public boolean isExposed(final MetaClassMember member) {
     return exposedMembers.contains(getPrivateMemberName(member));
   }
 }

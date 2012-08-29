@@ -222,6 +222,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         for (final MemberMapping memberMapping : mappingDefinition.getMemberMappings()) {
           if (!memberMapping.canWrite()) continue;
 
+          if (!memberMapping.getTargetType().isArray() && !context.isRendered(memberMapping.getTargetType())) {
+             context.getMarshallerGeneratorFactory().addMarshaller(memberMapping.getTargetType());
+          }
+
           final Statement bindingStatement;
           final Statement val;
           if (memberMapping.getType().isArray()) {

@@ -36,18 +36,18 @@ public class LoadVariable extends AbstractCallElement {
   private Object[] indexes;
   private boolean classMember;
 
-  public LoadVariable(String variableName, Object... indexes) {
+  public LoadVariable(final String variableName, final Object... indexes) {
     this.variableName = variableName;
     this.indexes = indexes == null ? new Object[0] : indexes;
   }
 
-  public LoadVariable(String variableName, boolean classMember, Object... indexes) {
+  public LoadVariable(final String variableName, final boolean classMember, final Object... indexes) {
     this(variableName, indexes);
     this.classMember = classMember;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer, final Context context, final Statement statement) {
     writer.reset();
 
     try {
@@ -78,17 +78,17 @@ public class LoadVariable extends AbstractCallElement {
         String generatedCache;
   
         @Override
-        public String generate(Context context) {
+        public String generate(final Context context) {
           if (generatedCache != null) return generatedCache;
 
           if (variableName.equals("this") && next != null && !(next instanceof ReturnValue)) {
             return generatedCache = "";
           }
 
-          StringBuilder buf = new StringBuilder((classMember
-                  && context.isAmbiguous(ref.getName()) ? "this." : "") + getName());
+          final StringBuilder buf = new StringBuilder((classMember
+                  && context.isAmbiguous(ref.getName()) ? "this." : "").concat(getName()));
   
-          for (Statement s : idx) {
+          for (final Statement s : idx) {
             buf.append('[').append(s.generate(context)).append(']');
           }
   
@@ -97,12 +97,12 @@ public class LoadVariable extends AbstractCallElement {
   
         @Override
         public MetaClass getType() {
-          MetaClass ret;
+          final MetaClass ret;
   
-          int dims = GenUtil.getArrayDimensions(ref.getType());
+          final int dims = GenUtil.getArrayDimensions(ref.getType());
   
           if (ref.getType().isArray() && idx.length > 0) {
-            int newDims = dims - idx.length;
+            final int newDims = dims - idx.length;
             if (newDims > 0) {
               ret = ref.getType().getOuterComponentType().asArrayOf(dims - idx.length);
             }
