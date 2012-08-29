@@ -22,16 +22,35 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 
 /**
+ * An empty statement. Use {@link #INSTANCE} to obtain an instance of this type.
+ *
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
- */                         
+ */
 public class EmptyStatement implements Statement {
+
+  /**
+   * Sharable empty statement instance.
+   */
   public static final Statement INSTANCE = new EmptyStatement();
-  
-  @Override
-  public String generate(Context context) {
-    throw new RuntimeException("empty statement cannot be generated");
+
+  /**
+   * Private constructor to enforce singletonness of this class.
+   */
+  private EmptyStatement() {
   }
 
+  /**
+   * Returns the empty string.
+   */
+  @Override
+  public String generate(Context context) {
+    return "";
+  }
+
+  /**
+   * Always returns the MetaClass for java.lang.Object.
+   */
   @Override
   public MetaClass getType() {
     return MetaClassFactory.get(Object.class);

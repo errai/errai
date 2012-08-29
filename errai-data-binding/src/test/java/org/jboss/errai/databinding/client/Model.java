@@ -21,7 +21,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
  * Simple bindable model for testing purposes.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Bindable
@@ -30,6 +30,7 @@ public class Model {
 
   private int id;
   private String value;
+  // the _ here is used to test proper JavaBean property discovery
   private String _name;
   private Integer _age;
   private boolean active;
@@ -62,8 +63,9 @@ public class Model {
     return _age;
   }
 
-  public void setAge(Integer _age) {
+  public Model setAge(Integer _age) {
     this._age = _age;
+    return this;
   }
 
   public boolean isActive() {
