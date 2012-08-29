@@ -1,9 +1,12 @@
 package org.jboss.errai.cdi.invalid.producer.client.test;
 
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependency;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.MockIOCGenerator;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -19,6 +22,16 @@ import static org.junit.Assert.fail;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class InvalidProducerIntegrationTest {
+
+  @Before
+  public void setup() {
+    System.setProperty(EnvUtil.SYSPROP_USE_REACHABILITY_ANALYSIS, "false");
+  }
+
+  @After
+  public void tearDown() {
+    System.setProperty(EnvUtil.SYSPROP_USE_REACHABILITY_ANALYSIS, "true");
+  }
 
   /**
    * In this case, a producer is available for @A but the injection point specifies @A @B
