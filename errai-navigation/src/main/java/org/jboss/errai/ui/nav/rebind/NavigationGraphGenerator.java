@@ -1,10 +1,13 @@
 package org.jboss.errai.ui.nav.rebind;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -13,6 +16,9 @@ import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Refs;
@@ -20,9 +26,12 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -45,7 +54,12 @@ public class NavigationGraphGenerator extends Generator {
     final ClassStructureBuilder<?> classBuilder =
             Implementations.extend(NavigationGraph.class, "GeneratedNavigationGraph");
 
+    // accumulation of (name, pageclass) mappings for dupe detection and dot file generation
+    BiMap<String, MetaClass> pageNames = HashBiMap.create();
+
+    // accumulation of pages with startingPage=true (for ensuring there is exactly one default page)
     List<MetaClass> defaultPages = new ArrayList<MetaClass>();
+
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
     for (MetaClass pageClass : pages) {
@@ -57,10 +71,15 @@ public class NavigationGraphGenerator extends Generator {
       Page annotation = pageClass.getAnnotation(Page.class);
       List<String> template = parsePageUriTemplate(pageClass, annotation.path());
       String pageName = template.get(0);
+
+      MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
+      if (prevPageWithThisName != null) {
+        throw new GenerationException(
+                "Page names must be unique, but " + prevPageWithThisName + " and " + pageClass +
+                " are both named [" + pageName + "]");
+      }
       Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
       if (annotation.startingPage() == true) {
-
-        // accumulate this in the list for the later sanity checks (ensuring there is exactly one default page)
         defaultPages.add(pageClass);
 
         // need to assign the page impl to a variable and add it to the map twice
@@ -80,6 +99,8 @@ public class NavigationGraphGenerator extends Generator {
               .invoke("put", pageName, pageImplStmt));
     }
     ctor.finish();
+
+    renderNavigationToDotFile(pageNames);
 
     if (defaultPages.size() == 0) {
       throw new GenerationException(
@@ -201,5 +222,49 @@ public class NavigationGraphGenerator extends Generator {
       throw new IllegalArgumentException("Found unterminated parameter at position " + i + " of " + uriTemplate);
     }
     return retval;
+  }
+
+  /**
+   * Renders the page-to-page navigation graph into the file {@code navgraph.gv}
+   * in the {@code .errai} cache directory.
+   *
+   * @param fromClass
+   */
+  private void renderNavigationToDotFile(BiMap<String, MetaClass> pages) {
+    final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath(), "navgraph.gv");
+    PrintWriter out = null;
+    try {
+      out = new PrintWriter(dotFile);
+      out.println("digraph Navigation {");
+      final MetaClass transitionToType = MetaClassFactory.get(TransitionTo.class);
+      for (Map.Entry<String, MetaClass> entry : pages.entrySet()) {
+        String pageName = entry.getKey();
+        MetaClass pageClass = entry.getValue();
+        out.println("\"" + pageName + "\"");
+        for (MetaField field : getAllFields(pageClass)) {
+          if (field.getType().getErased().equals(transitionToType)) {
+            MetaType targetPageType = field.getType().getParameterizedType().getTypeParameters()[0];
+            String targetPageName = pages.inverse().get(targetPageType);
+            out.println("\"" + pageName + "\" -> \"" + targetPageName + "\"");
+          }
+        }
+      }
+      out.println("}");
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    finally {
+      if (out != null) {
+        out.close();
+      }
+    }
+  }
+
+  private static List<MetaField> getAllFields(MetaClass c) {
+    ArrayList<MetaField> fields = new ArrayList<MetaField>();
+    for (; c != null; c = c.getSuperClass()) {
+      fields.addAll(Arrays.asList(c.getDeclaredFields()));
+    }
+    return fields;
   }
 }
