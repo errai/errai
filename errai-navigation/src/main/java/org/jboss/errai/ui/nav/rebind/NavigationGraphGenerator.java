@@ -19,7 +19,6 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.ui.nav.client.local.DefaultPage;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -46,36 +45,24 @@ public class NavigationGraphGenerator extends Generator {
     final ClassStructureBuilder<?> classBuilder =
             Implementations.extend(NavigationGraph.class, "GeneratedNavigationGraph");
 
-    final Collection<MetaClass> defaultPages = ClassScanner.getTypesAnnotatedWith(DefaultPage.class);
-    if (defaultPages.size() == 0) {
-      throw new GenerationException(
-              "No @Page classes are annotated with @DefaultPage. Exactly one page class" +
-              " must have the @DefaultPage annotation.");
-    }
-    if (defaultPages.size() > 1) {
-      StringBuilder defaultPageList = new StringBuilder();
-      for (MetaClass mc : defaultPages) {
-        defaultPageList.append("\n  ").append(mc.getFullyQualifiedName());
-      }
-      throw new GenerationException(
-              "Found more than one @DefaultPage: " + defaultPageList +
-              "\nExactly one page class must have the @DefaultPage annotation.");
-    }
-    MetaClass defaultPageClass = defaultPages.iterator().next();
-    if (defaultPageClass.getAnnotation(Page.class) == null) {
-      throw new GenerationException(
-              "Class " + defaultPageClass + " has the @DefaultPage annotation but not the @Page annotation." +
-              " The default page must be a page.");
-    }
-
+    List<MetaClass> defaultPages = new ArrayList<MetaClass>();
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
     for (MetaClass pageClass : pages) {
+      if (!pageClass.isAssignableTo(Widget.class)) {
+        throw new GenerationException(
+                "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must be a subtype " +
+                "of Widget.");
+      }
       Page annotation = pageClass.getAnnotation(Page.class);
-      List<String> template = parsePageUriTemplate(pageClass, annotation.value());
+      List<String> template = parsePageUriTemplate(pageClass, annotation.path());
       String pageName = template.get(0);
       Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
-      if (pageClass == defaultPageClass) {
+      if (annotation.startingPage() == true) {
+
+        // accumulate this in the list for the later sanity checks (ensuring there is exactly one default page)
+        defaultPages.add(pageClass);
+
         // need to assign the page impl to a variable and add it to the map twice
         ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
         pageImplStmt = Variable.get("defaultPage");
@@ -86,13 +73,28 @@ public class NavigationGraphGenerator extends Generator {
       else if (pageName.equals("")) {
         throw new GenerationException(
                 "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
-                " page annotated with @DefaultPage is permitted to have an empty path.");
+                " page with startPage=true is permitted to have an empty path.");
       }
       ctor.append(
               Stmt.nestedCall(Refs.get("pagesByName"))
               .invoke("put", pageName, pageImplStmt));
     }
     ctor.finish();
+
+    if (defaultPages.size() == 0) {
+      throw new GenerationException(
+              "No @Page classes have startPage=true. Exactly one @Page class" +
+              " must be designated as the starting page.");
+    }
+    if (defaultPages.size() > 1) {
+      StringBuilder defaultPageList = new StringBuilder();
+      for (MetaClass mc : defaultPages) {
+        defaultPageList.append("\n  ").append(mc.getFullyQualifiedName());
+      }
+      throw new GenerationException(
+              "Found more than one @Page with startPage=true: " + defaultPageList +
+              "\nExactly one @Page class must be designated as the starting page.");
+    }
 
     String out = classBuilder.toJavaString();
     final File fileCacheDir = RebindUtils.getErraiCacheDir();

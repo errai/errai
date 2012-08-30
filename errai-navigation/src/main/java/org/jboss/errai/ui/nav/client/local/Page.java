@@ -59,5 +59,17 @@ public @interface Page {
    * (called prodId and photoId) that can be reached at
    * {@code http://example.com/app/#Product/4/12}.</p>
    */
-  String value() default "";
+  String path() default "";
+
+  /**
+   * Indicates that the target class is the default starting page for the
+   * application. This means the page can be reached from the empty path ("") as
+   * well as the path it would normally be reachable by according to the
+   * {@link #path()} specification.
+   * <p>
+   * In an Errai application that uses the navigation system, exactly one
+   * {@code @Page}-annotated class must have {@code startingPage} set to
+   * {@code true}. It is a compile-time error otherwise.
+   */
+  boolean startingPage() default false;
 }

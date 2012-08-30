@@ -7,7 +7,7 @@ import org.jboss.errai.ui.nav.client.local.Page;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 @Dependent
-@Page("page_b")
+@Page(path="page_b")
 public class PageB extends SimplePanel {
 
 }
