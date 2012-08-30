@@ -29,11 +29,14 @@ Release Steps
      (Single book output, no static files)
    * Copy and commit the docbook files in /reference. Clean out the old chapters first
      (otherwise there will be old cruft left over if any chapters were renamed or renumbered):
-     % git rm reference/chapter-*
-     % cp $newdocs/chapter-* reference/
-     % git add reference/chatper-*
+     % cd reference
+     % rm src/main/docbook/en/chapter-*
+     % cp $newdocs/*.xml src/main/docbook/en/
+     % mvn xml:transform
+     % cp target/generated-resources/xml/xslt/en/*.xml src/main/docbook/en/
+     % git add src/main/docbook/en/chatper-*
    * Edit the version numbers in Book_Info.xml to reflect release version
-   * UPLOAD SINGLE_HTML OUTPUT, not the multi-page version
+   * Don't upload to JBoss FTP server! The release upload script will do this later.
 
 1. Export docbook from confluence for /quickstart
    * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833096
@@ -41,9 +44,13 @@ Release Steps
    * Copy and commit the docbook files (only chapter*) in /quickstart. Verify there is only one chapter of
      each name and one of each number (there will be old cruft left over if any chapters
      were renamed or renumbered)
+     % cd quickstart
+     % rm src/main/docbook/en/chapter-*
+     % cp $newdocs/chapter-* src/main/docbook/en/
+     % git add src/main/docbook/en/chatper-*
    * Manually copy the author directory from the downloaded zip into all three docbook
      output directories (html_single, html, pdf)
-   * remember to upload single_html, multi-page html, and pdf versions
+   * Don't upload to JBoss FTP server! The release upload script will do this later.
 
 1. Update quickstart docs to reflect the new version number
 
@@ -54,29 +61,28 @@ Release Steps
    (if any are out of sync with the parent version, Maven will not have updated them)
 
 1. Build and package the release. These are the bits that will be uploaded to nexus.
-   Expect this to take about 9 minutes.
-   % mvn clean install
-
-1. Upload the release to nexus:
-   % mvn deploy -Dgwt.compiler.skip=true
+   Expect this to take about 4 minutes, depending on network speed.
+   % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true
 
 1. Publish new quickstart archetypes to Nexus repo (both snapshots and released version)
    * % cd $somewhere/archetypes
    * % mvn versions:set -DnewVersion=x.y.z.Final
    * Afterward, verify that all subprojects reference the new parent pom's version: find . -name pom.xml | xargs grep x.y.z | grep SNAP
    * % mvn clean deploy
-   * Note that the kitschensink archetype is tested automatically. For the test to work AS7 has to be running
+   * Note that the kitschensink archetype is tested automatically. For the test to work, AS7 has to be running.
    * Now test the archetypes you just installed (use instructions from quickstart guides)
-   * check generated app's pom.xml for correct version
-   * mvn gwt:run
+     * Check generated app's pom.xml for correct version
+     * mvn gwt:run
 
-1. Create and upload the a-la-carte binary Errai distribution and docs
+1. Create the a-la-carte binary Errai distribution and docs
    * % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
+
+1. Upload the docs and the distro zipfile
    * % cd dist
-   * % ./scripts/upload_binaries.sh {version}
+   * % scripts/upload_binaries.sh ${version}
 
 1. Tag and push the release to github (DO THIS FOR BOTH ERRAI AND ITS ARCHETYPES):
-   * % git commit a -m "update to new version x.y.z"
+   * % git commit a -m "Updated to new version x.y.z"
    * % git tag x.y.z.Final
    * reset all versions to x.y.z+1-SNAPSHOT and commit
    * % git push origin /branch/
