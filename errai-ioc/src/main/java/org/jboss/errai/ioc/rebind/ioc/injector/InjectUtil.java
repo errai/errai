@@ -63,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -278,7 +277,7 @@ public class InjectUtil {
   private static List<InjectionTask> scanForTasks(final Injector injector,
                                                   final InjectionContext ctx,
                                                   final MetaClass type) {
-    final List<InjectionTask> accumulator = new LinkedList<InjectionTask>();
+    final List<InjectionTask> accumulator = new ArrayList<InjectionTask>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
     for (final Class<? extends Annotation> decorator : decorators) {
@@ -364,7 +363,7 @@ public class InjectUtil {
                                                                          final InjectionContext ctx,
                                                                          final MetaClass type,
                                                                          final List<InjectionTask> tasks) {
-    final List<MetaConstructor> accumulator = new LinkedList<MetaConstructor>();
+    final List<MetaConstructor> accumulator = new ArrayList<MetaConstructor>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
     for (final MetaConstructor cns : type.getConstructors()) {
@@ -409,7 +408,7 @@ public class InjectUtil {
 
   public static List<MetaMethod> scanForAnnotatedMethod(final MetaClass type,
                                                         final Class<? extends Annotation> annotationType) {
-    final List<MetaMethod> accumulator = new LinkedList<MetaMethod>();
+    final List<MetaMethod> accumulator = new ArrayList<MetaMethod>();
 
     MetaClass clazz = type;
     do {
