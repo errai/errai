@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.util;
 
-import org.mvel2.CompileException;
 import org.mvel2.util.ParseTools;
 
 import java.net.URL;
@@ -109,9 +108,7 @@ public class QuickDeps {
     while ((token = identifierTokenizer.nextToken()) != null) {
       if (RESERVED_KEYWORDS.contains(token)) {
         if ("import".equals(token)) {
-          token = identifierTokenizer.nextToken();
-
-          if (token.endsWith("*")) {
+          if ((token = identifierTokenizer.nextToken()).charAt(token.length() - 1) == '*') {
             wildcardPackages.add(token.substring(0, token.lastIndexOf('.')));
           }
           else {
@@ -121,16 +118,19 @@ public class QuickDeps {
         }
         else if ("package".equals(token)) {
           wildcardPackages.add(token = identifierTokenizer.nextToken());
-          packageName = token + ".";
+          packageName = token.concat(".");
         }
         else if ("class".equals(token)) {
           if (firstClass) {
             firstClass = false;
-            clazzName = identifierTokenizer.nextToken();
-            usedTypes.add(packageName + clazzName);
+            usedTypes.add(packageName + (clazzName = identifierTokenizer.nextToken()));
           }
           else {
-            final String innerClassName = packageName + clazzName + "$" + (token = identifierTokenizer.nextToken());
+            final String innerClassName = packageName
+                .concat(clazzName)
+                .concat("$")
+                .concat(token = identifierTokenizer.nextToken());
+
             usedTypes.add(innerClassName);
             imports.put(token, innerClassName);
           }
@@ -144,7 +144,7 @@ public class QuickDeps {
       /**
        * This handles the case where there's whitespace or a comment after the union operator.
        */
-      else if (token.endsWith(".")) {
+      else if (token.charAt(token.length() - 1) == '.') {
         token = token.substring(0, token.length() - 1);
       }
 
@@ -167,10 +167,10 @@ public class QuickDeps {
 
     for (final String pkg : wildcardPackages) {
 
-      final String fqcn = pkg + "." + name;
+      final String fqcn = pkg.concat(".").concat(name);
       final String slashified = fqcn.replaceAll("\\.", "/");
-      final String source = slashified + ".java";
-      final String clazz = slashified + ".class";
+      final String source = slashified.concat(".java");
+      final String clazz = slashified.concat(".class");
 
       URL url;
       if ((url = classLoader.getResource(source)) != null

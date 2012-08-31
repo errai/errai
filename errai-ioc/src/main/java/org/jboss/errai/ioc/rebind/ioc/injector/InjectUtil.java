@@ -120,7 +120,6 @@ public class InjectUtil {
           doPostConstruct(ctx, injector, postConstructTasks);
           doPreDestroy(ctx, injector, preDestroyTasks);
         }
-
       };
     }
     else {
