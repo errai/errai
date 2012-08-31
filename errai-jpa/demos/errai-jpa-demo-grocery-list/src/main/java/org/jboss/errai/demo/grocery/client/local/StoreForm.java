@@ -51,6 +51,13 @@ public class StoreForm extends Composite {
     return storeBinder.getModel();
   }
 
+  /**
+   * Gives keyboard focus to the appropriate widget in this form.
+   */
+  public void grabKeyboardFocus() {
+    name.setFocus(true);
+  }
+
   // TODO (after ERRAI-366): make this method package-private
   @EventHandler("saveButton")
   public void onSaveButtonClicked(ClickEvent event) {

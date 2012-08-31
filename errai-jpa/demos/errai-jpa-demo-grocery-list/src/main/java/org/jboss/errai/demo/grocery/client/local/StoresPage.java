@@ -94,6 +94,7 @@ public class StoresPage extends Composite {
     popover.setTitleHtml(new SafeHtmlBuilder().appendEscaped("New Store").toSafeHtml());
     popover.setBodyWidget(storeForm);
     popover.show(addStoreButton);
+    storeForm.grabKeyboardFocus();
 
     // hide store form when new store is saved
     storeForm.setAfterSaveAction(new Runnable() {
