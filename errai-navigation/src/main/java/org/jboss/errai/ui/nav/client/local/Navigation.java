@@ -58,12 +58,12 @@ public class Navigation {
    * Goes to
    * @param toPage
    */
-  public void goTo(Class<? extends Widget> toPage, String ... pathParams) {
+  public void goTo(Class<? extends Widget> toPage) {
     PageNode toPageInstance = navGraph.getPage(toPage);
-    goTo(toPageInstance, pathParams);
+    goTo(toPageInstance);
   }
 
-  public void goTo(PageNode toPage, String ... pathParams) {
+  public void goTo(PageNode toPage) {
     makePageVisible(toPage);
     History.newItem(toPage.name(), false);
   }

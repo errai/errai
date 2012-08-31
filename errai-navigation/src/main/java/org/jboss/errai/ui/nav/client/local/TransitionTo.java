@@ -48,7 +48,7 @@ public final class TransitionTo<P extends Widget> {
    * Transitions the application's view from the current page (whatever it is)
    * to the {@code toPage} of this transition.
    */
-  public void go(String ... pathParams) {
-    navigation.goTo(toPageWidgetType, pathParams);
+  public void go() {
+    navigation.goTo(toPageWidgetType);
   }
 }
