@@ -240,12 +240,21 @@ public class NavigationGraphGenerator extends Generator {
       for (Map.Entry<String, MetaClass> entry : pages.entrySet()) {
         String pageName = entry.getKey();
         MetaClass pageClass = entry.getValue();
-        out.println("\"" + pageName + "\"");
+
+        // entry for the node itself
+        out.print("\"" + pageName + "\"");
+        if (pageClass.getAnnotation(Page.class).startingPage() == true) {
+          out.print(" [penwidth=3]");
+        }
+        out.println();
+
         for (MetaField field : getAllFields(pageClass)) {
           if (field.getType().getErased().equals(transitionToType)) {
             MetaType targetPageType = field.getType().getParameterizedType().getTypeParameters()[0];
             String targetPageName = pages.inverse().get(targetPageType);
-            out.println("\"" + pageName + "\" -> \"" + targetPageName + "\"");
+
+            // entry for the link between nodes
+            out.println("\"" + pageName + "\" -> \"" + targetPageName + "\" [label=\"" + field.getName() + "\"]");
           }
         }
       }
