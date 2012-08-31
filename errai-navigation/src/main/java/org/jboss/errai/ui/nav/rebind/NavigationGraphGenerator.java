@@ -92,7 +92,7 @@ public class NavigationGraphGenerator extends Generator {
       else if (pageName.equals("")) {
         throw new GenerationException(
                 "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
-                " page with startPage=true is permitted to have an empty path.");
+                " page with startingPage=true is permitted to have an empty path.");
       }
       ctor.append(
               Stmt.nestedCall(Refs.get("pagesByName"))
@@ -104,7 +104,7 @@ public class NavigationGraphGenerator extends Generator {
 
     if (defaultPages.size() == 0) {
       throw new GenerationException(
-              "No @Page classes have startPage=true. Exactly one @Page class" +
+              "No @Page classes have startingPage=true. Exactly one @Page class" +
               " must be designated as the starting page.");
     }
     if (defaultPages.size() > 1) {
@@ -113,7 +113,7 @@ public class NavigationGraphGenerator extends Generator {
         defaultPageList.append("\n  ").append(mc.getFullyQualifiedName());
       }
       throw new GenerationException(
-              "Found more than one @Page with startPage=true: " + defaultPageList +
+              "Found more than one @Page with startingPage=true: " + defaultPageList +
               "\nExactly one @Page class must be designated as the starting page.");
     }
 
