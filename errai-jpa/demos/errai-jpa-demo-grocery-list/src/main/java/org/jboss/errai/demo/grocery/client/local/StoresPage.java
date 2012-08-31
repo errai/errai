@@ -11,9 +11,9 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 
-import org.jboss.errai.demo.grocery.client.local.nav.CompositePage;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -24,10 +24,12 @@ import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 
 @Dependent
 @Templated("#root")
-public class StoresPage extends CompositePage {
+@Page
+public class StoresPage extends Composite {
 
   // XXX need a better way of getting at this instance from the StoreListener
   private static StoresPage INSTANCE;
