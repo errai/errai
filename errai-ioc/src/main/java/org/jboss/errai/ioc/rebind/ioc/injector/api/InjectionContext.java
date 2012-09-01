@@ -192,7 +192,7 @@ public class InjectionContext {
       }
     }
 
-    if (matching.size() > 1 && (!type.isInterface() && !type.isAbstract())) {
+    if (matching.size() > 1 && type.isConcrete()) {
       // perform second pass
       final Iterator<Injector> secondIter = matching.iterator();
       while (secondIter.hasNext()) {
