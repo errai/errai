@@ -226,7 +226,8 @@
                     <skipTests>true</skipTests>
                     <failIfNoTests>false</failIfNoTests>
                     <trimStackTrace>false</trimStackTrace>
-                    <argLine>-Xmx2048m ${argLine} -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true</argLine>
+                     <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail.-->
+                     <argLine>-Xmx2048m ${argLine} -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
                     <systemProperties>
                         <property>
                             <name>log4j.output.dir</name>

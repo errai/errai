@@ -492,8 +492,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   @Override
   public String toJavaString() {
     try {
-      final String generated = classDefinition.toJavaString();
-      return generated;
+      return classDefinition.toJavaString();
     }
     catch (Throwable t) {
       GenUtil.throwIfUnhandled("error generating class: " + classDefinition.getFullyQualifiedName(), t);

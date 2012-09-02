@@ -216,18 +216,8 @@ public class InjectionPoint<T> {
     return injectionContext.getProcessingContext().getQualifyingMetadataFactory().createFrom(getQualifiers());
   }
 
-  private Boolean _isProxyCache;
-
   public boolean isProxy() {
     return injectionContext.isProxiedInjectorRegistered(getEnclosingType(), getQualifyingMetadata());
-
-//    if (_isProxyCache != null)
-//      return _isProxyCache;
-//    try {
-//      return _isProxyCache = injectionContext.isProxiedInjectorRegistered(getEnclosingType(), getQualifyingMetadata());
-//    } catch (InjectionFailure e) {
-//      return _isProxyCache = false;
-//    }
   }
 
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {

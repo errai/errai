@@ -306,7 +306,6 @@ public class MarshallersGenerator extends Generator {
 
           int deposits = 0;
 
-
           Strategies:
           for (final DiscoveryStrategy strategy : rootDiscoveryStrategies) {
             final DiscoveryContextImpl discoveryContext = new DiscoveryContextImpl();

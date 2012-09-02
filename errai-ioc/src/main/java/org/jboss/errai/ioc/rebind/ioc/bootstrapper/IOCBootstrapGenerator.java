@@ -113,6 +113,8 @@ public class IOCBootstrapGenerator {
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String ENABLED_ALTERNATIVES_PROPERTY = "errai.ioc.enabled.alternatives";
+  public static final String EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY
+      = "errai.ioc.experimental.infer_dependent_by_reachability";
 
   private final TreeLogger logger;
   private static final Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
@@ -485,7 +487,8 @@ public class IOCBootstrapGenerator {
   }
 
   /**
-   * @param injectionContext an instance of the injection context
+   * @param injectionContext
+   *     an instance of the injection context
    */
   private static void defaultConfigureProcessor(final InjectionContext injectionContext) {
     injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
@@ -528,6 +531,7 @@ public class IOCBootstrapGenerator {
   }
 
   private static void computeDependentScope(final GeneratorContext context, final InjectionContext injectionContext) {
+
     if (context != null) {
       for (final JPackage pkg : context.getTypeOracle().getPackages()) {
         TypeScan:

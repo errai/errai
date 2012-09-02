@@ -47,18 +47,25 @@ import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProducerInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Provider;
+import javax.inject.Scope;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -316,6 +323,41 @@ public class IOCProcessorFactory {
           break;
 
         case DependentBean:
+          registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
+            @Override
+            public boolean handle(final InjectableInstance instance,
+                                  final Annotation annotation,
+                                  final IOCProcessingContext context) {
+              final List<Injector> injectors = new ArrayList<Injector>(injectionContext.getInjectors(instance.getType()));
+              final Injector injector;
+
+              final Iterator<Injector> injectorIterator = injectors.iterator();
+              boolean removed = false;
+              while (injectorIterator.hasNext()) {
+                if (!injectorIterator.next().isEnabled()) {
+                  injectorIterator.remove();
+                  removed = true;
+                }
+              }
+
+              if (injectors.isEmpty() && removed) {
+                return true;
+              }
+
+              if (injectors.size() == 1) {
+                injector = injectors.get(0);
+              }
+              else {
+                injector = new TypeInjector(instance.getType(), injectionContext);
+              }
+
+              if (injector.isEnabled() && injector instanceof TypeInjector) {
+                injector.getBeanInstance(instance);
+              }
+              return true;
+            }
+          });
+          break;
         case SingletonBean:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
@@ -323,6 +365,7 @@ public class IOCProcessorFactory {
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
               final Injector injector = injectionContext.getInjector(instance.getType());
+
               if (injector.isEnabled()) {
                 injector.getBeanInstance(instance);
               }
@@ -337,6 +380,7 @@ public class IOCProcessorFactory {
   @SuppressWarnings({"unchecked"})
   public void process(final IOCProcessingContext context) {
     inferHandlers();
+
     /**
      * Let's accumulate all the processing tasks.
      */
@@ -366,12 +410,48 @@ public class IOCProcessorFactory {
 
           switch (elementType) {
             case TYPE: {
-              final Collection<MetaClass> classes;
+              Collection<MetaClass> classes;
               if (entry.handler instanceof ProvidedClassAnnotationHandler) {
                 classes = ((ProvidedClassAnnotationHandler) entry.handler).getClasses();
               }
               else {
                 classes = ClassScanner.getTypesAnnotatedWith(annoClass, context.getPackages());
+              }
+
+              if (annoClass.equals(Dependent.class)
+                  && Boolean.getBoolean(IOCBootstrapGenerator.EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY)
+                  && injectionContext.getAllReachableTypes() != null) {
+
+                System.out.println("******************************************************************************");
+                System.out.println("*** EXPERIMENTAL FEATURE ENABLED                                           ***");
+                System.out.println("*** You have enabled support for inferred dependent scope by reachability. ***");
+                System.out.println("***                                                                        ***");
+                System.out.println("*** This feature is designed to allow the @Dependent scope to work         ***");
+                System.out.println("*** as per the JSR-299 specification, without imposing the overhead of     ***");
+                System.out.println("*** adding all translatable beans to the container -- but rather, just     ***");
+                System.out.println("*** those which are reachable within your application.                     ***");
+                System.out.println("***                                                                        ***");
+                System.out.println("*** This feature is only experimental, and may be removed in a future      ***");
+                System.out.println("*** version without notice.                                                ***");
+                System.out.println("******************************************************************************");
+
+                classes = new ArrayList<MetaClass>(classes);
+
+                Scan: for (final String type : injectionContext.getAllReachableTypes()) {
+                  final MetaClass metaClass = MetaClassFactory.get(type);
+                  if (metaClass.isDefaultInstantiable() && metaClass.isPublic() && metaClass.isConcrete()) {
+                    for (final Annotation anno : metaClass.getAnnotations()) {
+                      if (anno.annotationType().isAnnotationPresent(Scope.class)
+                          || anno.annotationType().isAnnotationPresent(NormalScope.class)) {
+                        continue Scan;
+                      }
+                    }
+
+                    classes.add(metaClass);
+                  }
+                }
+
+                classes = Collections.unmodifiableCollection(classes);
               }
 
               for (final MetaClass clazz : classes) {
@@ -477,7 +557,16 @@ public class IOCProcessorFactory {
       public boolean process() {
         injectionContext.addType(type);
 
-        final Injector injector = injectionContext.getInjector(type);
+        final List<Injector> injectors = injectionContext.getInjectors(type);
+        final Injector injector;
+
+        if (injectors.size() == 1) {
+          injector = injectors.get(0);
+        }
+        else {
+          injector = new TypeInjector(type, injectionContext);
+        }
+
         final InjectableInstance injectableInstance
             = getInjectedInstance(annotation, type, injector, injectionContext);
 

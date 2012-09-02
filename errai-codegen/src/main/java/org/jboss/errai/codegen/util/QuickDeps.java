@@ -18,6 +18,8 @@ package org.jboss.errai.codegen.util;
 
 import org.mvel2.util.ParseTools;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,82 +90,87 @@ public class QuickDeps {
   };
 
   public static Set<String> getQuickTypeDependencyList(final String javaSource, ClassLoader classLoader) {
-    if (classLoader == null) {
-      classLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      if (classLoader == null) {
+        classLoader = Thread.currentThread().getContextClassLoader();
+      }
+
+      final IdentifierTokenizer identifierTokenizer = new IdentifierTokenizer(javaSource);
+
+      final Map<String, String> imports = new HashMap<String, String>(32);
+      final Set<String> wildcardPackages = new HashSet<String>(32);
+      wildcardPackages.add("java.lang");
+
+      final Set<String> usedTypes = new HashSet<String>(100);
+
+      boolean firstClass = true;
+      String clazzName = null;
+      String packageName = "";
+
+      String token;
+      while ((token = identifierTokenizer.nextToken()) != null) {
+        if (RESERVED_KEYWORDS.contains(token)) {
+          if ("import".equals(token)) {
+            if ((token = identifierTokenizer.nextToken()).charAt(token.length() - 1) == '*') {
+              wildcardPackages.add(token.substring(0, token.lastIndexOf('.')));
+            }
+            else {
+              imports.put(token, token);
+              imports.put(token.substring(token.lastIndexOf('.') + 1), token);
+            }
+          }
+          else if ("package".equals(token)) {
+            wildcardPackages.add(token = identifierTokenizer.nextToken());
+            packageName = token.concat(".");
+          }
+          else if ("class".equals(token)) {
+            if (firstClass) {
+              firstClass = false;
+              usedTypes.add(packageName + (clazzName = identifierTokenizer.nextToken()));
+            }
+            else {
+              final String innerClassName = packageName
+                  .concat(clazzName)
+                  .concat("$")
+                  .concat(token = identifierTokenizer.nextToken());
+
+              usedTypes.add(innerClassName);
+              imports.put(token, innerClassName);
+            }
+          }
+          continue;
+        }
+
+        if (token.endsWith(".class")) {
+          token = token.substring(0, token.length() - 6);
+        }
+        /**
+         * This handles the case where there's whitespace or a comment after the union operator.
+         */
+        else if (token.charAt(token.length() - 1) == '.') {
+          token = token.substring(0, token.length() - 1);
+        }
+
+        if (imports.containsKey(token)) {
+          usedTypes.add(imports.get(token));
+        }
+        else {
+          wildcardMatch(classLoader, imports, wildcardPackages, usedTypes, token);
+        }
+      }
+
+      return usedTypes;
     }
-
-    final IdentifierTokenizer identifierTokenizer = new IdentifierTokenizer(javaSource);
-
-    final Map<String, String> imports = new HashMap<String, String>(32);
-    final Set<String> wildcardPackages = new HashSet<String>(32);
-    wildcardPackages.add("java.lang");
-
-    final Set<String> usedTypes = new HashSet<String>(100);
-
-    boolean firstClass = true;
-    String clazzName = null;
-    String packageName = "";
-
-    String token;
-    while ((token = identifierTokenizer.nextToken()) != null) {
-      if (RESERVED_KEYWORDS.contains(token)) {
-        if ("import".equals(token)) {
-          if ((token = identifierTokenizer.nextToken()).charAt(token.length() - 1) == '*') {
-            wildcardPackages.add(token.substring(0, token.lastIndexOf('.')));
-          }
-          else {
-            imports.put(token, token);
-            imports.put(token.substring(token.lastIndexOf('.') + 1), token);
-          }
-        }
-        else if ("package".equals(token)) {
-          wildcardPackages.add(token = identifierTokenizer.nextToken());
-          packageName = token.concat(".");
-        }
-        else if ("class".equals(token)) {
-          if (firstClass) {
-            firstClass = false;
-            usedTypes.add(packageName + (clazzName = identifierTokenizer.nextToken()));
-          }
-          else {
-            final String innerClassName = packageName
-                .concat(clazzName)
-                .concat("$")
-                .concat(token = identifierTokenizer.nextToken());
-
-            usedTypes.add(innerClassName);
-            imports.put(token, innerClassName);
-          }
-        }
-        continue;
-      }
-
-      if (token.endsWith(".class")) {
-        token = token.substring(0, token.length() - 6);
-      }
-      /**
-       * This handles the case where there's whitespace or a comment after the union operator.
-       */
-      else if (token.charAt(token.length() - 1) == '.') {
-        token = token.substring(0, token.length() - 1);
-      }
-
-      if (imports.containsKey(token)) {
-        usedTypes.add(imports.get(token));
-      }
-      else {
-        wildcardMatch(classLoader, imports, wildcardPackages, usedTypes, token);
-      }
+    catch (IOException e) {
+      throw new RuntimeException("error reading filesystem", e);
     }
-
-    return usedTypes;
   }
 
   private static void wildcardMatch(final ClassLoader classLoader,
                                     final Map<String, String> imports,
                                     final Set<String> wildcardPackages,
                                     final Set<String> usedTypes,
-                                    final String name) {
+                                    final String name) throws IOException {
 
     for (final String pkg : wildcardPackages) {
 
@@ -176,11 +183,19 @@ public class QuickDeps {
       if ((url = classLoader.getResource(source)) != null
           || (url = classLoader.getResource(clazz)) != null) {
 
-        final String urlFile = url.getFile();
+        String urlFile = url.getFile();
+
+        int split;
+        if ((split = urlFile.lastIndexOf('!')) != -1)  {
+          urlFile = urlFile.substring(split + 2);
+        }
+
         if (urlFile.endsWith(source) || urlFile.endsWith(clazz)) {
-          imports.put(fqcn, fqcn);
-          imports.put(name, fqcn);
-          usedTypes.add(fqcn);
+          if (split != -1 || new File(urlFile).getCanonicalFile().getAbsolutePath().equals(urlFile)) {
+            imports.put(fqcn, fqcn);
+            imports.put(name, fqcn);
+            usedTypes.add(fqcn);
+          }
           return;
         }
       }

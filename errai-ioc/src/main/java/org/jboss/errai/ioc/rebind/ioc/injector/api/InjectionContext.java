@@ -702,6 +702,10 @@ public class InjectionContext {
     return reachableTypes.isEmpty() || reachableTypes.contains(fqnc);
   }
 
+  public Collection<String> getAllReachableTypes() {
+    return reachableTypes.toCollection();
+  }
+
   public void setAttribute(final String name, final Object value) {
     attributeMap.put(name, value);
   }
