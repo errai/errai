@@ -533,6 +533,9 @@ public class IOCProcessorFactory {
                           final Class<? extends Annotation> aClass,
                           final IOCProcessingContext context) {
 
+    if (type.getFullyQualifiedName().equals("java.lang.Object")) {
+      return;
+    }
 
     final Annotation annotation = type.getAnnotation(aClass);
 
@@ -567,10 +570,7 @@ public class IOCProcessorFactory {
           injector = new TypeInjector(type, injectionContext);
         }
 
-        final InjectableInstance injectableInstance
-            = getInjectedInstance(annotation, type, injector, injectionContext);
-
-        return entry.handler.handle(injectableInstance, annotation, context);
+        return entry.handler.handle(getInjectedInstance(annotation, type, injector, injectionContext), annotation, context);
       }
 
       @Override
@@ -654,11 +654,9 @@ public class IOCProcessorFactory {
       @SuppressWarnings("unchecked")
       @Override
       public void processDependencies() {
-        final InjectableInstance injectableInstance
-            = InjectableInstance.getFieldInjectedInstance(metaField, null,
-            injectionContext);
 
-        entry.handler.getDependencies(dependencyControl, injectableInstance, annotation, context);
+        entry.handler.getDependencies(dependencyControl, InjectableInstance.getFieldInjectedInstance(metaField, null,
+        injectionContext), annotation, context);
       }
 
       @SuppressWarnings("unchecked")
@@ -666,9 +664,8 @@ public class IOCProcessorFactory {
       public boolean process() {
         injectionContext.addType(type);
 
-        final Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-            = InjectableInstance.getFieldInjectedInstance(metaField, injector,
+            = InjectableInstance.getFieldInjectedInstance(metaField, injectionContext.getInjector(type),
             injectionContext);
 
         entry.handler.registerMetadata(injectableInstance, annotation, context);
@@ -684,9 +681,7 @@ public class IOCProcessorFactory {
 
     del.processDependencies();
 
-    final MetaClass masqueradeClass = ((DependencyControlImpl) dependencyControl).masqueradeClass;
-
-    injectionContext.getGraphBuilder().addItem(masqueradeClass, del);
+    injectionContext.getGraphBuilder().addItem(((DependencyControlImpl) dependencyControl).masqueradeClass, del);
   }
 
   private class ProcessingEntry implements Comparable<ProcessingEntry> {

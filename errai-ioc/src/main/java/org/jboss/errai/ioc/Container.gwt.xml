@@ -28,7 +28,7 @@
                 class="org.jboss.errai.ioc.client.Bootstrapper"/>
     </generate-with>
 
-    <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.QualiferEqualityFactoryGenerator">
+    <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.QualifierEqualityFactoryGenerator">
         <when-type-assignable class="org.jboss.errai.ioc.client.QualifierEqualityFactory" />
     </generate-with>
 

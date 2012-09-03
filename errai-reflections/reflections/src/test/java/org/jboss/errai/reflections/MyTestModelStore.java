@@ -1,4 +1,4 @@
-//generated using Reflections JavaCodeSerializer [Sun Sep 02 18:48:56 EDT 2012]
+//generated using Reflections JavaCodeSerializer [Mon Sep 03 12:58:47 EDT 2012]
 package org.jboss.errai.reflections;
 
 import static org.jboss.errai.reflections.serializers.JavaCodeSerializer.*;
