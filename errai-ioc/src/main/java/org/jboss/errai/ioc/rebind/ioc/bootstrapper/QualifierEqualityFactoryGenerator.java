@@ -89,8 +89,9 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     final TypeOracle oracle = generatorContext.getTypeOracle();
 
-    final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder = ClassBuilder.define(packageName + "." + className)
-        .publicScope().implementsInterface(QualifierEqualityFactory.class)
+    final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder
+        = ClassBuilder.define(packageName + "." + className).publicScope()
+        .implementsInterface(QualifierEqualityFactory.class)
         .body();
 
     builder.getClassDefinition().getContext().setPermissiveMode(true);
@@ -108,7 +109,6 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     for (final Class<?> aClass : typesAnnotatedWith) {
       try {
-
         final MetaClass MC_annotationClass = GWTClass.newInstance(oracle, oracle.getType(aClass.getName()));
         final Collection<MetaMethod> methods = getAnnotationAttributes(MC_annotationClass);
 

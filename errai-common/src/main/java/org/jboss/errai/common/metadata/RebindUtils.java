@@ -377,18 +377,23 @@ public class RebindUtils {
     return packages;
   }
 
+  private static volatile GeneratorContext _lastTranslatableContext;
+  private static volatile Set<String> _translatablePackagesCache;
+
   /**
    * Returns a list of all translatable packages accessible to the module under compilation (including inherited modules).
    */
   public static Set<String> findTranslatablePackages(final GeneratorContext context) {
+    if (context.equals(_lastTranslatableContext) && _translatablePackagesCache != null) {
+      return _translatablePackagesCache;
+    }
+
     final JPackage[] jpackages = context.getTypeOracle().getPackages();
     final Set<String> packages = new HashSet<String>(jpackages.length * 2);
     for (final JPackage p : jpackages) {
       packages.add(p.getName());
     }
 
-    return packages;
+    return _translatablePackagesCache = Collections.unmodifiableSet(packages);
   }
-
-
 }

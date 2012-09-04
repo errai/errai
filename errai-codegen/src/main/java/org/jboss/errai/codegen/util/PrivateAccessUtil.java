@@ -1,6 +1,5 @@
 package org.jboss.errai.codegen.util;
 
-import com.google.gwt.core.client.UnsafeNativeLong;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -8,7 +7,6 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,16 +30,6 @@ public class PrivateAccessUtil {
   public static void registerPrivateMemberAccessor(final String type, final PrivateMemberAccessor accessor) {
     PRIVATE_MEMBER_ACCESSORS.put(type, accessor);
   }
-
-  /**
-   * Annotation instance that can be passed to the code generator when generating long accessors.
-   */
-  private static final UnsafeNativeLong UNSAFE_NATIVE_LONG_ANNOTATION = new UnsafeNativeLong() {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return UnsafeNativeLong.class;
-    }
-  };
 
   public static void addPrivateAccessStubs(final String type,
                                            final ClassStructureBuilder<?> classBuilder,
