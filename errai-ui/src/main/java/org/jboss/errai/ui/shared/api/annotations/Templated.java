@@ -115,6 +115,8 @@ import com.google.gwt.user.client.ui.Composite;
  * }
  * </pre>
  * 
+ * <p>
+ * <b>See also:</b> {@link DataField}, {@link Bound}, {@link AutoBound}, {@link EventHandler}, {@link SinkNative}
  * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
