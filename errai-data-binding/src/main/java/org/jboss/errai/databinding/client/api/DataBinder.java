@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Provides the API to programmatically bind properties of a data model instance (any POJO annotated with
  * {@link Bindable}) to UI fields/widgets. The properties of the model and the UI components will automatically be kept
  * in sync for as long as they are bound.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DataBinder<T> implements HasPropertyChangeHandlers {
@@ -37,7 +37,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Creates a {@link DataBinder} for a newly created model instance of the provided type (see {@link #forType(Class)}).
-   * 
+   *
    * @param modelType
    *          The bindable type, must not be null.
    */
@@ -47,7 +47,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Creates a {@link DataBinder} for the provided model instance (see {@link #forModel(Object)}).
-   * 
+   *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    */
@@ -58,7 +58,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Creates a {@link DataBinder} for the provided model instance, initializing either model or UI widgets from the
    * values defined by {@link InitialState} (see {@link #forModel(Object, InitialState)}).
-   * 
+   *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param intialState
@@ -71,7 +71,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Creates a {@link DataBinder} for a newly created model instance of the provided type.
-   * 
+   *
    * @param modelType
    *          The bindable type, must not be null.
    */
@@ -81,7 +81,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Creates a {@link DataBinder} for the provided model instance.
-   * 
+   *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    */
@@ -92,7 +92,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Creates a {@link DataBinder} for the provided model instance, initializing either model or UI widgets from the
    * values defined by {@link InitialState}.
-   * 
+   *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param intialState
@@ -107,9 +107,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
    * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   * 
-   * @param <T>
-   *          The model type
+   *
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -117,7 +115,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          not be null.
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
-   *           If <T> does not have a property with the given name.
+   *           If {@code widget} does not have a property with the given name.
    */
   public DataBinder<T> bind(final Widget widget, final String property) {
     bind(widget, property, null);
@@ -128,9 +126,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
    * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   * 
-   * @param <T>
-   *          The model type
+   *
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -140,7 +136,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
-   *           If <T> does not have a property with the given name.
+   *           If {@code widget} does not have a property with the given name.
    */
   @SuppressWarnings("unchecked")
   public DataBinder<T> bind(final Widget widget, final String property,
@@ -155,10 +151,10 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Unbinds the widget from the specified model property, bound by a previous call to
    * {@link #bind(HasValue, Object, String)}.
-   * 
+   *
    * @param property
    *          The name of the property to unbind, must not be null.
-   * 
+   *
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   @SuppressWarnings("unchecked")
@@ -169,7 +165,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Unbinds the widget and model bound by previous calls to {@link #bind(HasValue, Object, String)}.
-   * 
+   *
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   @SuppressWarnings("unchecked")
@@ -180,7 +176,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Returns the model instance associated with this {@link DataBinder}.
-   * 
+   *
    * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
    *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI.
    */
@@ -191,7 +187,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Changes the underlying model instance. The existing bindings stay intact but only affect the new model instance.
    * The previously associated model instance will no longer be kept in sync with the UI.
-   * 
+   *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
@@ -205,7 +201,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Changes the underlying model instance. The existing bindings stay intact but only affect the new model instance.
    * The previously associated model instance will no longer be kept in sync with the UI.
-   * 
+   *
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param initialState
@@ -230,7 +226,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Returns the widget currently bound to the provided model property (see {@link #bind(Widget, String)}).
-   * 
+   *
    * @param property
    *          The name of the model property, must not be null.
    * @return The widget currently bound to the provided property or null if no widget was bound.
@@ -241,13 +237,23 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public void addPropertyChangeHandler(PropertyChangeHandler handler) {
+  public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
     ((HasPropertyChangeHandlers) this.model).addPropertyChangeHandler(handler);
   }
 
   @Override
-  public void removePropertyChangeHandler(PropertyChangeHandler handler) {
+  public void removePropertyChangeHandler(PropertyChangeHandler<?> handler) {
     ((HasPropertyChangeHandlers) this.model).removePropertyChangeHandler(handler);
+  }
+
+  @Override
+  public <T> void addPropertyChangeHandler(String property, PropertyChangeHandler<T> handler) {
+    ((HasPropertyChangeHandlers) this.model).addPropertyChangeHandler(property, handler);
+  }
+
+  @Override
+  public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
+    ((HasPropertyChangeHandlers) this.model).removePropertyChangeHandler(property, handler);
   }
 
 }

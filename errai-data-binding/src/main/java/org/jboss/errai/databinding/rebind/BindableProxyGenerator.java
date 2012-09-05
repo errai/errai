@@ -425,11 +425,27 @@ public class BindableProxyGenerator {
                  Variable.get("handler")))
          .finish();
 
+    classBuilder.publicMethod(void.class, "addPropertyChangeHandler",
+        Parameter.of(String.class, "name"),
+        Parameter.of(PropertyChangeHandler.class, "handler"))
+          .append(
+              Stmt.loadClassMember("propertyChangeHandlerSupport").invoke("addPropertyChangeHandler",
+                 Variable.get("name"), Variable.get("handler")))
+          .finish();
+
     classBuilder.publicMethod(void.class, "removePropertyChangeHandler",
         Parameter.of(PropertyChangeHandler.class, "handler"))
           .append(
               Stmt.loadClassMember("propertyChangeHandlerSupport").invoke("removePropertyChangeHandler",
                   Variable.get("handler")))
+          .finish();
+
+    classBuilder.publicMethod(void.class, "removePropertyChangeHandler",
+        Parameter.of(String.class, "name"),
+        Parameter.of(PropertyChangeHandler.class, "handler"))
+          .append(
+              Stmt.loadClassMember("propertyChangeHandlerSupport").invoke("removePropertyChangeHandler",
+                 Variable.get("name"), Variable.get("handler")))
           .finish();
   }
 }

@@ -18,13 +18,14 @@ package org.jboss.errai.databinding.client.api;
 
 import java.awt.Checkbox;
 
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Contract for converters than can perform model value to widget value transformations and vice versa.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
+ *
  * @param <M>
  *          The type of the model value (field type of the model)
  * @param <W>
@@ -35,7 +36,7 @@ public interface Converter<M, W> {
 
   /**
    * Converts the provided widget value to a model value of type &lt;M&gt;.
-   * 
+   *
    * @param widgetValue
    *          the widget value to convert
    * @return converted value for the model.
@@ -43,8 +44,8 @@ public interface Converter<M, W> {
   public M toModelValue(W widgetValue);
 
   /**
-   * Converts the provided model value to a value usable by widgets of type {@link HasValue&lt;W&gt;}.
-   * 
+   * Converts the provided model value to a value usable by widgets of type {@link HasValue HasValue&lt;W&gt;}.
+   *
    * @param modelValue
    *          the model value to convert
    * @return converted value for the widget.
