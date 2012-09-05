@@ -95,7 +95,10 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   // because of the way the AST works, all three of these tests are needed to protect the code generator from regressions
   @NamedQuery(name="zentityOrderByStringDescThenInt", query="SELECT z FROM Zentity z ORDER BY z.string DESC, z.primitiveInt"),
   @NamedQuery(name="zentityOrderByStringAscThenInt", query="SELECT z FROM Zentity z ORDER BY z.string ASC, z.primitiveInt"),
-  @NamedQuery(name="zentityOrderByStringThenInt", query="SELECT z FROM Zentity z ORDER BY z.string, z.primitiveInt")
+  @NamedQuery(name="zentityOrderByStringThenInt", query="SELECT z FROM Zentity z ORDER BY z.string, z.primitiveInt"),
+
+  @NamedQuery(name="zentityLowercaseFunction", query="SELECT z FROM Zentity z WHERE 'foo' = lower(z.string)"),
+  @NamedQuery(name="zentityUppercaseFunction", query="SELECT z FROM Zentity z WHERE upper(z.string) = 'FOO'"),
 })
 public class Zentity {
 

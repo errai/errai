@@ -119,8 +119,20 @@ public class ErraiEntityManagerGenerator extends Generator {
           String typeName) throws UnableToCompleteException {
 
     GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+    EntityManagerFactory emf = createHibernateEntityManagerFactory();
+    try {
+      final ClassStructureBuilder<?> classBuilder = generateEntityManagerClass(
+              logger, context, emf);
+      return classBuilder.getClassDefinition().getFullyQualifiedName();
+    }
+    finally {
+      emf.close();
+    }
+  }
 
-    EntityManager em = createHibernateEntityManager();
+  private ClassStructureBuilder<?> generateEntityManagerClass(
+          TreeLogger logger, GeneratorContext context, EntityManagerFactory emf) {
+    EntityManager em = emf.createEntityManager();
     Metamodel mm = em.getMetamodel();
 
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
@@ -181,8 +193,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       printWriter.append(out);
       context.commit(logger, printWriter);
     }
-
-    return classBuilder.getClassDefinition().getFullyQualifiedName();
+    return classBuilder;
   }
 
   private void generatePopulateMetamodelMethod(
@@ -225,7 +236,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     pmm.finish();
   }
 
-  public static EntityManager createHibernateEntityManager() {
+  public static EntityManagerFactory createHibernateEntityManagerFactory() {
 
     // this is a Set on purpose: two copies of the same persistence.xml will often be present
     // because GWT likes having source directories on the classpath.
@@ -258,9 +269,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
     properties.put("javax.persistence.validation.mode", "none");
 
-    EntityManagerFactory emf = new HibernatePersistence().createEntityManagerFactory(persistenceUnits.iterator().next(), properties);
-    EntityManager em = emf.createEntityManager();
-    return em;
+    return new HibernatePersistence().createEntityManagerFactory(persistenceUnits.iterator().next(), properties);
   }
 
   private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm) {

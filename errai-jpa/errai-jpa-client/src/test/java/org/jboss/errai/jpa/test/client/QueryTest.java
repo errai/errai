@@ -1077,4 +1077,52 @@ public class QueryTest extends GWTTestCase {
     assertEquals(resultStrings.get(4), zentity5.toString());
   }
 
+  public void testLowercaseFunction() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("Foo");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("bar");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLowercaseFunction", Zentity.class);
+    List<Zentity> results = q.getResultList();
+    assertEquals(2, results.size());
+    assertTrue(results.contains(zentity1));
+    assertTrue(results.contains(zentity2));
+  }
+
+  public void testUppercaseFunction() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("Foo");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("bar");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityUppercaseFunction", Zentity.class);
+    List<Zentity> results = q.getResultList();
+    assertEquals(2, results.size());
+    assertTrue(results.contains(zentity1));
+    assertTrue(results.contains(zentity2));
+  }
+
 }

@@ -20,7 +20,9 @@ import org.hibernate.hql.internal.ast.HqlParser;
 import org.hibernate.hql.internal.ast.HqlSqlWalker;
 import org.hibernate.hql.internal.ast.QueryTranslatorImpl;
 import org.hibernate.hql.internal.ast.tree.DotNode;
+import org.hibernate.hql.internal.ast.tree.IdentNode;
 import org.hibernate.hql.internal.ast.tree.ParameterNode;
+import org.hibernate.hql.internal.ast.tree.SqlNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
 import org.jboss.errai.codegen.ArithmeticOperator;
@@ -376,8 +378,23 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.JAVA_CONSTANT:
       return Stmt.loadLiteral(MVEL.eval(ast.getText()));
 
+    case HqlSqlTokenTypes.METHOD_CALL:
+      IdentNode methodNameNode = (IdentNode) traverser.next();
+      SqlNode exprList = (SqlNode) traverser.next();
+      Statement[] args = new Statement[exprList.getNumberOfChildren()];
+      for (int i = 0; i < args.length; i++) {
+        args[i] = generateExpression(traverser, dotNodeResolver);
+      }
+      if ("lower".equals(methodNameNode.getOriginalText())) {
+        return Stmt.castTo(String.class, Stmt.load(args[0])).invoke("toLowerCase");
+      }
+      else if ("upper".equals(methodNameNode.getOriginalText())) {
+        return Stmt.castTo(String.class, Stmt.load(args[0])).invoke("toUpperCase");
+      }
+      throw new UnsupportedOperationException("The JPQL function " + methodNameNode.getOriginalText() + " is not supported");
+
     default:
-      throw new UnexpectedTokenException(ast.getType(), "an expression (boolean, literal, JPQL path, or named parameter)");
+      throw new UnexpectedTokenException(ast.getType(), "an expression (boolean, literal, JPQL path, method call, or named parameter)");
     }
 
     // I keep feeling like this will be useful, but so far it has turned out to be unnecessary:
