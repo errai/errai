@@ -32,7 +32,9 @@ import java.lang.annotation.Annotation;
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
 
-  public ContextualProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
+  public ContextualProviderInjector(final MetaClass type,
+                                    final MetaClass providerType,
+                                    final InjectionContext context) {
     super(type, context);
     this.providerInjector = new TypeInjector(providerType,context);
     context.registerInjector(providerInjector);
@@ -45,8 +47,8 @@ public class ContextualProviderInjector extends TypeInjector {
   }
 
   @Override
-  public Statement getBeanInstance(InjectableInstance injectableInstance) {
-    MetaClass type;
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
+    final MetaClass type;
     MetaParameterizedType pType = null;
 
     switch (injectableInstance.getTaskType()) {
@@ -54,25 +56,28 @@ public class ContextualProviderInjector extends TypeInjector {
         return null;
       case PrivateField:
       case Field:
-        MetaField field = injectableInstance.getField();
+        final MetaField field = injectableInstance.getField();
         type = field.getType();
 
         pType = type.getParameterizedType();
         break;
 
       case Parameter:
-        MetaParameter parm = injectableInstance.getParm();
+        final MetaParameter parm = injectableInstance.getParm();
         type = parm.getType();
 
         pType = type.getParameterizedType();
         break;
+
+      default:
+        throw new RuntimeException("illegal task type: " + injectableInstance.getType());
     }
 
-    MetaType[] typeArgs = pType.getTypeParameters();
-    MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
+    final MetaType[] typeArgs = pType.getTypeParameters();
+    final MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
 
     for (int i = 0; i < typeArgs.length; i++) {
-      MetaType argType = typeArgs[i];
+      final MetaType argType = typeArgs[i];
 
       if (argType instanceof MetaClass) {
         typeArgsClasses[i] = (MetaClass) argType;
@@ -82,11 +87,12 @@ public class ContextualProviderInjector extends TypeInjector {
       }
     }
 
-    Annotation[] qualifiers = injectableInstance.getQualifiers();
+    final Annotation[] qualifiers = injectableInstance.getQualifiers();
 
 
     if (providerInjector.isSingleton() && providerInjector.isRendered()) {
-      return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
+      return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("provide", typeArgsClasses,
+          qualifiers.length != 0 ? qualifiers : null);
     }
     else {
       return Stmt.nestedCall(providerInjector.getBeanInstance(injectableInstance))

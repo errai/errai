@@ -33,10 +33,10 @@ public class LoadNested extends AbstractCallElement {
       String generatedCache;
       
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         if (generatedCache != null) return generatedCache;
 
-        String res = statement.generate(context).trim();
+        final String res = statement.generate(context).trim();
 
         type = statement.getType();
 
@@ -63,7 +63,7 @@ public class LoadNested extends AbstractCallElement {
     };
   }
 
-  private static boolean isIdentifierOnly(String s) {
+  private static boolean isIdentifierOnly(final String s) {
     for (int i = 0; i < s.length(); i++) {
       if (!Character.isJavaIdentifierPart(s.charAt(0))) return false;
     }
@@ -72,7 +72,7 @@ public class LoadNested extends AbstractCallElement {
   }
   
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer, final Context context, final Statement statement) {
     nextOrReturn(writer, context, this.statement);
   }
 

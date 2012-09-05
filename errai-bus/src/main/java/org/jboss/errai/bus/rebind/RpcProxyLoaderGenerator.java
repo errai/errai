@@ -78,24 +78,24 @@ public class RpcProxyLoaderGenerator extends Generator {
     return packageName + "." + className;
   }
 
-  private String generate(GeneratorContext context, String className) {
+  private String generate(final GeneratorContext context, final String className) {
     final File fileCacheDir = org.jboss.errai.common.metadata.RebindUtils.getErraiCacheDir();
     final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
     
     log.info("generating rpc proxy loader class.");
-    String gen = generate(context);
+    final String gen = generate(context);
     RebindUtils.writeStringToFile(cacheFile, gen);
 
     return gen;
   }
 
-  private String generate(GeneratorContext context) {
+  private String generate(final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
 
     final MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
 
-    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Remote.class, 
+    for (final MetaClass remote : ClassScanner.getTypesAnnotatedWith(Remote.class,
         RebindUtils.findTranslatablePackages(context))) {
       
       if (remote.isInterface()) {

@@ -32,7 +32,9 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.If;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.HasProperties;
@@ -66,7 +68,7 @@ import com.google.gwt.user.client.ui.Widget;
  * <li>Update the target model's state in response to value change events (only works for widgets that implement
  * {@link HasValue})</li>
  * <ul>
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyGenerator {
@@ -354,13 +356,23 @@ public class BindableProxyGenerator {
           );
 
       MetaClass paramType = setterMethod.getParameters()[0].getType();
+
+      Statement callSetterOnTarget = Stmt.loadClassMember("target").invoke(setterMethod.getName(),
+                Cast.to(paramType, Stmt.loadVariable(property)));
+
+      // If the set method we are proxying returns a value, capture that value into a local variable
+      Statement returnValueOfSetter = EmptyStatement.INSTANCE;
+      if (!setterMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
+        callSetterOnTarget = Stmt.declareFinalVariable("returnValueOfSetter", setterMethod.getReturnType(), callSetterOnTarget);
+        returnValueOfSetter = Stmt.nestedCall(Refs.get("returnValueOfSetter")).returnValue();
+      }
+
       classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
           Parameter.of(paramType, property))
           .append(
               Stmt.declareVariable("oldValue", Object.class, Stmt.loadClassMember("target").invoke(
                   getterMethod.getName())))
-          .append(Stmt.loadClassMember("target").invoke(setterMethod.getName(),
-                    Cast.to(paramType, Stmt.loadVariable(property))))
+          .append(callSetterOnTarget)
           .append(
               If.cond(Stmt.loadClassMember("bindings").invoke("containsKey", property))
                   .append(Stmt.declareVariable("widget", Widget.class,
@@ -400,6 +412,7 @@ public class BindableProxyGenerator {
                     ))
             .append(
                 Stmt.loadVariable("propertyChangeHandlerSupport").invoke("notifyHandlers", Stmt.loadVariable("event")))
+            .append(returnValueOfSetter)
           .finish();
     }
   }
@@ -412,11 +425,27 @@ public class BindableProxyGenerator {
                  Variable.get("handler")))
          .finish();
 
+    classBuilder.publicMethod(void.class, "addPropertyChangeHandler",
+        Parameter.of(String.class, "name"),
+        Parameter.of(PropertyChangeHandler.class, "handler"))
+          .append(
+              Stmt.loadClassMember("propertyChangeHandlerSupport").invoke("addPropertyChangeHandler",
+                 Variable.get("name"), Variable.get("handler")))
+          .finish();
+
     classBuilder.publicMethod(void.class, "removePropertyChangeHandler",
         Parameter.of(PropertyChangeHandler.class, "handler"))
           .append(
               Stmt.loadClassMember("propertyChangeHandlerSupport").invoke("removePropertyChangeHandler",
                   Variable.get("handler")))
+          .finish();
+
+    classBuilder.publicMethod(void.class, "removePropertyChangeHandler",
+        Parameter.of(String.class, "name"),
+        Parameter.of(PropertyChangeHandler.class, "handler"))
+          .append(
+              Stmt.loadClassMember("propertyChangeHandlerSupport").invoke("removePropertyChangeHandler",
+                 Variable.get("name"), Variable.get("handler")))
           .finish();
   }
 }

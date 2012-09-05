@@ -27,12 +27,12 @@ import org.jboss.errai.codegen.literal.LiteralFactory;
 public class LoadLiteral extends AbstractCallElement {
   private Object literalValue;
 
-  public LoadLiteral(Object literalValue) {
+  public LoadLiteral(final Object literalValue) {
     this.literalValue = literalValue;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer, final Context context, final Statement statement) {
     writer.reset();
     try {
       nextOrReturn(writer, context, LiteralFactory.getLiteral(context, literalValue));

@@ -21,7 +21,7 @@ import com.google.gwt.user.client.Random;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import javax.inject.*;
 
 /**
  * @author Mike Brock

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
@@ -105,7 +106,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     final List<User> users = new ArrayList<User>();
     users.add(new User(11l, "first", "last", 20, Gender.MALE, null));
-    users.add(new User(12l, "firs2", "las2", 40, Gender.MALE, null));
+    users.add(new User(12l, "first2", "last2", 40, Gender.MALE, null));
 
     String jackson = MarshallingWrapper.toJSON(users);
 
@@ -126,7 +127,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     final List<User> users = new ArrayList<User>();
     users.add(new User(11l, "first", "last", 20, Gender.MALE, null));
-    users.add(new User(12l, "firs2", "las2", 40, Gender.MALE, null));
+    users.add(new User(12l, "first2", "last2", 40, Gender.MALE, null));
 
     String jackson = MarshallingWrapper.toJSON(users);
 
@@ -178,6 +179,28 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             finishTest();
           }
         }).postJacksonPortableWithByteArray(jackson);
+  }
+  
+  @Test
+  public void testJacksonMarshallingOfMap() {
+    delayTestFinish(5000);
+
+    final Map<String, User> users = new HashMap<String, User>();
+    users.put("1", new User(11l, "first", "last", 20, Gender.MALE, null));
+    users.put("2", new User(12l, "first2", "last2", 40, Gender.MALE, null));
+
+    String jackson = MarshallingWrapper.toJSON(users);
+
+    RestClient.create(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            Map<String, User> result = MarshallingWrapper.fromJSON(jackson, Map.class, String.class, User.class);
+            assertEquals(users, result);
+            finishTest();
+          }
+        }).postJacksonMap(jackson);
   }
 
 }

@@ -6,8 +6,10 @@
          <tbody>
             <row>
                <entry>
-                  <para>Concepts</para>
-                  <para>One of the primary complaints of GWT to date has been that it is  difficult to use "pure HTML" when building and skinning widgets.  Inevitably one must turn to Java-based configuration in order to finish  the job. Errai, however, strives to remove the need for Java styling.  HTML template files are placed in the project source tree, and  referenced from custom "Composite components" (Errai UI Widgets) in  Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency  injection is supported in all custom components. Errai UI provides rapid  prototyping and HTML5 templating for GWT.</para>
+                  <para>
+                One of the primary complaints of GWT to date has been that it is  difficult to use "pure HTML" when building and skinning widgets.  Inevitably one must turn to Java-based configuration in order to finish  the job. Errai, however, strives to remove the need for Java styling.  HTML template files are placed in the project source tree, and  referenced from custom "Composite components" (Errai UI Widgets) in  Java. Since Errai UI depends on Errai IOC and Errai CDI, dependency  injection is supported in all custom components. Errai UI provides rapid  prototyping and HTML5 templating for GWT.
+                
+              </para>
                </entry>
                <entry>
                   <para>
@@ -32,7 +34,7 @@
       <para>
         The Errai UI module is directly integrated with
         <xref linkend="sid-51282340"/>
-        and Errai  JPA but can also be used as a standalone project in any GWT client  application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using
+        and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Errai UI GWT module, and ensuring that you have properly using
         <link linkend="sid-19398999">Errai CDI's @Inject</link>
         to instantiate your widgets:
       </para>
@@ -41,6 +43,11 @@
          <informalexample>
             <programlisting language="xml">&lt;inherits name="org.jboss.errai.ui.UI" /&gt;</programlisting>
          </informalexample>
+         <para>
+          If you work better by playing with a finished product, you can see a simple client-server project
+          <ulink url="https://github.com/lincolnthree/errai-ui-demo">implemented using Errai UI here</ulink>
+          .
+        </para>
       </section>
    </section>
    <section id="sid-51806600_ErraiUI-UseErraiUICompositecomponents">
@@ -328,7 +335,7 @@ This text will be ignored.</programlisting>
       <section id="sid-51806600_ErraiUI-Elementattributes%28templatewins%29">
          <title>Element attributes (template wins)</title>
          <para>
-          When styling your templates, you should keep in mind that all  attributes defined in the template file will take precedence over any  preset attributes in your Widgets. This "attribute merge" occurs only when  the components are instantiated; subsequent changes to any attributes  after Widget construction will function normally. In the example we defined a Composite component that applied  several styles to a child Widget in its constructor, but we can see from  the output that the styles from the template have overridden them.  If styles must be applied in Java, instead of the template,
+          When styling your templates, you should keep in mind that all attributes defined in the template file will take precedence over any  preset attributes in your Widgets. This "attribute merge" occurs only when  the components are instantiated; subsequent changes to any attributes  after Widget construction will function normally. In the example we defined a Composite component that applied  several styles to a child Widget in its constructor, but we can see from  the output that the styles from the template have overridden them.  If styles must be applied in Java, instead of the template,
           <code>@PostConstruct</code>
           or other methods should be favored over constructors to apply styles to  fully-constructed Composite components.
         </para>
@@ -388,7 +395,9 @@ This text will be ignored.</programlisting>
             <para>Native DOM events on Elements</para>
          </listitem>
       </orderedlist>
-      <para>It is not possible to handle Native DOM events on Widgets because GWT overrides native event handlers when Widgets are added to the DOM. You must programatically configure such handlers after the Widget has been added to the DOM.</para>
+      <important>
+         <para>It is not possible to handle Native DOM events on Widgets because GWT  overrides native event handlers when Widgets are added to the DOM. You  must programatically configure such handlers after the Widget has been  added to the DOM.</para>
+      </important>
       <section id="sid-51806600_ErraiUI-Concepts">
          <title>Concepts</title>
          <para>
@@ -425,7 +434,7 @@ public class WidgetHandlerComponent extends Composite { 
       <section id="sid-51806600_ErraiUI-GWTeventsonDOMElements">
          <title>GWT events on DOM Elements</title>
          <para>
-          It is also possible to handle GWT events on Elements which are specified as a
+          Errai UI also makes it possible to handle GWT events on native Elements which are specified as a
           <code>@DataField</code>
           in the component class. This is useful when a full GWT Widget is not available for a given Element, or for GWT events that might not normally be available on a given Element type. This could occur, for instance, when clicking on a
           <code>&lt;div&gt;</code>
@@ -465,12 +474,18 @@ public class ElementHandlerComponent extends Composite { 
          </informalexample>
          <para>
           The
-          <code>@SyncNative</code>
+          <code>@SinkNative</code>
           annotation is used to select native events (as a bit mask) of which the method should handle; this sink behaves the same as when using
           <code>DOM.sinkEvents(Element e, int bits)</code>
           . Note that a
           <code>@DataField</code>
           reference in the component class is optional.
+        </para>
+         <important>
+            <para>Only one @EventHandler may be specified for a given data-field when @SinkNative is used to handle native DOM events.</para>
+         </important>
+         <para>
+          
         </para>
          <informalexample>
             <programlisting language="java">@Templated
@@ -494,9 +509,88 @@ public class QuickHandlerComponent extends Composite {
          </informalexample>
       </section>
    </section>
-   <section id="sid-51806600_ErraiUI-Databinding">
-      <title>binding</title>
-      <para>[christian?]</para>
+   <section id="sid-51806600_ErraiUI-DataBinding">
+      <title>Data Binding</title>
+      <para>
+        A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks cause a significant amount of boilerplate code which can be alleviated by Errai. Errai's
+        <link linkend="sid-51282340">data binding module</link>
+        provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when integrated with Errai UI.
+      </para>
+      <para>
+        In the following example, all
+        <code>@DataFields</code>
+        annotated with
+        <code>@Bound</code>
+        will automatically be bound to properties of the data model (a
+        <code>User</code>
+        object). The model object is provided by an injected
+        <code>DataBinder</code>
+        instance which has to be annotated with
+        <code>@AutoBound</code>
+        for the automatic bindings to be carried out. Both field and constructor injection can be used.
+      </para>
+      <informalexample>
+         <programlisting language="java">@Templated
+public class LoginForm extends Composite {
+
+   @Inject
+   @Bound
+   @DataField   
+   private TextBox username;
+ 
+   @Inject   
+   @Bound
+   @DataField
+   private PasswordTextBox password;
+  
+   @DataField    
+   private Button submit = new Button();
+
+   private User user;
+   
+   @Inject 
+   public LoginForm(@AutoBound DataBinder&lt;User&gt; userBinder) {
+     this.user = userBinder.getModel();
+   }
+}</programlisting>
+      </informalexample>
+      <para>
+        Now the user object and the username and password fields are automatically kept in sync. No event handling code needs to be written for updating the user object in response to input field changes and no code needs to be written for updating the user interface fields when the model object changes (when
+        <code>setUsername</code>
+        or
+        <code>setPassword</code>
+        is called).
+      </para>
+      <para>
+        By default, the bindings are carried out based on the
+        <code>@DataField</code>
+        names. So, in the example above, the
+        <code>@DataField</code>
+        username is automatically bound to the JavaBean property username of the model object. The
+        <code>@Bound</code>
+        annotation also allows for specifying the property to bind to. In the following example, the password field is bound the JavaBean property named pass, assuming such a property exists in the
+        <code>User</code>
+        class.
+      </para>
+      <informalexample>
+         <programlisting language="java">@Inject   
+@Bound(property="pass")
+@DataField
+private PasswordTextBox password;</programlisting>
+      </informalexample>
+      <para>
+        The
+        <code>@Bound</code>
+        annotation further allows to specify a converter to use for the binding (see
+        <link linkend="sid-51282340_DataBinding-SpecifyingConverters">Specifying Converters</link>
+        for details). This is how a binding specific converter can be specified on a data field:
+      </para>
+      <informalexample>
+         <programlisting language="java">@Inject   
+@Bound(converter=MyDateConverter.class)
+@DataField
+private TextBox date;</programlisting>
+      </informalexample>
    </section>
    <section id="sid-51806600_ErraiUI-NestCompositecomponents">
       <title>Nest Composite components</title>

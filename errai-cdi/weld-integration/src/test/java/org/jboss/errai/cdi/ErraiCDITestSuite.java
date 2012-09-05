@@ -7,6 +7,7 @@ import org.jboss.errai.cdi.event.client.test.LocalEventIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.BeanManagerIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.CyclicDepsIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.DependentScopeIntegrationTest;
+import org.jboss.errai.cdi.injection.client.test.ExperimentalDependentScopeTest;
 import org.jboss.errai.cdi.injection.client.test.InjectionIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.InstanceInjectionIntegrationTest;
 import org.jboss.errai.cdi.injection.client.test.PostConstructOrderTest;
@@ -27,6 +28,7 @@ import org.junit.runners.Suite;
     CyclicDepsIntegrationTest.class,
     PostConstructOrderTest.class,
     DependentScopeIntegrationTest.class,
+    ExperimentalDependentScopeTest.class,
     SpecializationIntegrationTest.class,
     StereotypesIntegrationTest.class,
     LocalEventIntegrationTest.class,

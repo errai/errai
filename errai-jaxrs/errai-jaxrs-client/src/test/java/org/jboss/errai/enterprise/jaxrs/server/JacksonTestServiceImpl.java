@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.jaxrs.server;
 
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
@@ -75,6 +76,19 @@ public class JacksonTestServiceImpl implements JacksonTestService {
     try {
       ByteArrayTestWrapper entity = mapper.readValue(jackson, ByteArrayTestWrapper.class);
       return mapper.writeValueAsString(entity);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  @Override
+  public String postJacksonMap(String jackson) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      Map<String, User> users = mapper.readValue(jackson, Map.class);
+      return mapper.writeValueAsString(users);
     }
     catch (Exception e) {
       e.printStackTrace();

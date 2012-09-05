@@ -192,7 +192,7 @@ public class InjectionContext {
       }
     }
 
-    if (matching.size() > 1 && (!type.isInterface() && !type.isAbstract())) {
+    if (matching.size() > 1 && type.isConcrete()) {
       // perform second pass
       final Iterator<Injector> secondIter = matching.iterator();
       while (secondIter.hasNext()) {
@@ -700,6 +700,10 @@ public class InjectionContext {
 
   public boolean isReachable(final String fqnc) {
     return reachableTypes.isEmpty() || reachableTypes.contains(fqnc);
+  }
+
+  public Collection<String> getAllReachableTypes() {
+    return reachableTypes.toCollection();
   }
 
   public void setAttribute(final String name, final Object value) {

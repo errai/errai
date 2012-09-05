@@ -28,6 +28,8 @@ import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.Marshalling;
@@ -38,7 +40,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Data binding integration tests.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author David Cracauer <dcracauer@gmail.com>
  */
@@ -369,5 +371,31 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(1).getPropertyName());
     assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
     assertEquals("Wrong previous value in event", "UI change", handler.getEvents().get(1).getOldValue());
+  }
+
+  /**
+   * Ensures that, when a property change event is fired, the new value is
+   * already set on the model object.
+   */
+  @Test
+  public void testNewValueIsSetBeforeEventIsFired() {
+    TextBox textBox = new TextBox();
+    final DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "value");
+    binder.getModel().setValue("Old Value");
+    class MyHandler implements PropertyChangeHandler {
+      String observedValueWhenEventFired;
+      @Override
+      public void onPropertyChange(PropertyChangeEvent event) {
+        observedValueWhenEventFired = binder.getModel().getValue();
+      }
+    }
+    MyHandler handler = new MyHandler();
+    binder.addPropertyChangeHandler(handler);
+
+    textBox.setValue("New Value", true);
+    assertEquals("New Value", handler.observedValueWhenEventFired);
+
+    binder.getModel().setValue("New New Value");
+    assertEquals("New New Value", handler.observedValueWhenEventFired);
   }
 }

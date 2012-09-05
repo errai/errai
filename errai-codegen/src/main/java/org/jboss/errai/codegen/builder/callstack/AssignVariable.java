@@ -53,7 +53,7 @@ public class AssignVariable extends AbstractCallElement {
         wrapperStmt = new Statement() {
           @Override
           public String generate(final Context context) {
-            return stmt.generate(context) + ";";
+            return stmt.generate(context).concat(";");
           }
   
           @Override

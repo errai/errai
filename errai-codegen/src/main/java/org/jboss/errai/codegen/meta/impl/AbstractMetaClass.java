@@ -401,7 +401,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private String hashString() {
     if (_hashString == null) {
-      _hashString = MetaClass.class.getName() + ":" + getFullyQualifiedName();
+      _hashString = MetaClass.class.getName().concat(":").concat(getFullyQualifiedName());
       if (getParameterizedType() != null) {
         _hashString += getParameterizedType().toString();
       }
@@ -605,7 +605,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = getInternalPrimitiveNameFrom(name.trim());
     }
     else {
-      name = "L" + getInternalPrimitiveNameFrom(name.trim()).replaceAll("\\.", "/") + ";";
+      name = "L".concat(getInternalPrimitiveNameFrom(name.trim()).replaceAll("\\.", "/")).concat(";");
     }
 
     return _internalNameCache = dimString + name;

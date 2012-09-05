@@ -17,17 +17,17 @@ package org.jboss.errai.databinding.client.api;
 
 /**
  * A {@link PropertyChangeEvent} gets dispatched when any property of a bound bean is changed.
- * 
+ *
  * @author David Cracauer <dcracauer@gmail.com>
  */
-public interface PropertyChangeHandler {
+public interface PropertyChangeHandler<T> {
 
   /**
    * Called when {@link PropertyChangeEvent} is dispatched.
-   * 
+   *
    * @param event
    *          the {@link PropertyChangeEvent} that was dispatched.
    */
-  public void onPropertyChange(PropertyChangeEvent event);
+  public void onPropertyChange(PropertyChangeEvent<T> event);
 
 }

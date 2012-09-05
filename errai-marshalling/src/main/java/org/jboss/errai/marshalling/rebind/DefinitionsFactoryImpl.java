@@ -257,7 +257,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               }
             }
           }
-
         }
         catch (Throwable t) {
           throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getName(), t);
@@ -268,7 +267,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             + " does not implement " + Marshaller.class.getName());
       }
     }
-
 
     exposedClasses.add(MetaClassFactory.get(Object.class));
     exposedClasses.addAll(getEnvironmentConfig().getExposedClasses());
@@ -341,7 +339,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       addDefinition(aliasDef);
     }
 
-    for (Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
+    for (final Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
       fillInheritanceMap(entry.getValue().getMappingClass());
     }
 
@@ -350,14 +348,14 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     for (final Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
       final MappingDefinition def = entry.getValue();
 
-      InstantiationMapping instantiationMapping = def.getInstantiationMapping();
-      for (Mapping mapping : instantiationMapping.getMappings()) {
+      final InstantiationMapping instantiationMapping = def.getInstantiationMapping();
+      for (final Mapping mapping : instantiationMapping.getMappings()) {
         if (shouldUseObjectMarshaller(mapping.getType())) {
           mapping.setType(javaLangObjectRef);
         }
       }
 
-      for (Mapping mapping : entry.getValue().getMemberMappings()) {
+      for (final Mapping mapping : entry.getValue().getMemberMappings()) {
         if (shouldUseObjectMarshaller(mapping.getType())) {
           mapping.setType(javaLangObjectRef);
         }
@@ -367,10 +365,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   @Override
-  public boolean shouldUseObjectMarshaller(MetaClass type) {
-    boolean hasPortableSubtypes = inheritanceMap.containsKey(type.getFullyQualifiedName());
-    boolean hasMarshaller = getDefinition(type.asClass()) != null;
-    boolean isConcrete = !(type.isAbstract() || type.isInterface());
+  public boolean shouldUseObjectMarshaller(final MetaClass type) {
+    final boolean hasPortableSubtypes = inheritanceMap.containsKey(type.getFullyQualifiedName());
+    final boolean hasMarshaller = getDefinition(type.asClass()) != null;
+    final boolean isConcrete = !(type.isAbstract() || type.isInterface());
     return (hasPortableSubtypes && !hasMarshaller) || (hasPortableSubtypes && hasMarshaller && isConcrete);
   }
 
@@ -380,7 +378,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
    *
    * @param mappingClass
    */
-  private void fillInheritanceMap(MetaClass mappingClass) {
+  private void fillInheritanceMap(final MetaClass mappingClass) {
     fillInheritanceMap(inheritanceMap, mappingClass, mappingClass);
   }
 

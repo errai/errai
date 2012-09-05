@@ -115,6 +115,7 @@ public abstract class EnvUtil {
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
     final Set<MetaClass> nonportableClasses = new HashSet<MetaClass>();
+    final Set<String> explicitTypes = new HashSet<String>();
     final Set<MetaClass> portableNonExposed = new HashSet<MetaClass>();
 
     final Set<MetaClass> exposedFromScanner = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Portable.class));
@@ -163,6 +164,7 @@ public abstract class EnvUtil {
               for (final String s : props.getString(key).split(" ")) {
                 try {
                   exposedClasses.add(MetaClassFactory.get(s.trim()));
+                  explicitTypes.add(s.trim());
                 }
                 catch (Exception e) {
                   throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
@@ -198,6 +200,8 @@ public abstract class EnvUtil {
                   final Class<?> toMapping = Class.forName(mapping[1].trim());
 
                   mappingAliases.put(fromMapping.getName(), toMapping.getName());
+                  explicitTypes.add(fromMapping.getName());
+                  explicitTypes.add(toMapping.getName());
                 }
                 catch (Exception e) {
                   throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
@@ -230,7 +234,7 @@ public abstract class EnvUtil {
       fillInInterfacesAndSuperTypes(portableNonExposed, cls);
     }
 
-    return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed, frameworkProps);
+    return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed, explicitTypes, frameworkProps);
   }
 
   private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
@@ -306,6 +310,8 @@ public abstract class EnvUtil {
       return _reachableCache;
     }
 
+    final EnviromentConfig config = getEnvironmentConfig();
+
     if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) != null
         && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
 
@@ -326,7 +332,8 @@ public abstract class EnvUtil {
 
     try {
       for (final MetaClass mc : allCachedClasses) {
-        if (!packages.contains(mc.getPackageName())) continue;
+        if (!config.getExplicitTypes().contains(mc.getFullyQualifiedName())
+            && !packages.contains(mc.getPackageName())) continue;
 
         final URL resource = classLoader.getResource(mc.getFullyQualifiedName().replaceAll("\\.", "/") + ".java");
 
@@ -381,7 +388,7 @@ public abstract class EnvUtil {
     private final byte[] sourceBuffer;
     private final Set<String> results;
 
-    private ReachabilityRunnable(byte[] sourceBuffer, Set<String> results) {
+    private ReachabilityRunnable(final byte[] sourceBuffer, final Set<String> results) {
       this.sourceBuffer = sourceBuffer;
       this.results = results;
     }

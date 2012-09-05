@@ -50,16 +50,14 @@ import java.util.Set;
 /**
  * @author Mike Brock
  */
-public class QualiferEqualityFactoryGenerator extends Generator {
+public class QualifierEqualityFactoryGenerator extends Generator {
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+  public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
+      throws UnableToCompleteException {
     try {
-      // get classType and save instance variables
-    //  GenUtil.setPermissiveMode(true);
-
       final JClassType classType = context.getTypeOracle().getType(typeName);
-      String packageName = classType.getPackage().getName();
-      String className = classType.getSimpleSourceName() + "Impl";
+      final String packageName = classType.getPackage().getName();
+      final String className = classType.getSimpleSourceName() + "Impl";
 
       logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
@@ -91,33 +89,33 @@ public class QualiferEqualityFactoryGenerator extends Generator {
 
     final TypeOracle oracle = generatorContext.getTypeOracle();
 
-    final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder = ClassBuilder.define(packageName + "." + className)
-            .publicScope().implementsInterface(QualifierEqualityFactory.class)
-            .body();
+    final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder
+        = ClassBuilder.define(packageName + "." + className).publicScope()
+        .implementsInterface(QualifierEqualityFactory.class)
+        .body();
 
     builder.getClassDefinition().getContext().setPermissiveMode(true);
 
     final MetaClass mapStringAnnoComp
-            = parameterizedAs(HashMap.class, typeParametersOf(String.class, AnnotationComparator.class));
+        = parameterizedAs(HashMap.class, typeParametersOf(String.class, AnnotationComparator.class));
 
     builder.privateField(COMPARATOR_MAP_VAR, mapStringAnnoComp)
-            .initializesWith(Stmt.newObject(mapStringAnnoComp)).finish();
+        .initializesWith(Stmt.newObject(mapStringAnnoComp)).finish();
 
     final ConstructorBlockBuilder<? extends ClassStructureBuilder<?>> constrBuilder = builder.publicConstructor();
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Set<Class<?>> typesAnnotatedWith = scanner.getTypesAnnotatedWith(Qualifier.class);
 
-    for (Class<?> aClass : typesAnnotatedWith) {
+    for (final Class<?> aClass : typesAnnotatedWith) {
       try {
-
         final MetaClass MC_annotationClass = GWTClass.newInstance(oracle, oracle.getType(aClass.getName()));
         final Collection<MetaMethod> methods = getAnnotationAttributes(MC_annotationClass);
 
         if (methods.isEmpty()) continue;
 
         constrBuilder._(Stmt.loadVariable(COMPARATOR_MAP_VAR)
-                .invoke("put", aClass.getName(), generateComparatorFor(MC_annotationClass, methods)));
+            .invoke("put", aClass.getName(), generateComparatorFor(MC_annotationClass, methods)));
       }
       catch (NotFoundException e) {
         // ignore.
@@ -129,37 +127,38 @@ public class QualiferEqualityFactoryGenerator extends Generator {
 
     final MetaClass annotationClazz = JavaReflectionClass.newUncachedInstance(Annotation.class);
     builder.publicMethod(boolean.class, "isEqual",
-            Parameter.of(annotationClazz, "a1"), Parameter.of(annotationClazz, "a2"))
-            .body()
-            ._(If.cond(invokeStatic(QualifierUtil.class, "isSameType", Refs.get("a1"), Refs.get("a2")))
-                    ._(
-                            If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
-                                    Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
-                                    ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
-                                            ).invoke("isEqual", Refs.get("a1"), Refs.get("a2")).returnValue())
-                                    .finish()
-                                    .else_()
-                                    ._(Stmt.load(true).returnValue())
-                                    .finish()
-                    )
+        Parameter.of(annotationClazz, "a1"), Parameter.of(annotationClazz, "a2"))
+        .body()
+        ._(If.cond(invokeStatic(QualifierUtil.class, "isSameType", Refs.get("a1"), Refs.get("a2")))
+            ._(
+                If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
+                    Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
+                    ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
+                        .invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
+                    ).invoke("isEqual", Refs.get("a1"), Refs.get("a2")).returnValue())
                     .finish()
                     .else_()
-                    ._(Stmt.load(false).returnValue())
-                    .finish()).finish();
+                    ._(Stmt.load(true).returnValue())
+                    .finish()
+            )
+            .finish()
+            .else_()
+            ._(Stmt.load(false).returnValue())
+            .finish()).finish();
 
 
     builder.publicMethod(int.class, "hashCodeOf", Parameter.of(Annotation.class, "a1"))
-            .body()
-            ._(
-                    If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
-                      Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
-                      ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
-                              .invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
-                      ).invoke("hashCodeOf", Refs.get("a1")).returnValue())
-                            .finish()
-                    .else_()
-                    ._(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode").returnValue())
-                    .finish()).finish();
+        .body()
+        ._(
+            If.cond(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
+                Stmt.loadVariable("a1").invoke("annotationType").invoke("getName")))
+                ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
+                    .invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
+                ).invoke("hashCodeOf", Refs.get("a1")).returnValue())
+                .finish()
+                .else_()
+                ._(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode").returnValue())
+                .finish()).finish();
 
 
     final String csq = builder.toJavaString();
@@ -175,10 +174,10 @@ public class QualiferEqualityFactoryGenerator extends Generator {
 
   private static Collection<MetaMethod> getAnnotationAttributes(final MetaClass MC_annotationClass) {
     final List<MetaMethod> methods = new ArrayList<MetaMethod>();
-    for (MetaMethod method : MC_annotationClass.getDeclaredMethods()) {
+    for (final MetaMethod method : MC_annotationClass.getDeclaredMethods()) {
       if (method.isAnnotationPresent(Nonbinding.class) || method.isPrivate() || method.isProtected()
-              || method.getName().equals("equals") ||
-              method.getName().equals("hashCode")) continue;
+          || method.getName().equals("equals") ||
+          method.getName().equals("hashCode")) continue;
 
       methods.add(method);
     }
@@ -190,28 +189,28 @@ public class QualiferEqualityFactoryGenerator extends Generator {
 
     final AnonymousClassStructureBuilder clsBuilder = ObjectBuilder.newInstanceOf(MC_annoComparator).extend();
     final MethodBlockBuilder<AnonymousClassStructureBuilder> isEqualBuilder = clsBuilder
-            .publicMethod(boolean.class, "isEqual",
-                    Parameter.of(MC_annotationClass, "a1"), Parameter.of(MC_annotationClass, "a2"))
-            .annotatedWith(new Override() {
-              @Override
-              public Class<? extends Annotation> annotationType() {
-                return Override.class;
-              }
-            });
+        .publicMethod(boolean.class, "isEqual",
+            Parameter.of(MC_annotationClass, "a1"), Parameter.of(MC_annotationClass, "a2"))
+        .annotatedWith(new Override() {
+          @Override
+          public Class<? extends Annotation> annotationType() {
+            return Override.class;
+          }
+        });
 
-    for (MetaMethod method : methods) {
+    for (final MetaMethod method : methods) {
       if (method.getReturnType().isPrimitive()) {
         isEqualBuilder._(
-                If.notEquals(Stmt.loadVariable("a1").invoke(method), Stmt.loadVariable("a2").invoke(method))
-                        ._(Stmt.load(false).returnValue())
-                        .finish()
+            If.notEquals(Stmt.loadVariable("a1").invoke(method), Stmt.loadVariable("a2").invoke(method))
+                ._(Stmt.load(false).returnValue())
+                .finish()
         );
       }
       else {
         isEqualBuilder._(
-                If.not(Stmt.loadVariable("a1").invoke(method).invoke("equals", Stmt.loadVariable("a2").invoke(method)))
-                        ._(Stmt.load(false).returnValue())
-                        .finish()
+            If.not(Stmt.loadVariable("a1").invoke(method).invoke("equals", Stmt.loadVariable("a2").invoke(method)))
+                ._(Stmt.load(false).returnValue())
+                .finish()
         );
       }
     }
@@ -219,14 +218,14 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     isEqualBuilder._(Stmt.load(true).returnValue());
 
     final BlockBuilder<AnonymousClassStructureBuilder> hashCodeOfBuilder
-            = clsBuilder.publicOverridesMethod("hashCodeOf", Parameter.of(MC_annotationClass, "a1"));
+        = clsBuilder.publicOverridesMethod("hashCodeOf", Parameter.of(MC_annotationClass, "a1"));
 
     hashCodeOfBuilder._(Stmt.declareVariable(int.class).named("hash")
-            .initializeWith(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode")));
+        .initializeWith(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode")));
 
-    for (MetaMethod method : methods) {
-        hashCodeOfBuilder._(Stmt.loadVariable("hash")
-                .assignValue(hashArith(method)));
+    for (final MetaMethod method : methods) {
+      hashCodeOfBuilder._(Stmt.loadVariable("hash")
+          .assignValue(hashArith(method)));
     }
 
     hashCodeOfBuilder._(Stmt.loadVariable("hash").returnValue());
@@ -239,10 +238,11 @@ public class QualiferEqualityFactoryGenerator extends Generator {
     return classStructureBuilder.finish();
   }
 
-  private static Statement hashArith(MetaMethod method) {
+  private static Statement hashArith(final MetaMethod method) {
     return Arith.expr(
-            Arith.expr(31, ArithmeticOperator.Multiplication, Refs.get("hash")),
-            ArithmeticOperator.Addition,
-            Stmt.invokeStatic(QualifierUtil.class, "hashValueFor", Stmt.loadVariable("a1").invoke(method)));
+        Arith.expr(31, ArithmeticOperator.Multiplication, Refs.get("hash")),
+        ArithmeticOperator.Addition,
+        Stmt.invokeStatic(QualifierUtil.class, "hashValueFor", Stmt.loadVariable("a1").invoke(method))
+    );
   }
 }

@@ -56,6 +56,10 @@ public class MarshallingWrapper {
     return Marshalling.fromJSON(_fromJSON(json), type, elementType);
   }
 
+  public static <T> T fromJSON(final String json, final Class<T> type, final Class<?> mapKeyType, final Class<?> mapValueType) {
+    return Marshalling.fromJSON(_fromJSON(json), type, mapKeyType, mapValueType);
+  }
+  
   public static Object fromJSON(final String json) {
     return Marshalling.fromJSON(_fromJSON(json), Object.class);
   }

@@ -22,6 +22,7 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.getConstructionStrategy;
 
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -72,7 +73,7 @@ public class TypeInjector extends AbstractInjector {
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
-    this.instanceVarName = InjectUtil.getNewInjectorName() + "_" + type.getName();
+    this.instanceVarName = InjectUtil.getNewInjectorName().concat("_").concat(type.getName());
 
     final Set<Annotation> qualifiers = new HashSet<Annotation>();
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
@@ -153,17 +154,20 @@ public class TypeInjector extends AbstractInjector {
     ctx.pushBlockBuilder(callbackBuilder);
 
     /* get a new unique variable for the creational callback */
-    creationalCallbackVarName = InjectUtil.getNewInjectorName() + "_" + type.getName() + "_creationalCallback";
+    creationalCallbackVarName = InjectUtil.getNewInjectorName().concat("_")
+        .concat(type.getName()).concat("_creational");
 
     /* get the construction strategy and execute it to wire the bean */
-    InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
+    getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
       public void beanConstructed() {
         /* the bean has been constructed, so get a reference to the BeanRef and set it to the 'beanRef' variable. */
 
         /* add the bean to CreationalContext */
-        callbackBuilder.append(loadVariable("context").invoke("addBean",loadVariable("context").invoke("getBeanReference", load(type),
-                        load(qualifyingMetadata.getQualifiers())), Refs.get(instanceVarName)));
+        callbackBuilder.append(
+            loadVariable("context").invoke("addBean", loadVariable("context").invoke("getBeanReference", load(type),
+                load(qualifyingMetadata.getQualifiers())), Refs.get(instanceVarName))
+        );
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
@@ -241,9 +245,9 @@ public class TypeInjector extends AbstractInjector {
 
       context.declareOverridden(cls);
 
-      final List<Injector> injs = context.getInjectors(cls);
+      final List<Injector> injectors = context.getInjectors(cls);
 
-      for (final Injector inj : injs) {
+      for (final Injector inj : injectors) {
         if (this.beanName == null) {
           this.beanName = inj.getBeanName();
         }

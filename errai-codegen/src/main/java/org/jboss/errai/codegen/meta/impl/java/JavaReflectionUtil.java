@@ -37,7 +37,7 @@ import java.util.Map;
 public class JavaReflectionUtil {
 
   public static MetaTypeVariable[] fromTypeVariable(final TypeVariable[] typeVariables) {
-    final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
+    final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>(typeVariables.length);
 
     for (final TypeVariable typeVariable : typeVariables) {
       typeVariableList.add(new JavaReflectionTypeVariable(typeVariable));

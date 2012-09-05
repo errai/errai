@@ -16,13 +16,17 @@ public class EnviromentConfig {
   private final Set<MetaClass> portableSuperTypes;
   private final Map<String, String> frameworkProperties;
 
+  private final Set<String> explicitTypes;
+
   EnviromentConfig(final Map<String, String> mappingAliases,
                    final Set<MetaClass> exposedClasses,
                    final Set<MetaClass> portableSuperTypes,
+                   final Set<String> explicitTypes,
                    final Map<String, String> frameworkProperties) {
     this.mappingAliases = Collections.unmodifiableMap(mappingAliases);
     this.exposedClasses = Collections.unmodifiableSet(exposedClasses);
     this.portableSuperTypes = Collections.unmodifiableSet(portableSuperTypes);
+    this.explicitTypes = Collections.unmodifiableSet(explicitTypes);
     this.frameworkProperties = new HashMap<String, String>(frameworkProperties);
   }
 
@@ -36,6 +40,10 @@ public class EnviromentConfig {
 
   public Set<MetaClass> getPortableSuperTypes() {
     return portableSuperTypes;
+  }
+
+  public Set<String> getExplicitTypes() {
+    return explicitTypes;
   }
 
   public Map<String, String> getFrameworkProperties() {

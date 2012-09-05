@@ -77,7 +77,8 @@ public class ProducerInjector extends AbstractInjector {
 
     this.disposerMethod = findDisposerMethod(injectionContext.getProcessingContext());
 
-    this.creationalCallbackVarName = InjectUtil.getNewInjectorName() + "_" + injectedType.getName() + "_creationalCallback";
+    this.creationalCallbackVarName = InjectUtil.getNewInjectorName().concat("_")
+        .concat(injectedType.getName().concat("_creational"));
 
     final Set<Annotation> qualifiers = new HashSet<Annotation>();
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(producerMember.getAnnotations()));

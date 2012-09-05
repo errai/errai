@@ -176,6 +176,17 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract boolean isAnonymousClass();
 
+  public boolean isConcrete() {
+    return !isInterface()
+        && !isAbstract()
+        && !isSynthetic()
+        && !isAnonymousClass()
+        && !isPrimitive()
+        && !isArray()
+        && !isAnnotation()
+        && !isEnum();
+  }
+
   public abstract MetaClass asBoxed();
 
   public abstract MetaClass asUnboxed();

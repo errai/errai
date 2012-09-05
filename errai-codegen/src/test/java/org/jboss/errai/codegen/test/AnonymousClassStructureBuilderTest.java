@@ -184,4 +184,18 @@ public class AnonymousClassStructureBuilderTest extends AbstractCodegenTest {
             "\n" +
             "};", cls);
   }
+
+  /** Regression test for ERRAI-363. */
+  @Test
+  public void testReferenceToAnonymousClassMember() throws Exception {
+    ClassStructureBuilder<?> builder = ClassBuilder.define("com.foo.A").publicScope().body();
+    builder.privateMethod(void.class, "method")
+            .append(ObjectBuilder.newInstanceOf(Runnable.class).extend()
+                    .privateField("memberOfRunnable", Object.class).finish()
+                    .publicOverridesMethod("run").append(Stmt.loadVariable("memberOfRunnable").invoke("hashCode")).finish()
+            .finish())
+        .finish();
+    String javaString = builder.toJavaString();
+    assertEquals("package com.foo; public class A { private void method() { new Runnable() { private Object memberOfRunnable; public void run() { memberOfRunnable.hashCode(); } }; } }", javaString);
+  }
 }

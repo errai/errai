@@ -33,6 +33,7 @@ import org.jboss.errai.config.rebind.EnvUtil;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -147,7 +148,7 @@ public class GWTUtil {
     final TypeOracle typeOracle = context.getTypeOracle();
     MetaClassFactory.emptyCache();
     if (typeOracle != null) {
-      final Set<String> translatable = RebindUtils.findTranslatablePackages(context);
+      final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));
       translatable.remove("java.lang");
       translatable.remove("java.lang.annotation");
 

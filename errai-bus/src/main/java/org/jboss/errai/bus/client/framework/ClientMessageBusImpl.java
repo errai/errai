@@ -415,7 +415,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   };
 
-
   /**
    * Sends the message using it's encoded subject. If the bus has not been initialized, it will be added to
    * <tt>postInitTasks</tt>.

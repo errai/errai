@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.util.Map;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -62,8 +64,16 @@ public class TypeMarshaller {
     }
     else {
       if (!type.equals(MetaClassFactory.get(void.class))) {
-        demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement,
-            type.asBoxed().asClass(), MarshallingGenUtil.getConcreteElementType(type.asBoxed()));
+        if (type.isAssignableTo(Map.class)) {
+          demarshallingStatement =
+              Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement, type.asBoxed().asClass(), 
+                  MarshallingGenUtil.getConcreteMapKeyType(type.asBoxed()),
+                  MarshallingGenUtil.getConcreteMapValueType(type.asBoxed()));
+        }
+        else {
+          demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement,
+              type.asBoxed().asClass(), MarshallingGenUtil.getConcreteElementType(type.asBoxed()));
+        }
       }
       else {
         demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement);
@@ -98,7 +108,7 @@ public class TypeMarshaller {
       if (type.equals(statement.getType())) {
         return statement;
       }
-      
+
       if (MetaClassFactory.get(void.class).equals(type)) {
         return Stmt.load(null);
       }

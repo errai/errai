@@ -18,6 +18,7 @@ import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -78,7 +79,14 @@ public class StereotypesIntegrationTest extends AbstractErraiCDITest {
     // NOTE: This is different form the TCK test in that, in Errai, we don't expect non-explicitly declared
     //       and un-reachable beans to be available from the bean manager. Thus, the correct behavior for us
     //       is that this bean is not registered at all.
-    assertEquals(0, getBeans(ShetlandPony.class).size());
+
+
+    final Collection<IOCBeanDef<ShetlandPony>> beans = getBeans(ShetlandPony.class);
+
+    // now that experimental support exists (testcase must support both modes)
+    if (beans.size() > 1) {
+      fail("should be none or one bean");
+    }
   }
 
   public void testStereotypeDeclaredInheritedIsIndirectlyInherited() {
@@ -89,7 +97,12 @@ public class StereotypesIntegrationTest extends AbstractErraiCDITest {
     // NOTE: This is different form the TCK test in that, in Errai, we don't expect non-explicitly declared
     //       and un-reachable beans to be available from the bean manager. Thus, the correct behavior for us
     //       is that this bean is not registered at all.
-    assertEquals(0, getBeans(MiniatureClydesdale.class).size());
+    final Collection<IOCBeanDef<MiniatureClydesdale>> beans = getBeans(MiniatureClydesdale.class);
+
+    // now that experimental support exists (testcase must support both modes)
+    if (beans.size() > 1) {
+      fail("should be none or one bean");
+    }
   }
 
   public void testStereotypeScopeIsOverriddenByInheritedScope() {

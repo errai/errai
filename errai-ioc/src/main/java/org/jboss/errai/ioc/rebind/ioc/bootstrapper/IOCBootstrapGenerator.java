@@ -113,6 +113,8 @@ public class IOCBootstrapGenerator {
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String ENABLED_ALTERNATIVES_PROPERTY = "errai.ioc.enabled.alternatives";
+  public static final String EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY
+      = "errai.ioc.experimental.infer_dependent_by_reachability";
 
   private final TreeLogger logger;
   private static final Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
@@ -152,7 +154,8 @@ public class IOCBootstrapGenerator {
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
       gen = _generate(packageName, className);
-      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms " + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
+      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
+          + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
 
       ThreadUtil.execute(new Runnable() {
         @Override
@@ -173,7 +176,8 @@ public class IOCBootstrapGenerator {
     final ClassStructureBuilder<?> classStructureBuilder =
         Implementations.implement(Bootstrapper.class, packageName, className);
 
-    logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Generating IOC Bootstrapper " + packageName + "." + className);
+    logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Generating IOC Bootstrapper "
+        + packageName + "." + className);
 
     final BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
     final Context buildContext = bootStrapClass.getContext();
@@ -310,7 +314,7 @@ public class IOCBootstrapGenerator {
     injectionContextBuilder.reachableTypes(allDeps);
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
-    defaultConfigureProcessor(context, injectionContext);
+    defaultConfigureProcessor(injectionContext);
 
     // generator constructor source code
     final IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
@@ -336,6 +340,7 @@ public class IOCBootstrapGenerator {
         .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
             .invoke("getRootContext")).finish();
 
+    @SuppressWarnings("unchecked")
     final BlockBuilder builder = new BlockBuilderImpl(classBuilder.getClassDefinition().getInstanceInitializer(), null);
 
     _doRunnableTasks(beforeTasks, builder);
@@ -343,7 +348,7 @@ public class IOCBootstrapGenerator {
     procFactory.process(procContext);
 
     int i = 0;
-    int beanDeclrMethod = 0;
+    int beanDeclareMethodCount = 0;
     BlockBuilder<? extends ClassStructureBuilder<?>> declareBeanBody = null;
 
     for (final Statement stmt : procContext.getAppendToEnd()) {
@@ -351,7 +356,7 @@ public class IOCBootstrapGenerator {
         if (declareBeanBody != null) {
           declareBeanBody.finish();
         }
-        final String methodName = "declareBeans_" + beanDeclrMethod++;
+        final String methodName = "declareBeans_" + beanDeclareMethodCount++;
 
         declareBeanBody = classBuilder.privateMethod(void.class, methodName).body();
         blockBuilder.append(Stmt.loadVariable("this").invoke(methodName));
@@ -366,10 +371,10 @@ public class IOCBootstrapGenerator {
       declareBeanBody.finish();
     }
 
-
     final Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
     for (final Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
-      PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs ? "jsni" : "reflection", classBuilder, f.getKey());
+      PrivateAccessUtil.addPrivateAccessStubs(f.getValue(),
+          !useReflectionStubs ? "jsni" : "reflection", classBuilder, f.getKey());
     }
 
     final Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
@@ -399,9 +404,9 @@ public class IOCBootstrapGenerator {
   }
 
   public static void processExtensions(final GeneratorContext context,
-                                       final IOCProcessingContext procContext,
+                                       final IOCProcessingContext processingContext,
                                        final InjectionContext injectionContext,
-                                       final IOCProcessorFactory procFactory,
+                                       final IOCProcessorFactory processorFactory,
                                        final List<MetaClass> beforeTasks,
                                        final List<MetaClass> afterTasks) {
 
@@ -416,10 +421,11 @@ public class IOCBootstrapGenerator {
 
     for (final Class<?> clazz : iocExtensions) {
       try {
-        final Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
+        final Class<? extends IOCExtensionConfigurator> configuratorClass
+            = clazz.asSubclass(IOCExtensionConfigurator.class);
 
         final IOCExtensionConfigurator configurator = configuratorClass.newInstance();
-        configurator.configure(procContext, injectionContext, procFactory);
+        configurator.configure(processingContext, injectionContext, processorFactory);
 
         extensionConfigurators.add(configurator);
       }
@@ -430,8 +436,8 @@ public class IOCBootstrapGenerator {
 
     computeDependentScope(context, injectionContext);
 
-    final Collection<MetaClass> bootstrappers = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
-    for (final MetaClass clazz : bootstrappers) {
+    final Collection<MetaClass> bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
+    for (final MetaClass clazz : bootstrapClassCollection) {
       final IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
         beforeTasks.add(clazz);
@@ -467,7 +473,8 @@ public class IOCBootstrapGenerator {
         }
 
         injectionContext.registerDecorator(
-            decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
+            decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType)
+        );
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
@@ -475,15 +482,15 @@ public class IOCBootstrapGenerator {
     }
 
     for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
-      extensionConfigurator.afterInitialization(procContext, injectionContext, procFactory);
+      extensionConfigurator.afterInitialization(processingContext, injectionContext, processorFactory);
     }
   }
 
   /**
-   * @param context
    * @param injectionContext
+   *     an instance of the injection context
    */
-  private static void defaultConfigureProcessor(final GeneratorContext context, final InjectionContext injectionContext) {
+  private static void defaultConfigureProcessor(final InjectionContext injectionContext) {
     injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
     injectionContext.mapElementType(WiringElementType.SingletonBean, EntryPoint.class);
 
@@ -524,6 +531,7 @@ public class IOCBootstrapGenerator {
   }
 
   private static void computeDependentScope(final GeneratorContext context, final InjectionContext injectionContext) {
+
     if (context != null) {
       for (final JPackage pkg : context.getTypeOracle().getPackages()) {
         TypeScan:

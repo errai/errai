@@ -147,12 +147,14 @@ public class JacksonTransformer {
           }
         }
         else if (k.equals(QUALIFIED_VALUE)) {
-          if (encType.isString().stringValue().equals("java.util.Date")) {
-            String dateValue = obj.get(k).isString().stringValue();
-            parent.put(key, new JSONNumber(Double.parseDouble(dateValue)));
-          }
-          else {
-            parent.put(key, obj.get(k));
+          if (parent != null) {
+            if (encType.isString().stringValue().equals("java.util.Date")) {
+              String dateValue = obj.get(k).isString().stringValue();
+              parent.put(key, new JSONNumber(Double.parseDouble(dateValue)));
+            }
+            else {
+              parent.put(key, obj.get(k));
+            }
           }
         }
         else if (k.startsWith(SerializationParts.EMBEDDED_JSON)) {

@@ -175,5 +175,4 @@ public class RpcProxyGenerator {
                 .invoke("sendNowWith", Stmt.loadVariable("bus")))
         .finish();
   }
-
 }

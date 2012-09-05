@@ -16,6 +16,8 @@
 
 package org.jboss.errai.config.rebind;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import org.jboss.errai.common.client.framework.Assert;
@@ -36,7 +38,9 @@ public class ReachableTypes {
    */
   public static final ReachableTypes EVERYTHING_REACHABLE_INSTANCE = new ReachableTypes(null, false);
 
-  /** The set of reachable types. Will be null if reachabilityFeatureEnabled == false. */
+  /**
+   * The set of reachable types. Will be null if reachabilityFeatureEnabled == false.
+   */
   private final Set<String> reachable;
 
   private final boolean reachabilityFeatureEnabled;
@@ -64,7 +68,8 @@ public class ReachableTypes {
    * compiled.
    *
    * @param fqcn
-   *          The fully-qualified name of the class in question.
+   *     The fully-qualified name of the class in question.
+   *
    * @return True if reachability analysis found the named class or if
    *         reachability analysis is disabled.
    */
@@ -76,8 +81,9 @@ public class ReachableTypes {
    * Adds the named class as a reachable type.
    *
    * @param fqcn
-   *          The fully-qualified name of the class that should be considered
-   *          reachable.
+   *     The fully-qualified name of the class that should be considered
+   *     reachable.
+   *
    * @return True if reachability analysis is enabled and the given class was
    *         not already in the reachable set. False otherwise.
    */
@@ -92,8 +98,9 @@ public class ReachableTypes {
    * Removed the named class as a reachable type.
    *
    * @param fqcn
-   *          The fully-qualified name of the class that should be considered
-   *          unreachable.
+   *     The fully-qualified name of the class that should be considered
+   *     unreachable.
+   *
    * @return True if reachability analysis is enabled and the given class was
    *         previously in the reachable set. False otherwise.
    */
@@ -114,4 +121,14 @@ public class ReachableTypes {
   public boolean isBasedOnReachabilityAnalysis() {
     return reachabilityFeatureEnabled;
   }
+
+  /**
+   * Return a collection of all reachable types
+   *
+   * @return an unmodifiable collection of all reachable types. returns null if everything is reachable.
+   */
+  public Collection<String> toCollection() {
+    return reachable == null ? null : Collections.unmodifiableCollection(reachable);
+  }
+
 }

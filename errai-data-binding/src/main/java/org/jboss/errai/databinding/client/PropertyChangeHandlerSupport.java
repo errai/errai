@@ -22,50 +22,95 @@ import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 /**
  * This is a utility class that can be used by implementations of {@link HasPropertyChangeHandlers}. It manages a list
  * of handlers and dispatches {@link PropertyChangeEvent}s.
- * 
+ *
  * @author David Cracauer <dcracauer@gmail.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PropertyChangeHandlerSupport {
 
-  private final List<PropertyChangeHandler> handlers = new ArrayList<PropertyChangeHandler>();
+  private final List<PropertyChangeHandler<?>> handlers = new ArrayList<PropertyChangeHandler<?>>();
+  private final Multimap<String, PropertyChangeHandler<?>> specificPropertyHandlers = ArrayListMultimap.create();
 
   /**
-   * Adds a {@link PropertyChangeHandler} to the list of handlers. Multiple handlers can be registered. If the same
-   * handler instance is passed multiple times, it will be notified multiple times.
-   * 
+   * Adds a {@link PropertyChangeHandler} that will be notified when any
+   * property of the bound object changes. Multiple handlers can be registered.
+   * If the same handler instance is passed multiple times, it will be notified
+   * multiple times.
+   *
    * @param handler
    *          The {@link PropertyChangeHandler} to add, must not be null.
    */
-  public void addPropertyChangeHandler(PropertyChangeHandler handler) {
+  public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
     handlers.add(Assert.notNull(handler));
+  }
+
+  /**
+   * Adds a {@link PropertyChangeHandler} that will be notified only when the
+   * given property of the bound object changes. Multiple handlers can be
+   * registered for each property. If the same handler instance is passed for
+   * the same property multiple times, it will be notified multiple times. If
+   * the property name does not correspond to a property of the bound object, no
+   * exception is thrown, but no events will ever be delivered to the handler.
+   *
+   * @param name
+   *          The property name for which notifications should be sent.
+   * @param handler
+   *          The {@link PropertyChangeHandler} to add, must not be null.
+   */
+  public void addPropertyChangeHandler(String name, PropertyChangeHandler<?> handler) {
+    specificPropertyHandlers.put(name, Assert.notNull(handler));
   }
 
   /**
    * Removes a {@link PropertyChangeHandler} from the list of handlers. If the handler was added more than once to the
    * same event source, it will be notified one less time after being removed. If listener is null, or was never added,
    * no exception is thrown and no action is taken.
-   * 
+   *
    * @param handler
    *          The {@link PropertyChangeHandler} to remove.
    */
-  public void removePropertyChangeHandler(PropertyChangeHandler handler) {
+  public void removePropertyChangeHandler(PropertyChangeHandler<?> handler) {
     handlers.remove(handler);
+  }
+
+  /**
+   * Removes a {@link PropertyChangeHandler}, causing it no longer to be
+   * notified only when the given property of the bound object changes. If the
+   * same handler instance was added for the same property multiple times, it
+   * will be notified one less time per change than before. If listener is null,
+   * was never added, or the property name does not correspond to a property of
+   * the bound object, no exception is thrown and no action is taken.
+   *
+   * @param name
+   *          The property name for which notifications should be sent.
+   * @param handler
+   *          The {@link PropertyChangeHandler} to add, must not be null.
+   */
+  public void removePropertyChangeHandler(String name, PropertyChangeHandler<?> handler) {
+    specificPropertyHandlers.remove(name, Assert.notNull(handler));
   }
 
   /**
    * Notify registered {@link PropertyChangeHandlers} of a {@link PropertyChangeEvent}. Will only dispatch events that
    * represent a change. If oldValue and newValue are equal, the event will be ignored.
-   * 
+   *
    * @param event
    *          {@link the PropertyChangeEvent} to provide to handlers.
    */
-  public void notifyHandlers(PropertyChangeEvent event) {
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  public void notifyHandlers(PropertyChangeEvent<?> event) {
     if (!acceptEvent(event)) {
       return;
+    }
+
+    for (PropertyChangeHandler handler : specificPropertyHandlers.get(event.getPropertyName())) {
+      handler.onPropertyChange(event);
     }
 
     for (PropertyChangeHandler handler : handlers) {
@@ -73,7 +118,7 @@ public class PropertyChangeHandlerSupport {
     }
   }
 
-  private boolean acceptEvent(PropertyChangeEvent event) {
+  private boolean acceptEvent(PropertyChangeEvent<?> event) {
     if (event == null) {
       return false;
     }

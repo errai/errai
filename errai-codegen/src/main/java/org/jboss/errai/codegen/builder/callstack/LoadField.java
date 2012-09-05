@@ -32,7 +32,7 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaField;
 public class LoadField extends AbstractCallElement {
   private final String fieldName;
 
-  public LoadField(String fieldName) {
+  public LoadField(final String fieldName) {
     this.fieldName = fieldName;
   }
 
@@ -73,8 +73,8 @@ public class LoadField extends AbstractCallElement {
       }
 
       @Override
-      public String generate(Context context) {
-        StringBuilder buf = new StringBuilder(currCallString);
+      public String generate(final Context context) {
+        final StringBuilder buf = new StringBuilder(currCallString);
         if (!currCallString.isEmpty()) {
           buf.append(".");
         }

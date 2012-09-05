@@ -67,7 +67,7 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
- * 
+ *
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
@@ -119,9 +119,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             .finish();
 
         /**
-         * 
+         *
          * DEMARSHALL METHOD
-         * 
+         *
          */
         final BlockBuilder<?> builder =
                 classStructureBuilder.publicOverridesMethod("demarshall",
@@ -222,6 +222,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         for (final MemberMapping memberMapping : mappingDefinition.getMemberMappings()) {
           if (!memberMapping.canWrite()) continue;
 
+          if (memberMapping.getTargetType().isConcrete() && !context.isRendered(memberMapping.getTargetType())) {
+             context.getMarshallerGeneratorFactory().addMarshaller(memberMapping.getTargetType());
+          }
+
           final Statement bindingStatement;
           final Statement val;
           if (memberMapping.getType().isArray()) {
@@ -285,7 +289,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
           final MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(memberMapping.getType());
           final MetaClass mapKeyType = MarshallingGenUtil.getConcreteMapKeyType(memberMapping.getType());
-          
+
           if (elementType != null) {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
           }
@@ -293,10 +297,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             if (mapKeyType != null) {
               ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", mapKeyType.getFullyQualifiedName()));
               final MetaClass mapValueType = MarshallingGenUtil.getConcreteMapValueType(memberMapping.getType());
-              ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", mapValueType.getFullyQualifiedName()));  
+              ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", mapValueType.getFullyQualifiedName()));
             }
           }
-          
+
           ifBlockBuilder.append(bindingStatement);
 
           if (elementType != null) {
@@ -322,9 +326,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         builder.append(tryBuilder.finish()).finish();
 
         /**
-         * 
+         *
          * MARSHAL METHOD
-         * 
+         *
          */
         final BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
                 Parameter.of(toMap, "a0"), Parameter.of(MarshallingSession.class, "a1"));
@@ -552,13 +556,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
     else {
       String varName = MarshallingGenUtil.getVarName(toType);
-      
+
       if (toType.equals(MetaClassFactory.get(Object.class))) {
         return Stmt.create(context.getCodegenContext())
                 .loadVariable(varName)
                 .invoke("demarshall", targetType.asClass(), valueStatement, loadVariable("a1"));
       }
-      
+
       return Stmt.create(context.getCodegenContext())
               .loadVariable(varName)
               .invoke("demarshall", valueStatement, loadVariable("a1"));
