@@ -16,10 +16,11 @@
 
 package org.jboss.errai.codegen;
 
-import org.jboss.errai.codegen.builder.ClosedBlock;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.errai.codegen.builder.ClosedBlock;
+import org.jboss.errai.codegen.util.EmptyStatement;
 
 /**
  * Represents a code block (e.g. a loop body).
@@ -73,12 +74,12 @@ public class BlockStatement extends AbstractStatement {
 
     boolean isLastBlock = false;
     for (final Statement statement : statements) {
-      if (buf.length() != 0)
+      if (buf.length() != 0 && !(statement instanceof EmptyStatement))
         buf.append("\n");
 
       buf.append(statement.generate(context));
 
-      if (!(statement instanceof Comment)
+      if (!(statement instanceof Comment) && !(statement instanceof EmptyStatement)
               && !buf.toString().endsWith(";") && !buf.toString().endsWith(":") && !buf.toString().endsWith("}")) {
         buf.append(";");
       }
