@@ -113,6 +113,11 @@ public class BindableProxyGenerator {
         .append(Stmt.loadClassMember("target").returnValue())
         .finish()
         .publicMethod(boolean.class, "equals", Parameter.of(Object.class, "obj"))
+        .append(
+            If.instanceOf(Variable.get("obj"), classBuilder.getClassDefinition())
+             .append(Stmt.loadVariable("obj").assignValue(
+                 Stmt.castTo(classBuilder.getClassDefinition(), Variable.get("obj")).invoke("unwrap")))
+             .finish())
         .append(Stmt.loadClassMember("target").invoke("equals", Variable.get("obj")).returnValue())
         .finish()
         .publicMethod(int.class, "hashCode")
@@ -355,10 +360,10 @@ public class BindableProxyGenerator {
                               Stmt.loadVariable("value"),
                               Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
               .append(
-                  Stmt.loadVariable("propertyChangeHandlerSupport").invoke(
-                      "notifyHandlers",
-                      Stmt.newObject(PropertyChangeEvent.class, Stmt.loadVariable("property"), Stmt
-                          .loadVariable("oldValue"), Stmt.loadVariable("value"))))
+                  Stmt.loadVariable("propertyChangeHandlerSupport").invoke("notifyHandlers",
+                      Stmt.newObject(PropertyChangeEvent.class, Stmt.loadVariable("this"), 
+                          Stmt.loadVariable("property"), Stmt .loadVariable("oldValue"), 
+                          Stmt.loadVariable("value"))))
               .append(Stmt.returnVoid())
               .finish()
           );
@@ -415,7 +420,7 @@ public class BindableProxyGenerator {
             )
             .append(
                 Stmt.declareVariable("event", PropertyChangeEvent.class,
-                    Stmt.newObject(PropertyChangeEvent.class, property,
+                    Stmt.newObject(PropertyChangeEvent.class, Stmt.loadVariable("this"), property,
                         Stmt.loadVariable("oldValue"), Stmt.loadVariable(property))
                     )
                 )

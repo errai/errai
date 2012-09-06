@@ -435,13 +435,15 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
-
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
+    
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
     assertEquals("Should have received excatly two property change event", 2, handler.events.size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(1).getPropertyName());
     assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
     assertEquals("Wrong previous value in event", "UI change", handler.getEvents().get(1).getOldValue());
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
   }
 
   /**

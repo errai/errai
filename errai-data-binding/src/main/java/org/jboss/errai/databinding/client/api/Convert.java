@@ -122,7 +122,8 @@ public class Convert {
    */
   @SuppressWarnings({ "unchecked" })
   public static <M, W> W toWidgetValue(Widget widget, Class<M> modelValueType, M modelValue, Converter<M, W> converter) {
-    return (W) toWidgetValue(inferWidgetValueType(Assert.notNull(widget)),
+    return (W) toWidgetValue(
+        inferWidgetValueType(Assert.notNull(widget)),
         Assert.notNull(modelValueType),
         modelValue,
         converter);
@@ -184,7 +185,8 @@ public class Convert {
    */
   @SuppressWarnings({ "unchecked" })
   public static <M, W> M toModelValue(Class<M> modelValueType, Widget widget, W widgetValue, Converter<M, W> converter) {
-    return (M) toModelValue(Assert.notNull(modelValueType),
+    return (M) toModelValue(
+        Assert.notNull(modelValueType),
         inferWidgetValueType(Assert.notNull(widget)),
         widgetValue,
         converter);

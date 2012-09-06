@@ -31,8 +31,6 @@ public class MockHandler implements PropertyChangeHandler {
 
   @Override
   public void onPropertyChange(PropertyChangeEvent event) {
-    System.out.println("======= " + events.size());
-    new Exception().printStackTrace();
     events.add(event);
   }
 
