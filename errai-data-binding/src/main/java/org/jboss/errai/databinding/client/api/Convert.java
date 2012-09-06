@@ -153,10 +153,6 @@ public class Convert {
     Assert.notNull(widgetValueType);
     Assert.notNull(modelValueType);
 
-    if (modelValueType.equals(widgetValueType) && modelValue != null) {
-      return (W) modelValue;
-    }
-
     if (converter == null) {
       converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, widgetValueType));
     }
@@ -218,10 +214,6 @@ public class Convert {
 
     Assert.notNull(modelValueType);
     Assert.notNull(widgetValueType);
-
-    if (widgetValueType.equals(modelValueType) && widgetValue != null) {
-      return (M) widgetValue;
-    }
 
     if (converter == null) {
       converter = defaultConverters.get(new ConverterRegistrationKey(modelValueType, widgetValueType));

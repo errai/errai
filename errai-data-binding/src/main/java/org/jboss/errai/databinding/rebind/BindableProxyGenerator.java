@@ -204,7 +204,6 @@ public class BindableProxyGenerator {
 
   private void generateStateSyncMethods(ClassStructureBuilder<?> classBuilder) {
     generateStateSyncForBindings(classBuilder);
-
     classBuilder.privateMethod(void.class, "syncState", Parameter.of(Widget.class, "widget", true),
         Parameter.of(String.class, "property", true), Parameter.of(InitialState.class, "initialState", true))
         .append(
@@ -221,13 +220,16 @@ public class BindableProxyGenerator {
                                     Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                     Stmt.loadVariable("hasValue").invoke("getValue"))))
                         .append(
-                            Stmt.loadVariable("hasValue").invoke(
-                                "setValue",
-                                Stmt.invokeStatic(Convert.class, "toWidgetValue",
-                                    Variable.get("widget"),
-                                    Stmt.loadVariable("propertyTypes").invoke("get", Variable.get("property")),
-                                    Stmt.loadVariable("value"),
-                                    Stmt.loadVariable("converters").invoke("get", Variable.get("property")))))
+                            If.idEquals(Variable.get("initialState"), Stmt.loadStatic(InitialState.class, "FROM_MODEL"))
+                            .append(
+                                Stmt.loadVariable("hasValue").invoke(
+                                    "setValue",
+                                    Stmt.invokeStatic(Convert.class, "toWidgetValue",
+                                        Variable.get("widget"),
+                                        Stmt.loadVariable("propertyTypes").invoke("get", Variable.get("property")),
+                                        Stmt.loadVariable("value"),
+                                        Stmt.loadVariable("converters").invoke("get", Variable.get("property")))))
+                             .finish())
                         .finish()
                         .elseif_(
                             Bool.instanceOf(Variable.get("widget"), HasText.class))
@@ -240,17 +242,22 @@ public class BindableProxyGenerator {
                                     Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                     Stmt.loadVariable("hasText").invoke("getText"))))
                         .append(
-                            Stmt.loadVariable("hasText").invoke(
-                                "setText",
-                                Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "toWidgetValue",
-                                    String.class,
-                                    Stmt.loadVariable("propertyTypes").invoke("get", Variable.get("property")),
-                                    Stmt.loadVariable("value"),
-                                    Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
+                            If.idEquals(Variable.get("initialState"), Stmt.loadStatic(InitialState.class, "FROM_MODEL"))
+                            .append(
+                                Stmt.loadVariable("hasText").invoke(
+                                    "setText",
+                                    Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "toWidgetValue",
+                                        String.class,
+                                        Stmt.loadVariable("propertyTypes").invoke("get", Variable.get("property")),
+                                        Stmt.loadVariable("value"),
+                                        Stmt.loadVariable("converters").invoke("get", Variable.get("property"))))))
+                            .finish())
                         .finish()
                 )
-                .append(
-                    Stmt.loadVariable("this").invoke("set", Variable.get("property"), Variable.get("value")))
+                .append(If.idEquals(Variable.get("initialState"), Stmt.loadStatic(InitialState.class, "FROM_UI"))
+                    .append(
+                        Stmt.loadVariable("this").invoke("set", Variable.get("property"), Variable.get("value")))
+                    .finish())
                 .finish())
         .finish();
   }
