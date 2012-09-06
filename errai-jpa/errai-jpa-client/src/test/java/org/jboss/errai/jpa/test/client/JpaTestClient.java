@@ -15,11 +15,22 @@ public class JpaTestClient {
   @Inject EntityManager entityManager;
 
   public JpaTestClient() {
+    fallbackToSessionStorage();
     if (INSTANCE != null) {
       System.out.println("WARN: overwriting JpaTestClient singleton reference from " + INSTANCE + " to " + this);
     }
     INSTANCE = this;
   }
+
+  /**
+   * HTMLUnit supports sessionStorage but not localStorage. They have the same
+   * API, so we just alias localStorage to sessionStorage.
+   */
+  public static native void fallbackToSessionStorage() /*-{
+    if ($wnd.localStorage === undefined) {
+      $wnd.localStorage = $wnd.sessionStorage;
+    }
+  }-*/;
 
   @PostConstruct
   public void storeAlbums() {

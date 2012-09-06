@@ -29,22 +29,22 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   private native void putImpl(String key, String value) /*-{
-    $wnd.sessionStorage.setItem(key, value);
+    $wnd.localStorage.setItem(key, value);
   }-*/;
 
   private native String getImpl(String key) /*-{
-    return $wnd.sessionStorage.getItem(key);
+    return $wnd.localStorage.getItem(key);
   }-*/;
 
   private native String removeImpl(String key) /*-{
-    return $wnd.sessionStorage.removeItem(key);
+    return $wnd.localStorage.removeItem(key);
   }-*/;
 
   @Override
   public native void removeAll() /*-{
-    for (var i = $wnd.sessionStorage.length - 1; i >= 0; i--) {
-      var key = $wnd.sessionStorage.key(i);
-      $wnd.sessionStorage.removeItem(key);
+    for (var i = $wnd.localStorage.length - 1; i >= 0; i--) {
+      var key = $wnd.localStorage.key(i);
+      $wnd.localStorage.removeItem(key);
     }
   }-*/;
 
@@ -56,9 +56,9 @@ public class WebStorageBackend implements StorageBackend {
    *          The visitor that will act on each key/value pair.
    */
   private native void forEachKey(EntryVisitor entryVisitor) /*-{
-    for (var i = 0, n = $wnd.sessionStorage.length; i < n; i++) {
-      var key = $wnd.sessionStorage.key(i);
-      var value = $wnd.sessionStorage.getItem(key);
+    for (var i = 0, n = $wnd.localStorage.length; i < n; i++) {
+      var key = $wnd.localStorage.key(i);
+      var value = $wnd.localStorage.getItem(key);
       entryVisitor.@org.jboss.errai.jpa.client.local.backend.EntryVisitor::visit(Ljava/lang/String;Ljava/lang/String;)(key, value);
     }
   }-*/;
