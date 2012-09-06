@@ -71,7 +71,7 @@ public class ItemListPage extends Composite {
       it.remove();
     }
 
-    TypedQuery<Item> itemQuery = em.createNamedQuery("allItems", Item.class);
+    TypedQuery<Item> itemQuery = em.createNamedQuery("allItemsByName", Item.class);
     for (Item item : itemQuery.getResultList()) {
       ItemWidget itemWidget = bm.lookupBean(ItemWidget.class).newInstance();
       itemWidget.setItem(item);

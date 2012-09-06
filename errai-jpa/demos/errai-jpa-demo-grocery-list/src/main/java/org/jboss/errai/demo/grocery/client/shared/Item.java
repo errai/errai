@@ -16,7 +16,7 @@ import org.jboss.errai.demo.grocery.client.local.ItemListPage;
 @Bindable
 @Entity
 @EntityListeners(ItemListPage.ItemListener.class)
-@NamedQuery(name="allItems", query="SELECT i FROM Item i")
+@NamedQuery(name="allItemsByName", query="SELECT i FROM Item i ORDER BY i.name")
 public class Item {
 
   @Id @GeneratedValue
