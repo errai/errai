@@ -41,6 +41,12 @@ public class ItemListPage extends Composite {
   private void initInstance() {
     INSTANCE = this;
     refreshFromDb();
+    newItemForm.setAfterSaveAction(new Runnable() {
+      @Override
+      public void run() {
+        newItemForm.setItem(new Item());
+      }
+    });
   }
 
   @SuppressWarnings("unused")

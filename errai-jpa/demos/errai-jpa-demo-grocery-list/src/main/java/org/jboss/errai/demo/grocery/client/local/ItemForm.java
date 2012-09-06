@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.demo.grocery.client.shared.User;
@@ -65,6 +66,14 @@ public class ItemForm extends Composite {
     return itemBinder.getModel();
   }
 
+  public void setItem(Item item) {
+    if (item.getDepartment() == null) {
+      item.setDepartment(new Department());
+    }
+    department.setText(item.getDepartment().getName());
+    itemBinder.setModel(item, InitialState.FROM_MODEL);
+  }
+
   /**
    * Gives keyboard focus to the appropriate widget in this form.
    */
@@ -112,4 +121,5 @@ public class ItemForm extends Composite {
   public void setAfterSaveAction(Runnable afterSaveAction) {
     this.afterSaveAction = afterSaveAction;
   }
+
 }
