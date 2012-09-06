@@ -53,12 +53,12 @@ public class StoresPage extends Composite {
     refreshFromDb();
   }
 
+  @SuppressWarnings("unused")
   @PreDestroy
   private void deInitInstance() {
     INSTANCE = null;
   }
 
-  // in a word, this JPA listener stuff is "yuck."
   // TODO make a bridge from JPA lifecycle events to CDI events
   public static class StoreListener {
     @PostPersist @PostUpdate @PostRemove

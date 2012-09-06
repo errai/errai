@@ -15,6 +15,7 @@
 
 <!-- Les styles -->
 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="GroceryList.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 
 <!-- Les fav and touch icons -->
@@ -27,6 +28,7 @@
 <link rel="apple-touch-icon" sizes="114x114"
 	href="images/apple-touch-icon-114x114.png">
 -->
+  <script type="text/javascript" src="js/relative-time.js"></script>    
   <script type="text/javascript" src="GroceryList/GroceryList.nocache.js"></script>    
 </head>
 

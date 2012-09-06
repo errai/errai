@@ -3,19 +3,14 @@ package org.jboss.errai.demo.grocery.client.shared;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-
-import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
- * Department (section of a store) that an item can be found in.
+ * Represents a user of the grocery list application.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@Bindable
 @Entity
-@NamedQuery(name="departmentByName", query="SELECT d FROM Department d WHERE lower(name) = lower(:name) ORDER BY d.name")
-public class Department {
+public class User {
 
   @Id @GeneratedValue
   private long id;
@@ -30,16 +25,11 @@ public class Department {
     this.name = name;
   }
 
-  public long getId() {
-    return id;
-  }
-
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + (int) (id ^ (id >>> 32));
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
     return result;
   }
 
@@ -51,20 +41,14 @@ public class Department {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    Department other = (Department) obj;
+    User other = (User) obj;
     if (id != other.id)
-      return false;
-    if (name == null) {
-      if (other.name != null)
-        return false;
-    }
-    else if (!name.equals(other.name))
       return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "Department [id=" + id + ", name=" + name + "]";
+    return "User: id=" + id + ", name=" + name;
   }
 }

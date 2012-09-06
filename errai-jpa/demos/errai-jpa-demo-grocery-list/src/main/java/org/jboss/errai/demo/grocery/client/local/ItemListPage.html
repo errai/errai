@@ -1,22 +1,20 @@
 <!DOCTYPE html>
 
-<html>
-<head>
 <link href="../../../../../../../../webapp/bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="../../../../../../../../webapp/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-</head>
-<body>
 
-  <div data-field="main">
-
-    <div class=row>
-      <ul class="nav nav-list">
-        <li>Prototypical Item</li>
-        <li>Fake item 2</li>
-        <li>Fake item 3</li>
-      </ul>
-    </div>
+<div data-field="main" class=row>
+  <div class=span6>
+    <h3>Add an Item</h3>
+    <div data-field="newItemForm">New item form goes here</div>
   </div>
 
-</body>
-</html>
+  <div class=span6>
+    <h3>Existing Items</h3>
+    <div data-field="listContainer" style="width: 100%">
+      <div>Prototypical Item</div>
+      <div>Fake item 2</div>
+      <div>Fake item 3</div>
+    </div>
+  </div>
+</div>

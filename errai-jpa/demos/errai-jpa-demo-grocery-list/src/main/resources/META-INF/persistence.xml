@@ -9,5 +9,6 @@
     <class>org.jboss.errai.demo.grocery.client.shared.Department</class>
     <class>org.jboss.errai.demo.grocery.client.shared.Item</class>
     <class>org.jboss.errai.demo.grocery.client.shared.Store</class>
+    <class>org.jboss.errai.demo.grocery.client.shared.User</class>
   </persistence-unit>
 </persistence>
