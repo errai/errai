@@ -157,16 +157,28 @@ public class ErraiEntityManagerGenerator extends Generator {
 
     // now generate all the query factories
     for (NamedQuery namedQuery : namedQueries) {
-      pnqm._(Stmt.codeComment("**"));
-      pnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
-      pnqm._(Stmt.codeComment("** " + namedQuery.query()));
-      pnqm._(Stmt.codeComment("**"));
-      TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, namedQuery);
-      Statement generatedFactory = generator.generate(Stmt.loadVariable("this"), classBuilder.getClassDefinition().getContext());
-      pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
-              .invoke("put",
-                      Stmt.loadLiteral(namedQuery.name()),
-                      generatedFactory));
+      try {
+        pnqm._(Stmt.codeComment("**"));
+        pnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
+        pnqm._(Stmt.codeComment("** " + namedQuery.query()));
+        pnqm._(Stmt.codeComment("**"));
+        TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, namedQuery);
+        Statement generatedFactory = generator.generate(Stmt.loadVariable("this"), classBuilder.getClassDefinition().getContext());
+        pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
+                .invoke("put",
+                        Stmt.loadLiteral(namedQuery.name()),
+                        generatedFactory));
+      }
+      catch (Exception ex) {
+        // catch-and-rethrow to attach information about the query that failed
+        GenerationException wrapperException =
+            new GenerationException("Unable to translate JPQL named query.\n" +
+                "Name: " + namedQuery.name() + "\n" +
+                "Query: " + namedQuery.query(),
+                ex);
+        logger.log(com.google.gwt.core.ext.TreeLogger.Type.ERROR, "Translation Failed", ex);
+        throw wrapperException;
+      }
     }
     pnqm.finish();
 
