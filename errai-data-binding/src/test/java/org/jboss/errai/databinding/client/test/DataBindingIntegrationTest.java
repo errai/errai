@@ -84,7 +84,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testHasTextBinding() {
+  public void testBindingOfHasText() {
     Label label = new Label();
     Model model = DataBinder.forType(Model.class).bind(label, "id").getModel();
 
@@ -93,7 +93,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testIntegerToStringBinding() {
+  public void testBindingOfIntegerToString() {
     TextBox textBox = new TextBox();
     Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
 
@@ -147,7 +147,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testMultipleDataBindings() {
+  public void testMultipleBindings() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox valueTextBox = new TextBox();
     binder.bind(valueTextBox, "value");
@@ -241,7 +241,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testCustomConverter() {
+  public void testBindingSpecificConverter() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
@@ -262,6 +262,51 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
+  }
+  
+  @Test
+  public void testBindingSpecificConverterWithNullValues() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return (widgetValue==null) ? -1 : 0;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return (modelValue==null) ? "null-widget" : modelValue.toString();
+      }
+    };
+
+    TextBox textBox = new TextBox();
+    Model model = DataBinder.forType(Model.class).bind(textBox, "age", converter).getModel();
+
+    textBox.setValue(null, true);
+    assertEquals("Model not properly updated using custom converter", Integer.valueOf(-1), model.getAge());
+
+    model.setAge(null);
+    assertEquals("Widget not properly updated using custom converter", "null-widget", textBox.getText());
+  }
+
+  @Test
+  public void testBindingSpecificConverterForReadOnlyField() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        throw new UnsupportedOperationException("Should never be called!");
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "test";
+      }
+    };
+
+    Label label = new Label();
+    Model model = DataBinder.forModel(new Model(), InitialState.FROM_MODEL).bind(label, "age", converter).getModel();
+
+    model.setAge(123);
+    assertEquals("Widget not properly updated using custom converter", "test", label.getText());
   }
 
   @Test
@@ -288,6 +333,32 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using global default converter",
         "testGlobalDefaultConverter", textBox.getText());
+  }
+  
+  @Test
+  public void testGlobalDefaultConverterWithNullValues() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return (widgetValue==null) ? -1 : 0;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return (modelValue==null) ? "null-widget" : modelValue.toString();
+      }
+    };
+
+    Convert.registerDefaultConverter(Integer.class, String.class, converter);
+
+    TextBox textBox = new TextBox();
+    Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
+
+    textBox.setValue(null, true);
+    assertEquals("Model not properly updated using global default converter", Integer.valueOf(-1), model.getAge());
+
+    model.setAge(null);
+    assertEquals("Widget not properly updated using global default converter", "null-widget", textBox.getText());
   }
 
   @Test
@@ -357,20 +428,22 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "value");
     binder.addPropertyChangeHandler(handler);
-
+    
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
     assertEquals("Should have received excatly one property change event", 1, handler.events.size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
-
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
+    
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
     assertEquals("Should have received excatly two property change event", 2, handler.events.size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(1).getPropertyName());
     assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
     assertEquals("Wrong previous value in event", "UI change", handler.getEvents().get(1).getOldValue());
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
   }
 
   /**

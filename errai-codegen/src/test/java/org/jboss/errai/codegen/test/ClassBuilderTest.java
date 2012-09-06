@@ -25,11 +25,9 @@ import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Variable;
-import org.jboss.errai.codegen.builder.ClassDefinitionBuilderScope;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.UndefinedMethodException;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.test.model.Baz;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Test;
@@ -86,7 +84,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
             .publicScope()
             .body()
             .publicMethod(void.class, "someMethod")
-            .append(new InnerClass((BuildMetaClass) innerClass.getClassDefinition()))
+            .append(new InnerClass(innerClass.getClassDefinition()))
             .append(Stmt.newObject(innerClass.getClassDefinition()))
             .finish()
             .toJavaString();

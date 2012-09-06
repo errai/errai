@@ -19,13 +19,16 @@ package org.jboss.errai.databinding.client.api;
  * Dispatched when a bound property has changed.
  *
  * @author David Cracauer <dcracauer@gmail.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PropertyChangeEvent<T> {
+  private final Object source;
   private final String propertyName;
   private final T oldValue;
   private final T newValue;
 
-  public PropertyChangeEvent(String propertyName, T oldValue, T newValue) {
+  public PropertyChangeEvent(Object source, String propertyName, T oldValue, T newValue) {
+    this.source = source;
     this.propertyName = propertyName;
     this.oldValue = oldValue;
     this.newValue = newValue;
@@ -58,4 +61,12 @@ public class PropertyChangeEvent<T> {
     return propertyName;
   }
 
+  /**
+   * Gets the object on which the Event initially occurred.
+   * 
+   * @return the source object.
+   */
+  public Object getSource() {
+    return source;
+  }
 }
