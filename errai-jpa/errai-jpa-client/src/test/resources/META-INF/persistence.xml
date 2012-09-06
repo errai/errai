@@ -17,5 +17,8 @@
     <class>org.jboss.errai.jpa.test.entity.EntityWithBoxedIntId</class>
     <class>org.jboss.errai.jpa.test.entity.EntityWithBigIntegerId</class>
 
+    <class>org.jboss.errai.jpa.test.entity.CascadeFrom</class>
+    <class>org.jboss.errai.jpa.test.entity.CascadeTo</class>
+
   </persistence-unit>
 </persistence>

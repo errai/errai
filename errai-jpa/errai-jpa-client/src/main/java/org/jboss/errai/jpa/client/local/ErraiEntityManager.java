@@ -336,13 +336,13 @@ public abstract class ErraiEntityManager implements EntityManager {
     CascadeType cascadeType;
     switch (newState) {
     case DETACHED: cascadeType = CascadeType.DETACH; break;
-    case MANAGED: cascadeType = CascadeType.MERGE; break;
+    case MANAGED: cascadeType = CascadeType.PERSIST; break; // XXX could be a MERGE once that's implemented
     case REMOVED: cascadeType = CascadeType.REMOVE; break;
     case NEW: throw new IllegalArgumentException();
     default: throw new AssertionError("Unknown entity state " + newState);
     }
     R relatedEntity = cascadeAcross.get(owningEntity);
-    System.out.println("*** Cascade across " + cascadeAcross + " to " + relatedEntity + "?");
+    System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + relatedEntity + "?");
     if (cascadeAcross.cascades(cascadeType)) {
       System.out.println("    Yes");
       if (cascadeAcross.isCollection()) {
@@ -356,6 +356,12 @@ public abstract class ErraiEntityManager implements EntityManager {
     }
     else {
       System.out.println("    No");
+      if (relatedEntity != null && cascadeType == CascadeType.PERSIST && !contains(relatedEntity)) {
+        throw new IllegalStateException(
+                "Entity " + owningEntity + " references an unsaved entity via relationship attribute [" +
+                cascadeAcross.getName() + "]. Save related attribute before flushing or change" +
+                " cascade rule to include PERSIST.");
+      }
     }
   }
 
@@ -596,7 +602,7 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public boolean contains(Object entity) {
-    throw new UnsupportedOperationException("Not implemented");
+    return persistenceContext.containsValue(entity);
   }
 
   @Override

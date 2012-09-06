@@ -29,9 +29,11 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   ErraiJpaTest.class,
   HibernateJpaTest.class,
+  QueryTest.class,
   HibernateQueryTest.class,
   IdGeneratorTest.class,
-  QueryTest.class})
+  ErraiCascadeTest.class,
+  HibernateCascadeTest.class})
 public class AllJpaTests {
 
 }
