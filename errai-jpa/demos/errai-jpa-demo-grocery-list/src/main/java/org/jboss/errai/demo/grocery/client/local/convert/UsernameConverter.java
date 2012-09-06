@@ -12,7 +12,7 @@ public class UsernameConverter implements Converter<User, String>{
 
   @Override
   public String toWidgetValue(User modelValue) {
-    return modelValue.getName();
+    return modelValue == null ? "" : modelValue.getName();
   }
 
 }

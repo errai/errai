@@ -87,8 +87,9 @@ public class ItemWidget extends Composite {
    *         then this UI widget will not update.
    */
   public Item setItem(Item item) {
+    System.out.println("ItemWidget: adopting model object " + System.identityHashCode(item));
     if (item.getDepartment() == null) {
-      throw new NullPointerException("given item has null department; this is not allowed");
+      item.setDepartment(new Department());
     }
     deptBinder.setModel(item.getDepartment(), InitialState.FROM_MODEL);
     return itemBinder.setModel(item, InitialState.FROM_MODEL);

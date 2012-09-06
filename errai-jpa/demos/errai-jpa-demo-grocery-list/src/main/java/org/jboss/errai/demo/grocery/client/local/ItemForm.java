@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Department;
@@ -104,13 +105,14 @@ public class ItemForm extends Composite {
 
     itemBinder.getModel().setAddedOn(new Date());
 
-    em.persist(itemBinder.getModel());
+    // Because we are reusing the itemBinder instance for multiple models, we have to give
+    // JPA the raw Item object, not the proxy which could later wrap a different object
+    em.persist(((WrappedPortable) itemBinder.getModel()).unwrap());
     em.flush();
 
     if (afterSaveAction != null) {
       afterSaveAction.run();
     }
-    System.out.println("Click handler finished for " + itemBinder.getModel());
   }
 
   @PreDestroy
