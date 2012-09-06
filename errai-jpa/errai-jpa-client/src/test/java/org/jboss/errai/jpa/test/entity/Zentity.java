@@ -99,6 +99,9 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 
   @NamedQuery(name="zentityLowercaseFunction", query="SELECT z FROM Zentity z WHERE 'foo' = lower(z.string)"),
   @NamedQuery(name="zentityUppercaseFunction", query="SELECT z FROM Zentity z WHERE upper(z.string) = 'FOO'"),
+
+  // regression test: hibernate's parser does not guess at the expected type of :str in this case (was causing NPE)
+  @NamedQuery(name="zentityParamNestedInFunction", query="SELECT z FROM Zentity z WHERE lower(:str) = z.string"),
 })
 public class Zentity {
 

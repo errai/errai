@@ -144,10 +144,18 @@ public class TypedQueryFactoryGenerator {
 
       // invoking ErraiParameter(String name, Integer position, Class<T> type)
 
+      Class<?> paramType;
+      if (ps.getExpectedType() != null) {
+        paramType = ps.getExpectedType().getReturnedClass();
+      }
+      else {
+        paramType = Object.class;
+      }
+
       generatedParamList[i] = Stmt.newObject(ErraiParameter.class).withParameters(
               ps.getName(),
               Integer.valueOf(i),
-              ps.getExpectedType().getReturnedClass());
+              paramType);
     }
     return generatedParamList;
   }
