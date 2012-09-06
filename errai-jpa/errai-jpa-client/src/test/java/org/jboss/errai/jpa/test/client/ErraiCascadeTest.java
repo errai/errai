@@ -45,6 +45,48 @@ public class ErraiCascadeTest extends GWTTestCase {
   }
 
   /**
+   * Creates a CascadeFrom object, fills in all its related CascadeTo
+   * attributes, persists everything, and flushes the entity manager. Useful as
+   * a first step in most tests of cascade behaviour.
+   *
+   * @param em
+   *          The entity manager to persist with
+   * @return a newly-created CascadeFrom, persistent and managed by em, with all
+   *         related CascadeTo attributes likewise persisted and managed by em.
+   */
+  private static CascadeFrom createFullyPersistedObject(EntityManager em) {
+    CascadeFrom from = new CascadeFrom();
+    from.setAll(new CascadeTo());
+    from.setDetach(new CascadeTo());
+    from.setMerge(new CascadeTo());
+    from.setNone(new CascadeTo());
+    from.setPersist(new CascadeTo());
+    from.setRefresh(new CascadeTo());
+    from.setRemove(new CascadeTo());
+
+    em.persist(from.getAll());
+    em.persist(from.getDetach());
+    em.persist(from.getMerge());
+    em.persist(from.getNone());
+    em.persist(from.getPersist());
+    em.persist(from.getRefresh());
+    em.persist(from.getRemove());
+    em.persist(from);
+
+    em.flush();
+    assertTrue(em.contains(from));
+    assertTrue(em.contains(from.getAll()));
+    assertTrue(em.contains(from.getDetach()));
+    assertTrue(em.contains(from.getMerge()));
+    assertTrue(em.contains(from.getNone()));
+    assertTrue(em.contains(from.getPersist()));
+    assertTrue(em.contains(from.getRefresh()));
+    assertTrue(em.contains(from.getRemove()));
+
+    return from;
+  }
+
+  /**
    * Tests that the entity manager was injected into the testing class. If this
    * test fails, the likely cause is that the
    * {@link ErraiEntityManagerGenerator} failed to output a compilable class. In
@@ -88,6 +130,40 @@ public class ErraiCascadeTest extends GWTTestCase {
       assertTrue("Exception message doesn't mention bad relationship: " + ex.getMessage(),
               ex.getMessage().contains("none"));
     }
+  }
+
+  public void testCascadeRemove() throws Exception {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    CascadeFrom from = createFullyPersistedObject(em);
+
+    em.remove(from);
+
+    assertFalse(em.contains(from));
+    assertFalse(em.contains(from.getAll()));
+    assertTrue(em.contains(from.getDetach()));
+    assertTrue(em.contains(from.getMerge()));
+    assertTrue(em.contains(from.getNone()));
+    assertTrue(em.contains(from.getPersist()));
+    assertTrue(em.contains(from.getRefresh()));
+    assertFalse(em.contains(from.getRemove()));
+  }
+
+  public void testCascadeDetach() throws Exception {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    CascadeFrom from = createFullyPersistedObject(em);
+
+    em.detach(from);
+
+    assertFalse(em.contains(from));
+    assertFalse(em.contains(from.getAll()));
+    assertFalse(em.contains(from.getDetach()));
+    assertTrue(em.contains(from.getMerge()));
+    assertTrue(em.contains(from.getNone()));
+    assertTrue(em.contains(from.getPersist()));
+    assertTrue(em.contains(from.getRefresh()));
+    assertTrue(em.contains(from.getRemove()));
   }
 
 }
