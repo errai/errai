@@ -10,7 +10,7 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 /**
  * Defines an injector which is responsible for providing instance references of beans to the code generating
- * container..
+ * container.
  *
  * @author Mike Brock
  */
@@ -182,11 +182,32 @@ public interface Injector {
    */
   void addRegistrationHook(RegistrationHook registrationHook);
 
+  /**
+   * Adds a {@link RenderingHook} which will be triggered when the injector is rendered.
+   *
+   * @param renderingHook an instance of {@link RenderingHook} to be called when the injector is rendered.
+   */
   void addRenderingHook(RenderingHook renderingHook);
 
+  /**
+   * Add a {@link Runnable} task to be executed when and if the injector is disabled.
+   *
+   * @param runnable an instance of {@link Runnable} to be called if the injector is disabled.
+   */
+  void addDisablingHook(Runnable runnable);
+
+  /**
+   * Get the name of the bean (if it has a name). Otherwise return null.
+   *
+   * @return the name of the bean. or null if it has no name.
+   */
   String getBeanName();
 
+  /**
+   * Set the enabled state of the bean. A bean that has been disabled (set to <tt>false</tt>), is not eligible for
+   * injection.
+   *
+   * @param enabled the enabled state of the bean to set (<tt>true</tt> for enabled, <tt>false</tt> for disabled).
+   */
   void setEnabled(boolean enabled);
-
-  void addDisablingCallback(Runnable runnable);
 }

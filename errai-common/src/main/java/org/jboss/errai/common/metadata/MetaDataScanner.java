@@ -80,7 +80,6 @@ public class MetaDataScanner extends Reflections {
 
   MetaDataScanner(List<URL> urls) {
     super(getConfiguration(urls));
-    scan();
   }
 
   private static final Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =

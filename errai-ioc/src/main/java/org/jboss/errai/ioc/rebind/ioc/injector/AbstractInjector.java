@@ -235,7 +235,7 @@ public abstract class AbstractInjector implements Injector {
 
       context.getProcessingContext().appendToEnd(statement);
 
-      addDisablingCallback(new Runnable() {
+      addDisablingHook(new Runnable() {
         @Override
         public void run() {
           context.getProcessingContext().getAppendToEnd().remove(statement);
@@ -295,7 +295,7 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public void addDisablingCallback(final Runnable runnable) {
+  public void addDisablingHook(final Runnable runnable) {
     disablingCallback.add(runnable);
   }
 

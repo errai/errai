@@ -177,7 +177,7 @@ public class Reflections extends ReflectionUtils {
     //
     protected void scan() {
         if (configuration.getUrls() == null || configuration.getUrls().isEmpty()) {
-            log.error("given scan urls are empty. set urls in the configuration");
+         //  log.error("given scan urls are empty. set urls in the configuration");
             return;
         } else {
             if (log.isDebugEnabled()) {

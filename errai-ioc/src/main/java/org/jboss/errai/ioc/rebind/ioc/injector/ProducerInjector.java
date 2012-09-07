@@ -107,7 +107,7 @@ public class ProducerInjector extends AbstractInjector {
         new InjectorRegistrationListener() {
           @Override
           public void onRegister(final MetaClass type, final Injector injector) {
-            injector.addDisablingCallback(new Runnable() {
+            injector.addDisablingHook(new Runnable() {
               @Override
               public void run() {
                 setEnabled(false);

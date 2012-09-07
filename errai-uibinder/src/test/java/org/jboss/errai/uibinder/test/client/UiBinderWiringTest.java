@@ -34,7 +34,7 @@ public class UiBinderWiringTest extends AbstractErraiIOCTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        HelloWorld helloWorld = IOC.getBeanManager().lookupBean(HelloWorld.class).getInstance();
+        final HelloWorld helloWorld = IOC.getBeanManager().lookupBean(HelloWorld.class).getInstance();
 
         assertNotNull("binder null!", helloWorld.getBinder());
         assertNotNull("ui element null", helloWorld.getNameSpan());

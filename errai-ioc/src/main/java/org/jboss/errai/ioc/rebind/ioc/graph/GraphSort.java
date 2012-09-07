@@ -53,50 +53,6 @@ public final class GraphSort {
     return sortUnitList;
   }
 
-  public static Set<List<SortUnit>> sortAndPartitionGraph(final Collection<SortUnit> in) {
-    final Map<MetaClass, Set<SortUnit>> builderMap = new LinkedHashMap<MetaClass, Set<SortUnit>>();
-
-    for (final SortUnit unit : sortGraph(in)) {
-      final Set<SortUnit> traversal = new HashSet<SortUnit>();
-      _traverseGraphExtent(traversal, unit);
-
-      final Set<SortUnit> partition = new HashSet<SortUnit>(traversal);
-      for (final SortUnit tUnit : traversal) {
-        final Set<SortUnit> c = builderMap.get(tUnit.getType());
-        if (c != null) {
-          partition.addAll(c);
-        }
-      }
-
-      for (final SortUnit partitionedUnit : partition) {
-        builderMap.put(partitionedUnit.getType(), partition);
-      }
-    }
-
-    final Set<List<SortUnit>> consolidated = new LinkedHashSet<List<SortUnit>>();
-    final Map<Set<SortUnit>, List<SortUnit>> sortingCache = new IdentityHashMap<Set<SortUnit>, List<SortUnit>>();
-
-    for (final Map.Entry<MetaClass, Set<SortUnit>> metaClassSetEntry : builderMap.entrySet()) {
-      if (!sortingCache.containsKey(metaClassSetEntry.getValue())) {
-        sortingCache.put(metaClassSetEntry.getValue(), sortGraph(metaClassSetEntry.getValue()));
-      }
-
-      consolidated.add(sortingCache.get(metaClassSetEntry.getValue()));
-    }
-
-    return consolidated;
-  }
-
-  private static void _traverseGraphExtent(final Set<SortUnit> partition,
-                                           final SortUnit toVisit) {
-    if (partition.contains(toVisit)) return;
-    partition.add(toVisit);
-
-    for (final SortUnit dep : toVisit.getDependencies()) {
-      _traverseGraphExtent(partition, dep);
-    }
-  }
-
   private static List<SortUnit> topologicalSort(final List<SortUnit> toSort) {
     final Set<String> visited = new HashSet<String>();
     final List<SortUnit> sorted = new ArrayList<SortUnit>();

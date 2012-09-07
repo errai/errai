@@ -29,15 +29,16 @@ import com.google.gwt.user.client.ui.Widget;
  * Provides the API to programmatically bind properties of a data model instance (any POJO annotated with
  * {@link Bindable}) to UI fields/widgets. The properties of the model and the UI components will automatically be kept
  * in sync for as long as they are bound.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DataBinder<T> implements HasPropertyChangeHandlers {
+
   private T model;
 
   /**
    * Creates a {@link DataBinder} for a newly created model instance of the provided type (see {@link #forType(Class)}).
-   *
+   * 
    * @param modelType
    *          The bindable type, must not be null.
    */
@@ -46,8 +47,23 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
+   * Creates a {@link DataBinder} for a newly created model instance of the provided type (see {@link #forType(Class)}),
+   * initializing either model or UI widgets from the values defined by {@link InitialState} (see
+   * {@link #forModel(Object, InitialState)}).
+   * 
+   * @param modelType
+   *          The bindable type, must not be null.
+   * @param initialState
+   *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
+   *          synchronization should be carried out.
+   */
+  private DataBinder(Class<T> modelType, InitialState initialState) {
+    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), initialState);
+  }
+
+  /**
    * Creates a {@link DataBinder} for the provided model instance (see {@link #forModel(Object)}).
-   *
+   * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    */
@@ -58,30 +74,44 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Creates a {@link DataBinder} for the provided model instance, initializing either model or UI widgets from the
    * values defined by {@link InitialState} (see {@link #forModel(Object, InitialState)}).
-   *
+   * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
-   * @param intialState
+   * @param initialState
    *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
    *          synchronization should be carried out.
    */
-  private DataBinder(T model, InitialState intialState) {
-    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
+  private DataBinder(T model, InitialState initialState) {
+    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), initialState);
   }
 
   /**
    * Creates a {@link DataBinder} for a newly created model instance of the provided type.
-   *
+   * 
    * @param modelType
    *          The bindable type, must not be null.
    */
   public static <T> DataBinder<T> forType(Class<T> modelType) {
-    return new DataBinder<T>(modelType);
+    return new DataBinder<T>(modelType, null);
+  }
+
+  /**
+   * Creates a {@link DataBinder} for a newly created model instance of the provided type, initializing either model or
+   * UI widgets from the values defined by {@link InitialState}.
+   * 
+   * @param modelType
+   *          The bindable type, must not be null.
+   * @param intialState
+   *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
+   *          synchronization should be carried out.
+   */
+  public static <T> DataBinder<T> forType(Class<T> modelType, InitialState initialState) {
+    return new DataBinder<T>(modelType, initialState);
   }
 
   /**
    * Creates a {@link DataBinder} for the provided model instance.
-   *
+   * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    */
@@ -92,22 +122,22 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Creates a {@link DataBinder} for the provided model instance, initializing either model or UI widgets from the
    * values defined by {@link InitialState}.
-   *
+   * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param intialState
    *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
    *          synchronization should be carried out.
    */
-  public static <T> DataBinder<T> forModel(T model, InitialState intialState) {
-    return new DataBinder<T>(model, intialState);
+  public static <T> DataBinder<T> forModel(T model, InitialState initialState) {
+    return new DataBinder<T>(model, initialState);
   }
 
   /**
    * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
    * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   *
+   * 
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -126,7 +156,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
    * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   *
+   * 
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -151,10 +181,10 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Unbinds the widget from the specified model property, bound by a previous call to
    * {@link #bind(HasValue, Object, String)}.
-   *
+   * 
    * @param property
    *          The name of the property to unbind, must not be null.
-   *
+   * 
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   @SuppressWarnings("unchecked")
@@ -165,7 +195,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Unbinds the widget and model bound by previous calls to {@link #bind(HasValue, Object, String)}.
-   *
+   * 
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   @SuppressWarnings("unchecked")
@@ -176,7 +206,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Returns the model instance associated with this {@link DataBinder}.
-   *
+   * 
    * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
    *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI.
    */
@@ -187,7 +217,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Changes the underlying model instance. The existing bindings stay intact but only affect the new model instance.
    * The previously associated model instance will no longer be kept in sync with the UI.
-   *
+   * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @return The model instance which has to be used in place of the provided model (see {@link #forModel(Object)} and
@@ -201,7 +231,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Changes the underlying model instance. The existing bindings stay intact but only affect the new model instance.
    * The previously associated model instance will no longer be kept in sync with the UI.
-   *
+   * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
    * @param initialState
@@ -215,18 +245,30 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   public T setModel(T model, InitialState initialState) {
     Assert.notNull(model);
 
-    // Ensure that we do not proxy the model twice
+    // ensure that we do not proxy the model twice
     if (model instanceof BindableProxy) {
-      model = (T) ((BindableProxy<?>) model).unwrap();
+      model = (T) ((BindableProxy<T>) model).unwrap();
     }
 
-    ((BindableProxy<T>) this.model).setModel(model, initialState);
+    // create a new proxy and copy the bindings
+    BindableProxy<T> newProxy =
+        (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model, initialState);
+
+    BindableProxy<T> proxy = ((BindableProxy<T>) this.model);
+    for (String boundProperty : proxy.getBoundProperties()) {
+      newProxy.bind(proxy.getWidget(boundProperty), boundProperty, proxy.getConverter(boundProperty));
+    }
+
+    // unbind the old proxied model
+    proxy.unbind();
+
+    this.model = (T) newProxy;
     return this.model;
   }
 
   /**
    * Returns the widget currently bound to the provided model property (see {@link #bind(Widget, String)}).
-   *
+   * 
    * @param property
    *          The name of the model property, must not be null.
    * @return The widget currently bound to the provided property or null if no widget was bound.
