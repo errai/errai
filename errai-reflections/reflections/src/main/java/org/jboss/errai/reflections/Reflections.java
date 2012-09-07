@@ -87,7 +87,6 @@ public class Reflections extends ReflectionUtils {
       scanner.setConfiguration(configuration);
       scanner.setStore(store.get(scanner));
     }
-
   }
 
   /**
@@ -517,8 +516,6 @@ public class Reflections extends ReflectionUtils {
   public Store getStore() {
     return store;
   }
-
-  //
 
   /**
    * serialize to a given directory and filename

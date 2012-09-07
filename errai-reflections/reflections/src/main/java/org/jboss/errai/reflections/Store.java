@@ -10,6 +10,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -121,7 +122,12 @@ public class Store {
     final ConcurrentMap<String, Multimap<String, String>> storeMap = loadingCache.asMap();
     final ConcurrentMap<String, Multimap<String, String>> outerStoreMap = outer.loadingCache.asMap();
     for (final String indexName : outerStoreMap.keySet()) {
-      storeMap.get(indexName).putAll(outer.get(indexName));
+      Multimap<String, String> stringStringMultimap = storeMap.get(indexName);
+      if (stringStringMultimap == null) {
+        storeMap.put(indexName, stringStringMultimap = HashMultimap.create());
+      }
+
+      stringStringMultimap.putAll(outer.get(indexName));
     }
   }
 
