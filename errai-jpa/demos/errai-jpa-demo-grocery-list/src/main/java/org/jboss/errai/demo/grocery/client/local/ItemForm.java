@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Department;
@@ -101,13 +100,11 @@ public class ItemForm extends Composite {
     // TODO inject an application-scoped currentUser
     User fakeUser = new User();
     fakeUser.setName("me");
-    itemBinder.getModel().setAddedBy(fakeUser);
 
+    itemBinder.getModel().setAddedBy(fakeUser);
     itemBinder.getModel().setAddedOn(new Date());
 
-    // Because we are reusing the itemBinder instance for multiple models, we have to give
-    // JPA the raw Item object, not the proxy which could later wrap a different object
-    em.persist(((WrappedPortable) itemBinder.getModel()).unwrap());
+    em.persist(itemBinder.getModel());
     em.flush();
 
     if (afterSaveAction != null) {
