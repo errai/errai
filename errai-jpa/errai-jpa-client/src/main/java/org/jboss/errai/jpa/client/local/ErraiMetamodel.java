@@ -75,6 +75,26 @@ public class ErraiMetamodel implements Metamodel {
   }
 
   /**
+   * Works like {@link #entity(String)} but
+   *
+   * @param className
+   *          The fully-qualified class name of the entity type to retrieve (as
+   *          returned by {@code Class.getName()}). Null not permitted.
+   * @param failIfNotFound
+   *          does not throw an exception if the entity type does not exist.
+   * @return the ErraiEntityType associated with the named class, or null if
+   *         {@code failIfNotFound} is true and no such entity exists.
+   */
+  @SuppressWarnings("unchecked")
+  <X> ErraiEntityType<X> entity(String className, boolean failIfNotFound) {
+    ErraiEntityType<X> et = (ErraiEntityType<X>) entityTypes.get(className);
+    if (failIfNotFound && et == null) {
+      throw new IllegalArgumentException(className + " is not a known entity type");
+    }
+    return et;
+  }
+
+  /**
    * Retrieves an ErraiEntityType by name rather than class reference.
    *
    * @param className
@@ -84,13 +104,8 @@ public class ErraiMetamodel implements Metamodel {
    * @throws IllegalArgumentException
    *           if the given class name is not an known entity type.
    */
-  @SuppressWarnings("unchecked")
   public <X> ErraiEntityType<X> entity(String className) {
-    ErraiEntityType<X> et = (ErraiEntityType<X>) entityTypes.get(className);
-    if (et == null) {
-      throw new IllegalArgumentException(className + " is not a known entity type");
-    }
-    return et;
+    return entity(className, true);
   }
 
   @Override

@@ -117,7 +117,7 @@ public class Key<X, T> {
             + "\",\"id\":" + JsonUtil.basicValueToJson(id) + "}");
   }
 
-  public static Key<?, ?> fromJson(ErraiEntityManager em, String key) {
+  public static Key<?, ?> fromJson(ErraiEntityManager em, String key, boolean failIfNotFound) {
     JSONValue k;
     try {
       k = JSONParser.parseStrict(key);
@@ -127,7 +127,10 @@ public class Key<X, T> {
     }
 
     String entityClassName = k.isObject().get("entityType").isString().stringValue();
-    ErraiEntityType<Object> et = em.getMetamodel().entity(entityClassName);
+    ErraiEntityType<Object> et = em.getMetamodel().entity(entityClassName, failIfNotFound);
+    if (et == null) {
+      return null;
+    }
     ErraiSingularAttribute<?, Object> idAttr = et.getId(Object.class);
     Object id = JsonUtil.basicValueFromJson(k.isObject().get("id"), idAttr.getJavaType());
 

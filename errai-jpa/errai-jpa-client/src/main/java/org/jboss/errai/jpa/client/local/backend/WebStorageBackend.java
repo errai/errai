@@ -97,7 +97,8 @@ public class WebStorageBackend implements StorageBackend {
     forEachKey(new EntryVisitor() {
       @Override
       public void visit(String key, String value) {
-        Key<?, ?> k = Key.fromJson(em, key);
+        Key<?, ?> k = Key.fromJson(em, key, false);
+        if (k == null) return;
         System.out.println("getAll(): considering " + value);
         if (k.getEntityType() == type) {
           System.out.println(" --> correct type");
