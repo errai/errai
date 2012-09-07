@@ -148,6 +148,14 @@ public class RebindUtils {
     return fileCacheDir;
   }
 
+  public static File getCacheFile(final String name) {
+    return new File(getErraiCacheDir(), name);
+  }
+
+  public static boolean cacheFileExists(final String name) {
+    return getCacheFile(name).exists();
+  }
+
   private static boolean nocache = Boolean.getBoolean("errai.devel.nocache");
   private static Boolean _hasClasspathChanged;
 
@@ -162,11 +170,9 @@ public class RebindUtils {
     }
     else {
       final String fileHashValue = readFileToString(hashFile);
-      if (fileHashValue.equals(hashValue)) {
-        return _hasClasspathChanged = true;
-      }
-      else {
+      if (!fileHashValue.equals(hashValue)) {
         writeStringToFile(hashFile, hashValue);
+        return _hasClasspathChanged = true;
       }
     }
 

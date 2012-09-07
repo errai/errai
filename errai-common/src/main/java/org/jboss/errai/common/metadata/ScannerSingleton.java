@@ -28,12 +28,16 @@ public class ScannerSingleton {
   private static volatile MetaDataScanner scanner;
 
   private static final FutureTask<MetaDataScanner> future = new FutureTask<MetaDataScanner>(
-          new Callable<MetaDataScanner>() {
-            @Override
-            public MetaDataScanner call() throws Exception {
-              return MetaDataScanner.createInstance();
-            }
+      new Callable<MetaDataScanner>() {
+        @Override
+        public MetaDataScanner call() throws Exception {
+          if (!RebindUtils.hasClasspathChanged() && RebindUtils.cacheFileExists("reflections.cache")) {
+              return MetaDataScanner.createInstanceFromCache();
           }
+
+          return MetaDataScanner.createInstance();
+        }
+      }
   );
 
   static {
@@ -48,6 +52,10 @@ public class ScannerSingleton {
       if (scanner == null) {
         try {
           scanner = future.get();
+
+          if (scanner != null) {
+            scanner.save(RebindUtils.getErraiCacheDir() + "/reflections.cache");
+          }
         }
         catch (Throwable t) {
           t.printStackTrace();
