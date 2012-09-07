@@ -16,6 +16,8 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.Set;
+
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.Converter;
@@ -41,7 +43,8 @@ public interface BindableProxy<T> extends WrappedPortable {
    * @param converter
    *          the converter to use for this binding, null if default conversion should be used.
    */
-  public void bind(Widget widget, String property, @SuppressWarnings("rawtypes") Converter converter);
+  @SuppressWarnings("rawtypes")
+  public void bind(Widget widget, String property, Converter converter);
 
   /**
    * Unbinds the property with the given name.
@@ -57,16 +60,11 @@ public interface BindableProxy<T> extends WrappedPortable {
   public void unbind();
 
   /**
-   * Changes the target model instance of this proxy. The existing bindings stay intact but only affect the new model
-   * instance. The previously associated model instance will no longer be kept in sync with the UI.
+   * Returns the set of bound properties of this proxy.
    * 
-   * @param model
-   *          The instance of a {@link Bindable} type, must not be null.
-   * @param state
-   *          Specifies the origin of the initial state of both model and UI widget, null if no initial state
-   *          synchronization should be carried out.
+   * @return bound properties, an emtpy set if no properties have been bound.
    */
-  public void setModel(T model, InitialState initialState);
+  public Set<String> getBoundProperties();
 
   /**
    * Returns the widget currently bound to the provided property (see {@link #bind(Widget, String, Converter)}).
@@ -76,6 +74,17 @@ public interface BindableProxy<T> extends WrappedPortable {
    * @return the widget currently bound to the provided property or null if no widget was bound to the property.
    */
   public Widget getWidget(String property);
+
+  /**
+   * Returns the converter used for the binding of the provided property (see {@link #bind(Widget, String, Converter)}).
+   * 
+   * @param property
+   *          the name of the model property
+   * @return the converter used for the bound property or null if the property was not bound or no converter was
+   *         specified for the binding.
+   */
+  @SuppressWarnings("rawtypes")
+  public Converter getConverter(String property);
 
   /**
    * Updates all widgets bound to the model instance associated with this proxy (see

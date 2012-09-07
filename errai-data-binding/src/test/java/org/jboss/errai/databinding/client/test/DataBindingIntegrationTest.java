@@ -40,7 +40,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Data binding integration tests.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author David Cracauer <dcracauer@gmail.com>
  */
@@ -117,7 +117,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testUnbindingSingleProperty() {
+  public void testUnbindingSpecificProperty() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox textBox = new TextBox();
     Model model = binder.bind(textBox, "value").getModel();
@@ -132,7 +132,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testUnbindingAll() {
+  public void testUnbindingAllProperties() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox textBox = new TextBox();
     Model model = binder.bind(textBox, "value").getModel();
@@ -216,7 +216,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testInitialStateSync() {
+  public void testBindingWithModelChange() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox textBox = new TextBox();
     binder.bind(textBox, "name");
@@ -224,11 +224,30 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     Model model = new Model();
     model.setName("initial name");
     binder.setModel(model, InitialState.FROM_MODEL);
-    assertEquals("Widget not properly initialized based on model's initial state", "initial name", textBox.getText());
+    assertEquals("Widget not properly initialized after model change caused state sychnronization", "initial name",
+        textBox.getText());
 
+    model = new Model();
     textBox.setText("changed name");
     binder.setModel(model, InitialState.FROM_UI);
-    assertEquals("Model not properly initialized based on widget's initial state", "changed name", model.getName());
+    assertEquals("Model not properly updated after model change caused state synchronization", "changed name", model
+        .getName());
+  }
+
+  @Test
+  public void testBindingWithInitialStateSync() {
+    TextBox textBox = new TextBox();
+    textBox.setValue("initial ui value");
+
+    DataBinder<Model> binder = DataBinder.forType(Model.class, InitialState.FROM_UI).bind(textBox, "name");
+    assertEquals("Model not properly initialized based on widget's initial state", "initial ui value", binder
+        .getModel().getName());
+
+    Model model = new Model();
+    model.setName("initial model value");
+    DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name");
+    assertEquals("Model not properly initialized based on widget's initial state", "initial model value", textBox
+        .getValue());
   }
 
   @Test
@@ -263,18 +282,18 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
   }
-  
+
   @Test
   public void testBindingSpecificConverterWithNullValues() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
-        return (widgetValue==null) ? -1 : 0;
+        return (widgetValue == null) ? -1 : 0;
       }
 
       @Override
       public String toWidgetValue(Integer modelValue) {
-        return (modelValue==null) ? "null-widget" : modelValue.toString();
+        return (modelValue == null) ? "null-widget" : modelValue.toString();
       }
     };
 
@@ -286,6 +305,35 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     model.setAge(null);
     assertEquals("Widget not properly updated using custom converter", "null-widget", textBox.getText());
+  }
+
+  @Test
+  public void testBindingRetainsConverterAfterModelChange() {
+    Converter<Integer, String> converter = new Converter<Integer, String>() {
+      @Override
+      public Integer toModelValue(String widgetValue) {
+        return 1701;
+      }
+
+      @Override
+      public String toWidgetValue(Integer modelValue) {
+        return "testCustomConverter";
+      }
+    };
+
+    TextBox textBox = new TextBox();
+    DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "age", converter);
+
+    Model oldModel = binder.getModel();
+    
+    binder.setModel(new Model());
+    textBox.setValue("321", true);
+    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), binder.getModel().getAge());
+
+    binder.getModel().setAge(123);
+    assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
+    
+    assertEquals("Original model should not have been updated", null, oldModel.getAge());
   }
 
   @Test
@@ -334,18 +382,18 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Widget not properly updated using global default converter",
         "testGlobalDefaultConverter", textBox.getText());
   }
-  
+
   @Test
   public void testGlobalDefaultConverterWithNullValues() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
-        return (widgetValue==null) ? -1 : 0;
+        return (widgetValue == null) ? -1 : 0;
       }
 
       @Override
       public String toWidgetValue(Integer modelValue) {
-        return (modelValue==null) ? "null-widget" : modelValue.toString();
+        return (modelValue == null) ? "null-widget" : modelValue.toString();
       }
     };
 
@@ -428,7 +476,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "value");
     binder.addPropertyChangeHandler(handler);
-    
+
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
     assertEquals("Should have received excatly one property change event", 1, handler.events.size());
@@ -436,7 +484,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
-    
+
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
     assertEquals("Should have received excatly two property change event", 2, handler.events.size());
@@ -447,8 +495,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   /**
-   * Ensures that, when a property change event is fired, the new value is
-   * already set on the model object.
+   * Ensures that, when a property change event is fired, the new value is already set on the model object.
    */
   @Test
   public void testNewValueIsSetBeforeEventIsFired() {
@@ -457,6 +504,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     binder.getModel().setValue("Old Value");
     class MyHandler implements PropertyChangeHandler {
       String observedValueWhenEventFired;
+
       @Override
       public void onPropertyChange(PropertyChangeEvent event) {
         observedValueWhenEventFired = binder.getModel().getValue();

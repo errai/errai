@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.rebind;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -79,6 +80,7 @@ public class BindableProxyGenerator {
     this.bindable = bindable;
   }
 
+  @SuppressWarnings("serial")
   public ClassStructureBuilder<?> generate() {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.define(bindable.getName() + "Proxy", bindable)
         .packageScope()
@@ -97,14 +99,14 @@ public class BindableProxyGenerator {
         .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
         .append(generatePropertiesMap())
         .finish()
-        .publicMethod(void.class, "setModel", Parameter.of(Object.class, "target"),
-            Parameter.of(InitialState.class, "initialState"))
-        .append(Stmt.loadClassMember("target").assignValue(Stmt.castTo(bindable, Stmt.loadVariable("target"))))
-        .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
-        .append(Stmt.loadVariable("this").invoke("syncState", Variable.get("initialState")))
-        .finish()
         .publicMethod(Widget.class, "getWidget", Parameter.of(String.class, "property"))
         .append(Stmt.loadVariable("bindings").invoke("get", Variable.get("property")).returnValue())
+        .finish()
+        .publicMethod(Converter.class, "getConverter", Parameter.of(String.class, "property"))
+        .append(Stmt.loadVariable("converters").invoke("get", Variable.get("property")).returnValue())
+        .finish()
+        .publicMethod(MetaClassFactory.get(new TypeLiteral<Set<String>>() {}), "getBoundProperties")
+        .append(Stmt.loadVariable("bindings").invoke("keySet").returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")
         .append(Stmt.loadVariable("this").invoke("syncState", Stmt.loadStatic(InitialState.class, "FROM_MODEL")))
