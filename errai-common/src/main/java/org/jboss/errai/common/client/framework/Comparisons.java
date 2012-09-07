@@ -139,4 +139,64 @@ public class Comparisons {
     return c1.compareTo(c2);
   }
 
+  /**
+   * Checks of the given value matches the given JPQL wildcard pattern.
+   *
+   * @param value
+   *          The string value to test. May be null.
+   * @param pattern
+   *          The JPQL pattern to test against. Special characters are "{@code _}
+   *          ", which matches any single character, and "{@code %}", which
+   *          matches 0 or more characters.
+   */
+  // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
+  public static Boolean like(String value, String pattern) {
+    if (value == null || pattern == null) {
+      return null;
+    }
+    return value.matches(sqlWildcardToRegex(pattern));
+  }
+
+  private static String sqlWildcardToRegex(String pattern) {
+    StringBuilder sb = new StringBuilder(pattern.length());
+    for (int i = 0; i < pattern.length(); i++) {
+      char ch = pattern.charAt(i);
+      switch (ch) {
+      case '_':
+        sb.append('.');
+        break;
+
+      case '%':
+        sb.append(".*");
+        break;
+
+      case '.':
+      case '\\':
+      case '+':
+      case '*':
+      case '?':
+      case '[':
+      case '^':
+      case ']':
+      case '$':
+      case '(':
+      case ')':
+      case '{':
+      case '}':
+      case '=':
+      case '!':
+      case '<':
+      case '>':
+      case '|':
+      case ':':
+      case '-':
+        sb.append('\\');
+        // FALLTHROUGH
+
+      default:
+        sb.append(ch);
+      }
+    }
+    return sb.toString();
+  }
 }

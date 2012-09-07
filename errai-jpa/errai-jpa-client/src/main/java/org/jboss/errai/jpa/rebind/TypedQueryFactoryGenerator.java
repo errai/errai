@@ -332,6 +332,12 @@ public class TypedQueryFactoryGenerator {
               Stmt.invokeStatic(Comparisons.class, "nullSafeGreaterThan", outside, big));
     }
 
+    case HqlSqlTokenTypes.LIKE:
+      return Stmt.invokeStatic(
+              Comparisons.class, "like",
+              Cast.to(String.class, generateExpression(traverser, dotNodeResolver)),
+              Cast.to(String.class, generateExpression(traverser, dotNodeResolver)));
+
     case HqlSqlTokenTypes.IS_NULL:
       return Bool.isNull(generateExpression(traverser, dotNodeResolver));
 

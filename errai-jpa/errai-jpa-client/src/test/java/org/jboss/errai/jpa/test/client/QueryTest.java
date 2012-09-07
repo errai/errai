@@ -1149,4 +1149,52 @@ public class QueryTest extends GWTTestCase {
     assertTrue(results.contains(zentity2));
   }
 
+  public void testLikeOperator() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentityFoo = new Zentity();
+    zentityFoo.setString("Foo");
+    em.persist(zentityFoo);
+
+    Zentity zentityfoo = new Zentity();
+    zentityfoo.setString("foo");
+    em.persist(zentityfoo);
+
+    Zentity zentitybar = new Zentity();
+    zentitybar.setString("bar");
+    em.persist(zentitybar);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLike", Zentity.class);
+    q.setParameter("str", "f%o");
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertTrue(results.contains(zentityfoo));
+  }
+
+  public void testLikeOperatorRegexCharsOk() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("!@#$%^&*()_+");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("+_)(*&^%$#@!");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString(",./<>?[]{};':\"\\");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLike", Zentity.class);
+    q.setParameter("str", "%(__+");
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertTrue(results.contains(zentity1));
+  }
+
 }
