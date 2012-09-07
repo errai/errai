@@ -1227,4 +1227,31 @@ public class QueryTest extends GWTTestCase {
     assertTrue(results.contains(zentitybar));
   }
 
+  public void testLikeOperatorWithEscape() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("wx%yz");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("wx!yz");
+    em.persist(zentity2);
+
+    Zentity zentitybar = new Zentity();
+    zentitybar.setString("bar");
+    em.persist(zentitybar);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLikeWithEscapeChar", Zentity.class);
+
+    // note that the query sets the escape character for the LIKE expression to 'a'
+    q.setParameter("str", "wxa%yz");
+
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertTrue(results.contains(zentity1));
+  }
+
 }

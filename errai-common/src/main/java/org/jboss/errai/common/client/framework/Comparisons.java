@@ -150,26 +150,45 @@ public class Comparisons {
    *          matches 0 or more characters.
    */
   // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
-  public static Boolean like(String value, String pattern) {
+  public static Boolean like(String value, String pattern, String escapeChar) {
     if (value == null || pattern == null) {
       return null;
     }
-    return value.matches(sqlWildcardToRegex(pattern));
+    return value.matches(sqlWildcardToRegex(pattern, escapeChar));
   }
 
-  private static String sqlWildcardToRegex(String pattern) {
+  private static String sqlWildcardToRegex(String pattern, String escapeChar) {
+    char esc;
+    if (escapeChar == null) {
+      esc = 'x'; // (not used in this case)
+    }
+    else if (escapeChar.length() != 1) {
+      throw new IllegalArgumentException("In LIKE x ESCAPE e, e must be a single-character string");
+    }
+    else {
+      esc = escapeChar.charAt(0);
+    }
+
     StringBuilder sb = new StringBuilder(pattern.length());
     for (int i = 0; i < pattern.length(); i++) {
       char ch = pattern.charAt(i);
-      switch (ch) {
-      case '_':
+      if (ch == esc) {
+        // advance to next character and don't treat as wildcard
+        ch = pattern.charAt(++i);
+      }
+      else if (ch == '_') {
+        // wildcard: match any one char
         sb.append('.');
-        break;
-
-      case '%':
+        continue;
+      }
+      else if (ch == '%') {
+        // wildcard: match 0 or more chars
         sb.append(".*");
-        break;
+        continue;
+      }
 
+      // append non-jpql-wildcard char (escaping if it's a special regex char)
+      switch(ch) {
       case '.':
       case '\\':
       case '+':

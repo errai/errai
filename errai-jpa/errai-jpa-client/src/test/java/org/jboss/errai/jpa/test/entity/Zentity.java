@@ -87,6 +87,7 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 
   @NamedQuery(name="zentityLike", query="SELECT z FROM Zentity z WHERE z.string LIKE :str"),
   @NamedQuery(name="zentityNotLike", query="SELECT z FROM Zentity z WHERE z.string NOT LIKE :str"),
+  @NamedQuery(name="zentityLikeWithEscapeChar", query="SELECT z FROM Zentity z WHERE z.string LIKE :str ESCAPE 'a' AND 1 = 1"),
 
   @NamedQuery(name="zentityNoWhereClause", query="SELECT z FROM Zentity z"),
 

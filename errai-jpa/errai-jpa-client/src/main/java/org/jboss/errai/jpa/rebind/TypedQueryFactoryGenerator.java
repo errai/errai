@@ -334,10 +334,15 @@ public class TypedQueryFactoryGenerator {
 
     case HqlSqlTokenTypes.NOT_LIKE:
     case HqlSqlTokenTypes.LIKE: {
+      Statement valueExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver));
+      Statement patternExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver));
+      Statement escapeCharExpr = Cast.to(String.class, Stmt.loadLiteral(null));
+      if (ast.getNumberOfChildren() == 3) {
+        traverser.next();
+        escapeCharExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver));
+      }
       Statement likeStmt = Stmt.invokeStatic(
-              Comparisons.class, "like",
-              Cast.to(String.class, generateExpression(traverser, dotNodeResolver)),
-              Cast.to(String.class, generateExpression(traverser, dotNodeResolver)));
+              Comparisons.class, "like", valueExpr, patternExpr, escapeCharExpr);
       return ast.getType() == HqlSqlTokenTypes.LIKE ? likeStmt : Bool.notExpr(likeStmt);
     }
 
