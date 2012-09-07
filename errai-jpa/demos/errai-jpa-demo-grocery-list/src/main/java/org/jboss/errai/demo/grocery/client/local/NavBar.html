@@ -3,10 +3,9 @@
         <div class="container">
           <a class="brand" href="#">Errai</a>
           <ul class="nav">
-            <!-- XXX this way of making links is not compile-time safe. better to inject these into the template. -->
-            <li><a href="#WelcomePage">Home</a>
-            <li><a href="#ItemListPage">Items</a>
-            <li><a href="#StoresPage">Stores</a>
+            <li><a data-field=home>Home</a>
+            <li><a data-field=items>Items</a>
+            <li><a data-field=stores>Stores</a>
           </ul>
         </div>
       </div>
