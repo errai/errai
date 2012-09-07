@@ -1195,6 +1195,36 @@ public class QueryTest extends GWTTestCase {
     List<Zentity> results = q.getResultList();
     assertEquals(1, results.size());
     assertTrue(results.contains(zentity1));
+
+    q.setParameter("str", ",./<>?[]{};':\"\\");
+    results = q.getResultList();
+    assertEquals(1, results.size());
+    assertTrue(results.contains(zentity3));
+  }
+
+  public void testNotLikeOperator() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentityFoo = new Zentity();
+    zentityFoo.setString("Foo");
+    em.persist(zentityFoo);
+
+    Zentity zentityfoo = new Zentity();
+    zentityfoo.setString("foo");
+    em.persist(zentityfoo);
+
+    Zentity zentitybar = new Zentity();
+    zentitybar.setString("bar");
+    em.persist(zentitybar);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityNotLike", Zentity.class);
+    q.setParameter("str", "f%o");
+    List<Zentity> results = q.getResultList();
+    assertEquals(2, results.size());
+    assertTrue(results.contains(zentityFoo));
+    assertTrue(results.contains(zentitybar));
   }
 
 }
