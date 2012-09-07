@@ -52,7 +52,9 @@ public @interface Bound {
   /**
    * The {@link Converter} to use when setting values on the model or widget.
    */
-  Class<? extends Converter> converter() default NO_CONVERTER.class;
+  // The NO_CONVERTER class needs to be fully qualified here to work around a JDK bug:
+  // http://bugs.sun.com/view_bug.do?bug_id=6512707
+  Class<? extends Converter> converter() default org.jboss.errai.ui.shared.api.annotations.Bound.NO_CONVERTER.class;
 
   static abstract class NO_CONVERTER implements Converter {}
 }
