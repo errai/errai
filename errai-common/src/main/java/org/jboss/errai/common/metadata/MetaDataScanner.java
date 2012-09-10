@@ -40,6 +40,7 @@ import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Multimap;
 import javassist.bytecode.ClassFile;
 
 import org.jboss.errai.common.client.framework.ErraiAppAttribs;
@@ -70,7 +71,7 @@ public class MetaDataScanner extends Reflections {
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
 
-  private static final PropertyScanner propScanner = new PropertyScanner(
+  private static final ErraiPropertyScanner propScanner = new ErraiPropertyScanner(
       new Predicate<String>() {
         public boolean apply(final String file) {
           return file.endsWith(".properties");
@@ -309,7 +310,7 @@ public class MetaDataScanner extends Reflections {
     return getConfigUrls(MetaDataScanner.class.getClassLoader());
   }
 
-  public Properties getProperties(final String name) {
-    return propScanner.getProperties().get(name);
+  public Multimap<String, String> getErraiProperties() {
+    return propScanner.getProperties();
   }
 }
