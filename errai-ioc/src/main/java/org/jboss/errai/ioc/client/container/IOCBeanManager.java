@@ -36,18 +36,34 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class IOCBeanManager {
+  /**
+   * A map of all named beans.
+   */
   private final Map<String, List<IOCBeanDef>> namedBeans
       = new HashMap<String, List<IOCBeanDef>>();
 
+  /**
+   * A map of all beans managed by the bean mean manager, keyed by type.
+   */
   private final Map<Class<?>, List<IOCBeanDef>> beanMap
       = new HashMap<Class<?>, List<IOCBeanDef>>();
 
+  /**
+   * A map which contains bean instances as keys, and their associated {@link CreationalContext}s as values.
+   */
   private final Map<Object, CreationalContext> creationalContextMap
-      = new HashMap<Object, CreationalContext>();
+      = new IdentityHashMap<Object, CreationalContext>();
 
+  /**
+   * A map which contains proxied instances as keys, and the underlying proxied bean instances as values.
+   */
   private final Map<Object, Object> proxyLookupForManagedBeans
       = new IdentityHashMap<Object, Object>();
 
+  /**
+   * A collection which contains a list of all known concrete bean types being managed. eg. no interface or
+   * abstract types will be present in this collection.
+   */
   private final Set<String> concreteBeans
       = new HashSet<String>();
 
@@ -275,10 +291,26 @@ public class IOCBeanManager {
     return proxyLookupForManagedBeans.containsKey(ref);
   }
 
+  /**
+   * Associates the reference to a proxied bean to the underlying bean instance which it is proxying.
+   *
+   * @param proxyRef
+   *     the reference to the proxy
+   * @param realRef
+   *     the reference to the bean being proxied.
+   */
   void addProxyReference(final Object proxyRef, final Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
+  /**
+   * Associates a bean instance with a creational context.
+   *
+   * @param ref
+   *     the reference to the bean
+   * @param creationalContext
+   *     the {@link CreationalContext} instance to associate the bean instance with.
+   */
   void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
     creationalContextMap.put(ref, creationalContext);
   }
@@ -447,6 +479,30 @@ public class IOCBeanManager {
     }
   }
 
+
+  /**
+   * Associates a {@link DestructionCallback} with a bean instance. If the bean manager cannot find a valid
+   * {@link CreationalContext} to associate with the bean, or the bean is no longer considered active, the method
+   * returns <tt>false</tt>. Otherwise, the method returns <tt>true</tt>, indicating the callback is now registered
+   * and will be called when the bean is destroyed.
+   *
+   * @param beanInstance
+   *        the bean instance to associate the callback to.
+   * @param destructionCallback
+   *        the instance of the {@link DestructionCallback}.
+   * @return
+   *        <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
+   *        {@link CreationalContext} and <tt>false</tt> if not.
+   */
+  public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
+    final CreationalContext creationalContext = creationalContextMap.get(beanInstance);
+    if (creationalContext == null) {
+      return false;
+    }
+
+    creationalContext.addDestructionCallback(beanInstance, destructionCallback);
+    return true;
+  }
 
   void destroyAllBeans() {
     namedBeans.clear();

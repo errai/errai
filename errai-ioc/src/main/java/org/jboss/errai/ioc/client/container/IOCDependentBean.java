@@ -40,10 +40,14 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     this.beanManager = beanManager;
     this.type = type;
     this.beanType = beanType;
-    this.qualifiers = new HashSet<Annotation>();
+
     if (qualifiers != null) {
-      Collections.addAll(this.qualifiers, qualifiers);
+      Collections.addAll(this.qualifiers = new HashSet<Annotation>(), qualifiers);
     }
+    else {
+      this.qualifiers = Collections.emptySet();
+    }
+
     this.name = name;
     this.concrete = concrete;
     this.creationalCallback = creationalCallback;
@@ -61,7 +65,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T newInstance() {
-    final CreationalContext context = new CreationalContext(beanManager, "javax.enterprise.context.Dependent");
+    final CreationalContext context = new CreationalContext(beanManager, Dependent.class.getName());
     try {
       return creationalCallback.getInstance(context);
     }
@@ -72,7 +76,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T getInstance() {
-    final CreationalContext context = new CreationalContext(beanManager, "javax.enterprise.context.Dependent");
+    final CreationalContext context = new CreationalContext(beanManager, Dependent.class.getName());
     try {
       return getInstance(context);
     }

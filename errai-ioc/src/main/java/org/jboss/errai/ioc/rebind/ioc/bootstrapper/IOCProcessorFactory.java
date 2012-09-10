@@ -85,7 +85,6 @@ public class IOCProcessorFactory {
 
   public void registerHandler(final Class<? extends Annotation> annotation,
                               final AnnotationHandler handler) {
-
     registerHandler(annotation, handler, null);
   }
 
@@ -159,7 +158,8 @@ public class IOCProcessorFactory {
 
   @SuppressWarnings("unchecked")
   private void inferHandlers() {
-    for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
+    for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry
+        : injectionContext.getAllElementMappings()) {
       switch (entry.getKey()) {
         case TopLevelProvider:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
@@ -202,7 +202,9 @@ public class IOCProcessorFactory {
                   providedType = (MetaClass) parmType;
                 }
 
-                injectionContext.registerInjector(new ProviderInjector(providedType, providerClassType, injectionContext));
+                injectionContext.registerInjector(
+                    new ProviderInjector(providedType, providerClassType, injectionContext)
+                );
               }
               else if (MC_ContextualTypeProvider.isAssignableFrom(providerClassType)) {
                 for (final MetaClass interfaceType : providerClassType.getInterfaces()) {
@@ -229,7 +231,9 @@ public class IOCProcessorFactory {
                   providedType = (MetaClass) parmType;
                 }
 
-                injectionContext.registerInjector(new ContextualProviderInjector(providedType, providerClassType, injectionContext));
+                injectionContext.registerInjector(
+                    new ContextualProviderInjector(providedType, providerClassType, injectionContext)
+                );
               }
               else {
                 throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
@@ -255,7 +259,8 @@ public class IOCProcessorFactory {
       }
     }
 
-    for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
+    for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry
+        : injectionContext.getAllElementMappings()) {
       switch (entry.getKey()) {
         case ProducerElement:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
@@ -301,7 +306,8 @@ public class IOCProcessorFactory {
 
               if (!producerMember.isStatic()) {
                 // if this is a static producer, it does not have a dependency on its parent bean
-                injectionContext.getGraphBuilder().addDependency(injectedType, Dependency.on(instance.getEnclosingType()));
+                injectionContext.getGraphBuilder()
+                    .addDependency(injectedType, Dependency.on(instance.getEnclosingType()));
               }
             }
 
@@ -309,7 +315,8 @@ public class IOCProcessorFactory {
             public boolean handle(final InjectableInstance instance,
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
-              final List<Injector> injectors = injectionContext.getInjectors(instance.getElementTypeOrMethodReturnType());
+              final List<Injector> injectors
+                  = injectionContext.getInjectors(instance.getElementTypeOrMethodReturnType());
               for (final Injector injector : injectors) {
                 if (injector.isEnabled() && injectionContext.isTypeInjectable(injector.getEnclosingType())) {
                   injector.getBeanInstance(instance);
@@ -437,8 +444,21 @@ public class IOCProcessorFactory {
 
                 classes = new ArrayList<MetaClass>(classes);
 
-                Scan: for (final String type : injectionContext.getAllReachableTypes()) {
-                  final MetaClass metaClass = MetaClassFactory.get(type);
+                MetaClass metaClass;
+                Scan:
+                for (final String type : injectionContext.getAllReachableTypes()) {
+                  if (type.indexOf('$') != -1) {
+                    try {
+                      metaClass = MetaClassFactory.get(type);
+                    }
+                    catch (Throwable t) {
+                      continue;
+                    }
+                  }
+                  else {
+                    metaClass = MetaClassFactory.get(type);
+                  }
+
                   if (metaClass.isDefaultInstantiable() && metaClass.isPublic() && metaClass.isConcrete()) {
                     for (final Annotation anno : metaClass.getAnnotations()) {
                       if (anno.annotationType().isAnnotationPresent(Scope.class)
@@ -570,7 +590,8 @@ public class IOCProcessorFactory {
           injector = new TypeInjector(type, injectionContext);
         }
 
-        return entry.handler.handle(getInjectedInstance(annotation, type, injector, injectionContext), annotation, context);
+        return entry.handler
+            .handle(getInjectedInstance(annotation, type, injector, injectionContext), annotation, context);
       }
 
       @Override
@@ -656,7 +677,7 @@ public class IOCProcessorFactory {
       public void processDependencies() {
 
         entry.handler.getDependencies(dependencyControl, InjectableInstance.getFieldInjectedInstance(metaField, null,
-        injectionContext), annotation, context);
+            injectionContext), annotation, context);
       }
 
       @SuppressWarnings("unchecked")

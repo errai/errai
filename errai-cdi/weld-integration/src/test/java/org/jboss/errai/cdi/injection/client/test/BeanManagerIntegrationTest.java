@@ -1,7 +1,9 @@
 package org.jboss.errai.cdi.injection.client.test;
 
 import org.jboss.errai.cdi.injection.client.AbstractBean;
+import org.jboss.errai.cdi.injection.client.Amex;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
+import org.jboss.errai.cdi.injection.client.Bar;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
 import org.jboss.errai.cdi.injection.client.CommonInterfaceB;
 import org.jboss.errai.cdi.injection.client.Cow;
@@ -26,11 +28,14 @@ import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanApples
 import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanOranges;
 import org.jboss.errai.cdi.injection.client.qualifier.QualV;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -303,6 +308,36 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
     assertEquals(1, beans.size());
     assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
+  }
+
+  public void testReportedScopeCorrect() {
+    final IOCBeanDef<ApplicationScopedBean> appScopeBean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
+    final IOCBeanDef<DependentScopedBean> dependentIOCBean = IOC.getBeanManager().lookupBean(DependentScopedBean.class);
+
+    assertEquals(ApplicationScoped.class, appScopeBean.getScope());
+    assertEquals(Dependent.class, dependentIOCBean.getScope());
+  }
+
+  public void testAddingProgrammaticDestructionCallback() {
+    final DependentScopedBean dependentScopedBean
+        = IOC.getBeanManager().lookupBean(DependentScopedBean.class).newInstance();
+
+    class TestValueHolder {
+      boolean destroyed = false;
+    }
+
+    final TestValueHolder testValueHolder = new TestValueHolder();
+
+    IOC.getBeanManager().addDestructionCallback(dependentScopedBean, new DestructionCallback<Object>() {
+      @Override
+      public void destroy(Object bean) {
+        testValueHolder.destroyed = true;
+      }
+    });
+
+    IOC.getBeanManager().destroyBean(dependentScopedBean);
+
+    assertEquals(true, testValueHolder.destroyed);
   }
 
   private static boolean containsInstanceOf(final Collection<IOCBeanDef> defs, final Class<?> clazz) {
