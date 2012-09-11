@@ -27,6 +27,9 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 @SuppressWarnings("JpaQlInspection")
 @TestOnly @Entity
 @NamedQueries({
+
+  // LITERAL VALUES
+  // --------------
   @NamedQuery(name="zentityPrimitiveBoolean", query="SELECT z FROM Zentity z WHERE z.primitiveBool = :b"),
   @NamedQuery(name="zentityString", query="SELECT z FROM Zentity z WHERE z.string = :s"),
   @NamedQuery(name="zentityLiteralString", query="SELECT z FROM Zentity z WHERE z.string = 'D''oh!'"),
@@ -60,6 +63,11 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="albumLiteralEnum",
               query="SELECT a FROM Album a WHERE a.format = org.jboss.errai.jpa.test.entity.Format.SINGLE"),
 
+
+
+  // BOOLEAN EXPRESSIONS
+  // -------------------
+
   @NamedQuery(name="zentityAnd",
               query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555"),
   @NamedQuery(name="zentityOr",
@@ -68,6 +76,11 @@ import org.jboss.errai.ioc.client.api.TestOnly;
               query="SELECT z FROM Zentity z WHERE NOT z.string = 'hello'"),
   @NamedQuery(name="zentityNestedBooleanLogic",
               query="SELECT z FROM Zentity z WHERE z.string = 'hello' AND z.primitiveInt = 555 OR z.primitiveByte = 1"),
+
+
+
+  // COMPARISON OPERATORS
+  // --------------------
 
   // Thoroughness dictates that we should test all combinations of numeric types (int > double, byte > double, ...)
   // but the equals tests already do that. We'll just assume that coercing everything to double works for inequalities too.
@@ -94,7 +107,10 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityNotLike", query="SELECT z FROM Zentity z WHERE z.string NOT LIKE :str"),
   @NamedQuery(name="zentityLikeWithEscapeChar", query="SELECT z FROM Zentity z WHERE z.string LIKE :str ESCAPE 'a' AND 1 = 1"),
 
-  @NamedQuery(name="zentityNoWhereClause", query="SELECT z FROM Zentity z"),
+
+
+  // ORDER BY
+  // --------
 
   @NamedQuery(name="zentityOrderByPrimitiveInt", query="SELECT z FROM Zentity z ORDER BY z.primitiveInt"),
   @NamedQuery(name="zentityOrderByPrimitiveIntDesc", query="SELECT z FROM Zentity z ORDER BY z.primitiveInt DESC"),
@@ -106,11 +122,22 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityOrderByStringAscThenInt", query="SELECT z FROM Zentity z ORDER BY z.string ASC, z.primitiveInt"),
   @NamedQuery(name="zentityOrderByStringThenInt", query="SELECT z FROM Zentity z ORDER BY z.string, z.primitiveInt"),
 
+
+
+  // STRING FUNCTIONS
+  // ----------------
   @NamedQuery(name="zentityLowercaseFunction", query="SELECT z FROM Zentity z WHERE 'foo' = lower(z.string)"),
   @NamedQuery(name="zentityUppercaseFunction", query="SELECT z FROM Zentity z WHERE upper(z.string) = 'FOO'"),
 
   // regression test: hibernate's parser does not guess at the expected type of :str in this case (was causing NPE)
   @NamedQuery(name="zentityParamNestedInFunction", query="SELECT z FROM Zentity z WHERE lower(:str) = z.string"),
+
+  @NamedQuery(name="zentityConcatFunction", query="SELECT z FROM Zentity z WHERE 'foo' = concat(z.string, 'o', 'o')"),
+
+  // OTHER
+  // -----
+
+  @NamedQuery(name="zentityNoWhereClause", query="SELECT z FROM Zentity z"),
 })
 public class Zentity {
 

@@ -41,6 +41,8 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Arith;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.Implementations.StringBuilderBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.framework.Comparisons;
@@ -431,6 +433,13 @@ public class TypedQueryFactoryGenerator {
       }
       else if ("upper".equals(methodNameNode.getOriginalText())) {
         return Stmt.castTo(String.class, Stmt.load(args[0])).invoke("toUpperCase");
+      }
+      else if ("concat".equals(methodNameNode.getOriginalText())) {
+        StringBuilderBuilder sb = Implementations.newStringBuilder();
+        for (Statement s : args) {
+          sb.append(s);
+        }
+        return Stmt.load(sb).invoke("toString");
       }
       throw new UnsupportedOperationException("The JPQL function " + methodNameNode.getOriginalText() + " is not supported");
 
