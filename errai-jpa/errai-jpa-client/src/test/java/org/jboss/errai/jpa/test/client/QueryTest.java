@@ -3,6 +3,7 @@ package org.jboss.errai.jpa.test.client;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -742,6 +743,66 @@ public class QueryTest extends GWTTestCase {
     assertFalse(resultStrings.contains(zentity1.toString()));
     assertTrue(resultStrings.contains(zentity2.toString()));
     assertTrue(resultStrings.contains(zentity3.toString()));
+  }
+
+  public void testInSingleValuedParams() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("baz");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityInSingleValuedParams", Zentity.class);
+    q.setParameter("in1", "foo");
+    q.setParameter("in2", "bar");
+    q.setParameter("in3", "baz");
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertFalse(resultStrings.contains(zentity1.toString()));
+    assertTrue(resultStrings.contains(zentity2.toString()));
+    assertTrue(resultStrings.contains(zentity3.toString()));
+  }
+
+  public void testInCollectionParam() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("baz");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityInCollectionParam", Zentity.class);
+    q.setParameter("inList", Arrays.asList(new String[] {"hello", "foo", "this one doesn't match"}));
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(2, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertTrue(resultStrings.contains(zentity2.toString()));
+    assertFalse(resultStrings.contains(zentity3.toString()));
   }
 
   public void testNumericBetween() {

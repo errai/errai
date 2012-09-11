@@ -1,5 +1,7 @@
 package org.jboss.errai.common.client.framework;
 
+import java.util.Collection;
+
 /**
  * Non-instantiable utility methods for comparing two or more values.
  *
@@ -137,6 +139,46 @@ public class Comparisons {
     if (c1 == null && c2 != null) return -1;
     if (c1 != null && c2 == null) return 1;
     return c1.compareTo(c2);
+  }
+
+  /**
+   * Tests if the first argument is equal to any of the remaining arguments.
+   * Equality is tested using {@link #nullSafeEquals(Object, Object)}.
+   * <p>
+   * <b>Special Case</b><br>
+   * If the collection has only one item in it, and that item is assignable to
+   * Collection, then that collection will be searched rather than being treated
+   * as a single scalar value. This allows correct behaviour for a JPQL query
+   * {@code SELECT x FROM MyClass x WHERE x.prop IN :param} and {@code param}
+   * resolves to a collection value at runtime.
+   *
+   * @param thingToCompare
+   *          The item to compare against the remaining arguments.
+   * @param collection
+   *          One or more items to test for equality with {@code thingToCompare}
+   *          .
+   * @return True if there is an item in {@code collection} that compares equal
+   *         with {@code thingToCompare}. False otherwise.
+   */
+  // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
+  public static boolean in(Object thingToCompare, Object[] collection) {
+    // special case: if the collection only has one member and it's a collection, we unwrap it.
+    // this provides the required JPQL behaviour.
+    if (collection.length == 1 && collection[0] instanceof Collection) {
+      for (Object o : (Collection<?>) collection[0]) {
+        if (nullSafeEquals(thingToCompare, o)) {
+          return true;
+        }
+      }
+    }
+    else {
+      for (Object o : collection) {
+        if (nullSafeEquals(thingToCompare, o)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**

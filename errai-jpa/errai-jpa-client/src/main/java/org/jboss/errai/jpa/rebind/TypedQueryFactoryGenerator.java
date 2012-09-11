@@ -2,6 +2,7 @@ package org.jboss.errai.jpa.rebind;
 
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -339,20 +340,12 @@ public class TypedQueryFactoryGenerator {
       if (ast.getType() != HqlSqlTokenTypes.IN_LIST) {
         throw new GenerationException("Expected IN_LIST node but found " + ast.getText());
       }
-      Statement inTestExpr = null;
+
+      List<Statement> collection = new ArrayList<Statement>(ast.getNumberOfChildren());
       for (int i = 0; i < ast.getNumberOfChildren(); i++) {
-        if (inTestExpr == null) {
-          inTestExpr = Stmt.invokeStatic(
-                  Comparisons.class, "nullSafeEquals",
-                  thingToTest, generateExpression(traverser, dotNodeResolver));
-        }
-        else {
-          inTestExpr = Bool.or(inTestExpr, Stmt.invokeStatic(
-                  Comparisons.class, "nullSafeEquals",
-                  thingToTest, generateExpression(traverser, dotNodeResolver)));
-        }
+        collection.add(Cast.to(Object.class, generateExpression(traverser, dotNodeResolver)));
       }
-      return inTestExpr;
+      return Stmt.invokeStatic(Comparisons.class, "in", thingToTest, collection.toArray());
     }
 
     case HqlSqlTokenTypes.NOT_LIKE:
