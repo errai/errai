@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NamedQuery;
@@ -69,8 +70,9 @@ import com.google.gwt.json.client.JSONObject;
 public class TypedQueryFactoryGenerator {
 
   private final String jpaQuery;
-  private QueryTranslatorImpl query;
-  private Class<?> resultType;
+  private final QueryTranslatorImpl query;
+  private final Class<?> resultType;
+  private final AtomicInteger uniqueNumber = new AtomicInteger();
 
   public TypedQueryFactoryGenerator(EntityManager em, NamedQuery namedQuery) {
     this.jpaQuery = Assert.notNull(namedQuery.query());
@@ -177,16 +179,17 @@ public class TypedQueryFactoryGenerator {
     AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
     AST whereClause = traverser.fastForwardTo(HqlSqlTokenTypes.WHERE);
 
+    BlockBuilder<?> matchesMethod = classBuilder
+            .publicOverridesMethod("matches", Parameter.of(JSONObject.class, "candidate"));
+
     Statement matchesStmt;
     if (whereClause != null) {
-      matchesStmt = generateExpression(traverser, new JsonDotNodeResolver());
+      matchesStmt = generateExpression(traverser, new JsonDotNodeResolver(), matchesMethod);
     }
     else {
       matchesStmt = Stmt.loadLiteral(true);
     }
 
-    BlockBuilder<?> matchesMethod = classBuilder
-            .publicOverridesMethod("matches", Parameter.of(JSONObject.class, "candidate"));
     matchesMethod.append(Stmt.nestedCall(matchesStmt).returnValue());
     matchesMethod.finish();
   }
@@ -227,8 +230,8 @@ public class TypedQueryFactoryGenerator {
       compareMethod.append(Stmt.declareVariable("result", int.class));
 
       while (traverser.context().contains(orderByParentNode)) {
-        Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), lhsResolver));
-        Statement rhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), rhsResolver));
+        Statement lhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), lhsResolver, compareMethod));
+        Statement rhs = Stmt.castTo(Comparable.class, generateExpression(new AstInorderTraversal(orderNode), rhsResolver, compareMethod));
 
         // Determine if this subclause is marked ASCENDING or DESCENDING, and if so, skip over that node
         traverser.fastForwardToNextSiblingOf(orderNode);
@@ -279,8 +282,15 @@ public class TypedQueryFactoryGenerator {
    * @param dotNodeResolver
    *          the mechanism for resolving a DotNode (that is, a JPQL property
    *          reference in the query) into an Errai codegen Statement.
+   * @param containingMethod
+   *          the builder for the method that will eventually receive the
+   *          returned statement. If the code emitted by this generator depends
+   *          on some variable declaration, the variable declaration statement
+   *          will be appended to this block.
+   * @return a statement that evaluates to the subtree rooted at the current
+   *         position of {@code traverser}.
    */
-  private Statement generateExpression(AstInorderTraversal traverser, DotNodeResolver dotNodeResolver) {
+  private Statement generateExpression(AstInorderTraversal traverser, DotNodeResolver dotNodeResolver, BlockBuilder<?> containingMethod) {
     AST ast = traverser.next();
     switch (ast.getType()) {
 
@@ -291,46 +301,46 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.EQ:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeEquals",
-              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
+              generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.NE:
       return Bool.notExpr(Stmt.invokeStatic(
               Comparisons.class, "nullSafeEquals",
-              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver)));
+              generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod)));
 
     case HqlSqlTokenTypes.GT:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeGreaterThan",
-              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
+              generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.GE:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeGreaterThanOrEqualTo",
-              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
+              generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.LT:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeLessThan",
-              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
+              generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.LE:
       return Stmt.invokeStatic(
               Comparisons.class, "nullSafeLessThanOrEqualTo",
-              generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
+              generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.BETWEEN: {
-      Statement middle = generateExpression(traverser, dotNodeResolver);
-      Statement small = generateExpression(traverser, dotNodeResolver);
-      Statement big = generateExpression(traverser, dotNodeResolver);
+      Statement middle = generateExpression(traverser, dotNodeResolver, containingMethod);
+      Statement small = generateExpression(traverser, dotNodeResolver, containingMethod);
+      Statement big = generateExpression(traverser, dotNodeResolver, containingMethod);
       return Bool.and(
               Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", small, middle),
               Stmt.invokeStatic(Comparisons.class, "nullSafeLessThanOrEqualTo", middle, big));
     }
 
     case HqlSqlTokenTypes.NOT_BETWEEN: {
-      Statement outside = generateExpression(traverser, dotNodeResolver);
-      Statement small = generateExpression(traverser, dotNodeResolver);
-      Statement big = generateExpression(traverser, dotNodeResolver);
+      Statement outside = generateExpression(traverser, dotNodeResolver, containingMethod);
+      Statement small = generateExpression(traverser, dotNodeResolver, containingMethod);
+      Statement big = generateExpression(traverser, dotNodeResolver, containingMethod);
       return Bool.or(
               Stmt.invokeStatic(Comparisons.class, "nullSafeLessThan", outside, small),
               Stmt.invokeStatic(Comparisons.class, "nullSafeGreaterThan", outside, big));
@@ -339,7 +349,7 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.NOT_IN:
     case HqlSqlTokenTypes.IN: {
       final boolean notIn = ast.getType() == HqlSqlTokenTypes.NOT_IN;
-      Statement thingToTest = generateExpression(traverser, dotNodeResolver);
+      Statement thingToTest = generateExpression(traverser, dotNodeResolver, containingMethod);
       ast = traverser.next();
       if (ast.getType() != HqlSqlTokenTypes.IN_LIST) {
         throw new GenerationException("Expected IN_LIST node but found " + ast.getText());
@@ -347,7 +357,7 @@ public class TypedQueryFactoryGenerator {
 
       List<Statement> collection = new ArrayList<Statement>(ast.getNumberOfChildren());
       for (int i = 0; i < ast.getNumberOfChildren(); i++) {
-        collection.add(Cast.to(Object.class, generateExpression(traverser, dotNodeResolver)));
+        collection.add(Cast.to(Object.class, generateExpression(traverser, dotNodeResolver, containingMethod)));
       }
       Statement callToComparisonsIn = Stmt.invokeStatic(Comparisons.class, "in", thingToTest, collection.toArray());
       return notIn ? Bool.notExpr(callToComparisonsIn) : callToComparisonsIn;
@@ -355,12 +365,12 @@ public class TypedQueryFactoryGenerator {
 
     case HqlSqlTokenTypes.NOT_LIKE:
     case HqlSqlTokenTypes.LIKE: {
-      Statement valueExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver));
-      Statement patternExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver));
+      Statement valueExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver, containingMethod));
+      Statement patternExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver, containingMethod));
       Statement escapeCharExpr = Cast.to(String.class, Stmt.loadLiteral(null));
       if (ast.getNumberOfChildren() == 3) {
         traverser.next();
-        escapeCharExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver));
+        escapeCharExpr = Cast.to(String.class, generateExpression(traverser, dotNodeResolver, containingMethod));
       }
       Statement likeStmt = Stmt.invokeStatic(
               Comparisons.class, "like", valueExpr, patternExpr, escapeCharExpr);
@@ -368,19 +378,19 @@ public class TypedQueryFactoryGenerator {
     }
 
     case HqlSqlTokenTypes.IS_NULL:
-      return Bool.isNull(generateExpression(traverser, dotNodeResolver));
+      return Bool.isNull(generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.IS_NOT_NULL:
-      return Bool.isNotNull(generateExpression(traverser, dotNodeResolver));
+      return Bool.isNotNull(generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.OR:
-      return Bool.or(generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
+      return Bool.or(generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.AND:
-      return Bool.and(generateExpression(traverser, dotNodeResolver), generateExpression(traverser, dotNodeResolver));
+      return Bool.and(generateExpression(traverser, dotNodeResolver, containingMethod), generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.NOT:
-      return Bool.notExpr(generateExpression(traverser, dotNodeResolver));
+      return Bool.notExpr(generateExpression(traverser, dotNodeResolver, containingMethod));
 
     //
     // VALUE EXPRESSIONS
@@ -400,7 +410,7 @@ public class TypedQueryFactoryGenerator {
       return Stmt.loadLiteral(SqlUtil.parseStringLiteral(ast.getText()));
 
     case HqlSqlTokenTypes.UNARY_MINUS:
-      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateExpression(traverser, dotNodeResolver));
+      return ArithmeticExpressionBuilder.create(ArithmeticOperator.Subtraction, generateExpression(traverser, dotNodeResolver, containingMethod));
 
     case HqlSqlTokenTypes.NUM_INT:
     case HqlSqlTokenTypes.NUM_DOUBLE:
@@ -426,7 +436,7 @@ public class TypedQueryFactoryGenerator {
       SqlNode exprList = (SqlNode) traverser.next();
       Statement[] args = new Statement[exprList.getNumberOfChildren()];
       for (int i = 0; i < args.length; i++) {
-        args[i] = generateExpression(traverser, dotNodeResolver);
+        args[i] = generateExpression(traverser, dotNodeResolver, containingMethod);
       }
       if ("lower".equals(methodNameNode.getOriginalText())) {
         return Stmt.castTo(String.class, Stmt.load(args[0])).invoke("toLowerCase");
@@ -440,6 +450,25 @@ public class TypedQueryFactoryGenerator {
           sb.append(s);
         }
         return Stmt.load(sb).invoke("toString");
+      }
+      else if ("substring".equals(methodNameNode.getOriginalText())) {
+        int uniq = uniqueNumber.incrementAndGet();
+        containingMethod.append(Stmt.declareFinalVariable("substrOrig" + uniq, String.class,
+                Cast.to(String.class, args[0])));
+        containingMethod.append(Stmt.declareFinalVariable("substrStart" + uniq, int.class,
+                Arith.expr(Cast.to(Integer.class, args[1]), ArithmeticOperator.Subtraction, 1)));
+        if (args.length == 2) {
+          return Stmt.loadVariable("substrOrig" + uniq).invoke("substring", Stmt.loadVariable("substrStart" + uniq));
+        }
+        else if (args.length == 3) {
+          containingMethod.append(Stmt.declareFinalVariable("substrEnd" + uniq, int.class,
+                  Arith.expr(Cast.to(Integer.class, args[2]), ArithmeticOperator.Addition, Stmt.loadVariable("substrStart" + uniq))));
+          return Stmt.loadVariable("substrOrig" + uniq).invoke(
+                  "substring", Stmt.loadVariable("substrStart" + uniq), Stmt.loadVariable("substrEnd" + uniq));
+        }
+        else {
+          throw new GenerationException("Found " + args.length + " arguments to concat() function. Expected 2 or 3.");
+        }
       }
       throw new UnsupportedOperationException("The JPQL function " + methodNameNode.getOriginalText() + " is not supported");
 

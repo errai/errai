@@ -1291,6 +1291,63 @@ public class QueryTest extends GWTTestCase {
     assertFalse(results.contains(zentity3));
   }
 
+  public void testSubstringFunctionOneArg() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("ala b");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("raffe");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("donkey");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentitySubstringFunctionOneArg", Zentity.class);
+    q.setParameter("bigStr", "giraffe");
+    q.setParameter("startPos", 3);
+
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertFalse(results.contains(zentity1));
+    assertTrue(results.contains(zentity2));
+    assertFalse(results.contains(zentity3));
+  }
+
+  public void testSubstringFunctionTwoArgs() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("ala b");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("raffe");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("donkey");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentitySubstringFunctionTwoArgs", Zentity.class);
+    q.setParameter("bigStr", "koala bear");
+    q.setParameter("startPos", 3);
+    q.setParameter("length", 5);
+
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertTrue(results.contains(zentity1));
+    assertFalse(results.contains(zentity2));
+    assertFalse(results.contains(zentity3));
+  }
+
   public void testLikeOperator() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 

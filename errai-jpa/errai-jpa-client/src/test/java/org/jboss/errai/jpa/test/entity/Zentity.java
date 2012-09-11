@@ -133,6 +133,8 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityParamNestedInFunction", query="SELECT z FROM Zentity z WHERE lower(:str) = z.string"),
 
   @NamedQuery(name="zentityConcatFunction", query="SELECT z FROM Zentity z WHERE 'foo' = concat(z.string, 'o', 'o')"),
+  @NamedQuery(name="zentitySubstringFunctionOneArg", query="SELECT z FROM Zentity z WHERE z.string = substring(:bigStr, :startPos)"),
+  @NamedQuery(name="zentitySubstringFunctionTwoArgs", query="SELECT z FROM Zentity z WHERE z.string = substring(:bigStr, :startPos, :length)"),
 
   // OTHER
   // -----
