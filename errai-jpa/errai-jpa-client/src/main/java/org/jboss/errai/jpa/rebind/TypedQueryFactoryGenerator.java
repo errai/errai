@@ -334,7 +334,9 @@ public class TypedQueryFactoryGenerator {
               Stmt.invokeStatic(Comparisons.class, "nullSafeGreaterThan", outside, big));
     }
 
+    case HqlSqlTokenTypes.NOT_IN:
     case HqlSqlTokenTypes.IN: {
+      final boolean notIn = ast.getType() == HqlSqlTokenTypes.NOT_IN;
       Statement thingToTest = generateExpression(traverser, dotNodeResolver);
       ast = traverser.next();
       if (ast.getType() != HqlSqlTokenTypes.IN_LIST) {
@@ -345,7 +347,8 @@ public class TypedQueryFactoryGenerator {
       for (int i = 0; i < ast.getNumberOfChildren(); i++) {
         collection.add(Cast.to(Object.class, generateExpression(traverser, dotNodeResolver)));
       }
-      return Stmt.invokeStatic(Comparisons.class, "in", thingToTest, collection.toArray());
+      Statement callToComparisonsIn = Stmt.invokeStatic(Comparisons.class, "in", thingToTest, collection.toArray());
+      return notIn ? Bool.notExpr(callToComparisonsIn) : callToComparisonsIn;
     }
 
     case HqlSqlTokenTypes.NOT_LIKE:

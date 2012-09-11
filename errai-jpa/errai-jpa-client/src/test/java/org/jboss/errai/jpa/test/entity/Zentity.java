@@ -88,6 +88,7 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityInLiteral", query="SELECT z FROM Zentity z WHERE z.string IN ('foo', 'bar', 'baz')"),
   @NamedQuery(name="zentityInSingleValuedParams", query="SELECT z FROM Zentity z WHERE z.string IN (:in1, :in2, :in3)"),
   @NamedQuery(name="zentityInCollectionParam", query="SELECT z FROM Zentity z WHERE z.string IN :inList"),
+  @NamedQuery(name="zentityNotInLiteral", query="SELECT z FROM Zentity z WHERE z.string NOT IN ('foo', 'bar', 'baz')"),
 
   @NamedQuery(name="zentityLike", query="SELECT z FROM Zentity z WHERE z.string LIKE :str"),
   @NamedQuery(name="zentityNotLike", query="SELECT z FROM Zentity z WHERE z.string NOT LIKE :str"),

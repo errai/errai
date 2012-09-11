@@ -745,6 +745,34 @@ public class QueryTest extends GWTTestCase {
     assertTrue(resultStrings.contains(zentity3.toString()));
   }
 
+  public void testNotInLiteral() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("hello");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("baz");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityNotInLiteral", Zentity.class);
+    Set<String> resultStrings = new HashSet<String>();
+    for (Zentity z : q.getResultList()) {
+      resultStrings.add(z.toString());
+    }
+    assertEquals(1, resultStrings.size());
+    assertTrue(resultStrings.contains(zentity1.toString()));
+    assertFalse(resultStrings.contains(zentity2.toString()));
+    assertFalse(resultStrings.contains(zentity3.toString()));
+  }
+
   public void testInSingleValuedParams() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 
