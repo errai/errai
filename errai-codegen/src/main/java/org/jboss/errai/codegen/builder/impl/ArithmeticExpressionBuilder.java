@@ -59,6 +59,40 @@ public class ArithmeticExpressionBuilder extends ExpressionBuilder<ArithmeticOpe
 
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(Number.class);
+    Class<?> lhsType = null;
+    if (lhs != null) {
+      lhsType = lhs.getType().asUnboxed().asClass();
+    }
+    Class<?> rhsType = null;
+    if (rhs != null) {
+      rhsType = rhs.getType().asUnboxed().asClass();
+    }
+    return MetaClassFactory.get(promote(lhsType, rhsType));
+  }
+
+  /**
+   * Implements unary or binary numeric promotion <a href=
+   * "http://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.6.2"
+   * >according to the JLS</a>.
+   *
+   * @param lhs
+   *          the left-hand-side type as an unboxed numeric type. Can be null if
+   *          there is no left-hand-side operand.
+   * @param lhs
+   *          the right-hand-side type as an unboxed numeric type. Can be null
+   *          if there is no right-hand-side operand.
+   * @return The unboxed numeric class type that the expression results in.
+   */
+  private Class<?> promote(Class<?> lhs, Class<?> rhs) {
+    if (lhs == double.class || rhs == double.class) {
+      return double.class;
+    }
+    if (lhs == float.class || rhs == float.class) {
+      return float.class;
+    }
+    if (lhs == long.class || rhs == long.class) {
+      return long.class;
+    }
+    return int.class;
   }
 }
