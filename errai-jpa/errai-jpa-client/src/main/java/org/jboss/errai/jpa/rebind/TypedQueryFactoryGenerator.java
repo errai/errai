@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Arith;
 import org.jboss.errai.codegen.util.Bool;
@@ -330,6 +331,28 @@ public class TypedQueryFactoryGenerator {
       return Bool.or(
               Stmt.invokeStatic(Comparisons.class, "nullSafeLessThan", outside, small),
               Stmt.invokeStatic(Comparisons.class, "nullSafeGreaterThan", outside, big));
+    }
+
+    case HqlSqlTokenTypes.IN: {
+      Statement thingToTest = generateExpression(traverser, dotNodeResolver);
+      ast = traverser.next();
+      if (ast.getType() != HqlSqlTokenTypes.IN_LIST) {
+        throw new GenerationException("Expected IN_LIST node but found " + ast.getText());
+      }
+      Statement inTestExpr = null;
+      for (int i = 0; i < ast.getNumberOfChildren(); i++) {
+        if (inTestExpr == null) {
+          inTestExpr = Stmt.invokeStatic(
+                  Comparisons.class, "nullSafeEquals",
+                  thingToTest, generateExpression(traverser, dotNodeResolver));
+        }
+        else {
+          inTestExpr = Bool.or(inTestExpr, Stmt.invokeStatic(
+                  Comparisons.class, "nullSafeEquals",
+                  thingToTest, generateExpression(traverser, dotNodeResolver)));
+        }
+      }
+      return inTestExpr;
     }
 
     case HqlSqlTokenTypes.NOT_LIKE:

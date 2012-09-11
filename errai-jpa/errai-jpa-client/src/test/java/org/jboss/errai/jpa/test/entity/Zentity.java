@@ -85,6 +85,9 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityBetween", query="SELECT z FROM Zentity z WHERE z.boxedDouble BETWEEN 2.0 AND 4.0"),
   @NamedQuery(name="zentityNotBetween", query="SELECT z FROM Zentity z WHERE z.boxedDouble NOT BETWEEN 2.0 AND 4.0"),
 
+  @NamedQuery(name="zentityInLiteral", query="SELECT z FROM Zentity z WHERE z.string IN ('foo', 'bar', 'baz')"),
+//  @NamedQuery(name="zentityInParam", query="SELECT z FROM Zentity z WHERE z.string IN :inList"),
+
   @NamedQuery(name="zentityLike", query="SELECT z FROM Zentity z WHERE z.string LIKE :str"),
   @NamedQuery(name="zentityNotLike", query="SELECT z FROM Zentity z WHERE z.string NOT LIKE :str"),
   @NamedQuery(name="zentityLikeWithEscapeChar", query="SELECT z FROM Zentity z WHERE z.string LIKE :str ESCAPE 'a' AND 1 = 1"),
