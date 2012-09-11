@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>errai-codegen-gwt</artifactId>
+    <name>Errai::Codegen::GWT</name>
 
     <dependencies>
         <dependency>
