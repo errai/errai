@@ -129,6 +129,16 @@ public class AstInorderTraversal implements Iterator<AST> {
     return null;
   }
 
+  public AST fastForwardTo(AST node) {
+    while (hasNext()) {
+      AST ast = next();
+      if (ast == node) {
+        return ast;
+      }
+    }
+    throw new IllegalArgumentException("Didn't find requested node in the remainder of the traversal");
+  }
+
   /**
    * Not implemented.
    *

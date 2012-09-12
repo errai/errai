@@ -60,6 +60,7 @@ import antlr.TokenStreamException;
 import antlr.collections.AST;
 
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.regexp.shared.RegExp;
 
 /**
  * Code generator for making TypedQuery instances based on existing typesafe
@@ -434,6 +435,75 @@ public class TypedQueryFactoryGenerator {
     case HqlSqlTokenTypes.METHOD_CALL:
       IdentNode methodNameNode = (IdentNode) traverser.next();
       SqlNode exprList = (SqlNode) traverser.next();
+
+      // trim is weird because it can take keywords (IDENT nodes) in its arg list
+      if ("trim".equals(methodNameNode.getOriginalText())) {
+        String trimType = "BOTH";
+        Statement trimChar = Stmt.loadLiteral(' ');
+        Statement untrimmedStr;
+        ast = traverser.next();
+        if (ast.getType() == HqlSqlTokenTypes.IDENT) {
+          if (ast.getText().equalsIgnoreCase("BOTH")) {
+            trimType = "BOTH";
+            ast = traverser.next();
+          }
+          else if (ast.getText().equalsIgnoreCase("LEADING")) {
+            trimType = "LEADING";
+            ast = traverser.next();
+          }
+          else if (ast.getText().equalsIgnoreCase("TRAILING")) {
+            trimType = "TRAILING";
+            ast = traverser.next();
+          }
+        }
+
+        // [[IDENT('LEADING|TRAILING|BOTH')], [<expression:trimchar>], IDENT(FROM),] <expression:untrimmedStr>
+        //                                    ^^^ you are here
+        if (exprList.getNumberOfChildren() == 4 ||
+                (exprList.getNumberOfChildren() == 3 && ast.getType() != HqlSqlTokenTypes.IDENT)) {
+          Statement trimStr = generateExpression(new AstInorderTraversal(ast), dotNodeResolver, containingMethod);
+          trimChar = Stmt.nestedCall(trimStr).invoke("charAt", 0);
+          ast = traverser.fastForwardTo(ast.getNextSibling());
+        }
+
+        if (ast.getType() == HqlSqlTokenTypes.IDENT) {
+          if (ast.getText().equalsIgnoreCase("FROM")) {
+            ast = traverser.next();
+          }
+          else {
+            throw new GenerationException("Found unexpected JPQL keyword " + ast.getText() + " in query (expected FROM)");
+          }
+        }
+
+        untrimmedStr = generateExpression(new AstInorderTraversal(ast), dotNodeResolver, containingMethod);
+        traverser.fastForwardToNextSiblingOf(ast);
+
+        // declare a local variable with the regex pattern in it
+        int uniq = uniqueNumber.incrementAndGet();
+        StringBuilderBuilder trimPattern = Implementations.newStringBuilder();
+        trimPattern.append("^");
+        if (trimType.equals("LEADING") || trimType.equals("BOTH")) {
+          trimPattern.append(Stmt.invokeStatic(Comparisons.class, "escapeRegexChar", trimChar));
+          trimPattern.append("*");
+        }
+        trimPattern.append("(.*?)");
+        if (trimType.equals("TRAILING") || trimType.equals("BOTH")) {
+          trimPattern.append(Stmt.invokeStatic(Comparisons.class, "escapeRegexChar", trimChar));
+          trimPattern.append("*");
+        }
+        trimPattern.append("$");
+        containingMethod.append(
+                Stmt.declareFinalVariable(
+                        "trimmer" + uniq,
+                        RegExp.class,
+                        Stmt.invokeStatic(RegExp.class, "compile", Stmt.load(trimPattern).invoke("toString"))));
+
+        return Stmt.nestedCall(
+                  Stmt.loadVariable("trimmer" + uniq).invoke("exec", Stmt.castTo(String.class, Stmt.load(untrimmedStr))
+               ).invoke("getGroup", 1));
+      }
+
+      // for all other functions, we can pre-process the arguments like this:
       Statement[] args = new Statement[exprList.getNumberOfChildren()];
       for (int i = 0; i < args.length; i++) {
         args[i] = generateExpression(traverser, dotNodeResolver, containingMethod);

@@ -126,6 +126,7 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 
   // STRING FUNCTIONS
   // ----------------
+
   @NamedQuery(name="zentityLowercaseFunction", query="SELECT z FROM Zentity z WHERE 'foo' = lower(z.string)"),
   @NamedQuery(name="zentityUppercaseFunction", query="SELECT z FROM Zentity z WHERE upper(z.string) = 'FOO'"),
 
@@ -135,6 +136,12 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityConcatFunction", query="SELECT z FROM Zentity z WHERE 'foo' = concat(z.string, 'o', 'o')"),
   @NamedQuery(name="zentitySubstringFunctionOneArg", query="SELECT z FROM Zentity z WHERE z.string = substring(:bigStr, :startPos)"),
   @NamedQuery(name="zentitySubstringFunctionTwoArgs", query="SELECT z FROM Zentity z WHERE z.string = substring(:bigStr, :startPos, :length)"),
+  @NamedQuery(name="zentityTrimFunction", query="SELECT z FROM Zentity z WHERE trim(z.string) = 'foo'"),
+  @NamedQuery(name="zentityTrimLeadingFunction", query="SELECT z FROM Zentity z WHERE trim(LEADING FROM z.string) = 'foo'"),
+  @NamedQuery(name="zentityTrimTrailingFunction", query="SELECT z FROM Zentity z WHERE trim(TRAILING FROM z.string) = 'foo'"),
+  @NamedQuery(name="zentityTrimTrailingWithCustomPadFunction", query="SELECT z FROM Zentity z WHERE trim(TRAILING 'o' FROM z.string) = 'f'"),
+
+
 
   // OTHER
   // -----

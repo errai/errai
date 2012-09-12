@@ -1348,6 +1348,130 @@ public class QueryTest extends GWTTestCase {
     assertFalse(results.contains(zentity3));
   }
 
+  public void testTrimFunction() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("   foo   ");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("  foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("foo ");
+    em.persist(zentity3);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setString(" bar ");
+    em.persist(zentity4);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityTrimFunction", Zentity.class);
+
+    List<Zentity> results = q.getResultList();
+    assertEquals(3, results.size());
+    assertTrue(results.contains(zentity1));
+    assertTrue(results.contains(zentity2));
+    assertTrue(results.contains(zentity3));
+    assertFalse(results.contains(zentity4));
+  }
+
+  public void testTrimLeadingFunction() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("   foo   ");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("  foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("foo ");
+    em.persist(zentity3);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setString(" bar ");
+    em.persist(zentity4);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityTrimLeadingFunction", Zentity.class);
+
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertFalse(results.contains(zentity1));
+    assertTrue(results.contains(zentity2));
+    assertFalse(results.contains(zentity3));
+    assertFalse(results.contains(zentity4));
+  }
+
+  public void testTrimTrailingFunction() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("   foo   ");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("  foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("foo ");
+    em.persist(zentity3);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setString(" bar ");
+    em.persist(zentity4);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityTrimTrailingFunction", Zentity.class);
+
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertFalse(results.contains(zentity1));
+    assertFalse(results.contains(zentity2));
+    assertTrue(results.contains(zentity3));
+    assertFalse(results.contains(zentity4));
+  }
+
+  public void testTrimTrailingWithCustomPadFunction() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("   foo   ");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("  foo");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("foo");
+    em.persist(zentity3);
+
+    Zentity zentity4 = new Zentity();
+    zentity4.setString(" bar ");
+    em.persist(zentity4);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityTrimTrailingWithCustomPadFunction", Zentity.class);
+
+    List<Zentity> results = q.getResultList();
+    assertEquals(1, results.size());
+    assertFalse(results.contains(zentity1));
+    assertFalse(results.contains(zentity2));
+    assertTrue(results.contains(zentity3));
+    assertFalse(results.contains(zentity4));
+  }
+
   public void testLikeOperator() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 

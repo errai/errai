@@ -230,33 +230,39 @@ public class Comparisons {
       }
 
       // append non-jpql-wildcard char (escaping if it's a special regex char)
-      switch(ch) {
-      case '.':
-      case '\\':
-      case '+':
-      case '*':
-      case '?':
-      case '[':
-      case '^':
-      case ']':
-      case '$':
-      case '(':
-      case ')':
-      case '{':
-      case '}':
-      case '=':
-      case '!':
-      case '<':
-      case '>':
-      case '|':
-      case ':':
-      case '-':
-        sb.append('\\');
-        // FALLTHROUGH
+      sb.append(escapeRegexChar(ch));
+    }
+    return sb.toString();
+  }
 
-      default:
-        sb.append(ch);
-      }
+  public static String escapeRegexChar(char ch) {
+    StringBuilder sb = new StringBuilder(2);
+    switch (ch) {
+    case '.':
+    case '\\':
+    case '+':
+    case '*':
+    case '?':
+    case '[':
+    case '^':
+    case ']':
+    case '$':
+    case '(':
+    case ')':
+    case '{':
+    case '}':
+    case '=':
+    case '!':
+    case '<':
+    case '>':
+    case '|':
+    case ':':
+    case '-':
+      sb.append('\\');
+      // FALLTHROUGH
+
+    default:
+      sb.append(ch);
     }
     return sb.toString();
   }
