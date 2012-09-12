@@ -37,6 +37,10 @@ public interface PlainMethodTestService {
   @GET
   @Path("/void")
   public void getReturningVoid();
+  
+  @GET 
+  @Path("noslash")
+  public String getWithPathWithoutSlash();
  
   @POST 
   public String post();

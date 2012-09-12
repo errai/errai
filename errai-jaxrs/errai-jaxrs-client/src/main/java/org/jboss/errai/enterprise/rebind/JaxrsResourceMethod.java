@@ -31,21 +31,34 @@ import org.jboss.errai.codegen.meta.MetaMethod;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsResourceMethod {
-  private MetaMethod method;
-  private Statement httpMethod;
-  private String path;
+  private final MetaMethod method;
+  private final Statement httpMethod;
+  private final String path;
 
-  private JaxrsResourceMethodParameters parameters;
-  private JaxrsHeaders resourceClassHeaders;
-  private JaxrsHeaders methodHeaders;
+  private final JaxrsResourceMethodParameters parameters;
+  private final JaxrsHeaders resourceClassHeaders;
+  private final JaxrsHeaders methodHeaders;
 
   public JaxrsResourceMethod(MetaMethod method, JaxrsHeaders headers, String rootResourcePath) {
-    this.method = method;
-
     Path subResourcePath = method.getAnnotation(Path.class);
-    String fullPath = "/" + rootResourcePath + ((subResourcePath != null) ? subResourcePath.value() : "");
-    this.path = fullPath.replaceAll("//", "/").replaceFirst("/", "");
+    String fullPath = rootResourcePath;
+    if (fullPath.startsWith("/")) {
+      fullPath = fullPath.substring(1);
+    }
     
+    if (fullPath.endsWith("/")) {
+      fullPath = fullPath.substring(0, fullPath.length() - 1); 
+    }
+
+    if (subResourcePath != null) {
+      if (!subResourcePath.value().startsWith("/")) {
+        fullPath += "/";
+      }
+      fullPath += subResourcePath.value();
+    }
+
+    this.method = method;
+    this.path = fullPath;
     this.httpMethod = JaxrsGwtRequestMethodMapper.fromMethod(method);
     this.parameters = JaxrsResourceMethodParameters.fromMethod(method);
     this.methodHeaders = JaxrsHeaders.fromMethod(method);

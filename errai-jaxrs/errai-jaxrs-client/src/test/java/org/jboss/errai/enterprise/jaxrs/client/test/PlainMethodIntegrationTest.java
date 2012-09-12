@@ -58,6 +58,13 @@ public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
     RestClient.create(PlainMethodTestService.class, "/",
         new AssertionCallback<Void>("@GET returning void failed", null)).getReturningVoid();
   }
+  
+  @Test
+  public void testGetWithPathWithoutSlash() {
+    RestClient.create(PlainMethodTestService.class, "/",
+        new AssertionCallback<String>("@GET with @Path without slash failed", 
+            "getWithPathWithoutSlash")).getWithPathWithoutSlash();
+  }
 
   @Test
   public void testPostWithRemoteCallback() {
