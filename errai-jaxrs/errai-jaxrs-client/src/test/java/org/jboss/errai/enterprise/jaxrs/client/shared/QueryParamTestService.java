@@ -29,7 +29,7 @@ import javax.ws.rs.QueryParam;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Path("/test/queryparam")
+@Path("/test/queryparam/")
 public interface QueryParamTestService {
 
   @GET
