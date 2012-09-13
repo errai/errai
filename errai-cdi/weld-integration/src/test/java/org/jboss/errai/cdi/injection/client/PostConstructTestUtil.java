@@ -14,7 +14,7 @@ public class PostConstructTestUtil {
     order.clear();
   }
 
-  public static void record(String fired) {
+  public static void record(final String fired) {
     order.add(fired);
   }
 

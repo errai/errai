@@ -32,7 +32,6 @@ public class InstanceTestBean {
   @Inject
   private Instance<DependentBeanA> injectDependentBeanA;
 
-
   public Instance<ApplicationScopedBeanA> getInjectApplicationScoped() {
     return injectApplicationScoped;
   }

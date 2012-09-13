@@ -11,7 +11,6 @@ public class Air {
   private Bird bird;
 
   public Air() {
-
   }
 
   @Inject
