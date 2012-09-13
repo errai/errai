@@ -21,6 +21,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Stmt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import com.google.gwt.dev.util.collect.IdentityHashSet;
 
@@ -44,6 +46,8 @@ import org.jboss.errai.codegen.util.Stmt;
  * @author Mike Brock
  */
 public final class SnapshotMaker {
+
+  final static Logger logger = LoggerFactory.getLogger(SnapshotMaker.class);
 
   /**
    * Callback interface for providing custom method bodies in snapshots. There are three major use cases:
@@ -232,8 +236,10 @@ public final class SnapshotMaker {
               ") is not an instance of requested type to snapshot " + typeToSnapshot.getName());
     }
 
-    System.out.println("** Making snapshot of " + o);
-    System.out.println("   Existing snapshots: " + existingSnapshots);
+    if (logger.isDebugEnabled()) {
+      logger.debug("** Making snapshot of " + o);
+      logger.debug("   Existing snapshots: " + existingSnapshots);
+    }
 
     final List<MetaMethod> sortedMethods = Arrays.asList(typeToExtend.getMethods());
     Collections.sort(sortedMethods, new Comparator<MetaMethod>() {
@@ -243,7 +249,7 @@ public final class SnapshotMaker {
       }
     });
 
-    System.out.println("   Creating a new statement");
+    logger.debug("   Creating a new statement");
     return new Statement() {
       String generatedCache;
 
@@ -256,7 +262,10 @@ public final class SnapshotMaker {
 
       @Override
       public String generate(Context context) {
-        System.out.println("++ Statement.generate() for " + o);
+        if (logger.isDebugEnabled()) {
+          logger.debug("++ Statement.generate() for " + o);
+        }
+
         if (generatedCache != null) return generatedCache;
 
         // create a subcontext and record the types we will allow the LiteralFactory to create automatic
@@ -269,14 +278,16 @@ public final class SnapshotMaker {
         unfinishedSnapshots.add(o);
         for (MetaMethod method : sortedMethods) {
           if (method.isFinal() || method.getName().equals("toString")) continue;
-          
-          System.out.println("  method " + method.getName());
-          System.out.println("    return type " + method.getReturnType());
+
+          if (logger.isDebugEnabled()) {
+            logger.debug("  method " + method.getName());
+            logger.debug("    return type " + method.getReturnType());
+          }
 
           if (methodBodyCallback != null) {
             Statement providedMethod = methodBodyCallback.generateMethodBody(method, o, builder);
             if (providedMethod != null) {
-              System.out.println("    body provided by callback");
+              logger.debug("    body provided by callback");
               builder
                   .publicOverridesMethod(method.getName(), Parameter.of(method.getParameters()))
                   .append(providedMethod)
@@ -287,7 +298,9 @@ public final class SnapshotMaker {
 
           if (method.getName().equals("equals") || method.getName().equals("hashCode")) {
             // we skip these if not provided by the callback
-            System.out.println("    skipping special-case method " + method.getName());
+            if (logger.isDebugEnabled()) {
+              logger.debug("    skipping special-case method " + method.getName());
+            }
             continue;
           }
 
@@ -299,17 +312,23 @@ public final class SnapshotMaker {
 
           if (method.getReturnType().equals(void.class)) {
             builder.publicOverridesMethod(method.getName()).finish();
-            System.out.println("  finished method " + method.getName());
+            if (logger.isDebugEnabled()) {
+              logger.debug("  finished method " + method.getName());
+            }
             continue;
           }
           try {
 
             final Object retval = typeToExtend.asClass().getMethod(method.getName()).invoke(o);
             methodReturnVals.put(retval, method);
-            System.out.println("    retval=" + retval);
+
+            if (logger.isDebugEnabled()) {
+              logger.debug("    retval=" + retval);
+            }
+
             Statement methodBody;
             if (existingSnapshots.containsKey(retval)) {
-              System.out.println("    using existing snapshot");
+              logger.debug("    using existing snapshot");
               methodBody = existingSnapshots.get(retval);
             }
             else if (subContext.isLiteralizableClass(method.getReturnType().getErased())) {
@@ -318,17 +337,22 @@ public final class SnapshotMaker {
               }
 
               // use Stmt.create(context) to pass the context along.
-              System.out.println("    >> recursing for " + retval);
+              if (logger.isDebugEnabled()) {
+                logger.debug("    >> recursing for " + retval);
+              }
+
               methodBody = Stmt.create(subContext).nestedCall(makeSnapshotAsSubclass(
                   retval, method.getReturnType(), method.getReturnType(),
                   methodBodyCallback, typesToRecurseOn, existingSnapshots, unfinishedSnapshots)).returnValue();
             }
             else {
-              System.out.println("    relying on literal factory");
+              logger.debug("    relying on literal factory");
               methodBody = Stmt.load(retval).returnValue();
             }
 
-            System.out.println("  finished method " + method.getName());
+            if (logger.isDebugEnabled()) {
+              logger.debug("  finished method " + method.getName());
+            }
 
             builder.publicOverridesMethod(method.getName()).append(methodBody).finish();
             existingSnapshots.put(retval, methodBody);
@@ -346,7 +370,9 @@ public final class SnapshotMaker {
           }
         }
 
-        System.out.println("    finished: " + builder);
+        if (logger.isDebugEnabled()) {
+          logger.debug("    finished: " + builder);
+        }
 
         try {
           generatedCache = prettyPrintJava(builder.finish().toJavaString());
