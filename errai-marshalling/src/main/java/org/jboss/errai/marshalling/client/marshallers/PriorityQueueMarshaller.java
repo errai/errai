@@ -28,9 +28,7 @@ import org.jboss.errai.marshalling.client.api.json.EJArray;
  */
 @ClientMarshaller @ServerMarshaller
 public class PriorityQueueMarshaller extends AbstractCollectionMarshaller<PriorityQueue> {
-  
-  private static final PriorityQueue[] EMPTY_ARRAY = new PriorityQueue[0];
-  
+
   @Override
   public Class<PriorityQueue> getTypeHandled() {
     return PriorityQueue.class;
@@ -38,7 +36,7 @@ public class PriorityQueueMarshaller extends AbstractCollectionMarshaller<Priori
   
   @Override
   public PriorityQueue[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new PriorityQueue[0];
   }
 
   @Override

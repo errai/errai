@@ -30,8 +30,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  */
 @ClientMarshaller @ServerMarshaller
 public class TimestampMarshaller extends AbstractNullableMarshaller<Timestamp> {
-  
-  private static final Timestamp[] EMPTY_ARRAY = new Timestamp[0];
 
   @Override
   public Class<Timestamp> getTypeHandled() {
@@ -40,7 +38,7 @@ public class TimestampMarshaller extends AbstractNullableMarshaller<Timestamp> {
   
   @Override
   public Timestamp[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new Timestamp[0];
   }
 
   @Override

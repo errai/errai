@@ -16,7 +16,6 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ContentNegotiationTestService;
 import org.junit.Test;
@@ -35,72 +34,72 @@ public class ContentNegotiationIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testGetText() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@GET producing String using text/plain failed", "text")).getText();
   }
 
   @Test
   public void testGetTextAsJson() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@GET producing String using application/json failed", "json")).getTextAsJson();
   }
   
   @Test
   public void testGetLong() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<Long>("@GET producing long using text/plain failed", 0l)).getLong();
   }
 
   @Test
   public void testGetLongAsJson() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<Long>("@GET producing long application/json failed", 1l)).getLongAsJson();
   }
   
   public void testGetInt() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<Integer>("@GET producing int using text/plain failed", 0)).getInt();
   }
 
   @Test
   public void testGetIntAsJsonUsingCustomMediaType() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<Integer>("@GET producing int application/myapp+json failed", 1)).getIntAsJson();
   }
   
   @Test
   public void testPostAsText() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@POST consuming text/* failed", "post:text")).postText("text");
   }
 
   @Test
   public void testPostAsXml() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@POST consuming application/xml failed", "post:xml")).postXml("xml");
   }
   
   @Test
   public void testPutAsText() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@PUT consuming text/plain failed", "put:text")).putText("text");
   }
 
   @Test
   public void testPutAsXml() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@PUT consuming application/* failed", "put:xml")).putXml("xml");
   }
   
   @Test
   public void testDeleteAsText() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@DELETE consuming text/plain failed", "delete:text")).deleteText("text");
   }
 
   @Test
   public void testDeleteAsXml() {
-    RestClient.create(ContentNegotiationTestService.class,
+    call(ContentNegotiationTestService.class,
         new AssertionCallback<String>("@DELETE consuming application/xml failed", "delete:xml")).deleteXml("xml");
   }
 }

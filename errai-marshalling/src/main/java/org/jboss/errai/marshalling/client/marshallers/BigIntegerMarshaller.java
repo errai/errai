@@ -30,8 +30,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ClientMarshaller @ServerMarshaller
 public class BigIntegerMarshaller extends AbstractNullableMarshaller<BigInteger> {
 
-  private static final BigInteger[] EMPTY_ARRAY = new BigInteger[0];
-
   @Override
   public Class<BigInteger> getTypeHandled() {
     return BigInteger.class;
@@ -39,7 +37,7 @@ public class BigIntegerMarshaller extends AbstractNullableMarshaller<BigInteger>
   
   @Override
   public BigInteger[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new BigInteger[0];
   }
   
   @Override

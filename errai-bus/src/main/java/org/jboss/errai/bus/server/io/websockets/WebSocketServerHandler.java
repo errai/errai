@@ -94,13 +94,13 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
   private WebSocketServerHandshaker handshaker = null;
   private ErraiService svc;
 
-  public WebSocketServerHandler(ErraiService bus) {
+  public WebSocketServerHandler(final ErraiService bus) {
     this.svc = bus;
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    Object msg = e.getMessage();
+  public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
+    final Object msg = e.getMessage();
     if (msg instanceof HttpRequest) {
       handleHttpRequest(ctx, (HttpRequest) msg);
     }
@@ -109,7 +109,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-  private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req) throws Exception {
+  private void handleHttpRequest(final ChannelHandlerContext ctx, final HttpRequest req) throws Exception {
     // Allow only GET methods.
     if (req.getMethod() != GET) {
       sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, FORBIDDEN));
@@ -117,7 +117,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     // Handshake
-    WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
+    final WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
         this.getWebSocketLocation(req), null, false);
     this.handshaker = wsFactory.newHandshaker(req);
     if (this.handshaker == null) {
@@ -128,7 +128,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-  private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
+  private void handleWebSocketFrame(final ChannelHandlerContext ctx, final WebSocketFrame frame) {
 
     // Check for closing frame
     if (frame instanceof CloseWebSocketFrame) {
@@ -146,21 +146,21 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
           .getName()));
     }
 
-    @SuppressWarnings("unchecked") EJObject val = JSONDecoder.decode(((TextWebSocketFrame) frame).getText()).isObject();
+    @SuppressWarnings("unchecked") final EJObject val = JSONDecoder.decode(((TextWebSocketFrame) frame).getText()).isObject();
 
-    QueueSession session;
+    final QueueSession session;
 
     // this is not an active channel.
     if (!activeChannels.containsKey(ctx.getChannel())) {
-      String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
+      final String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
       if (BusCommands.ConnectToQueue.name().equals(commandType)) {
-        String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
+        final String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
         // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (session = svc.getBus().getSessionBySessionId(sessionKey)) != null) {
-          LocalContext localContext = LocalContext.get(session);
+          final LocalContext localContext = LocalContext.get(session);
 
           if (localContext.hasAttribute(SESSION_ATTR_WS_STATUS) &&
               WEBSOCKET_ACTIVE.equals(localContext.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
@@ -179,7 +179,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
           }
 
           // check the activation key matches.
-          EJString activationKey = val.get(MessageParts.WebSocketToken.name()).isString();
+          final EJString activationKey = val.get(MessageParts.WebSocketToken.name()).isString();
           if (activationKey == null || !WebSocketTokenManager.verifyOneTimeToken(session, activationKey.stringValue())) {
             // nope. go away!
             sendMessage(ctx, getFailedNegotiation("bad negotiation key"));
@@ -187,7 +187,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
           else {
             // the key matches. now we send the reverse challenge to prove this client is actually
             // already talking to the bus over the COMET channel.
-            String reverseToken = WebSocketTokenManager.getNewOneTimeToken(session);
+            final String reverseToken = WebSocketTokenManager.getNewOneTimeToken(session);
             localContext.setAttribute(MessageParts.WebSocketToken.name(), reverseToken);
             localContext.setAttribute(SESSION_ATTR_WS_STATUS, WEBSOCKET_AWAIT_ACTIVATION);
 
@@ -220,7 +220,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
   }
 
-  private void sendHttpResponse(ChannelHandlerContext ctx, HttpRequest req, HttpResponse res) {
+  private void sendHttpResponse(final ChannelHandlerContext ctx, final HttpRequest req, final HttpResponse res) {
     // Generate an error page if response status code is not OK (200).
     if (res.getStatus().getCode() != 200) {
       res.setContent(ChannelBuffers.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8));
@@ -228,28 +228,28 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     // Send the response and close the connection if necessary.
-    ChannelFuture f = ctx.getChannel().write(res);
+    final ChannelFuture f = ctx.getChannel().write(res);
     if (!isKeepAlive(req) || res.getStatus().getCode() != 200) {
       f.addListener(ChannelFutureListener.CLOSE);
     }
   }
 
   @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+  public void exceptionCaught(final ChannelHandlerContext ctx, final ExceptionEvent e) throws Exception {
     //noinspection ThrowableResultOfMethodCallIgnored
     e.getCause().printStackTrace();
     e.getChannel().close();
   }
 
-  private String getWebSocketLocation(HttpRequest req) {
+  private String getWebSocketLocation(final HttpRequest req) {
     return "ws://" + req.getHeader(HttpHeaders.Names.HOST) + WEBSOCKET_PATH;
   }
 
-  public static void sendMessage(ChannelHandlerContext ctx, String message) {
+  public static void sendMessage(final ChannelHandlerContext ctx, final String message) {
     ctx.getChannel().write(new TextWebSocketFrame(message));
   }
 
-  private static String getFailedNegotiation(String error) {
+  private static String getFailedNegotiation(final String error) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
         + BusCommands.WebsocketNegotiationFailed.name() + "\"," +
         "\"" + MessageParts.ErrorMessage.name() + "\":\"" + error + "\"}]";
@@ -260,14 +260,14 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
         + BusCommands.WebsocketChannelOpen.name() + "\"}]";
   }
 
-  private static String getReverseChallenge(String token) {
+  private static String getReverseChallenge(final String token) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
         + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
         token + "\"}]";
   }
 
   public void stop() {
-    for (Channel channel : activeChannels.keySet()) {
+    for (final Channel channel : activeChannels.keySet()) {
       channel.close();
     }
   }
@@ -277,7 +277,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     private final Map<String, String[]> parameters = new HashMap<String, String[]>();
 
     @Override
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
       return attributes.get(name);
     }
 
@@ -304,7 +304,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+    public void setCharacterEncoding(final String env) throws UnsupportedEncodingException {
     }
 
     @Override
@@ -323,7 +323,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public String getParameter(String name) {
+    public String getParameter(final String name) {
       final String[] parms = parameters.get(name);
       if (parms == null) {
         return null;
@@ -351,7 +351,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public String[] getParameterValues(String name) {
+    public String[] getParameterValues(final String name) {
       return parameters.get(name);
     }
 
@@ -396,12 +396,12 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void setAttribute(String name, Object o) {
+    public void setAttribute(final String name, final Object o) {
       attributes.put(name, o);
     }
 
     @Override
-    public void removeAttribute(String name) {
+    public void removeAttribute(final String name) {
       attributes.remove(name);
     }
 
@@ -421,12 +421,12 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public RequestDispatcher getRequestDispatcher(String path) {
+    public RequestDispatcher getRequestDispatcher(final String path) {
       return null;
     }
 
     @Override
-    public String getRealPath(String path) {
+    public String getRealPath(final String path) {
       return null;
     }
 
@@ -461,7 +461,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+    public AsyncContext startAsync(final ServletRequest servletRequest, final ServletResponse servletResponse) throws IllegalStateException {
       return null;
     }
 
@@ -496,17 +496,17 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public long getDateHeader(String name) {
+    public long getDateHeader(final String name) {
       return 0;
     }
 
     @Override
-    public String getHeader(String name) {
+    public String getHeader(final String name) {
       return null;
     }
 
     @Override
-    public Enumeration<String> getHeaders(String name) {
+    public Enumeration<String> getHeaders(final String name) {
       return null;
     }
 
@@ -516,7 +516,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public int getIntHeader(String name) {
+    public int getIntHeader(final String name) {
       return 0;
     }
 
@@ -551,7 +551,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public boolean isUserInRole(String role) {
+    public boolean isUserInRole(final String role) {
       return false;
     }
 
@@ -581,7 +581,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public HttpSession getSession(boolean create) {
+    public HttpSession getSession(final boolean create) {
       return null;
     }
 
@@ -611,12 +611,12 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+    public boolean authenticate(final HttpServletResponse response) throws IOException, ServletException {
       return false;
     }
 
     @Override
-    public void login(String username, String password) throws ServletException {
+    public void login(final String username, final String password) throws ServletException {
     }
 
     @Override
@@ -629,7 +629,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public Part getPart(String name) throws IOException, ServletException {
+    public Part getPart(final String name) throws IOException, ServletException {
       return null;
     }
   }

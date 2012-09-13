@@ -57,11 +57,11 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     final User user =
         new User(11l, "first", "last", 20, Gender.MALE, new User(12l, "first2", "last2", 40, Gender.FEMALE, null));
-    final User friend1 = 
-      new User(13l, "friend1-first", "friend1-last", 1, Gender.MALE, null);
-    final User friend2 = 
-      new User(14l, "friend2-first", "friend2-last", 2, Gender.FEMALE, null);
-    
+    final User friend1 =
+        new User(13l, "friend1-first", "friend1-last", 1, Gender.MALE, null);
+    final User friend2 =
+        new User(14l, "friend2-first", "friend2-last", 2, Gender.FEMALE, null);
+
     user.setPetNames(new ArrayList<String>() {
       {
         add("pet1");
@@ -89,7 +89,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     String jackson = MarshallingWrapper.toJSON(user);
 
-    RestClient.create(JacksonTestService.class,
+    call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
           public void callback(String jackson) {
@@ -110,7 +110,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     String jackson = MarshallingWrapper.toJSON(users);
 
-    RestClient.create(JacksonTestService.class,
+    call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
           public void callback(String jackson) {
@@ -131,7 +131,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     String jackson = MarshallingWrapper.toJSON(users);
 
-    RestClient.create(JacksonTestService.class,
+    call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
           public void callback(String jackson) {
@@ -152,7 +152,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     String jackson = MarshallingWrapper.toJSON(bytes);
 
-    RestClient.create(JacksonTestService.class,
+    call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
           public void callback(String jackson) {
@@ -170,7 +170,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     final ByteArrayTestWrapper entity = new ByteArrayTestWrapper();
     String jackson = MarshallingWrapper.toJSON(entity);
 
-    RestClient.create(JacksonTestService.class,
+    call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
           public void callback(String jackson) {
@@ -180,7 +180,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
           }
         }).postJacksonPortableWithByteArray(jackson);
   }
-  
+
   @Test
   public void testJacksonMarshallingOfMap() {
     delayTestFinish(5000);
@@ -191,8 +191,9 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     String jackson = MarshallingWrapper.toJSON(users);
 
-    RestClient.create(JacksonTestService.class,
+    call(JacksonTestService.class,
         new RemoteCallback<String>() {
+          @SuppressWarnings("unchecked")
           @Override
           public void callback(String jackson) {
             assertNotNull("Server failed to parse JSON using Jackson", jackson);

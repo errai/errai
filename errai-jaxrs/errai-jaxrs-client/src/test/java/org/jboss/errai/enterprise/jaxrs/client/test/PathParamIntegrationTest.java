@@ -19,7 +19,6 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 import javax.ws.rs.core.PathSegment;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.PathSegmentImpl;
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 import org.junit.Test;
@@ -40,14 +39,14 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testGetWithPathParam() {
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionCallback<Long>("@GET with @PathParam failed", 1l)).getWithPathParam(1l);
   }
 
   @Test
   public void testGetWithEncodedPathParam() {
     String pathWithSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
-    RestClient.create(PathParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @PathParam failed",
+    call(PathParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @PathParam failed",
         pathWithSpecialChars)).getWithStringPathParam(pathWithSpecialChars);
   }
 
@@ -60,44 +59,44 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
     assertEquals("", ps.getMatrixParameters().getFirst("empty"));
     assertNull(ps.getMatrixParameters().getFirst("path"));
 
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionCallback<String>("@GET with @PathParam failed", "nameValue/authorValue"))
         .getWithPathSegmentPathParam(ps);
   }
 
   @Test
   public void testGetWithMultiplePathParams() {
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionCallback<String>("@GET with @PathParams failed", "1/2")).getWithMultiplePathParams(1, 2);
   }
 
   @Test
   public void testGetWithReusedPathParam() {
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionCallback<String>("@GET with @PathParam failed", "1.0/2.0/1.0")).getWithReusedPathParam(1.0, 2.0);
   }
 
   @Test
   public void testPostWithPathParam() {
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionCallback<Float>("@POST with @PathParam failed", 1f)).postWithPathParam(1f);
   }
 
   @Test
   public void testPutWithPathParam() {
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionCallback<Long>("@PUT with @PathParam failed", 1l)).putWithPathParam(1l);
   }
 
   @Test
   public void testDeleteWithPathParam() {
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionCallback<Long>("@DELETE with @PathParam failed", 1l)).deleteWithPathParam(1l);
   }
 
   @Test
   public void testHeadWithPathParam() {
-    RestClient.create(PathParamTestService.class,
+    call(PathParamTestService.class,
         new AssertionResponseCallback("@HEAD with @PathParam failed", Response.SC_NO_CONTENT)).headWithPathParam(1l);
   }
 }

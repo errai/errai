@@ -22,6 +22,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -373,6 +374,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public LinkedHashMap<String, Integer> testLinkedHashMap(LinkedHashMap<String, Integer> map) {
     return map;
+  }
+
+  @Override
+  public LinkedHashSet<String> testLinkedHashSet(LinkedHashSet<String> set) {
+    return set;
   }
 
   @Override

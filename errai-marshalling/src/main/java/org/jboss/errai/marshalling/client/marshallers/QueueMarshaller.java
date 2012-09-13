@@ -32,9 +32,7 @@ import org.jboss.errai.marshalling.client.api.json.EJArray;
 @ClientMarshaller @ServerMarshaller
 @ImplementationAliases({AbstractQueue.class})
 public class QueueMarshaller extends AbstractCollectionMarshaller<Queue> {
-  
-  private static final LinkedList[] EMPTY_ARRAY = new LinkedList[0];
-  
+
   @Override
   public Class<Queue> getTypeHandled() {
     return Queue.class;
@@ -42,7 +40,7 @@ public class QueueMarshaller extends AbstractCollectionMarshaller<Queue> {
   
   @Override
   public Queue[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new LinkedList[0];
   }
 
   @Override

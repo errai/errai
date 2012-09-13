@@ -69,7 +69,7 @@ public class DeploymentContext {
   public List<URL> process() {
     PackagingUtil.process(this);
 
-    List<URL> superAndSubContexts = new ArrayList<URL>();
+    final List<URL> superAndSubContexts = new ArrayList<URL>();
 
     for (Map.Entry<String, File> entry : subContexts.entrySet()) {
       File unzipped = entry.getValue();

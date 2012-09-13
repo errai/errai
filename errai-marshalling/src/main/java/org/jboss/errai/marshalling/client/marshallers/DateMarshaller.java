@@ -32,8 +32,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ServerMarshaller
 public class DateMarshaller extends AbstractNullableMarshaller<Date> {
 
-  private static final Date[] EMPTY_ARRAY = new Date[0];
-
   @Override
   public Class<Date> getTypeHandled() {
     return Date.class;
@@ -41,7 +39,7 @@ public class DateMarshaller extends AbstractNullableMarshaller<Date> {
 
   @Override
   public Date[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new Date[0];
   }
 
   @Override

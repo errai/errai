@@ -75,7 +75,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
   private static class SimpleEventChannelWrapped implements QueueChannel {
     private final WebSocket socket;
 
-    public SimpleEventChannelWrapped(WebSocket socket) {
+    public SimpleEventChannelWrapped(final WebSocket socket) {
       this.socket = socket;
     }
 
@@ -85,7 +85,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     }
 
     @Override
-    public void write(String data) throws IOException {
+    public void write(final String data) throws IOException {
       socket.writeFrame(TextFrame.from(data));
     }
 
@@ -96,16 +96,16 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
   }
 
   @Override
-  protected void onSocketOpened(WebSocket socket) throws IOException {
+  protected void onSocketOpened(final WebSocket socket) throws IOException {
   }
 
   @Override
-  protected void onSocketClosed(WebSocket socket) throws IOException {
+  protected void onSocketClosed(final WebSocket socket) throws IOException {
     final QueueSession session = sessionProvider.createOrGetSession(socket.getHttpSession(),
             socket.getSocketID());
 
     final LocalContext localSessionContext = LocalContext.get(session);
-    QueueSession cometSession = localSessionContext.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS);
+    final QueueSession cometSession = localSessionContext.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS);
     service.getBus().getQueue(cometSession).setDirectSocketChannel(null);
   }
 
@@ -134,7 +134,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
     if (text.length() == 0) return;
 
-    @SuppressWarnings("unchecked") EJObject val = JSONDecoder.decode(text).isObject();
+    @SuppressWarnings("unchecked") final EJObject val = JSONDecoder.decode(text).isObject();
 
     final LocalContext localSessionContext = LocalContext.get(session);
 
@@ -142,15 +142,15 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
     // this is not an active channel.
     if (cometSession == null) {
-      String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
+      final String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
       if (BusCommands.ConnectToQueue.name().equals(commandType)) {
-        String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
+        final String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
         // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (cometSession = service.getBus().getSessionBySessionId(sessionKey)) != null) {
-          LocalContext localCometSession = LocalContext.get(cometSession);
+          final LocalContext localCometSession = LocalContext.get(cometSession);
 
           if (localCometSession.hasAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS) &&
                   WebSocketServerHandler.WEBSOCKET_ACTIVE.equals(localCometSession.getAttribute(String.class, WebSocketServerHandler.SESSION_ATTR_WS_STATUS))) {
@@ -165,7 +165,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
           }
 
           // check the activation key matches.
-          EJString activationKey = val.get(MessageParts.WebSocketToken.name()).isString();
+          final EJString activationKey = val.get(MessageParts.WebSocketToken.name()).isString();
           if (activationKey == null || !WebSocketTokenManager.verifyOneTimeToken(cometSession, activationKey.stringValue())) {
 
             // nope. go away!
@@ -174,7 +174,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
           else {
             // the key matches. now we send the reverse challenge to prove this client is actually
             // already talking to the bus over the COMET channel.
-            String reverseToken = WebSocketTokenManager.getNewOneTimeToken(cometSession);
+            final String reverseToken = WebSocketTokenManager.getNewOneTimeToken(cometSession);
             localCometSession.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS, WebSocketServerHandler.WEBSOCKET_AWAIT_ACTIVATION);
 
             // send the challenge.
@@ -195,17 +195,17 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     else {
       // this is an active session. send the message.;
 
-      Message msg = MessageFactory.createCommandMessage(cometSession, text);
+      final Message msg = MessageFactory.createCommandMessage(cometSession, text);
       msg.setResource(HttpServletRequest.class.getName(), socket.getServletRequest());
       service.store(msg);
     }
   }
 
-  public static void sendMessage(QueueChannel channel, String message) throws IOException {
+  public static void sendMessage(final QueueChannel channel, final String message) throws IOException {
     channel.write(message);
   }
 
-  private static String getFailedNegotiation(String error) {
+  private static String getFailedNegotiation(final String error) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
             + BusCommands.WebsocketNegotiationFailed.name() + "\"," +
             "\"" + MessageParts.ErrorMessage.name() + "\":\"" + error + "\"}]";
@@ -216,7 +216,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
             + BusCommands.WebsocketChannelOpen.name() + "\"}]";
   }
 
-  private static String getReverseChallenge(String token) {
+  private static String getReverseChallenge(final String token) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
             + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
             token + "\"}]";

@@ -30,8 +30,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  */
 @ClientMarshaller @ServerMarshaller
 public class TimeMarshaller extends AbstractNullableMarshaller<Time> {
-  
-  private static final Time[] EMPTY_ARRAY = new Time[0];
 
   @Override
   public Time doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
@@ -59,7 +57,7 @@ public class TimeMarshaller extends AbstractNullableMarshaller<Time> {
   
   @Override
   public Time[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new Time[0];
   }
 
   @Override

@@ -31,11 +31,9 @@ import org.jboss.errai.marshalling.client.api.json.EJArray;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-@ImplementationAliases({AbstractSet.class, HashSet.class, LinkedHashSet.class})
+@ImplementationAliases({AbstractSet.class, HashSet.class})
 public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
-  
-  private static final HashSet[] EMPTY_ARRAY = new HashSet[0];
-  
+
   @Override
   public Class<Set> getTypeHandled() {
     return Set.class;
@@ -43,7 +41,7 @@ public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
 
   @Override
   public Set[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new HashSet[0];
   }
   
   @Override

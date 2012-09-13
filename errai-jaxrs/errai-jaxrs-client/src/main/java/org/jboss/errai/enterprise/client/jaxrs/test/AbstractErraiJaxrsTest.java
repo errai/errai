@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.test;
 
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
@@ -31,6 +33,7 @@ import com.google.gwt.junit.client.GWTTestCase;
  */
 public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected String jaxRsApplicationRoot = "/";
+  private final TestErrorCallback errorCallback = new TestErrorCallback();;
  
   @Override
   protected void gwtSetUp() throws Exception {
@@ -38,6 +41,14 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
     RestClient.setApplicationRoot(jaxRsApplicationRoot);
     RestClient.setJacksonMarshallingActive(false);
     super.gwtSetUp();
+  }
+
+  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, Integer... successCodes) {
+    return RestClient.create(remote, callback, errorCallback, successCodes);
+  }
+
+  protected <T, R> T call(Class<T> remote, String baseUrl, RemoteCallback<R> callback, Integer... successCodes) {
+    return RestClient.create(remote, baseUrl, callback, errorCallback, successCodes);
   }
 
   protected class AssertionCallback<T> implements RemoteCallback<T> {
@@ -79,6 +90,14 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
       if (body != null)
         assertEquals(msg, body, response.getText());
       finishTest();
+    }
+  }
+  
+  private class TestErrorCallback implements ErrorCallback {
+    @Override
+    public boolean error(Message message, Throwable throwable) {
+      fail(throwable.toString());
+      return false;
     }
   }
 }

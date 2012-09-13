@@ -27,8 +27,6 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  */
 @ClientMarshaller @ServerMarshaller
 public class StringBufferMarshaller extends AbstractNullableMarshaller<StringBuffer> {
-  
-  private static final StringBuffer[] EMPTY_ARRAY = new StringBuffer[0];
 
   public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
 
@@ -44,7 +42,7 @@ public class StringBufferMarshaller extends AbstractNullableMarshaller<StringBuf
   
   @Override
   public StringBuffer[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new StringBuffer[0];
   }
 
   @Override
