@@ -278,7 +278,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     }
 
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+    properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
     properties.put("javax.persistence.validation.mode", "none");
 
     return new HibernatePersistence().createEntityManagerFactory(persistenceUnits.iterator().next(), properties);

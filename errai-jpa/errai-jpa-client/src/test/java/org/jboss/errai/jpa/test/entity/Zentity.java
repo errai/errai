@@ -141,6 +141,8 @@ import org.jboss.errai.ioc.client.api.TestOnly;
   @NamedQuery(name="zentityTrimTrailingFunction", query="SELECT z FROM Zentity z WHERE trim(TRAILING FROM z.string) = 'foo'"),
   @NamedQuery(name="zentityTrimTrailingWithCustomPadFunction", query="SELECT z FROM Zentity z WHERE trim(TRAILING 'o' FROM z.string) = 'f'"),
   @NamedQuery(name="zentityLengthFunction", query="SELECT z FROM Zentity z WHERE length(z.string) = 3"),
+  @NamedQuery(name="zentityLocateFunction2Args", query="SELECT z FROM Zentity z WHERE locate(:lookFor, z.string) = 2"),
+  @NamedQuery(name="zentityLocateFunction3Args", query="SELECT z FROM Zentity z WHERE locate(:lookFor, z.string, 3) > 0"),
 
 
 

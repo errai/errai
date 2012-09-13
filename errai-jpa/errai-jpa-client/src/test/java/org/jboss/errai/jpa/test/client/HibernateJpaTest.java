@@ -33,11 +33,11 @@ public class HibernateJpaTest extends ErraiJpaTest {
     // don't call super implementation.. it is client-side-specific
 
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("hibernate.connection.driver_class", "org.hsqldb.jdbcDriver");
-    properties.put("hibernate.connection.url", "jdbc:hsqldb:mem:temporary");
+    properties.put("hibernate.connection.driver_class", "org.h2.Driver");
+    properties.put("hibernate.connection.url", "jdbc:h2:mem:temporary");
     properties.put("hibernate.connection.username", "sa");
     properties.put("hibernate.connection.password", "");
-    properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+    properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
     properties.put("hibernate.hbm2ddl.auto", "update");
     properties.put("javax.persistence.validation.mode", "none");
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiJpaClientTests", properties);

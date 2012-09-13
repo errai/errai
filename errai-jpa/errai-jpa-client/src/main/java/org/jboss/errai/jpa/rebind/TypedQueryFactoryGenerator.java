@@ -21,6 +21,7 @@ import org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory;
 import org.hibernate.hql.internal.ast.HqlParser;
 import org.hibernate.hql.internal.ast.HqlSqlWalker;
 import org.hibernate.hql.internal.ast.QueryTranslatorImpl;
+import org.hibernate.hql.internal.ast.tree.BooleanLiteralNode;
 import org.hibernate.hql.internal.ast.tree.DotNode;
 import org.hibernate.hql.internal.ast.tree.IdentNode;
 import org.hibernate.hql.internal.ast.tree.ParameterNode;
@@ -100,7 +101,7 @@ public class TypedQueryFactoryGenerator {
       resultType = query.getReturnTypes()[0].getReturnedClass();
       org.hibernate.hql.internal.ast.tree.Statement sqlAST = query.getSqlAST();
 
-      System.out.println("Second level parse tree:");
+      System.out.println("Second level parse tree for " + namedQuery.name() + ":");
       sqlAST.getWalker().getASTPrinter().showAst(sqlAST.getWalker().getAST(), System.out);
     } catch (RecognitionException e) {
       throw new RuntimeException("Failed to parse JPQL query: " + jpaQuery);
@@ -427,7 +428,7 @@ public class TypedQueryFactoryGenerator {
 
     case HqlSqlTokenTypes.TRUE:
     case HqlSqlTokenTypes.FALSE:
-      return Stmt.loadLiteral(Boolean.parseBoolean(ast.getText()));
+      return Stmt.loadLiteral(((BooleanLiteralNode) ast).getValue());
 
     case HqlSqlTokenTypes.JAVA_CONSTANT:
       return Stmt.loadLiteral(MVEL.eval(ast.getText()));
@@ -543,6 +544,17 @@ public class TypedQueryFactoryGenerator {
       else if ("length".equals(methodNameNode.getOriginalText())) {
         // all numerics must be double for purposes of comparison in this JPQL implementation
         return Stmt.castTo(double.class, Stmt.nestedCall(Stmt.castTo(String.class, Stmt.load(args[0])).invoke("length")));
+      }
+      else if ("locate".equals(methodNameNode.getOriginalText())) {
+        // all numerics must be double for purposes of comparison in this JPQL implementation
+        Statement startIndex = Stmt.loadLiteral(0);
+        if (args.length == 3) {
+          // For the 3-arg variant, JPA spec doesn't say whether we return the index in the original string or the index in the substring.
+          // I'm just guessing it's the same as Java's rule.
+          startIndex = Arith.expr(Stmt.castTo(int.class, Stmt.load(args[2])), ArithmeticOperator.Subtraction, 1);
+        }
+        Statement indexOf = Stmt.castTo(String.class, Stmt.load(args[1])).invoke("indexOf", Stmt.castTo(String.class, Stmt.load(args[0])), startIndex);
+        return Stmt.castTo(double.class, Stmt.nestedCall(Arith.expr(indexOf, ArithmeticOperator.Addition, 1)));
       }
       throw new UnsupportedOperationException("The JPQL function " + methodNameNode.getOriginalText() + " is not supported");
 
