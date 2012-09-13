@@ -16,36 +16,35 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
+
+import java.util.AbstractSet;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
-public class ShortMarshaller extends AbstractNumberMarshaller<Short> {
+@ClientMarshaller @ServerMarshaller
+public class LinkedHashSetMarshaller extends AbstractCollectionMarshaller<LinkedHashSet> {
 
   @Override
-  public Class<Short> getTypeHandled() {
-    return Short.class;
+  public Class<LinkedHashSet> getTypeHandled() {
+    return LinkedHashSet.class;
   }
 
   @Override
-  public Short[] getEmptyArray() {
-    return new Short[0];
+  public LinkedHashSet[] getEmptyArray() {
+    return new LinkedHashSet[0];
   }
-
+  
   @Override
-  public Short doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
-    if (o.isObject() != null) {
-      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().shortValue();
-    }
-    else {
-      return o.isNumber().shortValue();
-    }
+  public LinkedHashSet doDemarshall(final EJArray o, final MarshallingSession ctx) {
+    return marshallToCollection(new LinkedHashSet<Object>(o.size()), o, ctx);
   }
 }

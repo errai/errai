@@ -22,6 +22,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -164,6 +165,8 @@ public interface TestSerializationRPCService {
   public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc);
 
   public LinkedHashMap<String,Integer> testLinkedHashMap(LinkedHashMap<String,Integer> map);
+
+  public LinkedHashSet<String> testLinkedHashSet(LinkedHashSet<String> set);
 
   public ImplicitEnum testImplicitEnum(ImplicitEnum e);
 }

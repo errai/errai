@@ -16,7 +16,6 @@ import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 @ServerMarshaller
 @AlwaysQualify
 public class LinkedMapMarshaller extends MapMarshaller<LinkedHashMap<Object, Object>> {
-  private static final LinkedHashMap[] EMPTY_ARRAY = new LinkedHashMap[0];
 
   @Override
   public Class<LinkedHashMap<Object, Object>> getTypeHandled() {
@@ -31,6 +30,6 @@ public class LinkedMapMarshaller extends MapMarshaller<LinkedHashMap<Object, Obj
 
   @Override
   public LinkedHashMap[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new LinkedHashMap[0];
   }
 }

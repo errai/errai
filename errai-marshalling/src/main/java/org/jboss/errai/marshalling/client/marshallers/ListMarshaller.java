@@ -35,9 +35,7 @@ import org.jboss.errai.marshalling.client.api.json.EJArray;
 @ServerMarshaller
 @ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
 public class ListMarshaller extends AbstractCollectionMarshaller<List> {
-  
-  private static final ArrayList[] EMPTY_ARRAY = new ArrayList[0];
-  
+
   public static final ListMarshaller INSTANCE = new ListMarshaller();
 
   @Override
@@ -47,7 +45,7 @@ public class ListMarshaller extends AbstractCollectionMarshaller<List> {
 
   @Override
   public List[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new ArrayList[0];
   }
   
   @Override

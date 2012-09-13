@@ -35,8 +35,7 @@ import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 @AlwaysQualify
 @ImplementationAliases({TreeMap.class})
 public class SortedMapMarshaller extends MapMarshaller<SortedMap<Object, Object>> {
-  private static final TreeMap[] EMPTY_ARRAY = new TreeMap[0];
-  
+
   @Override
   public Class<SortedMap<Object, Object>> getTypeHandled() {
     return SimpleTypeLiteral.<SortedMap<Object, Object>>ofRawType(SortedMap.class).get();
@@ -50,6 +49,6 @@ public class SortedMapMarshaller extends MapMarshaller<SortedMap<Object, Object>
   
   @Override
   public SortedMap[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new TreeMap[0];
   }
 }

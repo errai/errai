@@ -28,8 +28,6 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 @ClientMarshaller
 @ServerMarshaller
 public class StringBuilderMarshaller extends AbstractNullableMarshaller<StringBuilder> {
-  
-  private static final StringBuilder[] EMPTY_ARRAY = new StringBuilder[0];
 
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
 
@@ -40,7 +38,7 @@ public class StringBuilderMarshaller extends AbstractNullableMarshaller<StringBu
 
   @Override
   public StringBuilder[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new StringBuilder[0];
   }
   
   @Override

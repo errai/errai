@@ -29,9 +29,7 @@ import org.jboss.errai.marshalling.client.api.json.EJArray;
 @ClientMarshaller
 @ServerMarshaller
 public class LinkedListMarshaller extends AbstractCollectionMarshaller<LinkedList> {
-  
-  private static final LinkedList[] EMPTY_ARRAY = new LinkedList[0];
-  
+
   @Override
   public Class<LinkedList> getTypeHandled() {
     return LinkedList.class;
@@ -39,7 +37,7 @@ public class LinkedListMarshaller extends AbstractCollectionMarshaller<LinkedLis
   
   @Override
   public LinkedList[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new LinkedList[0];
   }
 
   @Override

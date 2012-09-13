@@ -28,7 +28,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ClientMarshaller
 @ServerMarshaller
 public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
-  private static final Byte[] EMPTY_ARRAY = new Byte[0];
 
   @Override
   public Class<Byte> getTypeHandled() {
@@ -37,7 +36,7 @@ public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
 
   @Override
   public Byte[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new Byte[0];
   }
 
   @Override

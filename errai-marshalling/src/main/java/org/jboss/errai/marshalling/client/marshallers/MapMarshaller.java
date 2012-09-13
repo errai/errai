@@ -45,7 +45,6 @@ import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 @ImplementationAliases({ AbstractMap.class, HashMap.class })
 public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
-  private static final HashMap[] EMPTY_ARRAY = new HashMap[0];
 
   @Override
   public Class<T> getTypeHandled() {
@@ -54,7 +53,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
 
   @Override
   public T[] getEmptyArray() {
-    return (T[]) EMPTY_ARRAY;
+    return (T[]) new HashMap[0];
   }
 
   @SuppressWarnings("unchecked")

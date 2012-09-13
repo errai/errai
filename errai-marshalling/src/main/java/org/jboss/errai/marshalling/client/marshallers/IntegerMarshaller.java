@@ -28,7 +28,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ClientMarshaller
 @ServerMarshaller
 public class IntegerMarshaller extends AbstractNumberMarshaller<Integer> {
-  private static final Integer[] EMPTY_ARRAY = new Integer[0];
 
   @Override
   public Class<Integer> getTypeHandled() {
@@ -37,7 +36,7 @@ public class IntegerMarshaller extends AbstractNumberMarshaller<Integer> {
 
   @Override
   public Integer[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new Integer[0];
   }
 
   @Override

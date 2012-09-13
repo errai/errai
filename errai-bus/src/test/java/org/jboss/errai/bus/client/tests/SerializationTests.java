@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -253,9 +254,10 @@ public class SerializationTests extends AbstractErraiTest {
    * failure. You still have to call Assert.fail() if you want that.
    *
    * @param expect
-   *          The expected value.
+   *     The expected value.
    * @param got
-   *          The actual value.
+   *     The actual value.
+   *
    * @return A new String as described above.
    */
   private static String failMessage(Object expect, Object got) {
@@ -553,7 +555,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final NeverDeclareAnArrayOfThisType[] expected = { new NeverDeclareAnArrayOfThisType() };
+        final NeverDeclareAnArrayOfThisType[] expected = {new NeverDeclareAnArrayOfThisType()};
 
         MessageBuilder.createCall(new RemoteCallback<NeverDeclareAnArrayOfThisType[]>() {
           @Override
@@ -1002,17 +1004,17 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final LinkedHashMap<String,Integer> map = new LinkedHashMap<String, Integer>();
-        map.put("jonathan",   1);
-        map.put("christian",  2);
-        map.put("mike",       3);
-        map.put("lincoln",    4);
-        map.put("marius",     5);
-        map.put("banana",     6);
-        map.put("fruit",      7);
-        map.put("peas",       8);
-        map.put("hamburger",  9);
-        map.put("durian",     10);
+        final LinkedHashMap<String, Integer> map = new LinkedHashMap<String, Integer>();
+        map.put("jonathan", 1);
+        map.put("christian", 2);
+        map.put("mike", 3);
+        map.put("lincoln", 4);
+        map.put("marius", 5);
+        map.put("banana", 6);
+        map.put("fruit", 7);
+        map.put("peas", 8);
+        map.put("hamburger", 9);
+        map.put("durian", 10);
 
         MessageBuilder.createCall(new RemoteCallback<LinkedHashMap<String, Integer>>() {
           @Override
@@ -1024,6 +1026,30 @@ public class SerializationTests extends AbstractErraiTest {
             finishTest();
           }
         }, TestSerializationRPCService.class).testLinkedHashMap(map);
+      }
+    });
+  }
+
+  public void testLinkedHashSet() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final LinkedHashSet<String> set = new LinkedHashSet<String>();
+        set.add("foo");
+        set.add("bar");
+        set.add("foobar");
+
+        MessageBuilder.createCall(new RemoteCallback<LinkedHashSet>() {
+          @Override
+          public void callback(LinkedHashSet response) {
+            String compareTo = set.toString();
+            String compareFrom = response.toString();
+
+            assertEquals(compareTo, compareFrom);
+
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testLinkedHashSet(set);
       }
     });
   }
@@ -1166,9 +1192,9 @@ public class SerializationTests extends AbstractErraiTest {
 
           private boolean stackTraceEqual(StackTraceElement el1, StackTraceElement el2) {
             return el1.getClassName().equals(el2.getClassName())
-                    && el1.getFileName().equals(el2.getFileName())
-                    && el1.getLineNumber() == el2.getLineNumber()
-                    && el1.getMethodName().equals(el2.getMethodName());
+                && el1.getFileName().equals(el2.getFileName())
+                && el1.getLineNumber() == el2.getLineNumber()
+                && el1.getMethodName().equals(el2.getMethodName());
           }
         }
 
@@ -1225,9 +1251,9 @@ public class SerializationTests extends AbstractErraiTest {
 
           private boolean stackTraceEqual(StackTraceElement el1, StackTraceElement el2) {
             return el1.getClassName().equals(el2.getClassName())
-                    && el1.getFileName().equals(el2.getFileName())
-                    && el1.getLineNumber() == el2.getLineNumber()
-                    && el1.getMethodName().equals(el2.getMethodName());
+                && el1.getFileName().equals(el2.getFileName())
+                && el1.getLineNumber() == el2.getLineNumber()
+                && el1.getMethodName().equals(el2.getMethodName());
           }
         }
 
@@ -1258,8 +1284,8 @@ public class SerializationTests extends AbstractErraiTest {
         class EqualTester {
           public boolean isEqual(FactoryEntity r) {
             return r != null &&
-                    entity.getName().equals(r.getName()) &&
-                    entity.getAge() == r.getAge();
+                entity.getName().equals(r.getName()) &&
+                entity.getAge() == r.getAge();
           }
         }
 
@@ -1628,7 +1654,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-       final SubMoron subMoron = new SubMoron("ABCDEFG");
+        final SubMoron subMoron = new SubMoron("ABCDEFG");
         subMoron.setDumbFieldThatShouldntBeMarshalled("Hello, There!");
 
         MessageBuilder.createCall(new RemoteCallback<SubMoron>() {
@@ -1916,8 +1942,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithSuperClassField>() {
           @Override
           public void callback(EntityWithSuperClassField response) {
-              assertEquals(entity, response);
-              finishTest();
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithSuperClassField(entity);
       }
@@ -1949,7 +1975,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   //Serves as regression test for ERRAI-389
   public void testEntityWithPublicSuperTypeField() {
     runAfterInit(new Runnable() {

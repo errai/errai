@@ -29,7 +29,6 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 @ClientMarshaller
 @ServerMarshaller
 public class LongMarshaller extends AbstractNumberMarshaller<Long> {
-  private static final Long[] EMPTY_ARRAY = new Long[0];
 
   @Override
   public Class<Long> getTypeHandled() {
@@ -38,7 +37,7 @@ public class LongMarshaller extends AbstractNumberMarshaller<Long> {
 
   @Override
   public Long[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new Long[0];
   }
 
   @Override

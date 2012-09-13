@@ -102,9 +102,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
   private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 
-  private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
-  private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
-  private final List<QueueClosedListener> queueClosedListeners = new LinkedList<QueueClosedListener>();
+  private final List<SubscribeListener> subscribeListeners = new ArrayList<SubscribeListener>();
+  private final List<UnsubscribeListener> unsubscribeListeners = new ArrayList<UnsubscribeListener>();
+  private final List<QueueClosedListener> queueClosedListeners = new ArrayList<QueueClosedListener>();
 
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 

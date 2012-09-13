@@ -30,8 +30,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 @ClientMarshaller
 @ServerMarshaller
 public class BigDecimalMarshaller extends AbstractNullableMarshaller<BigDecimal> {
-  
-  private static final BigDecimal[] EMPTY_ARRAY = new BigDecimal[0];
 
   @Override
   public Class<BigDecimal> getTypeHandled() {
@@ -40,7 +38,7 @@ public class BigDecimalMarshaller extends AbstractNullableMarshaller<BigDecimal>
   
   @Override
   public BigDecimal[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new BigDecimal[0];
   }
 
   @Override

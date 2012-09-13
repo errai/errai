@@ -31,9 +31,7 @@ import org.jboss.errai.marshalling.client.api.json.EJArray;
 @ClientMarshaller @ServerMarshaller
 @ImplementationAliases({TreeSet.class})
 public class SortedSetMarshaller extends AbstractCollectionMarshaller<SortedSet> {
-  
-  private static final TreeSet[] EMPTY_ARRAY = new TreeSet[0];
-  
+
   @Override
   public Class<SortedSet> getTypeHandled() {
     return SortedSet.class;
@@ -41,7 +39,7 @@ public class SortedSetMarshaller extends AbstractCollectionMarshaller<SortedSet>
 
   @Override
   public SortedSet[] getEmptyArray() {
-    return EMPTY_ARRAY;
+    return new TreeSet[0];
   }
   
   @Override
