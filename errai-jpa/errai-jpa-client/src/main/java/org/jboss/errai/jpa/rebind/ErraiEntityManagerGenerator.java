@@ -238,7 +238,6 @@ public class ErraiEntityManagerGenerator extends Generator {
       // XXX using StringStatement because this gives OutOfScopeException for metamodel:
       // pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType", Variable.get(entityTypeVarName)));
       pmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
-      System.out.println("singular attributes of " + et + ": " + attributes);
     }
 
     // XXX using StringStatement because this gives OutOfScopeException for metamodel:

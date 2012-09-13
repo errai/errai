@@ -3,7 +3,6 @@ package org.jboss.errai.jpa.rebind;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -55,6 +54,8 @@ import org.jboss.errai.jpa.client.local.ErraiTypedQuery;
 import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 import org.mvel2.MVEL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
@@ -71,6 +72,8 @@ import com.google.gwt.regexp.shared.RegExp;
  */
 public class TypedQueryFactoryGenerator {
 
+  Logger logger = LoggerFactory.getLogger(TypedQueryFactoryGenerator.class);
+
   private final String jpaQuery;
   private final QueryTranslatorImpl query;
   private final Class<?> resultType;
@@ -83,7 +86,11 @@ public class TypedQueryFactoryGenerator {
       HqlParser parser = HqlParser.getInstance(jpaQuery);
       parser.statement();
       AST hqlAst = parser.getAST();
-      parser.showAst(hqlAst, System.out);
+
+      if (logger.isDebugEnabled()) {
+        logger.debug("First-level parse tree for " + namedQuery.name() + ":");
+        parser.showAst(hqlAst, System.out);
+      }
 
       SessionImplementor hibernateSession = em.unwrap(SessionImplementor.class);
       ASTQueryTranslatorFactory translatorFactory = new ASTQueryTranslatorFactory();
@@ -91,7 +98,6 @@ public class TypedQueryFactoryGenerator {
               namedQuery.name(), jpaQuery, java.util.Collections.EMPTY_MAP, hibernateSession.getFactory());
 
       query.compile(Collections.EMPTY_MAP, false);
-      System.out.println("Return types: " + Arrays.toString(query.getReturnTypes()));
 
       if (query.getReturnTypes().length != 1) {
         throw new RuntimeException(
@@ -101,8 +107,11 @@ public class TypedQueryFactoryGenerator {
       resultType = query.getReturnTypes()[0].getReturnedClass();
       org.hibernate.hql.internal.ast.tree.Statement sqlAST = query.getSqlAST();
 
-      System.out.println("Second level parse tree for " + namedQuery.name() + ":");
-      sqlAST.getWalker().getASTPrinter().showAst(sqlAST.getWalker().getAST(), System.out);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Second-level parse tree for " + namedQuery.name() + ":");
+        sqlAST.getWalker().getASTPrinter().showAst(sqlAST.getWalker().getAST(), System.out);
+      }
+
     } catch (RecognitionException e) {
       throw new RuntimeException("Failed to parse JPQL query: " + jpaQuery);
     } catch (TokenStreamException e) {
@@ -143,7 +152,9 @@ public class TypedQueryFactoryGenerator {
    * Creates an array of statements that generates code for the array of named parameters in the query.
    */
   private Statement[] generateQueryParamArray() {
-    System.out.println("Named parameters: " + query.getParameterTranslations().getNamedParameterNames());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Named parameters: " + query.getParameterTranslations().getNamedParameterNames());
+    }
     @SuppressWarnings("unchecked")
     List<ParameterSpecification> parameterSpecifications = query.getSqlAST().getWalker().getParameters();
     Statement generatedParamList[] = new Statement[parameterSpecifications.size()];
