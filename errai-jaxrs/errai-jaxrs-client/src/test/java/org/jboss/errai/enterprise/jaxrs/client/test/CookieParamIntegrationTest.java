@@ -16,7 +16,6 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.CookieParamTestService;
 import org.junit.Test;
@@ -38,35 +37,35 @@ public class CookieParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithCookieParam() {
     Cookies.setCookie("myCookie", "1701");
-    RestClient.create(CookieParamTestService.class,
+    call(CookieParamTestService.class,
         new AssertionCallback<Integer>("@GET with @CookieParam failed", 1701)).getWithIntegerCookieParam(null);
   } 
   
   @Test
   public void testGetWithOverridingCookieParam() {
     Cookies.setCookie("myCookie", "1701");
-    RestClient.create(CookieParamTestService.class,
+    call(CookieParamTestService.class,
         new AssertionCallback<Integer>("@GET with @CookieParam failed", 1702)).getWithIntegerCookieParam(1702);
   }
 
   @Test
   public void testPostWithCookieParam() {
     Cookies.setCookie("myCookie", "1701");
-    RestClient.create(CookieParamTestService.class,
+    call(CookieParamTestService.class,
         new AssertionCallback<String>("@POST with @CookieParam failed", "1701")).postWithStringCookieParam(null);
   }
 
   @Test
   public void testPutWithCookieParam() {
     Cookies.setCookie("myCookie", "1701");
-    RestClient.create(CookieParamTestService.class,
+    call(CookieParamTestService.class,
         new AssertionCallback<Long>("@PUT with @CookieParam failed", 1701l)).putWithLongCookieParam(null);
   }
 
   @Test
   public void testDeleteWithCookieParam() {
     Cookies.setCookie("myCookie", "1701");
-    RestClient.create(CookieParamTestService.class,
+    call(CookieParamTestService.class,
         new AssertionCallback<Double>("@DELETE with @CookieParam failed", 1701.0)).deleteWithDoubleCookieParam(null);
   }
 }

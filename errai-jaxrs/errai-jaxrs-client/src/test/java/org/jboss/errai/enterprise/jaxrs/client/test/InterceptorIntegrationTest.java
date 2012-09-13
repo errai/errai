@@ -16,7 +16,6 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.InterceptedTestService;
 import org.junit.Test;
@@ -35,28 +34,28 @@ public class InterceptorIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testInterceptedRestCallWithEndpointBypassing() {
-    RestClient.create(InterceptedTestService.class,
+    call(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGetWithEndpointBypassing();
   }
 
   @Test
   public void testInterceptedRestCallWithParameterManipulation() {
-    RestClient.create(InterceptedTestService.class,
+    call(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "intercepted"))
         .interceptedGetWithParameterManipulation("will be replaced by interceptor");
   }
 
   @Test
   public void testInterceptedRestCallWithResultManipulation() {
-    RestClient.create(InterceptedTestService.class,
+    call(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "result_intercepted"))
         .interceptedGetWithResultManipulation("will be replaced by interceptor");
   }
   
   @Test
   public void testInterceptedRestCallWithChainedInterceptors() {
-    RestClient.create(InterceptedTestService.class,
+    call(InterceptedTestService.class,
         new AssertionCallback<String>("Request was not intercepted", "ABCD"))
         .interceptedGetWithChainedInterceptors("");
   }

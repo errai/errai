@@ -16,7 +16,6 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 import org.junit.Test;
@@ -37,44 +36,45 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testGetWithQueryParam() {
-    RestClient.create(QueryParamTestService.class,
+    call(QueryParamTestService.class,
         new AssertionCallback<Long>("@GET with @QueryParam failed", 1l)).getWithQueryParam(1l);
   }
 
   @Test
   public void testGetWithEncodedQueryParam() {
     String queryParamSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
-    RestClient.create(QueryParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @QueryParam failed",
-        queryParamSpecialChars)).getWithStringQueryParam(queryParamSpecialChars);
+    call(QueryParamTestService.class,
+        new AssertionCallback<String>("@GET w/ encoded @QueryParam failed", queryParamSpecialChars))
+        .getWithStringQueryParam(queryParamSpecialChars);
   }
 
   @Test
   public void testGetWithMultipleQueryParams() {
-    RestClient.create(QueryParamTestService.class,
+    call(QueryParamTestService.class,
         new AssertionCallback<String>("@GET with @QueryParams failed", "1/2")).getWithMultipleQueryParams(1l, 2l);
   }
 
   @Test
   public void testPostWithQueryParam() {
-    RestClient.create(QueryParamTestService.class,
+    call(QueryParamTestService.class,
         new AssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam(1);
   }
 
   @Test
   public void testPutWithQueryParam() {
-    RestClient.create(QueryParamTestService.class,
+    call(QueryParamTestService.class,
         new AssertionCallback<Double>("@PUT with @QueryParam failed", 1.0)).putWithQueryParam(1.0);
   }
 
   @Test
   public void testDeleteWithQueryParam() {
-    RestClient.create(QueryParamTestService.class,
+    call(QueryParamTestService.class,
         new AssertionCallback<Short>("@DELETE with @QueryParam failed", (short) 1)).deleteWithQueryParam((short) 1);
   }
 
   @Test
   public void testHeadWithQueryParam() {
-    RestClient.create(QueryParamTestService.class,
+    call(QueryParamTestService.class,
         new AssertionResponseCallback("@HEAD with @QueryParam failed", Response.SC_NO_CONTENT)).headWithQueryParam(1l);
   }
 }
