@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 //generated using Reflections JavaCodeSerializer [Wed Sep 12 21:14:40 EDT 2012]
+=======
+//generated using Reflections JavaCodeSerializer [Mon Sep 10 15:24:55 EDT 2012]
+>>>>>>> 84d12b2... code cleanup
 package org.jboss.errai.reflections;
 
 import static org.jboss.errai.reflections.serializers.JavaCodeSerializer.*;
