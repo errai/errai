@@ -41,13 +41,13 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   }
 
   protected class AssertionCallback<T> implements RemoteCallback<T> {
-    private String msg;
-    private T expected;
+    private final String msg;
+    private final T expected;
 
     public AssertionCallback(String msg, T expected) {
       this.msg = msg;
       this.expected = expected;
-      delayTestFinish(5000);
+      delayTestFinish(10000);
     }
 
     @Override
@@ -58,8 +58,8 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   }
 
   protected class AssertionResponseCallback implements ResponseCallback {
-    private String msg;
-    private int statusCode;
+    private final String msg;
+    private final int statusCode;
     private String body;
 
     public AssertionResponseCallback(String msg, int statusCode) {
