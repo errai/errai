@@ -1472,6 +1472,31 @@ public class QueryTest extends GWTTestCase {
     assertFalse(results.contains(zentity4));
   }
 
+  public void testLengthFunction() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("Foo");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("bar");
+    em.persist(zentity2);
+
+    Zentity zentity3 = new Zentity();
+    zentity3.setString("foobar");
+    em.persist(zentity3);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLengthFunction", Zentity.class);
+    List<Zentity> results = q.getResultList();
+    assertEquals(2, results.size());
+    assertTrue(results.contains(zentity1));
+    assertTrue(results.contains(zentity2));
+    assertFalse(results.contains(zentity3));
+  }
+
   public void testLikeOperator() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 

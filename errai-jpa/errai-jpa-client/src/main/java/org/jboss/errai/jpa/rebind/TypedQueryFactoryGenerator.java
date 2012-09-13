@@ -457,10 +457,10 @@ public class TypedQueryFactoryGenerator {
           }
         }
 
-        // [[IDENT('LEADING|TRAILING|BOTH')], [<expression:trimchar>], IDENT(FROM),] <expression:untrimmedStr>
-        //                                    ^^^ you are here
         if (exprList.getNumberOfChildren() == 4 ||
                 (exprList.getNumberOfChildren() == 3 && ast.getType() != HqlSqlTokenTypes.IDENT)) {
+          // [[IDENT('LEADING|TRAILING|BOTH')], [<expression:trimchar>], IDENT(FROM),] <expression:untrimmedStr>
+          //                                     ^^^ you are here
           Statement trimStr = generateExpression(new AstInorderTraversal(ast), dotNodeResolver, containingMethod);
           trimChar = Stmt.nestedCall(trimStr).invoke("charAt", 0);
           ast = traverser.fastForwardTo(ast.getNextSibling());
@@ -539,6 +539,10 @@ public class TypedQueryFactoryGenerator {
         else {
           throw new GenerationException("Found " + args.length + " arguments to concat() function. Expected 2 or 3.");
         }
+      }
+      else if ("length".equals(methodNameNode.getOriginalText())) {
+        // all numerics must be double for purposes of comparison in this JPQL implementation
+        return Stmt.castTo(double.class, Stmt.nestedCall(Stmt.castTo(String.class, Stmt.load(args[0])).invoke("length")));
       }
       throw new UnsupportedOperationException("The JPQL function " + methodNameNode.getOriginalText() + " is not supported");
 
