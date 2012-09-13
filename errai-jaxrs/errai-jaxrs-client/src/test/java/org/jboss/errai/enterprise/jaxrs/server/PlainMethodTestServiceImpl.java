@@ -59,4 +59,9 @@ public class PlainMethodTestServiceImpl implements PlainMethodTestService {
   public String head() {
     return "head";
   }
+
+  @Override
+  public String getWithPathWithoutSlash() {
+    return "getWithPathWithoutSlash";
+  }
 }

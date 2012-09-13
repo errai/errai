@@ -224,14 +224,12 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     Model model = new Model();
     model.setName("initial name");
     binder.setModel(model, InitialState.FROM_MODEL);
-    assertEquals("Widget not properly initialized after model change caused state sychnronization", "initial name",
-        textBox.getText());
+    assertEquals("Widget not updated after model change", "initial name", textBox.getText());
 
     model = new Model();
     textBox.setText("changed name");
     binder.setModel(model, InitialState.FROM_UI);
-    assertEquals("Model not properly updated after model change caused state synchronization", "changed name", model
-        .getName());
+    assertEquals("Model not updated after model change", "changed name", model.getName());
   }
 
   @Test
@@ -240,14 +238,12 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     textBox.setValue("initial ui value");
 
     DataBinder<Model> binder = DataBinder.forType(Model.class, InitialState.FROM_UI).bind(textBox, "name");
-    assertEquals("Model not properly initialized based on widget's initial state", "initial ui value", binder
-        .getModel().getName());
+    assertEquals("Model not initialized based on widget's state", "initial ui value", binder.getModel().getName());
 
     Model model = new Model();
     model.setName("initial model value");
     DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name");
-    assertEquals("Model not properly initialized based on widget's initial state", "initial model value", textBox
-        .getValue());
+    assertEquals("Model not initialized based on widget's state", "initial model value", textBox.getValue());
   }
 
   @Test
@@ -325,14 +321,14 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "age", converter);
 
     Model oldModel = binder.getModel();
-    
+
     binder.setModel(new Model());
     textBox.setValue("321", true);
     assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), binder.getModel().getAge());
 
     binder.getModel().setAge(123);
     assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
-    
+
     assertEquals("Original model should not have been updated", null, oldModel.getAge());
   }
 

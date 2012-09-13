@@ -16,6 +16,7 @@
 package org.jboss.errai.common.metadata;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.reflections.scanners.AbstractScanner;
 import org.jboss.errai.reflections.vfs.Vfs;
 
@@ -25,17 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-/**
- * Collects all property files and merges them under a single key
- *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 10, 2010
- */
-public class PropertyScanner extends AbstractScanner {
+public class ErraiPropertyScanner extends AbstractScanner {
   Predicate<String> predicate;
-  Map<String, Properties> properties = new HashMap<String, Properties>();
 
-  public PropertyScanner(final Predicate<String> predicate) {
+  public ErraiPropertyScanner(final Predicate<String> predicate) {
     this.predicate = predicate;
   }
 
@@ -44,14 +38,14 @@ public class PropertyScanner extends AbstractScanner {
   }
 
   public void scan(final Vfs.File file) {
-
-    final String key = file.getName();
-    if (null == properties.get(key)) {
-      properties.put(key, new Properties());
-    }
-
     try {
-      properties.get(key).load(file.openInputStream());
+      final Properties properties = new Properties();
+      properties.load(file.openInputStream());
+
+      final Multimap<String, String> store = getStore();
+      for (final Map.Entry<Object, Object> entry : properties.entrySet()) {
+        store.put((String) entry.getKey(), (String) entry.getValue());
+      }
     }
     catch (IOException e) {
       throw new RuntimeException("Failed to load properties: " + file.getFullPath(), e);
@@ -62,7 +56,7 @@ public class PropertyScanner extends AbstractScanner {
     throw new UnsupportedOperationException(); //shouldn't get here
   }
 
-  public Map<String, Properties> getProperties() {
-    return properties;
+  public Multimap<String, String> getProperties() {
+    return getStore();
   }
 }

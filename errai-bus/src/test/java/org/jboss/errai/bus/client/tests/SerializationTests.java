@@ -1949,6 +1949,32 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  //Serves as regression test for ERRAI-389
+  public void testEntityWithPublicSuperTypeField() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final User u = new User();
+
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(User response) {
+            try {
+              assertEquals(u.publicSuperField, "publicSuperField");
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithNullField(u);
+      }
+    });
+  }
+
 
   public void testEntityWithEnumContainerContainer() {
     runAfterInit(new Runnable() {

@@ -289,7 +289,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public <T> void addPropertyChangeHandler(String property, PropertyChangeHandler<T> handler) {
+  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
     ((HasPropertyChangeHandlers) this.model).addPropertyChangeHandler(property, handler);
   }
 

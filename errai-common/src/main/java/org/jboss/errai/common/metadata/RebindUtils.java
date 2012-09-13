@@ -38,11 +38,8 @@ import java.util.zip.ZipInputStream;
 public class RebindUtils {
 
   static Logger logger = LoggerFactory.getLogger(RebindUtils.class);
-
   private static String hashSeed = "errai20-bx1";
-
   private final static Pattern erraiCommonJarFinder = Pattern.compile(".*/errai\\-common.*\\.jar!/META-INF/MANIFEST.MF");
-
 
   static {
     try {
@@ -134,8 +131,8 @@ public class RebindUtils {
 
   public static String hashToHexString(final byte[] hash) {
     final StringBuilder hexString = new StringBuilder();
-    for (final byte mdbyte : hash) {
-      hexString.append(Integer.toHexString(0xFF & mdbyte));
+    for (final byte b : hash) {
+      hexString.append(Integer.toHexString(0xFF & b));
     }
     return hexString.toString();
   }
@@ -144,8 +141,17 @@ public class RebindUtils {
     String cacheDir = System.getProperty("errai.devel.debugCacheDir");
     if (cacheDir == null) cacheDir = new File(".errai/").getAbsolutePath();
     final File fileCacheDir = new File(cacheDir);
+    //noinspection ResultOfMethodCallIgnored
     fileCacheDir.mkdirs();
     return fileCacheDir;
+  }
+
+  public static File getCacheFile(final String name) {
+    return new File(getErraiCacheDir(), name);
+  }
+
+  public static boolean cacheFileExists(final String name) {
+    return getCacheFile(name).exists();
   }
 
   private static boolean nocache = Boolean.getBoolean("errai.devel.nocache");
@@ -162,11 +168,9 @@ public class RebindUtils {
     }
     else {
       final String fileHashValue = readFileToString(hashFile);
-      if (fileHashValue.equals(hashValue)) {
-        return _hasClasspathChanged = true;
-      }
-      else {
+      if (!fileHashValue.equals(hashValue)) {
         writeStringToFile(hashFile, hashValue);
+        return _hasClasspathChanged = true;
       }
     }
 
@@ -387,10 +391,11 @@ public class RebindUtils {
     if (context.equals(_lastTranslatableContext) && _translatablePackagesCache != null) {
       return _translatablePackagesCache;
     }
+    _lastTranslatableContext = context;
 
-    final JPackage[] jpackages = context.getTypeOracle().getPackages();
-    final Set<String> packages = new HashSet<String>(jpackages.length * 2);
-    for (final JPackage p : jpackages) {
+    final JPackage[] jPackages = context.getTypeOracle().getPackages();
+    final Set<String> packages = new HashSet<String>(jPackages.length * 2);
+    for (final JPackage p : jPackages) {
       packages.add(p.getName());
     }
 

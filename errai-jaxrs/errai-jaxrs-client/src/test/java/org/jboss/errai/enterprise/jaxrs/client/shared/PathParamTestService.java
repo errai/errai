@@ -34,7 +34,7 @@ import javax.ws.rs.core.PathSegment;
 @Path("/test/pathparam")
 @Produces("text/plain")
 public interface PathParamTestService {
-
+  
   @GET 
   @Path("/t1/{id}")
   public long getWithPathParam(@PathParam("id") long id);

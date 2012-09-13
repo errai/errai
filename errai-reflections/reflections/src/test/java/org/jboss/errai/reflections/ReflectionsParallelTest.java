@@ -2,6 +2,7 @@ package org.jboss.errai.reflections;
 
 import com.google.common.base.Predicate;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.jboss.errai.reflections.scanners.*;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
@@ -11,6 +12,7 @@ import org.jboss.errai.reflections.util.FilterBuilder;
 import static java.util.Arrays.asList;
 
 /** */
+@Ignore
 public class ReflectionsParallelTest extends ReflectionsTest {
 
     @BeforeClass

@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public class GWTMetaDataScanner extends MetaDataScanner {
   public GWTMetaDataScanner(final List<URL> urls) {
-    super(urls);
+    super(urls, null);
   }
 
   @Override

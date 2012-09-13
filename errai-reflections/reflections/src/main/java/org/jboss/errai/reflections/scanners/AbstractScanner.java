@@ -26,15 +26,15 @@ public abstract class AbstractScanner implements Scanner {
         return getClass().getName();
     }
 
-    public boolean acceptsInput(String file) {
+    public boolean acceptsInput(final String file) {
         return file.endsWith(".class"); //is a class file
     }
 
-    public void scan(Vfs.File file) {
+    public void scan(final Vfs.File file) {
         InputStream inputStream = null;
         try {
             inputStream = file.openInputStream();
-            Object cls = configuration.getMetadataAdapter().createClassObject(inputStream);
+            final Object cls = configuration.getMetadataAdapter().createClassObject(inputStream);
             scan(cls);
         } catch (IOException e) {
             throw new ReflectionsException("could not create class file from " + file.getName(), e);
@@ -66,11 +66,11 @@ public abstract class AbstractScanner implements Scanner {
         return resultFilter;
     }
 
-    public void setResultFilter(Predicate<String> resultFilter) {
+    public void setResultFilter(final Predicate<String> resultFilter) {
         this.resultFilter = resultFilter;
     }
 
-    public Scanner filterResultsBy(Predicate<String> filter) {
+    public Scanner filterResultsBy(final Predicate<String> filter) {
         this.setResultFilter(filter); return this;
     }
 

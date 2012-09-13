@@ -75,6 +75,4 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
   }
   
   public abstract T getInstance();
-
-
 }

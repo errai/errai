@@ -113,7 +113,6 @@ public class InjectionContext {
     private ReachableTypes reachableTypes = ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
 
-
     public static Builder create() {
       return new Builder();
     }

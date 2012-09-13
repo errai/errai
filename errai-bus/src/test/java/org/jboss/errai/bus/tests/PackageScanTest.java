@@ -126,7 +126,7 @@ public class PackageScanTest extends TestCase {
 
   private MetaDataScanner createScanner(List<URL> urlList) {
     long s0 = System.currentTimeMillis();
-    MetaDataScanner scanner = MetaDataScanner.createInstance(urlList);
+    MetaDataScanner scanner = MetaDataScanner.createInstance(urlList, null);
     System.out.println("Scan time: " + (System.currentTimeMillis() - s0));
     return scanner;
 

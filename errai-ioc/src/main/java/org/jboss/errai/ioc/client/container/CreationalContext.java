@@ -162,6 +162,11 @@ public class CreationalContext {
     return Collections.unmodifiableSet(wired.keySet());
   }
 
+  /**
+   * Returns a list of the instances of every created bean within this creational context.
+   *
+   * @return An unmodifiable collection of every bean instance within the creational context.
+   */
   public Collection<Object> getAllCreatedBeanInstances() {
     return Collections.unmodifiableCollection(wired.values());
   }
@@ -309,6 +314,9 @@ public class CreationalContext {
     registerAllBeans();
   }
 
+  /**
+   * Fires all {@link InitializationCallback}s which were declared during creation of the beans.
+   */
   @SuppressWarnings("unchecked")
   private void fireAllInitCallbacks() {
     for (final Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
@@ -316,6 +324,9 @@ public class CreationalContext {
     }
   }
 
+  /**
+   * Resolves all proxies which were opened during creation of the beans.
+   */
   @SuppressWarnings("unchecked")
   private void resolveAllProxies() {
     boolean beansResolved = false;
@@ -366,12 +377,19 @@ public class CreationalContext {
     }
   }
 
+  /**
+   * Registers all created beans with the bean manager.
+   */
   private void registerAllBeans() {
     for (final Object ref : getAllCreatedBeanInstances()) {
       beanManager.addBeanToContext(ref, this);
     }
   }
 
+
+  /**
+   * Fires all {@link DestructionCallback}s within the context.
+   */
   @SuppressWarnings("unchecked")
   void destroyContext() {
     if (immutableContext) {
