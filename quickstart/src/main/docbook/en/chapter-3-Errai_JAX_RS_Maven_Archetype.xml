@@ -5,15 +5,18 @@
     <title>Errai JAX-RS Maven Archetype</title>
     <para>You can use the Errai JAX-RS maven archetype to get started quickly. It will generate a fully functional CRUD application using JAX-RS.</para>
     <informalexample>
-      <programlisting>mvn archetype:generate \
+      <programlisting>
+mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=jaxrs-quickstart \
--DarchetypeVersion=2.1.0.CR1 \
--DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
+-DarchetypeVersion=2.1.0.CR2 \
+-DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
+</programlisting>
     </informalexample>
     <para>Customize the build properties according to your needs.</para>
     <informalexample>
-      <programlisting>Define value for property 'groupId': : foo.bar
+      <programlisting>
+Define value for property 'groupId': : foo.bar
 Define value for property 'artifactId': : rest-app
 Define value for property 'version': 1.0-SNAPSHOT:
 Define value for property 'package': foo.bar: com.foo.bar
@@ -22,13 +25,16 @@ groupId: foo.bar
 artifactId: rest-app
 version: 1.0-SNAPSHOT
 package: com.foo.bar
-Y:</programlisting>
+Y:
+</programlisting>
     </informalexample>
     <para>The project will be created in a directory that corresponds to the provided artifactId.</para>
     <para>Now we have a fully working build environment set up in a few, simple steps. You can already use it to launch the GWT development mode or to package your web application for deployment.</para>
     <informalexample>
-      <programlisting>mvn gwt:run (launch hosted mode)
-mvn gwt:debug (launch hosted with debug settings)</programlisting>
+      <programlisting>
+mvn gwt:run (launch hosted mode)
+mvn gwt:debug (launch hosted with debug settings)
+</programlisting>
     </informalexample>
     <para>The example application comes with an integration test suite that exercises most of its client-side and server-side code. To run the test suite, type:</para>
     <informalexample>
