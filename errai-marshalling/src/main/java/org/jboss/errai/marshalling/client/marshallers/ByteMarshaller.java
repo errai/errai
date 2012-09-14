@@ -40,7 +40,7 @@ public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
   }
 
   @Override
-  public Byte doNotNullDemarshall(final EJValue o, MarshallingSession ctx) {
+  public Byte doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().byteValue();
     }

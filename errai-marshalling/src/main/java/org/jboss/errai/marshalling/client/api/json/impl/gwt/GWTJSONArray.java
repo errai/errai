@@ -26,7 +26,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 public class GWTJSONArray implements EJArray {
   final JSONArray array;
 
-  public GWTJSONArray(JSONArray array) {
+  public GWTJSONArray(final JSONArray array) {
     this.array = array;
   }
 
@@ -36,7 +36,7 @@ public class GWTJSONArray implements EJArray {
   }
 
   @Override
-  public EJValue get(int index) {
+  public EJValue get(final int index) {
     return new GWTJSONValue(array.get(index));
   }
 }

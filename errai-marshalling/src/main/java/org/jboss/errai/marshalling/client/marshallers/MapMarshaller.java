@@ -67,8 +67,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
       return impl;
 
     Object demarshalledKey;
-    String assumedKeyType = ctx.getAssumedMapKeyType();
-    String assumedValueType = ctx.getAssumedMapValueType();
+    final String assumedKeyType = ctx.getAssumedMapKeyType();
+    final String assumedValueType = ctx.getAssumedMapValueType();
     for (final String key : o.isObject().keySet()) {
       final EJValue ejValue = o.isObject().get(key);
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
@@ -84,8 +84,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
           }
           demarshalledKey = convertKey(assumedKeyType, key);
 
-          String valueType = (assumedValueType != null) ? assumedValueType : ctx.determineTypeFor(null, ejValue);
-          Object demarshalledValue = ctx.getMarshallerInstance(valueType).demarshall(ejValue, ctx);
+          final String valueType = (assumedValueType != null) ? assumedValueType : ctx.determineTypeFor(null, ejValue);
+          final Object demarshalledValue = ctx.getMarshallerInstance(valueType).demarshall(ejValue, ctx);
           impl.put(demarshalledKey, demarshalledValue);
         }
         else {
@@ -98,11 +98,11 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
     return impl;
   }
 
-  // This only exists to support demarshalling of maps using Jackson. The Jackson payload doesn't contain our
+  // This only exists to support de-marshalling of maps using Jackson. The Jackson payload doesn't contain our
   // EMBEDDED_JSON or any type information, so we have to convert the key (which is always a String) to it's actual
   // type. We only support primitive wrapper types as key types. Other types require a custom
   // Key(De)serializer in Jackson anyway which would be unknown to Errai.
-  private Object convertKey(String toType, String key) {
+  private Object convertKey(final String toType, final String key) {
     if (toType.equals(Integer.class.getName())) {
       return Integer.parseInt(key);
     }

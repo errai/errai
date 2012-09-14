@@ -22,7 +22,7 @@ package org.jboss.errai.marshalling.client.api;
 public class ParserFactory {
   private static Parser parserSingleton;
 
-  public static void registerParser(Parser parser) {
+  public static void registerParser(final Parser parser) {
     if (parserSingleton != null)
       throw new IllegalStateException("parser already registered");
     
@@ -32,5 +32,4 @@ public class ParserFactory {
   public static Parser get() {
     return parserSingleton;
   }
-  
 }

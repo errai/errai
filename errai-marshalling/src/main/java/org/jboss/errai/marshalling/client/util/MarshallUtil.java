@@ -32,18 +32,18 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallUtil {
-  public static Marshaller<Object> getQualifiedNumberMarshaller(Object o) {
+  public static Marshaller<Object> getQualifiedNumberMarshaller(final Object o) {
     final Class<Object> type = (Class<Object>) o.getClass();
 
     return new Marshaller<Object>() {
 
       @Override
-      public String marshall(Object o, MarshallingSession ctx) {
+      public String marshall(final Object o, final MarshallingSession ctx) {
         return NumbersUtils.qualifiedNumericEncoding(o);
       }
 
       @Override
-      public Object demarshall(EJValue o, MarshallingSession ctx) {
+      public Object demarshall(final EJValue o, final MarshallingSession ctx) {
         return null;
       }
 
@@ -73,7 +73,7 @@ public class MarshallUtil {
     return sb.toString();
   }
 
-  public static void jsonStringEscape(StringBuilder sb, final char ch) {
+  public static void jsonStringEscape(final StringBuilder sb, final char ch) {
     switch (ch) {
       case '"':
         sb.append("\\\"");
@@ -116,7 +116,7 @@ public class MarshallUtil {
     }
   }
 
-  public static Marshaller<Object> getMarshaller(Object obj, MarshallingSession session) {
+  public static Marshaller<Object> getMarshaller(Object obj, final MarshallingSession session) {
     Marshaller<Object> m = session.getMarshallerInstance(obj.getClass().getName());
     if (m == null && obj instanceof WrappedPortable) {
       obj = ((WrappedPortable) obj).unwrap();

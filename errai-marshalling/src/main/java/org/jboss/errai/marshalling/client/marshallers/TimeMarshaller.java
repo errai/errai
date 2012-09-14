@@ -34,11 +34,11 @@ public class TimeMarshaller extends AbstractNullableMarshaller<Time> {
   @Override
   public Time doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
-      EJValue qualifiedValue = o.isObject().get(SerializationParts.QUALIFIED_VALUE);
+      final EJValue qualifiedValue = o.isObject().get(SerializationParts.QUALIFIED_VALUE);
       if (!qualifiedValue.isNull() && qualifiedValue.isString() != null) {
         return new Time(Long.parseLong(qualifiedValue.isString().stringValue()));
       }
-      EJValue numericValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      final EJValue numericValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
       if (!numericValue.isNull() && numericValue.isNumber() != null) {
         return new Time(new Double(numericValue.isNumber().doubleValue()).longValue());
       }

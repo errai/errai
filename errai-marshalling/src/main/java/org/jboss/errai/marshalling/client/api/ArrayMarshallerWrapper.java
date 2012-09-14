@@ -18,7 +18,7 @@ public class ArrayMarshallerWrapper extends AbstractNullableMarshaller<Object> {
 
   private final Marshaller<?> wrappedMarshaller;
   
-  public ArrayMarshallerWrapper(Marshaller<?> wrappedMarshaller) {
+  public ArrayMarshallerWrapper(final Marshaller<?> wrappedMarshaller) {
     this.wrappedMarshaller = wrappedMarshaller;
   }
 
@@ -31,12 +31,12 @@ public class ArrayMarshallerWrapper extends AbstractNullableMarshaller<Object> {
   }
 
   @Override
-  public Object doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public Object doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return ListMarshaller.INSTANCE.demarshall(o, ctx).toArray(wrappedMarshaller.getEmptyArray());
   }
 
   @Override
-  public String doNotNullMarshall(Object o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final Object o, final MarshallingSession ctx) {
     return ListMarshaller.INSTANCE.marshall(Arrays.asList((Object[]) o), o.getClass().getName(), ctx);
   }
 

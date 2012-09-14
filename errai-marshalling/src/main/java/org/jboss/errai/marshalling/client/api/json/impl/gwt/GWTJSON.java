@@ -23,7 +23,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Mike Brock
  */
 public class GWTJSON {
-  public static EJValue wrap(JSONValue v) {
+  public static EJValue wrap(final JSONValue v) {
     return new GWTJSONValue(v);
   }
 }

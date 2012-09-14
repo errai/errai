@@ -25,7 +25,7 @@ import org.jboss.errai.marshalling.client.api.json.EJString;
 public class GWTJSONString implements EJString {
   private final JSONString str;
 
-  public GWTJSONString(JSONString str) {
+  public GWTJSONString(final JSONString str) {
     this.str = str;
   }
 

@@ -25,7 +25,7 @@ import org.jboss.errai.marshalling.client.api.json.EJBoolean;
 public class GWTJSONBoolean implements EJBoolean {
   final JSONBoolean bool;
 
-  public GWTJSONBoolean(JSONBoolean bool) {
+  public GWTJSONBoolean(final JSONBoolean bool) {
     this.bool = bool;
   }
 

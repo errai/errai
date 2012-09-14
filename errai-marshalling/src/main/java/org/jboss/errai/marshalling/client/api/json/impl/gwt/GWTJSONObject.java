@@ -28,12 +28,12 @@ import java.util.Set;
 public class GWTJSONObject implements EJObject {
   final JSONObject obj;
 
-  public GWTJSONObject(JSONObject obj) {
+  public GWTJSONObject(final JSONObject obj) {
     this.obj = obj;
   }
 
   @Override
-  public EJValue get(String name) {
+  public EJValue get(final String name) {
     return new GWTJSONValue(obj.get(name));
   }
 
@@ -43,7 +43,7 @@ public class GWTJSONObject implements EJObject {
   }
 
   @Override
-  public boolean containsKey(String name) {
+  public boolean containsKey(final String name) {
     return obj.containsKey(name);
   }
 

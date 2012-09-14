@@ -36,7 +36,7 @@ public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller
     return marshall(o, o.getClass().getName(), ctx);
   }
 
-  public final String marshall(C o, String encodedType, MarshallingSession ctx) {
+  public final String marshall(final C o, final String encodedType, final MarshallingSession ctx) {
     if (o == null) {
       return "null";
     }

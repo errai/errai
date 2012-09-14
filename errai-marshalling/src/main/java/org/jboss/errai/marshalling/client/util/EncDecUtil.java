@@ -28,7 +28,7 @@ import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrappe
  * @author Mike Brock
  */
 public class EncDecUtil {
-  public static void arrayMarshall(StringBuilder buf, Collection o, MarshallingSession ctx) {
+  public static void arrayMarshall(final StringBuilder buf, final Collection o, final MarshallingSession ctx) {
     final Iterator iter = o.iterator();
 
     buf.append("[");
@@ -42,7 +42,7 @@ public class EncDecUtil {
       elem = iter.next();
       
       if (elem != null) {
-        Marshaller<Object> marshaller;
+        final Marshaller<Object> marshaller;
         if (Marshalling.needsQualification(elem)) {
           marshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
         }
@@ -66,7 +66,7 @@ public class EncDecUtil {
    * @param <T>
    * @return
    */
-  public static <T> Marshaller<T> qualifyMarshaller(Marshaller<T> marshaller) {
+  public static <T> Marshaller<T> qualifyMarshaller(final Marshaller<T> marshaller) {
     return new QualifyingMarshallerWrapper<T>(marshaller);
   }
 }

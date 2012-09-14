@@ -54,12 +54,12 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
   public abstract C doDemarshall(final EJArray o, MarshallingSession ctx);
 
   protected <T extends Collection<Object>> T marshallToCollection(final T collection,
-                                                          final EJArray array,
-                                                          final MarshallingSession ctx) {
+                                                                  final EJArray array,
+                                                                  final MarshallingSession ctx) {
     if (array == null) return null;
 
     final String assumedElementType = ctx.getAssumedElementType();
-    
+
     for (int i = 0; i < array.size(); i++) {
       final EJValue elem = array.get(i);
       if (!elem.isNull()) {
@@ -71,11 +71,11 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
             type = assumedElementType;
           }
         }
-        
+
         if (type == null) {
           type = ctx.determineTypeFor(null, elem);
         }
-        
+
         collection.add(ctx.getMarshallerInstance(type).demarshall(elem, ctx));
       }
       else {

@@ -25,7 +25,7 @@ import org.jboss.errai.marshalling.client.api.json.EJNumber;
 public class GWTJSONNumber implements EJNumber {
   private final JSONNumber number;
 
-  public GWTJSONNumber(JSONNumber number) {
+  public GWTJSONNumber(final JSONNumber number) {
     this.number = number;
   }
 
