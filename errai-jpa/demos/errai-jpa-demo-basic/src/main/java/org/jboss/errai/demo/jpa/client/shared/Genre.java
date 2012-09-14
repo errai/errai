@@ -3,9 +3,15 @@ package org.jboss.errai.demo.jpa.client.shared;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
+@NamedQueries({
+  @NamedQuery(name="allGenresByName", query="SELECT g FROM Genre g ORDER BY g.name"),
+  @NamedQuery(name="genresWithId", query="SELECT g FROM Genre g WHERE g.id IN :idSet ORDER BY g.name")
+})
 @Portable @Entity
 public class Genre {
 

@@ -29,6 +29,7 @@ public class Main {
 
   private Button resetEverythingButton = new Button("Reset all data to defaults");
   private Button newAlbumButton = new Button("New Album...");
+  private Button newArtistButton = new Button("New Artist...");
 
   @PostConstruct
   public void init() {
@@ -92,12 +93,34 @@ public class Main {
       }
     });
 
+    newArtistButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        ArtistForm af = new ArtistForm(new Artist(), em);
+        final PopupPanel pp = new PopupPanel(true, true);
+        af.setSaveHandler(new RowOperationHandler<Artist>() {
+          @Override
+          public void handle(Artist artist) {
+            em.persist(artist);
+            em.flush();
+            refreshUI();
+            pp.hide();
+          }
+        });
+        pp.setWidget(af);
+        pp.setGlassEnabled(true);
+        pp.show();
+        af.grabFocus();
+      }
+    });
+
     preFillDatabaseIfEmpty();
     refreshUI();
 
     RootPanel.get().add(resetEverythingButton);
     RootPanel.get().add(albumsWidget);
     RootPanel.get().add(newAlbumButton);
+    RootPanel.get().add(newArtistButton);
   }
 
   private void refreshUI() {
@@ -106,12 +129,26 @@ public class Main {
     albumsWidget.addAll(albums.getResultList());
   }
 
+  /**
+   * If there are no Album instances in the database, this method creates and
+   * persists a selection of music from the 1960's.
+   */
   private void preFillDatabaseIfEmpty() {
     TypedQuery<Album> albums = em.createNamedQuery("allAlbums", Album.class);
     if (albums.getResultList().isEmpty()) {
+      Genre rock = new Genre("Rock");
+      Genre soul = new Genre("Soul");
+      Genre rnb = new Genre("R&B");
+
       Artist beatles = new Artist();
       beatles.setName("The Beatles");
-      beatles.addGenre(new Genre("Rock"));
+      beatles.addGenre(rock);
+
+      Artist samNDave = new Artist();
+      samNDave.setName("Sam & Dave");
+      samNDave.addGenre(rock);
+      samNDave.addGenre(soul);
+      samNDave.addGenre(rnb);
 
       Album album = new Album();
       album.setArtist(beatles);
@@ -140,6 +177,62 @@ public class Main {
       album.setName("The Beatles");
       album.setReleaseDate(new Date(-34974000000L));
       em.persist(album);
+
+      album = new Album();
+      album.setArtist(beatles);
+      album.setFormat(Format.LP);
+      album.setName("Magical Mystery Tour");
+      album.setReleaseDate(new Date(-66164400000L));
+      em.persist(album);
+
+      album = new Album();
+      album.setArtist(beatles);
+      album.setFormat(Format.LP);
+      album.setName("Sgt. Pepper's Lonely Hearts Club Band");
+      album.setReleaseDate(new Date(-81633600000L));
+      em.persist(album);
+
+      album = new Album();
+      album.setArtist(beatles);
+      album.setFormat(Format.LP);
+      album.setName("Revolver");
+      album.setReleaseDate(new Date(-107553600000L));
+      em.persist(album);
+
+      album = new Album();
+      album.setArtist(beatles);
+      album.setFormat(Format.LP);
+      album.setName("Rubber Soul");
+      album.setReleaseDate(new Date(-128718000000L));
+      em.persist(album);
+
+      album = new Album();
+      album.setArtist(samNDave);
+      album.setFormat(Format.LP);
+      album.setName("Hold On, I'm Comin'");
+      album.setReleaseDate(new Date(-121114800000L));
+      em.persist(album);
+
+      album = new Album();
+      album.setArtist(samNDave);
+      album.setFormat(Format.LP);
+      album.setName("Double Dynamite");
+      album.setReleaseDate(new Date(-97354800000L));
+      em.persist(album);
+
+      album = new Album();
+      album.setArtist(samNDave);
+      album.setFormat(Format.LP);
+      album.setName("Soul Men");
+      album.setReleaseDate(new Date(-71092800000L));
+      em.persist(album);
+
+      // Some extra genres to play with
+      em.persist(new Genre("Classical"));
+      em.persist(new Genre("Country"));
+      em.persist(new Genre("Folk"));
+      em.persist(new Genre("Funk"));
+      em.persist(new Genre("Pop"));
 
       // store them
       em.flush();
