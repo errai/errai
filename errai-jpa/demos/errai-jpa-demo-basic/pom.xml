@@ -9,7 +9,7 @@
     <relativePath>../..</relativePath>
   </parent>
 
-  <name>Errai::JPA::Demos::Grocery List</name>
+  <name>Errai::JPA::Demos::Basic</name>
   <artifactId>errai-jpa-demo-basic</artifactId>
   <packaging>war</packaging>
 
