@@ -9,7 +9,9 @@
     </para>
    <example>
       <title>App.gwt.xml</title>
-      <programlisting language="xml">&lt;inherits name="org.jboss.errai.databinding.DataBinding" /&gt;</programlisting>
+      <programlisting language="xml">
+&lt;inherits name="org.jboss.errai.databinding.DataBinding" /&gt;
+</programlisting>
    </example>
    <section id="sid-51282340_DataBinding-BindableObjects">
       <title>Bindable Objects</title>
@@ -20,7 +22,8 @@
       </para>
       <example>
          <title>Customer.java</title>
-         <programlisting language="java">@Bindable
+         <programlisting language="java">
+@Bindable
 public class Customer {
   ...
   private String name;
@@ -33,7 +36,8 @@ public class Customer {
     this.name = name;
   }
   ...
-}</programlisting>
+}
+</programlisting>
       </example>
    </section>
    <section id="sid-51282340_DataBinding-InitializingaDataBinder">
@@ -45,14 +49,18 @@ public class Customer {
       </para>
       <para>injected into a client-side bean:</para>
       <informalexample>
-         <programlisting language="java">public class CustomerView {
+         <programlisting language="java">
+public class CustomerView {
   @Inject
   private DataBinder&lt;Customer&gt; dataBinder;
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>or created manually:</para>
       <informalexample>
-         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forType(Customer.class);</programlisting>
+         <programlisting language="java">
+DataBinder&lt;Customer&gt; dataBinder = DataBinder.forType(Customer.class);
+</programlisting>
       </informalexample>
       <para>
         In both cases above, the
@@ -64,16 +72,22 @@ public class Customer {
         can also be associated with an already existing object:
       </para>
       <informalexample>
-         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject);</programlisting>
+         <programlisting language="java">
+DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject);
+</programlisting>
       </informalexample>
       <para>In case there is existing state in either the model object or the UI components before the they are bound, initial state synchronization can be carried out to align the model and the corresponding UI fields.</para>
       <para>For using the model object's state to set the initial values in the UI:</para>
       <informalexample>
-         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject, InitialState.FROM_MODEL);</programlisting>
+         <programlisting language="java">
+DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject, InitialState.FROM_MODEL);
+</programlisting>
       </informalexample>
       <para>For using the UI values to set the initial state in the model object:</para>
       <informalexample>
-         <programlisting language="java">DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject, InitialState.FROM_UI);</programlisting>
+         <programlisting language="java">
+DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObject, InitialState.FROM_UI);
+</programlisting>
       </informalexample>
    </section>
    <section id="sid-51282340_DataBinding-CreatingBindings">
@@ -86,7 +100,8 @@ public class Customer {
         instance, thereby specifying which widgets should be bound to which properties of the model. Note that when using Errai UI these bindings are created automatically based on matching data-field and model property names.
       </para>
       <informalexample>
-         <programlisting language="java">public class CustomerView {
+         <programlisting language="java">
+public class CustomerView {
   @Inject
   private DataBinder&lt;Customer&gt; dataBinder;
 
@@ -101,7 +116,8 @@ public class Customer {
         .bind(idLabel, "id")
         .getModel();
   }
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>
         After the call to
@@ -133,7 +149,8 @@ public class Customer {
       <section id="sid-51282340_DataBinding-Registeringaglobaldefaultconverter">
          <title>Registering a global default converter</title>
          <informalexample>
-            <programlisting language="java">@DefaultConverter
+            <programlisting language="java">
+@DefaultConverter
 public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
 
   private static final String DATE_FORMAT = "YY_DD_MM";
@@ -147,7 +164,8 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
   public String toWidgetValue(Date modelValue) {
     return DateTimeFormat.getFormat(DATE_FORMAT).format((Date) modelValue);
   }
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>
           All converters annotated with
@@ -171,7 +189,9 @@ public class MyCustomDateConverter implements Converter&lt;Date, String&gt; {
           calls.
         </para>
          <informalexample>
-            <programlisting language="java">dataBinder.bind(textBox, "name", customConverter);</programlisting>
+            <programlisting language="java">
+dataBinder.bind(textBox, "name", customConverter);
+</programlisting>
          </informalexample>
          <para>Converters specified on the binding level take precedence over global default converters with matching types.</para>
       </section>

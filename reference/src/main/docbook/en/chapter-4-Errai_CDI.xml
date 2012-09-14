@@ -83,7 +83,8 @@
       <para>Let's take a look at an example.</para>
       <example>
          <title>FraudClient.java</title>
-         <programlisting language="java">public class FraudClient extends LayoutPanel {
+         <programlisting language="java">
+public class FraudClient extends LayoutPanel {
 
   @Inject
   private Event&lt;AccountActivity&gt; event; (1)
@@ -109,7 +110,8 @@
   public void processFraud(@Observes @Detected Fraud fraudEvent) { (2)
     responsePanel.setText("Fraud detected: " + fraudEvent.getTimestamp());
   }
-}</programlisting>
+}
+</programlisting>
       </example>
       <para>Two things are noteworthy in this example:</para>
       <orderedlist inheritnum="ignore" continuation="restarts">
@@ -137,7 +139,8 @@
       <para>To complete the example, let's look at the corresponding server-side CDI bean:</para>
       <example>
          <title>AccountService.java</title>
-         <programlisting language="java">@ApplicationScoped
+         <programlisting language="java">
+@ApplicationScoped
 public class AccountService {
 
   @Inject @Detected
@@ -147,7 +150,8 @@ public class AccountService {
     Fraud fraud = new Fraud(System.currentTimeMillis());
     event.fire(fraud);
  }
-}</programlisting>
+}
+</programlisting>
       </example>
       <section id="sid-21758054_Events-Conversationalevents">
          <title>Conversational events</title>
@@ -158,7 +162,8 @@ public class AccountService {
         </para>
          <example>
             <title>SubscriptionService.java</title>
-            <programlisting language="java">@ApplicationScoped
+            <programlisting language="java">
+@ApplicationScoped
 public class SubscriptionService {
 
   @Inject
@@ -168,7 +173,8 @@ public class SubscriptionService {
     Document docs = createWelcomePackage(subscription);
     welcomeEvent.fire(docs);
  }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>
           And the
@@ -177,10 +183,12 @@ public class SubscriptionService {
         </para>
          <example>
             <title>Document.java</title>
-            <programlisting language="java">@Conversational @Portable
+            <programlisting language="java">
+@Conversational @Portable
 public class Document {
    // code here
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>
           As such, when
@@ -198,7 +206,8 @@ public class Document {
          <para>Example server code:</para>
          <example>
             <title>MyServerBean.java</title>
-            <programlisting language="java">@ApplicationScoped
+            <programlisting language="java">
+@ApplicationScoped
 public class MyServerBean {
   @Inject
   Event&lt;MyResponseEvent&gt; myResponseEvent;
@@ -217,12 +226,14 @@ public class MyServerBean {
 
     myResponseEvent.fire(response);
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>Domain-model:</para>
          <example>
             <title>MyRequestEvent.java</title>
-            <programlisting language="java">@Portable
+            <programlisting language="java">
+@Portable
 public class MyRequestEvent {
   private boolean thankYou;
 
@@ -237,11 +248,13 @@ public class MyRequestEvent {
   public boolean isThankYou() {
     return thankYou;
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <example>
             <title>MyResponseEvent.java</title>
-            <programlisting language="java">@Portable
+            <programlisting language="java">
+@Portable
 public class MyResponseEvent {
   private String message;
 
@@ -256,12 +269,14 @@ public class MyResponseEvent {
   public String getMessage() {
     return message;
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>Client application logic:</para>
          <example>
             <title>MyClientBean.java</title>
-            <programlisting language="java">@EntryPoint
+            <programlisting language="java">
+@EntryPoint
 public class MyClientBean {
    @Inject
    Event&lt;MyRequestEvent&gt; requestEvent;
@@ -292,7 +307,8 @@ public class MyClientBean {
 
      RootPanel.get().add(vPanel);
    }
-}</programlisting>
+}
+</programlisting>
          </example>
       </section>
    </section>
@@ -301,7 +317,8 @@ public class MyClientBean {
       <para>Producer methods and fields act as sources of objects to be injected. They are useful when additional control over object creation is needed before injections can take place e.g. when you need to make a decision at runtime before an object can be created and injected.</para>
       <example>
          <title>App.java</title>
-         <programlisting language="java">@EntryPoint
+         <programlisting language="java">
+@EntryPoint
 public class App {
   ...
 
@@ -309,18 +326,21 @@ public class App {
   private MyBaseWidget createWidget() {
     return (Canvas.isSupported()) ? new MyHtml5Widget() : new MyDefaultWidget();
   }
-}</programlisting>
+}
+</programlisting>
       </example>
       <example>
          <title>MyComposite.java</title>
-         <programlisting language="java">@ApplicationScoped
+         <programlisting language="java">
+@ApplicationScoped
 public class MyComposite extends Composite {
 
   @Inject @Supported
   private MyBaseWidget widget;
 
   ...
-}</programlisting>
+}
+</programlisting>
       </example>
       <para>
         Producers can also be scoped themselves. By default, producer methods are dependent-scoped, meaning they get called every time an injection for their provided type is requested. If a producer method is scoped
@@ -329,20 +349,54 @@ public class MyComposite extends Composite {
       </para>
       <example>
          <title>Singleton producer</title>
-         <programlisting language="java">public class App {
+         <programlisting language="java">
+public class App {
   ...
 
   @Produces @Singleton
   private MyBean produceMyBean() {
     return new MyBean();
   }
-}</programlisting>
+}
+</programlisting>
       </example>
       <para>
         For more information on CDI producers, see the
         <ulink url="http://docs.jboss.org/cdi/spec/1.0/html/">CDI specification</ulink>
         and the
         <ulink url="http://seamframework.org/Weld/WeldDocumentation">WELD reference documentation</ulink>
+        .
+      </para>
+   </section>
+   <section id="sid-53118110">
+      <title>safe dynamic lookup</title>
+      <para>
+        As an alternative to using the bean manager to dynamically create beans, this can be accomplished in a type-safe way by injecting a
+        <code>javax.enterprise.inject.Instance&lt;T&gt;</code>
+        .
+      </para>
+      <para>
+        For instance, assume you have a dependent-scoped bean
+        <code>Bar</code>
+        and consider the following:
+      </para>
+      <informalexample>
+         <programlisting language="java">
+public class Foo {
+  @Inject Instance&lt;Bar&gt; barInstance;
+
+  public void pingNewBar() {
+    Bar bar = barInstance.get();
+    bar.ping();
+  }
+}
+</programlisting>
+      </informalexample>
+      <para>
+        In this example, calling
+        <code>barInstance.get()</code>
+        returns a new instance of the dependent-scoped bean
+        <code>Bar</code>
         .
       </para>
    </section>
@@ -364,7 +418,8 @@ public class MyComposite extends Composite {
          <title>Deployment in Development Mode</title>
          <para>In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). Since GWT uses Jetty, that only supports read only JNDI, we need to replace the default Jetty launcher with a custom one that will setup the JNDI bindings:</para>
          <informalexample>
-            <programlisting language="xml">&lt;plugin&gt;
+            <programlisting language="xml">
+&lt;plugin&gt;
   &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
   &lt;artifactId&gt;gwt-maven plugin&lt;/artifactId&gt;
   &lt;version&gt;${gwt.maven}&lt;/version&gt;
@@ -376,7 +431,8 @@ public class MyComposite extends Composite {
   &lt;executions&gt;
   ...
   &lt;/executions&gt;
-&lt;/plugin&gt;</programlisting>
+&lt;/plugin&gt;
+</programlisting>
          </informalexample>
          <note>
             <title>Starting Development Mode from within your IDE</title>
@@ -384,7 +440,8 @@ public class MyComposite extends Composite {
          </note>
          <para>Once this is set up correctly, we can bootstrap the CDI container through a servlet listener:</para>
          <informalexample>
-            <programlisting language="xml">&lt;web-app&gt;
+            <programlisting language="xml">
+&lt;web-app&gt;
   ...
   &lt;listener&gt;
     &lt;listener-class&gt;org.jboss.errai.container.CDIServletStateListener&lt;/listener-class&gt;
@@ -396,7 +453,8 @@ public class MyComposite extends Composite {
     &lt;resource-env-ref-type&gt;javax.enterprise.inject.spi.BeanManager&lt;/resource-env-ref-type&gt;
   &lt;/resource-env-ref&gt;
   ...
-&lt;/web-app&gt;</programlisting>
+&lt;/web-app&gt;
+</programlisting>
          </informalexample>
          <note>
             <title>Errai-CDI maven archetype</title>

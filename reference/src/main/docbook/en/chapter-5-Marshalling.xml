@@ -96,7 +96,8 @@
          <section id="sid-5931328_Marshalling-Example%3AASimpleEntity">
             <title>Example: A Simple Entity</title>
             <informalexample>
-               <programlisting language="java">@Portable
+               <programlisting language="java">
+@Portable
 public class Person {
   private String name;
   private int age;
@@ -116,7 +117,8 @@ public class Person {
   public int getAge() {
     return age; 
   }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
             <para>This is a pretty vanilla domain object. Note the default, public, no-argument constructor. In this case, it will be necessary to have one explicitly declared. But notice we have no setters. In this case, the marshaler will rely on private field access to write the values on each side of the marshalling transaction. For simple domain objects, this is both nice and convenient. But you may want to make the class immutable and have a constructor enforce invariance. See the next section for that.</para>
          </section>
@@ -124,7 +126,8 @@ public class Person {
             <title>Example: An Immutable Entity with a Public Constructor</title>
             <para>Immutability is almost always a good practice, and the marshalling system provides you a straight forward way to tell it how to marshal and de-marshal objects which enforce an immutable contract. Let's modify our example from the previous section.</para>
             <informalexample>
-               <programlisting language="java">@Portable
+               <programlisting language="java">
+@Portable
 public class Person {
   private final String name;
   private final int age;
@@ -141,7 +144,8 @@ public class Person {
   public int getAge() {
     return age; 
   }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
             <para>
             Here we have set both of the class fields final. By doing so, we had to remove our default constructor. But that's okay, because we have annotated the remaining constructor's parameters using the
@@ -158,7 +162,8 @@ public class Person {
             <title>Example: An Immutable Entity with a Factory Method</title>
             <para>Another good practice is to use a factory pattern to enforce invariance. Once again, let's modify our example.</para>
             <informalexample>
-               <programlisting language="java">@Portable
+               <programlisting language="java">
+@Portable
 public class Person {
   private final String name;
   private final int age;
@@ -179,7 +184,8 @@ public class Person {
   public int getAge() {
     return age; 
   }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
             <para>
             Here we have made our only declared constructor private, and created a static factory method. Notice that we've simply used the same
@@ -191,7 +197,8 @@ public class Person {
             <title>Example: An Immutable Entity with a Builder</title>
             <para>For types with a large number of optional attributes, a builder is often the best approach.</para>
             <informalexample>
-               <programlisting language="java">@Portable
+               <programlisting language="java">
+@Portable
 public class Person {
   private final String name;
   private final int age;
@@ -228,7 +235,8 @@ public class Person {
       return new Person(name, age);
     }
   }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
             <para>
             In this example, we have a nested
@@ -282,15 +290,19 @@ public class Person {
           </para>
             <example>
                <title>Example ErraiApp.properties defining portable classes.</title>
-               <programlisting language="ini">errai.marshalling.serializableTypes=org.foo.client.UserEntity \
+               <programlisting language="ini">
+errai.marshalling.serializableTypes=org.foo.client.UserEntity \
                                     org.foo.client.GroupEntity \
-                                    org.abcinc.model.client.Profile</programlisting>
+                                    org.abcinc.model.client.Profile
+</programlisting>
             </example>
             <para>If any of the serializable types have nested classes that you wish to make non-portable, you can specify them like this:</para>
             <example>
                <title>Example ErraiApp.properties defining nonportable classes.</title>
-               <programlisting language="ini">errai.marshalling.nonserializableTypes=org.foo.client.UserEntity$Builder \
-                                       org.foo.client.GroupEntity$Builder</programlisting>
+               <programlisting language="ini">
+errai.marshalling.nonserializableTypes=org.foo.client.UserEntity$Builder \
+                                       org.foo.client.GroupEntity$Builder
+</programlisting>
             </example>
          </section>
          <section id="sid-5931328_Marshalling-AliasedMappingsofExistingInterfaceContracts">
@@ -312,12 +324,14 @@ public class Person {
             .
           </para>
             <informalexample>
-               <programlisting language="java">package org.foo.client;
+               <programlisting language="java">
+package org.foo.client;
 
 @Portable(aliasOf = java.util.List.class)
 public MyListImpl extends ArrayList {
   // .. //
-}</programlisting>
+}
+</programlisting>
             </informalexample>
             <para>
             In the case of this example, the marshaller will not attempt to comprehend your class. Instead, it will merely rely on the
@@ -332,8 +346,11 @@ public MyListImpl extends ArrayList {
             attribute.
           </para>
             <informalexample>
-               <programlisting language="ini">errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.util.List \
-                                 org.foo.client.MyMapImpl-&gt;java.util.Map</programlisting>
+               <programlisting language="ini">
+errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.util.List \
+                                 org.foo.client.MyMapImpl-&gt;java.util.Map
+
+</programlisting>
             </informalexample>
             <para>The list of classes is whitespace-separated so that it may be split across lines.</para>
             <para>
@@ -373,7 +390,8 @@ public MyListImpl extends ArrayList {
           </para>
             <para>Consider the following class:</para>
             <informalexample>
-               <programlisting language="java">public class MySuperCustomEntity {
+               <programlisting language="java">
+public class MySuperCustomEntity {
    private final String mySuperName;
    private String mySuperNickname;
 
@@ -392,12 +410,15 @@ public MyListImpl extends ArrayList {
    public String getMySuperNickname() {
      return this.mySuperNickname;
    }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
             <para>Let us construct this object like so:</para>
             <informalexample>
-               <programlisting language="java">MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
-  entity.setSuperNickname("coo");</programlisting>
+               <programlisting language="java">
+  MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
+  entity.setSuperNickname("coo");
+</programlisting>
             </informalexample>
             <para>
             It is clear that we may rely on this object's two getter methods to extract the totality of its state. But due to the fact that the
@@ -408,7 +429,8 @@ public MyListImpl extends ArrayList {
           </para>
             <para>Let us consider how we could go about telling the marshalling framework to pull this off:</para>
             <informalexample>
-               <programlisting language="java">@CustomMapping
+               <programlisting language="java">
+@CustomMapping
 public MySuperCustomEntityMapping extends MappingDefinition {
   public MySuperCustomEntityMapping() {
     super(MySuperCustomEntity.class);                                                          // (1)
@@ -423,7 +445,8 @@ public MySuperCustomEntityMapping extends MappingDefinition {
     addMemberMapping(new ReadMapping("mySuperName", String.class, "getMySuperName"));          // (4)
     addMemberMapping(new ReadMapping("mySuperNickname", String.class, "getMySuperNickname"));  // (5)
   }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
             <para>
             And that's it. This describes to the marshalling framework how it should go about constructing and deconstructing
@@ -511,7 +534,8 @@ public MySuperCustomEntityMapping extends MappingDefinition {
         </para>
          <example>
             <title>DataMarshaller.java from the built-in marshallers</title>
-            <programlisting language="java">@ClientMarshaller @ServerMarshaller
+            <programlisting language="java">
+@ClientMarshaller @ServerMarshaller
 public class DateMarshaller extends AbstractNullableMarshaller&lt;Date&gt; {
   @Override
   public Class&lt;Date&gt; getTypeHandled() {
@@ -540,7 +564,8 @@ public class DateMarshaller extends AbstractNullableMarshaller&lt;Date&gt; {
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>
           The class is annotated with both

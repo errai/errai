@@ -23,16 +23,14 @@
       </para>
       <para>One common cause of this problem is a &lt;resources&gt; section in pom.xml that includes src/main/java (to expose .java sources to the GWT compiler) that does not also include src/main/resources as a resource path. You must include both explicitly:</para>
       <informalexample>
-         <programlisting language="xml">
-&lt;resources&gt;
+         <programlisting language="xml">&lt;resources&gt;
   &lt;resource&gt;
     &lt;directory&gt;src/main/java&lt;/directory&gt;
   &lt;/resource&gt;
   &lt;resource&gt;
     &lt;directory&gt;src/main/resources&lt;/directory&gt;
   &lt;/resource&gt;
-&lt;/resources&gt;
-</programlisting>
+&lt;/resources&gt;</programlisting>
       </informalexample>
    </section>
    <section id="sid-32473113_Troubleshooting%26FAQ-WhyamIgetting%22java.lang.ClassFormatError%3AIllegalmethodname%22%3Cinit%3E%24%22inclassorg%2Fxyz%2Fpackage%2FMyClass%22%3F">

@@ -24,7 +24,8 @@
    </note>
    <para>A simple example:</para>
    <informalexample>
-      <programlisting language="java">public class MyLittleClass {
+      <programlisting language="java">
+public class MyLittleClass {
   private final TimeService timeService;
 
   @Inject
@@ -35,7 +36,8 @@
   public void printTime() {
     System.out.println(this.timeService.getTime());
   }
-}</programlisting>
+}
+</programlisting>
    </informalexample>
    <para>
       In this example, we create a simple class which declares a dependency using
@@ -47,14 +49,16 @@
       . In this particular case, we use constructor injection to establish the contract between the container and the component. We can similarly use field injection to the same effect:
     </para>
    <informalexample>
-      <programlisting language="java">public class MyLittleClass {
+      <programlisting language="java">
+public class MyLittleClass {
   @Inject
   private TimeService timeService;
 
   public void printTime() {
     System.out.println(this.timeService.getTime());
   }
-}</programlisting>
+}
+</programlisting>
    </informalexample>
    <para>
       In order to inject
@@ -64,9 +68,11 @@
       or the Errai DI container will not acknowledge the type as a bean.
     </para>
    <informalexample>
-      <programlisting language="java">@ApplicationScoped
+      <programlisting language="java">
+@ApplicationScoped
 public class TimeService {
-}</programlisting>
+}
+</programlisting>
    </informalexample>
    <para>
       
@@ -84,12 +90,12 @@ public class TimeService {
         <code>
             <ulink url="http://download.oracle.com/javaee/6/api/javax/inject/Provider.html">Provider</ulink>
         </code>
-        , which is scanned for an auto-discovered by the container.
+        , which is scanned for and auto-discovered by the container.
       </para>
       <para>
         A
         <code>Provider</code>
-        is essentially a factory which produces dependent types in the container, which defers instantiation responsibility for the provided type to the provider implementation. Top-level providers use the standard
+        is essentially a factory which produces type instances within in the container, and defers instantiation responsibility for the provided type to the provider implementation. Top-level providers use the standard
         <code>javax.inject.Provider&lt;T&gt;</code>
         interface.
       </para>
@@ -134,15 +140,18 @@ public class TimeService {
         <emphasis role="strong">TimeService.java</emphasis>
       </para>
       <informalexample>
-         <programlisting language="java">public interface TimeService {
+         <programlisting language="java">
+public interface TimeService {
   public String getTime();
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>
         <emphasis role="strong">TimeServiceProvider.java</emphasis>
       </para>
       <informalexample>
-         <programlisting language="java">@IOCProvider
+         <programlisting language="java">
+@IOCProvider
 @Singleton
 public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
   @Override
@@ -153,15 +162,18 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
       }
     };
   }
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>If you are familiar with Guice, this is semantically identical to configuring an injector like so:</para>
       <informalexample>
-         <programlisting language="java">Guice.createInjector(new AbstractModule() {
+         <programlisting language="java">
+Guice.createInjector(new AbstractModule() {
   public void configure() {
     bind(TimeService.class).toProvider(TimeServiceProvider.class);
   }
- }).getInstance(MyApp.class);</programlisting>
+ }).getInstance(MyApp.class);
+</programlisting>
       </informalexample>
       <para>
         As shown in the above example code, the annotation
@@ -176,7 +188,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
    <section id="sid-5931332">
       <title>Wiring server side components</title>
       <para>
-        By default, Errai uses Google Guice to wire components. When deploying services on the server-side, it is currently possible to obtain references to the
+        By default, Errai uses Google Guice to wire server-side components. When deploying services on the server-side, it is currently possible to obtain references to the
         <code>MessageBus</code>
         ,
         <code>RequestDispatcher</code>
@@ -202,7 +214,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
       <section id="sid-24674461">
          <title>Dependent Scope</title>
          <para>
-          In Errai CDI, all client types are valid bean types if they are default constructable or can have construction dependencies satisfied. These unqualified beans belong the dependent pseudo-scope. See:
+          In Errai IOC, all client types are valid bean types if they are default constructable or can have construction dependencies satisfied. These unqualified beans belong to the dependent pseudo-scope. See:
           <ulink url="http://docs.jboss.org/weld/reference/latest/en-US/html/scopescontexts.html#d0e1997">Dependent Psuedo-Scope from CDI Documentation</ulink>
         </para>
          <para>
@@ -212,26 +224,34 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
           <code>@Singleton</code>
           or
           <code>@EntryPoint</code>
-          . Although these three scopes are supported for completeness and conformance to the specification, within the client they effectively result in behavior that is identical.
+          . Although
+          <code>@ApplicationScoped</code>
+          and
+          <code>@Singleton</code>
+          are supported for completeness and conformance, within the client they effectively result in behavior that is identical.
         </para>
          <example>
             <title>Example dependent scoped bean</title>
-            <programlisting language="java">public void MyDependentScopedBean {
+            <programlisting language="java">
+public void MyDependentScopedBean {
   private final Date createdDate;
 
   public MyDependentScopedBean {
     createdDate = new Date();
   }  
-}</programlisting>
+}
+</programlisting>
          </example>
          <example>
             <title>Example ApplicationScoped bean</title>
-            <programlisting language="java">@ApplicationScoped
+            <programlisting language="java">
+@ApplicationScoped
 public void MyClientBean {
   @Inject MyDependentScopedBean bean;
 
   // ... //
-}</programlisting>
+}
+</programlisting>
          </example>
          <important>
             <title>Availability of dependent beans in the client-side BeanManager</title>
@@ -261,17 +281,20 @@ public void MyClientBean {
           </para>
             <example>
                <title>A simple message receiving service</title>
-               <programlisting language="java">@Service
+               <programlisting language="java">
+@Service
 public class MyService implements MessageCallback {
   public void callback(Message message) {
     // ... //
   }
-}</programlisting>
+}
+</programlisting>
             </example>
             <para>Or like so ...</para>
             <example>
                <title>Mapping a callback from a field of a bean</title>
-               <programlisting language="java">@Singleton
+               <programlisting language="java">
+@Singleton
 public class MyAppBean {
    @Service("MyService")
    private final MessageCallback myService = new MesageCallback() {
@@ -279,7 +302,8 @@ public class MyAppBean {
        // ... //
      }
    }
-}</programlisting>
+}
+</programlisting>
             </example>
             <para>As with server-side use of the annotation, if a service name is not explicitly specified, the underlying class name or field name being annotated will be used as the service name.</para>
          </section>
@@ -294,12 +318,14 @@ public class MyAppBean {
           </para>
             <example>
                <title>A local only service</title>
-               <programlisting language="java">@Service @Local
+               <programlisting language="java">
+@Service @Local
 public class MyLocalService implements MessageCallback {
   public void callback(Message message) {
     // ... //
   }
-}</programlisting>
+}
+</programlisting>
             </example>
          </section>
          <section id="sid-20938797_BusServices-LifecycleImpactofServices">
@@ -325,7 +351,9 @@ public class MyLocalService implements MessageCallback {
           </para>
             <example>
                <title>Injecting a MessageBus</title>
-               <programlisting language="java">@Inject MessageBus bus;</programlisting>
+               <programlisting language="java">
+@Inject MessageBus bus;
+</programlisting>
             </example>
          </section>
          <section id="sid-20938800_ClientComponents-RequestDispatcher">
@@ -341,7 +369,9 @@ public class MyLocalService implements MessageCallback {
           </para>
             <example>
                <title>Injecting a RequestDispatcher</title>
-               <programlisting language="java">@Inject RequestDispatcher dispatcher;</programlisting>
+               <programlisting language="java">
+@Inject RequestDispatcher dispatcher;
+</programlisting>
             </example>
          </section>
          <section id="sid-20938800_ClientComponents-Caller%3C%3F%3E">
@@ -354,7 +384,8 @@ public class MyLocalService implements MessageCallback {
             <para>For example:</para>
             <example>
                <title>An example Caller&lt;?&gt; proxy</title>
-               <programlisting language="java">public void MyClientBean {
+               <programlisting language="java">
+public void MyClientBean {
   @Inject
   private Caller&lt;MyRpcInterface&gt; rpcCaller;
  
@@ -367,7 +398,8 @@ public class MyLocalService implements MessageCallback {
       }
     ).callSomeMethod();
   }
-}</programlisting>
+}
+</programlisting>
             </example>
             <para>
             The above code shows the injection of a proxy for the RPC remote interface,
@@ -392,7 +424,8 @@ public class MyLocalService implements MessageCallback {
           </para>
             <example>
                <title>Using an InitBallot to Control Startup</title>
-               <programlisting language="java">@Singleton
+               <programlisting language="java">
+@Singleton
 public class MyClientBean {
   @Inject InitBallot&lt;MyClientBean&gt; ballot;
 
@@ -402,7 +435,8 @@ public class MyClientBean {
     
     ballot.voteForInit();
   }
-}</programlisting>
+}
+</programlisting>
             </example>
          </section>
          <section id="sid-21758082_LifecycleTools-PerformingTasksAfterInitialization">
@@ -418,13 +452,16 @@ public class MyClientBean {
           </para>
             <example>
                <title>Using @AfterInitialization to do something after startup</title>
-               <programlisting language="java">@Singleton
+               <programlisting language="java">
+@Singleton
 public class MyClientBean {
   @AfterInitialization
   public void doStuffAfterInit() {
     // ... do some work ...
   }
-}</programlisting>
+}
+
+</programlisting>
             </example>
          </section>
       </section>
@@ -439,11 +476,13 @@ public class MyClientBean {
       <para>As you might expect, you can inject the bean manager into any of your managed beans.</para>
       <example>
          <title>Injecting the client-side bean manager</title>
-         <programlisting language="java">public MyManagedBean {
+         <programlisting language="java">
+public MyManagedBean {
   @Inject IOCBeanManager manager;
    
   // class body 
-}</programlisting>
+}
+</programlisting>
       </example>
       <para>
         If you need to access the bean manager outside a managed bean, such as in a unit test, you can access it by calling
@@ -460,7 +499,8 @@ public class MyClientBean {
         </para>
          <example>
             <title>Example lookup of a bean</title>
-            <programlisting language="java">public MyManagedBean {
+            <programlisting language="java">
+public MyManagedBean {
   @Inject IOCBeanManager manager;
    
   public void lookupBean() {
@@ -472,7 +512,8 @@ public class MyClientBean {
       SimpleBean inst = bean.getInstance();
     }
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>
           In this example we lookup a bean class named
@@ -483,7 +524,8 @@ public class MyClientBean {
         </para>
          <example>
             <title>Looking up beans with qualifiers</title>
-            <programlisting language="java">MyQualifier qual = new MyQualifier() {
+            <programlisting language="java">
+MyQualifier qual = new MyQualifier() {
   public annotationType() {
     return MyQualifier.class;
   }
@@ -496,7 +538,8 @@ MyOtherQualifier qual2 = new MyOtherQualifier() {
 }
 
 // pass qualifiers to IOCBeanManager.lookupBean
-IOCBean&lt;SimpleInterface&gt; bean = beanManager.lookupBean(SimpleBean.class, qual, qual2);</programlisting>
+IOCBean&lt;SimpleInterface&gt; bean = beanManager.lookupBean(SimpleBean.class, qual, qual2);
+</programlisting>
          </example>
          <para>In this example we manually construct instances of qualifier annotations in order to pass it to the bean manager for lookup. This is a necessary step since there's currently no support for annotation literals in Errai client code.</para>
          <para id="sid-21627016_Client-SideBeanManager-AvailabilityOfBeans"/>
@@ -517,16 +560,20 @@ IOCBean&lt;SimpleInterface&gt; bean = beanManager.lookupBean(SimpleBean.class, q
          <para>It may be desirable to have multiple matching dependencies for a given injection point with the ability to specify which implementation to use at runtime. For instance, you may have different versions of your application which target different browsers or capabilities of the browser. Using alternatives allows you to share common interfaces among your beans, while still using dependency injection, by exporting consideration of what implementation to use to the container's configuration.</para>
          <para>Consider the following example:</para>
          <informalexample>
-            <programlisting language="java">@Singleton @Alternative
+            <programlisting language="java">
+@Singleton @Alternative
 public class MobileView implements View {
   // ... //
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>and</para>
          <informalexample>
-            <programlisting language="java">@Singleton @Alternative
+            <programlisting language="java">
+@Singleton @Alternative
 public class DesktopView implements View {
-  // ... //</programlisting>
+  // ... // 
+</programlisting>
          </informalexample>
          <para>
           In our controller logic we in turn inject the
@@ -534,13 +581,15 @@ public class DesktopView implements View {
           interface:
         </para>
          <informalexample>
-            <programlisting language="java">@EntryPoint
+            <programlisting language="java">
+@EntryPoint
 public class MyApp {
   @Inject
   View view;
   
   // ... //
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>
           This code is unaware of the implementation of
@@ -557,15 +606,19 @@ public class MyApp {
           for the module, you can simply specify which active alternative should be used:
         </para>
          <informalexample>
-            <programlisting language="java">errai.ioc.enabled.alternatives=org.foo.MobileView</programlisting>
+            <programlisting language="java">
+errai.ioc.enabled.alternatives=org.foo.MobileView
+</programlisting>
          </informalexample>
          <para>You can specify multiple alternative classes by white space separating them:</para>
          <informalexample>
-            <programlisting language="ini">errai.ioc.enabled.alternatives=org.foo.MobileView \
+            <programlisting language="ini">
+errai.ioc.enabled.alternatives=org.foo.MobileView \
                                org.foo.HTML5Orientation \
-                               org.foo.MobileStorage</programlisting>
+                               org.foo.MobileStorage 
+</programlisting>
          </informalexample>
-         <para>You can only have one enabled alternative for matching set of alternatives, otherwise you will get ambiguous resolution errors from the container.</para>
+         <para>You can only have one enabled alternative for a matching set of alternatives, otherwise you will get ambiguous resolution errors from the container.</para>
       </section>
       <section id="sid-22872133_AlternativesandMocks-TestMocks">
          <title>Test Mocks</title>
@@ -576,12 +629,14 @@ public class MyApp {
         </para>
          <para>Consider the following:</para>
          <informalexample>
-            <programlisting language="java">@ApplicationScoped
+            <programlisting language="java">
+@ApplicationScoped
 public class UserManagementImpl implements UserManagement {
   public List&lt;User&gt; listUsers() {
      // do user listy things!
   } 
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>
           You can specify a mock implementation of this class by implementing its common parent type (
@@ -591,13 +646,15 @@ public class UserManagementImpl implements UserManagement {
           annotation inside your test package like so:
         </para>
          <informalexample>
-            <programlisting language="java">@TestMock @ApplicationScoped
+            <programlisting language="java">
+@TestMock @ApplicationScoped
 public class MockUserManagementImpl implements UserManagement {
   public List&lt;User&gt; listUsers() { 
      // return only a test user.
      return Collections.singletonList(TestUser.INSTANCE);
   }
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>
           In this case, the container will replace the
@@ -618,7 +675,8 @@ public class MockUserManagementImpl implements UserManagement {
           .
         </para>
          <informalexample>
-            <programlisting language="java">@TestMock @IOCProvider
+            <programlisting language="java">
+@TestMock @IOCProvider
 public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&lt;Caller&lt;HappyService&gt;&gt; {
  
   @Override
@@ -626,7 +684,8 @@ public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&
     return new Caller&lt;HappyService&gt;() {
       ...
     }
-}</programlisting>
+}
+</programlisting>
          </informalexample>
       </section>
    </section>
@@ -661,7 +720,8 @@ public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&
         </para>
          <example>
             <title>Destruction of bean</title>
-            <programlisting language="java">public MyManagedBean {
+            <programlisting language="java">
+public MyManagedBean {
   @Inject IOCBeanManager manager;
 
   public void createABeanThenDestroyIt() {
@@ -673,7 +733,8 @@ public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&
     // destroy the bean!
     manager.destroyBean(bean);
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>When the bean manager "destroys" the bean, any pre-destroy methods the bean declares are called, it is taken out of service and no longer tracked by the bean manager. If there are references on the bean by other objects, the bean will continue to be accessible to those objects.</para>
          <important>
@@ -682,7 +743,8 @@ public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&
          <para>Another important consideration is the rule, "all beans created together are destroyed together." Consider the following example:</para>
          <example>
             <title>SimpleBean.class</title>
-            <programlisting language="java">@Dependent
+            <programlisting language="java">
+@Dependent
 public class SimpleBean {
    @Inject @New AnotherBean anotherBean;
 
@@ -694,11 +756,13 @@ public class SimpleBean {
    private void cleanUp() {
      // do some cleanup tasks
    }
-}</programlisting>
+}
+</programlisting>
          </example>
          <example>
             <title>Destroying bean from subgraph</title>
-            <programlisting language="java">public MyManagedBean {
+            <programlisting language="java">
+public MyManagedBean {
   @Inject IOCBeanManager manager;
 
   public void createABeanThenDestroyIt() {
@@ -708,7 +772,8 @@ public class SimpleBean {
     // destroy the AnotherBean reference from inside the bean
     manager.destroyBean(bean.getAnotherBean());
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>
           In this example we pass the instance of
@@ -734,14 +799,16 @@ public class SimpleBean {
             <para>For instance:</para>
             <example>
                <title>Destroying bean with disposer</title>
-               <programlisting language="java">public MyManagedBean {
+               <programlisting language="java">
+public MyManagedBean {
   @Inject @New SimpleBean myNewSimpleBean;
   @Inject Disposer&lt;SimpleBean&gt; simpleBeanDisposer;
 
   public void destroyMyBean() {
     simpleBeanDisposer.dispose(myNewSimpleBean);
   }
-}</programlisting>
+}
+</programlisting>
             </example>
          </section>
       </section>

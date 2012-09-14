@@ -114,7 +114,8 @@
          <para>The contents of the server-side files would be as follows:</para>
          <example>
             <title>CustomerService.java</title>
-            <programlisting language="java">@Path("customers")
+            <programlisting language="java">
+@Path("customers")
 public interface CustomerService {
   @GET
   @Produces("application/json")
@@ -124,12 +125,14 @@ public interface CustomerService {
   @Consumes("application/json")
   @Produces("text/plain")
   public long createCustomer(Customer customer);
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>The above interface is visible both to server-side code and to client-side code. It is used by client-side code to describe the available operations, their parameter types, and their return types. If you use your IDE's refactoring tools to modify this interface, both the server-side and client-side code will be updated automatically.</para>
          <example>
             <title>CustomerServiceImpl.java</title>
-            <programlisting language="java">public class CustomerServiceImpl implements CustomerService {
+            <programlisting language="java">
+public class CustomerServiceImpl implements CustomerService {
 
   @Override
   public List&lt;Customer&gt; listAllCustomers() {
@@ -141,7 +144,8 @@ public interface CustomerService {
   public long createCustomer(Customer customer) {
     // Store new Customer instance in back-end data store
   }
-}</programlisting>
+}
+</programlisting>
          </example>
          <para>The above class implements the shared interface. Since it performs database and/or filesystem operations to manipulate the persistent data store, it is not GWT translatable, and it's therefore kept in a package that is not part of the GWT module.</para>
          <important>
@@ -168,14 +172,16 @@ public interface CustomerService {
       </para>
       <example>
          <title>App.java</title>
-         <programlisting language="java">...
+         <programlisting language="java">
+...
 Button create = new Button("Create", new ClickHandler() {
   public void onClick(ClickEvent clickEvent) {
     Customer customer = new Customer(firstName, lastName, postalCode);
     RestClient.create(CustomerService.class, callback).createCustomer(customer);
   }
 });
-...</programlisting>
+...
+</programlisting>
       </example>
       <para>
         For details on the callback mechanism see
@@ -193,8 +199,10 @@ Button create = new Button("Create", new ClickHandler() {
           .
         </para>
          <informalexample>
-            <programlisting language="java">@Inject
-private Caller&lt;CustomerService&gt; customerService;</programlisting>
+            <programlisting language="java">
+@Inject
+private Caller&lt;CustomerService&gt; customerService; 
+</programlisting>
          </informalexample>
          <para>
           To create a request, the callback objects need to be provided to the
@@ -202,7 +210,9 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
           method before the corresponding interface method is invoked.
         </para>
          <informalexample>
-            <programlisting language="java">customerService.call(callback).listAllCustomers();</programlisting>
+            <programlisting language="java">
+customerService.call(callback).listAllCustomers();
+</programlisting>
          </informalexample>
       </section>
    </section>
@@ -222,11 +232,13 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
         ).
       </para>
       <informalexample>
-         <programlisting language="java">RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
+         <programlisting language="java">
+RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
   public void callback(Long id) {
     Window.alert("Customer created with ID: " + id);
   }
-};</programlisting>
+};
+</programlisting>
       </informalexample>
       <para>
         A special case of this
@@ -242,12 +254,14 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
         for the method result.
       </para>
       <informalexample>
-         <programlisting language="java">ResponseCallback callback = new ResponseCallback() {
+         <programlisting language="java">
+ResponseCallback callback = new ResponseCallback() {
   public void callback(Response response) {
     Window.alert("HTTP status code: " + response.getStatusCode());
     Window.alert("HTTP response body: " + response.getText());
   }
-};</programlisting>
+};
+</programlisting>
       </informalexample>
       <para>
         For handling errors, Errai's error callback mechanism can be reused and an instance of
@@ -263,7 +277,8 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
         indicate a communication problem.
       </para>
       <informalexample>
-         <programlisting language="java">ErrorCallback errorCallback = new ErrorCallback() {
+         <programlisting language="java">
+ErrorCallback errorCallback = new ErrorCallback() {
   public boolean error(Message message, Throwable throwable) {
     try {
       throw throwable;
@@ -278,7 +293,8 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
     }
     return false;
   }
-};</programlisting>
+};
+</programlisting>
       </informalexample>
    </section>
    <section id="sid-50233520">
@@ -298,7 +314,8 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
         . If the type is annotated, all interface methods will be intercepted.
       </para>
       <informalexample>
-         <programlisting language="java">@Path("customers")
+         <programlisting language="java">
+@Path("customers")
 public interface CustomerService {
 
   @GET
@@ -306,16 +323,20 @@ public interface CustomerService {
   @Produces("application/json")
   @InterceptedCall(MyCacheInterceptor.class)
   public Customer retrieveCustomerById(@PathParam("id") long id);
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>Note that an ordered list of interceptors can be used for specifying an interceptor chain e.g.</para>
       <informalexample>
-         <programlisting language="java">@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
-public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
+         <programlisting language="java">
+@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
+public Customer retrieveCustomerById(@PathParam("id") long id);
+</programlisting>
       </informalexample>
       <para>Implementing an interceptor is easy:</para>
       <informalexample>
-         <programlisting language="java">public class MyCacheInterceptor implements RestClientInterceptor {
+         <programlisting language="java">
+public class MyCacheInterceptor implements RestClientInterceptor {
 
   @Override
   public void aroundInvoke(final RestCallContext context) {
@@ -323,7 +344,8 @@ public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
     builder.setHeader("headerName", "value");
     context.proceed();
   }
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>
         The
@@ -380,19 +402,25 @@ public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
          <para>To configure a relative or absolute root path, the following JavaScript variable can be set in either</para>
          <para>the host HTML page</para>
          <informalexample>
-            <programlisting language="xml">&lt;script type="text/javascript"&gt;
+            <programlisting language="xml">
+&lt;script type="text/javascript"&gt;
   erraiJaxRsApplicationRoot = "/MyJaxRsEndpointPath";
-&lt;/script&gt;</programlisting>
+&lt;/script&gt;
+</programlisting>
          </informalexample>
          <para>or by using a JSNI method:</para>
          <informalexample>
-            <programlisting language="java">private native void setMyJaxRsAppRoot(String path) /*-{
+            <programlisting language="java">
+private native void setMyJaxRsAppRoot(String path) /*-{
   $wnd.erraiJaxRsApplicationRoot = path;
-}-*/;</programlisting>
+}-*/;
+</programlisting>
          </informalexample>
          <para>or by simply invoking:</para>
          <informalexample>
-            <programlisting language="java">RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
+            <programlisting language="java">
+RestClient.setApplicationRoot("/MyJaxRsEndpointPath");
+</programlisting>
          </informalexample>
          <para>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</para>
       </section>
@@ -404,19 +432,25 @@ public Customer retrieveCustomerById(@PathParam("id") long id);</programlisting>
           does not have to be deployed on the server in this case!
         </para>
          <informalexample>
-            <programlisting language="xml">&lt;script type="text/javascript"&gt;
+            <programlisting language="xml">
+&lt;script type="text/javascript"&gt;
   erraiJaxRsJacksonMarshallingActive = true;
-&lt;/script&gt;</programlisting>
+&lt;/script&gt;
+</programlisting>
          </informalexample>
          <para>or by using a JSNI method:</para>
          <informalexample>
-            <programlisting language="java">private native void setJacksonMarshallingActive(boolean active) /*-{
+            <programlisting language="java">
+private native void setJacksonMarshallingActive(boolean active) /*-{
   $wnd.erraiJaxRsJacksonMarshallingActive = active;
-}-*/;</programlisting>
+}-*/;
+</programlisting>
          </informalexample>
          <para>or by simply invoking:</para>
          <informalexample>
-            <programlisting language="java">RestClient.setJacksonMarshallingActive(true);</programlisting>
+            <programlisting language="java">
+RestClient.setJacksonMarshallingActive(true);
+</programlisting>
          </informalexample>
       </section>
    </section>

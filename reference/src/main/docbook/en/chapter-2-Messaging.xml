@@ -32,7 +32,8 @@
           . In this simple example we send it to the subject 'HelloWorldService'.
         </para>
          <informalexample>
-            <programlisting language="java">public class HelloWorld implements EntryPoint {
+            <programlisting language="java">
+public class HelloWorld implements EntryPoint {
 
   // Get an instance of the RequestDispatcher
   private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
@@ -53,7 +54,8 @@
         [...]
       }
    }
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>In the above example we build and send a message every time the button is clicked. Here's an explanation of what's going on as annotated above:</para>
          <orderedlist inheritnum="ignore" continuation="restarts">
@@ -105,12 +107,14 @@
          <title>Recieving Messages on the Server Bus / Server Services</title>
          <para>Every message has a sender and at least one receiver. A receiver is as it sounds--it receives the message and does something with it. Implementing a receiver (also referred to as a service) is as simple as implementing our standard MessageCallback interface, which is used pervasively across, both client and server code. Let's begin with server side component that receives messages:</para>
          <informalexample>
-            <programlisting language="java">@Service
+            <programlisting language="java">
+@Service
   public class HelloWorldService implements MessageCallback {
     public void callback(Message message) {
       System.out.println("Hello, World!");
     }
-  }</programlisting>
+  }
+</programlisting>
          </informalexample>
          <para>
           He we declare an extremely simple service. The
@@ -126,7 +130,8 @@
           ':
         </para>
          <informalexample>
-            <programlisting language="java">@Service
+            <programlisting language="java">
+@Service
 public class HelloWorldService implements MessageCallback {
 
   private RequestDispatcher dispatcher;
@@ -146,7 +151,8 @@ public class HelloWorldService implements MessageCallback {
       .sendNowWith(dispatcher);      // (5)
     });
   }
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>The above example shows a service which sends a message in response to receiving a message. Here's what's going on:</para>
          <orderedlist inheritnum="ignore" continuation="restarts">
@@ -183,7 +189,8 @@ public class HelloWorldService implements MessageCallback {
          <title>Receiving Messages on the Client Bus/ Client Services</title>
          <para>Messages can be received asynchronously and arbitriraily by declaring callback services within the client bus. As ErraiBus maintains an open COMET channel at all times, these messages are delivered in real time to the client as they are sent. This provides built-in push messaging for all client services.</para>
          <informalexample>
-            <programlisting language="java">public class HelloWorld implements EntryPoint {
+            <programlisting language="java">
+public class HelloWorld implements EntryPoint {
 
   private MessageBus bus = ErraiBus.get();
 
@@ -206,7 +213,8 @@ public class HelloWorldService implements MessageCallback {
 
      [...]
   }
-}</programlisting>
+}
+</programlisting>
          </informalexample>
          <para>
           In the above example, we declare a new client service called
@@ -220,7 +228,8 @@ public class HelloWorldService implements MessageCallback {
       <para>Conversations are message exchanges which are between a single client and a service. They are a fundmentally important concept in ErraiBus, since by default, a message will be broadcast to all client services listening on a particular channel.</para>
       <para>When you create a reply with an incoming message, you ensure that the message you are sending back is received by the same client which sent the incoming message. A simple example:</para>
       <informalexample>
-         <programlisting language="java">@Service
+         <programlisting language="java">
+@Service
 public class HelloWorldService implements MessageCallback {
   public void callback(CommandMessage message) {
     // Send a message to the 'HelloWorldClient' on the client that sent us the
@@ -232,7 +241,8 @@ public class HelloWorldService implements MessageCallback {
       .noErrorHandling().reply();
     });
   }
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>
         Note that the only difference between the example in the  previous section and this is the use of the
@@ -259,7 +269,8 @@ public class HelloWorldService implements MessageCallback {
         . It will lead to faster and quicker identification of problems with your applications if you have error handlers, and generally help you build more robust code.
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">
+MessageBuilder.createMessage()
     .toSubject("HelloWorldService")
     .signalling()
     .with("msg", "Hi there!")
@@ -269,11 +280,13 @@ public class HelloWorldService implements MessageCallback {
           return true;
       }
     })
-    .sendNowWith(dispatcher);</programlisting>
+    .sendNowWith(dispatcher);
+</programlisting>
       </informalexample>
       <para>The addition of error handling at first may put off developers as it makes code more verbose and less-readable. This is nothing that some good practice can't fix. In fact, you may find cases where the same error handler can appropriately be shared between multiple different calls.</para>
       <informalexample>
-         <programlisting language="java">ErrorCallback error = new ErrorCallback() {
+         <programlisting language="java">
+ErrorCallback error = new ErrorCallback() {
   public boolean error(Message message, Throwable throwable) {
     throwable.printStackTrace();
     return true;
@@ -285,7 +298,8 @@ MessageBuilder.createMessage()
   .signalling()
   .with("msg", "Hi there!")
   .errorsHandledBy(error)
-  .sendNowWith(dispatcher);</programlisting>
+  .sendNowWith(dispatcher);
+</programlisting>
       </informalexample>
       <para>
         The error handler is required to return a
@@ -296,7 +310,8 @@ MessageBuilder.createMessage()
       </para>
       <para>Errai further provides a subject to subscribe to for handling global errors on the client (such as a disconnected server bus or an invalid response code) that occur outside a regular application message exchange. Subscribing to this subject is useful to detect errors early (e.g. due to failing heartbeat requests). A use case that comes to mind here is activating your application's offline mode.</para>
       <informalexample>
-         <programlisting language="java">bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+         <programlisting language="java">
+bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
   @Override
   public void callback(Message message) {
     try {
@@ -310,7 +325,8 @@ MessageBuilder.createMessage()
       // handle system errors (e.g response marshalling errors) - that of course should never happen :)
     }
   }
-});</programlisting>
+});
+</programlisting>
       </informalexample>
    </section>
    <section id="sid-5931284">
@@ -330,7 +346,8 @@ MessageBuilder.createMessage()
         API after specifying the error handling of the message.
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">
+MessageBuilder.createMessage()
   .toSubject("ConversationalService").signalling()
   .with("SomeField", someValue)
   .noErrorHandling()
@@ -338,7 +355,8 @@ MessageBuilder.createMessage()
     public void callback(Message message) {
       System.out.println("I received a response");
     }
-   })</programlisting>
+   })
+</programlisting>
       </informalexample>
       <para>See the next section on how to build conversational services that can respond to such messages.</para>
    </section>
@@ -346,10 +364,12 @@ MessageBuilder.createMessage()
       <title>Broadcasting</title>
       <para>Broadcasting messages to all clients listening on a specific subject is quite simple and involves nothing more than forgoing use of the reply API. For instance:</para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createMessage().
+         <programlisting language="java">
+MessageBuilder.createMessage().
     .toSubject("MessageListener")
     .with("Text", "Hello, from your overlords in the cloud")
-    .noErrorHandling().sendGlobalWith(dispatcher);</programlisting>
+    .noErrorHandling().sendGlobalWith(dispatcher);
+</programlisting>
       </informalexample>
       <para>
         If sent from the server, all clients currently connected, who are listening to the subject
@@ -393,19 +413,23 @@ MessageBuilder.createMessage()
         ).
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createConversation(msg)
+         <programlisting language="java">
+  MessageBuilder.createConversation(msg)
     .toSubject("FunSubject")
     .signalling()
     .noErrorHandling()
-    .replyDelayed(TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+    .replyDelayed(TimeUnit.SECONDS, 5); // sends the message after 5 seconds.
+</programlisting>
       </informalexample>
       <para>or</para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">
+   MessageBuilder.createMessage()
      .toSubject("FunSubject")
      .signalling()
      .noErrorHandling()
-     .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+     .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.
+</programlisting>
       </informalexample>
    </section>
    <section id="sid-5931311">
@@ -416,7 +440,8 @@ MessageBuilder.createMessage()
         methods. The task will repeat indefinitely until cancelled (see next section).
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">
+  MessageBuilder.createMessage()
     .toSubject("FunSubject")
     .signalling()
     .withProvided("time", new ResourceProvider&lt;String&gt;() {
@@ -427,7 +452,8 @@ MessageBuilder.createMessage()
        }
      }
      .noErrorHandling()
-     .sendRepeatingWith(requestDispatcher, TimeUnit.SECONDS, 1); //sends a message every 1 second</programlisting>
+     .sendRepeatingWith(requestDispatcher, TimeUnit.SECONDS, 1); //sends a message every 1 second
+</programlisting>
       </informalexample>
       <para>
         The above example sends a message very 1 second with a message part called
@@ -444,7 +470,8 @@ MessageBuilder.createMessage()
         instance which is returned when creating a task. Reference to the AsyncTask object can be retained and cancelled by any other thread.
       </para>
       <informalexample>
-         <programlisting language="java">AsyncTask task = MessageBuilder.createConversation(message)
+         <programlisting language="java">
+AsyncTask task = MessageBuilder.createConversation(message)
   .toSubject("TimeChannel").signalling()
   .withProvided(TimeServerParts.TimeString, new ResourceProvider&lt;String&gt;() {
      public String get() {
@@ -455,7 +482,8 @@ MessageBuilder.createMessage()
     ...
 
   // cancel the task and interrupt it's thread if necessary.
-  task.cancel(true);</programlisting>
+  task.cancel(true);
+</programlisting>
       </informalexample>
    </section>
    <section id="sid-5931289">
@@ -467,10 +495,12 @@ MessageBuilder.createMessage()
       </para>
       <para>Consider the following client side code:</para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">
+  MessageBuilder.createMessage()
     .toSubject("ObjectService").signalling()
     .with(MessageParts.ReplyTo, "ClientEndpoint")
-    .noErrorHandling().sendNowWith(dispatcher);</programlisting>
+    .noErrorHandling().sendNowWith(dispatcher);
+</programlisting>
       </informalexample>
       <para>
         And the conversational code on the server (for service
@@ -478,10 +508,12 @@ MessageBuilder.createMessage()
         ):
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createConversation(message)
+         <programlisting language="java">
+  MessageBuilder.createConversation(message)
     .subjectProvided().signalling()
     .with("Records", records)
-    .noErrorHandling().reply();</programlisting>
+    .noErrorHandling().reply();
+</programlisting>
       </informalexample>
       <para>
         In the above examples, assuming that the latter example is inside a service called "
@@ -504,25 +536,31 @@ MessageBuilder.createMessage()
         resource:
       </para>
       <informalexample>
-         <programlisting language="java">QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
-   String sessionId = sess.getSessionId();</programlisting>
+         <programlisting language="java">
+   QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
+   String sessionId = sess.getSessionId();
+</programlisting>
       </informalexample>
       <para>
-        The utility class
-        <code>org.jboss.errai.bus.server.util.ServerBusUtils</code>
-        contains a utility method for extracting the String-based SessionID which is used to identify the message queue associated with any particular client. You may use this method to extract the
+        You can extract the
         <code>SessionID</code>
-        from a message so that you may use it for routing. For example:
+        from a message so that you may use it for routing by obtaining the
+        <code>QueueSession</code>
+        resource from the
+        <code>Message</code>
+        . For example:
       </para>
       <informalexample>
-         <programlisting language="java">...
+         <programlisting language="java">
+...
   public void callback(Message message) {
    QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
    String sessionId = sess.getSessionId();
 
     // Record this sessionId somewhere.
     ...
-  }</programlisting>
+  }
+</programlisting>
       </informalexample>
       <para>
         The
@@ -534,12 +572,14 @@ MessageBuilder.createMessage()
         as a  MessagePart to indicate to the bus where you want the message to go.
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">
+  MessageBuilder.createMessage()
     .toSubject("ClientMessageListener")
     .signalling()
     .with(MessageParts.SessionID, sessionId)
     .with("Message", "We're relaying a message!")
-    .noErrorHandling().sendNowWith(dispatcher);</programlisting>
+    .noErrorHandling().sendNowWith(dispatcher);
+</programlisting>
       </informalexample>
       <para>
         By providing the
@@ -571,7 +611,8 @@ MessageBuilder.createMessage()
             <para>A session scope is scoped across all instances of the same session. When a session scope is used, any parameters stored will be accessible and visible by all browser instances and tabs.</para>
             <para>The SessionContext helper class is used for accessing the session scope.</para>
             <informalexample>
-               <programlisting language="java">public class TestService implements MessageCallback {
+               <programlisting language="java">
+public class TestService implements MessageCallback {
   public void callback(final Message message) {
     // obtain a reference to the session context by referencing the incoming message.
     SessionContext injectionContext = SessionContext.get(message);
@@ -579,7 +620,8 @@ MessageBuilder.createMessage()
     // set an attribute.
     injectionContext.setAttribute("MyAttribute", "Foo");
   }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
          </section>
          <section id="sid-5931315_QueueSessions-LocalScope">
@@ -591,7 +633,8 @@ MessageBuilder.createMessage()
             helper class.
           </para>
             <informalexample>
-               <programlisting language="java">public class TestService implements MessageCallback {
+               <programlisting language="java">
+public class TestService implements MessageCallback {
   public void callback(final Message message) {
     // obtain a reference to the local context by referencing the incoming message.
     LocalContext injectionContext = LocalContext.get(message);
@@ -599,7 +642,8 @@ MessageBuilder.createMessage()
    // set an attribute.
     injectionContext.setAttribute("MyAttribute", "Foo");
   }
-}</programlisting>
+}
+</programlisting>
             </informalexample>
          </section>
       </section>
@@ -1099,6 +1143,114 @@ MessageBuilder.createMessage()
                </tgroup>
             </informaltable>
          </section>
+      </section>
+   </section>
+   <section id="sid-53380177">
+      <title>WebSockets</title>
+      <para>ErraiBus has support for WebSocket-based communication. When WebSockets are enabled, capable web browsers will attempt to upgrade their COMET-based communication with the server-side bus to use a WebSocket channel.</para>
+      <para>There are two different ways the bus can enable WebSockets. The first uses a sideband server, which is a small, lightweight server which runs on a different port from the application server. The second is native JBoss AS 7-based integration.</para>
+      <section id="sid-53380177_WebSockets-Configuringthesidebandserver">
+         <title>Configuring the sideband server</title>
+         <para>
+          Activating the sideband server is as simple as adding the following to the
+          <code>ErraiService.properties</code>
+          file:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+errai.bus.enable_web_socket_server=true
+</programlisting>
+         </informalexample>
+         <para>
+          The default port for the sideband server is
+          <code>8085</code>
+          . You can change this by specifying a port with the
+          <code>errai.bus.web_socket_port</code>
+          property in the
+          <code>ErraiService.properties</code>
+          file.
+        </para>
+      </section>
+      <section id="sid-53380177_WebSockets-DeployingwithJBossAS7">
+         <title>Deploying with JBoss AS 7</title>
+         <para>
+          It is currently necessary use the native connector in JBoss AS for WebSockets to work. So the first step is to configure your JBoss AS instance to use the native connector by changing the
+          <code>domain/configuration/domain.xml</code>
+          file, and change the line:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="false"&gt;  
+</programlisting>
+         </informalexample>
+         <para>to:</para>
+         <informalexample>
+            <programlisting language="java">
+&lt;subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="true"&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          You will then need to configure the servlet in your application's
+          <code>web.xml</code>
+          which will provide WebSocket upgrade support within AS7.
+        </para>
+         <para>
+          Add the following to the
+          <code>web.xml</code>
+          :
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;context-param&gt;
+  &lt;param-name&gt;websockets-enabled&lt;/param-name&gt;
+  &lt;param-value&gt;true&lt;/param-value&gt;
+&lt;/context-param&gt;
+
+&lt;context-param&gt;
+  &lt;param-name&gt;websocket-path-element&lt;/param-name&gt;
+  &lt;param-value&gt;in.erraiBusWS&lt;/param-value&gt;
+&lt;/context-parm&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          This will tell the bus to enable web sockets support. The
+          <code>websocket-path-element</code>
+          specified the path element within a URL which the client bus should request in order to negotiate a websocket connection. For instance, specifying
+          <code>in.erraiBusWS</code>
+          as we have in the snippit above, will result in attempted negotiation at
+          <code>http://&lt;your_server&gt;:&lt;your_port&gt;/&lt;context_path&gt;/in.erraiBusWS</code>
+          . For this to have any meaningful result, we must add a servlet mapping that will match this pattern:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;servlet&gt;
+  &lt;servlet-name&gt;ErraiWSServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.JBossAS7WebSocketServlet&lt;/servlet-class&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;service-locator&lt;/param-name&gt;
+    &lt;param-value&gt;org.jboss.errai.cdi.server.CDIServiceLocator&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
+
+&lt;servlet-mapping&gt;
+  &lt;servlet-name&gt;ErraiWSServlet&lt;/servlet-name&gt;
+  &lt;url-pattern&gt;*.erraiBusWS&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+</programlisting>
+         </informalexample>
+         <note>
+            <title>Do not remove the regular ErraiBus servlet mappings!</title>
+            <para>
+            When configuring ErraiBus to use WebSockets on JBoss AS, you
+            <emphasis role="strong">do not</emphasis>
+            remove the existing servlet mappings for the bus. The WebSocket servlet is in
+            <emphasis role="italics">addition to</emphasis>
+            your current bus servlet. This is because ErraiBus
+            <emphasis role="italics">always</emphasis>
+            negotiates WebSocket sessions over the COMET channel.
+          </para>
+         </note>
       </section>
    </section>
 </chapter>

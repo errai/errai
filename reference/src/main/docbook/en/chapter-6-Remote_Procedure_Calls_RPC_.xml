@@ -5,10 +5,12 @@
    <para>Please note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</para>
    <para>Creating a service is straight forward. It requires the definition of a remote interface, and a service class which implements it. See the following:</para>
    <informalexample>
-      <programlisting language="java">@Remote
+      <programlisting language="java">
+@Remote
 public interface MyRemoteService {
   public boolean isEveryoneHappy();
-}</programlisting>
+}
+</programlisting>
    </informalexample>
    <para>
       The
@@ -16,14 +18,16 @@ public interface MyRemoteService {
       annotation tells Errai that we'd like to use this interface as a remote interface. The remote interface must be part of of the GWT client code. It cannot be part of the server-side code, since the interface will need to be referenced from both the client and server side code. That said, the implementation of a service is relatively simple to the point:
     </para>
    <informalexample>
-      <programlisting language="java">@Service
+      <programlisting language="java">
+@Service
 public class MyRemoteServiceImpl implements MyRemoteService {
 
   public boolean isEveryoneHappy() {
     // blatently lie and say everyone's happy.
     return true;
   }
-}</programlisting>
+}
+</programlisting>
    </informalexample>
    <para>
       That's all there is to it. You use the same
@@ -38,11 +42,13 @@ public class MyRemoteServiceImpl implements MyRemoteService {
         API. Since all messages are asynchronous, the actual code for calling the remote service involves the use of a callback, which we use to receive the response from the remote method. Let's see how it works:
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
+         <programlisting language="java">
+MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
   public void callback(Boolean isHappy) {
     if (isHappy) Window.alert("Everyone is happy!");
   }
- }, MyRemoteService.class).isEveryoneHappy();</programlisting>
+ }, MyRemoteService.class).isEveryoneHappy();
+</programlisting>
       </informalexample>
       <para>
         In the above example, we declare a remote callback that receives a Boolean, to correspond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However,
@@ -50,7 +56,9 @@ public class MyRemoteServiceImpl implements MyRemoteService {
         :
       </para>
       <informalexample>
-         <programlisting language="java">boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
+         <programlisting language="java">
+ boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();
+</programlisting>
       </informalexample>
       <para>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</para>
       <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-ProxyInjection">
@@ -61,8 +69,10 @@ public class MyRemoteServiceImpl implements MyRemoteService {
           API is to have a proxy of the service injected.
         </para>
          <informalexample>
-            <programlisting language="java">@Inject
-private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
+            <programlisting language="java">
+@Inject
+private Caller&lt;MyRemoteService&gt; remoteService; 
+</programlisting>
          </informalexample>
          <para>
           For calling the remote service, the callback objects need to be provided to the
@@ -70,7 +80,9 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
           method before the corresponding interface method is invoked.
         </para>
          <informalexample>
-            <programlisting language="java">remoteService.call(callback).isEveryoneHappy();</programlisting>
+            <programlisting language="java">
+remoteService.call(callback).isEveryoneHappy();
+</programlisting>
          </informalexample>
       </section>
    </section>
@@ -82,7 +94,8 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
         on the client:
       </para>
       <informalexample>
-         <programlisting language="java">MessageBuilder.createCall(
+         <programlisting language="java">
+MessageBuilder.createCall(
   new RemoteCallback&lt;Boolean&gt;() {
     public void callback(Boolean isHappy) {
       if (isHappy) Window.alert("Everyone is happy!");
@@ -102,7 +115,8 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
       return false;
     }
   },
-  MyRemoteService.class).isEveryoneHappy();</programlisting>
+  MyRemoteService.class).isEveryoneHappy();
+</programlisting>
       </informalexample>
       <para>
         As remote exceptions need to be serialized to be sent to the client, the
@@ -125,21 +139,26 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
         . If the type is annotated, all interface methods will be intercepted.
       </para>
       <informalexample>
-         <programlisting language="java">@Remote
+         <programlisting language="java">
+@Remote
 public interface CustomerService {
 
   @InterceptedCall(MyCacheInterceptor.class)
   public Customer retrieveCustomerById(long id);
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>Note that an ordered list of interceptors can be used for specifying an interceptor chain e.g.</para>
       <informalexample>
-         <programlisting language="java">@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
-public Customer retrieveCustomerById(long id);</programlisting>
+         <programlisting language="java">
+@InterceptedCall({MyCacheInterceptor.class, MySecurityInterceptor.class})
+public Customer retrieveCustomerById(long id);
+</programlisting>
       </informalexample>
       <para>Implementing an interceptor is easy:</para>
       <informalexample>
-         <programlisting language="java">public class MyCacheInterceptor implements RpcInterceptor {
+         <programlisting language="java">
+public class MyCacheInterceptor implements RpcInterceptor {
 
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
@@ -147,7 +166,8 @@ public Customer retrieveCustomerById(long id);</programlisting>
     context.proceed() // executes the next interceptor in the chain or the actual remote call.
     // context.setResult() // sets the result directly without carrying out the remote call.
   }
-}</programlisting>
+}
+</programlisting>
       </informalexample>
       <para>
         The
@@ -183,7 +203,8 @@ public Customer retrieveCustomerById(long id);</programlisting>
         that provides access to message resources that are otherwise not visible to RPC endpoints.
       </para>
       <informalexample>
-         <programlisting language="java">@Service
+         <programlisting language="java">
+@Service
 public class MyRemoteServiceImpl implements MyRemoteService {
 
   public boolean isEveryoneHappy() {
@@ -192,7 +213,8 @@ public class MyRemoteServiceImpl implements MyRemoteService {
     ...
     return true;
   }
-}</programlisting>
+}
+</programlisting>
       </informalexample>
    </section>
 </chapter>

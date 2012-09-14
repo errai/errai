@@ -32,17 +32,6 @@
       <itemizedlist>
          <listitem>
             <para>
-            The @Conversational annotation must now target the event objects themselves, not the observer methods of the events. So an
-            <emphasis role="italics">event type</emphasis>
-            is either conversational or not; you no longer specify that listeners receive arbitrary events in a conversational context. See the
-            <link linkend="sid-21758054_Events-Conversationalevents">Conversational Events</link>
-            section of the CDI chapter for details.
-          </para>
-         </listitem>
-      </itemizedlist>
-      <itemizedlist>
-         <listitem>
-            <para>
             Errai CDI projects must now use the
             <code>SimpleDispatcher</code>
             instead of the
@@ -117,8 +106,7 @@
           </para>
             <example>
                <title>web.xml</title>
-               <programlisting language="xml">
-&lt;servlet&gt;
+               <programlisting language="xml">&lt;servlet&gt;
   &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
   &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
   &lt;init-param&gt;
@@ -126,8 +114,7 @@
     &lt;param-value&gt;true&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
-&lt;/servlet&gt;
-</programlisting>
+&lt;/servlet&gt;</programlisting>
             </example>
          </listitem>
       </itemizedlist>
