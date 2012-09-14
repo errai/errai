@@ -100,6 +100,7 @@ public class AlbumForm extends Composite {
     // Note: with Errai Data Sync, the code in this method would be unnecessary. See the Grocery List demo for an example.
 
     name.setText(album.getName());
+
     if (album.getArtist() != null) {
       for (int i = 0; i < artist.getItemCount(); i++) {
         if (Long.parseLong(artist.getValue(i)) == album.getArtist().getId()) {
@@ -107,13 +108,18 @@ public class AlbumForm extends Composite {
         }
       }
     }
+
     if (album.getFormat() != null) {
       format.setSelectedIndex(album.getFormat().ordinal());
     }
     else {
       format.setSelectedIndex(Format.LP.ordinal());
     }
-    releaseDate.setValue(album.getReleaseDate());
+
+    if (album.getReleaseDate() != null) {
+      releaseDate.setValue(album.getReleaseDate());
+      releaseDate.setCurrentMonth(album.getReleaseDate());
+    }
   }
 
   public void setSaveHandler(RowOperationHandler<Album> handler) {

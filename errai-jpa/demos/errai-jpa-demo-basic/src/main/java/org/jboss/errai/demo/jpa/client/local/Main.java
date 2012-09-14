@@ -42,6 +42,26 @@ public class Main {
       }
     });
 
+    albumsWidget.setEditHandler(new RowOperationHandler<Album>() {
+      @Override
+      public void handle(Album a) {
+        AlbumForm af = new AlbumForm(a, em);
+        final PopupPanel pp = new PopupPanel(true, true);
+        af.setSaveHandler(new RowOperationHandler<Album>() {
+          @Override
+          public void handle(Album album) {
+            em.flush();
+            refreshUI();
+            pp.hide();
+          }
+        });
+        pp.setWidget(af);
+        pp.setGlassEnabled(true);
+        pp.show();
+        af.grabFocus();
+      }
+    });
+
     resetEverythingButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
