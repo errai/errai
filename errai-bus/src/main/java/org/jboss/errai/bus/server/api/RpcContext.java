@@ -25,55 +25,47 @@ import org.jboss.errai.bus.client.api.QueueSession;
 /**
  * This utility provides access to {@link Message} resources otherwise not visible to RPC endpoints. It can be used to
  * gain access to HTTP session and servlet request objects.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class RpcContext {
-  private static final ThreadLocal<HttpSession> threadLocalHttpSession = new ThreadLocal<HttpSession>();
-  private static final ThreadLocal<ServletRequest> threadLocalServletRequest = new ThreadLocal<ServletRequest>();
+  private static final ThreadLocal<Message> threadLocalMessage = new ThreadLocal<Message>();
 
   /**
    * Reads resources from the provided {@link Message} and stores them in {@link ThreadLocal}s.
-   * 
+   *
    * @param message
    */
   public static void set(final Message message) {
-    final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
-    if (queueSession != null) {
-      final HttpSession session =
-            queueSession.getAttribute(HttpSession.class, HttpSession.class.getName());
-
-      if (session != null) {
-        threadLocalHttpSession.set(session);
-      }
-    }
-
-    final HttpServletRequest request
-            = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
-    if (request != null) {
-      threadLocalServletRequest.set(request);
-    }
+    threadLocalMessage.set(message);
   }
 
   /**
    * Removes the resources associated with the current thread.
    */
   public static void remove() {
-    threadLocalHttpSession.remove();
-    threadLocalServletRequest.remove();
-  }
-  
-  /**
-   * @return the HTTP session object associated with this {@see Thread}
-   */
-  public static HttpSession getHttpSession() {
-    return threadLocalHttpSession.get();
+    threadLocalMessage.remove();
   }
 
   /**
-   * @return the servlet request instance associated with this {@see Thread}
+   * @return the QueueSession associated with this {@link Thread}
+   */
+  public static QueueSession getQueueSession() {
+    return threadLocalMessage.get().getResource(QueueSession.class, "Session");
+  }
+
+  /**
+   * @return the HTTP session object associated with this {@link Thread}
+   */
+  public static HttpSession getHttpSession() {
+    return getQueueSession().getAttribute(HttpSession.class, HttpSession.class.getName());
+  }
+
+  /**
+   * @return the servlet request instance associated with this {@link Thread}
    */
   public static ServletRequest getServletRequest() {
-    return threadLocalServletRequest.get();
+    return threadLocalMessage.get().getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
   }
 }
