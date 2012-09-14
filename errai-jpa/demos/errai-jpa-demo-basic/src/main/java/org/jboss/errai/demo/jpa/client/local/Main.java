@@ -17,6 +17,7 @@ import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 
 @EntryPoint
@@ -27,6 +28,7 @@ public class Main {
   private AlbumTable albumsWidget = new AlbumTable();
 
   private Button resetEverythingButton = new Button("Reset all data to defaults");
+  private Button newAlbumButton = new Button("New Album...");
 
   @PostConstruct
   public void init() {
@@ -49,11 +51,33 @@ public class Main {
       }
     });
 
+    newAlbumButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        AlbumForm af = new AlbumForm(new Album(), em);
+        final PopupPanel pp = new PopupPanel(true, true);
+        af.setSaveHandler(new RowOperationHandler<Album>() {
+          @Override
+          public void handle(Album album) {
+            em.persist(album);
+            em.flush();
+            refreshUI();
+            pp.hide();
+          }
+        });
+        pp.setWidget(af);
+        pp.setGlassEnabled(true);
+        pp.show();
+        af.grabFocus();
+      }
+    });
+
     preFillDatabaseIfEmpty();
     refreshUI();
 
-    RootPanel.get().add(albumsWidget);
     RootPanel.get().add(resetEverythingButton);
+    RootPanel.get().add(albumsWidget);
+    RootPanel.get().add(newAlbumButton);
   }
 
   private void refreshUI() {

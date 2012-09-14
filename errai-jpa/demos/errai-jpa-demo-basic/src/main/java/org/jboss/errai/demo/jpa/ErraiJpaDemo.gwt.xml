@@ -3,7 +3,8 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
 <module rename-to="ErraiJpaDemo">
 
-   <inherits name="org.jboss.errai.jpa.JPA" />
-   <inherits name="org.jboss.errai.enterprise.CDI" />
+  <inherits name="org.jboss.errai.jpa.JPA" />
+  <inherits name="org.jboss.errai.enterprise.CDI" />
+  <inherits name='com.google.gwt.user.theme.clean.Clean'/>
 
 </module>

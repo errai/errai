@@ -7,10 +7,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
+@NamedQuery(name="allArtistsByName", query="SELECT a FROM Artist a ORDER BY a.name")
 @Portable @Entity
 public class Artist implements Comparable<Artist> {
 
