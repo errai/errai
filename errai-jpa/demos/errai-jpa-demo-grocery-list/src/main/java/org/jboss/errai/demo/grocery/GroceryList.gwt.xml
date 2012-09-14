@@ -12,8 +12,4 @@
    <inherits name="org.jboss.errai.databinding.DataBinding" />
    <inherits name="org.jboss.errai.enterprise.CDI" />
 
-   <!-- Testing only
-    -->
-   <set-property name="user.agent" value="safari,gecko1_8" />
-
 </module>

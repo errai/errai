@@ -1,0 +1,34 @@
+.albumTable {
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.albumTable td {
+    padding-top: 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #ddd;
+}
+
+.albumTable .albumName {
+    width: 25em;
+}
+
+.albumTable .artistName {
+    width: 25em;
+}
+
+.albumTable .format {
+    width: 6em;
+}
+
+.albumTable .releaseDate {
+    width: 6em;
+}
+
+.albumTable .deleteButton {
+    width: 4em;
+}
+
+.albumTable .deleteButton {
+    width: 4em;
+}
