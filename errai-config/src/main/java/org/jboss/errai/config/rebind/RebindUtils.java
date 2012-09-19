@@ -35,7 +35,7 @@ import java.lang.reflect.Type;
  */
 public class RebindUtils {
   public static String createCallSignature(MetaMethod m) {
-    StringAppender append = new StringAppender(m.getName()).append(':');
+    StringBuilder append = new StringBuilder(m.getName()).append(':');
     for (MetaParameter parm : m.getParameters()) {
       append.append(parm.getType().getCanonicalName()).append(':');
     }
@@ -44,7 +44,7 @@ public class RebindUtils {
 
   public static String createCallSignature(Class<?> referenceClass, Method m) {
     TypeToken<?> resolver = TypeToken.of(referenceClass);
-    StringAppender append = new StringAppender(m.getName()).append(':');
+    StringBuilder append = new StringBuilder(m.getName()).append(':');
     for (Type c : m.getGenericParameterTypes()) {
       TypeToken<?> resolvedParamType = resolver.resolveType(c);
       append.append(resolvedParamType.getRawType().getCanonicalName()).append(':');

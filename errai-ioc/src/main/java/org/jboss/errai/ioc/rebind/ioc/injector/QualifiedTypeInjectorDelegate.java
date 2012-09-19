@@ -47,12 +47,12 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
     this.qualifyingMetadata = delegate.getQualifyingMetadata();
 
     delegate.addRegistrationHook(
-           new RegistrationHook() {
-             @Override
-             public void onRegister(final InjectionContext context, final Statement beanValue) {
-               registerWithBeanManager(context, beanValue);
-             }
-           }
+        new RegistrationHook() {
+          @Override
+          public void onRegister(final InjectionContext context, final Statement beanValue) {
+            registerWithBeanManager(context, beanValue);
+          }
+        }
     );
   }
 
@@ -138,10 +138,10 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       final QualifyingMetadata md = delegate.getQualifyingMetadata();
       context.getProcessingContext().appendToEnd(
-              Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                      .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                              isSingleton() ? valueRef : null, md.render(), null, false));
-      
+          Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+              .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
+                  isSingleton() ? valueRef : null, md.render(), null, false));
+
       for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
       }
@@ -151,6 +151,26 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   @Override
   public boolean isAlternative() {
     return delegate.isAlternative();
+  }
+
+  @Override
+  public boolean isSoftDisabled() {
+    return super.isSoftDisabled();
+  }
+
+  @Override
+  public void setSoftDisabled(final boolean softDisabled) {
+    super.setSoftDisabled(softDisabled);
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return super.isEnabled();
+  }
+
+  @Override
+  public void setEnabled(final boolean enabled) {
+    super.setEnabled(enabled);
   }
 
   @Override
