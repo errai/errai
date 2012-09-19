@@ -145,7 +145,7 @@ public abstract class ReflectionUtils {
                 catch (ClassNotFoundException e) { /*continue*/ }
             }
 
-            return null;
+            throw new IllegalArgumentException("Unable to load class \"" + type + "\"");
         }
     }
 
