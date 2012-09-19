@@ -10,18 +10,4 @@
     
     <public path="resources"></public>
     <stylesheet src="style.css"/>
-    
-    <!-- Default is to assume HTML 5 device orientation support -->
-    <replace-with class="org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector">
-      <when-type-is class="org.jboss.errai.demo.mobile.client.local.OrientationDetector"/>
-    </replace-with>
-    
-    <!-- Mozilla has its own device orientation support -->
-    <replace-with class="org.jboss.errai.demo.mobile.client.local.MozillaOrientationDetector">
-      <when-type-is class="org.jboss.errai.demo.mobile.client.local.OrientationDetector" />
-      <any>
-        <when-property-is name="user.agent" value="gecko"/>
-      </any>
-    </replace-with>
-    
 </module>

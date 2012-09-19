@@ -36,15 +36,6 @@ public class Html5OrientationDetector extends OrientationDetector {
     this.@org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::listener = listener;
     $wnd.addEventListener('deviceorientation', listener, false);
   }-*/;
-//
-//  @Override
-//  public native void stopFiringOrientationEvents() /*-{
-//    var listener = @org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::listener;
-//    if (listener) {
-//      $wnd.removeEventListener('deviceorientation', listener, false);
-//      @org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::listener = null;
-//    }
-//  }-*/;
 
   /**
    * Returns true always.
