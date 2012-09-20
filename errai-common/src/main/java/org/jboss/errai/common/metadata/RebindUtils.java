@@ -100,13 +100,22 @@ public class RebindUtils {
 
   private static volatile String _classpathHashCache;
 
+  private static final String[] hashableExtensions = {".java", ".class", ".properties", ".xml"};
+
+  private static boolean isValidFileType(final String fileName) {
+    for (String extension: hashableExtensions) {
+      if (fileName.endsWith(extension)) return true;
+    }
+    return false;
+  }
+
   public static String getClasspathHash() {
     if (_hasClasspathChanged != null) {
       return _classpathHashCache;
     }
 
     try {
-      final MessageDigest md = MessageDigest.getInstance("SHA-256");
+      final MessageDigest md = MessageDigest.getInstance("SHA-1");
       final String classPath = System.getProperty("java.class.path");
 
       md.update(hashSeed.getBytes());
@@ -115,9 +124,12 @@ public class RebindUtils {
         _recurseDir(new File(p), new FileVisitor() {
           @Override
           public void visit(final File f) {
-            md.update(f.getName().getBytes());
-            md.update((byte) f.lastModified());
-            md.update((byte) f.length());
+            final String fileName = f.getName();
+            if (isValidFileType(fileName)) {
+              md.update(fileName.getBytes());
+              md.update((byte) f.lastModified());
+              md.update((byte) f.length());
+            }
           }
         });
       }
@@ -147,7 +159,7 @@ public class RebindUtils {
   }
 
   public static File getCacheFile(final String name) {
-    return new File(getErraiCacheDir(), name);
+    return new File(getErraiCacheDir(), name).getAbsoluteFile();
   }
 
   public static boolean cacheFileExists(final String name) {
@@ -178,7 +190,7 @@ public class RebindUtils {
   }
 
   private static Map<Class<? extends Annotation>, Boolean> _changeMapForAnnotationScope
-          = new HashMap<Class<? extends Annotation>, Boolean>();
+      = new HashMap<Class<? extends Annotation>, Boolean>();
 
   public static boolean hasClasspathChangedForAnnotatedWith(final Set<Class<? extends Annotation>> annotations) {
     if (Boolean.getBoolean("errai.devel.forcecache")) return true;
@@ -200,7 +212,7 @@ public class RebindUtils {
     Boolean changed = _changeMapForAnnotationScope.get(annoClass);
     if (changed == null) {
       final File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/"
-              + annoClass.getName().replaceAll("\\.", "_") + ".sha");
+          + annoClass.getName().replaceAll("\\.", "_") + ".sha");
 
       final MetaDataScanner singleton = ScannerSingleton.getOrCreateInstance();
       final String hash = singleton.getHashForTypesAnnotatedWith(hashSeed, annoClass);
@@ -334,7 +346,7 @@ public class RebindUtils {
   public static String getModuleName(final GeneratorContext context) {
     try {
       final StandardGeneratorContext standardGeneratorContext =
-              (StandardGeneratorContext) context;
+          (StandardGeneratorContext) context;
       final Field field = StandardGeneratorContext.class.getDeclaredField("module");
       field.setAccessible(true);
       final ModuleDef moduleDef = (ModuleDef) field.get(standardGeneratorContext);

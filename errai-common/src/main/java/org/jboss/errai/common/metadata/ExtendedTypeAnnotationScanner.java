@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
-* @author Mike Brock
-*/
+ * @author Mike Brock
+ */
 public class ExtendedTypeAnnotationScanner extends TypeAnnotationsScanner {
   @Override
   public void scan(final Object cls) {

@@ -31,7 +31,7 @@ public class ScannerSingleton {
       new Callable<MetaDataScanner>() {
         @Override
         public MetaDataScanner call() throws Exception {
-          if (!RebindUtils.hasClasspathChanged() && RebindUtils.cacheFileExists("reflections.cache")) {
+          if (RebindUtils.cacheFileExists(RebindUtils.getClasspathHash() + ".cache.xml")) {
               return MetaDataScanner.createInstanceFromCache();
           }
 
@@ -41,8 +41,7 @@ public class ScannerSingleton {
   );
 
   static {
-    final Thread thread = new Thread(future);
-    thread.start();
+    new Thread(future).start();
   }
 
   private static final Object lock = new Object();
@@ -54,7 +53,7 @@ public class ScannerSingleton {
           scanner = future.get();
 
           if (scanner != null) {
-            scanner.save(RebindUtils.getErraiCacheDir() + "/reflections.cache");
+            scanner.save(RebindUtils.getCacheFile(RebindUtils.getClasspathHash() + ".cache.xml").getAbsolutePath());
           }
         }
         catch (Throwable t) {

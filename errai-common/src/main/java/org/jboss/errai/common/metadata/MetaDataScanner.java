@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
@@ -61,7 +62,7 @@ import org.jboss.errai.reflections.vfs.Vfs;
  * href="http://code.google.com/p/reflections/">Reflections</a> library.
  * <p/>
  * <p/>
- * The initial set of config Url's (entry points) is discovered through ErraiApp.properties.
+ * The initial set of config URLs (entry points) is discovered through ErraiApp.properties.
  *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
@@ -91,7 +92,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   static final Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =
-      new TreeMap<String, Set<SortableClassFileWrapper>>();
+      new ConcurrentHashMap<String, Set<SortableClassFileWrapper>>();
 
   static class SortableClassFileWrapper implements Comparable<SortableClassFileWrapper> {
     private String name;
@@ -113,7 +114,6 @@ public class MetaDataScanner extends Reflections {
   }
 
   private static Configuration getConfiguration(final List<URL> urls) {
-
     return new ConfigurationBuilder()
         .setUrls(urls)
         .setExecutorService(Executors.newFixedThreadPool(2))
@@ -123,16 +123,14 @@ public class MetaDataScanner extends Reflections {
             new ExtendedTypeAnnotationScanner(),
             propScanner
         );
-
   }
 
   static MetaDataScanner createInstanceFromCache() {
     try {
-      return createInstance(getConfigUrls(), RebindUtils.getCacheFile("reflections.cache"));
+      return createInstance(getConfigUrls(), RebindUtils.getCacheFile(RebindUtils.getClasspathHash() + ".cache.xml"));
     }
     catch (ReflectionsException e) {
       e.printStackTrace();
-      System.out.println("falling over...");
       return createInstance();
     }
   }

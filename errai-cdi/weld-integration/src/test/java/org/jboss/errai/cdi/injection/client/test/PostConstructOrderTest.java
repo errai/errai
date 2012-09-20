@@ -21,7 +21,7 @@ public class PostConstructOrderTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.injection.InjectionTestModule";
   }
 
-  public void testPostConstructFiresInCorrectOrder() {
+  public void testPostConstructFiresInCorrectOrderR() {
     PostConstructTestUtil.reset();
     final PostConstrBeanA beanA = IOC.getBeanManager().lookupBean(PostConstrBeanA.class).getInstance();
 
