@@ -24,6 +24,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -77,7 +79,11 @@ public class ReachabilityTest {
             "javax.enterprise.inject.Instance",
             "javax.inject.Inject",
             "org.jboss.errai.codegen.test.model.Bar",
-            "org.jboss.errai.codegen.test.model.Bwah"
+            "org.jboss.errai.codegen.test.model.Bwah",
+            BigDecimal.class.getName(),
+            BigInteger.class.getName(),
+            String.class.getName(),
+            Class.class.getName()
         )
     );
 

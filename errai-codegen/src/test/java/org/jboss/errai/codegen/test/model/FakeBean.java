@@ -18,6 +18,8 @@ package org.jboss.errai.codegen.test.model;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * @author Mike Brock
@@ -26,5 +28,13 @@ public class FakeBean {
   @Inject Bwah bwahBean;
 
   @Inject Instance<Bar> instanceBar;
+
+  public void testMethod() {
+    addSomething("foobie", BigInteger.class, BigDecimal.class);
+  }
+
+  private void addSomething(String name, Class a, Class b) {
+    // yay
+  }
 }
 

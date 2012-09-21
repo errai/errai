@@ -8,7 +8,7 @@ import org.jboss.errai.ioc.client.container.IOC;
  * This tests an experimental feature of Errai -- relying on reachability analysis to determine whether or not
  * a bean should be accessible through the bean manager as a dependent scoped bean.
  * <p>
- * You <storng>MUST</storng> ensure that the flag <tt>-Derrai.ioc.experimental.infer_dependent_by_reachability=true</tt>
+ * You <strong>MUST</strong> ensure that the flag <tt>-Derrai.ioc.experimental.infer_dependent_by_reachability=true</tt>
  * is specified for whatever forks the JVM to run these tests. This cannot currently be specified within the test as
  * this test is GWT translatable code.
  *

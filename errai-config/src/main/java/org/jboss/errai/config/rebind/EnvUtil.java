@@ -332,10 +332,18 @@ public abstract class EnvUtil {
 
     try {
       for (final MetaClass mc : allCachedClasses) {
-        if (!config.getExplicitTypes().contains(mc.getFullyQualifiedName())
+        if (mc.isInterface()) continue;
+
+        String fullyQualifiedName = mc.getFullyQualifiedName();
+        int splitPoint;
+        while ((splitPoint = fullyQualifiedName.lastIndexOf('$')) != -1) {
+          fullyQualifiedName = fullyQualifiedName.substring(0, splitPoint);
+        }
+
+        if (!config.getExplicitTypes().contains(fullyQualifiedName)
             && !packages.contains(mc.getPackageName())) continue;
 
-        final URL resource = classLoader.getResource(mc.getFullyQualifiedName().replaceAll("\\.", "/") + ".java");
+        final URL resource = classLoader.getResource(fullyQualifiedName.replaceAll("\\.", "/") + ".java");
 
         if (resource != null) {
           InputStream stream = null;
@@ -354,6 +362,9 @@ public abstract class EnvUtil {
               stream.close();
             }
           }
+        }
+        else {
+          log.warn("source for " + fullyQualifiedName + " is missing.");
         }
       }
     }
