@@ -352,6 +352,9 @@ public abstract class EnvUtil {
             final byte[] readBuffer = new byte[stream.available()];
             stream.read(readBuffer);
 
+            if (log.isDebugEnabled()) {
+              log.debug("scanning " + fullyQualifiedName + " for reachable types ...");
+            }
             executor.execute(new ReachabilityRunnable(readBuffer, allDeps));
           }
           catch (IOException e) {

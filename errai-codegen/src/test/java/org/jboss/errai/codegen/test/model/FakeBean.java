@@ -33,7 +33,7 @@ public class FakeBean {
     addSomething("foobie", BigInteger.class, BigDecimal.class);
   }
 
-  private void addSomething(String name, Class a, Class b) {
+  private void addSomething(final String name, final Class a, final Class b) {
     // yay
   }
 }
