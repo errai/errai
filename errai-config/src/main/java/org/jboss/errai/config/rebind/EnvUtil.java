@@ -332,8 +332,6 @@ public abstract class EnvUtil {
 
     try {
       for (final MetaClass mc : allCachedClasses) {
-        if (mc.isInterface()) continue;
-
         String fullyQualifiedName = mc.getFullyQualifiedName();
         int splitPoint;
         while ((splitPoint = fullyQualifiedName.lastIndexOf('$')) != -1) {
