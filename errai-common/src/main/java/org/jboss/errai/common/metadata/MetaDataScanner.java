@@ -36,13 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.Multimap;
-import javassist.bytecode.ClassFile;
 
 import org.jboss.errai.common.client.framework.ErraiAppAttribs;
 
@@ -93,25 +91,6 @@ public class MetaDataScanner extends Reflections {
 
   static final Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =
       new ConcurrentHashMap<String, Set<SortableClassFileWrapper>>();
-
-  static class SortableClassFileWrapper implements Comparable<SortableClassFileWrapper> {
-    private String name;
-    private ClassFile classFile;
-
-    SortableClassFileWrapper(final String name, final ClassFile classFile) {
-      this.name = name;
-      this.classFile = classFile;
-    }
-
-    public ClassFile getClassFile() {
-      return classFile;
-    }
-
-    @Override
-    public int compareTo(final SortableClassFileWrapper o) {
-      return name.compareTo(o.name);
-    }
-  }
 
   private static Configuration getConfiguration(final List<URL> urls) {
     return new ConfigurationBuilder()

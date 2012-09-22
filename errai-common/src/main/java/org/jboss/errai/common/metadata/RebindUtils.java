@@ -38,49 +38,8 @@ import java.util.zip.ZipInputStream;
 public class RebindUtils {
 
   static Logger logger = LoggerFactory.getLogger(RebindUtils.class);
-  private static String hashSeed = "errai20-bx1";
+  private static String hashSeed = "errai21CR2";
   private final static Pattern erraiCommonJarFinder = Pattern.compile(".*/errai\\-common.*\\.jar!/META-INF/MANIFEST.MF");
-
-  static {
-    try {
-      final Enumeration<URL> resources = MetaDataScanner.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
-      SeedFinder:
-      while (resources.hasMoreElements()) {
-
-        final URL url = resources.nextElement();
-        String urlString = url.getFile();
-
-        if (erraiCommonJarFinder.matcher(urlString).matches()) {
-          if (urlString.startsWith("file:")) {
-            urlString = urlString.substring(5);
-          }
-
-          final String fileName = urlString.substring(0, urlString.indexOf('!'));
-
-          final File file = new File(fileName);
-
-          if (file.exists() && !file.isDirectory()) {
-            final ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
-
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-              if (entry.getName().endsWith("MANIFEST.MF")) {
-                hashSeed = String.valueOf(entry.getTime());
-                break SeedFinder;
-              }
-            }
-
-            zipInputStream.close();
-            break;
-          }
-        }
-      }
-
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
 
   private static volatile String _tempDirectory;
 
@@ -103,7 +62,7 @@ public class RebindUtils {
   private static final String[] hashableExtensions = {".java", ".class", ".properties", ".xml"};
 
   private static boolean isValidFileType(final String fileName) {
-    for (String extension: hashableExtensions) {
+    for (String extension : hashableExtensions) {
       if (fileName.endsWith(extension)) return true;
     }
     return false;
@@ -127,8 +86,26 @@ public class RebindUtils {
             final String fileName = f.getName();
             if (isValidFileType(fileName)) {
               md.update(fileName.getBytes());
-              md.update((byte) f.lastModified());
-              md.update((byte) f.length());
+              final long lastModified = f.lastModified();
+//              md.update((byte) ((lastModified >> 56 & 0xFF)));
+//              md.update((byte) ((lastModified >> 48 & 0xFF)));
+//              md.update((byte) ((lastModified >> 40 & 0xFF)));
+//              md.update((byte) ((lastModified >> 32 & 0xFF)));
+              md.update((byte) ((lastModified >> 24 & 0xFF)));
+              md.update((byte) ((lastModified >> 16 & 0xFF)));
+              md.update((byte) ((lastModified >> 8 & 0xFF)));
+              md.update((byte) ((lastModified & 0xFF)));
+
+              final long length = f.length();
+//
+//              md.update((byte) ((length >> 56 & 0xFF)));
+//              md.update((byte) ((length >> 48 & 0xFF)));
+//              md.update((byte) ((length >> 40 & 0xFF)));
+//              md.update((byte) ((length >> 32 & 0xFF)));
+              md.update((byte) ((length >> 24 & 0xFF)));
+              md.update((byte) ((length >> 16 & 0xFF)));
+              md.update((byte) ((length >> 8 & 0xFF)));
+              md.update((byte) ((length & 0xFF)));
             }
           }
         });
@@ -385,6 +362,10 @@ public class RebindUtils {
           packages.add(packageName);
         }
       }
+    }
+    catch (NoSuchFieldException e) {
+      logger.error("the version of GWT you are running does not appear to be compatible with this version of Errai", e);
+      throw new RuntimeException("could not access the module field in the GeneratorContext");
     }
     catch (Exception e) {
       throw new RuntimeException("could not determine module package", e);

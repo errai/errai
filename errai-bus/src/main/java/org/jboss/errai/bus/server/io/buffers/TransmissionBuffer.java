@@ -444,7 +444,7 @@ public class TransmissionBuffer implements Buffer {
    * @param bufferColor  the buffer color
    * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
-   *                              the specified <tt>OuputStream</tt>
+   *                              the specified <tt>OutputStream</tt>
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
@@ -461,7 +461,7 @@ public class TransmissionBuffer implements Buffer {
    * @param bufferColor  the buffer color
    * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
-   *                              the specified <tt>OuputStream</tt>
+   *                              the specified <tt>OutputStream</tt>
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
@@ -536,7 +536,7 @@ public class TransmissionBuffer implements Buffer {
    * {@param head} position, from the specified {@param segment} position.
    *
    * @param bufferColor the buffer color
-   * @param headSeq     the squence position to seek up to
+   * @param headSeq     the sequence position to seek up to
    * @param colorSeq    the sequence position to seek from.
    * @return returns an long representing the initial sequence to read from
    */
@@ -562,7 +562,7 @@ public class TransmissionBuffer implements Buffer {
    * @param head         the head position to seek to.
    * @param sequence     the sequence position to seek from
    * @param color        the data color for the buffer.
-   * @param outputStream the <tt>OuputStream</tt> to read into.
+   * @param outputStream the <tt>OutputStream</tt> to read into.
    * @param callback     an optional {@link BufferCallback}.
    * @return returns the segment position after reading + 1.
    * @throws IOException thrown if data cannot be read from the buffer or written to the OutputStream.

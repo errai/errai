@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * @author Mike Brock
  */
-public class EnviromentConfig {
+public class EnvironmentConfig {
   private final Map<String, String> mappingAliases;
   private final Set<MetaClass> exposedClasses;
   private final Set<MetaClass> portableSuperTypes;
@@ -18,11 +18,11 @@ public class EnviromentConfig {
 
   private final Set<String> explicitTypes;
 
-  EnviromentConfig(final Map<String, String> mappingAliases,
-                   final Set<MetaClass> exposedClasses,
-                   final Set<MetaClass> portableSuperTypes,
-                   final Set<String> explicitTypes,
-                   final Map<String, String> frameworkProperties) {
+  EnvironmentConfig(final Map<String, String> mappingAliases,
+                    final Set<MetaClass> exposedClasses,
+                    final Set<MetaClass> portableSuperTypes,
+                    final Set<String> explicitTypes,
+                    final Map<String, String> frameworkProperties) {
     this.mappingAliases = Collections.unmodifiableMap(mappingAliases);
     this.exposedClasses = Collections.unmodifiableSet(exposedClasses);
     this.portableSuperTypes = Collections.unmodifiableSet(portableSuperTypes);

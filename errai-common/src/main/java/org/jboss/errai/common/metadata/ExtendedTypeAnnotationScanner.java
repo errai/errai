@@ -28,12 +28,12 @@ public class ExtendedTypeAnnotationScanner extends TypeAnnotationsScanner {
         getStore().put(annotationType, className);
 
         if (cls instanceof ClassFile) {
-          Set<MetaDataScanner.SortableClassFileWrapper> classes = MetaDataScanner.annotationsToClassFile.get(annotationType);
+          Set<SortableClassFileWrapper> classes = MetaDataScanner.annotationsToClassFile.get(annotationType);
           if (classes == null) {
             MetaDataScanner.annotationsToClassFile.put(annotationType, classes =
-                new TreeSet<MetaDataScanner.SortableClassFileWrapper>());
+                new TreeSet<SortableClassFileWrapper>());
           }
-          classes.add(new MetaDataScanner.SortableClassFileWrapper(className, (ClassFile) cls));
+          classes.add(new SortableClassFileWrapper(className, (ClassFile) cls));
         }
       }
     }

@@ -30,8 +30,6 @@ public final class ClassScanner {
   public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
                                                                      final Set<String> packages) {
 
-    long tm = System.currentTimeMillis();
-
     final Collection<MetaParameter> result = new HashSet<MetaParameter>();
     for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
       for (final MetaMethod method : metaClass.getDeclaredMethods()) {

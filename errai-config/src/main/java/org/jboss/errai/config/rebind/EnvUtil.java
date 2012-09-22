@@ -17,12 +17,9 @@
 package org.jboss.errai.config.rebind;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -37,14 +34,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.google.gwt.thirdparty.guava.common.io.Files;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.QuickDeps;
 import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.util.ClassScanner;
@@ -52,8 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
-
-import javax.xml.transform.stream.StreamSource;
 
 /**
  * @author Mike Brock
@@ -110,7 +103,7 @@ public abstract class EnvUtil {
 
   private static Logger log = LoggerFactory.getLogger(EnvUtil.class);
 
-  private static EnviromentConfig loadConfiguredPortableTypes() {
+  private static EnvironmentConfig loadConfiguredPortableTypes() {
     final Map<String, String> frameworkProps = new HashMap<String, String>();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
@@ -234,7 +227,7 @@ public abstract class EnvUtil {
       fillInInterfacesAndSuperTypes(portableNonExposed, cls);
     }
 
-    return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed, explicitTypes, frameworkProps);
+    return new EnvironmentConfig(mappingAliases, exposedClasses, portableNonExposed, explicitTypes, frameworkProps);
   }
 
   private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
@@ -247,9 +240,9 @@ public abstract class EnvUtil {
     }
   }
 
-  private static EnviromentConfig _environmentConfigCache;
+  private static EnvironmentConfig _environmentConfigCache;
 
-  public static EnviromentConfig getEnvironmentConfig() {
+  public static EnvironmentConfig getEnvironmentConfig() {
     if (_environmentConfigCache == null) _environmentConfigCache = loadConfiguredPortableTypes();
     return _environmentConfigCache;
   }
@@ -310,7 +303,7 @@ public abstract class EnvUtil {
       return _reachableCache;
     }
 
-    final EnviromentConfig config = getEnvironmentConfig();
+    final EnvironmentConfig config = getEnvironmentConfig();
 
     if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) != null
         && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
@@ -378,7 +371,7 @@ public abstract class EnvUtil {
       executor.awaitTermination(60, TimeUnit.MINUTES);
     }
     catch (InterruptedException e) {
-      e.printStackTrace();
+      log.warn("the reachability analysis was interrupted", e);
     }
 
     if (log.isDebugEnabled()) {

@@ -58,19 +58,19 @@ public class VfsUrlType implements Vfs.UrlType {
     jbossAS = jbossFound;
   }
 
-  public boolean matches(URL url) {
+  public boolean matches(final URL url) {
     return url.getProtocol().equals(VFS)
             || url.getProtocol().equals(VFSZIP)
             || url.getProtocol().equals(VFSFILE);
   }
 
-  public Vfs.Dir createDir(URL url) {
+  public Vfs.Dir createDir(final URL url) {
     // Create non VFS Url
-    File deployment = PackagingUtil.identifyDeployment(url);
+    final File deployment = PackagingUtil.identifyDeployment(url);
     if (null == deployment)
       throw new RuntimeException("Unable identify deployment file for: " + url);
 
-    File file = deployment.getAbsoluteFile();
+    final File file = deployment.getAbsoluteFile();
 
     try {
       if (jbossAS) {
@@ -84,7 +84,7 @@ public class VfsUrlType implements Vfs.UrlType {
         }
       }
 
-      URL targetURL = file.toURI().toURL();
+      final URL targetURL = file.toURI().toURL();
 
       // delegate unpacked archives to SystemDir handler
       if (deployment.isDirectory())
@@ -97,5 +97,4 @@ public class VfsUrlType implements Vfs.UrlType {
       throw new RuntimeException("Invalid URL", e);
     }
   }
-
 }
