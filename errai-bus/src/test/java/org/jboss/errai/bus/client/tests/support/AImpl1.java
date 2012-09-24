@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.tests.res;
+package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class BImpl1 extends AbstractClassB {
+public class AImpl1 extends AbstractClassA {
 
   private Integer value;
 
-  public BImpl1 () {}
+  public AImpl1 () {}
   
-  public BImpl1 (Integer value) {
+  public AImpl1 (Integer value) {
     this.value = value;
   }
   
@@ -53,7 +53,7 @@ public class BImpl1 extends AbstractClassB {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BImpl1 other = (BImpl1) obj;
+    AImpl1 other = (AImpl1) obj;
     if (value == null) {
       if (other.value != null)
         return false;
@@ -65,7 +65,7 @@ public class BImpl1 extends AbstractClassB {
 
   @Override
   public String toString() {
-    return "BImpl1 [value=" + value + "]";
+    return "AImpl1 [value=" + value + "]";
   }
 
 }

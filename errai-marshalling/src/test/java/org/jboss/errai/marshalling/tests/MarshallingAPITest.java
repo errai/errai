@@ -16,6 +16,12 @@
 
 package org.jboss.errai.marshalling.tests;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.AImpl1;
@@ -39,12 +45,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -59,7 +59,6 @@ public class MarshallingAPITest {
   private void testEncodeDecode(Object value) {
     if (value == null) return;
     final String json = ServerMarshalling.toJSON(value);
-    System.out.println(json);
     Assert.assertEquals(value, ServerMarshalling.fromJSON(json));
   }
 

@@ -289,15 +289,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
           final MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(memberMapping.getType());
           final MetaClass mapKeyType = MarshallingGenUtil.getConcreteMapKeyType(memberMapping.getType());
-
+          final MetaClass mapValueType = MarshallingGenUtil.getConcreteMapValueType(memberMapping.getType());
+          
+          boolean assumedMapTypesSet = false;
           if (elementType != null) {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
           }
           else {
-            if (mapKeyType != null) {
+            if (mapKeyType != null && !mapKeyType.isAbstract() && !mapKeyType.isInterface() && 
+                mapValueType != null && !mapValueType.isAbstract() && !mapValueType.isInterface()) {
               ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", mapKeyType.getFullyQualifiedName()));
-              final MetaClass mapValueType = MarshallingGenUtil.getConcreteMapValueType(memberMapping.getType());
               ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", mapValueType.getFullyQualifiedName()));
+              assumedMapTypesSet = true;
             }
           }
 
@@ -306,7 +309,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           if (elementType != null) {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", (String) null));
           }
-          else if (mapKeyType != null) {
+          else if (assumedMapTypesSet) {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", (String) null));
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", (String) null));
           }

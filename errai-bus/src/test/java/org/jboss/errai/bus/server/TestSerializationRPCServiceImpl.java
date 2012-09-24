@@ -34,6 +34,8 @@ import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
 import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
 import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
@@ -103,7 +105,6 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public byte testByte(byte b) {
     return b;
   }
-
 
   @Override
   public String[] testStringArray(String[] str) {
@@ -236,7 +237,8 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   }
 
   @Override
-  public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity) {
+  public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(
+      EntityWithStringBufferAndStringBuilder entity) {
     return entity;
   }
 
@@ -388,6 +390,17 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public ImplicitEnum testImplicitEnum(ImplicitEnum e) {
+    return e;
+  }
+
+  @Override
+  public EntityWithMapUsingAbstractValueType testEntityWithMapUsingAbstractValueType(
+      EntityWithMapUsingAbstractValueType e) {
+    return e;
+  }
+
+  @Override
+  public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(EntityWithMapUsingAbstractKeyType e) {
     return e;
   }
 }

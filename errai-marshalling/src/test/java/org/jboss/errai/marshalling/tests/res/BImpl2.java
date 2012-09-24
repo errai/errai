@@ -23,12 +23,12 @@ public class BImpl2 extends AbstractClassB {
 
   private String value;
 
- public BImpl2 () {}
-  
-  public BImpl2 (String value) {
+  public BImpl2() {}
+
+  public BImpl2(String value) {
     this.value = value;
   }
-  
+
   public void setValue(String value) {
     this.value = value;
   }
@@ -65,7 +65,7 @@ public class BImpl2 extends AbstractClassB {
 
   @Override
   public String toString() {
-    return "AImpl2 [value=" + value + "]";
+    return "BImpl2 [value=" + value + "]";
   }
 
 }

@@ -39,11 +39,16 @@ import java.util.TreeSet;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.tests.support.AImpl1;
+import org.jboss.errai.bus.client.tests.support.AImpl2;
+import org.jboss.errai.bus.client.tests.support.AbstractClassA;
 import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.CustomList;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
 import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
 import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
@@ -2001,7 +2006,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testEntityWithEnumContainerContainer() {
     runAfterInit(new Runnable() {
       @Override
@@ -2031,6 +2035,66 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testEntityWithEnumContainerContainer(ecc);
+      }
+    });
+  }
+  
+  //Serves as regression test for ERRAI-403
+  public void testEntityWithMapUsingAbstractValueType() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithMapUsingAbstractValueType e = new EntityWithMapUsingAbstractValueType(); 
+        
+        final Map<String, AbstractClassA> data = new HashMap<String, AbstractClassA>();
+        data.put("1", new AImpl1(4711));
+        data.put("2", new AImpl2("4711"));
+        e.setData(data);
+        
+        MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingAbstractValueType>() {
+          @Override
+          public void callback(EntityWithMapUsingAbstractValueType response) {
+            try {
+              assertEquals(e, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithMapUsingAbstractValueType(e);
+      }
+    });
+  }
+  
+  //Serves as regression test for ERRAI-403
+  public void testEntityWithMapUsingAbstractKeyType() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithMapUsingAbstractKeyType e = new EntityWithMapUsingAbstractKeyType(); 
+        
+        final Map<AbstractClassA, String> data = new HashMap<AbstractClassA, String>();
+        data.put(new AImpl1(4711), "1");
+        data.put(new AImpl2("4711"), "2");
+        e.setData(data);
+        
+        MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingAbstractKeyType>() {
+          @Override
+          public void callback(EntityWithMapUsingAbstractKeyType response) {
+            try {
+              assertEquals(e, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithMapUsingAbstractKeyType(e);
       }
     });
   }

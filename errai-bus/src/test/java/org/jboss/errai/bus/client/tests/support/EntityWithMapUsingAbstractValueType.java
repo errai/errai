@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.tests.res;
+package org.jboss.errai.bus.client.tests.support;
+
+import java.util.Map;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
+/**
+ * Portable type used to test marshalling of types using maps with abstract value type.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Portable
-public class BImpl1 extends AbstractClassB {
+public class EntityWithMapUsingAbstractValueType {
 
-  private Integer value;
+  private Map<String, AbstractClassA> data = null;
 
-  public BImpl1 () {}
-  
-  public BImpl1 (Integer value) {
-    this.value = value;
-  }
-  
-  public void setValue(Integer value) {
-    this.value = value;
+  public Map<String, AbstractClassA> getData() {
+    return data;
   }
 
-  public Integer getValue() {
-    return value;
+  public void setData(Map<String, AbstractClassA> data) {
+    this.data = data;
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    result = prime * result + ((data == null) ? 0 : data.hashCode());
     return result;
   }
 
@@ -53,19 +54,19 @@ public class BImpl1 extends AbstractClassB {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BImpl1 other = (BImpl1) obj;
-    if (value == null) {
-      if (other.value != null)
+    EntityWithMapUsingAbstractValueType other = (EntityWithMapUsingAbstractValueType) obj;
+    if (data == null) {
+      if (other.data != null)
         return false;
     }
-    else if (!value.equals(other.value))
+    else if (!data.equals(other.data))
       return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "BImpl1 [value=" + value + "]";
+    return "EntityWithMapUsingAbstractValueType [data=" + data + "]";
   }
 
 }

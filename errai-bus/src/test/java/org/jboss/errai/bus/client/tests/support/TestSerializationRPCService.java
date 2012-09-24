@@ -163,7 +163,11 @@ public interface TestSerializationRPCService {
   public User testEntityWithNullField(User u);
 
   public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc);
+  
+  public EntityWithMapUsingAbstractValueType testEntityWithMapUsingAbstractValueType(EntityWithMapUsingAbstractValueType e);
 
+  public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(EntityWithMapUsingAbstractKeyType e);
+  
   public LinkedHashMap<String,Integer> testLinkedHashMap(LinkedHashMap<String,Integer> map);
 
   public LinkedHashSet<String> testLinkedHashSet(LinkedHashSet<String> set);
