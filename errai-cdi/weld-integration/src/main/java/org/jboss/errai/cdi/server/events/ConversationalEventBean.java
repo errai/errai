@@ -52,13 +52,12 @@ public class ConversationalEventBean implements Bean {
   private BeanManagerImpl manager;
   private MessageBus bus;
   private Set<Type> typesSet;
-  private Type type;
 
-  public ConversationalEventBean(Type type, BeanManagerImpl manager, MessageBus bus) {
+  public ConversationalEventBean(final Type type, final BeanManagerImpl manager, final MessageBus bus) {
     this.manager = manager;
     this.bus = bus;
-    this.type = type;
-    typesSet = Arrays2.<Type>asSet(type, Object.class);
+    //noinspection unchecked
+    typesSet = Arrays2.asSet(type, Object.class);
   }
 
   @Override
@@ -106,13 +105,13 @@ public class ConversationalEventBean implements Bean {
   }
 
   @Override
-  public Object create(CreationalContext creationalContext) {
-    InjectionPoint injectionPoint = Container.instance().services().get(CurrentInjectionPoint.class).peek();
+  public Object create(final CreationalContext creationalContext) {
+    final InjectionPoint injectionPoint = Container.instance().services().get(CurrentInjectionPoint.class).peek();
     return ConversationalEventImpl.of(injectionPoint, manager, bus);
   }
 
   @Override
-  public void destroy(Object instance, CreationalContext creationalContext) {
+  public void destroy(final Object instance, final CreationalContext creationalContext) {
   }
 
   @Override

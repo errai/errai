@@ -59,7 +59,7 @@ public class CDIServerUtil {
     return (T) beanManager.getReference(bean, beanClass, beanManager.createCreationalContext(bean));
   }
 
-  public static String resolveServiceName(Class<?> type) {
+  public static String resolveServiceName(final Class<?> type) {
     String subjectName = type.getAnnotation(Service.class).value();
 
     if (subjectName.equals(""))
@@ -72,7 +72,7 @@ public class CDIServerUtil {
   static class AnnotationHolder implements Annotation {
     private final Class<? extends Annotation> annotationType;
 
-    AnnotationHolder(Class<? extends Annotation> annotationType) {
+    AnnotationHolder(final Class<? extends Annotation> annotationType) {
       this.annotationType = annotationType;
     }
 
@@ -87,11 +87,11 @@ public class CDIServerUtil {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
       if (this == o) return true;
       if (!(o instanceof AnnotationHolder)) return false;
 
-      AnnotationHolder that = (AnnotationHolder) o;
+      final AnnotationHolder that = (AnnotationHolder) o;
 
       if (annotationType != null ? !annotationType.equals(that.annotationType) : that.annotationType != null)
         return false;

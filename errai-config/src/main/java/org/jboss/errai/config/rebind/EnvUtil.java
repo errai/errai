@@ -19,6 +19,7 @@ package org.jboss.errai.config.rebind;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
+import sun.java2d.loops.GeneralRenderer;
 
 /**
  * @author Mike Brock
@@ -295,29 +297,70 @@ public abstract class EnvUtil {
     _environmentConfigCache = null;
   }
 
-  private static volatile GeneratorContext _lastContext;
-  private static volatile ReachableTypes _reachableCache;
+  static class ReachabilityCache {
+    private volatile GeneratorContext _lastContext;
+    private final Map<String, ReachableTypes> moduleToReachableTypes = new ConcurrentHashMap<String, ReachableTypes>();
+
+    public boolean isCacheValid(final GeneratorContext context) {
+      return isCacheValid(context, RebindUtils.getModuleName(context));
+
+    }
+
+    public boolean isCacheValid(final GeneratorContext context, final String moduleName) {
+      return _lastContext == context && moduleToReachableTypes.containsKey(moduleName);
+    }
+
+    public ReachableTypes getCache(final GeneratorContext context) {
+      final String moduleName = RebindUtils.getModuleName(context);
+      if (isCacheValid(context, moduleName)) {
+        return moduleToReachableTypes.get(moduleName);
+      }
+      else {
+        return null;
+      }
+    }
+
+    public void putCache(final GeneratorContext context, final ReachableTypes reachableTypes) {
+      if (_lastContext == null) {
+        _lastContext = context;
+      }
+      else if (_lastContext != context) {
+        _lastContext = context;
+        moduleToReachableTypes.clear();
+      }
+
+      moduleToReachableTypes.put(RebindUtils.getModuleName(context), reachableTypes);
+    }
+  }
+
+
+  private static volatile SoftReference<ReachabilityCache> reachabilityCache = null;
 
   public static ReachableTypes getAllReachableClasses(final GeneratorContext context) {
-    if (_lastContext == context && _reachableCache != null) {
-      return _reachableCache;
+    if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) != null
+         && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
+
+       log.warn("reachability analysis disabled. errai may generate unnecessary code.");
+       log.warn("enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
+       return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
+     }
+
+    ReachabilityCache cache;
+    if (reachabilityCache == null || (cache = reachabilityCache.get()) == null) {
+      reachabilityCache = new SoftReference<ReachabilityCache>(cache = new ReachabilityCache());
+    }
+
+    if (cache.isCacheValid(context)) {
+      return cache.getCache(context);
     }
 
     final EnvironmentConfig config = getEnvironmentConfig();
-
-    if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) != null
-        && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
-
-      log.warn("reachability analysis disabled. errai may generate unnecessary code.");
-      log.warn("enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
-      return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
-    }
 
     long time = System.currentTimeMillis();
 
     final Set<String> packages = RebindUtils.findTranslatablePackagesInModule(context);
 
-    final Set<String> allDeps = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(100));
+    final Set<String> allDependencies = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(100));
     final Collection<MetaClass> allCachedClasses = MetaClassFactory.getAllCachedClasses();
     final ClassLoader classLoader = EnvUtil.class.getClassLoader();
 
@@ -346,7 +389,7 @@ public abstract class EnvUtil {
             if (log.isDebugEnabled()) {
               log.debug("scanning " + fullyQualifiedName + " for reachable types ...");
             }
-            executor.execute(new ReachabilityRunnable(readBuffer, allDeps));
+            executor.execute(new ReachabilityRunnable(readBuffer, allDependencies));
           }
           catch (IOException e) {
             log.warn("could not open resource: " + resource.getFile());
@@ -372,11 +415,13 @@ public abstract class EnvUtil {
     }
     catch (InterruptedException e) {
       log.warn("the reachability analysis was interrupted", e);
+      cache.putCache(context, ReachableTypes.EVERYTHING_REACHABLE_INSTANCE);
+      return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
     }
 
     if (log.isDebugEnabled()) {
       log.debug("*** REACHABILITY ANALYSIS (production mode: " + EnvUtil.isProdMode() + ") ***");
-      for (final String s : allDeps) {
+      for (final String s : allDependencies) {
         log.debug(" -> " + s);
       }
 
@@ -385,8 +430,9 @@ public abstract class EnvUtil {
       log.debug("*** END OF REACHABILITY ANALYSIS (" + time + "ms) *** ");
     }
 
-    _lastContext = context;
-    return _reachableCache = new ReachableTypes(allDeps, true);
+    final ReachableTypes reachableTypes = new ReachableTypes(allDependencies, true);
+    cache.putCache(context, reachableTypes);
+    return reachableTypes;
   }
 
   private static class ReachabilityRunnable implements Runnable {

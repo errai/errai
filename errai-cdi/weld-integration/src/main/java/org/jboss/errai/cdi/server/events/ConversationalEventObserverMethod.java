@@ -45,7 +45,7 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
   }
 
   @Override
-  public void notify(Object event) {
+  public void notify(final Object event) {
     final EventConversationContext.Context ctx = EventConversationContext.get();
     if (ctx != null && ctx.getSessionId() != null) {
       if (ctx.getEventObject() == event) return;
