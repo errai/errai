@@ -49,6 +49,7 @@ import org.jboss.errai.bus.client.tests.support.CustomList;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
 import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
 import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
@@ -61,6 +62,7 @@ import org.jboss.errai.bus.client.tests.support.Group;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
+import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.SubMoron;
@@ -1004,7 +1006,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-
+  
   public void testLinkedHashMap() {
     runAfterInit(new Runnable() {
       @Override
@@ -2095,6 +2097,34 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testEntityWithMapUsingAbstractKeyType(e);
+      }
+    });
+  }
+  
+  public void testEntityWithMapUsingSubtypeValues() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Map<String, Person> map = new HashMap<String, Person>();
+        map.put("1", new Student(1, "student"));
+        map.put("2", new User(2, "user"));
+        
+        final EntityWithMapUsingSubtypeValues e = new EntityWithMapUsingSubtypeValues();
+        e.setData(map);
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingSubtypeValues>() {
+          @Override
+          public void callback(EntityWithMapUsingSubtypeValues response) {
+            try {
+              assertEquals(e, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithMapUsingSubtypeValues(e);
       }
     });
   }

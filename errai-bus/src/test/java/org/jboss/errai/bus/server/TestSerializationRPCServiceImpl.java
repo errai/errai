@@ -36,6 +36,7 @@ import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
 import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
 import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
@@ -401,6 +402,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(EntityWithMapUsingAbstractKeyType e) {
+    return e;
+  }
+
+  @Override
+  public EntityWithMapUsingSubtypeValues testEntityWithMapUsingSubtypeValues(EntityWithMapUsingSubtypeValues e) {
     return e;
   }
 }

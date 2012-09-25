@@ -296,8 +296,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
           }
           else {
-            if (mapKeyType != null && !mapKeyType.isAbstract() && !mapKeyType.isInterface() && 
-                mapValueType != null && !mapValueType.isAbstract() && !mapValueType.isInterface()) {
+            if (mapKeyType != null && mapValueType != null) {
               ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", mapKeyType.getFullyQualifiedName()));
               ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", mapValueType.getFullyQualifiedName()));
               assumedMapTypesSet = true;

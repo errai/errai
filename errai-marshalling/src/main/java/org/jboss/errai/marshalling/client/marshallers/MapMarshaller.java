@@ -78,13 +78,19 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
             ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
       }
       else {
-        if (assumedKeyType != null) {
+        if (assumedKeyType != null && assumedValueType != null) {
           if (key.startsWith(SerializationParts.OBJECT_ID)) {
             continue;
           }
           demarshalledKey = convertKey(assumedKeyType, key);
 
-          final String valueType = (assumedValueType != null) ? assumedValueType : ctx.determineTypeFor(null, ejValue);
+          String valueType = null;
+          if (ejValue.isObject() != null && ejValue.isObject().containsKey(SerializationParts.ENCODED_TYPE)) {
+            valueType = ctx.determineTypeFor(null, ejValue);
+          }
+          else {
+            valueType = assumedValueType;
+          }
           final Object demarshalledValue = ctx.getMarshallerInstance(valueType).demarshall(ejValue, ctx);
           impl.put(demarshalledKey, demarshalledValue);
         }

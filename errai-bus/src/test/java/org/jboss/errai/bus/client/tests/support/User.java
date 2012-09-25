@@ -34,6 +34,13 @@ public class User extends Person {
   private Map<User, String> userStringMap;
   private Map<String, User> userMapString;
 
+  public User() {}
+  
+  public User(int id, String name) {
+    this.id = id;
+    this.name = name;
+  }
+  
   public int getId() {
     return id;
   }

@@ -24,12 +24,12 @@ public class Student extends Person {
   private int id;
   private String name;
   
-  private Integer nullInt = null;
-  private Float nullFloat = null;
-  private Double nullDouble = null;
-  private Short nullShort = null;
-  private Long nullLong = null;
-  private Byte nullByte = null;
+  private final Integer nullInt = null;
+  private final Float nullFloat = null;
+  private final Double nullDouble = null;
+  private final Short nullShort = null;
+  private final Long nullLong = null;
+  private final Byte nullByte = null;
 
   public Student() {}
   
@@ -93,5 +93,12 @@ public class Student extends Person {
     int result = id;
     result = 31 * result + (name != null ? name.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "Student [id=" + id + ", name=" + name + ", nullInt=" + nullInt + ", nullFloat=" + nullFloat
+        + ", nullDouble=" + nullDouble + ", nullShort=" + nullShort + ", nullLong=" + nullLong + ", nullByte="
+        + nullByte + "]";
   }
 }
