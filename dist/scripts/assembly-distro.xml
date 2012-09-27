@@ -150,5 +150,27 @@
                 <exclude>**/src/main/webapp/RestDemo/**</exclude>
             </excludes>
         </fileSet>
+        <fileSet>
+            <directory>../errai-jpa/demos/</directory>
+            <outputDirectory>jpa-examples/</outputDirectory>
+            <excludes>
+                <exclude>pom.xml</exclude>
+                <exclude>**/*.iml</exclude>
+                <exclude>**/gwt-unitCache/**</exclude>
+                <exclude>**/.settings/**</exclude>
+                <exclude>**/.classpath</exclude>
+                <exclude>**/.project</exclude>
+                <exclude>**/.gitignore</exclude>
+                <exclude>**/.gwt/**</exclude>
+                <exclude>**/.errai/**</exclude>
+                <exclude>**/*.JUnit/**</exclude>
+                <exclude>**/target/**</exclude>
+                <exclude>**/WEB-INF/lib/**</exclude>
+                <exclude>**/WEB-INF/classes/**</exclude>
+
+                <exclude>**/src/main/webapp/GroceryList/**</exclude>
+                <exclude>**/src/main/webapp/ErraiJpaDemo/**</exclude>
+            </excludes>
+        </fileSet>
     </fileSets>
 </assembly>
