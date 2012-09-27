@@ -102,7 +102,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final List<SubscribeListener> onSubscribeHooks
       = new ArrayList<SubscribeListener>();
 
-  /* ArrayList of all unsubscription listeners */
+  /* ArrayList of all un-subscription listeners */
   private final List<UnsubscribeListener> onUnsubscribeHooks
       = new ArrayList<UnsubscribeListener>();
 
@@ -1312,7 +1312,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     retries = 0;
   }
 
-  protected class LongPollRequestCallback implements RequestCallback {
+  private class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(final Request request, final Throwable throwable) {
       if (handleHTTPTransportError(request, throwable, statusCode)) {
@@ -1401,14 +1401,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  protected class NoPollRequestCallback extends LongPollRequestCallback {
+  private class NoPollRequestCallback extends LongPollRequestCallback {
     @Override
     public void schedule() {
       performPoll();
     }
   }
 
-  protected class ShortPollRequestCallback extends LongPollRequestCallback {
+  private class ShortPollRequestCallback extends LongPollRequestCallback {
     public ShortPollRequestCallback() {
     }
 

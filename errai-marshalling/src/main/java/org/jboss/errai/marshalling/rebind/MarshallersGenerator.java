@@ -57,16 +57,16 @@ public class MarshallersGenerator extends Generator {
   private static final String SERVER_MARSHALLER_OUTPUT_ENABLED_PROP = "errai.marshalling.server.classOutput.enabled";
 
   private static final String SERVER_MARSHALLER_OUTPUT_DIR =
-          System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) != null ?
-                  System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) :
-                  null;
+      System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) != null ?
+          System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) :
+          null;
 
   private static final boolean SERVER_MARSHALLER_OUTPUT_ENABLED =
-          Boolean.valueOf(System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP, "true"));
+      Boolean.valueOf(System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP, "true"));
 
   private static final String[] candidateOutputDirectories =
-          {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/",
-                  "WEB-INF/classes/", "src/main/webapp/WEB-INF/classes/"};
+      {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/",
+          "WEB-INF/classes/", "src/main/webapp/WEB-INF/classes/"};
 
   private static final DiscoveryStrategy[] rootDiscoveryStrategies;
 
@@ -75,120 +75,126 @@ public class MarshallersGenerator extends Generator {
   static {
     // define the strategies which will be used to figure out where to deposit the server-side marshaller
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
-            new DiscoveryStrategy() {
-              @Override
-              public Set<String> getCandidate(final GeneratorContext context, final DiscoveryContext veto) {
-                final File cwd = new File("").getAbsoluteFile();
-                final Set<File> matching = ClassChangeUtil.findAllMatching("classlist.mf", cwd);
-                final Set<String> candidateDirectories = new HashSet<String>();
+        new DiscoveryStrategy() {
+          @Override
+          public Set<String> getCandidate(final GeneratorContext context, final DiscoveryContext veto) {
+            final File cwd = new File("").getAbsoluteFile();
+            final Set<File> matching = ClassChangeUtil.findAllMatching("classlist.mf", cwd);
+            final Set<String> candidateDirectories = new HashSet<String>();
 
-                veto.resultsAbsolute();
+            veto.resultsAbsolute();
 
-                if (!matching.isEmpty()) {
-                  class Candidate {
-                    int score;
-                    File root;
-                  }
-
-                  Candidate bestCandidate = null;
-                  String gwtModuleName = RebindUtils.getModuleName(context);
-
-                  if (gwtModuleName != null) {
-
-                    if (gwtModuleName.endsWith(".JUnit")) {
-                      gwtModuleName = gwtModuleName.substring(0, gwtModuleName.length() - 6);
-                    }
-                    gwtModuleName = gwtModuleName.substring(0, gwtModuleName.lastIndexOf('.'));
-
-                    for (final File f : matching) {
-                      final Candidate candidate = new Candidate();
-                      candidate.root = f.getParentFile();
-
-                      final Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
-
-                      for (final String fqcn : clazzes) {
-
-                        try {
-                          final JClassType type = context.getTypeOracle().findType(fqcn);
-
-                          if (type != null && fqcn.startsWith(gwtModuleName)) {
-                            candidate.score++;
-                          }
-                        }
-                        catch (Throwable ignored) {
-                        }
-                      }
-
-                      if (candidate.score > 0 && (bestCandidate == null || candidate.score > bestCandidate.score)) {
-                        bestCandidate = candidate;
-                      }
-                    }
-
-                    if (bestCandidate != null) {
-                      candidateDirectories.add(bestCandidate.root.getAbsolutePath());
-                    }
-                  }
-                }
-
-                return candidateDirectories;
+            if (!matching.isEmpty()) {
+              class Candidate {
+                int score;
+                File root;
               }
-            }
-            ,
-            new DiscoveryStrategy() {
-              @Override
-              public Set<String> getCandidate(final GeneratorContext context,
-                                              final DiscoveryContext discoveryContext) {
 
-                final ServerMappingContext ctx = MappingContextSingleton.get();
+              Candidate bestCandidate = null;
+              String gwtModuleName = RebindUtils.getModuleName(context);
 
-                final Map<String, String> matchNames = new HashMap<String, String>();
+              if (gwtModuleName != null) {
 
-                for (final MetaClass cls : ctx.getDefinitionsFactory().getExposedClasses()) {
-                  matchNames.put(cls.getName(), cls.getName());
+                if (gwtModuleName.endsWith(".JUnit")) {
+                  gwtModuleName = gwtModuleName.substring(0, gwtModuleName.length() - 6);
                 }
-
-                final File cwd = new File("").getAbsoluteFile();
-
-                final Set<File> roots = ClassChangeUtil.findMatchingOutputDirectoryByModel(matchNames, cwd);
-
-                if (!roots.isEmpty()) {
-                  for (final File file : roots) {
-                    log.info(" ** signature matched root! " + file.getAbsolutePath());
-                  }
-                  discoveryContext.resultsAbsolute();
+                final int endIndex = gwtModuleName.lastIndexOf('.');
+                if (endIndex != -1) {
+                  gwtModuleName = gwtModuleName.substring(0, endIndex);
                 }
                 else {
-                  log.warn(" ** NO ROOTS FOUND!");
-                  discoveryContext.veto();
+                  gwtModuleName = "";
                 }
 
+                for (final File f : matching) {
+                  final Candidate candidate = new Candidate();
+                  candidate.root = f.getParentFile();
 
-                final Set<String> rootsPaths = new HashSet<String>();
-                for (final File f : roots) {
-                  rootsPaths.add(f.getAbsolutePath());
+                  final Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
+
+                  for (final String fqcn : clazzes) {
+
+                    try {
+                      final JClassType type = context.getTypeOracle().findType(fqcn);
+
+                      if (type != null && fqcn.startsWith(gwtModuleName)) {
+                        candidate.score++;
+                      }
+                    }
+                    catch (Throwable ignored) {
+                    }
+                  }
+
+                  if (candidate.score > 0 && (bestCandidate == null || candidate.score > bestCandidate.score)) {
+                    bestCandidate = candidate;
+                  }
                 }
 
-                return rootsPaths;
-              }
-            },
-
-            new DiscoveryStrategy() {
-              @Override
-              public Set<String> getCandidate(final GeneratorContext context,
-                                              final DiscoveryContext veto) {
-                // try the CWD
-                return Collections.singleton(new File("").getAbsolutePath());
+                if (bestCandidate != null) {
+                  candidateDirectories.add(bestCandidate.root.getAbsolutePath());
+                }
               }
             }
-            ,
-            new DiscoveryStrategy() {
-              @Override
-              public Set<String> getCandidate(final GeneratorContext context,
-                                              final DiscoveryContext veto) {
 
-                return Collections.singleton(RebindUtils.guessWorkingDirectoryForModule(context));
-              }
+            return candidateDirectories;
+          }
+        }
+        ,
+        new DiscoveryStrategy() {
+          @Override
+          public Set<String> getCandidate(final GeneratorContext context,
+                                          final DiscoveryContext discoveryContext) {
+
+            final ServerMappingContext ctx = MappingContextSingleton.get();
+
+            final Map<String, String> matchNames = new HashMap<String, String>();
+
+            for (final MetaClass cls : ctx.getDefinitionsFactory().getExposedClasses()) {
+              matchNames.put(cls.getName(), cls.getName());
             }
+
+            final File cwd = new File("").getAbsoluteFile();
+
+            final Set<File> roots = ClassChangeUtil.findMatchingOutputDirectoryByModel(matchNames, cwd);
+
+            if (!roots.isEmpty()) {
+              for (final File file : roots) {
+                log.info(" ** signature matched root! " + file.getAbsolutePath());
+              }
+              discoveryContext.resultsAbsolute();
+            }
+            else {
+              log.warn(" ** NO ROOTS FOUND!");
+              discoveryContext.veto();
+            }
+
+
+            final Set<String> rootsPaths = new HashSet<String>();
+            for (final File f : roots) {
+              rootsPaths.add(f.getAbsolutePath());
+            }
+
+            return rootsPaths;
+          }
+        },
+
+        new DiscoveryStrategy() {
+          @Override
+          public Set<String> getCandidate(final GeneratorContext context,
+                                          final DiscoveryContext veto) {
+            // try the CWD
+            return Collections.singleton(new File("").getAbsolutePath());
+          }
+        }
+        ,
+        new DiscoveryStrategy() {
+          @Override
+          public Set<String> getCandidate(final GeneratorContext context,
+                                          final DiscoveryContext veto) {
+
+            return Collections.singleton(RebindUtils.guessWorkingDirectoryForModule(context));
+          }
+        }
     };
   }
 
@@ -205,7 +211,7 @@ public class MarshallersGenerator extends Generator {
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
-          throws UnableToCompleteException {
+      throws UnableToCompleteException {
 
     if (GWT.isProdMode()) {
       log.info("compiling in production mode.");
@@ -263,7 +269,7 @@ public class MarshallersGenerator extends Generator {
         }
         else {
           serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.Java)
-                  .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+              .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
           _serverMarshallerCache = serverSideClass;
         }
 
@@ -337,7 +343,7 @@ public class MarshallersGenerator extends Generator {
 
           if (deposits == 0) {
             logger.warn(" *** the server marshaller was not deposited into your build output!\n" +
-                    "   A target output could not be resolved through configuration or auto-detection!");
+                "   A target output could not be resolved through configuration or auto-detection!");
           }
         }
       }
@@ -350,7 +356,7 @@ public class MarshallersGenerator extends Generator {
       }
 
       return _clientMarshallerCache
-              = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.GWT, EnvUtil.getAllReachableClasses(context))
+          = MarshallerGeneratorFactory.getFor(MarshallerOutputTarget.GWT, EnvUtil.getAllReachableClasses(context))
           .generate(packageName, className);
     }
   }
@@ -370,7 +376,7 @@ public class MarshallersGenerator extends Generator {
                                            final String outputPath) {
 
     final File outputDir = new File(sourceDir + File.separator +
-            RebindUtils.packageNameToDirName(SERVER_MARSHALLER_PACKAGE_NAME) + File.separator);
+        RebindUtils.packageNameToDirName(SERVER_MARSHALLER_PACKAGE_NAME) + File.separator);
 
     final File classOutputPath = new File(outputPath);
 
@@ -382,9 +388,9 @@ public class MarshallersGenerator extends Generator {
     RebindUtils.writeStringToFile(sourceFile, serverSideClass);
 
     ClassChangeUtil.compileClass(outputDir.getAbsolutePath(),
-            SERVER_MARSHALLER_PACKAGE_NAME,
-            SERVER_MARSHALLER_CLASS_NAME,
-            classOutputPath.getAbsolutePath());
+        SERVER_MARSHALLER_PACKAGE_NAME,
+        SERVER_MARSHALLER_CLASS_NAME,
+        classOutputPath.getAbsolutePath());
 
     return new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".class").getAbsolutePath();
   }

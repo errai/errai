@@ -21,6 +21,7 @@ import org.mvel2.util.ParseTools;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -89,7 +90,23 @@ public class QuickDeps {
     }
   };
 
+  private static final Predicate DEFAULT_PREDICATE = new Predicate() {
+    @Override
+    public boolean processPackage(String packageName) {
+      return true;
+    }
+
+    @Override
+    public boolean processClass(String className) {
+      return true;
+    }
+  };
+
   public static Set<String> getQuickTypeDependencyList(final String javaSource, ClassLoader classLoader) {
+    return getQuickTypeDependencyList(javaSource, classLoader, DEFAULT_PREDICATE);
+  }
+
+  public static Set<String> getQuickTypeDependencyList(final String javaSource, ClassLoader classLoader, Predicate predicate) {
     try {
       if (classLoader == null) {
         classLoader = Thread.currentThread().getContextClassLoader();
@@ -121,12 +138,23 @@ public class QuickDeps {
           }
           else if ("package".equals(token)) {
             wildcardPackages.add(token = identifierTokenizer.nextToken());
+            if (!predicate.processPackage(token)) {
+               return Collections.emptySet();
+            }
+
             packageName = token.concat(".");
+
           }
           else if ("class".equals(token)) {
             if (firstClass) {
               firstClass = false;
-              usedTypes.add(packageName + (clazzName = identifierTokenizer.nextToken()));
+              final String fqcn = packageName + (clazzName = identifierTokenizer.nextToken());
+
+              if (!predicate.processClass(fqcn)) {
+                return Collections.emptySet();
+              }
+
+              usedTypes.add(fqcn);
             }
             else {
               final String innerClassName = packageName
@@ -274,5 +302,10 @@ public class QuickDeps {
     }
 
     return cursor;
+  }
+
+  public static interface Predicate {
+    public boolean processPackage(String packageName);
+    public boolean processClass(String className);
   }
 }

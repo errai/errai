@@ -336,14 +336,52 @@ public abstract class EnvUtil {
 
   private static volatile SoftReference<ReachabilityCache> reachabilityCache = null;
 
+  private static final Set<String> reachabilityExclusionNegative = new HashSet<String>();
+  private static final Set<String> reachabilityExclusionList = new HashSet<String>() {
+    {
+      add("com.google.gwt");
+      add("java");
+      add("org.jboss.errai.marshalling.client.marshallers");
+      add("org.jboss.errai.bus.client.framework");
+    }
+  };
+
+  private static boolean isReachabilityExcluded(final String packageName) {
+    if (packageName == null) return false;
+
+    if (reachabilityExclusionNegative.contains(packageName)) {
+      return false;
+    }
+    else if (reachabilityExclusionList.contains(packageName)) {
+      return true;
+    }
+
+    boolean found = false;
+    for (final String pkg : reachabilityExclusionList) {
+      if (packageName.startsWith(pkg)) {
+        found = true;
+      }
+    }
+
+    if (found) {
+      reachabilityExclusionList.add(packageName);
+      return true;
+    }
+    else {
+      reachabilityExclusionNegative.add(packageName);
+      return false;
+    }
+
+  }
+
   public static ReachableTypes getAllReachableClasses(final GeneratorContext context) {
     if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) != null
-         && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
+        && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
 
-       log.warn("reachability analysis disabled. errai may generate unnecessary code.");
-       log.warn("enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
-       return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
-     }
+      log.warn("reachability analysis disabled. errai may generate unnecessary code.");
+      log.warn("enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
+      return ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
+    }
 
     ReachabilityCache cache;
     if (reachabilityCache == null || (cache = reachabilityCache.get()) == null) {
@@ -358,13 +396,46 @@ public abstract class EnvUtil {
 
     long time = System.currentTimeMillis();
 
-    final Set<String> packages = RebindUtils.findTranslatablePackagesInModule(context);
+    final Set<String> packages = RebindUtils.getOuterTranslatablePackages(context);
+
+    if (isJUnitTest()) {
+      packages.addAll(RebindUtils.findTranslatablePackagesInModule(context));
+    }
+
+    class Reachability {
+      private Set<String> packages;
+      private Set<String> negativeHits = new HashSet<String>();
+
+      Reachability(final Set<String> packages) {
+        this.packages = new HashSet<String>(packages);
+      }
+
+      public boolean isReachablePackage(final String pkg) {
+        if (pkg == null || packages.contains(pkg)) {
+          return true;
+        }
+        if (negativeHits.contains(pkg)) {
+          return false;
+        }
+
+        for (final String p : packages) {
+          if (pkg.startsWith(p)) {
+            packages.add(pkg);
+            return true;
+          }
+        }
+
+        negativeHits.add(pkg);
+        return false;
+      }
+    }
 
     final Set<String> allDependencies = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(100));
     final Collection<MetaClass> allCachedClasses = MetaClassFactory.getAllCachedClasses();
     final ClassLoader classLoader = EnvUtil.class.getClassLoader();
 
     final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    final Reachability reachability = new Reachability(packages);
 
     try {
       for (final MetaClass mc : allCachedClasses) {
@@ -374,8 +445,10 @@ public abstract class EnvUtil {
           fullyQualifiedName = fullyQualifiedName.substring(0, splitPoint);
         }
 
-        if (!config.getExplicitTypes().contains(fullyQualifiedName)
-            && !packages.contains(mc.getPackageName())) continue;
+        if (!config.getExplicitTypes().contains(fullyQualifiedName)) {
+          if (mc.isPrimitive() || mc.isArray() || isReachabilityExcluded(mc.getPackageName())
+              || !reachability.isReachablePackage(mc.getPackageName())) continue;
+        }
 
         final URL resource = classLoader.getResource(fullyQualifiedName.replaceAll("\\.", "/") + ".java");
 

@@ -35,7 +35,8 @@ import java.util.Set;
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
  * client {@link org.jboss.errai.bus.client.framework.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
-public class ErraiBus implements EntryPoint {
+public class
+    ErraiBus implements EntryPoint {
   private static MessageBus bus;
 
   static {

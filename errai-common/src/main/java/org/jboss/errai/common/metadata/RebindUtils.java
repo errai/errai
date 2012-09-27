@@ -7,19 +7,32 @@ import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.javac.StandardGeneratorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -319,15 +332,125 @@ public class RebindUtils {
     }
   }
 
-
-  public static String getModuleName(final GeneratorContext context) {
+  private static ModuleDef getModuleDef(final GeneratorContext context) {
     try {
       final StandardGeneratorContext standardGeneratorContext =
           (StandardGeneratorContext) context;
       final Field field = StandardGeneratorContext.class.getDeclaredField("module");
       field.setAccessible(true);
-      final ModuleDef moduleDef = (ModuleDef) field.get(standardGeneratorContext);
-      return moduleDef.getCanonicalName();
+      return (ModuleDef) field.get(standardGeneratorContext);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException("could not get module definition (you may be using an incompatible GWT version)", t);
+    }
+  }
+
+  public static Set<File> getAllModuleXMLs(final GeneratorContext context) {
+    final ModuleDef moduleDef = getModuleDef(context);
+
+    try {
+      final Field field = ModuleDef.class.getDeclaredField("gwtXmlFiles");
+      field.setAccessible(true);
+      return (Set<File>) field.get(moduleDef);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition (you may be using an " +
+          "incompatible GWT version)");
+    }
+  }
+
+  public static Set<String> getOuterTranslatablePackages(final GeneratorContext context) {
+
+    final Set<File> xmlRoots = getAllModuleXMLs(context);
+    final Set<String> pathRoots = new HashSet<String>();
+    final List<String> classPathRoots = new ArrayList<String>();
+    try {
+      final Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("");
+
+      while (resources.hasMoreElements()) {
+        classPathRoots.add(resources.nextElement().getFile());
+      }
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    for (final File xmlFile : xmlRoots) {
+      if (xmlFile.exists()) {
+
+        InputStream inputStream = null;
+        try {
+
+          inputStream = new BufferedInputStream(new FileInputStream(xmlFile));
+          final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+          final Document document = builder.parse(inputStream);
+
+          final XPath xPath = XPathFactory.newInstance().newXPath();
+
+          final NodeList moduleNodes
+              = (NodeList) xPath.evaluate("//module/*", document, XPathConstants.NODESET);
+
+          if (moduleNodes.getLength() > 0) {
+            for (int i = 0; i < moduleNodes.getLength(); i++) {
+              final Node item = moduleNodes.item(i);
+              final String nodeName = item.getNodeName();
+              if (nodeName.equals("super-source") || nodeName.equals("source")) {
+                final String path = item.getAttributes().getNamedItem("path").getNodeValue();
+                final String filePath = new File(xmlFile.getParentFile(), path).getAbsolutePath();
+
+                for (String cpRoot : classPathRoots) {
+                  if (filePath.startsWith(cpRoot)) {
+                    pathRoots.add(filePath.substring(cpRoot.length()).replaceAll("/", "\\.").replaceAll("\\\\", "."));
+                  }
+                }
+              }
+            }
+          }
+
+          final File clientPath = new File(xmlFile.getParentFile().getAbsoluteFile(), "client").getAbsoluteFile();
+          if (clientPath.exists()) {
+            String filePath = clientPath.getAbsolutePath();
+            for (String cpRoot : classPathRoots) {
+              if (filePath.startsWith(cpRoot)) {
+                pathRoots.add(filePath.substring(cpRoot.length()).replaceAll("/", "\\.").replaceAll("\\\\", "."));
+              }
+            }
+          }
+        }
+        catch (ParserConfigurationException e) {
+          e.printStackTrace();
+        }
+        catch (XPathExpressionException e) {
+          e.printStackTrace();
+        }
+        catch (SAXException e) {
+          e.printStackTrace();
+        }
+        catch (IOException e) {
+          logger.error("error accessing module XML file", e);
+        }
+        finally {
+          if (inputStream != null) {
+            try {
+              inputStream.close();
+            }
+            catch (IOException e) {
+              logger.warn("problem closing stream", e);
+            }
+          }
+        }
+      }
+      else {
+        logger.warn("the GWT module file '" + xmlFile.getAbsolutePath() + "' does not appear to exist.");
+      }
+    }
+
+    return pathRoots;
+  }
+
+  public static String getModuleName(final GeneratorContext context) {
+    try {
+      return getModuleDef(context).getCanonicalName();
     }
     catch (Throwable t) {
       return null;
@@ -336,7 +459,8 @@ public class RebindUtils {
 
 
   /**
-   * Returns the list of translatable packages in the module that caused the generator to run (the module under compilation).
+   * Returns the list of translatable packages in the module that caused the generator to run (the module under
+   * compilation).
    */
   public static Set<String> findTranslatablePackagesInModule(final GeneratorContext context) {
     final Set<String> packages = new HashSet<String>();
@@ -355,7 +479,8 @@ public class RebindUtils {
       // moduleName looks like "com.foo.xyz.MyModule" and we just want the package part
       // for tests .JUnit is appended to the module name by GWT
       final String moduleName = moduleDef.getCanonicalName().replace(".JUnit", "");
-      final String modulePackage = moduleName.substring(0, moduleName.lastIndexOf('.'));
+      final int endIndex = moduleName.lastIndexOf('.');
+      final String modulePackage = endIndex == -1 ? "" : moduleName.substring(0, endIndex);
 
       for (final String packageName : findTranslatablePackages(context)) {
         if (packageName != null && packageName.startsWith(modulePackage)) {
