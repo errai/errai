@@ -22,6 +22,8 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
+import java.lang.reflect.Method;
+
 /**
  * @author Mike Brock
  */
@@ -29,12 +31,12 @@ public class ReadMapping extends SimpleMapping implements MemberMapping {
   private MetaClass toMap;
   private MetaClassMember readingMember;
   private String getterMethod;
-  
-  public ReadMapping(String key, Class<?> type,  String getterMethod) {
+
+  public ReadMapping(String key, Class<?> type, String getterMethod) {
     this(key, JavaReflectionClass.newUncachedInstance(type), getterMethod);
   }
 
-  public ReadMapping( String key, MetaClass type, String getterMethod) {
+  public ReadMapping(String key, MetaClass type, String getterMethod) {
     super(key, type);
     this.getterMethod = getterMethod;
   }
@@ -52,12 +54,16 @@ public class ReadMapping extends SimpleMapping implements MemberMapping {
   @Override
   public MetaClassMember getReadingMember() {
     if (readingMember != null) {
-    return readingMember;
+      return readingMember;
     }
-    
-    MetaMethod meth = toMap.getMethod(getterMethod, new MetaClass[0]);
 
-    meth.asMethod().setAccessible(true);
+    final MetaMethod meth = toMap.getMethod(getterMethod, new MetaClass[0]);
+
+
+    final Method method = meth.asMethod();
+    if (method != null) {
+      method.setAccessible(true);
+    }
 
     readingMember = meth;
 

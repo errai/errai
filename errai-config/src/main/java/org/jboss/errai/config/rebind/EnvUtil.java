@@ -351,17 +351,6 @@ public abstract class EnvUtil {
       add("com.google.gwt");
       add("java");
       add("javax");
-//
-//      add("org.jboss.errai.marshalling.client.marshallers");
-//
-//      add("org.jboss.errai.bus.client.framework");
-//      add("org.jboss.errai.bus.client.api");
-//
-//      add("org.jboss.errai.ioc.client");
-//      add("org.jboss.errai.marshalling.client");
-//      add("org.jboss.errai.common.client");
-//      add("org.jboss.errai.databinding.client");
-//      add("org.jboss.errai.enterprise.client");
     }
   };
 

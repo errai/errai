@@ -15,10 +15,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -44,19 +40,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RebindUtils {
-
   static Logger logger = LoggerFactory.getLogger(RebindUtils.class);
   private static String hashSeed = "errai21CR2";
-  private final static Pattern erraiCommonJarFinder = Pattern.compile(".*/errai\\-common.*\\.jar!/META-INF/MANIFEST.MF");
 
   private static volatile String _tempDirectory;
 
@@ -68,6 +59,7 @@ public class RebindUtils {
     final File file = new File(System.getProperty("java.io.tmpdir") + "/errai/" + getClasspathHash() + "/");
 
     if (!file.exists()) {
+      //noinspection ResultOfMethodCallIgnored
       file.mkdirs();
     }
 
@@ -368,8 +360,8 @@ public class RebindUtils {
       gwtXmlFilesField.setAccessible(true);
     }
     catch (Throwable t) {
-      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition (you may be using an " +
-          "incompatible GWT version)");
+      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition " +
+          "(you may be using an incompatible GWT version)");
     }
   }
 
@@ -380,8 +372,8 @@ public class RebindUtils {
       return (Set<File>) gwtXmlFilesField.get(moduleDef);
     }
     catch (Throwable t) {
-      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition (you may be using an " +
-          "incompatible GWT version)");
+      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition " +
+          "(you may be using an incompatible GWT version)");
     }
   }
 
@@ -426,7 +418,8 @@ public class RebindUtils {
 
                     for (final String cpRoot : classPathRoots) {
                       if (filePath.startsWith(cpRoot)) {
-                        pathRoots.add(filePath.substring(cpRoot.length()).replaceAll("/", "\\.").replaceAll("\\\\", "."));
+                        pathRoots.add(filePath.substring(cpRoot.length())
+                            .replaceAll("/", "\\.").replaceAll("\\\\", "."));
                       }
                     }
                   }
@@ -462,7 +455,6 @@ public class RebindUtils {
                 }
               }
             }
-
           }
         });
       }

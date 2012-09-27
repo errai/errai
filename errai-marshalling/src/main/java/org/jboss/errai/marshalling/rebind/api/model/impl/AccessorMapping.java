@@ -22,13 +22,15 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
+import java.lang.reflect.Method;
+
 /**
  * @author Mike Brock
  */
 public class AccessorMapping extends SimpleMapping implements MemberMapping {
   private MetaClassMember bindingMember;
   private MetaClassMember readingMember;
-  
+
   private String setterMethod;
   private String getterMethod;
 
@@ -52,7 +54,11 @@ public class AccessorMapping extends SimpleMapping implements MemberMapping {
 
     MetaMethod meth = toMap.getMethod(setterMethod, targetType);
 
-    meth.asMethod().setAccessible(true);
+    final Method method = meth.asMethod();
+
+    if (method != null) {
+      method.setAccessible(true);
+    }
 
     bindingMember = meth;
 
@@ -71,14 +77,18 @@ public class AccessorMapping extends SimpleMapping implements MemberMapping {
 
     MetaMethod meth = toMap.getMethod(getterMethod, new MetaClass[0]);
 
-    meth.asMethod().setAccessible(true);
-    
+    final Method method = meth.asMethod();
+
+    if (method != null) {
+      method.setAccessible(true);
+    }
+
     readingMember = meth;
-    
+
     if (readingMember == null) {
       throw new RuntimeException("no such getter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
-    } 
-    
+    }
+
     return readingMember;
   }
 

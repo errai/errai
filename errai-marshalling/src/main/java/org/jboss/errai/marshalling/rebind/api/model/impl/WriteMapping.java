@@ -22,6 +22,8 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
+import java.lang.reflect.Method;
+
 /**
  * @author Mike Brock
  */
@@ -52,7 +54,11 @@ public class WriteMapping extends SimpleMapping implements MemberMapping {
 
     MetaMethod meth = toMap.getMethod(getterMethod, targetType);
 
-    meth.asMethod().setAccessible(true);
+    final Method method = meth.asMethod();
+
+    if (method != null) {
+      method.setAccessible(true);
+    }
 
     writingMember = meth;
 
