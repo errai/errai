@@ -18,4 +18,6 @@ iframe {
 	margin-left: auto;
 	margin-right: auto;
 	border-radius: 6px;
+	width: 800px;
+	height: 260px;
 }
