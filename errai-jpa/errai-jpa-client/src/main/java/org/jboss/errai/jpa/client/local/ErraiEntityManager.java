@@ -28,10 +28,13 @@ import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 /**
- * The Errai specialization of the JPA 2.0 EntityManager interface. An
- * implementation of this interface, based on all JPA entities visible to the
- * GWT compiler, is generated when the end-user project is compiled.
- *
+ * The Errai specialization of the JPA 2.0 EntityManager interface, together
+ * with an implementation of much of the logic. When the end-user project is
+ * compiled, a concrete subclass of this class is generated. The subclass
+ * populates the metamodel with the type and attribute information required for
+ * enumerating and creating entity instances, and enumerating, reading, and
+ * writing their fields.
+ * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public abstract class ErraiEntityManager implements EntityManager {
