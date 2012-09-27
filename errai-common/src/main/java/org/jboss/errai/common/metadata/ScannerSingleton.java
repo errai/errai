@@ -31,7 +31,7 @@ public class ScannerSingleton {
       new Callable<MetaDataScanner>() {
         @Override
         public MetaDataScanner call() throws Exception {
-          if (RebindUtils.cacheFileExists(RebindUtils.getClasspathHash() + ".cache.xml")) {
+          if (Boolean.getBoolean("errai.reflections.cache") && RebindUtils.cacheFileExists(RebindUtils.getClasspathHash() + ".cache.xml")) {
               return MetaDataScanner.createInstanceFromCache();
           }
 
@@ -52,7 +52,7 @@ public class ScannerSingleton {
         try {
           scanner = future.get();
 
-          if (scanner != null) {
+          if (scanner != null && Boolean.getBoolean("errai.reflections.cache") ) {
             scanner.save(RebindUtils.getCacheFile(RebindUtils.getClasspathHash() + ".cache.xml").getAbsolutePath());
           }
         }

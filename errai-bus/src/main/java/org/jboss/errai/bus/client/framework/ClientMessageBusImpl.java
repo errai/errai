@@ -603,7 +603,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       try {
-        sendBuilder.sendRequest(message, new RequestCallback() {
+        getSendBuilder().sendRequest(message, new RequestCallback() {
           int statusCode = 0;
 
           @Override
@@ -1005,10 +1005,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             stop(false);
 
-            setReinit(true);
+         //   setReinit(true);
 
             init();
-            setReinit(false);
+        //    setReinit(false);
             break;
 
           case WebsocketChannelVerify:

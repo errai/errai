@@ -86,6 +86,8 @@ public class RebindUtils {
       final MessageDigest md = MessageDigest.getInstance("SHA-1");
       final String classPath = System.getProperty("java.class.path");
 
+      final Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("");
+
       md.update(hashSeed.getBytes());
 
       for (final String p : classPath.split(System.getProperty("path.separator"))) {

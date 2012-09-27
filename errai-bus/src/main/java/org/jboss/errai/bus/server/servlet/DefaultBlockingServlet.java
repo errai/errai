@@ -94,7 +94,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
           throws ServletException, IOException {
-    pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(),
+    pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
             httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
             httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
   }
@@ -111,7 +111,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   @Override
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
           throws ServletException, IOException {
-    final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(),
+    final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
             httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     service.store(createCommandMessage(session, httpServletRequest));
