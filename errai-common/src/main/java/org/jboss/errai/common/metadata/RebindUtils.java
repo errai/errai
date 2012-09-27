@@ -328,23 +328,13 @@ public class RebindUtils {
     }
   }
 
-  private final static Field moduleField;
-
-  static {
-    try {
-      moduleField = StandardGeneratorContext.class.getDeclaredField("module");
-      moduleField.setAccessible(true);
-    }
-    catch (Throwable t) {
-      throw new RuntimeException("could not get module definition (you may be using an incompatible GWT version)", t);
-
-    }
-  }
-
   private static ModuleDef getModuleDef(final GeneratorContext context) {
     try {
       final StandardGeneratorContext standardGeneratorContext =
           (StandardGeneratorContext) context;
+
+      Field moduleField = StandardGeneratorContext.class.getDeclaredField("module");
+      moduleField.setAccessible(true);
       return (ModuleDef) moduleField.get(standardGeneratorContext);
     }
     catch (Throwable t) {
@@ -352,23 +342,12 @@ public class RebindUtils {
     }
   }
 
-  private final static Field gwtXmlFilesField;
-
-  static {
-    try {
-      gwtXmlFilesField = ModuleDef.class.getDeclaredField("gwtXmlFiles");
-      gwtXmlFilesField.setAccessible(true);
-    }
-    catch (Throwable t) {
-      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition " +
-          "(you may be using an incompatible GWT version)");
-    }
-  }
-
   public static Set<File> getAllModuleXMLs(final GeneratorContext context) {
     final ModuleDef moduleDef = getModuleDef(context);
 
     try {
+      Field gwtXmlFilesField = ModuleDef.class.getDeclaredField("gwtXmlFiles");
+      gwtXmlFilesField.setAccessible(true);
       return (Set<File>) gwtXmlFilesField.get(moduleDef);
     }
     catch (Throwable t) {
