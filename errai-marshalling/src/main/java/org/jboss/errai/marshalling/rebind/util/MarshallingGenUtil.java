@@ -226,7 +226,7 @@ public class MarshallingGenUtil {
       return "true".equals(frameworkProperties.get(USE_STATIC_MARSHALLERS));
     }
     else {
-      return true;
+      return !EnvUtil.isDevMode();
     }
   }
 

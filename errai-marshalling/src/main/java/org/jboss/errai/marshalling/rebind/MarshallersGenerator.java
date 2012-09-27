@@ -274,18 +274,19 @@ public class MarshallersGenerator extends Generator {
         }
 
         if (junitOrDevMode) {
-          final String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
-          log.info("*** using temporary path: " + tmpLocation + " ***");
+          if (MarshallingGenUtil.isUseStaticMarshallers()) {
+            final String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
+            log.info("*** using temporary path: " + tmpLocation + " ***");
 
-          final String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
+            final String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
 
-          try {
-            ClassChangeUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+            try {
+              ClassChangeUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+            }
+            catch (IOException e) {
+              throw new RuntimeException("failed to load server marshallers", e);
+            }
           }
-          catch (IOException e) {
-            throw new RuntimeException("failed to load server marshallers", e);
-          }
-
         }
         else if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
           generateServerMarshallers(sourceOutputTemp, serverSideClass, SERVER_MARSHALLER_OUTPUT_DIR);

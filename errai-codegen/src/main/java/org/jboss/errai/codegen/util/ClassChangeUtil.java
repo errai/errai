@@ -205,7 +205,6 @@ public class ClassChangeUtil {
         return null;
       }
 
-
       return new File(classOutputDir.getAbsolutePath() + File.separatorChar
           + className + ".class").getAbsolutePath();
     }
