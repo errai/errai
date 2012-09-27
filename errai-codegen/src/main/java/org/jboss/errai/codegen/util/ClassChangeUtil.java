@@ -73,7 +73,9 @@ public class ClassChangeUtil {
                        final String toCompile,
                        final String classpath) {
 
-      return BatchCompiler.compile("-classpath \"" + classpath + "\" -d " + outputPath + " -source 1.6 " + toCompile, new PrintWriter(out), new PrintWriter(errors),
+      // "-classpath \"" + classpath + "\" -d " + outputPath + " -source 1.6 " + toCompile
+      return BatchCompiler.compile(new String[] { "-classpath", classpath, "-d", outputPath, "-source", "1.6", toCompile },
+          new PrintWriter(out), new PrintWriter(errors),
           new CompilationProgress() {
             @Override
             public void begin(final int remainingWork) {
@@ -196,7 +198,7 @@ public class ClassChangeUtil {
           new File(sourcePath + File.separator + className + ".java").getAbsolutePath(), classPath) != 0) {
 
         System.out.println("*** FAILED TO COMPILE CLASS ***");
-        System.out.println("*** Classpath Used: " + sb.toString());
+        System.out.println("*** Classpath Used: " + classPath);
 
         for (final byte b : errorOutputStream.toByteArray()) {
           System.out.print((char) b);
