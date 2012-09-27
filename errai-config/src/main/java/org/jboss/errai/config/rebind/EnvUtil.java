@@ -48,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
-import sun.java2d.loops.GeneralRenderer;
 
 /**
  * @author Mike Brock
@@ -337,7 +336,13 @@ public abstract class EnvUtil {
   private static volatile SoftReference<ReachabilityCache> reachabilityCache = null;
 
   private static final Set<String> reachabilityExclusionNegative = new HashSet<String>();
-  private static final Set<String> reachabilityExclusionList = new HashSet<String>() {
+  private static final Set<String> reachabilityClassExclusionList = new HashSet<String>() {
+    {
+      add("org.jboss.errai.bus.client.framework.ClientMessageBusImpl");
+    }
+  };
+
+  private static final Set<String> reachabilityPackageExclusionList = new HashSet<String>() {
     {
       /**
        * These packages are generally excluded to improve devmode/testing performance. This explicit
@@ -346,9 +351,12 @@ public abstract class EnvUtil {
       add("com.google.gwt");
       add("java");
       add("javax");
-
+//
       add("org.jboss.errai.marshalling.client.marshallers");
-      add("org.jboss.errai.bus.client");
+
+      add("org.jboss.errai.bus.client.framework");
+      add("org.jboss.errai.bus.client.api");
+
       add("org.jboss.errai.ioc.client");
       add("org.jboss.errai.marshalling.client");
       add("org.jboss.errai.common.client");
@@ -363,19 +371,19 @@ public abstract class EnvUtil {
     if (reachabilityExclusionNegative.contains(packageName)) {
       return false;
     }
-    else if (reachabilityExclusionList.contains(packageName)) {
+    else if (reachabilityPackageExclusionList.contains(packageName)) {
       return true;
     }
 
     boolean found = false;
-    for (final String pkg : reachabilityExclusionList) {
+    for (final String pkg : reachabilityPackageExclusionList) {
       if (packageName.startsWith(pkg)) {
         found = true;
       }
     }
 
     if (found) {
-      reachabilityExclusionList.add(packageName);
+      reachabilityPackageExclusionList.add(packageName);
       return true;
     }
     else {
@@ -412,9 +420,9 @@ public abstract class EnvUtil {
     if (isJUnitTest()) {
       packages.addAll(RebindUtils.findTranslatablePackagesInModule(context));
     }
-    //   else {
-    packages.addAll(RebindUtils.getOuterTranslatablePackages(context));
-    //   }
+    else {
+      packages.addAll(RebindUtils.getOuterTranslatablePackages(context));
+    }
 
     class Reachability {
       private Set<String> packages;
