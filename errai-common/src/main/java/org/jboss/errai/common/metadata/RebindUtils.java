@@ -40,6 +40,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -75,7 +79,7 @@ public class RebindUtils {
   private static final String[] hashableExtensions = {".java", ".class", ".properties", ".xml"};
 
   private static boolean isValidFileType(final String fileName) {
-    for (String extension : hashableExtensions) {
+    for (final String extension : hashableExtensions) {
       if (fileName.endsWith(extension)) return true;
     }
     return false;
@@ -332,16 +336,40 @@ public class RebindUtils {
     }
   }
 
+  private final static Field moduleField;
+
+  static {
+    try {
+      moduleField = StandardGeneratorContext.class.getDeclaredField("module");
+      moduleField.setAccessible(true);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException("could not get module definition (you may be using an incompatible GWT version)", t);
+
+    }
+  }
+
   private static ModuleDef getModuleDef(final GeneratorContext context) {
     try {
       final StandardGeneratorContext standardGeneratorContext =
           (StandardGeneratorContext) context;
-      final Field field = StandardGeneratorContext.class.getDeclaredField("module");
-      field.setAccessible(true);
-      return (ModuleDef) field.get(standardGeneratorContext);
+      return (ModuleDef) moduleField.get(standardGeneratorContext);
     }
     catch (Throwable t) {
       throw new RuntimeException("could not get module definition (you may be using an incompatible GWT version)", t);
+    }
+  }
+
+  private final static Field gwtXmlFilesField;
+
+  static {
+    try {
+      gwtXmlFilesField = ModuleDef.class.getDeclaredField("gwtXmlFiles");
+      gwtXmlFilesField.setAccessible(true);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition (you may be using an " +
+          "incompatible GWT version)");
     }
   }
 
@@ -349,9 +377,7 @@ public class RebindUtils {
     final ModuleDef moduleDef = getModuleDef(context);
 
     try {
-      final Field field = ModuleDef.class.getDeclaredField("gwtXmlFiles");
-      field.setAccessible(true);
-      return (Set<File>) field.get(moduleDef);
+      return (Set<File>) gwtXmlFilesField.get(moduleDef);
     }
     catch (Throwable t) {
       throw new RuntimeException("could not access 'gwtXmlFiles' filed from the module definition (you may be using an " +
@@ -360,9 +386,8 @@ public class RebindUtils {
   }
 
   public static Set<String> getOuterTranslatablePackages(final GeneratorContext context) {
-
     final Set<File> xmlRoots = getAllModuleXMLs(context);
-    final Set<String> pathRoots = new HashSet<String>();
+    final Set<String> pathRoots = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     final List<String> classPathRoots = new ArrayList<String>();
     try {
       final Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("");
@@ -375,74 +400,83 @@ public class RebindUtils {
       e.printStackTrace();
     }
 
+    final ExecutorService executorService
+        = Executors.newCachedThreadPool();
+
     for (final File xmlFile : xmlRoots) {
       if (xmlFile.exists()) {
+        executorService.execute(new Runnable() {
+          @Override
+          public void run() {
+            InputStream inputStream = null;
+            try {
 
-        InputStream inputStream = null;
-        try {
+              inputStream = new BufferedInputStream(new FileInputStream(xmlFile));
+              final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+              final Document document = builder.parse(inputStream);
+              final NodeList moduleNodes = document.getElementsByTagName("module");
 
-          inputStream = new BufferedInputStream(new FileInputStream(xmlFile));
-          final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-          final Document document = builder.parse(inputStream);
+              if (moduleNodes.getLength() > 0) {
+                for (int i = 0; i < moduleNodes.getLength(); i++) {
+                  final Node item = moduleNodes.item(i);
+                  final String nodeName = item.getNodeName();
+                  if (nodeName.equals("super-source") || nodeName.equals("source")) {
+                    final String path = item.getAttributes().getNamedItem("path").getNodeValue();
+                    final String filePath = new File(xmlFile.getParentFile(), path).getAbsolutePath();
 
-          final XPath xPath = XPathFactory.newInstance().newXPath();
+                    for (final String cpRoot : classPathRoots) {
+                      if (filePath.startsWith(cpRoot)) {
+                        pathRoots.add(filePath.substring(cpRoot.length()).replaceAll("/", "\\.").replaceAll("\\\\", "."));
+                      }
+                    }
+                  }
+                }
+              }
 
-          final NodeList moduleNodes
-              = (NodeList) xPath.evaluate("//module/*", document, XPathConstants.NODESET);
-
-          if (moduleNodes.getLength() > 0) {
-            for (int i = 0; i < moduleNodes.getLength(); i++) {
-              final Node item = moduleNodes.item(i);
-              final String nodeName = item.getNodeName();
-              if (nodeName.equals("super-source") || nodeName.equals("source")) {
-                final String path = item.getAttributes().getNamedItem("path").getNodeValue();
-                final String filePath = new File(xmlFile.getParentFile(), path).getAbsolutePath();
-
-                for (String cpRoot : classPathRoots) {
+              final File clientPath = new File(xmlFile.getParentFile().getAbsoluteFile(), "client").getAbsoluteFile();
+              if (clientPath.exists()) {
+                final String filePath = clientPath.getAbsolutePath();
+                for (final String cpRoot : classPathRoots) {
                   if (filePath.startsWith(cpRoot)) {
                     pathRoots.add(filePath.substring(cpRoot.length()).replaceAll("/", "\\.").replaceAll("\\\\", "."));
                   }
                 }
               }
             }
-          }
-
-          final File clientPath = new File(xmlFile.getParentFile().getAbsoluteFile(), "client").getAbsoluteFile();
-          if (clientPath.exists()) {
-            String filePath = clientPath.getAbsolutePath();
-            for (String cpRoot : classPathRoots) {
-              if (filePath.startsWith(cpRoot)) {
-                pathRoots.add(filePath.substring(cpRoot.length()).replaceAll("/", "\\.").replaceAll("\\\\", "."));
-              }
+            catch (ParserConfigurationException e) {
+              e.printStackTrace();
             }
-          }
-        }
-        catch (ParserConfigurationException e) {
-          e.printStackTrace();
-        }
-        catch (XPathExpressionException e) {
-          e.printStackTrace();
-        }
-        catch (SAXException e) {
-          e.printStackTrace();
-        }
-        catch (IOException e) {
-          logger.error("error accessing module XML file", e);
-        }
-        finally {
-          if (inputStream != null) {
-            try {
-              inputStream.close();
+            catch (SAXException e) {
+              e.printStackTrace();
             }
             catch (IOException e) {
-              logger.warn("problem closing stream", e);
+              logger.error("error accessing module XML file", e);
             }
+            finally {
+              if (inputStream != null) {
+                try {
+                  inputStream.close();
+                }
+                catch (IOException e) {
+                  logger.warn("problem closing stream", e);
+                }
+              }
+            }
+
           }
-        }
+        });
       }
       else {
         logger.warn("the GWT module file '" + xmlFile.getAbsolutePath() + "' does not appear to exist.");
       }
+    }
+
+    try {
+      executorService.shutdown();
+      executorService.awaitTermination(60, TimeUnit.MINUTES);
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
     }
 
     return pathRoots;

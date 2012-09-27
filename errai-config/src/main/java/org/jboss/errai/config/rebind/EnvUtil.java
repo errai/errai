@@ -339,10 +339,21 @@ public abstract class EnvUtil {
   private static final Set<String> reachabilityExclusionNegative = new HashSet<String>();
   private static final Set<String> reachabilityExclusionList = new HashSet<String>() {
     {
+      /**
+       * These packages are generally excluded to improve devmode/testing performance. This explicit
+       * exclusion doesn't really have an effect during production compiles.
+       */
       add("com.google.gwt");
       add("java");
+      add("javax");
+
       add("org.jboss.errai.marshalling.client.marshallers");
-      add("org.jboss.errai.bus.client.framework");
+      add("org.jboss.errai.bus.client");
+      add("org.jboss.errai.ioc.client");
+      add("org.jboss.errai.marshalling.client");
+      add("org.jboss.errai.common.client");
+      add("org.jboss.errai.databinding.client");
+      add("org.jboss.errai.enterprise.client");
     }
   };
 
@@ -396,11 +407,14 @@ public abstract class EnvUtil {
 
     long time = System.currentTimeMillis();
 
-    final Set<String> packages = RebindUtils.getOuterTranslatablePackages(context);
+    final Set<String> packages = new HashSet<String>();
 
     if (isJUnitTest()) {
       packages.addAll(RebindUtils.findTranslatablePackagesInModule(context));
     }
+    //   else {
+    packages.addAll(RebindUtils.getOuterTranslatablePackages(context));
+    //   }
 
     class Reachability {
       private Set<String> packages;
@@ -445,9 +459,15 @@ public abstract class EnvUtil {
           fullyQualifiedName = fullyQualifiedName.substring(0, splitPoint);
         }
 
-        if (!config.getExplicitTypes().contains(fullyQualifiedName)) {
-          if (mc.isPrimitive() || mc.isArray() || isReachabilityExcluded(mc.getPackageName())
-              || !reachability.isReachablePackage(mc.getPackageName())) continue;
+        if (mc.isPrimitive() || mc.isArray()) {
+          continue;
+        }
+        else if (isReachabilityExcluded(mc.getPackageName())) {
+          continue;
+        }
+        else if (!config.getExplicitTypes().contains(fullyQualifiedName)
+            && !reachability.isReachablePackage(mc.getPackageName())) {
+          continue;
         }
 
         final URL resource = classLoader.getResource(fullyQualifiedName.replaceAll("\\.", "/") + ".java");

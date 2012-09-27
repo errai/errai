@@ -73,7 +73,6 @@ public class ClassChangeUtil {
                        final String toCompile,
                        final String classpath) {
 
-      // "-classpath \"" + classpath + "\" -d " + outputPath + " -source 1.6 " + toCompile
       return BatchCompiler.compile(new String[] { "-classpath", classpath, "-d", outputPath, "-source", "1.6", toCompile },
           new PrintWriter(out), new PrintWriter(errors),
           new CompilationProgress() {
