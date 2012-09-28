@@ -581,8 +581,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final List<Message> txMessages) {
     if (message == null) return;
 
-    System.out.println("TX:" + message);
-
     try {
       txActive = true;
 
