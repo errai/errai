@@ -1641,7 +1641,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     Panel contentPanel = new AbsolutePanel();
 
     public BusErrorDialog() {
-      setModal(true);
+      setModal(false);
 
       final VerticalPanel panel = new VerticalPanel();
 
