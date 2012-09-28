@@ -39,7 +39,6 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.slf4j.Logger;
-import sun.rmi.transport.ObjectTable;
 
 /**
  * @author Mike Brock
