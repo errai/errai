@@ -39,6 +39,7 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.slf4j.Logger;
+import sun.rmi.transport.ObjectTable;
 
 /**
  * @author Mike Brock
@@ -145,6 +146,30 @@ public class MappingContextSingleton {
     };
   }
 
+
+  private static final Marshaller<Object> NULL_MARSHALLER = new Marshaller<Object>() {
+    @Override
+    public Class<Object> getTypeHandled() {
+      return Object.class;
+    }
+
+    @Override
+    public Object demarshall(EJValue o, MarshallingSession ctx) {
+      return null;
+    }
+
+    @Override
+    public String marshall(Object o, MarshallingSession ctx) {
+      return "null";
+    }
+
+    @Override
+    public Object[] getEmptyArray() {
+      return null;
+    }
+  };
+
+
   public static ServerMappingContext loadDynamicMarshallers() {
     dynamicMarshallingWarning();
 
@@ -202,6 +227,8 @@ public class MappingContextSingleton {
               addArrayMarshaller(mapping.getType());
             }
           }
+
+          addArrayMarshaller(def.getMappingClass().asArrayOf(1));
         }
 
         for (final MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
@@ -242,6 +269,10 @@ public class MappingContextSingleton {
 
       @Override
       public Marshaller<Object> getMarshaller(final String clazz) {
+        if (clazz == null) {
+          return NULL_MARSHALLER;
+        }
+
         final MappingDefinition def = factory.getDefinition(clazz);
 
         if (def == null) {

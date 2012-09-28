@@ -367,7 +367,16 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   @Override
   public boolean shouldUseObjectMarshaller(final MetaClass type) {
     final boolean hasPortableSubtypes = inheritanceMap.containsKey(type.getFullyQualifiedName());
-    final boolean hasMarshaller = getDefinition(type.asClass()) != null;
+    final MappingDefinition definition = getDefinition(type);
+    final boolean hasMarshaller = definition != null;
+
+    if (hasMarshaller) {
+      if (definition.getClass().isAnnotationPresent(CustomMapping.class)
+          || definition.getClientMarshallerClass() != null) {
+        return false;
+      }
+    }
+
     final boolean isConcrete = !(type.isAbstract() || type.isInterface());
     return (hasPortableSubtypes && !hasMarshaller) || (hasPortableSubtypes && hasMarshaller && isConcrete);
   }
