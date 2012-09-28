@@ -84,18 +84,18 @@ public class Application {
 @EntryPoint
 public class Application {
    private String[] colors = new String[]{"Blue", "Yellow", "Red"};
- 
+
    @Inject
    private Instance&lt;ColorComponent&gt; instance;
  
    @PostConstruct
-   public void init() {
-      for( String color: colors ) {
-         ColorComponent comp = instance.get();
-         comp.setColor(c);
-         RootPanel.get().add();
+   public void init() {
+      for(String color: colors) {
+        ColorComponent comp = instance.get();
+        comp.setColor(c);
+        RootPanel.get().add();
       }
-   }
+   }
 }
 </programlisting>
          </informalexample>
@@ -162,14 +162,14 @@ public class LoginForm extends Composite {
 &lt;form&gt;
   &lt;legend&gt;Log in to your account&lt;/legend&gt;
 
-  &lt;label for="username"&gt;Username&lt;/label&gt;
-  &lt;input id="username" type="text" placeholder="Username"&gt;
+  &lt;label for="username"&gt;Username&lt;/label&gt;
+  &lt;input id="username" type="text" placeholder="Username"&gt;
 
   &lt;label for="password"&gt;Password&lt;/label&gt;
   &lt;input id="password" type="password" placeholder="Password"&gt;
 
   &lt;button&gt;Log in&lt;/button&gt;
-  &lt;button&gt;Cancel&lt;/button&gt;
+  &lt;button&gt;Cancel&lt;/button&gt;
 &lt;/form&gt;
 </programlisting>
       </informalexample>
@@ -202,28 +202,28 @@ public class LoginForm extends Composite {
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
 &lt;head&gt;
-    &lt;title&gt;A full HTML snippit&lt;/title&gt;
+    &lt;title&gt;A full HTML snippit&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-    &lt;div&gt;
-       &lt;form data-field="login-form"&gt;
-          &lt;legend&gt;Log in to your account&lt;/legend&gt;
-                
-          &lt;label for="username"&gt;Username&lt;/label&gt;
-          &lt;input id="username" type="text" placeholder="Username"&gt;
-                
-          &lt;label for="username"&gt;Password&lt;/label&gt;
-          &lt;input id="password" type="password" placeholder="Password"&gt;
-                
-          &lt;button&gt;Log in&lt;/button&gt;
-          &lt;button&gt;Cancel&lt;/button&gt;
-        &lt;/form&gt;
-    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;form data-field="login-form"&gt;
+          &lt;legend&gt;Log in to your account&lt;/legend&gt;
 
-    &lt;hr&gt;
-    &lt;footer data-field="theme-footer"&gt;
-        &lt;p&gt;© Company 2012&lt;/p&gt;
-    &lt;/footer&gt;
+          &lt;label for="username"&gt;Username&lt;/label&gt;
+          &lt;input id="username" type="text" placeholder="Username"&gt;
+      
+          &lt;label for="username"&gt;Password&lt;/label&gt;
+          &lt;input id="password" type="password" placeholder="Password"&gt;
+                
+          &lt;button&gt;Log in&lt;/button&gt;
+          &lt;button&gt;Cancel&lt;/button&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+
+    &lt;hr&gt;
+    &lt;footer data-field="theme-footer"&gt;
+        &lt;p&gt;© Company 2012&lt;/p&gt;
+    &lt;/footer&gt;
 &lt;/body&gt;
 &lt;/html&gt;
 </programlisting>
@@ -254,21 +254,21 @@ public class Footer extends Composite {
 @Templated
 public class LoginForm extends Composite {
    // This element must be initialized manually because Element is not @Inject-able*/
-   @DataField  
+   @DataField
    private Element form = DOM.createForm();
 
    // If not otherwise specified, the data-field name defaults to the name of the field; in this case, the data-field name would be "username"
-   @Inject  
-   @DataField   
+   @Inject
+   @DataField
    private TextBox username;
- 
+
    // The data-field name may also be specified manually
-   @Inject   
+   @Inject
    @DataField("pass")
    private PasswordTextBox password;
-  
+
    // We can also choose to instantiate our own Widgets. Injection is not required.
-   @DataField    
+   @DataField
    private Button submit = new Button();
 }
 </programlisting>
@@ -288,14 +288,14 @@ public class LoginForm extends Composite {
 &lt;form data-field="form"&gt;
   &lt;legend&gt;Log in to your account&lt;/legend&gt;
 
-  &lt;label for="username"&gt;Username&lt;/label&gt;
-  &lt;input data-field="username" id="username" type="text" placeholder="Username"&gt;
+  &lt;label for="username"&gt;Username&lt;/label&gt;
+  &lt;input data-field="username" id="username" type="text" placeholder="Username"&gt;
 
   &lt;label for="password"&gt;Password&lt;/label&gt;
   &lt;input data-field="pass" id="password" type="password" placeholder="Password"&gt;
 
   &lt;button data-field="submit"&gt;Log in&lt;/button&gt;
-  &lt;button&gt;Cancel&lt;/button&gt;
+  &lt;button&gt;Cancel&lt;/button&gt;
 &lt;/form&gt;
 </programlisting>
          </informalexample>
@@ -334,10 +334,10 @@ public class LoginForm extends Composite {
 public class StyledComponent extends Composite {
    @Inject
    @DataField("field-1")
-   private Label div = new Label();
+   private Label div = new Label();
 
-   public StyledComponent() {
-      div.getElement().setAttribute("style", "position: fixed; top: 0; left: 0;");
+   public StyledComponent() {
+      div.getElement().setAttribute("style", "position: fixed; top: 0; left: 0;");
       this.getElement().setId("outer-id");
    }
 }
@@ -454,16 +454,15 @@ This text will be ignored.
          <informalexample>
             <programlisting language="java">
 @Templated
-public class WidgetHandlerComponent extends Composite { 
+public class WidgetHandlerComponent extends Composite {
 
    @Inject
-   @DataField("b1") 
-   private Button button; 
+   @DataField("b1")
+   private Button button;
 
-   @EventHandler("b1") 
-   public void doSomethingC1(ClickEvent e)
-   {
-      // do something 
+   @EventHandler("b1")
+   public void doSomethingC1(ClickEvent e) {
+     // do something
    }
 }
 </programlisting>
@@ -483,15 +482,14 @@ public class WidgetHandlerComponent extends Composite { 
          <informalexample>
             <programlisting language="java">
 @Templated
-public class ElementHandlerComponent extends Composite { 
+public class ElementHandlerComponent extends Composite {
 
-   @DataField("div-1") 
-   private DivElement button = DOM.createDiv(); 
+   @DataField("div-1")
+   private DivElement button = DOM.createDiv();
 
-   @EventHandler("div-1") 
-   public void doSomethingC1(ClickEvent e)
-   {
-      // do something 
+   @EventHandler("div-1")
+   public void doSomethingC1(ClickEvent e) {
+     // do something 
    }
 }
 </programlisting>
@@ -533,21 +531,21 @@ public class ElementHandlerComponent extends Composite { 
             <programlisting language="java">
 @Templated
 public class QuickHandlerComponent extends Composite {
- 
-  @DataField
-  private AnchorElement link = DOM.createAnchor().cast();
 
-  @EventHandler("link")
-  @SinkNative(Event.ONCLICK | Event.ONMOUSEOVER)
-  public void doSomething(Event e) {
-    // do something
-  }
+  @DataField
+  private AnchorElement link = DOM.createAnchor().cast();
 
-  @EventHandler("div")
-  @SinkNative(Event.ONMOUSEOVER)
-  public void doSomethingElse(Event e) {
-    // do something else
-  }
+  @EventHandler("link")
+  @SinkNative(Event.ONCLICK | Event.ONMOUSEOVER)
+  public void doSomething(Event e) {
+    // do something
+  }
+
+  @EventHandler("div")
+  @SinkNative(Event.ONMOUSEOVER)
+  public void doSomethingElse(Event e) {
+    // do something else
+  }
 }
 </programlisting>
          </informalexample>
@@ -580,15 +578,15 @@ public class LoginForm extends Composite {
 
    @Inject
    @Bound
-   @DataField   
+   @DataField
    private TextBox username;
- 
-   @Inject   
+
+   @Inject
    @Bound
    @DataField
    private PasswordTextBox password;
-  
-   @DataField    
+
+   @DataField
    private Button submit = new Button();
 
    private User user;
@@ -620,7 +618,7 @@ public class LoginForm extends Composite {
       </para>
       <informalexample>
          <programlisting language="java">
-@Inject   
+@Inject
 @Bound(property="pass")
 @DataField
 private PasswordTextBox password;
@@ -635,12 +633,21 @@ private PasswordTextBox password;
       </para>
       <informalexample>
          <programlisting language="java">
-@Inject   
+@Inject
 @Bound(converter=MyDateConverter.class)
 @DataField
 private TextBox date;
 </programlisting>
       </informalexample>
+      <para>
+        Errai's
+        <code>DataBinder</code>
+        also allows to register
+        <code>PropertyChangeHandlers</code>
+        for the cases where keeping the model and UI in sync is not enough and additional logic needs to be executed (see
+        <link linkend="sid-51282340_DataBinding-PropertyChangeHandlers">Property Change Handlers</link>
+        for details).
+      </para>
    </section>
    <section id="sid-51806600_ErraiUI-NestCompositecomponents">
       <title>Nest Composite components</title>
@@ -652,11 +659,11 @@ private TextBox date;
       <informalexample>
          <programlisting language="java">
 @Templated
-public class ComponentOne extends Composite { 
+public class ComponentOne extends Composite {
 
    @Inject
-   @DataField("other-comp") 
-   private ComponentTwo two; 
+   @DataField("other-comp")
+   private ComponentTwo two;
 }
 </programlisting>
       </informalexample>
@@ -690,7 +697,7 @@ public class ComponentOne extends Composite { 
          <informalexample>
             <programlisting language="java">
 @Templated
-public class PageLayout extends Composite { 
+public class PageLayout extends Composite {
 
    @Inject
    @DataField
@@ -718,7 +725,7 @@ public class PageLayout extends Composite { 
          <informalexample>
             <programlisting language="java">
 @Templated("PageLayout.html")
-public class LoginLayout extends PageLayout { 
+public class LoginLayout extends PageLayout {
 
    @Inject
    @DataField
@@ -739,7 +746,7 @@ public class LoginLayout extends PageLayout { 
          <informalexample>
             <programlisting language="java">
 @Templated("PageLayout.html")
-public class LoginLayout extends PageLayout { 
+public class LoginLayout extends PageLayout {
 
    @Inject
    @DataField
