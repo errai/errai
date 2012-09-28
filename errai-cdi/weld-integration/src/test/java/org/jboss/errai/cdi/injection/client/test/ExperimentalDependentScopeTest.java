@@ -3,6 +3,7 @@ package org.jboss.errai.cdi.injection.client.test;
 import org.jboss.errai.cdi.injection.client.ReachabiltyInferredDependentBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.junit.Ignore;
 
 /**
  * This tests an experimental feature of Errai -- relying on reachability analysis to determine whether or not
@@ -14,6 +15,7 @@ import org.jboss.errai.ioc.client.container.IOC;
  *
  * @author Mike Brock
  */
+@Ignore
 public class ExperimentalDependentScopeTest extends AbstractErraiCDITest {
   {
     disableBus = true;

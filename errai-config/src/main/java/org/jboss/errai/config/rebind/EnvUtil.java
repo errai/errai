@@ -383,8 +383,8 @@ public abstract class EnvUtil {
   }
 
   public static ReachableTypes getAllReachableClasses(final GeneratorContext context) {
-    if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) != null
-        && !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
+    if (System.getProperty(SYSPROP_USE_REACHABILITY_ANALYSIS) == null
+        || !Boolean.getBoolean(SYSPROP_USE_REACHABILITY_ANALYSIS)) {
 
       log.warn("reachability analysis disabled. errai may generate unnecessary code.");
       log.warn("enable reachability analysis with -D" + SYSPROP_USE_REACHABILITY_ANALYSIS + "=true");
