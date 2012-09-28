@@ -5,7 +5,9 @@
    <para>
       The data binding module is directly integrated with
       <xref linkend="sid-51806600"/>
-      and Errai JPA but can also be used as a standalone project in any GWT client application by simply inheriting the Data Binding GWT module:
+      and
+      <xref linkend="sid-54493688"/>
+      but can also be used as a standalone project in any GWT client application by simply inheriting the Data Binding GWT module:
     </para>
    <example>
       <title>App.gwt.xml</title>
@@ -195,5 +197,37 @@ dataBinder.bind(textBox, "name", customConverter);
          </informalexample>
          <para>Converters specified on the binding level take precedence over global default converters with matching types.</para>
       </section>
+   </section>
+   <section id="sid-51282340_DataBinding-PropertyChangeHandlers">
+      <title>Property Change Handlers</title>
+      <para>
+        In some cases keeping the model and the UI in sync is not enough. Errai's
+        <code>DataBinder</code>
+        allows for the registration of
+        <code>PropertyChangeHandlers</code>
+        for both specific properties or all properties of a bound model. This provides a uniform notification mechanism for model and UI value changes.
+        <code>PropertyChangeHandlers</code>
+        can be used to carry out any additional logic that might be necessary after a model or UI value has changed.
+      </para>
+      <informalexample>
+         <programlisting language="java">
+dataBinder.addPropertyChangeHandler(new PropertyChangeHandler() {
+  @Override
+  public void onPropertyChange(PropertyChangeEvent event) {
+    Window.alert(event.getPropertyName() + " changed to:" + event.getNewValue());
+  }
+});
+</programlisting>
+      </informalexample>
+      <informalexample>
+         <programlisting language="java">
+dataBinder.addPropertyChangeHandler("name", new PropertyChangeHandler() {
+  @Override
+  public void onPropertyChange(PropertyChangeEvent event) {
+    Window.alert("name changed to:" + event.getNewValue());
+  }
+});
+</programlisting>
+      </informalexample>
    </section>
 </chapter>
