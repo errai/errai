@@ -41,6 +41,7 @@ import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,9 +52,16 @@ import org.junit.Test;
  */
 public class MarshallingAPITest {
 
+
   @Before
   public void ensureMarshallingSystemInitialized() {
+    System.setProperty("errai.dev.force_reflections", "true");
     MappingContextSingleton.get();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    System.setProperty("errai.dev.force_reflections", "false");
   }
 
   private void testEncodeDecode(Object value) {
@@ -133,43 +141,43 @@ public class MarshallingAPITest {
     ItemWithEnum itemWithEnum = new ItemWithEnum();
     testEncodeDecode(itemWithEnum);
   }
-  
+
 
   @Test
   public void testEntityWithInterface() {
     EntityWithInterface ewi = new EntityWithInterface();
     ewi.setA(new AImpl1(4711));
     testEncodeDecode(ewi);
-   
+
     ewi = new EntityWithInterface();
     ewi.setA(new AImpl2("admin"));
     testEncodeDecode(ewi);
   }
-  
+
   @Test
   public void testEntityWithInterfaceArray() {
     EntityWithInterfaceArray ewia = new EntityWithInterfaceArray();
-    
+
     InterfaceA[] a = new InterfaceA[4];
     a[0] = new AImpl1(4711);
     a[1] = null;
     a[2] = new AImpl2("admin");
     a[3] = new ASubImpl1(11f);
     ewia.setA(a);
-    
+
     testEncodeDecode(ewia);
   }
 
   @Test
   public void testEntityWithPortableSubtypesInArray() {
     EntityWithPortableSubtypesInArray ewpsia = new EntityWithPortableSubtypesInArray();
-    
+
     AImpl1[] a = new AImpl1[3];
     a[0] = new AImpl1(4711);
     a[1] = null;
     a[2] = new ASubImpl1(11f);
     ewpsia.setA(a);
-    
+
     testEncodeDecode(ewpsia);
   }
 
@@ -178,50 +186,50 @@ public class MarshallingAPITest {
     EntityWithAbstractFieldType ewaft = new EntityWithAbstractFieldType();
     ewaft.setB(new BImpl1(4711));
     testEncodeDecode(ewaft);
-   
+
     ewaft = new EntityWithAbstractFieldType();
     ewaft.setB(new BImpl2("admin"));
     testEncodeDecode(ewaft);
   }
-  
+
   @Test
   public void testEntityWithPublicFields() {
     EntityWithPublicFields ewpf = new EntityWithPublicFields();
-    
+
     ArrayList<String> values = new ArrayList<String>();
     values.add("1");
     values.add("2");
     values.add("3");
-    
+
     ewpf.value = 17;
     ewpf.values = values;
-    
+
     testEncodeDecode(ewpf);
   }
-  
+
   @Test
   public void testEntityWithInheritedPublicFields() {
     EntityWithInheritedPublicFields ewipf = new EntityWithInheritedPublicFields();
-    
+
     ArrayList<String> values = new ArrayList<String>();
     values.add("1");
     values.add("2");
     values.add("3");
-    
+
     ewipf.value = 17;
     ewipf.values = values;
-    
+
     testEncodeDecode(ewipf);
   }
-  
+
   @Test
   public void testEntityWithMapUsingArrayValues() {
     EntityWithMapUsingArrayValues ewmuav = new EntityWithMapUsingArrayValues();
-    
+
     Map<String, String[]> data = new HashMap<String, String[]>();
     data.put("1", new String[]{"2", "3", "4"});
     data.put("5", new String[]{"6", "7", "8"});
-    
+
     ewmuav.setData(data);
     testEncodeDecode(ewmuav);
   }

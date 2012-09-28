@@ -58,7 +58,7 @@ public class GenUtil {
 
   static {
     PERMISSIVE_MODE = System.getProperty(PERMISSIVE_PROPERTY) != null
-            && Boolean.getBoolean(PERMISSIVE_PROPERTY);
+        && Boolean.getBoolean(PERMISSIVE_PROPERTY);
   }
 
   public static boolean isPermissiveMode() {
@@ -101,8 +101,8 @@ public class GenUtil {
       }
       catch (GenerationException t) {
         t.appendFailureInfo("in method call: "
-                + method.getDeclaringClass().getFullyQualifiedName()
-                + "." + method.getName() + "(" + Arrays.toString(methParms) + ")");
+            + method.getDeclaringClass().getFullyQualifiedName()
+            + "." + method.getName() + "(" + Arrays.toString(methParms) + ")");
         throw t;
       }
     }
@@ -163,7 +163,7 @@ public class GenUtil {
         }
 
         throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
-                + from.getFullyQualifiedName());
+            + from.getFullyQualifiedName());
       }
     }
   }
@@ -184,7 +184,9 @@ public class GenUtil {
         }
       }
 
-      if (input instanceof BuildMetaClass) {
+      if (input != null && MetaClassFactory.get(input.getClass())
+          .getOuterComponentType().getFullyQualifiedName().equals(MetaClass.class.getName())) {
+//      if (input instanceof MetaClass) {
         return generate(context, input);
       }
 
@@ -297,7 +299,7 @@ public class GenUtil {
 
   public static boolean equals(final MetaField a, final MetaField b) {
     return a.getName().equals(b.getName()) && !a.getType().equals(b.getType())
-            && !a.getDeclaringClass().equals(b.getDeclaringClass());
+        && !a.getDeclaringClass().equals(b.getDeclaringClass());
   }
 
   public static boolean equals(final MetaConstructor a, final MetaConstructor b) {
@@ -365,13 +367,13 @@ public class GenUtil {
 
   public static boolean isPrimitiveWrapper(final MetaClass clazz) {
     return Integer.class.getName().equals(clazz.getFullyQualifiedName())
-            || Boolean.class.getName().equals(clazz.getFullyQualifiedName())
-            || Long.class.getName().equals(clazz.getFullyQualifiedName())
-            || Double.class.getName().equals(clazz.getFullyQualifiedName())
-            || Float.class.getName().equals(clazz.getFullyQualifiedName())
-            || Short.class.getName().equals(clazz.getFullyQualifiedName())
-            || Character.class.getName().equals(clazz.getFullyQualifiedName())
-            || Byte.class.getName().equals(clazz.getFullyQualifiedName());
+        || Boolean.class.getName().equals(clazz.getFullyQualifiedName())
+        || Long.class.getName().equals(clazz.getFullyQualifiedName())
+        || Double.class.getName().equals(clazz.getFullyQualifiedName())
+        || Float.class.getName().equals(clazz.getFullyQualifiedName())
+        || Short.class.getName().equals(clazz.getFullyQualifiedName())
+        || Character.class.getName().equals(clazz.getFullyQualifiedName())
+        || Byte.class.getName().equals(clazz.getFullyQualifiedName());
   }
 
   public static MetaClass getUnboxedFromWrapper(final MetaClass clazz) {
@@ -432,7 +434,7 @@ public class GenUtil {
           }
 
           if (retType != null
-                  && !retType.getFullyQualifiedName().equals(method.getReturnType().getFullyQualifiedName())) {
+              && !retType.getFullyQualifiedName().equals(method.getReturnType().getFullyQualifiedName())) {
             continue;
           }
 
@@ -547,7 +549,7 @@ public class GenUtil {
         score += 4;
       }
       else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
-              && !Object_MetaClass.equals(arguments[i])) {
+          && !Object_MetaClass.equals(arguments[i])) {
         score += 3 + scoreInterface(actualParamType, arguments[i]);
       }
       else if (canConvert(actualParamType, arguments[i])) {

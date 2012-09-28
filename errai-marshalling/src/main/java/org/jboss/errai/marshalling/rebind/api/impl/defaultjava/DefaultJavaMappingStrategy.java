@@ -107,7 +107,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         final AnonymousClassStructureBuilder classStructureBuilder = Stmt.create(context.getCodegenContext())
                 .newObject(parameterizedAs(Marshaller.class, typeParametersOf(toMap))).extend();
 
-        Class<?> arrayType = Array.newInstance(toMap.asClass(), 0).getClass();
+        final MetaClass arrayType = toMap.asArrayOf(1);
         classStructureBuilder.privateField("EMPTY_ARRAY", arrayType).initializesWith(Stmt.newArray(toMap, 0)).finish();
 
         classStructureBuilder.publicMethod(arrayType, "getEmptyArray")
@@ -557,7 +557,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       return demarshallEnum(Stmt.nestedCall(valueStatement).invoke("isObject"), valueStatement, toType);
     }
     else {
-      String varName = MarshallingGenUtil.getVarName(toType);
+      final String varName = MarshallingGenUtil.getVarName(toType);
 
       if (toType.equals(MetaClassFactory.get(Object.class))) {
         return Stmt.create(context.getCodegenContext())

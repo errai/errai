@@ -25,11 +25,13 @@ public class InvalidProducerIntegrationTest {
 
   @Before
   public void setup() {
+    System.setProperty("errai.dev.force_reflections", "true");
     System.setProperty(EnvUtil.SYSPROP_USE_REACHABILITY_ANALYSIS, "false");
   }
 
   @After
   public void tearDown() {
+    System.setProperty("errai.dev.force_reflections", "false");
     System.setProperty(EnvUtil.SYSPROP_USE_REACHABILITY_ANALYSIS, "true");
   }
 

@@ -13,6 +13,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MarshallingExtension;
 import org.jboss.errai.marshalling.rebind.api.MarshallingExtensionConfigurator;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -49,6 +50,8 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
 
   @Override
   public void configure(GeneratorMappingContext generatorMappingContext) {
+    if (!MarshallingGenUtil.isUseStaticMarshallers()) return;
+
     final ClassStructureBuilder<?> builder = generatorMappingContext.getClassStructureBuilder();
 
     for (final ObserverPoint observerPoint : scanForObserverPointsInClassPath()) {
