@@ -126,6 +126,12 @@
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-navigation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
             <artifactId>errai-js</artifactId>
             <version>${project.version}</version>
         </dependency>

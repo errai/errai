@@ -55,6 +55,7 @@
                 <include>org.jboss.errai:errai-jpa-client</include>
                 <include>org.jboss.errai:errai-config</include>
                 <include>org.jboss.errai:errai-ui</include>
+                <include>org.jboss.errai:errai-navigation</include>
                 <include>org.jboss.errai:errai-js</include>
             </includes>
         </dependencySet>
