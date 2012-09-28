@@ -49,12 +49,12 @@ public class MappingContextSingleton {
 
   static {
     ParserFactory.registerParser(
-            new Parser() {
-              @Override
-              public EJValue parse(final String input) {
-                return JSONDecoder.decode(input);
-              }
-            });
+        new Parser() {
+          @Override
+          public EJValue parse(final String input) {
+            return JSONDecoder.decode(input);
+          }
+        });
 
     ServerMappingContext sContext;
 
@@ -83,7 +83,7 @@ public class MappingContextSingleton {
 
   private static void dynamicMarshallingWarning() {
     log.warn("using dynamic marshallers. dynamic marshallers are designed" +
-            " for development mode testing, and ideally should not be used in production. *");
+        " for development mode testing, and ideally should not be used in production. *");
   }
 
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
@@ -239,24 +239,29 @@ public class MappingContextSingleton {
         final MetaClass compType = type.getOuterComponentType();
 
         if (!factory.hasDefinition(type.getFullyQualifiedName())
-                && !factory.hasDefinition(type.getInternalName())) {
+            && !factory.hasDefinition(type.getInternalName())) {
 
           MappingDefinition outerDef = factory.getDefinition(compType);
           Marshaller<Object> marshaller;
-          
+
           if (outerDef != null && !factory.shouldUseObjectMarshaller(compType)) {
-             marshaller = outerDef.getMarshallerInstance();
+            marshaller = outerDef.getMarshallerInstance();
           }
           else {
             marshaller = factory.getDefinition(Object.class).getMarshallerInstance();
           }
+
+          if (marshaller == null) {
+            return;
+          }
+
           MappingDefinition newDef = new MappingDefinition(EncDecUtil.qualifyMarshaller(
-                  new DefaultArrayMarshaller(type, marshaller)), true);
+              new DefaultArrayMarshaller(type, marshaller)), true);
 
           if (outerDef != null) {
             newDef.setClientMarshallerClass(outerDef.getClientMarshallerClass());
           }
-          
+
           factory.addDefinition(newDef);
         }
       }

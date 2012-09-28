@@ -30,19 +30,19 @@ public class RemoteServiceProxyFactory implements ProxyFactory {
 
   @Override
   @SuppressWarnings({ "unchecked" })
-  public <T> T getRemoteProxy(Class<T> proxyType) {
+  public <T> T getRemoteProxy(final Class<T> proxyType) {
     Assert.notNull(proxyType);
     
     if (remoteProxyProviders.isEmpty()) {
       throw new RuntimeException("There are no proxy providers registered yet.");
     }
     
-    ProxyProvider proxyProvider = remoteProxyProviders.get(proxyType);
+    final ProxyProvider proxyProvider = remoteProxyProviders.get(proxyType);
     if (proxyProvider == null) {
       throw new RuntimeException("No proxy provider found for type:"+proxyType.getName());
     }
     
-    Object proxy = proxyProvider.getProxy();
+    final Object proxy = proxyProvider.getProxy();
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for: " + proxyType.getName());
     }
@@ -50,7 +50,7 @@ public class RemoteServiceProxyFactory implements ProxyFactory {
     return (T) proxy;
   }
 
-  public static void addRemoteProxy(Class<?> proxyType, ProxyProvider proxyProvider) {
+  public static void addRemoteProxy(final Class<?> proxyType, final ProxyProvider proxyProvider) {
     Assert.notNull(proxyType);
     Assert.notNull(proxyProvider);
     

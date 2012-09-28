@@ -31,7 +31,7 @@ public class CallContextStatus {
   private boolean interceptorChainStarted = false;
   private final List<Class<?>> interceptors;
   
-  public CallContextStatus(Class<?>... interceptors) {
+  public CallContextStatus(final Class<?>... interceptors) {
     this.interceptors = new ArrayList<Class<?>>(Arrays.asList(interceptors));
   }
     
@@ -47,7 +47,7 @@ public class CallContextStatus {
     }
   }
 
-  public void setProceeding(boolean proceeding) {
+  public void setProceeding(final boolean proceeding) {
     this.proceeding = proceeding;
   }
   

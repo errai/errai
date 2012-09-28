@@ -50,10 +50,10 @@ public class JSONUtilCli {
     /**
      * We have to do a two-stage decoding of the message.  We cannot fully decode the message here, as we
      * cannot be sure the destination endpoint exists within this Errai bundle.  So we extract the ToSubject
-     * field and send the unparsed JSON object onwards.
+     * field and send the un-parsed JSON object onwards.
      *
      */
-    JSONValue val = null;
+    JSONValue val;
 
     try {
       val = JSONParser.parseStrict(value);
@@ -62,6 +62,9 @@ public class JSONUtilCli {
       if (!GWT.isProdMode()) {
         System.out.println("*** working around devmode bug ***");
         val = JSONParser.parseStrict(value);
+      }
+      else {
+        val = null;
       }
     }
 
