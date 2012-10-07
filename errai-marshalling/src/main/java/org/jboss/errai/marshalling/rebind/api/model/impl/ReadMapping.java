@@ -32,11 +32,11 @@ public class ReadMapping extends SimpleMapping implements MemberMapping {
   private MetaClassMember readingMember;
   private String getterMethod;
 
-  public ReadMapping(String key, Class<?> type, String getterMethod) {
+  public ReadMapping(final String key, final Class<?> type, final String getterMethod) {
     this(key, JavaReflectionClass.newUncachedInstance(type), getterMethod);
   }
 
-  public ReadMapping(String key, MetaClass type, String getterMethod) {
+  public ReadMapping(final String key, final MetaClass type, final String getterMethod) {
     super(key, type);
     this.getterMethod = getterMethod;
   }
@@ -85,7 +85,7 @@ public class ReadMapping extends SimpleMapping implements MemberMapping {
   }
 
   @Override
-  public void setMappingClass(MetaClass clazz) {
+  public void setMappingClass(final MetaClass clazz) {
     this.toMap = clazz;
   }
 }

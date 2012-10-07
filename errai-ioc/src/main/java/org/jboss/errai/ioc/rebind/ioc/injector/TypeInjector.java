@@ -32,7 +32,6 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
-import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
@@ -69,7 +68,7 @@ public class TypeInjector extends AbstractInjector {
     }
 
     // check to see if this is a singleton and/or alternative bean
-    this.testmock = context.isElementType(WiringElementType.TestMockBean, type);
+    this.testMock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 

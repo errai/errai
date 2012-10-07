@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="sid-54493676">
+   <title>Errai UI Navigation</title>
+   <para>Starting in version 2.1, Errai offers a system for creating applications that have multiple bookmarkable pages. This navigation system has the following features:</para>
+   <itemizedlist>
+      <listitem>
+         <para>Declarative, statically-analyzable configuration of pages and links</para>
+         <itemizedlist>
+            <listitem>
+               <para>Compile time referential safety (i.e. “no broken links”)</para>
+            </listitem>
+            <listitem>
+               <para>Can generate storyboard of the application’s navigation flow at compile time</para>
+            </listitem>
+         </itemizedlist>
+      </listitem>
+      <listitem>
+         <para>Decentralized configuration</para>
+         <itemizedlist>
+            <listitem>
+               <para>Create a new page by creating a new annotated class. No need to edit a second file.</para>
+            </listitem>
+            <listitem>
+               <para>Make navigational changes in the natural place in the code.</para>
+            </listitem>
+         </itemizedlist>
+      </listitem>
+      <listitem>
+         <para>Integrates cleanly with Errai UI templates, but also works well with other view technologies.</para>
+      </listitem>
+      <listitem>
+         <para>Builds on Errai CDI</para>
+      </listitem>
+   </itemizedlist>
+   <section id="sid-54493676_ErraiUINavigation-GettingStarted">
+      <title>Getting Started</title>
+      <section id="sid-54493676_ErraiUINavigation-Compiletimedependency">
+         <title>Compile-time dependency</title>
+         <para>To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</para>
+         <informalexample>
+            <programlisting language="xml">
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-navigation&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          If you are not using Maven for dependency management, add
+          <code>errai-navigation-version.jar</code>
+          to your classpath.
+        </para>
+      </section>
+      <section id="sid-54493676_ErraiUINavigation-GWTModuleDescriptor">
+         <title>GWT Module Descriptor</title>
+         <para>
+          Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's
+          <code>*.gwt.xml</code>
+          file:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+   &lt;inherits name="org.jboss.errai.ui.nav.Navigation"/&gt;
+</programlisting>
+         </informalexample>
+      </section>
+   </section>
+   <section id="sid-54493676_ErraiUINavigation-HowitWorks">
+      <title>How it Works</title>
+      <para>
+        Errai Navigation has three main parts: the
+        <code>@Page</code>
+        annotation marks any widget as a page; the
+        <code>TransitionTo&lt;P&gt;</code>
+        interface is an injectable type that provides a link to another page; and the
+        <code>Navigation</code>
+        singleton offers control over the navigation system as a whole.
+      </para>
+      <para>
+        The Navigation singleton owns a GWT Panel, called the
+        <emphasis role="italics">navigation panel</emphasis>
+        . This panel always contains a widget corresponding to the the fragment ID (the part after the # symbol) in the browser's location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser's location bar is updated to reflect the new current page.
+      </para>
+      <section id="sid-54493676_ErraiUINavigation-DeclaringaPage">
+         <title>Declaring a Page</title>
+         <para>
+          To declare a page, annotate any subclass of Widget with the
+          <code>@Page</code>
+          annotation:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Page
+public class ItemListPage extends Composite {
+  // Anything goes...
+}
+</programlisting>
+         </informalexample>
+         <para>
+          By default, the name of a page is the simple name of the class that declares it. In the above example, the
+          <code>ItemListPage</code>
+          will fill the navigation panel whenever the browser's location bar ends with
+          <code>#ItemListPage</code>
+          . If you prefer a different page name, use the
+          <code>@Page</code>
+          annotation's
+          <code>path</code>
+          attribute:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Page(path="items")
+public class ItemListPage extends Composite {
+  // Anything goes...
+}
+</programlisting>
+         </informalexample>
+         <section id="sid-54493676_ErraiUINavigation-TheStartingPage">
+            <title>The Starting Page</title>
+            <para>
+            Each application must have exactly one
+            <emphasis role="italics">starting page</emphasis>
+            . This requirement is enforced at compile time. The starting page is displayed when there is no fragment ID present in the browser's location bar.
+          </para>
+            <para>
+            Use the
+            <code>startingPage</code>
+            attribute to declare the starting page, like this:
+          </para>
+            <informalexample>
+               <programlisting language="java">
+@Page(startingPage=true)
+public class WelcomePage extends Composite {
+  // Anything goes...
+}
+</programlisting>
+            </informalexample>
+            <para>
+            Pages are looked up as CDI beans, so you can inject other CDI beans into fields or a constructor. Pages can also have
+            <code>@PostConstruct</code>
+            and
+            <code>@PreDestroy</code>
+            CDI methods.
+          </para>
+         </section>
+         <section id="sid-54493676_ErraiUINavigation-PageLifecycle">
+            <title>Page Lifecycle</title>
+            <para>The lifecycle of a Page instance is governed by CDI scope: Dependent and implict-scoped beans are instantiated each time the user navigates to them, and Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.</para>
+            <para>
+            Any widget can be a page. This includes Errai UI
+            <code>@Templated</code>
+            classes! Simply annotate any Errai UI templated class with
+            <code>@Page</code>
+            , and it will become a page that can be navigated to.
+          </para>
+         </section>
+      </section>
+      <section id="sid-54493676_ErraiUINavigation-DeclaringaLink">
+         <title>Declaring a Link</title>
+         <para>
+          To declare a link from one page to another, inject an instance of
+          <code>TransitionTo&lt;P&gt;</code>
+          , where
+          <code>P</code>
+          is the class of the target page.
+        </para>
+         <para>For example, this code declares a link from the welcome page to the item list page:</para>
+         <informalexample>
+            <programlisting language="java">
+@Page(startingPage=true)
+public class WelcomePage extends Composite {
+
+  @Inject TransitionTo&lt;ItemListPage&gt; startButtonClicked;
+
+}
+</programlisting>
+         </informalexample>
+         <para>
+          You do not need to implement the
+          <code>TransitionTo</code>
+          interface yourself; the framework creates the appropriate instance for you.
+        </para>
+         <para>
+          You can inject any number of links into a page. The only restriction is that the target of the link must be a Widget type that is annotated with
+          <code>@Page</code>
+          .
+        </para>
+      </section>
+      <section id="sid-54493676_ErraiUINavigation-FollowingaLink">
+         <title>Following a Link</title>
+         <para>
+          To follow a link, simply call the
+          <code>go()</code>
+          method on an injected
+          <code>TransitionTo</code>
+          object. For example:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Page(startingPage=true)
+public class WelcomePage extends Composite {
+
+  @Inject TransitionTo&lt;ItemListPage&gt; startButtonClicked;
+
+  public void onStartButtonPressed(ClickEvent e) {
+    startButtonClicked.go();
+  }
+}
+</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-54493676_ErraiUINavigation-InstallingtheNavigationPanelintotheUserInterface">
+         <title>Installing the Navigation Panel into the User Interface</title>
+         <para>
+          Now that you've created several pages and injected some links between them, there is one last step to seeing the results in the user interface: you must add the navigation panel somewhere in the document. The best place to do this is during application startup, for example in the
+          <code>@PostConstruct</code>
+          method of your
+          <code>@EntryPoint</code>
+          class. You can allow Errai Navigation to control the full contents of the page, or you can opt to keep some parts of the page (headers, footers, and sidebars, for example) away from Errai Navigation.
+        </para>
+         <para>This example code gives the Navigation system control of the full page contents:</para>
+         <informalexample>
+            <programlisting language="java">
+@EntryPoint
+public class Bootstrap {
+
+  @Inject
+  private Navigation navigation;
+
+  @PostConstruct
+  public void clientMain() {
+    RootPanel.get().add(navigation.getContentPanel());
+  }
+
+}
+</programlisting>
+         </informalexample>
+         <para>The following example reserves space for header and footer content that is not affected by the navigation system:</para>
+         <informalexample>
+            <programlisting language="java">
+@EntryPoint
+public class Bootstrap {
+
+  @Inject
+  private Navigation navigation;
+
+  @PostConstruct
+  public void clientMain() {
+    VerticalPanel vp = new VerticalPanel();
+    vp.add(new HeaderWidget());
+    vp.add(navigation.getContentPanel());
+    vp.add(new FooterWidget());
+
+    RootPanel.get().add(vp);
+  }
+}
+</programlisting>
+         </informalexample>
+         <para>This last example demonstrates a simple approach to defining the page structure with an Errai UI template. The final product is identical to the above example, but in this case the overall page structure is declared in an HTML template rather than being defined programmatically in procedural logic:</para>
+         <informalexample>
+            <programlisting language="java">
+@Templated
+@EntryPoint
+public class OverallPageStrucutre extends Composite {
+
+  @Inject
+  private Navigation navigation;
+
+  @Inject @DataField
+  private HeaderWidget header;
+
+  @Inject @DataField
+  private SimplePanel content;
+
+  @Inject @DataField
+  private FooterWidget footer;
+
+  @PostConstruct
+  public void clientMain() {
+
+    // give over the contents of this.content to the navigation panel
+    content.add(navigation.getContentPanel());
+
+    // add this whole templated widget to the root panel
+    RootPanel.get().add(this);
+  }
+
+}
+</programlisting>
+         </informalexample>
+      </section>
+      <section id="sid-54493676_ErraiUINavigation-ViewingtheGeneratedNavigationGraph">
+         <title>Viewing the Generated Navigation Graph</title>
+         <para>
+          Because the pages and links in an Errai Navigation application are declared structurally, the framework gets a complete picture of the app's navigation structure at compile time. This knowledge is saved out during compilation (and at page reload when in Dev Mode) to the file
+          <code>.errai/navgraph.gv</code>
+          . You can view the navigation graph using any tool that understands the GraphViz (also known as DOT) file format.
+        </para>
+         <para>
+          One popular open source tool that can display GraphViz/DOT files is
+          <ulink url="http://www.graphviz.org/">GraphViz</ulink>
+          . Free downloads are available for all major operating systems.
+        </para>
+         <para>When rendered, a navigation graph looks like this:</para>
+         <para>
+            <figure float="0">
+               <title>TODO InformalFigure image title empty</title>
+               <mediaobject>
+                  <imageobject>
+                     <imagedata fileref="author/download/attachments/54493676/example_errai_nav_graph.png"/>
+                  </imageobject>
+               </mediaobject>
+            </figure>
+        </para>
+         <para>In the rendered graph, the pages are nodes (text surrounded by an ellipse). The starting page is drawn with a heavier stroke. The links are drawn as arrows from one page to another. The labels on these arrows come from the Java field names the TransitionTo objects were injected into.</para>
+      </section>
+   </section>
+</chapter>

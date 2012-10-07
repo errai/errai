@@ -329,6 +329,36 @@ bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
 </programlisting>
       </informalexample>
    </section>
+   <section id="sid-54493380">
+      <title>Handling Transport Errors</title>
+      <para>
+        You may need to detect problems which occur on the bus at runtime. The client bus API provides a facility for doing this in the
+        <code>org.jboss.errai.bus.client.framework.ClientMessageBus</code>
+        using the
+        <code>addTransportErrorHandler()</code>
+        method.
+      </para>
+      <para>
+        A
+        <code>TransportErrorHandler</code>
+        is an interface which you can use to define error handling behavior in the event of a transport problem.
+      </para>
+      <para>For example:</para>
+      <informalexample>
+         <programlisting language="java">
+messageBus.addTransportErrorHandler(new TransportErrorHandler() {
+  public void onError(TransportError error) {
+    // error handling code.
+  }
+});
+</programlisting>
+      </informalexample>
+      <para>
+        The
+        <code>TransportError</code>
+        interface represents the details of an an error from the bus. It contains a set of methods which can be used for determining information on the initial request which triggered the error, if the error occurred over HTTP or WebSockets, status code information, etc. See the JavaDoc for more information.
+      </para>
+   </section>
    <section id="sid-5931284">
       <title>Single-Response Conversations &amp; Pseudo-Synchronous Messaging</title>
       <para>

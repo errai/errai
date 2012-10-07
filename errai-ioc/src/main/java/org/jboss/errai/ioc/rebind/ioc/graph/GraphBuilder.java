@@ -71,14 +71,14 @@ public class GraphBuilder {
     final List<SortUnit> sortUnitList = new ArrayList<SortUnit>(10);
     final HashMap<String, SortUnit> sortUnitHashMap = new HashMap<String, SortUnit>(10);
 
-    for (String type : itemMap.keySet()) {
+    for (final String type : itemMap.keySet()) {
       sortUnitList.add(_build(sortUnitHashMap, type));
     }
 
     return sortUnitList;
   }
 
-  private SortUnit _build(Map<String, SortUnit> sortUnits, String type) {
+  private SortUnit _build(final Map<String, SortUnit> sortUnits, final String type) {
     if (sortUnits.containsKey(type)) {
       return sortUnits.get(type);
     }
@@ -90,7 +90,7 @@ public class GraphBuilder {
     final Collection<Dependency> deps = dependencyMap.get(type);
 
     final List<SortUnit> sortUnitDependencies = new ArrayList<SortUnit>();
-    for (Dependency d : deps) {
+    for (final Dependency d : deps) {
       sortUnitDependencies.add(_build(sortUnits, d.getType().getFullyQualifiedName()));
     }
 
@@ -106,7 +106,7 @@ public class GraphBuilder {
   public static String toDOTRepresentation(final List<SortUnit> graph) {
     final StringBuilder sb = new StringBuilder("digraph g {\n");
     final Set<String> visited = new HashSet<String>();
-    for (SortUnit su : graph) {
+    for (final SortUnit su : graph) {
       if (!visit(visited, su)) {
         continue;
       }
@@ -115,7 +115,7 @@ public class GraphBuilder {
         sb.append("  ").append(quote(su)).append("\n");
       }
       else {
-        for (SortUnit node : su.getDependencies()) {
+        for (final SortUnit node : su.getDependencies()) {
           if (!visit(visited, su, node)) {
             continue;
           }
@@ -155,7 +155,7 @@ public class GraphBuilder {
    * @param n The object whose quoted string representation to generate.
    * @return A quoted string representation of n.
    */
-  private static String quote(SortUnit n) {
+  private static String quote(final SortUnit n) {
     // note that only " is escaped in the DOT language (a bare backslash is just a bare backslash)
     return "\"" + n.getType().getFullyQualifiedName().replaceAll("\\Q\"\\E", "\\\"") + "\"";
   }

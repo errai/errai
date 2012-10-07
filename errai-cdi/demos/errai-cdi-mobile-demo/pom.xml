@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <name>Errai::CDI::Demo::Mobile</name>
   <artifactId>errai-cdi-demo-mobile</artifactId>
@@ -28,17 +28,17 @@
     </dependency>
 
     <dependency>
-        <groupId>org.jboss.ejb3</groupId>
-        <artifactId>jboss-ejb3-api</artifactId>
-        <scope>provided</scope>
-        <version>3.1.0</version>
+      <groupId>org.jboss.ejb3</groupId>
+      <artifactId>jboss-ejb3-api</artifactId>
+      <scope>provided</scope>
+      <version>3.1.0</version>
     </dependency>
 
     <dependency>
-        <groupId>javax.enterprise</groupId>
-        <artifactId>cdi-api</artifactId>
-        <scope>provided</scope>
-        <version>1.0-SP4</version>
+      <groupId>javax.enterprise</groupId>
+      <artifactId>cdi-api</artifactId>
+      <scope>provided</scope>
+      <version>1.0-SP4</version>
     </dependency>
 
     <!-- Errai Core -->
@@ -267,7 +267,7 @@
           <version>1</version>
           <scope>provided</scope>
         </dependency>
-    
+
         <dependency>
           <groupId>javax.annotation</groupId>
           <artifactId>jsr250-api</artifactId>
@@ -643,7 +643,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>

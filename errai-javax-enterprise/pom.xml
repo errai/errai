@@ -10,6 +10,7 @@
         <artifactId>errai-parent</artifactId>
         <groupId>org.jboss.errai</groupId>
         <version>3.0-SNAPSHOT</version>
+
     </parent>
 
     <build>

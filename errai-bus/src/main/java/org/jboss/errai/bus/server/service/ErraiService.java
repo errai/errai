@@ -56,7 +56,6 @@ public interface ErraiService<S> extends ServiceComposite<S> {
    */
   public ServerMessageBus getBus();
 
-
   /**
    * Gets the configuration used to initalize the service
    *

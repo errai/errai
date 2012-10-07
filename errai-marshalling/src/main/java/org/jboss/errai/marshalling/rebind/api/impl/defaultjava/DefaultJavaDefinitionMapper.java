@@ -240,7 +240,7 @@ public class DefaultJavaDefinitionMapper {
 
         definition.addMemberMapping(new MemberMapping() {
           private MetaClass type = (field.getType().isArray() ? field.getType() : field.getType());
-          private final MetaClass targetType = type;
+          private final MetaClass targetType = type.getErased().asBoxed();
 
           @Override
           public MetaClassMember getBindingMember() {
