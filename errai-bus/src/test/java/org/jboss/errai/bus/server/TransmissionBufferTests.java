@@ -58,18 +58,18 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testBufferWriteAndRead() {
-    TransmissionBuffer buffer = TransmissionBuffer.createDirect();
+    final TransmissionBuffer buffer = TransmissionBuffer.createDirect();
 
-    String s = "This is a test";
+    final String s = "This is a test";
 
-    BufferColor colorA = BufferColor.getNewColor();
+    final BufferColor colorA = BufferColor.getNewColor();
 
 
     try {
-      ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
+      final ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
       buffer.write(s.length(), bInputStream, colorA);
 
-      ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+      final ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
       buffer.read(bOutputStream, colorA);
 
       assertEquals(s, new String(bOutputStream.toByteArray()));
@@ -80,16 +80,16 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testBufferCycle() throws IOException {
-    TransmissionBuffer buffer = TransmissionBuffer.create(10, 10);
+    final TransmissionBuffer buffer = TransmissionBuffer.create(10, 10);
 
-    BufferColor color = BufferColor.getNewColor();
+    final BufferColor color = BufferColor.getNewColor();
 
-    String s = "12345789012345";
+    final String s = "12345789012345";
 
-    long start = System.currentTimeMillis();
+    final long start = System.currentTimeMillis();
     for (int i = 0; i < 1000000; i++) {
-      ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
-      ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+      final ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
+      final ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
 
       buffer.write(s.length(), bInputStream, color);
       buffer.read(bOutputStream, color);
@@ -101,19 +101,19 @@ public class TransmissionBufferTests extends TestCase {
 
 
   public void testColorInterleaving() throws IOException {
-    TransmissionBuffer buffer = TransmissionBuffer.create(10, 20);
+    final TransmissionBuffer buffer = TransmissionBuffer.create(10, 20);
 
-    BufferColor colorA = BufferColor.getNewColor();
-    BufferColor colorB = BufferColor.getNewColor();
-    BufferColor colorC = BufferColor.getNewColor();
-
-
-    String stringA = "12345678";
-    String stringB = "ABCDEFGH";
-    String stringC = "IJKLMNOP";
+    final BufferColor colorA = BufferColor.getNewColor();
+    final BufferColor colorB = BufferColor.getNewColor();
+    final BufferColor colorC = BufferColor.getNewColor();
 
 
-    long start = System.currentTimeMillis();
+    final String stringA = "12345678";
+    final String stringB = "ABCDEFGH";
+    final String stringC = "IJKLMNOP";
+
+
+    final long start = System.currentTimeMillis();
     for (int i = 0; i < 1000000; i++) {
       ByteArrayInputStream bInputStream = new ByteArrayInputStream(stringA.getBytes());
       buffer.write(stringA.length(), bInputStream, colorA);
@@ -164,7 +164,7 @@ public class TransmissionBufferTests extends TestCase {
 
     final AtomicInteger totalWrites = new AtomicInteger();
 
-    List<String> results = Collections.synchronizedList(new ArrayList<String>());
+    final List<String> results = Collections.synchronizedList(new ArrayList<String>());
 
     for (int i = 0; i < createCount; i++) {
       final BufferColor toContend = colors.get(random.nextInt(COLOR_COUNT));
@@ -173,8 +173,8 @@ public class TransmissionBufferTests extends TestCase {
         @Override
         public void run() {
           try {
-            String toWrite = writeString[random.nextInt(writeString.length)];
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
+            final String toWrite = writeString[random.nextInt(writeString.length)];
+            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
             buffer.write(toWrite.getBytes().length, byteArrayInputStream, toContend);
             totalWrites.incrementAndGet();
 
@@ -196,7 +196,7 @@ public class TransmissionBufferTests extends TestCase {
 
     assertEquals(createCount, totalWrites.intValue());
 
-    AtomicInteger resultSequenceNumber = new AtomicInteger();
+    final AtomicInteger resultSequenceNumber = new AtomicInteger();
 
     for (int i = 0; i < COLOR_COUNT; i++) {
       resultSequenceNumber.incrementAndGet();
@@ -207,10 +207,10 @@ public class TransmissionBufferTests extends TestCase {
       buffer.read(byteArrayOutputStream, colors.get(i));
       assertTrue("Expected >0 bytes; got " + byteArrayOutputStream.size(), byteArrayOutputStream.size() > 0);
 
-      String val = new String(byteArrayOutputStream.toByteArray());
+      final String val = new String(byteArrayOutputStream.toByteArray());
       results.add(val);
 
-      List<String> buildResultList = new ArrayList<String>();
+      final List<String> buildResultList = new ArrayList<String>();
 
       int st = 0;
       for (int c = 0; c < val.length(); c++) {
@@ -222,12 +222,12 @@ public class TransmissionBufferTests extends TestCase {
       }
 
 
-      List<String> resultList = new ArrayList<String>(buildResultList);
-      List<String> log = new ArrayList<String>(writeLog.get(colors.get(i).getColor()));
+      final List<String> resultList = new ArrayList<String>(buildResultList);
+      final List<String> log = new ArrayList<String>(writeLog.get(colors.get(i).getColor()));
 
       while (!log.isEmpty() && !resultList.isEmpty()) {
-        String nm = log.remove(0);
-        String test = resultList.remove(0);
+        final String nm = log.remove(0);
+        final String test = resultList.remove(0);
         if (!nm.equals(test)) {
           System.out.println("[" + resultSequenceNumber + "] expected : " + nm + " -- but found: " + test
                   + " (color: " + colors.get(i).getColor() + ")");
@@ -249,7 +249,7 @@ public class TransmissionBufferTests extends TestCase {
     assertEquals(COLOR_COUNT, results.size());
 
     int count = 0;
-    for (String res : results) {
+    for (final String res : results) {
       for (int i = 0; i < res.length(); i++) {
         if (res.charAt(i) == '<') count++;
       }
@@ -270,7 +270,7 @@ public class TransmissionBufferTests extends TestCase {
 
     final BufferColor colorA = BufferColor.getNewColor();
 
-    RandomProvider random = new RandomProvider() {
+    final RandomProvider random = new RandomProvider() {
       private char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
               'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
@@ -280,7 +280,7 @@ public class TransmissionBufferTests extends TestCase {
         return random.nextBoolean();
       }
 
-      public int nextInt(int upper) {
+      public int nextInt(final int upper) {
         return random.nextInt(upper);
       }
 
@@ -293,8 +293,8 @@ public class TransmissionBufferTests extends TestCase {
       }
 
       public String randString() {
-        StringBuilder builder = new StringBuilder();
-        int len = nextInt(25) + 5;
+        final StringBuilder builder = new StringBuilder();
+        final int len = nextInt(25) + 5;
         for (int i = 0; i < len; i++) {
           builder.append(nextChar());
         }
@@ -302,15 +302,15 @@ public class TransmissionBufferTests extends TestCase {
       }
     };
 
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     for (int i = 0; i < 1024 * 10; i++) {
       builder.append(random.nextChar());
     }
 
-    String s = builder.toString();
+    final String s = builder.toString();
 
-    ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
-    ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+    final ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
+    final ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
 
     try {
       for (int i = 0; i < 10000; i++) {
@@ -336,16 +336,17 @@ public class TransmissionBufferTests extends TestCase {
    * @throws Exception
    */
 
+  @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
   public void testMultithreadedBufferUse() throws Exception {
-    File logFile = new File("multithread_test.log");
-    File rawBufferFile = new File("raw_buffer.log");
+    final File logFile = new File("multithread_test.log");
+    final File rawBufferFile = new File("raw_buffer.log");
     if (!logFile.exists()) logFile.createNewFile();
     if (!rawBufferFile.exists()) rawBufferFile.createNewFile();
 
     final TransmissionBuffer buffer = TransmissionBuffer.createDirect(32, 32000);
 
-    OutputStream fileLog = new BufferedOutputStream(new FileOutputStream(logFile, false));
-    OutputStream rawBuffer = new BufferedOutputStream(new FileOutputStream(rawBufferFile, false));
+    final OutputStream fileLog = new BufferedOutputStream(new FileOutputStream(logFile, false));
+    final OutputStream rawBuffer = new BufferedOutputStream(new FileOutputStream(rawBufferFile, false));
 
     final PrintWriter logWriter = new PrintWriter(fileLog);
 
@@ -366,7 +367,7 @@ public class TransmissionBufferTests extends TestCase {
         writeString[i] = "<:::" + i + ":::>";
       }
 
-      ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(10);
+      final ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(10);
 
       //  logWriter.print("SESSION NUMBER " + outerCount);
 
@@ -383,8 +384,8 @@ public class TransmissionBufferTests extends TestCase {
       class TestReader {
         volatile boolean running = true;
 
-        public void read(BufferColor color, boolean wait) throws Exception {
-          ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        public void read(final BufferColor color, final boolean wait) throws Exception {
+          final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
           if (wait) {
             buffer.readWait(TimeUnit.SECONDS, 1, byteArrayOutputStream, color);
           }
@@ -392,8 +393,8 @@ public class TransmissionBufferTests extends TestCase {
             buffer.read(byteArrayOutputStream, color);
           }
 
-          String val = new String(byteArrayOutputStream.toByteArray()).trim();
-          List<String> buildResultList = new ArrayList<String>();
+          final String val = new String(byteArrayOutputStream.toByteArray()).trim();
+          final List<String> buildResultList = new ArrayList<String>();
 
           logWriter.println(val);
 
@@ -415,9 +416,9 @@ public class TransmissionBufferTests extends TestCase {
           }
 
           boolean match;
-          for (String s : buildResultList) {
+          for (final String s : buildResultList) {
             match = false;
-            for (String testString : writeString) {
+            for (final String testString : writeString) {
               if (s.equals(testString)) {
                 totalReads.incrementAndGet();
                 match = true;
@@ -462,10 +463,10 @@ public class TransmissionBufferTests extends TestCase {
           @Override
           public void run() {
             try {
-              String toWrite = writeString[item];
+              final String toWrite = writeString[item];
               writeAuditLog.add(toWrite);
 
-              ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
+              final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
               buffer.write(toWrite.length(), byteArrayInputStream, segs.get(item % SEGMENT_COUNT));
 
               totalWrites.incrementAndGet();
@@ -486,7 +487,7 @@ public class TransmissionBufferTests extends TestCase {
       LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(2));
 
       testReader.running = false;
-      for (Thread t : readers) {
+      for (final Thread t : readers) {
         t.join();
       }
 
@@ -518,19 +519,19 @@ public class TransmissionBufferTests extends TestCase {
       }
 
       System.out.println("Read / Write Symmetry Analysis ... ");
-      for (String s : writeAuditLog) {
+      for (final String s : writeAuditLog) {
         if (!readAuditLog.contains(s)) {
-          Collection<String> leftDiff = new ArrayList<String>(writeAuditLog);
+          final Collection<String> leftDiff = new ArrayList<String>(writeAuditLog);
           leftDiff.removeAll(readAuditLog);
 
-          Collection<String> rightDiff = new ArrayList<String>(readAuditLog);
+          final Collection<String> rightDiff = new ArrayList<String>(readAuditLog);
           rightDiff.removeAll(writeAuditLog);
 
-          Set<String> uniqueReads = new HashSet<String>(readAuditLog);
+          final Set<String> uniqueReads = new HashSet<String>(readAuditLog);
 
-          List<String> duplicates = new ArrayList<String>(readAuditLog);
+          final List<String> duplicates = new ArrayList<String>(readAuditLog);
           if (uniqueReads.size() < readAuditLog.size()) {
-            for (String str : uniqueReads) {
+            for (final String str : uniqueReads) {
               duplicates.remove(duplicates.indexOf(str));
             }
           }
@@ -567,19 +568,19 @@ public class TransmissionBufferTests extends TestCase {
 
 
   public void testGloballyVisibleColors() throws IOException {
-    BufferColor colorA = BufferColor.getNewColor();
-    BufferColor colorB = BufferColor.getNewColor();
+    final BufferColor colorA = BufferColor.getNewColor();
+    final BufferColor colorB = BufferColor.getNewColor();
 
-    BufferColor globalColor = BufferColor.getAllBuffersColor();
+    final BufferColor globalColor = BufferColor.getAllBuffersColor();
 
-    TransmissionBuffer buffer = TransmissionBuffer.create(5, 2500);
+    final TransmissionBuffer buffer = TransmissionBuffer.create(5, 2500);
 
-    String stringA = "12345678";
-    String stringB = "ABCDEFGH";
-    String stringC = "IJKLMNOP";
+    final String stringA = "12345678";
+    final String stringB = "ABCDEFGH";
+    final String stringC = "IJKLMNOP";
 
 
-    long start = System.currentTimeMillis();
+    final long start = System.currentTimeMillis();
     for (int i = 0; i < 1000000; i++) {
       ByteArrayInputStream bInputStream = new ByteArrayInputStream(stringA.getBytes());
       buffer.write(stringA.length(), bInputStream, colorA);
@@ -603,8 +604,8 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public static String createGiantString() {
-    int size = TransmissionBuffer.DEFAULT_SEGMENT_SIZE * 3;
-    StringBuilder sb = new StringBuilder(size + 10);
+    final int size = TransmissionBuffer.DEFAULT_SEGMENT_SIZE * 3;
+    final StringBuilder sb = new StringBuilder(size + 10);
     int i = 0;
     while (sb.length() < size) {
       sb.append(String.format("%10d,", i++));
@@ -613,39 +614,39 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testExtremelyLargeSegmentsInterleavedWithSmallSegments() throws IOException {
-    TransmissionBuffer buffer = TransmissionBuffer.create();
+    final TransmissionBuffer buffer = TransmissionBuffer.create();
 
-    BufferColor globalColor = BufferColor.getAllBuffersColor();
+    final BufferColor globalColor = BufferColor.getAllBuffersColor();
 
-    BufferColor red = BufferColor.getNewColor();
+    final BufferColor red = BufferColor.getNewColor();
 
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < 1; i++) {
-      String s = createGiantString();
+      final String s = createGiantString();
       sb.append(s);
-      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
+      final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
 
       buffer.write(byteArrayInputStream.available(), byteArrayInputStream, globalColor);
     }
 
-    String s = "this is a short string";
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
+    final String s = "this is a short string";
+    final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
     sb.append(s);
 
     buffer.write(byteArrayInputStream.available(), byteArrayInputStream, globalColor);
 
     byteArrayInputStream.reset();
 
-    StringBuilder out = new StringBuilder();
+    final StringBuilder out = new StringBuilder();
 
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
     // for (int i = 0; i < 5; i++) {
     buffer.read(byteArrayOutputStream, red);
     // }
 
-    for (byte b : byteArrayOutputStream.toByteArray()) {
+    for (final byte b : byteArrayOutputStream.toByteArray()) {
       out.append((char) b);
     }
 
@@ -655,12 +656,12 @@ public class TransmissionBufferTests extends TestCase {
   public void testContendedReads() throws IOException, InterruptedException {
     final TransmissionBuffer buffer = TransmissionBuffer.create();
 
-    BufferColor globalColor = BufferColor.getAllBuffersColor();
+    final BufferColor globalColor = BufferColor.getAllBuffersColor();
 
     final BufferColor red = BufferColor.getNewColor();
 
 
-    Thread[] threads = new Thread[2];
+    final Thread[] threads = new Thread[2];
     class Runstatus {
       boolean run = true;
     }
@@ -674,13 +675,13 @@ public class TransmissionBufferTests extends TestCase {
         public void run() {
           try {
             while (runstatus.run) {
-              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+              final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
               buffer.readWait(TimeUnit.MILLISECONDS, 100, byteArrayOutputStream, red);
 
-              StringBuilder out = new StringBuilder();
+              final StringBuilder out = new StringBuilder();
 
-              for (byte b : byteArrayOutputStream.toByteArray()) {
+              for (final byte b : byteArrayOutputStream.toByteArray()) {
                 out.append((char) b);
               }
 
@@ -693,19 +694,19 @@ public class TransmissionBufferTests extends TestCase {
       };
     }
 
-    for (Thread thread : threads) {
+    for (final Thread thread : threads) {
       thread.start();
     }
 
-    String s = "this is a short string";
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
+    final String s = "this is a short string";
+    final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
     buffer.write(byteArrayInputStream.available(), byteArrayInputStream, red);
 
     Thread.sleep(2000);
 
     runstatus.run = false;
 
-    for (Thread thread : threads) {
+    for (final Thread thread : threads) {
       thread.join();
     }
   }
@@ -735,7 +736,7 @@ public class TransmissionBufferTests extends TestCase {
     buffer.write(new TestInputStream(), BufferColor.getAllBuffersColor());
     buffer.write(new TestInputStream(), BufferColor.getAllBuffersColor());
 
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     try {
       buffer.read(byteArrayOutputStream, BufferColor.getAllBuffersColor());
     }

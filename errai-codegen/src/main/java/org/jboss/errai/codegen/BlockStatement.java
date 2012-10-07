@@ -30,12 +30,12 @@ import org.jboss.errai.codegen.util.EmptyStatement;
 public class BlockStatement extends AbstractStatement {
   public static final BlockStatement EMPTY_BLOCK = new BlockStatement() {
     @Override
-    public BlockStatement addStatement(Statement statement) {
+    public BlockStatement addStatement(final Statement statement) {
       throw new UnsupportedOperationException("this is an immutable object");
     }
 
     @Override
-    public void insertBefore(Statement statement) {
+    public void insertBefore(final Statement statement) {
       throw new UnsupportedOperationException("this is an immutable object");
     }
   };
@@ -74,13 +74,15 @@ public class BlockStatement extends AbstractStatement {
 
     boolean isLastBlock = false;
     for (final Statement statement : statements) {
-      if (buf.length() != 0 && !(statement instanceof EmptyStatement))
+      if (buf.length() != 0 && !(statement instanceof EmptyStatement)) {
         buf.append("\n");
+      }
 
       buf.append(statement.generate(context));
 
       if (!(statement instanceof Comment) && !(statement instanceof EmptyStatement)
               && !buf.toString().endsWith(";") && !buf.toString().endsWith(":") && !buf.toString().endsWith("}")) {
+
         buf.append(";");
       }
 

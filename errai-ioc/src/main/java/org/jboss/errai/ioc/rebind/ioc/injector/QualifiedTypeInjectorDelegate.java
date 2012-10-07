@@ -62,8 +62,8 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   }
 
   @Override
-  public boolean isTestmock() {
-    return delegate.isTestmock();
+  public boolean isTestMock() {
+    return delegate.isTestMock();
   }
 
   @Override

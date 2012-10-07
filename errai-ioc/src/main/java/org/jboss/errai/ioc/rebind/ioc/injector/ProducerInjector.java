@@ -294,7 +294,6 @@ public class ProducerInjector extends AbstractInjector {
     injectionContext.getProcessingContext().popBlockBuilder();
   }
 
-
   public Statement getValueStatement(final InjectionContext injectionContext, final Statement beanRef) {
     if (producerMember instanceof MetaMethod) {
       final MetaMethod producerMethod = (MetaMethod) producerMember;

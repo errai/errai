@@ -29,7 +29,9 @@ public class ProviderInjector extends TypeInjector {
   private final AbstractInjector providerInjector;
   private boolean provided = false;
 
-  public ProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
+  public ProviderInjector(final MetaClass type,
+                          final MetaClass providerType,
+                          final InjectionContext context) {
     super(type, context);
 
     if (EnvUtil.isProdMode()) {
@@ -40,14 +42,14 @@ public class ProviderInjector extends TypeInjector {
     context.registerInjector(providerInjector);
     providerInjector.setEnabled(isEnabled());
 
-    this.testmock = context.isElementType(WiringElementType.TestMockBean, providerType);
+    this.testMock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
     setRendered(true);
   }
 
   @Override
-  public Statement getBeanInstance(InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     if (isSingleton() && provided) {
       return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("get");
     }

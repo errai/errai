@@ -113,10 +113,10 @@ public class TransmissionBuffer implements Buffer {
       this._buffer = ByteBuffer.allocate(bufferSize);
     }
 
-    writeBuf(0, (byte) 0);
+    _buffer.put(0, (byte) 0);
 
     segmentMap = new short[segments];
-    writeSeg(0, (short) 0);
+    segmentMap[0] = (short) 0;
   }
 
   /**
@@ -211,16 +211,16 @@ public class TransmissionBuffer implements Buffer {
       * Allocate the segments to the this color
       */
       for (int i = 0; i < allocSize; i++) {
-        writeSeg((seq + i) % segments, bufferColor.color);
+        segmentMap[((seq + i) % segments)] = bufferColor.color;
       }
 
       for (; writeCursor < initialRead; writeCursor++) {
-        writeBuf(writeCursor, (byte) inputStream.read());
+        _buffer.put(writeCursor, (byte) inputStream.read());
       }
 
       if (writeCursor < end) {
         for (int i = 0; i < end - bufferSize; i++) {
-          writeBuf(i, (byte) inputStream.read());
+          _buffer.put(i, (byte) inputStream.read());
         }
       }
 
@@ -544,7 +544,7 @@ public class TransmissionBuffer implements Buffer {
     final int color = bufferColor.getColor();
 
     for (; colorSeq < headSeq; colorSeq++) {
-      final short seg = getSeg((int) colorSeq % segments);
+      final short seg = segmentMap[((int) colorSeq % segments)];
 
       if (seg == color || seg == Short.MIN_VALUE) {
         return colorSeq;
@@ -570,7 +570,7 @@ public class TransmissionBuffer implements Buffer {
   private long readNextChunk(final long head, final long sequence, final BufferColor color,
                              final OutputStream outputStream, final BufferCallback callback) throws IOException {
 
-    final long sequenceToRead = getNextSegment(color,  head , sequence );
+    final long sequenceToRead = getNextSegment(color, head, sequence);
     if (sequenceToRead != -1) {
       int readCursor = ((int) sequenceToRead % segments) * segmentSize;
 
@@ -590,25 +590,25 @@ public class TransmissionBuffer implements Buffer {
 
       if (callback == null) {
         for (; readCursor < maxInitialRead; readCursor++) {
-          outputStream.write(getBuf(readCursor));
+          outputStream.write(_buffer.get(readCursor));
         }
 
         if (readCursor < endRead) {
           final int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
-            outputStream.write(getBuf(i));
+            outputStream.write(_buffer.get(i));
           }
         }
       }
       else {
         for (; readCursor < maxInitialRead; readCursor++) {
-          outputStream.write(callback.each(getBuf(readCursor), outputStream));
+          outputStream.write(callback.each(_buffer.get(readCursor), outputStream));
         }
 
         if (readCursor < endRead) {
           final int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
-            outputStream.write(callback.each(getBuf(i), outputStream));
+            outputStream.write(callback.each(_buffer.get(i), outputStream));
           }
         }
       }
@@ -626,33 +626,17 @@ public class TransmissionBuffer implements Buffer {
    * @return the size in bytes.
    */
   private int readChunkSize(final int position) {
-    return ((((int) getBuf(position + 3)) & 0xFF)) +
-            ((((int) getBuf(position + 2)) & 0xFF) << 8) +
-            ((((int) getBuf(position + 1)) & 0xFF) << 16) +
-            ((((int) getBuf(position)) & 0xFF) << 24);
+    return ((((int) _buffer.get(position + 3)) & 0xFF)) +
+            ((((int) _buffer.get(position + 2)) & 0xFF) << 8) +
+            ((((int) _buffer.get(position + 1)) & 0xFF) << 16) +
+            ((((int) _buffer.get(position)) & 0xFF) << 24);
   }
 
   private void writeChunkSize(final int position, final int size) {
-    writeBuf(position, (byte) ((size >> 24) & 0xFF));
-    writeBuf(position + 1, (byte) ((size >> 16) & 0xFF));
-    writeBuf(position + 2, (byte) ((size >> 8) & 0xFF));
-    writeBuf(position + 3, (byte) (size & 0xFF));
-  }
-
-  private byte getBuf(final int idx) {
-    return _buffer.get(idx);
-  }
-
-  private void writeBuf(final int idx, final byte v) {
-    _buffer.put(idx, v);
-  }
-
-  private short getSeg(final int idx) {
-    return segmentMap[idx];
-  }
-
-  private void writeSeg(final int idx, final short v) {
-    segmentMap[idx] = v;
+    _buffer.put(position, (byte) ((size >> 24) & 0xFF));
+    _buffer.put(position + 1, (byte) ((size >> 16) & 0xFF));
+    _buffer.put(position + 2, (byte) ((size >> 8) & 0xFF));
+    _buffer.put(position + 3, (byte) (size & 0xFF));
   }
 
   public void clear() {

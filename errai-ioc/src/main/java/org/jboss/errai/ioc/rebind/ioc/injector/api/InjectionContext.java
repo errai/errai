@@ -216,7 +216,7 @@ public class InjectionContext {
       if (IOCGenerator.isTestMode) {
         final List<Injector> matchingMocks = new ArrayList<Injector>();
         for (final Injector inj : matching) {
-          if (inj.isTestmock()) {
+          if (inj.isTestMock()) {
             matchingMocks.add(inj);
           }
         }

@@ -28,12 +28,12 @@ public class SimpleMapping implements Mapping {
   protected MetaClass type;
   protected final MetaClass targetType;
 
-  protected SimpleMapping(String key, MetaClass targetType) {
+  protected SimpleMapping(final String key, final MetaClass targetType) {
     if (key == null) {
       throw new NullPointerException("key is null");
     }
 
-    this.type = this.targetType = targetType.asBoxed();
+    this.type = this.targetType = targetType.getErased().asBoxed();
     this.key = key;
   }
 
@@ -45,7 +45,7 @@ public class SimpleMapping implements Mapping {
     return type;
   }
 
-  public void setType(MetaClass type) {
+  public void setType(final MetaClass type) {
     this.type = type.asBoxed();
   }
 
@@ -54,7 +54,7 @@ public class SimpleMapping implements Mapping {
   }
 
   @Override
-  public void setMappingClass(MetaClass clazz) {
+  public void setMappingClass(final MetaClass clazz) {
     this.toMap = clazz;
   }
 }

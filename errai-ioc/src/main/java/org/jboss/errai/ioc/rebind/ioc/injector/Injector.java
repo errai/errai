@@ -36,7 +36,7 @@ public interface Injector {
    * Checks if the injector represents a test mock.
    * @return true if the injector is a test mock
    */
-  boolean isTestmock();
+  boolean isTestMock();
 
   /**
    * Checks if the injector an alternative.

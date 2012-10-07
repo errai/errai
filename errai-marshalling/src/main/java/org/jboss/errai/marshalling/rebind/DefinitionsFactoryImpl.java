@@ -350,13 +350,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       final InstantiationMapping instantiationMapping = def.getInstantiationMapping();
       for (final Mapping mapping : instantiationMapping.getMappings()) {
-        if (shouldUseObjectMarshaller(mapping.getType())) {
+        if (shouldUseObjectMarshaller(mapping.getType().getErased())) {
           mapping.setType(javaLangObjectRef);
         }
       }
 
       for (final Mapping mapping : entry.getValue().getMemberMappings()) {
-        if (shouldUseObjectMarshaller(mapping.getType())) {
+        if (shouldUseObjectMarshaller(mapping.getType().getErased())) {
           mapping.setType(javaLangObjectRef);
         }
       }

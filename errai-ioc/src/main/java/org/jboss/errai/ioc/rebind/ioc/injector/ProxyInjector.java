@@ -53,7 +53,6 @@ public class ProxyInjector extends AbstractInjector {
   private final MetaClass proxiedType;
   private final BuildMetaClass proxyClass;
 
-
   public ProxyInjector(final IOCProcessingContext context,
                        final MetaClass proxiedType,
                        final QualifyingMetadata metadata) {
@@ -77,7 +76,7 @@ public class ProxyInjector extends AbstractInjector {
   }
 
   @Override
-  public Statement getBeanInstance(InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     final IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
     pCtx.append(Stmt.declareFinalVariable(varName, proxyClass, newObject(proxyClass)));
@@ -95,7 +94,7 @@ public class ProxyInjector extends AbstractInjector {
     pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
             proxiedType, qualifyingMetadata.getQualifiers()));
 
-    for (Statement statement : closeStatements) {
+    for (final Statement statement : closeStatements) {
       proxyResolverBody.append(statement);
     }
 
@@ -113,14 +112,14 @@ public class ProxyInjector extends AbstractInjector {
     return proxiedType;
   }
 
-  public void addProxyCloseStatement(Statement statement) {
+  public void addProxyCloseStatement(final Statement statement) {
     closeStatements.add(statement);
   }
 
   public BlockBuilder getProxyResolverBlockBuilder() {
     return new BlockBuilderImpl() {
       @Override
-      public BlockBuilder append(Statement stmt) {
+      public BlockBuilder append(final Statement stmt) {
         closeStatements.add(stmt);
         return this;
       }

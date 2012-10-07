@@ -43,7 +43,7 @@ public abstract class AbstractInjector implements Injector {
 
   protected boolean enabled = true;
   protected boolean softDisabled = false;
-  protected boolean testmock;
+  protected boolean testMock;
   protected boolean alternative;
   private boolean created;
   private boolean rendered;
@@ -61,8 +61,8 @@ public abstract class AbstractInjector implements Injector {
   protected final List<Runnable> disablingCallback = new ArrayList<Runnable>();
 
   @Override
-  public boolean isTestmock() {
-    return testmock;
+  public boolean isTestMock() {
+    return testMock;
   }
 
   @Override
