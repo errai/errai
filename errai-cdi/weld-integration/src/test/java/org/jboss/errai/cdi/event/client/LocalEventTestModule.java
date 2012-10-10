@@ -1,17 +1,19 @@
 package org.jboss.errai.cdi.event.client;
 
-import org.jboss.errai.cdi.client.event.LocalEventA;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.client.qualifier.B;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.jboss.errai.cdi.client.event.DataBoundEvent;
+import org.jboss.errai.cdi.client.event.LocalEventA;
+import org.jboss.errai.cdi.client.qualifier.A;
+import org.jboss.errai.cdi.client.qualifier.B;
 
 /**
  * @author Mike Brock
@@ -19,9 +21,11 @@ import java.util.List;
 @ApplicationScoped
 public class LocalEventTestModule {
   @Inject private Event<LocalEventA> localEventAEvent;
+  @Inject private Event<DataBoundEvent> dataBoundEvent;
   @Inject @A private Event<LocalEventA> localEventAEventQualifiers;
 
   private final List<LocalEventA> capturedEvents = new ArrayList<LocalEventA>();
+  private DataBoundEvent capturedDataBoundEvent;
 
   private void observesLocalEventA(@Observes final LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":None"));
@@ -38,9 +42,17 @@ public class LocalEventTestModule {
   private void observesLocalEventWithQualifiersB(@Observes @A @B final LocalEventA localEventA) {
     capturedEvents.add(new LocalEventA(localEventA.getMessage() + ":AB"));
   }
+  
+  private void observesDataBoundEvent(@Observes final DataBoundEvent dataBoundEvent) {
+    capturedDataBoundEvent = dataBoundEvent;
+  }
 
   public List<LocalEventA> getCapturedEvents() {
     return capturedEvents;
+  }
+  
+  public DataBoundEvent getCapturedDataBoundEvent() {
+    return capturedDataBoundEvent;
   }
 
   public void fireEvent(final String eventText) {
@@ -59,4 +71,8 @@ public class LocalEventTestModule {
       }
     }).fire(new LocalEventA(eventText));
   }
+  
+  public void fireDataBoundEvent(DataBoundEvent event) {
+    dataBoundEvent.fire(event);
+ }
 }

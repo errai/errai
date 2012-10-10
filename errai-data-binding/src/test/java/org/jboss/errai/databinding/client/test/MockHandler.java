@@ -26,6 +26,7 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
  *
  * @author David Cracauer <dcracauer@gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class MockHandler implements PropertyChangeHandler {
   List<PropertyChangeEvent> events = new ArrayList<PropertyChangeEvent>();
 

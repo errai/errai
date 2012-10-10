@@ -1,12 +1,15 @@
 package org.jboss.errai.cdi.event.client.test;
 
+import java.util.List;
+
+import org.jboss.errai.cdi.client.event.DataBoundEvent;
 import org.jboss.errai.cdi.client.event.LocalEventA;
 import org.jboss.errai.cdi.event.client.LocalEventTestModule;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.databinding.client.BindableProxy;
+import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -64,6 +67,25 @@ public class LocalEventIntegrationTest extends AbstractErraiCDITest {
         assertEquals(extraQualText + ":A", capturedEvents.get(7).getMessage());
         assertEquals(extraQualText + ":AB", capturedEvents.get(8).getMessage());
 
+        finishTest();
+      }
+    });
+  }
+  
+  public void testLocalDataBoundEvent() {
+    delayTestFinish(60000);
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        final LocalEventTestModule module
+            = IOC.getBeanManager().lookupBean(LocalEventTestModule.class).getInstance();
+
+        DataBoundEvent dbe = DataBinder.forModel(new DataBoundEvent()).getModel();
+        module.fireDataBoundEvent(dbe);
+
+        assertNotNull("databound event was not observed", module.getCapturedDataBoundEvent());
+        assertFalse("event was not unwrapped", module.getCapturedDataBoundEvent() instanceof BindableProxy);
         finishTest();
       }
     });

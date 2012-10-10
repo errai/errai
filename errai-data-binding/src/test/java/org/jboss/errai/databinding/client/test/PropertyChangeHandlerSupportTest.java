@@ -42,7 +42,7 @@ public class PropertyChangeHandlerSupportTest {
     support.addPropertyChangeHandler(mh1);
 
     Object eventSource1 = new Object();
-    PropertyChangeEvent event1 = new PropertyChangeEvent(eventSource1, "foo", 1, 2);
+    PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource1, "foo", 1, 2);
 
     support.notifyHandlers(event1);
     assertEquals(1, mh1.events.size());
@@ -54,7 +54,7 @@ public class PropertyChangeHandlerSupportTest {
     support.addPropertyChangeHandler(mh2);
     
     Object eventSource2 = new Object();
-    PropertyChangeEvent event2 = new PropertyChangeEvent(eventSource2, "foo", 2, 3);
+    PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource2, "foo", 2, 3);
 
     support.notifyHandlers(event2);
     assertEquals(2, mh1.events.size());
@@ -74,7 +74,7 @@ public class PropertyChangeHandlerSupportTest {
     support.addPropertyChangeHandler("foo", mh2);
 
     Object eventSource1 = new Object();
-    PropertyChangeEvent event1 = new PropertyChangeEvent(eventSource1, "foo", 1, 2);
+    PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource1, "foo", 1, 2);
     support.notifyHandlers(event1);
     assertEquals(0, mh1.events.size());
     assertEquals(1, mh2.events.size());
@@ -82,7 +82,7 @@ public class PropertyChangeHandlerSupportTest {
     assertEquals(eventSource1, mh2.events.get(0).getSource());
 
     Object eventSource2 = new Object();
-    PropertyChangeEvent event2 = new PropertyChangeEvent(eventSource2, "bar", 2, 3);
+    PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource2, "bar", 2, 3);
     support.notifyHandlers(event2);
     assertEquals(1, mh1.events.size());
     assertEquals(event2, mh1.events.get(0));
@@ -98,7 +98,7 @@ public class PropertyChangeHandlerSupportTest {
     support.addPropertyChangeHandler(mh1);
 
     Object eventSource1 = new Object();
-    PropertyChangeEvent event1 = new PropertyChangeEvent(eventSource1, "foo", 1, 2);
+    PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource1, "foo", 1, 2);
     support.notifyHandlers(event1);
     assertEquals(1, mh1.events.size());
     assertEquals(event1, mh1.events.get(0));
@@ -109,7 +109,7 @@ public class PropertyChangeHandlerSupportTest {
     mh1.events.clear();
 
     Object eventSource2 = new Object();
-    PropertyChangeEvent event2 = new PropertyChangeEvent(eventSource2, "foo", 2, 3);
+    PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource2, "foo", 2, 3);
 
     support.notifyHandlers(event2);
     assertEquals(0, mh1.events.size());
@@ -122,17 +122,17 @@ public class PropertyChangeHandlerSupportTest {
     support.addPropertyChangeHandler("bar", mh1);
 
     Object eventSource = new Object();
-    PropertyChangeEvent event1 = new PropertyChangeEvent(eventSource, "bar", 1, 2);
+    PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource, "bar", 1, 2);
     support.notifyHandlers(event1);
     assertEquals(2, mh1.events.size());
 
     support.removePropertyChangeHandler("bar", mh1);
-    PropertyChangeEvent event2 = new PropertyChangeEvent(eventSource, "bar", 2, 3);
+    PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource, "bar", 2, 3);
     support.notifyHandlers(event2);
     assertEquals(3, mh1.events.size());
 
     support.removePropertyChangeHandler("bar", mh1);
-    PropertyChangeEvent event3 = new PropertyChangeEvent(eventSource, "bar", 3, 4);
+    PropertyChangeEvent<Integer> event3 = new PropertyChangeEvent<Integer>(eventSource, "bar", 3, 4);
     support.notifyHandlers(event3);
     assertEquals(3, mh1.events.size());
   }
@@ -143,9 +143,9 @@ public class PropertyChangeHandlerSupportTest {
     support.addPropertyChangeHandler(mh1);
 
     Object eventSource = new Object();
-    support.notifyHandlers(new PropertyChangeEvent(eventSource, "foo", null, null));
-    support.notifyHandlers(new PropertyChangeEvent(eventSource, "foo", 1, 1));
-    support.notifyHandlers(new PropertyChangeEvent(eventSource, "foo", "test", "test"));
+    support.notifyHandlers(new PropertyChangeEvent<Integer>(eventSource, "foo", null, null));
+    support.notifyHandlers(new PropertyChangeEvent<Integer>(eventSource, "foo", 1, 1));
+    support.notifyHandlers(new PropertyChangeEvent<String>(eventSource, "foo", "test", "test"));
     assertEquals(0, mh1.events.size());
   }
 }

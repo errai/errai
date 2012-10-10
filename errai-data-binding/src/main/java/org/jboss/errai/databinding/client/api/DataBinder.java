@@ -258,7 +258,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     BindableProxy<T> newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(
         model, (initialState != null) ? initialState : proxyState.getInitialState());
 
-    for (String boundProperty : proxyState.getBindings().keySet()) {
+    for (String boundProperty : proxyState.getBoundProperties()) {
       newProxy.bind(proxyState.getWidget(boundProperty), boundProperty, proxyState.getConverter(boundProperty));
     }
 

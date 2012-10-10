@@ -15,22 +15,6 @@
  */
 package org.jboss.errai.enterprise.client.cdi.api;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.framework.Subscription;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
-import org.jboss.errai.enterprise.client.cdi.CDICommands;
-import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
-import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +25,23 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.common.client.api.WrappedPortable;
+import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
+import org.jboss.errai.enterprise.client.cdi.CDICommands;
+import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 
 /**
  * CDI client interface.
@@ -128,15 +129,24 @@ public class CDI {
 
     if (payload == null) return;
 
+    final Object beanRef;
+    if (payload instanceof WrappedPortable) {
+      beanRef = ((WrappedPortable) payload).unwrap();
+      if (beanRef == null) return;
+    }
+    else {
+      beanRef = payload;
+    }
+    
     if (!local && !active) {
-      deferredEvents.add(new DeferredEvent(payload, qualifiers));
+      deferredEvents.add(new DeferredEvent(beanRef, qualifiers));
       return;
     }
 
     final Map<String, Object> messageMap = new HashMap<String, Object>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
-    messageMap.put(CDIProtocol.BeanType.name(), payload.getClass().getName());
-    messageMap.put(CDIProtocol.BeanReference.name(), payload);
+    messageMap.put(CDIProtocol.BeanType.name(), beanRef.getClass().getName());
+    messageMap.put(CDIProtocol.BeanReference.name(), beanRef);
     messageMap.put(CDIProtocol.FromClient.name(), "1");
 
     if (qualifiers != null && qualifiers.length > 0) {
@@ -145,7 +155,7 @@ public class CDI {
 
     consumeEventFromMessage(CommandMessage.createWithParts(messageMap));
 
-    if (isRemoteCommunicationEnabled() && remoteEvents.contains(payload.getClass().getName())) {
+    if (isRemoteCommunicationEnabled() && remoteEvents.contains(beanRef.getClass().getName())) {
       messageMap.put(MessageParts.ToSubject.name(), SERVER_DISPATCHER_SUBJECT);
       ErraiBus.get().send(CommandMessage.createWithParts(messageMap));
     }

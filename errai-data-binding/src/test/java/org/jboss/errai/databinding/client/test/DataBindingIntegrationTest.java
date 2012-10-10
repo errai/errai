@@ -499,11 +499,11 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     final DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "value");
     binder.getModel().setValue("Old Value");
-    class MyHandler implements PropertyChangeHandler {
+    class MyHandler implements PropertyChangeHandler<String> {
       String observedValueWhenEventFired;
 
       @Override
-      public void onPropertyChange(PropertyChangeEvent event) {
+      public void onPropertyChange(PropertyChangeEvent<String> event) {
         observedValueWhenEventFired = binder.getModel().getValue();
       }
     }

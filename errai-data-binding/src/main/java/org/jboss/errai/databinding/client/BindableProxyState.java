@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -72,20 +73,17 @@ public final class BindableProxyState<T> {
     }
   }
 
-  public Map<String, Widget> getBindings() {
-    return bindings;
-  }
-
-  public Map<String, Converter> getConverters() {
-    return converters;
-  }
-
-  public InitialState getInitialState() {
-    return initialState;
+  /**
+   * Returns the set of bound properties of this proxy.
+   * 
+   * @return bound properties, an empty set if no properties have been bound.
+   */
+  public Set<String> getBoundProperties() {
+    return bindings.keySet();
   }
   
   /**
-   * Returns the widget currently bound to the provided property (see {@link #bind(Widget, String, Converter)}).
+   * Returns the widget currently bound to the provided property (see {@link BindableProxy#bind(Widget, String, Converter)}).
    * 
    * @param property
    *          the name of the model property
@@ -96,7 +94,7 @@ public final class BindableProxyState<T> {
   }
 
   /**
-   * Returns the converter used for the binding of the provided property (see {@link #bind(Widget, String, Converter)}).
+   * Returns the converter used for the binding of the provided property (see {@link BindableProxy#bind(Widget, String, Converter)}).
    * 
    * @param property
    *          the name of the model property
@@ -105,5 +103,14 @@ public final class BindableProxyState<T> {
    */
   public Converter getConverter(String property) {
     return converters.get(property);
+  }
+  
+  /**
+   * Returns the {@link InitialState} configured when the proxy was created.
+   * 
+   * @return initial state, can be null.
+   */
+  public InitialState getInitialState() {
+    return initialState;
   }
 }

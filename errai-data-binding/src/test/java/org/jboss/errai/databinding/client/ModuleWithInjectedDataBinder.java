@@ -49,7 +49,7 @@ public class ModuleWithInjectedDataBinder {
     return dataBinder.getModel();
   }
   
-  public DataBinder getDataBinder() {
+  public DataBinder<Model> getDataBinder() {
     return dataBinder;
   }
 }
