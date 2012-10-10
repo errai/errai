@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
@@ -514,5 +515,20 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     binder.getModel().setValue("New New Value");
     assertEquals("New New Value", handler.observedValueWhenEventFired);
+  }
+
+  @Test
+  public void testUpdateWidgets() {
+    Model model = new Model();
+    TextBox textBox = new TextBox();
+    DataBinder<Model> binder = DataBinder.forModel(model).bind(textBox, "value");
+    assertEquals("TextBox should be empty", "", textBox.getText());
+
+    model.setValue("model change");
+
+    // This call is used by Errai JPA, to update the widgets after an entity was updated 
+    // using direct field access (e.g. the id was set).
+    ((BindableProxy<?>) binder.getModel()).updateWidgets();
+    assertEquals("TextBox should have been updated", "model change", textBox.getText());
   }
 }

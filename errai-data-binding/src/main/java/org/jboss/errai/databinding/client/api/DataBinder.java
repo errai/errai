@@ -19,6 +19,7 @@ package org.jboss.errai.databinding.client.api;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
+import org.jboss.errai.databinding.client.BindableProxyState;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 
@@ -250,13 +251,15 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       model = (T) ((BindableProxy<T>) model).unwrap();
     }
 
-    // create a new proxy and copy the bindings
-    BindableProxy<T> newProxy =
-        (BindableProxy<T>) BindableProxyFactory.getBindableProxy(model, initialState);
-
     BindableProxy<T> proxy = ((BindableProxy<T>) this.model);
-    for (String boundProperty : proxy.getBoundProperties()) {
-      newProxy.bind(proxy.getWidget(boundProperty), boundProperty, proxy.getConverter(boundProperty));
+    BindableProxyState<T> proxyState = proxy.getState();
+
+    // create a new proxy and copy the bindings
+    BindableProxy<T> newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(
+        model, (initialState != null) ? initialState : proxyState.getInitialState());
+
+    for (String boundProperty : proxyState.getBindings().keySet()) {
+      newProxy.bind(proxyState.getWidget(boundProperty), boundProperty, proxyState.getConverter(boundProperty));
     }
 
     // unbind the old proxied model
@@ -275,7 +278,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    */
   @SuppressWarnings("unchecked")
   public Widget getWidget(String property) {
-    return ((BindableProxy<T>) this.model).getWidget(Assert.notNull(property));
+    return ((BindableProxy<T>) this.model).getState().getWidget(Assert.notNull(property));
   }
 
   @Override

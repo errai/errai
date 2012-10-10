@@ -39,7 +39,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 @SuppressWarnings("rawtypes")
 public final class BindableProxyState<T> {
-  final Map<String, Class<?>> properties = new HashMap<String, Class<?>>();
+  final Map<String, Class<?>> propertyTypes = new HashMap<String, Class<?>>();
   final Map<String, Widget> bindings = new HashMap<String, Widget>();
   final Map<String, Converter> converters = new HashMap<String, Converter>();
   final Map<String, HandlerRegistration> handlerRegistrations = new HashMap<String, HandlerRegistration>();
@@ -70,5 +70,40 @@ public final class BindableProxyState<T> {
     if (reg != null) {
       reg.removeHandler();
     }
+  }
+
+  public Map<String, Widget> getBindings() {
+    return bindings;
+  }
+
+  public Map<String, Converter> getConverters() {
+    return converters;
+  }
+
+  public InitialState getInitialState() {
+    return initialState;
+  }
+  
+  /**
+   * Returns the widget currently bound to the provided property (see {@link #bind(Widget, String, Converter)}).
+   * 
+   * @param property
+   *          the name of the model property
+   * @return the widget currently bound to the provided property or null if no widget was bound to the property.
+   */
+  public Widget getWidget(String property) {
+    return bindings.get(property);
+  }
+
+  /**
+   * Returns the converter used for the binding of the provided property (see {@link #bind(Widget, String, Converter)}).
+   * 
+   * @param property
+   *          the name of the model property
+   * @return the converter used for the bound property or null if the property was not bound or no converter was
+   *         specified for the binding.
+   */
+  public Converter getConverter(String property) {
+    return converters.get(property);
   }
 }

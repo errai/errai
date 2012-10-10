@@ -19,10 +19,6 @@ package org.jboss.errai.databinding.rebind;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
-import java.util.Set;
-
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
@@ -82,7 +78,6 @@ public class BindableProxyGenerator {
     this.bindable = bindable;
   }
 
-  @SuppressWarnings("serial")
   public ClassStructureBuilder<?> generate() {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.define(bindable.getName() + "Proxy", bindable)
         .packageScope()
@@ -103,14 +98,8 @@ public class BindableProxyGenerator {
                 Variable.get("target"), Variable.get("initialState"))))
         .append(generatePropertiesMap())
         .finish()
-        .publicMethod(Widget.class, "getWidget", Parameter.of(String.class, "property"))
-        .append(field("bindings").invoke("get", Variable.get("property")).returnValue())
-        .finish()
-        .publicMethod(Converter.class, "getConverter", Parameter.of(String.class, "property"))
-        .append(field("converters").invoke("get", Variable.get("property")).returnValue())
-        .finish()
-        .publicMethod(MetaClassFactory.get(new TypeLiteral<Set<String>>() {}), "getBoundProperties")
-        .append(field("bindings").invoke("keySet").returnValue())
+        .publicMethod(BindableProxyState.class, "getState")
+        .append(Stmt.loadClassMember("state").returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")
         .append(Stmt.loadVariable("this").invoke("syncState", Stmt.loadStatic(InitialState.class, "FROM_MODEL")))
@@ -201,7 +190,7 @@ public class BindableProxyGenerator {
                                 Stmt.castTo(HasValue.class, Stmt.loadVariable("widget"))))
                         .append(
                             Stmt.loadVariable("value").assignValue(
-                                field("initialState").invoke("getInitialValue",
+                                Stmt.loadVariable("initialState").invoke("getInitialValue",
                                     Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                     Stmt.loadVariable("hasValue").invoke("getValue"))))
                         .append(
@@ -211,7 +200,7 @@ public class BindableProxyGenerator {
                                         "setValue",
                                         Stmt.invokeStatic(Convert.class, "toWidgetValue",
                                             Variable.get("widget"),
-                                            field("properties").invoke("get", Variable.get("property")),
+                                            field("propertyTypes").invoke("get", Variable.get("property")),
                                             Stmt.loadVariable("value"),
                                             field("converters").invoke("get", Variable.get("property")))))
                                 .finish())
@@ -223,7 +212,7 @@ public class BindableProxyGenerator {
                                 Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))))
                         .append(
                             Stmt.loadVariable("value").assignValue(
-                                field("initialState").invoke("getInitialValue",
+                                Stmt.loadVariable("initialState").invoke("getInitialValue",
                                     Stmt.loadVariable("this").invoke("get", Variable.get("property")),
                                     Stmt.loadVariable("hasText").invoke("getText"))))
                         .append(
@@ -233,7 +222,7 @@ public class BindableProxyGenerator {
                                         "setText",
                                         Stmt.castTo(String.class, Stmt.invokeStatic(Convert.class, "toWidgetValue",
                                             String.class,
-                                            field("properties").invoke("get", Variable.get("property")),
+                                            field("propertyTypes").invoke("get", Variable.get("property")),
                                             Stmt.loadVariable("value"),
                                             field("converters").invoke("get", Variable.get("property"))))))
                                 .finish())
@@ -256,7 +245,7 @@ public class BindableProxyGenerator {
                         .invoke("syncState",
                             field("bindings").invoke("get", Variable.get("property")),
                             Stmt.castTo(String.class, Stmt.loadVariable("property")),
-                            field("initialState")))
+                            Variable.get("initialState")))
                 .finish())
         .finish();
   }
@@ -432,7 +421,7 @@ public class BindableProxyGenerator {
     for (String property : bindable.getBeanDescriptor().getProperties()) {
       MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
       if (!readMethod.isFinal()) {
-        block.addStatement(field("properties").invoke("put", property,
+        block.addStatement(field("propertyTypes").invoke("put", property,
             readMethod.getReturnType().asBoxed().asClass()));
       }
     }
