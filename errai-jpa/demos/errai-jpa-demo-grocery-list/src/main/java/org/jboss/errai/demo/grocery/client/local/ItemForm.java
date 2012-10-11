@@ -3,6 +3,7 @@ package org.jboss.errai.demo.grocery.client.local;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -23,6 +24,8 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
@@ -41,18 +44,31 @@ public class ItemForm extends Composite {
   // Example: property "item.name" tracks the value in the TextBox "name"
   @Inject @AutoBound private DataBinder<Item> itemBinder;
 
-  @Inject @Bound @DataField private TextBox name;
+  @Inject @Bound @DataField private SuggestBox name;
   @Inject @Bound @DataField private TextBox comment;
 
   /**
    * Not bound because the department name belongs to the nested Department
    * object, not the Item.
    */
-  @Inject @DataField private TextBox department;
+  @Inject @DataField private SuggestBox department;
 
   @Inject @DataField private Button saveButton;
 
   private Runnable afterSaveAction;
+
+  @PostConstruct
+  private void setupSuggestions() {
+    MultiWordSuggestOracle iso = (MultiWordSuggestOracle) name.getSuggestOracle();
+    for (Item i : em.createNamedQuery("allItemsByName", Item.class).getResultList()) {
+      iso.add(i.getName());
+    }
+    
+    MultiWordSuggestOracle dso = (MultiWordSuggestOracle) department.getSuggestOracle();
+    for (Department d : em.createNamedQuery("allDepartments", Department.class).getResultList()) {
+      dso.add(d.getName());
+    }
+  }
 
   /**
    * Returns the store instance that is permanently associated with this form.

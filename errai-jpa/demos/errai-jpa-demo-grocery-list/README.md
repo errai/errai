@@ -32,8 +32,10 @@ This app is currently a work in progress. The following items remain to be done:
  * Editing an existing item (by double click on it)
  * Sort items by:
    * Name
-   * Store's department order
-     * With location awareness to suggest this automatically
+   * Department name
+     * Alphabetically
+     * In "store order" (order of visiting departments when walking through store)
+     * With location awareness to suggest a store automatically
    * Date added
  * Google Maps integration for setting up store location
  * Sync data to server using Errai Data Sync

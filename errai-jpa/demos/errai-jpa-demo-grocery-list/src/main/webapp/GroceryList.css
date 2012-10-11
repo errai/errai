@@ -25,7 +25,7 @@ div.item div.moreInfo {
     font-size: 8pt;
     text-align: right;
     float: right;
-    color: #ccc;
+    color: #a5a5a5;
 }
 
 div.item div.department {
@@ -34,4 +34,15 @@ div.item div.department {
 
 div.item.active {
     background: #fafafa;
+}
+
+/* Suggest box Stuff */
+.gwt-SuggestBoxPopup {
+	background: white;
+	border: 1px solid #444;
+	border-radius: 3px;
+}
+
+.gwt-SuggestBoxPopup .item-selected {
+	background: #aaa;
 }
