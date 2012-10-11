@@ -30,6 +30,7 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jpa-client</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -54,13 +55,6 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jsp-api</artifactId>
-      <version>2.0</version>
       <scope>provided</scope>
     </dependency>
 
@@ -205,11 +199,6 @@
       <version>${slf4j.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging</artifactId>
-      <version>3.0.0.Beta4</version>
-    </dependency>
   </dependencies>
 
   <profiles>
@@ -484,13 +473,6 @@
         </dependency>
 
         <dependency>
-          <groupId>org.javassist</groupId>
-          <artifactId>javassist</artifactId>
-          <version>3.15.0-GA</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-tools</artifactId>
           <scope>provided</scope>
@@ -502,6 +484,34 @@
           <artifactId>errai-javax-enterprise</artifactId>
           <version>${project.version}</version>
           <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-api</artifactId>
+            <version>1.1.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-spi</artifactId>
+            <version>1.1.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-core</artifactId>
+            <version>1.1.6.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Exclude development tools -->
@@ -531,6 +541,34 @@
           <artifactId>weld-se-core</artifactId>
           <scope>provided</scope>
           <version>${weld.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.logging</groupId>
+          <artifactId>jboss-logging</artifactId>
+          <version>3.1.0.GA</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>1.6.1</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+          <version>1.6.1</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+          <version>1.2.16</version>
+          <scope>provided</scope>
         </dependency>
 
         <!-- Jetty is used for testing only -->
@@ -631,12 +669,6 @@
           <groupId>javax.servlet</groupId>
           <artifactId>servlet-api</artifactId>
           <version>2.5</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>jsp-api</artifactId>
-          <version>2.0</version>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -807,7 +839,7 @@
         <configuration>
           <strict>true</strict>
           <logLevel>INFO</logLevel>
-          <runTarget>index.jsp</runTarget>
+          <runTarget>index.html</runTarget>
           <extraJvmArgs>
             -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:CompileThreshold=100 -XX:+UseNUMA
 <!--             -Derrai.codegen.permissive=true -Derrai.codegen.printOut=true
@@ -839,7 +871,7 @@
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
-          <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
+          <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class,**/persistence.xml</packagingExcludes>
 
           <webResources>
             <resource>
