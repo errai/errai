@@ -39,18 +39,18 @@ public class TypeRegistry {
   private final Map<AnnotatedType, List<AnnotatedMethod>> serviceMethods = new HashMap<AnnotatedType, List<AnnotatedMethod>>();
   private final Set<Class<?>> remoteInterfaces = new HashSet<Class<?>>();
 
-  public void addServiceEndpoint(AnnotatedType service) {
+  public void addServiceEndpoint(final AnnotatedType service) {
     serviceEndpoints.add(service);
   }
 
-  public void addServiceMethod(AnnotatedType service, AnnotatedMethod method) {
+  public void addServiceMethod(final AnnotatedType service, final AnnotatedMethod method) {
     if (!serviceMethods.containsKey(service)) {
       serviceMethods.put(service, new ArrayList<AnnotatedMethod>());
     }
     serviceMethods.get(service).add(method);
   }
 
-  public void addRemoteInterface(Class<?> intf) {
+  public void addRemoteInterface(final Class<?> intf) {
     remoteInterfaces.add(intf);
   }
 

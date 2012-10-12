@@ -26,7 +26,7 @@ import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
 import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.ioc.client.Bootstrapper;
-import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
+import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.QualifierEqualityFactory;
 import org.jboss.errai.ioc.client.QualifierEqualityFactoryProvider;
@@ -265,7 +265,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
 
               long tm = System.currentTimeMillis();
               new IOCBeanManagerLifecycle().resetBeanManager();
-              BootstrapperInjectionContext ctx = bs.bootstrapContainer();
+              SimpleInjectionContext ctx = bs.bootstrapContainer();
               ctx.getRootContext().finish();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");

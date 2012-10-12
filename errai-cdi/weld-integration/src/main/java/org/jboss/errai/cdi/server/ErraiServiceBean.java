@@ -57,10 +57,10 @@ public class ErraiServiceBean implements Bean {
           asList(ErraiService.class, Object.class)));
 
   @SuppressWarnings("unchecked")
-  public ErraiServiceBean(BeanManager bm, String name) {
+  public ErraiServiceBean(final BeanManager bm, final String name) {
 
     //use this to read annotations of the class
-    AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
+    final AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
 
     //use this to create the class and inject dependencies
     this.it = bm.createInjectionTarget(at);
@@ -105,15 +105,15 @@ public class ErraiServiceBean implements Bean {
   }
 
   @SuppressWarnings("unchecked")
-  public Object create(CreationalContext ctx) {
-    Object instance = ErraiServiceSingleton.getService();
+  public Object create(final CreationalContext ctx) {
+    final Object instance = ErraiServiceSingleton.getService();
     it.inject(instance, ctx);
     it.postConstruct(instance);
     return instance;
   }
 
   @SuppressWarnings("unchecked")
-  public void destroy(Object instance, CreationalContext ctx) {
+  public void destroy(final Object instance, final CreationalContext ctx) {
     it.preDestroy(instance);
     it.dispose(instance);
     ctx.release();

@@ -1,39 +1,23 @@
-/*
- * Copyright 2011 JBoss, by Red Hat, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *  
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package org.jboss.errai.ioc.client.container.async;
 
-package org.jboss.errai.ioc.client.container;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 
 /**
- * Represents a bean inside the container, capturing the type, qualifiers and instance reference for the bean.
- *
  * @author Mike Brock
  */
-public class IOCSingletonBean<T> extends IOCDependentBean<T> {
+public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
   private final T instance;
 
-  private IOCSingletonBean(final IOCBeanManager beanManager,
+  private AsyncSingletonBean(final AsyncBeanManager beanManager,
                            final Class<T> type,
                            final Class<?> beanType,
                            final Annotation[] qualifiers,
                            final String name,
                            final boolean concrete,
-                           final BeanProvider<T> callback,
+                           final AsyncBeanProvider<T> callback,
                            final T instance) {
 
     super(beanManager, type, beanType, qualifiers, name, concrete, callback);
@@ -56,26 +40,21 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
    *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
-  public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
+  public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManager beanManager,
                                           final Class<T> type,
                                           final Class<?> beanType,
                                           final Annotation[] qualifiers,
                                           final String name,
                                           final boolean concrete,
-                                          final BeanProvider<T> callback,
+                                          final AsyncBeanProvider<T> callback,
                                           final T instance) {
 
-    return new IOCSingletonBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback, instance);
+    return new AsyncSingletonBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback, instance);
   }
 
   @Override
-  public T getInstance(final CreationalContext context) {
-    return instance;
-  }
-
-  @Override
-  public T getInstance() {
-    return getInstance(null);
+  public void getInstance(final CreationalCallback<T> callback, final CreationalContext context) {
+    callback.callback(instance);
   }
 
   @Override
@@ -85,6 +64,6 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
 
   @Override
   public String toString() {
-    return "IOCSingletonBean [instance=" + instance + "]";
+    return "AsyncSingletonBean [instance=" + instance + "]";
   }
 }

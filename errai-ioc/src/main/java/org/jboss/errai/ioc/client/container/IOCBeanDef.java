@@ -56,7 +56,7 @@ public interface IOCBeanDef<T> {
   public T getInstance();
 
   /**
-   * Returns an instance of the bean within the active scope, using the specified CreationalContext.
+   * Returns an instance of the bean within the active scope, using the specified SimpleCreationalContext.
    *
    * @param context
    * @return

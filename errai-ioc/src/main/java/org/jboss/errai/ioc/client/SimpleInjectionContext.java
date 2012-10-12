@@ -16,27 +16,28 @@
 
 package org.jboss.errai.ioc.client;
 
-import org.jboss.errai.ioc.client.container.CreationalCallback;
-import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.BeanProvider;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 
-public class BootstrapperInjectionContext {
+public class SimpleInjectionContext implements InjectionContext<BeanProvider> {
   private final IOCBeanManager manager;
-  private final CreationalContext rootContext;
+  private final SimpleCreationalContext rootContext;
 
-  public BootstrapperInjectionContext() {
+  public SimpleInjectionContext() {
     manager = IOC.getBeanManager();
-    rootContext = new CreationalContext(true, manager, ApplicationScoped.class.getName());
+    rootContext = new SimpleCreationalContext(true, manager, ApplicationScoped.class);
   }
 
   @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,
-                      final CreationalCallback callback,
+                      final BeanProvider callback,
                       final Object instance,
                       final Annotation[] qualifiers) {
 
@@ -47,7 +48,7 @@ public class BootstrapperInjectionContext {
   @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,
-                      final CreationalCallback callback,
+                      final BeanProvider callback,
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name) {
@@ -58,7 +59,7 @@ public class BootstrapperInjectionContext {
   @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,
-                      final CreationalCallback callback,
+                      final BeanProvider callback,
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name,
@@ -67,7 +68,7 @@ public class BootstrapperInjectionContext {
     manager.addBean(type, beanType, callback, instance, qualifiers, name, concrete);
   }
 
-  public CreationalContext getRootContext() {
+  public SimpleCreationalContext getRootContext() {
     return rootContext;
   }
 }

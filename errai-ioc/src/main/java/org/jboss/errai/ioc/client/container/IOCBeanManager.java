@@ -75,7 +75,7 @@ public class IOCBeanManager {
 
   private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
                                                     final Class<?> beanType,
-                                                    final CreationalCallback<Object> callback,
+                                                    final BeanProvider<Object> callback,
                                                     final Object instance,
                                                     final Annotation[] qualifiers,
                                                     final String name,
@@ -86,7 +86,7 @@ public class IOCBeanManager {
 
   private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
                                                     final Class<?> beanType,
-                                                    final CreationalCallback<Object> callback,
+                                                    final BeanProvider<Object> callback,
                                                     final Annotation[] qualifiers,
                                                     final String name,
                                                     final boolean concrete) {
@@ -96,7 +96,7 @@ public class IOCBeanManager {
 
   private void registerSingletonBean(final Class<Object> type,
                                      final Class<?> beanType,
-                                     final CreationalCallback<Object> callback,
+                                     final BeanProvider<Object> callback,
                                      final Object instance,
                                      final Annotation[] qualifiers,
                                      final String beanName,
@@ -108,7 +108,7 @@ public class IOCBeanManager {
 
   private void registerDependentBean(final Class<Object> type,
                                      final Class<?> beanType,
-                                     final CreationalCallback<Object> callback,
+                                     final BeanProvider<Object> callback,
                                      final Annotation[] qualifiers,
                                      final String beanName,
                                      final boolean concrete) {
@@ -142,7 +142,7 @@ public class IOCBeanManager {
    */
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final CreationalCallback<Object> callback,
+                      final BeanProvider<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers) {
 
@@ -170,7 +170,7 @@ public class IOCBeanManager {
    */
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final CreationalCallback<Object> callback,
+                      final BeanProvider<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name) {
@@ -202,7 +202,7 @@ public class IOCBeanManager {
    */
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final CreationalCallback<Object> callback,
+                      final BeanProvider<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name,
@@ -229,7 +229,8 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
-    final CreationalContext creationalContext = creationalContextMap.get(getActualBeanReference(ref));
+    final SimpleCreationalContext creationalContext =
+        (SimpleCreationalContext) creationalContextMap.get(getActualBeanReference(ref));
 
     if (creationalContext == null) {
       return;

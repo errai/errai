@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
@@ -74,14 +73,14 @@ import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.ioc.client.Bootstrapper;
-import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
+import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.TestMock;
-import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -250,7 +249,7 @@ public class IOCBootstrapGenerator {
     });
 
     final BlockBuilder<?> blockBuilder =
-        classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer")
+        classStructureBuilder.publicMethod(SimpleInjectionContext.class, "bootstrapContainer")
             .methodComment("The main IOC bootstrap method.");
 
     final SourceWriter sourceWriter = new StringSourceWriter();
@@ -340,9 +339,9 @@ public class IOCBootstrapGenerator {
 
 
     classBuilder.privateField(procContext.getContextVariableReference().getName(), procContext.getContextVariableReference().getType())
-        .modifiers(Modifier.Final).initializesWith(Stmt.newObject(BootstrapperInjectionContext.class)).finish();
+        .modifiers(Modifier.Final).initializesWith(Stmt.newObject(SimpleInjectionContext.class)).finish();
 
-    classBuilder.privateField("context", CreationalContext.class).modifiers(Modifier.Final)
+    classBuilder.privateField("context", SimpleCreationalContext.class).modifiers(Modifier.Final)
         .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
             .invoke("getRootContext")).finish();
 

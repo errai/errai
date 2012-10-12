@@ -1,7 +1,8 @@
-package org.jboss.errai.ioc.rebind.ioc.injector;
+package org.jboss.errai.ioc.rebind.ioc.injector.basic;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import org.jboss.errai.codegen.Modifier;
@@ -20,11 +21,15 @@ import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
-import org.jboss.errai.ioc.client.container.CreationalCallback;
+import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
@@ -147,7 +152,7 @@ public class ProducerInjector extends AbstractInjector {
 
     final BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
 
-    final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
+    final MetaClass creationCallbackRef = parameterizedAs(BeanProvider.class,
         typeParametersOf(injectedType));
 
     final String var = InjectUtil.getUniqueVarName();
@@ -169,7 +174,7 @@ public class ProducerInjector extends AbstractInjector {
     return registerDestructorCallback(
         injectionContext,
         callbackBuilder,
-        loadVariable("context").invoke("getSingletonInstanceOrNew",
+        castTo(SimpleCreationalContext.class, loadVariable("context")).invoke("getSingletonInstanceOrNew",
             Stmt.loadVariable("injContext"),
             Stmt.loadVariable(var),
             Stmt.load(injectedType),
@@ -255,7 +260,7 @@ public class ProducerInjector extends AbstractInjector {
 
     creationalCallbackRendered = true;
 
-    final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
+    final MetaClass creationCallbackRef = parameterizedAs(BeanProvider.class,
         typeParametersOf(injectedType));
 
     final String var = InjectUtil.getUniqueVarName();

@@ -282,7 +282,7 @@ public abstract class AbstractInjector implements Injector {
     this.softDisabled = softDisabled;
   }
 
-  void disableSoftly() {
+  protected void disableSoftly() {
     this.enabled = false;
     this.softDisabled = true;
   }

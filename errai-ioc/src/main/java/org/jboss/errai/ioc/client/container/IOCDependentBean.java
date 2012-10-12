@@ -28,7 +28,7 @@ import java.util.HashSet;
  */
 public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   protected final IOCBeanManager beanManager;
-  protected final CreationalCallback<T> creationalCallback;
+  protected final BeanProvider<T> beanProvider;
 
   protected IOCDependentBean(final IOCBeanManager beanManager,
                              final Class<T> type,
@@ -36,7 +36,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
                              final Annotation[] qualifiers,
                              final String name,
                              final boolean concrete,
-                             final CreationalCallback<T> creationalCallback) {
+                             final BeanProvider<T> beanProvider) {
     this.beanManager = beanManager;
     this.type = type;
     this.beanType = beanType;
@@ -50,7 +50,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
     this.name = name;
     this.concrete = concrete;
-    this.creationalCallback = creationalCallback;
+    this.beanProvider = beanProvider;
   }
 
   public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
@@ -59,15 +59,15 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
                                           final Annotation[] qualifiers,
                                           final String name,
                                           final boolean concrete,
-                                          final CreationalCallback<T> callback) {
+                                          final BeanProvider<T> callback) {
     return new IOCDependentBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback);
   }
 
   @Override
   public T newInstance() {
-    final CreationalContext context = new CreationalContext(beanManager, Dependent.class.getName());
+    final SimpleCreationalContext context = new SimpleCreationalContext(beanManager, Dependent.class);
     try {
-      return creationalCallback.getInstance(context);
+      return beanProvider.getInstance(context);
     }
     finally {
       context.finish();
@@ -76,7 +76,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T getInstance() {
-    final CreationalContext context = new CreationalContext(beanManager, Dependent.class.getName());
+    final SimpleCreationalContext context = new SimpleCreationalContext(beanManager, Dependent.class);
     try {
       return getInstance(context);
     }
@@ -87,7 +87,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T getInstance(final CreationalContext context) {
-    return creationalCallback.getInstance(context);
+    return beanProvider.getInstance(context);
   }
 
   @Override

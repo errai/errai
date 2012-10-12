@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
+import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
@@ -61,7 +61,7 @@ public class IOCProcessingContext {
 
   protected final SourceWriter writer;
 
-  protected final Variable contextVariable = Variable.create("injContext", BootstrapperInjectionContext.class);
+  protected final Variable contextVariable = Variable.create("injContext", SimpleInjectionContext.class);
 
   protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
