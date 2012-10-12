@@ -6,6 +6,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -39,6 +41,8 @@ public class ItemForm extends Composite {
 
   @Inject private EntityManager em;
 
+  @Inject private Event<Item> newItemEvent;
+  
   // injecting this data binder causes automatic binding between
   // the properties of Item and the like-named @DataField members in this class
   // Example: property "item.name" tracks the value in the TextBox "name"
@@ -47,8 +51,8 @@ public class ItemForm extends Composite {
   @Inject @Bound @DataField private SuggestBox name;
   @Inject @Bound @DataField private TextBox comment;
 
-  /**
-   * Not bound because the department name belongs to the nested Department
+  /*
+   * Not @Bound because the department name belongs to the nested Department
    * object, not the Item.
    */
   @Inject @DataField private SuggestBox department;
@@ -70,6 +74,12 @@ public class ItemForm extends Composite {
     }
   }
 
+  @SuppressWarnings("unused")
+  private void onNewItem(@Observes Item newItem) {
+    System.out.println("ItemForm@" + System.identityHashCode(this) + " got new item event");
+    ((MultiWordSuggestOracle) name.getSuggestOracle()).add(newItem.getName());
+  }
+  
   /**
    * Returns the store instance that is permanently associated with this form.
    * The returned instance is bound to this store's fields: updates to the form
@@ -123,6 +133,7 @@ public class ItemForm extends Composite {
     em.persist(itemBinder.getModel());
     em.flush();
 
+    
     if (afterSaveAction != null) {
       afterSaveAction.run();
     }

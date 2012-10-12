@@ -1,22 +1,21 @@
 package org.jboss.errai.demo.grocery.client.shared;
 
-import java.util.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 
-import org.jboss.errai.databinding.client.api.Bindable;
-
-@Bindable
+/**
+ * Represents an item that is in or has been in the grocery list. This is used
+ * mostly as a source of suggestions for autocompletion.
+ * 
+ * @author jfuerth
+ */
 @Entity
-@EntityListeners(EventTranslator.ItemLifecycleListener.class)
-@NamedQuery(name="allItemsByName", query="SELECT i FROM Item i ORDER BY i.name")
-public class Item {
+@NamedQuery(name="allHistoricalItems", query="SELECT i FROM HistoricalItem i")
+public class HistoricalItem {
 
   @Id @GeneratedValue
   private long id;
@@ -25,26 +24,6 @@ public class Item {
 
   @ManyToOne(cascade={CascadeType.PERSIST, CascadeType.REFRESH})
   private Department department;
-
-  private String comment;
-
-  @ManyToOne(cascade={CascadeType.PERSIST, CascadeType.REFRESH})
-  private User addedBy;
-
-  public User getAddedBy() {
-    return addedBy;
-  }
-  public void setAddedBy(User addedBy) {
-    this.addedBy = addedBy;
-  }
-  public Date getAddedOn() {
-    return addedOn;
-  }
-  public void setAddedOn(Date addedOn) {
-    this.addedOn = addedOn;
-  }
-
-  private Date addedOn;
 
   public long getId() {
     return id;
@@ -61,13 +40,6 @@ public class Item {
   public void setDepartment(Department department) {
     this.department = department;
   }
-  public String getComment() {
-    return comment;
-  }
-  public void setComment(String comment) {
-    this.comment = comment;
-  }
-
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -84,13 +56,13 @@ public class Item {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    Item other = (Item) obj;
+    HistoricalItem other = (HistoricalItem) obj;
     if (id != other.id)
       return false;
     return true;
   }
   @Override
   public String toString() {
-    return "Item [id=" + id + ", name=" + name + ", comment=" + comment + "]";
+    return "HistoricalItem [id=" + id + ", name=" + name + ", department=" + department + "]";
   }
 }
