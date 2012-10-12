@@ -1,12 +1,13 @@
 package org.jboss.errai.demo.grocery.client.shared;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 /**
  * Represents a grocery list: a collection of {@link Item grocery items} that is
@@ -23,7 +24,18 @@ public class GroceryList {
   @ManyToOne
   private User owner;
   
-  private Set<Item> items = new HashSet<Item>();
+  @OneToMany
+  private List<Item> items = new ArrayList<Item>();
   
+  public long getId() {
+    return id;
+  }
   
+  public User getOwner() {
+    return owner;
+  }
+  
+  public List<Item> getItems() {
+    return items;
+  }
 }

@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.TextBox;
 public class ItemForm extends Composite {
 
   @Inject private EntityManager em;
+  @Inject private User user;
 
   @Inject private Event<Item> newItemEvent;
   
@@ -123,11 +124,7 @@ public class ItemForm extends Composite {
     }
     itemBinder.getModel().setDepartment(resolvedDepartment);
 
-    // TODO inject an application-scoped currentUser
-    User fakeUser = new User();
-    fakeUser.setName("me");
-
-    itemBinder.getModel().setAddedBy(fakeUser);
+    itemBinder.getModel().setAddedBy(user);
     itemBinder.getModel().setAddedOn(new Date());
 
     em.persist(itemBinder.getModel());

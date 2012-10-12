@@ -3,6 +3,7 @@ package org.jboss.errai.demo.grocery.client.shared;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 
 /**
  * Represents a user of the grocery list application.
@@ -10,6 +11,7 @@ import javax.persistence.Id;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Entity
+@NamedQuery(name="allUsers", query="SELECT u FROM User u")
 public class User {
 
   @Id @GeneratedValue

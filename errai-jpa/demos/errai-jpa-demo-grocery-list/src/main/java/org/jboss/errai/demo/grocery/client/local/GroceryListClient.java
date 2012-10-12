@@ -1,8 +1,14 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.jboss.errai.demo.grocery.client.shared.User;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -21,6 +27,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * the page URL.
  */
 @Templated("#main")
+@ApplicationScoped
 @EntryPoint
 public class GroceryListClient extends Composite {
 
@@ -39,4 +46,25 @@ public class GroceryListClient extends Composite {
     RootPanel.get().add(this);
   }
 
+  @Produces @ApplicationScoped
+  private User getUser(EntityManager em) {
+    // XXX Of course, this only works if all the data is local.
+    // When there is a server side to this demo, we will always have to authenticate with it before
+    // we can produce a User instance capable of syncing.
+    List<User> users = em.createNamedQuery("allUsers", User.class).getResultList();
+    
+    final User user;
+    if (users.isEmpty()) {
+      User newUser = new User();
+      newUser.setName("me");
+      em.persist(newUser);
+      em.flush();
+      user = newUser;
+    }
+    else {
+      user = users.get(0);
+    }
+    
+    return user;
+  }
 }
