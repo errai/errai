@@ -159,7 +159,13 @@
                     <version>${project.version}</version>
                     <scope>provided</scope>
                 </dependency>
-
+                
+                 <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-data-binding</artifactId>
+                    <version>${project.version}</version>
+                    <scope>provided</scope>
+                </dependency>
             </dependencies>
 
             <build>
@@ -314,13 +320,6 @@
                     <version>${project.version}</version>
                 </dependency>
                 
-                <dependency>
-                    <groupId>org.jboss.errai</groupId>
-                    <artifactId>errai-data-binding</artifactId>
-                    <version>${project.version}</version>
-                    <scope>test</scope>
-                </dependency>
-
                 <!-- CDI Development Utils -->
                 <!-- This must be placed above com.google.gwt:gwt-dev to override the
                             Jetty that is present there -->
@@ -410,7 +409,13 @@
                     <version>${project.version}</version>
                     <scope>provided</scope>
                 </dependency>
-
+                
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-data-binding</artifactId>
+                    <version>${project.version}</version>
+                    <scope>provided</scope>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>
