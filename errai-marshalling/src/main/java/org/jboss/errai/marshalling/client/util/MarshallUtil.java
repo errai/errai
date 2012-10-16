@@ -16,9 +16,6 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -75,55 +72,63 @@ public class MarshallUtil {
 
   public static void jsonStringEscape(final StringBuilder sb, final char ch) {
     switch (ch) {
-      case '"':
-        sb.append("\\\"");
-        break;
-      case '\\':
-        sb.append("\\\\");
-        break;
-      case '\b':
-        sb.append("\\b");
-        break;
-      case '\f':
-        sb.append("\\f");
-        break;
-      case '\n':
-        sb.append("\\n");
-        break;
-      case '\r':
-        sb.append("\\r");
-        break;
-      case '\t':
-        sb.append("\\t");
-        break;
-      case '/':
-        sb.append("\\/");
-        break;
-      default:
-        if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F')
+    case '"':
+      sb.append("\\\"");
+      break;
+    case '\\':
+      sb.append("\\\\");
+      break;
+    case '\b':
+      sb.append("\\b");
+      break;
+    case '\f':
+      sb.append("\\f");
+      break;
+    case '\n':
+      sb.append("\\n");
+      break;
+    case '\r':
+      sb.append("\\r");
+      break;
+    case '\t':
+      sb.append("\\t");
+      break;
+    case '/':
+      sb.append("\\/");
+      break;
+    default:
+      if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F')
                 || (ch >= '\u2000')) {
 
-          final String ss = Integer.toHexString(ch);
-          sb.append("\\u");
-          for (int k = 0; k < 4 - ss.length(); k++) {
-            sb.append('0');
-          }
-          sb.append(ss.toUpperCase());
+        final String ss = Integer.toHexString(ch);
+        sb.append("\\u");
+        for (int k = 0; k < 4 - ss.length(); k++) {
+          sb.append('0');
         }
-        else {
-          sb.append(ch);
-        }
+        sb.append(ss.toUpperCase());
+      }
+      else {
+        sb.append(ch);
+      }
     }
   }
 
   public static Marshaller<Object> getMarshaller(Object obj, final MarshallingSession session) {
-    Marshaller<Object> m = session.getMarshallerInstance(obj.getClass().getName());
+    final String className;
+    if (obj instanceof Enum<?>) {
+      className = ((Enum<?>) obj).getDeclaringClass().getName();
+    }
+    else {
+      className = obj.getClass().getName();
+    }
+
+    Marshaller<Object> m = session.getMarshallerInstance(className);
     if (m == null && obj instanceof WrappedPortable) {
       obj = ((WrappedPortable) obj).unwrap();
-      m = session.getMarshallerInstance(obj.getClass().getName());
+      m = session.getMarshallerInstance(className);
     }
     if (m == null) {
-      throw new RuntimeException("no marshalling definition available for type:" + obj.getClass().getName());
+      throw new RuntimeException("no marshalling definition available for type:" + className);
     }
     return m;
   }
@@ -138,8 +143,9 @@ public class MarshallUtil {
 
   /**
    * Returns the canonical class name of the component type of the given array type.
-   *
-   * @param fqcn An array type of any number of dimensions, such as {@code [[Ljava.lang.String;}.
+   * 
+   * @param fqcn
+   *          An array type of any number of dimensions, such as {@code [[Ljava.lang.String;}.
    * @return A class name, such as {@code java.lang.String}.
    */
   public static String getComponentClassName(String fqcn) {

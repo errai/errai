@@ -47,14 +47,6 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.mvel2.DataConversion;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-
 /**
  * @author Mike Brock
  */
