@@ -34,6 +34,7 @@ import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
@@ -407,6 +408,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public EntityWithMapUsingSubtypeValues testEntityWithMapUsingSubtypeValues(EntityWithMapUsingSubtypeValues e) {
+    return e;
+  }
+
+  @Override
+  public EntityWithInterfaceField testEntityWithInterfaceField(EntityWithInterfaceField e) {
     return e;
   }
 }
