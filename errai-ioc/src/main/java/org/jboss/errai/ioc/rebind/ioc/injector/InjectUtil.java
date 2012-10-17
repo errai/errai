@@ -477,7 +477,7 @@ public class InjectUtil {
       return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
     }
     else {
-      //todo: refactor the InjectionContext to provide a cleaner API for interface delegates
+      //todo: refactor the BootstrapInjectionContext to provide a cleaner API for interface delegates
 
       // try to inject it
       try {

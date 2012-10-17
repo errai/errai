@@ -283,6 +283,12 @@ public class InjectionContext {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
 
+  /**
+   * Marks the proxy for te specified type and qualifying metadata closed.
+   *
+   * @param injectorType
+   * @param qualifyingMetadata
+   */
   public void markProxyClosedIfNeeded(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       final Collection<Injector> collection = proxiedInjectors.get(injectorType.getErased());

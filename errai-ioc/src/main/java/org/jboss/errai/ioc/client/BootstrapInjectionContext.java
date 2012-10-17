@@ -7,7 +7,7 @@ import java.lang.annotation.Annotation;
 /**
  * @author Mike Brock
  */
-public interface InjectionContext<C> {
+public interface BootstrapInjectionContext<C> {
   public void addBean(final Class type,
                       final Class beanType,
                       final C callback,

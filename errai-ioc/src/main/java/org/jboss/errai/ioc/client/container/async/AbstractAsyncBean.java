@@ -50,7 +50,9 @@ public abstract class AbstractAsyncBean<T> implements AsyncBeanDef<T> {
   /**
    * Returns true if the underlying bean contains all of the annotations specified.
    *
-   * @param annotations a set of annotations to compare
+   * @param annotations
+   *     a set of annotations to compare
+   *
    * @return true if matches
    */
   public boolean matches(final Set<Annotation> annotations) {

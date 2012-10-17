@@ -69,7 +69,7 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
    *
    * @param callback
    *     the {@link BeanProvider} to be called in order to instantiate the bean if it is not already
-   *     available withint he current creational context.
+   *     available without he current creational context.
    * @param beanType
    *     the type of the bean
    * @param qualifiers
@@ -109,7 +109,7 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
    *     the {@link org.jboss.errai.ioc.client.SimpleInjectionContext} of the container
    * @param callback
    *     the {@link BeanProvider} to be called in order to instantiate the bean if it is not already
-   *     available withint he current creational context.   * @param beanType
+   *     available without he current creational context.   * @param beanType
    * @param qualifiers
    *     the qualifiers for the bean
    * @param <T>

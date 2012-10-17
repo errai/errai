@@ -1,8 +1,6 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import com.apple.eawt.Application;
-import org.jboss.errai.ioc.client.InjectionContext;
-import org.jboss.errai.ioc.client.container.BeanProvider;
+import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.container.IOC;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -11,7 +9,7 @@ import java.lang.annotation.Annotation;
 /**
  * @author Mike Brock
  */
-public class AsyncInjectionContext implements InjectionContext<AsyncBeanProvider> {
+public class AsyncInjectionContext implements BootstrapInjectionContext<AsyncBeanProvider> {
   private final AsyncBeanManager manager;
   private final AsyncCreationalContext context;
 

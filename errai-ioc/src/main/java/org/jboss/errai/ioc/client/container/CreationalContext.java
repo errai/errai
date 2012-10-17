@@ -118,7 +118,7 @@ public interface CreationalContext {
    * After a creational context has added all beans to the context, calling {@link #finish()} will result in all of
    * the provided {@link ProxyResolver}s being executed.
    * <p/>
-   * This method is typically called directly by the generated bootstapper.
+   * This method is typically called directly by the generated bootstrapper.
    *
    * @param proxyResolver
    *     the {@link ProxyResolver} used for handling closure of the cycle.

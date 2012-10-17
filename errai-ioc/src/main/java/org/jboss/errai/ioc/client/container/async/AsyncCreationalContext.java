@@ -1,7 +1,6 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.ioc.client.InjectionContext;
-import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
 import org.jboss.errai.ioc.client.container.BeanRef;
 
@@ -43,7 +42,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     }
   }
 
-  public <T> T getSingletonInstanceOrNew(final InjectionContext<AsyncBeanProvider> injectionContext,
+  public <T> T getSingletonInstanceOrNew(final BootstrapInjectionContext<AsyncBeanProvider> injectionContext,
                                          final AsyncBeanProvider<T> beanProvider,
                                          final CreationalCallback<T> creationalCallback,
                                          final Class<?> beanType,

@@ -20,12 +20,11 @@ import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 
-public class SimpleInjectionContext implements InjectionContext<BeanProvider> {
+public class SimpleInjectionContext implements BootstrapInjectionContext<BeanProvider> {
   private final IOCBeanManager manager;
   private final SimpleCreationalContext rootContext;
 

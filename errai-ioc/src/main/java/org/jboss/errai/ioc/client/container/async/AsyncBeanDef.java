@@ -10,77 +10,82 @@ import java.util.Set;
  */
 public interface AsyncBeanDef<T> {
   /**
-     * Returns the type of the bean.
-     *
-     * @see #getBeanClass()
-     * @return the type of the bean.
-     */
-    public Class<T> getType();
+   * Returns the type of the bean.
+   *
+   * @return the type of the bean.
+   *
+   * @see #getBeanClass()
+   */
+  public Class<T> getType();
 
 
-    /**
-     * Returns the actual bean class represented by this bean.
-     *
-     * @return the actual type of the bean.
-     */
-    public Class<?> getBeanClass();
+  /**
+   * Returns the actual bean class represented by this bean.
+   *
+   * @return the actual type of the bean.
+   */
+  public Class<?> getBeanClass();
 
-    /**
-     * Returns the scope of the bean.
-     *
-     * @returns the annotation type representing the scope of the bean.
-     */
-    public Class<? extends Annotation> getScope();
+  /**
+   * Returns the scope of the bean.
+   *
+   * @returns the annotation type representing the scope of the bean.
+   */
+  public Class<? extends Annotation> getScope();
 
-    /**
-     * Returns an instance of the bean within the active scope.
-     *
-     * @return The bean instance.
-     */
-    public void getInstance(CreationalCallback<T> callback);
+  /**
+   * Returns an instance of the bean within the active scope.
+   *
+   * @return The bean instance.
+   */
+  public void getInstance(CreationalCallback<T> callback);
 
-    /**
-     * Returns an instance of the bean within the active scope, using the specified SimpleCreationalContext.
-     *
-     * @param context
-     * @return
-     */
-    void getInstance(CreationalCallback<T> callback, CreationalContext context);
+  /**
+   * Returns an instance of the bean within the active scope, using the specified SimpleCreationalContext.
+   *
+   * @param context
+   *
+   * @return
+   */
+  void getInstance(CreationalCallback<T> callback, CreationalContext context);
 
-    /**
-     * Returns a new instance of the bean. Calling this method overrides the underlying scope and instantiates a new
-     * instance of the bean.
-     *
-     * @return a new instance of the bean.
-     */
-    public void newInstance(CreationalCallback<T> callback);
+  /**
+   * Returns a new instance of the bean. Calling this method overrides the underlying scope and instantiates a new
+   * instance of the bean.
+   *
+   * @return a new instance of the bean.
+   */
+  public void newInstance(CreationalCallback<T> callback);
 
-    /**
-     * Returns any qualifiers associated with the bean.
-     * @return
-     */
-    public Set<Annotation> getQualifiers();
+  /**
+   * Returns any qualifiers associated with the bean.
+   *
+   * @return
+   */
+  public Set<Annotation> getQualifiers();
 
 
-    /**
-     * Returns true if the beans qualifiers match the specified set of qualifiers.
-     *
-     * @param annotations the qualifiers to compare
-     * @return returns whether or not the bean matches the set of qualifiers
-     */
-    public boolean matches(Set<Annotation> annotations);
+  /**
+   * Returns true if the beans qualifiers match the specified set of qualifiers.
+   *
+   * @param annotations
+   *     the qualifiers to compare
+   *
+   * @return returns whether or not the bean matches the set of qualifiers
+   */
+  public boolean matches(Set<Annotation> annotations);
 
-    /**
-     * Returns the name of the bean.
-     *
-     * @return the name of the bean. If the bean does not have a name, returns null.
-     */
-    public String getName();
+  /**
+   * Returns the name of the bean.
+   *
+   * @return the name of the bean. If the bean does not have a name, returns null.
+   */
+  public String getName();
 
-    /**
-     * Returns true if the bean is a concrete bean definition and not an interface or abstract type.
-     *
-     * @return true if concrete.
-     */
-    public boolean isConcrete();
+  /**
+   * Returns true if the bean is a concrete bean definition and not an interface or abstract type.
+   *
+   * @return true if concrete.
+   */
+  public boolean isConcrete();
 }

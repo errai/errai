@@ -66,7 +66,6 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
       public void callback(final T beanInstance) {
         callback.callback(beanInstance);
         context.finish();
-
       }
     }, context);
   }
