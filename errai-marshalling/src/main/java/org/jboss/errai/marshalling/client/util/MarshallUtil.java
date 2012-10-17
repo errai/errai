@@ -114,7 +114,7 @@ public class MarshallUtil {
   }
 
   public static Marshaller<Object> getMarshaller(Object obj, final MarshallingSession session) {
-    final String className;
+    String className;
     if (obj instanceof Enum<?>) {
       className = ((Enum<?>) obj).getDeclaringClass().getName();
     }
@@ -124,7 +124,7 @@ public class MarshallUtil {
 
     Marshaller<Object> m = session.getMarshallerInstance(className);
     if (m == null && obj instanceof WrappedPortable) {
-      obj = ((WrappedPortable) obj).unwrap();
+      className = ((WrappedPortable) obj).unwrap().getClass().getName(); 
       m = session.getMarshallerInstance(className);
     }
     if (m == null) {
