@@ -150,6 +150,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean reinit = false;
   private boolean postInit = false;
   private boolean stateSyncInProgress = false;
+  private boolean sessionReEstablish = false;
 
   /**
    * The unique ID that will sent with the next request.
@@ -984,31 +985,33 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 else {
                   InitVotes.voteFor(ClientMessageBus.class);
                 }
+
                 // end of FinishStateSync Timer
               }
             }.schedule(5);
             break;
 
           case SessionExpired:
-            if (isReinit()) {
-              showError("session was terminated and could not be re-established", null);
-              return;
+            if (!sessionReEstablish) {
+              sessionReEstablish = true;
+
+              if (isReinit()) {
+                showError("session was terminated and could not be re-established", null);
+                return;
+              }
+
+              if (!isInitialized()) return;
+
+              LogUtil.log("http session has expired. resetting bus and attempting reconnection.");
+
+              for (final SessionExpirationListener listener : sessionExpirationListeners) {
+                listener.onSessionExpire();
+              }
+
+              stop(false);
+              init();
             }
 
-            if (!isInitialized()) return;
-
-            LogUtil.log("http session has expired. resetting bus and attempting reconnection.");
-
-            for (final SessionExpirationListener listener : sessionExpirationListeners) {
-              listener.onSessionExpire();
-            }
-
-            stop(false);
-
-         //   setReinit(true);
-
-            init();
-        //    setReinit(false);
             break;
 
           case WebsocketChannelVerify:
@@ -1115,6 +1118,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       setInitialized(true);
 
       LogUtil.log("bus federation complete. now operating normally.");
+
+      stateSyncInProgress = false;
+      sessionReEstablish = false;
     }
   }
 
