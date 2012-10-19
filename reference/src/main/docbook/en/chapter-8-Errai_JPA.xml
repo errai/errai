@@ -103,7 +103,7 @@
       <title>Getting Started</title>
       <section id="sid-54493688_ErraiJPA-Compiletimedependency">
          <title>Compile-time dependency</title>
-         <para>To use Errai UI Navigation, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</para>
+         <para>To use Errai JPA, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</para>
          <informalexample>
             <programlisting language="xml">
     &lt;dependency&gt;
@@ -122,7 +122,7 @@
       <section id="sid-54493688_ErraiJPA-GWTModuleDescriptor">
          <title>GWT Module Descriptor</title>
          <para>
-          Once you have Errai UI Navigation on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's
+          Once you have Errai JPA on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's
           <code>*.gwt.xml</code>
           file:
         </para>
@@ -916,6 +916,12 @@ public class StandaloneLifecycleListener {
                </para>
             </listitem>
             <listitem>
+               <para>
+                  <code>EntityManager.refresh()</code>
+              to pick up changes made in localStorage from a different browser window/tab.
+            </para>
+            </listitem>
+            <listitem>
                <para>Criteria Queries</para>
                <itemizedlist>
                   <listitem>
@@ -945,12 +951,6 @@ public class StandaloneLifecycleListener {
                <para>
                   <code>EntityManager.createNativeQuery(String, ...)</code>
               don't make sense because the underlying database is just a hash table. It does not have a query language.
-            </para>
-            </listitem>
-            <listitem>
-               <para>
-                  <code>EntityManager.refresh()</code>
-              is not implemented, but since nothing else updates the underlying database, this should not pose a problem.
             </para>
             </listitem>
             <listitem>
