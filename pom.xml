@@ -20,7 +20,7 @@
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.1.Final</version>
     <packaging>pom</packaging>
 
     <url>http://jboss.org/errai/errai</url>
