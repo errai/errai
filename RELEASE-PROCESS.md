@@ -58,13 +58,13 @@ Release Steps
 1. Update quickstart docs to reflect the new version number
 
 1. Ask Maven to update the version number in all the pom.xml files:
-
-       cd into the errai root directory   
-       % mvn versions:set -DnewVersion=x.y.z.Final
-       
+   
+        % cd $errai_root_dir
+        % mvn versions:set -DnewVersion=x.y.z.Final
+   
    Afterward, verify that all subprojects reference the new parent pom's version:
    
-       find . -name pom.xml | xargs grep x.y.z | grep SNAP
+       % find . -name pom.xml | xargs grep x.y.z | grep SNAP
        
    (if any are out of sync with the parent version, Maven will not have updated them)
 
@@ -75,48 +75,58 @@ Release Steps
 
 1. Publish new quickstart archetypes to Nexus repo (both snapshots and released version)
 
-    % cd $somewhere/archetypes
-    % mvn versions:set -DnewVersion=x.y.z.Final
+       % cd $somewhere/archetypes
+       % mvn versions:set -DnewVersion=x.y.z.Final
     
-   Afterward, verify that all subprojects reference the new parent pom's version: find . -name pom.xml | xargs grep x.y.z | grep SNAP
+   Afterward, verify that all subprojects reference the new parent pom's version:
+
+       % find . -name pom.xml | xargs grep x.y.z | grep SNAP
+
+   Then publish the archetypes to the repository:
    
-    % mvn clean deploy
+       % mvn clean deploy
     
-   * Note that the kitschensink archetype is tested automatically. For the test to work, AS7 has to be running.
+   * Note that the kitschensink archetype is tested automatically. For the test to work,
+     AS7 has to be running.
    * Now test the archetypes you just installed (use instructions from quickstart guides)
      * Check generated app's pom.xml for correct version
 
-      % mvn gwt:run
+            % mvn gwt:run
 
 1. Create the a-la-carte binary Errai distribution and docs
 
-    % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
+       % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
 
 1. Upload the docs and the distro zipfile
 
-    % cd dist
-    % scripts/upload_binaries.sh ${version}
+       % cd dist
+       % scripts/upload_binaries.sh ${version}
 
 1. Tag and push the release to github (DO THIS FOR BOTH ERRAI AND ITS ARCHETYPES):
 
-    % git commit a -m "Updated to new version x.y.z"
-    % git tag x.y.z.Final
+       % git commit a -m "Updated to new version x.y.z"
+       % git tag x.y.z.Final
     
   reset all versions to x.y.z+1-SNAPSHOT and commit
   
-    % git push origin /branch/
-    % git push origin --tags
-    % git push upstream /branch/
-    % git push upstream --tags
+       % git push origin /branch/
+       % git push origin --tags
+       % git push upstream /branch/
+       % git push upstream --tags
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
-   Find the corresponding staging repository (Sort by repository name)
-   Select it and click Close
-   Select it again and click Release
-   Browse to https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/ and verify that artifact are present
+   * Find the corresponding staging repository (Sort by repository name)
+   * Select it and click Close
+   * Select it again and click Release
+   * Browse to https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/
+     and verify that the artifacts are present
 
 1. Update http://www.jboss.org/errai/Documentation to provide the download links for
-   the generated/released docs and distribution. Also update the announcement on the welcome page (https://www.jboss.org/author/)
+   the generated/released docs and distribution.
+
+1. Update the announcement on the welcome page (https://www.jboss.org/author/)
+
+1. Publish a release blog entry at http://errai-blog.blogspot.com/
 
 1. Tweet about the release!
 
