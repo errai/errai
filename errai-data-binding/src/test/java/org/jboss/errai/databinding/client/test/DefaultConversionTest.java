@@ -14,7 +14,7 @@ import org.junit.Test;
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ConvertUnitTest {
+public class DefaultConversionTest {
 
   @Test
   public void testStringToString() throws Exception {

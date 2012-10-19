@@ -52,11 +52,6 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     return "org.jboss.errai.databinding.DataBindingTestModule";
   }
 
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-  }
-
   @Test
   public void testBasicBinding() {
     TextBox textBox = new TextBox();
@@ -85,7 +80,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingOfHasText() {
+  public void testBindingOfReadOnlyField() {
     Label label = new Label();
     Model model = DataBinder.forType(Model.class).bind(label, "id").getModel();
 
@@ -94,7 +89,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingOfIntegerToString() {
+  public void testBindingWithDefaultConversion() {
     TextBox textBox = new TextBox();
     Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
 
@@ -148,7 +143,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testMultipleBindings() {
+  public void testBindingOfMultipleProperties() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox valueTextBox = new TextBox();
     binder.bind(valueTextBox, "value");
@@ -217,7 +212,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingWithModelChange() {
+  public void testBindingWithModelInstanceChange() {
     DataBinder<Model> binder = DataBinder.forType(Model.class);
     TextBox textBox = new TextBox();
     binder.bind(textBox, "name");
@@ -257,7 +252,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingSpecificConverter() {
+  public void testBindingWithSpecificConverter() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
@@ -281,7 +276,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingSpecificConverterWithNullValues() {
+  public void testBindingWithSpecificConverterAndNullValues() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
@@ -305,7 +300,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingRetainsConverterAfterModelChange() {
+  public void testBindingRetainsConverterAfterModelInstanceChange() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
@@ -355,7 +350,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testGlobalDefaultConverter() {
+  public void testBindingWithGlobalDefaultConverter() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
@@ -381,7 +376,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testGlobalDefaultConverterWithNullValues() {
+  public void testBindingWithGlobalDefaultConverterAndNullValues() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {
@@ -407,7 +402,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testAutoRegisteredGlobalDefaultConverter() {
+  public void testBindingWithAutoRegisteredDefaultConverter() {
     TextBox textBox = new TextBox();
     Model model = DataBinder.forType(Model.class).bind(textBox, "active").getModel();
 
