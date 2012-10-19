@@ -23,7 +23,7 @@ Release Steps
 
 1. Run the test suite. Ensure all tests pass.
 
-    % mvn -Pintegration-test test
+        % mvn -Pintegration-test test
    
 1. Export docbook from confluence for /reference
   * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833085
@@ -62,54 +62,54 @@ Release Steps
    
    Afterward, verify that all subprojects reference the new parent pom's version:
    
-       % find . -name pom.xml | xargs grep x.y.z | grep SNAP
+        % find . -name pom.xml | xargs grep x.y.z | grep SNAP
        
    (if any are out of sync with the parent version, Maven will not have updated them)
 
 1. Build and package the release. These are the bits that will be uploaded to nexus.
    Expect this to take about 4 minutes, depending on network speed.
 
-       % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true
+        % mvn clean deploy -Dmaven.test.skip=true -Dgwt.compiler.skip=true
 
 1. Publish new quickstart archetypes to Nexus repo (both snapshots and released version)
 
-       % cd $somewhere/archetypes
-       % mvn versions:set -DnewVersion=x.y.z.Final
+        % cd $somewhere/archetypes
+        % mvn versions:set -DnewVersion=x.y.z.Final
     
    Afterward, verify that all subprojects reference the new parent pom's version:
 
-       % find . -name pom.xml | xargs grep x.y.z | grep SNAP
+        % find . -name pom.xml | xargs grep x.y.z | grep SNAP
 
    Then publish the archetypes to the repository:
    
-       % mvn clean deploy    
+        % mvn clean deploy    
   * Note that the kitschensink archetype is tested automatically. For the test to work,
      AS7 has to be running.
   * Now test the archetypes you just installed (use instructions from quickstart guides)
   * Check generated app's pom.xml for correct version
 
-      % mvn gwt:run
+          % mvn gwt:run
 
 1. Create the a-la-carte binary Errai distribution and docs
 
-       % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
+        % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
 
 1. Upload the docs and the distro zipfile
 
-       % cd dist
-       % scripts/upload_binaries.sh ${version}
+        % cd dist
+        % scripts/upload_binaries.sh ${version}
 
 1. Tag and push the release to github (DO THIS FOR BOTH ERRAI AND ITS ARCHETYPES):
 
-       % git commit a -m "Updated to new version x.y.z"
-       % git tag x.y.z.Final
+        % git commit a -m "Updated to new version x.y.z"
+        % git tag x.y.z.Final
     
   reset all versions to x.y.z+1-SNAPSHOT and commit
   
-       % git push origin /branch/
-       % git push origin --tags
-       % git push upstream /branch/
-       % git push upstream --tags
+        % git push origin /branch/
+        % git push origin --tags
+        % git push upstream /branch/
+        % git push upstream --tags
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
   * Find the corresponding staging repository (Sort by repository name)
