@@ -51,7 +51,7 @@ public class InjectionPointTest extends TestCase {
                         }
                       }
                     })
-            .sourceWriter(new StringSourceWriter())
+            //.sourceWriter(new StringSourceWriter())
             .context(Context.create())
             .bootstrapClassInstance(structureBuilder.getClassDefinition())
             .bootstrapBuilder(structureBuilder)

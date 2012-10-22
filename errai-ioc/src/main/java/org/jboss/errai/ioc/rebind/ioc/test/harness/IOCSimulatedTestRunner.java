@@ -25,6 +25,7 @@ import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
 import org.jboss.errai.common.client.util.TimeUnit;
+import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
@@ -32,6 +33,7 @@ import org.jboss.errai.ioc.client.QualifierEqualityFactory;
 import org.jboss.errai.ioc.client.QualifierEqualityFactoryProvider;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
@@ -59,7 +61,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
   List<Runner> runners = new ArrayList<Runner>();
   private Object instance;
 
-  public IOCSimulatedTestRunner(Class<? extends TestCase> toRun) throws Throwable {
+  public IOCSimulatedTestRunner(final Class<? extends TestCase> toRun) throws Throwable {
     super(toRun);
 
     for (final Method method : toRun.getDeclaredMethods()) {
@@ -71,14 +73,14 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
           }
 
           @Override
-          public void run(RunNotifier notifier) {
+          public void run(final RunNotifier notifier) {
             final IOCClientTestCase iocClientTestCase = (IOCClientTestCase) getInstance();
 
-            Description description = getDescription();
+            final Description description = getDescription();
 
             notifier.fireTestStarted(description);
 
-            TestResult result = new TestResult();
+            final TestResult result = new TestResult();
 
             try {
               if (SIMULATED) {
@@ -146,17 +148,17 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
   }
 
   @Override
-  protected Description describeChild(Runner child) {
+  protected Description describeChild(final Runner child) {
     return child.getDescription();
   }
 
   @Override
-  protected void runChild(Runner child, RunNotifier notifier) {
+  protected void runChild(final Runner child, final RunNotifier notifier) {
     child.run(notifier);
   }
 
   @Override
-  public void run(RunNotifier notifier) {
+  public void run(final RunNotifier notifier) {
     final IOCClientTestCase iocClientTestCase = (IOCClientTestCase) getInstance();
 
     if (SIMULATED) {
@@ -165,12 +167,12 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
         public QualifierEqualityFactory provide() {
           return new QualifierEqualityFactory() {
             @Override
-            public boolean isEqual(Annotation a1, Annotation a2) {
+            public boolean isEqual(final Annotation a1, final Annotation a2) {
               return a1.equals(a2);
             }
 
             @Override
-            public int hashCodeOf(Annotation a1) {
+            public int hashCodeOf(final Annotation a1) {
               return a1.hashCode();
             }
           };
@@ -184,12 +186,12 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
         public TaskManager get() {
           return new TaskManager() {
             @Override
-            public void execute(Runnable task) {
+            public void execute(final Runnable task) {
               service.execute(task);
             }
 
             @Override
-            public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {
+            public AsyncTask scheduleRepeating(final TimeUnit unit, final int interval, final Runnable task) {
               final ScheduledFuture<?> future =
                       service.scheduleAtFixedRate(task, unit.toMillis(interval), 0,
                               java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -197,12 +199,12 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
 
               return new AsyncTask() {
                 @Override
-                public void cancel(boolean interrupt) {
+                public void cancel(final boolean interrupt) {
                   future.cancel(true);
                 }
 
                 @Override
-                public void setExitHandler(Runnable runnable) {
+                public void setExitHandler(final Runnable runnable) {
                 }
 
                 @Override
@@ -213,19 +215,18 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
             }
 
             @Override
-            public AsyncTask schedule(TimeUnit unit, int interval, Runnable task) {
+            public AsyncTask schedule(final TimeUnit unit, final int interval, final Runnable task) {
               final ScheduledFuture<?> future =
                       service.schedule(task, unit.toMillis(interval), java.util.concurrent.TimeUnit.MILLISECONDS);
 
-
               return new AsyncTask() {
                 @Override
-                public void cancel(boolean interrupt) {
+                public void cancel(final boolean interrupt) {
                   future.cancel(true);
                 }
 
                 @Override
-                public void setExitHandler(Runnable runnable) {
+                public void setExitHandler(final Runnable runnable) {
                 }
 
                 @Override
@@ -247,10 +248,10 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
           @Override
           public void bootstrap() {
             try {
-              String rootPackage = iocClientTestCase.getModulePackage();
-              Set<String> packages = new HashSet<String>();
-              for (Package p : Package.getPackages()) {
-                String packageName = p.getName();
+              final String rootPackage = iocClientTestCase.getModulePackage();
+              final Set<String> packages = new HashSet<String>();
+              for (final Package p : Package.getPackages()) {
+                final String packageName = p.getName();
                 if (packageName.startsWith(rootPackage)) {
                   packages.add(packageName);
                 }
@@ -258,14 +259,14 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
 
               packages.add("org.jboss.errai.ioc.client.api.builtin");
 
-              MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
+              final MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
 
-              Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();
-              Bootstrapper bs = cls.newInstance();
+              final Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();
+              final Bootstrapper bs = cls.newInstance();
 
-              long tm = System.currentTimeMillis();
+              final long tm = System.currentTimeMillis();
               new IOCBeanManagerLifecycle().resetBeanManager();
-              SimpleInjectionContext ctx = bs.bootstrapContainer();
+              final BootstrapInjectionContext<?> ctx = bs.bootstrapContainer();
               ctx.getRootContext().finish();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");

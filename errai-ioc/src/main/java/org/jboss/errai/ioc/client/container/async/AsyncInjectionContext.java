@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -19,14 +20,34 @@ public class AsyncInjectionContext implements BootstrapInjectionContext<AsyncBea
   }
 
   @Override
-  public void addBean(Class type, Class beanType, AsyncBeanProvider callback, Object instance, Annotation[] qualifiers) {
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final AsyncBeanProvider callback,
+                      final Object instance,
+                      final Annotation[] qualifiers) {
   }
 
   @Override
-  public void addBean(Class type, Class beanType, AsyncBeanProvider callback, Object instance, Annotation[] qualifiers, String name) {
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final AsyncBeanProvider callback,
+                      final Object instance,
+                      final Annotation[] qualifiers,
+                      final String name) {
   }
 
   @Override
-  public void addBean(Class type, Class beanType, AsyncBeanProvider callback, Object instance, Annotation[] qualifiers, String name, boolean concrete) {
+  public void addBean(final Class type,
+                      final Class beanType,
+                      final AsyncBeanProvider callback,
+                      final Object instance,
+                      final Annotation[] qualifiers,
+                      final String name,
+                      final boolean concrete) {
+  }
+
+  @Override
+  public CreationalContext getRootContext() {
+    return null;
   }
 }

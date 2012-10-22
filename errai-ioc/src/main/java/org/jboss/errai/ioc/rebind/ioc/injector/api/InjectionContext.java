@@ -84,7 +84,7 @@ public class InjectionContext {
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
 
-  private final Set<Object> overridenTypesAndMembers = new HashSet<Object>();
+  private final Set<Object> overriddenTypesAndMembers = new HashSet<Object>();
 
   private final Map<MetaParameter, Statement> inlineBeanReferenceMap = new HashMap<MetaParameter, Statement>();
 
@@ -143,11 +143,11 @@ public class InjectionContext {
   public Injector getProxiedInjector(final MetaClass type, final QualifyingMetadata metadata) {
     //todo: figure out why I was doing this.
     final MetaClass erased = type.getErased();
-    final Collection<Injector> injs = proxiedInjectors.get(erased);
+    final Collection<Injector> injectors = proxiedInjectors.get(erased);
     final List<Injector> matching = new ArrayList<Injector>();
 
-    if (injs != null) {
-      for (final Injector inj : injs) {
+    if (injectors != null) {
+      for (final Injector inj : injectors) {
         if (inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
         }
@@ -193,10 +193,10 @@ public class InjectionContext {
 
     if (matching.size() > 1 && type.isConcrete()) {
       // perform second pass
-      final Iterator<Injector> secondIter = matching.iterator();
-      while (secondIter.hasNext()) {
-        if (!secondIter.next().getInjectedType().equals(erased))
-          secondIter.remove();
+      final Iterator<Injector> secondIterator = matching.iterator();
+      while (secondIterator.hasNext()) {
+        if (!secondIterator.next().getInjectedType().equals(erased))
+          secondIterator.remove();
       }
     }
 
@@ -205,10 +205,10 @@ public class InjectionContext {
     }
     else if (matching.size() > 1) {
       if (alternativeBeans) {
-        final Iterator<Injector> matchIter = matching.iterator();
-        while (matchIter.hasNext()) {
-          if (!enabledAlternatives.contains(matchIter.next().getInjectedType().getFullyQualifiedName())) {
-            matchIter.remove();
+        final Iterator<Injector> matchIterator = matching.iterator();
+        while (matchIterator.hasNext()) {
+          if (!enabledAlternatives.contains(matchIterator.next().getInjectedType().getFullyQualifiedName())) {
+            matchIterator.remove();
           }
         }
       }
@@ -289,7 +289,9 @@ public class InjectionContext {
    * @param injectorType
    * @param qualifyingMetadata
    */
-  public void markProxyClosedIfNeeded(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  public void markProxyClosedIfNeeded(final MetaClass injectorType,
+                                      final QualifyingMetadata qualifyingMetadata) {
+
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       final Collection<Injector> collection = proxiedInjectors.get(injectorType.getErased());
       final Iterator<Injector> iterator = collection.iterator();
@@ -304,7 +306,9 @@ public class InjectionContext {
     }
   }
 
-  public boolean isProxiedInjectorRegistered(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  public boolean isProxiedInjectorRegistered(final MetaClass injectorType,
+                                             final QualifyingMetadata qualifyingMetadata) {
+
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : proxiedInjectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
@@ -315,7 +319,9 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isInjectorRegistered(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  public boolean isInjectorRegistered(final MetaClass injectorType,
+                                      final QualifyingMetadata qualifyingMetadata) {
+
     if (injectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
@@ -326,7 +332,9 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isInjectableQualified(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  public boolean isInjectableQualified(final MetaClass injectorType,
+                                       final QualifyingMetadata qualifyingMetadata) {
+
     if (injectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
@@ -345,10 +353,6 @@ public class InjectionContext {
     return Collections.unmodifiableList(injectorList);
   }
 
-  public Injector getInjector(final Class<?> injectorType) {
-    return getInjector(MetaClassFactory.get(injectorType));
-  }
-
   public Injector getInjector(final MetaClass type) {
     final MetaClass erased = type.getErased();
     if (!injectors.containsKey(erased)) {
@@ -356,33 +360,33 @@ public class InjectionContext {
     }
 
     final List<Injector> injectorList = new ArrayList<Injector>(injectors.get(erased));
-    final Iterator<Injector> iter = injectorList.iterator();
+    final Iterator<Injector> iterator = injectorList.iterator();
     Injector inj;
 
     if (injectorList.size() > 1) {
-      while (iter.hasNext()) {
-        inj = iter.next();
+      while (iterator.hasNext()) {
+        inj = iterator.next();
 
         if (type.getParameterizedType() != null) {
           if (inj.getQualifyingTypeInformation() != null) {
             if (!type.getParameterizedType().isAssignableFrom(inj.getQualifyingTypeInformation())) {
-              iter.remove();
+              iterator.remove();
             }
           }
         }
 
         if (!inj.isEnabled()) {
-          iter.remove();
+          iterator.remove();
         }
       }
     }
 
     if (injectorList.size() > 1) {
       // perform second pass
-      final Iterator<Injector> secondIter = injectorList.iterator();
-      while (secondIter.hasNext()) {
-        if (!secondIter.next().getInjectedType().equals(erased))
-          secondIter.remove();
+      final Iterator<Injector> secondIterator = injectorList.iterator();
+      while (secondIterator.hasNext()) {
+        if (!secondIterator.next().getInjectedType().equals(erased))
+          secondIterator.remove();
       }
     }
 
@@ -401,20 +405,24 @@ public class InjectionContext {
     registerInjector(injector.getInjectedType(), injector, new HashSet<MetaClass>(), true);
   }
 
-  private void registerInjector(final MetaClass type, final Injector injector, final Set<MetaClass> processedTypes, final boolean allowOverride) {
+  private void registerInjector(final MetaClass type,
+                                final Injector injector,
+                                final Set<MetaClass> processedTypes,
+                                final boolean allowOverride) {
+
     List<Injector> injectorList = injectors.get(type.getErased());
 
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
     }
     else if (allowOverride) {
-      final Iterator<Injector> iter = injectorList.iterator();
+      final Iterator<Injector> iterator = injectorList.iterator();
 
-      while (iter.hasNext()) {
-        final Injector inj = iter.next();
+      while (iterator.hasNext()) {
+        final Injector inj = iterator.next();
 
         if (inj.isPseudo()) {
-          iter.remove();
+          iterator.remove();
         }
       }
     }
@@ -425,7 +433,8 @@ public class InjectionContext {
     notifyInjectorRegistered(injector);
   }
 
-  private void registerInjectorsForSuperTypesAndInterfaces(final MetaClass type, final Injector injector,
+  private void registerInjectorsForSuperTypesAndInterfaces(final MetaClass type,
+                                                           final Injector injector,
                                                            final Set<MetaClass> processedTypes) {
     MetaClass cls = type;
     do {
@@ -513,19 +522,19 @@ public class InjectionContext {
   }
 
   public void declareOverridden(final MetaClass type) {
-    overridenTypesAndMembers.add(type);
+    overriddenTypesAndMembers.add(type);
   }
 
   public void declareOverridden(final MetaMethod method) {
-    overridenTypesAndMembers.add(method);
+    overriddenTypesAndMembers.add(method);
   }
 
   public boolean isOverridden(final MetaClass type) {
-    return overridenTypesAndMembers.contains(type);
+    return overriddenTypesAndMembers.contains(type);
   }
 
   public boolean isOverridden(final MetaMethod method) {
-    return overridenTypesAndMembers.contains(method);
+    return overriddenTypesAndMembers.contains(method);
   }
 
   public Map<MetaField, PrivateAccessType> getPrivateFieldsToExpose() {
@@ -542,7 +551,7 @@ public class InjectionContext {
     registerInjector(new TypeInjector(type, this));
   }
 
-  public void addPsuedoScopeForType(final MetaClass type) {
+  public void addPseudoScopeForType(final MetaClass type) {
     final TypeInjector inj = new TypeInjector(type, this);
     inj.setReplaceable(true);
     registerInjector(inj);
@@ -593,7 +602,8 @@ public class InjectionContext {
    *
    * @return
    */
-  public boolean isElementType(final WiringElementType type, final com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
+  public boolean isElementType(final WiringElementType type,
+                               final com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
     final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
     for (final Annotation a : hasAnnotations.getAnnotations()) {
       if (annotationsForElementType.contains(a.annotationType())) {
@@ -603,7 +613,9 @@ public class InjectionContext {
     return false;
   }
 
-  public Annotation getMatchingAnnotationForElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
+  public Annotation getMatchingAnnotationForElementType(final WiringElementType type,
+                                                        final HasAnnotations hasAnnotations) {
+
     final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
     final Set<Annotation> annotationSet
         = new HashSet<Annotation>(Arrays.asList(hasAnnotations.getAnnotations()));
@@ -703,8 +715,8 @@ public class InjectionContext {
     return isReachable(clazz.getFullyQualifiedName());
   }
 
-  public boolean isReachable(final String fqnc) {
-    return reachableTypes.isEmpty() || reachableTypes.contains(fqnc);
+  public boolean isReachable(final String fqcn) {
+    return reachableTypes.isEmpty() || reachableTypes.contains(fqcn);
   }
 
   public Collection<String> getAllReachableTypes() {

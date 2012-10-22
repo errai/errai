@@ -208,7 +208,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         RequestBuilder.POST,
         URL.encode(getApplicationRoot() + OUT_SERVICE_ENTRY_POINT) + "?z=" + getNextRequestNumber()
     );
-
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 

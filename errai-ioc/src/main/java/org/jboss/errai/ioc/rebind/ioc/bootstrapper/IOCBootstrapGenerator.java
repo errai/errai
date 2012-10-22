@@ -19,40 +19,19 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Inject;
-import javax.inject.Scope;
-import javax.inject.Singleton;
-
 import com.google.common.collect.Multimap;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.InterningCallback;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.BlockBuilderImpl;
-import org.jboss.errai.codegen.literal.ArrayLiteral;
-import org.jboss.errai.codegen.literal.LiteralFactory;
-import org.jboss.errai.codegen.literal.LiteralValue;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -63,7 +42,6 @@ import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -72,6 +50,7 @@ import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.config.util.ThreadUtil;
+import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -80,7 +59,8 @@ import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.TestMock;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.async.AsyncInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -89,13 +69,22 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JPackage;
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.StringSourceWriter;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Inject;
+import javax.inject.Scope;
+import javax.inject.Singleton;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Generator for the Bootstrapper class generated to wire an application at runtime.
@@ -153,7 +142,7 @@ public class IOCBootstrapGenerator {
 
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
-      gen = _generate(packageName, className);
+      gen = generateSynchronousBootstrapper(packageName, className);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
           + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
 
@@ -170,7 +159,18 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  private String _generate(final String packageName, final String className) {
+  private String generateSynchronousBootstrapper(final String packageName, final String className) {
+    final InjectionContext injectionContext = setupContexts(packageName, className);
+    return generateBootstrappingClassSource(injectionContext, SimpleInjectionContext.class);
+  }
+
+  private String generateAsyncBootstrapper(final String packageName, final String className) {
+    final InjectionContext injectionContext = setupContexts(packageName, className);
+    return generateBootstrappingClassSource(injectionContext, AsyncInjectionContext.class);
+  }
+
+
+  private InjectionContext setupContexts(final String packageName, final String className) {
     final ReachableTypes allDeps = EnvUtil.getAllReachableClasses(context);
 
     final ClassStructureBuilder<?> classStructureBuilder =
@@ -182,77 +182,11 @@ public class IOCBootstrapGenerator {
     final BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
     final Context buildContext = bootStrapClass.getContext();
 
-    final MetaClass Annotation_MC = MetaClassFactory.get(Annotation.class);
-
-    buildContext.addInterningCallback(new InterningCallback() {
-      private final Map<Set<Annotation>, String> cachedArrays = new HashMap<Set<Annotation>, String>();
-
-      @Override
-      public Statement intern(final LiteralValue<?> literalValue) {
-        if (literalValue.getValue() == null) {
-          return null;
-        }
-
-        if (literalValue.getValue() instanceof Annotation) {
-          final Annotation annotation = (Annotation) literalValue.getValue();
-
-          final Class<? extends Annotation> aClass = annotation.annotationType();
-          final String fieldName = PrivateAccessUtil.condensify(aClass.getPackage().getName()) +
-              aClass.getSimpleName() + "_" + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
-
-          classStructureBuilder.privateField(fieldName, annotation.annotationType())
-              .modifiers(Modifier.Final).initializesWith(AnnotationEncoder.encode(annotation))
-              .finish();
-
-          return Refs.get(fieldName);
-        }
-        else if (literalValue.getType().isArray()
-            && Annotation_MC.isAssignableFrom(literalValue.getType().getOuterComponentType())) {
-
-          final Set<Annotation> annotationSet
-              = new HashSet<Annotation>(Arrays.asList((Annotation[]) literalValue.getValue()));
-
-          if (cachedArrays.containsKey(annotationSet)) {
-            return Refs.get(cachedArrays.get(annotationSet));
-          }
-
-          final MetaClass type = literalValue.getType().getOuterComponentType();
-          final String fieldName = "arrayOf" + PrivateAccessUtil.condensify(type.getPackageName()) +
-              type.getName().replaceAll("\\.", "_") + "_"
-              + String.valueOf(literalValue.getValue().hashCode()).replaceAll("\\-", "_");
-
-          // force rendering of literals in this array first.
-          for (final Annotation a : annotationSet) {
-            LiteralFactory.getLiteral(a).generate(buildContext);
-          }
-
-          classStructureBuilder.privateField(fieldName, literalValue.getType())
-              .modifiers(Modifier.Final).initializesWith(new Statement() {
-            @Override
-            public String generate(final Context context) {
-              return new ArrayLiteral(literalValue.getValue()).getCanonicalString(context);
-            }
-
-            @Override
-            public MetaClass getType() {
-              return literalValue.getType();
-            }
-          }).finish();
-
-          cachedArrays.put(annotationSet, fieldName);
-
-          return Refs.get(fieldName);
-        }
-
-        return null;
-      }
-    });
+    buildContext.addInterningCallback(new BootstrapInterningCallback(classStructureBuilder, buildContext));
 
     final BlockBuilder<?> blockBuilder =
         classStructureBuilder.publicMethod(SimpleInjectionContext.class, "bootstrapContainer")
             .methodComment("The main IOC bootstrap method.");
-
-    final SourceWriter sourceWriter = new StringSourceWriter();
 
     final IOCProcessingContext.Builder iocProcContextBuilder
         = IOCProcessingContext.Builder.create();
@@ -263,7 +197,6 @@ public class IOCBootstrapGenerator {
     iocProcContextBuilder.bootstrapClassInstance(bootStrapClass);
     iocProcContextBuilder.bootstrapBuilder(classStructureBuilder);
     iocProcContextBuilder.logger(logger);
-    iocProcContextBuilder.sourceWriter(sourceWriter);
     iocProcContextBuilder.gwtTarget(!useReflectionStubs);
 
     final InjectionContext.Builder injectionContextBuilder
@@ -304,45 +237,43 @@ public class IOCBootstrapGenerator {
       final Collection<String> enabledAlternativesProperties = props.get(ENABLED_ALTERNATIVES_PROPERTY);
 
       for (final String prop : enabledAlternativesProperties) {
-          final String[] alternatives = prop.split("\\s");
-          for (final String alternative : alternatives) {
-            injectionContextBuilder.enabledAlternative(alternative.trim());
-          }
+        final String[] alternatives = prop.split("\\s");
+        for (final String alternative : alternatives) {
+          injectionContextBuilder.enabledAlternative(alternative.trim());
+        }
       }
     }
 
     iocProcContextBuilder.packages(packages);
 
-    final IOCProcessingContext procContext = iocProcContextBuilder.build();
+    final IOCProcessingContext processingContext = iocProcContextBuilder.build();
 
-    injectionContextBuilder.processingContext(procContext);
+    injectionContextBuilder.processingContext(processingContext);
     injectionContextBuilder.reachableTypes(allDeps);
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
     defaultConfigureProcessor(injectionContext);
 
-    // generator constructor source code
-    final IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
-    processExtensions(context, procContext, injectionContext, procFactory, beforeTasks, afterTasks);
-    generateExtensions(procContext, procFactory, injectionContext, sourceWriter, classStructureBuilder, blockBuilder);
-
-    // close generated class
-    return sourceWriter.toString();
+    return injectionContext;
   }
 
-  private void generateExtensions(final IOCProcessingContext procContext,
-                                  final IOCProcessorFactory procFactory,
-                                  final InjectionContext injectionContext,
-                                  final SourceWriter sourceWriter,
-                                  final ClassStructureBuilder<?> classBuilder,
-                                  final BlockBuilder<?> blockBuilder) {
 
+  private String generateBootstrappingClassSource(final InjectionContext injectionContext,
+                                                  final Class<? extends BootstrapInjectionContext> injectionContextClass) {
 
-    classBuilder.privateField(procContext.getContextVariableReference().getName(), procContext.getContextVariableReference().getType())
-        .modifiers(Modifier.Final).initializesWith(Stmt.newObject(SimpleInjectionContext.class)).finish();
+    final IOCProcessorFactory processorFactory = new IOCProcessorFactory(injectionContext);
+      processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
 
-    classBuilder.privateField("context", SimpleCreationalContext.class).modifiers(Modifier.Final)
-        .initializesWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
+    final IOCProcessingContext processingContext = injectionContext.getProcessingContext();
+    final ClassStructureBuilder<?> classBuilder = processingContext.getBootstrapBuilder();
+    final BlockBuilder<?> blockBuilder = processingContext.getBlockBuilder();
+
+    classBuilder.privateField(processingContext.getContextVariableReference().getName(),
+        processingContext.getContextVariableReference().getType())
+        .modifiers(Modifier.Final).initializesWith(Stmt.newObject(injectionContextClass)).finish();
+
+    classBuilder.privateField("context", CreationalContext.class).modifiers(Modifier.Final)
+        .initializesWith(Stmt.loadVariable(processingContext.getContextVariableReference().getName())
             .invoke("getRootContext")).finish();
 
     @SuppressWarnings("unchecked")
@@ -350,13 +281,13 @@ public class IOCBootstrapGenerator {
 
     _doRunnableTasks(beforeTasks, builder);
 
-    procFactory.process(procContext);
+    processorFactory.process(processingContext);
 
     int i = 0;
     int beanDeclareMethodCount = 0;
     BlockBuilder<? extends ClassStructureBuilder<?>> declareBeanBody = null;
 
-    for (final Statement stmt : procContext.getAppendToEnd()) {
+    for (final Statement stmt : processingContext.getAppendToEnd()) {
       if (declareBeanBody == null || (i % 500) == 0) {
         if (declareBeanBody != null) {
           declareBeanBody.finish();
@@ -390,11 +321,11 @@ public class IOCBootstrapGenerator {
 
     _doRunnableTasks(afterTasks, blockBuilder);
 
-    blockBuilder.append(loadVariable(procContext.getContextVariableReference()).returnValue());
+    blockBuilder.append(loadVariable(processingContext.getContextVariableReference()).returnValue());
 
     blockBuilder.finish();
 
-    sourceWriter.print(classBuilder.toJavaString());
+    return classBuilder.toJavaString();
   }
 
   private static void _doRunnableTasks(final Collection<MetaClass> classes, final BlockBuilder<?> blockBuilder) {
@@ -409,7 +340,6 @@ public class IOCBootstrapGenerator {
   }
 
   public static void processExtensions(final GeneratorContext context,
-                                       final IOCProcessingContext processingContext,
                                        final InjectionContext injectionContext,
                                        final IOCProcessorFactory processorFactory,
                                        final List<MetaClass> beforeTasks,
@@ -430,7 +360,7 @@ public class IOCBootstrapGenerator {
             = clazz.asSubclass(IOCExtensionConfigurator.class);
 
         final IOCExtensionConfigurator configurator = configuratorClass.newInstance();
-        configurator.configure(processingContext, injectionContext, processorFactory);
+        configurator.configure(injectionContext.getProcessingContext(), injectionContext, processorFactory);
 
         extensionConfigurators.add(configurator);
       }
@@ -487,7 +417,7 @@ public class IOCBootstrapGenerator {
     }
 
     for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
-      extensionConfigurator.afterInitialization(processingContext, injectionContext, processorFactory);
+      extensionConfigurator.afterInitialization(injectionContext.getProcessingContext(), injectionContext, processorFactory);
     }
   }
 
@@ -563,7 +493,7 @@ public class IOCBootstrapGenerator {
             }
           }
 
-          injectionContext.addPsuedoScopeForType(GWTClass.newInstance(type.getOracle(), type));
+          injectionContext.addPseudoScopeForType(GWTClass.newInstance(type.getOracle(), type));
         }
       }
     }

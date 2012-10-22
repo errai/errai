@@ -252,7 +252,6 @@ public class MarshallersGenerator extends Generator {
 
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
 
-
   private static volatile String _serverMarshallerCache;
   private static volatile String _clientMarshallerCache;
   private static final Object generatorLock = new Object();
@@ -293,7 +292,7 @@ public class MarshallersGenerator extends Generator {
           logger.info("** deposited marshaller class in : " + new File(SERVER_MARSHALLER_OUTPUT_DIR).getAbsolutePath());
         }
         else {
-          logger.debug("Searching candidate output directories for generated marshallers");
+          logger.debug("searching candidate output directories for generated marshallers");
           File outputDirCdt;
 
           class DiscoveryContextImpl implements DiscoveryContext {

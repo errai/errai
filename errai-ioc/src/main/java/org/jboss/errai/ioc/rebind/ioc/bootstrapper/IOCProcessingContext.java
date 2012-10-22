@@ -59,7 +59,7 @@ public class IOCProcessingContext {
   protected final TreeLogger treeLogger;
   protected final GeneratorContext generatorContext;
 
-  protected final SourceWriter writer;
+  //protected final SourceWriter writer;
 
   protected final Variable contextVariable = Variable.create("injContext", SimpleInjectionContext.class);
 
@@ -70,7 +70,7 @@ public class IOCProcessingContext {
   private IOCProcessingContext(final Builder builder) {
     this.treeLogger = builder.treeLogger;
     this.generatorContext = builder.generatorContext;
-    this.writer = builder.sourceWriter;
+   // this.writer = builder.sourceWriter;
     this.context = builder.context;
     this.bootstrapClass = builder.bootstrapClassInstance;
     this.bootstrapBuilder = builder.bootstrapBuilder;
@@ -88,7 +88,7 @@ public class IOCProcessingContext {
   public static class Builder {
     private TreeLogger treeLogger;
     private GeneratorContext generatorContext;
-    private SourceWriter sourceWriter;
+  //  private SourceWriter sourceWriter;
     private Context context;
     private BuildMetaClass bootstrapClassInstance;
     private ClassStructureBuilder bootstrapBuilder;
@@ -111,10 +111,10 @@ public class IOCProcessingContext {
       return this;
     }
 
-    public Builder sourceWriter(final SourceWriter sourceWriter) {
-      this.sourceWriter = sourceWriter;
-      return this;
-    }
+//    public Builder sourceWriter(final SourceWriter sourceWriter) {
+//      this.sourceWriter = sourceWriter;
+//      return this;
+//    }
 
     public Builder context(final Context context) {
       this.context = context;
@@ -153,7 +153,7 @@ public class IOCProcessingContext {
 
     public IOCProcessingContext build() {
       Assert.notNull("treeLogger cannot be null", treeLogger);
-      Assert.notNull("sourceWriter cannot be null", sourceWriter);
+     // Assert.notNull("sourceWriter cannot be null", sourceWriter);
       Assert.notNull("context cannot be null", context);
       Assert.notNull("bootstrapClassInstance cannot be null", bootstrapClassInstance);
       Assert.notNull("bootstrapBuilder cannot be null", bootstrapBuilder);

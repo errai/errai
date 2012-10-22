@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.client;
 
 import org.jboss.errai.ioc.client.container.BeanProvider;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 
 import java.lang.annotation.Annotation;
 
@@ -28,4 +29,7 @@ public interface BootstrapInjectionContext<C> {
                         final Annotation[] qualifiers,
                         final String name,
                         final boolean concrete);
+
+  public CreationalContext getRootContext();
 }
+

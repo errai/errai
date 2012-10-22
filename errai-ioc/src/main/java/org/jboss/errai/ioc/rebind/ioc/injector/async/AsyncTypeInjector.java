@@ -18,6 +18,8 @@ import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
@@ -96,6 +98,7 @@ public class AsyncTypeInjector extends AbstractInjector {
   }
 
   private Statement _getType(final InjectableInstance injectableInstance) {
+
     // check to see if this injector has already been injected
     if (isRendered()) {
       if (isSingleton() && !hasNewQualifier(injectableInstance)) {
@@ -123,15 +126,18 @@ public class AsyncTypeInjector extends AbstractInjector {
     get a parameterized version of the BeanProvider class, parameterized with the type of
     bean it produces.
     */
-    final MetaClass creationCallbackRef = parameterizedAs(BeanProvider.class, typeParametersOf(type));
+    final MetaClass beanProviderClassRef = parameterizedAs(AsyncBeanProvider.class, typeParametersOf(type));
+    final MetaClass creationalCallbackClassRef = parameterizedAs(CreationalCallback.class, typeParametersOf(type));
 
     /*
     begin building the creational callback, implement the "getInstance" method from the interface
     and assign its BlockBuilder to a callbackBuilder so we can work with it.
     */
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
-        = newInstanceOf(creationCallbackRef).extend()
-        .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
+        = newInstanceOf(beanProviderClassRef).extend()
+        .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback"),
+            Parameter.of(CreationalContext.class, "context", true));
+
 
     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
     ctx.pushBlockBuilder(callbackBuilder);
@@ -169,7 +175,7 @@ public class AsyncTypeInjector extends AbstractInjector {
     declare a final variable for the BeanProvider and initialize it with the anonymous class we just
     built.
     */
-    ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
+    ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, beanProviderClassRef).modifiers(Modifier.Final)
         .initializesWith(callbackBuilder.finish().finish()).finish();
 
     final Statement retVal;

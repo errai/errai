@@ -25,6 +25,7 @@ import com.google.gwt.core.client.GWT;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 import java.lang.annotation.Annotation;
 
@@ -35,7 +36,7 @@ public class Container implements EntryPoint {
   }
 
   // stored for debugging purposes only. overwritten every time the container is bootstrapped.
-  private static SimpleInjectionContext injectionContext;
+  private static BootstrapInjectionContext<?> injectionContext;
 
   public void bootstrapContainer() {
     try {

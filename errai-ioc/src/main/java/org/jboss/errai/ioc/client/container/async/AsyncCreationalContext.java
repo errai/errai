@@ -48,7 +48,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
                                          final Class<?> beanType,
                                          final Annotation[] qualifiers) {
 
-    @SuppressWarnings("unchecked") T inst = (T) getBeanInstance(beanType, qualifiers);
+    @SuppressWarnings("unchecked") final T inst = (T) getBeanInstance(beanType, qualifiers);
 
     if (inst != null) {
       return inst;

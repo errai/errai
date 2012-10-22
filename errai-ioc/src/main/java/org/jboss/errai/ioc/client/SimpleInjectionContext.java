@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.client;
 
 import org.jboss.errai.ioc.client.container.BeanProvider;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
@@ -67,7 +68,7 @@ public class SimpleInjectionContext implements BootstrapInjectionContext<BeanPro
     manager.addBean(type, beanType, callback, instance, qualifiers, name, concrete);
   }
 
-  public SimpleCreationalContext getRootContext() {
+  public CreationalContext getRootContext() {
     return rootContext;
   }
 }
