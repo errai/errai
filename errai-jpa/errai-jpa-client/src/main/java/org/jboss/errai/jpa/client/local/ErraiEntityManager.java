@@ -498,14 +498,25 @@ public abstract class ErraiEntityManager implements EntityManager {
   @Override
   public <X> X find(Class<X> entityClass, Object primaryKey, Map<String, Object> properties) {
     Key<X, ?> key = Key.get(this, entityClass, primaryKey);
-    X entity = cast(entityClass, persistenceContext.get(key));
+    return find(key, properties);
+  }
+  
+  /**
+   * Retrieves the entity instance identified by the given Key.
+   * 
+   * @param key The key to look up. Must not be null.
+   * @param properties JPA hints (standard and Errai-specific) for the lookup.
+   * @return the entity instance, or null if the entity cannot be found.
+   */
+  public <X> X find(Key<X, ?> key, Map<String, Object> properties) {
+    X entity = cast(key.getEntityType().getJavaType(), persistenceContext.get(key));
     if (entity == null) {
       entity = backend.get(key);
       if (entity != null && !properties.containsKey(NO_SIDE_EFFECTS)) {
         persistenceContext.put(key, entity);
 
         // XXX when persistenceContext gets its own class, this should go on the ultimate ingress point
-        getMetamodel().entity(entityClass).deliverPostLoad(entity);
+        getMetamodel().entity(key.getEntityType().getJavaType()).deliverPostLoad(entity);
       }
     }
     return entity;

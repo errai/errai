@@ -27,6 +27,7 @@ import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.hql.internal.ast.tree.SqlNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
+import org.hibernate.type.Type;
 import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
@@ -34,6 +35,7 @@ import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
+import org.jboss.errai.codegen.TernaryStatement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ArithmeticExpressionBuilder;
@@ -52,6 +54,8 @@ import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.ErraiParameter;
 import org.jboss.errai.jpa.client.local.ErraiTypedQuery;
 import org.jboss.errai.jpa.client.local.JsonUtil;
+import org.jboss.errai.jpa.client.local.Key;
+import org.jboss.errai.jpa.client.local.LongIdGenerator;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 import org.mvel2.MVEL;
 import org.slf4j.Logger;
@@ -66,7 +70,7 @@ import com.google.gwt.regexp.shared.RegExp;
 
 /**
  * Code generator for making TypedQuery instances based on existing typesafe
- * queries or JPAQL queries.
+ * queries or JPQL queries.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
@@ -603,21 +607,47 @@ public class TypedQueryFactoryGenerator {
 
     @Override
     public Statement resolve(DotNode dotNode) {
-      Class<?> requestedType = dotNode.getDataType().getReturnedClass();
-      // normalize all numbers except longs and chars to double (literals do the same)
-      // if we did not do this here, Comparisons.nullSafeEquals() would have to do it at runtime
-      if (requestedType == Float.class || requestedType == float.class
-              || requestedType == Integer.class || requestedType == int.class
-              || requestedType == Short.class || requestedType == short.class
-              || requestedType == Byte.class || requestedType == byte.class) {
-        requestedType = Double.class;
-      } else if (requestedType == Character.class || requestedType == char.class) {
-        requestedType = String.class;
-      }
+      final Type dataType = dotNode.getDataType();
+      Class<?> requestedType = dataType.getReturnedClass();
 
-      return Stmt.invokeStatic(JsonUtil.class, "basicValueFromJson",
-              Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()),
-              requestedType);
+      if (dataType.isComponentType()) {
+        throw new UnsupportedOperationException("Can't resolve " + dotNode.getText() + ": Components are not implemented yet in JPQL expressions");
+      }
+      else if (dataType.isEntityType()) {
+        // generate this:
+        // entityManager.find(Key.fromJson(GeneratedErraiEntityManager.this, candidate.get(${propertyPath}).isObject(), false), NO_SIDE_EFFECTS);
+
+        // FIXME running a query that uses this in a where clause will be an O(N^2) operation on the number of entities. :-(
+        return new TernaryStatement(
+            Bool.notEquals(Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()).invoke("isNull"), null),
+            Stmt.loadLiteral(null),
+            Stmt.loadVariable("entityManager").invoke("find",
+                Stmt.invokeStatic(Key.class, "fromJsonObject",
+                    Stmt.loadVariable("entityManager"),
+                    Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()).invoke("isObject"),
+                    false),
+                Stmt.loadStatic(LongIdGenerator.class, "NO_SIDE_EFFECTS_OPTION")));
+      }
+      else if (dataType.isCollectionType()) {
+        throw new UnsupportedOperationException("Can't resolve " + dotNode.getText() + ": Collections are not implemented yet in JPQL expressions");
+      }
+      else { // it's a basic type
+
+        // normalize all numbers except longs and chars to double (literals do the same)
+        // if we did not do this here, Comparisons.nullSafeEquals() would have to do it at runtime
+        if (requestedType == Float.class || requestedType == float.class
+                || requestedType == Integer.class || requestedType == int.class
+                || requestedType == Short.class || requestedType == short.class
+                || requestedType == Byte.class || requestedType == byte.class) {
+          requestedType = Double.class;
+        } else if (requestedType == Character.class || requestedType == char.class) {
+          requestedType = String.class;
+        }
+
+        return Stmt.invokeStatic(JsonUtil.class, "basicValueFromJson",
+                Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()),
+                requestedType);
+      }
     }
   }
 

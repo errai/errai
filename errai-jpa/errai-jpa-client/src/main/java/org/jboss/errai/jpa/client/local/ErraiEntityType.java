@@ -1,6 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -289,8 +290,8 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
    */
   private <Y> JSONValue makeJsonReference(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, ErraiEntityManager eem) {
     Class<Y> attributeType = attr.getJavaType();
-    Y attrValue = attr.get(targetEntity);
-    if (attrValue == null) {
+    Y entityToReference = attr.get(targetEntity);
+    if (entityToReference == null) {
       return JSONNull.getInstance();
     }
     ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
@@ -298,8 +299,15 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       throw new IllegalArgumentException("Can't make a reference to non-entity-typed attribute " + attr);
     }
 
-    JSONObject ref = new JSONObject();
-    ref.put("entityReference", attrEntityType.makeInlineJson(attrValue, attrEntityType.getId(Object.class), eem));
+    Object idToReference = attrEntityType.getId(Object.class).get(entityToReference);
+    JSONValue ref;
+    if (idToReference == null) {
+      ref = JSONNull.getInstance();
+    }
+    else {
+      // XXX attrEntityType is incorrect entityToReference is a subtype of attr.getJavaType()
+      ref = new Key<Y, Object>(attrEntityType, idToReference).toJsonObject();
+    }
     return ref;
   }
 
@@ -338,8 +346,14 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     int index = 0;
     for (E element : (Iterable<E>) attrValue) {
       Object idToReference = attrEntityType.getId(Object.class).get(element);
-      JSONObject ref = new JSONObject();
-      ref.put("entityReference", JsonUtil.basicValueToJson(idToReference));
+      JSONValue ref;
+      if (idToReference == null) {
+        ref = JSONNull.getInstance();
+      }
+      else {
+        // XXX attrEntityType is incorrect for collection elements that are subtypes of the attrEntityType
+        ref = new Key<E, Object>(attrEntityType, idToReference).toJsonObject();
+      }
       array.set(index++, ref);
     }
     return array;
@@ -350,15 +364,9 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
 
     if (attrJsonValue == null || attrJsonValue.isNull() != null) return;
 
-    Class<Y> attributeType = attr.getJavaType();
-    ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
-
-    JSONValue idJson = attrJsonValue.isObject().get("entityReference");
-    Class<?> idType = attrEntityType.getId(Object.class).getJavaType();
-    Object id = JsonUtil.basicValueFromJson(idJson, idType);
-
-    System.out.println("   looking for " + attrEntityType.getJavaType() + " with id " + id);
-    Y value = eem.find(attrEntityType.getJavaType(), id);
+    Key<Y, ?> key = (Key<Y, ?>) Key.fromJsonObject(eem, attrJsonValue.isObject(), true);
+    System.out.println("   looking for " + key);
+    Y value = eem.find(key, Collections.<String,Object>emptyMap());
     attr.set(targetEntity, value);
   }
 
@@ -375,14 +383,12 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     Collection<E> collection = (Collection<E>) attr.createEmptyCollection();
 
     for (int i = 0; i < attrJsonValues.size(); i++) {
-      JSONValue idJson = attrJsonValues.get(i).isObject().get("entityReference");
-      Class<?> idType = attrEntityType.getId(Object.class).getJavaType();
-      Object id = JsonUtil.basicValueFromJson(idJson, idType);
+      Key<E, ?> key = (Key<E, ?>) Key.fromJsonObject(eem, attrJsonValues.get(i).isObject(), true);
 
-      System.out.println("   looking for " + attrEntityType.getJavaType() + " with id " + id);
-      E value = eem.getPartiallyConstructedEntity(Key.get(eem, attrEntityType.getJavaType(), id));
+      System.out.println("   looking for " + key);
+      E value = eem.getPartiallyConstructedEntity(key);
       if (value == null) {
-        value = eem.find(attrEntityType.getJavaType(), id);
+        value = eem.find(key, Collections.<String,Object>emptyMap());
       }
 
       collection.add(value);
