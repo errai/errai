@@ -46,6 +46,7 @@ public class BindableProxyFactory {
    *                   
    * @return proxy that can be used in place of the model instance.
    */
+  @SuppressWarnings("unchecked")
   public static <T> T getBindableProxy(T model, InitialState state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
 
@@ -68,6 +69,7 @@ public class BindableProxyFactory {
    *          Specifies the origin of the initial state of both model and UI widget.
    * @return proxy that can be used in place of the model instance.
    */
+  @SuppressWarnings("unchecked")
   public static <T> T getBindableProxy(Class<T> bindableType, InitialState state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(bindableType);
 

@@ -18,8 +18,8 @@ package org.jboss.errai.databinding.client.api;
 
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
+import org.jboss.errai.databinding.client.BindableProxyDriver;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
-import org.jboss.errai.databinding.client.BindableProxyState;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 
@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@SuppressWarnings("unchecked")
 public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   private T model;
@@ -169,13 +170,12 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @throws NonExistingPropertyException
    *           If {@code widget} does not have a property with the given name.
    */
-  @SuppressWarnings("unchecked")
   public DataBinder<T> bind(final Widget widget, final String property,
       @SuppressWarnings("rawtypes") final Converter converter) {
 
     Assert.notNull(widget);
     Assert.notNull(property);
-    ((BindableProxy<T>) this.model).bind(widget, property, converter);
+    ((BindableProxy<T>) this.model).getDriver().bind(widget, property, converter);
     return this;
   }
 
@@ -188,9 +188,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * 
    * @return the same {@link DataBinder} instance to support call chaining.
    */
-  @SuppressWarnings("unchecked")
   public DataBinder<T> unbind(String property) {
-    ((BindableProxy<T>) this.model).unbind(property);
+    ((BindableProxy<T>) this.model).getDriver().unbind(property);
     return this;
   }
 
@@ -199,9 +198,8 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * 
    * @return the same {@link DataBinder} instance to support call chaining.
    */
-  @SuppressWarnings("unchecked")
   public DataBinder<T> unbind() {
-    ((BindableProxy<T>) this.model).unbind();
+    ((BindableProxy<T>) this.model).getDriver().unbind();
     return this;
   }
 
@@ -242,7 +240,6 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
    *         {@link #getModel()}).
    */
-  @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
     Assert.notNull(model);
 
@@ -251,21 +248,20 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
       model = (T) ((BindableProxy<T>) model).unwrap();
     }
 
-    BindableProxy<T> proxy = ((BindableProxy<T>) this.model);
-    BindableProxyState<T> proxyState = proxy.getState();
+    BindableProxyDriver<T> driver = ((BindableProxy<T>) this.model).getDriver();
 
     // create a new proxy and copy the bindings
-    BindableProxy<T> newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(
-        model, (initialState != null) ? initialState : proxyState.getInitialState());
+    BindableProxy<T> proxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(
+        model, (initialState != null) ? initialState : driver.getInitialState());
 
-    for (String boundProperty : proxyState.getBoundProperties()) {
-      newProxy.bind(proxyState.getWidget(boundProperty), boundProperty, proxyState.getConverter(boundProperty));
+    for (String boundProperty : driver.getBoundProperties()) {
+      proxy.getDriver().bind(driver.getWidget(boundProperty), boundProperty, driver.getConverter(boundProperty));
     }
 
     // unbind the old proxied model
-    proxy.unbind();
+    driver.unbind();
 
-    this.model = (T) newProxy;
+    this.model = (T) proxy;
     return this.model;
   }
 
@@ -276,29 +272,28 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The name of the model property, must not be null.
    * @return The widget currently bound to the provided property or null if no widget was bound.
    */
-  @SuppressWarnings("unchecked")
   public Widget getWidget(String property) {
-    return ((BindableProxy<T>) this.model).getState().getWidget(Assert.notNull(property));
+    return ((BindableProxy<T>) this.model).getDriver().getWidget(Assert.notNull(property));
   }
 
   @Override
   public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
-    ((HasPropertyChangeHandlers) this.model).addPropertyChangeHandler(handler);
+    ((BindableProxy<T>) this.model).getDriver().addPropertyChangeHandler(handler);
   }
 
   @Override
   public void removePropertyChangeHandler(PropertyChangeHandler<?> handler) {
-    ((HasPropertyChangeHandlers) this.model).removePropertyChangeHandler(handler);
+    ((BindableProxy<T>) this.model).getDriver().removePropertyChangeHandler(handler);
   }
 
   @Override
   public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
-    ((HasPropertyChangeHandlers) this.model).addPropertyChangeHandler(property, handler);
+    ((BindableProxy<T>) this.model).getDriver().addPropertyChangeHandler(property, handler);
   }
 
   @Override
   public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
-    ((HasPropertyChangeHandlers) this.model).removePropertyChangeHandler(property, handler);
+    ((BindableProxy<T>) this.model).getDriver().removePropertyChangeHandler(property, handler);
   }
 
 }

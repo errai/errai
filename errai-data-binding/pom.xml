@@ -49,6 +49,9 @@
               <value>false</value>
             </property>
           </systemProperties>
+          <includes>
+            <include>**/AllDataBindingTests.java</include>
+          </includes>
         </configuration>
       </plugin>
       <plugin>
