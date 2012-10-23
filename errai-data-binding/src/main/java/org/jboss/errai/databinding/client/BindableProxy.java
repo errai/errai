@@ -30,15 +30,15 @@ import com.google.gwt.user.client.ui.Widget;
 public interface BindableProxy<T> extends WrappedPortable, HasProperties {
 
   /**
-   * Returns the {@link BindableProxyDriver} of this proxy.
+   * Returns the {@link BindableProxyAgent} of this proxy.
    * 
-   * @return the proxy's driver, never null.
+   * @return the proxy's agent, never null.
    */
-  public BindableProxyDriver<T> getDriver();
+  public BindableProxyAgent<T> getAgent();
 
   /**
    * Updates all widgets bound to the model instance associated with this proxy (see
-   * {@link BindableProxyDriver#bind(Widget, String, Converter)}). This method is only useful if the model instance has
+   * {@link BindableProxyAgent#bind(Widget, String, Converter)}). This method is only useful if the model instance has
    * undergone changes that were not caused by calls to methods on this proxy and were therefore not visible to this
    * proxy (e.g direct field access).
    */

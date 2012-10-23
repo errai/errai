@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.databinding.client.BindableProxy;
-import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -56,7 +56,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     Convert.deregisterDefaultConverters();
     super.gwtSetUp();
   }
-  
+
   @Test
   public void testBasicBinding() {
     TextBox textBox = new TextBox();
@@ -187,7 +187,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Widget for name should not have been updated", "ui.name", nameTextBox.getText());
     assertEquals("Widget for value not properly updated", "model.value", valueTextBox.getText());
   }
-  
+
   @Test
   public void testBindingWithModelInstanceChange() {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
@@ -230,7 +230,68 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
   }
-  
+
+  @Test
+  public void testBindablePropertyChainTwoLevelsDeep() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.child.name").getModel();
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getName());
+
+    model.getChild().getChild().setName("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+
+  @Test
+  public void testBindablePropertyChainWithNestedInstanceChange() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.value").getModel();
+
+    model.setChild(new TestModel());
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
+
+    model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+
+  @Test
+  public void testBindablePropertyChainWithUnbinding() {
+    TextBox valueTextBox = new TextBox();
+    TextBox nameTextBox = new TextBox();
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class)
+        .bind(valueTextBox, "child.value")
+        .bind(nameTextBox, "child.name");
+
+    TestModel model = binder.getModel();
+
+    // unbind specific nested property
+    binder.unbind("child.name");
+    model.getChild().setName("model change");
+    assertEquals("Widget should not have been updated because unbind was called for this property", "", nameTextBox.getText());
+
+    nameTextBox.setValue("UI change", true);
+    assertEquals("Model should not have been updated because unbind was called for this property", "model change", 
+        model.getChild().getName());
+
+    model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", valueTextBox.getText());
+
+    valueTextBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
+    
+    model.getChild().setValue("");
+    
+    // unbind all properties
+    binder.unbind();
+    model.getChild().setValue("model change");
+    assertEquals("Widget should not have been updated because unbind was called", "", valueTextBox.getText());
+
+    valueTextBox.setValue("UI change", true);
+    assertEquals("Model should not have been updated because unbind was called", "model change", model.getChild().getValue());
+  }
+
   @Test
   public void testBindableProxyMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
@@ -338,7 +399,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     model.setValue("model change");
 
-    // This call is used by Errai JPA, to update the widgets after an entity was updated 
+    // This call is used by Errai JPA, to update the widgets after an entity was updated
     // using direct field access (e.g. the id was set).
     ((BindableProxy<?>) binder.getModel()).updateWidgets();
     assertEquals("TextBox should have been updated", "model change", textBox.getText());

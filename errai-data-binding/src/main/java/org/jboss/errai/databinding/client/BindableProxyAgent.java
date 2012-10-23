@@ -35,12 +35,10 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Manages bindings and property change handlers for a {@link BindableProxy}.
- * 
- * Each generated {@link BindableProxy} uses an instance of this class to keep the widgets and corresponding model in
- * sync.
+ * Acts in behalf of a {@link BindableProxy} to keep the model and bound widgets in sync and to manage bindings and
+ * property change handlers.
  * <p>
- * The driver will:
+ * An agent will:
  * <ul>
  * <li>Carry out an initial state sync between the bound widgets and the target model, if specified (see
  * {@link DataBinder#DataBinder(Object, InitialState)})</li>
@@ -60,9 +58,10 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 @SuppressWarnings("rawtypes")
-public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
-  final Map<String, Class> propertyTypes = new HashMap<String, Class>();
+public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
+  final Map<String, PropertyType> propertyTypes = new HashMap<String, PropertyType>();
   final Map<String, Widget> bindings = new HashMap<String, Widget>();
+  final Map<String, DataBinder> binders = new HashMap<String, DataBinder>();
   final Map<String, Converter> converters = new HashMap<String, Converter>();
   final Map<String, HandlerRegistration> handlerRegistrations = new HashMap<String, HandlerRegistration>();
   final PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
@@ -71,7 +70,7 @@ public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
   final T target;
   final InitialState initialState;
 
-  BindableProxyDriver(BindableProxy<T> proxy, T target, InitialState initialState) {
+  BindableProxyAgent(BindableProxy<T> proxy, T target, InitialState initialState) {
     this.proxy = proxy;
     this.target = target;
     this.initialState = initialState;
@@ -133,13 +132,22 @@ public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
    */
   @SuppressWarnings("unchecked")
   public void bind(final Widget widget, final String property, final Converter converter) {
-    // This call ensures an exception is thrown for bindings to non existing properties.
-    // Reusing this method for this purpose helps to keep the generated code size smaller.
-    proxy.get(property);
+    validatePropertyExpr(property);
+    
+    if (property.indexOf(".") > 0) {
+      createNestedBinder(widget, property, converter);
+      return;
+    }
+
+    if (!propertyTypes.containsKey(property)) {
+      throw new NonExistingPropertyException(property);
+    }
+
     unbind(property);
     if (bindings.containsValue(widget)) {
       throw new RuntimeException("Widget already bound to a different property!");
     }
+
     bindings.put(property, widget);
     converters.put(property, converter);
     if (widget instanceof HasValue) {
@@ -148,7 +156,7 @@ public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
         public void onValueChange(ValueChangeEvent event) {
           Object oldValue = proxy.get(property);
 
-          Object value = Convert.toModelValue(propertyTypes.get(property),
+          Object value = Convert.toModelValue(propertyTypes.get(property).getType(),
               bindings.get(property), event.getValue(), converters.get(property));
           proxy.set(property, value);
 
@@ -157,6 +165,85 @@ public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
       }));
     }
     syncState(widget, property, initialState);
+  }
+
+  @SuppressWarnings("unchecked")
+  private void createNestedBinder(final Widget widget, final String property, final Converter converter) {
+    int dotPos = property.indexOf(".");
+    if (dotPos > 0) {
+      String bindableProperty = property.substring(0, dotPos);
+
+      if (!propertyTypes.containsKey(bindableProperty)) {
+        throw new NonExistingPropertyException(bindableProperty);
+      }
+      if (!propertyTypes.get(bindableProperty).isBindable()) {
+        throw new RuntimeException("The type of property " + bindableProperty + " (" 
+            + propertyTypes.get(bindableProperty).getType().getName() + ") is not a @Bindable type!");
+      }
+
+      DataBinder binder = binders.get(bindableProperty);
+      if (binder == null) {
+        if (proxy.get(bindableProperty) == null) {
+          binder = DataBinder.forType(propertyTypes.get(bindableProperty).getType(), initialState);
+        }
+        else {
+          binder = DataBinder.forModel(proxy.get(bindableProperty), initialState);
+        }
+        binders.put(bindableProperty, binder);
+      }
+      binder.bind(widget, property.substring(dotPos + 1), converter);
+      proxy.set(bindableProperty, binder.getModel());
+    }
+  }
+  
+  private void validatePropertyExpr(String property) {
+    if (property.startsWith(".") || property.endsWith(".")) {
+      throw new RuntimeException("Binding expression (property chain) cannot start or end with '.' :" + property);
+    }
+  }
+
+  /**
+   * Unbinds all properties.
+   */
+  public void unbind() {
+    for (DataBinder binder : binders.values()) {
+      binder.unbind();
+    }
+    binders.clear();
+
+    for (Object reg : handlerRegistrations.keySet()) {
+      (handlerRegistrations.get(reg)).removeHandler();
+    }
+    handlerRegistrations.clear();
+
+    bindings.clear();
+    converters.clear();
+  }
+
+  /**
+   * Unbinds the property with the given name.
+   * 
+   * @param property
+   *          the name of the model property to unbind, must not be null.
+   */
+  public void unbind(final String property) {
+    validatePropertyExpr(property);
+    
+    int dotPos = property.indexOf(".");
+    if (dotPos > 0) {
+      String bindableProperty = property.substring(0, dotPos);
+      DataBinder binder = binders.get(bindableProperty);
+      if (binder != null) {
+        binder.unbind(property.substring(dotPos + 1));
+      }
+    }
+
+    bindings.remove(property);
+    converters.remove(property);
+    HandlerRegistration reg = handlerRegistrations.remove(property);
+    if (reg != null) {
+      reg.removeHandler();
+    }
   }
 
   /**
@@ -179,13 +266,14 @@ public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
     if (widget instanceof HasValue) {
       HasValue hv = (HasValue) widget;
       Object widgetValue =
-          Convert.toWidgetValue(widget, propertyTypes.get(property), newValue, converters.get(property));
+          Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converters.get(property));
       hv.setValue(widgetValue, true);
     }
     else if (widget instanceof HasText) {
       HasText ht = (HasText) widget;
       Object widgetValue =
-          Convert.toWidgetValue(String.class, propertyTypes.get(property), newValue, converters.get(property));
+          Convert
+              .toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converters.get(property));
       ht.setText((String) widgetValue);
     }
 
@@ -215,7 +303,7 @@ public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
         value = initialState.getInitialValue(proxy.get(property), hasValue.getValue());
         if (initialState == InitialState.FROM_MODEL) {
           Object widgetValue =
-              Convert.toWidgetValue(widget, propertyTypes.get(property), value, converters.get(property));
+              Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), value, converters.get(property));
           hasValue.setValue(widgetValue);
         }
       }
@@ -224,40 +312,14 @@ public final class BindableProxyDriver<T> implements HasPropertyChangeHandlers {
         value = initialState.getInitialValue(proxy.get(property), hasText.getText());
         if (initialState == InitialState.FROM_MODEL) {
           Object widgetValue =
-              Convert.toWidgetValue(String.class, propertyTypes.get(property), value, converters.get(property));
+              Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), value,
+                  converters.get(property));
           hasText.setText((String) widgetValue);
         }
       }
       if (initialState == InitialState.FROM_UI) {
         proxy.set(property, value);
       }
-    }
-  }
-
-  /**
-   * Unbinds all properties.
-   */
-  public void unbind() {
-    for (Object reg : handlerRegistrations.keySet()) {
-      (handlerRegistrations.get(reg)).removeHandler();
-    }
-    bindings.clear();
-    handlerRegistrations.clear();
-    converters.clear();
-  }
-
-  /**
-   * Unbinds the property with the given name.
-   * 
-   * @param property
-   *          the name of the model property to unbind, must not be null.
-   */
-  public void unbind(final String property) {
-    bindings.remove(property);
-    converters.remove(property);
-    HandlerRegistration reg = handlerRegistrations.remove(property);
-    if (reg != null) {
-      reg.removeHandler();
     }
   }
 

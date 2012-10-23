@@ -32,13 +32,15 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.BindableProxy;
-import org.jboss.errai.databinding.client.BindableProxyDriver;
+import org.jboss.errai.databinding.client.BindableProxyAgent;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 
@@ -61,22 +63,22 @@ public class BindableProxyGenerator {
         .body();
 
     classBuilder
-        .privateField("driver", parameterizedAs(BindableProxyDriver.class, typeParametersOf(bindable)))
+        .privateField("agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
         .finish()
         .publicConstructor(Parameter.of(InitialState.class, "initialState"))
         .callThis(Stmt.newObject(bindable), Variable.get("initialState"))
         .finish()
         .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(InitialState.class, "initialState"))
-        .append(Stmt.loadVariable("driver").assignValue(
-            Stmt.newObject(parameterizedAs(BindableProxyDriver.class, typeParametersOf(bindable)),
+        .append(Stmt.loadVariable("agent").assignValue(
+            Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
                 Variable.get("this"), Variable.get("target"), Variable.get("initialState"))))
         .append(generatePropertiesMap())
         .finish()
-        .publicMethod(BindableProxyDriver.class, "getDriver")
-        .append(driver().returnValue())
+        .publicMethod(BindableProxyAgent.class, "getAgent")
+        .append(agent().returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")
-        .append(driver().invoke("syncState", Stmt.loadStatic(InitialState.class, "FROM_MODEL")))
+        .append(agent().invoke("syncState", Stmt.loadStatic(InitialState.class, "FROM_MODEL")))
         .finish()
         .publicMethod(bindable, "unwrap")
         .append(target().returnValue())
@@ -154,7 +156,6 @@ public class BindableProxyGenerator {
 
       Statement callSetterOnTarget =
           target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
-
       // If the set method we are proxying returns a value, capture that value into a local variable
       Statement returnValueOfSetter = EmptyStatement.INSTANCE;
       if (!setterMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
@@ -163,13 +164,24 @@ public class BindableProxyGenerator {
         returnValueOfSetter = Stmt.nestedCall(Refs.get("returnValueOfSetter")).returnValue();
       }
 
+      Statement updateNestedProxy = EmptyStatement.INSTANCE;
+      if (paramType.isAnnotationPresent(Bindable.class)) {
+        updateNestedProxy =
+            Stmt.if_(Bool.expr(field("binders").invoke("containsKey", property)))
+                .append(Stmt.loadVariable(property).assignValue(Cast.to(paramType,
+                    field("binders").invoke("get", property).invoke("setModel", Variable.get(property)))))
+                .append(Stmt.loadVariable("this").invoke("set", property, Variable.get(property)))
+                .finish();
+      }
+
       classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
           Parameter.of(paramType, property))
+          .append(updateNestedProxy)
           .append(
               Stmt.declareVariable("oldValue", paramType, target().invoke(getterMethod.getName())))
           .append(callSetterOnTarget)
           .append(
-              driver().invoke("updateWidgetAndFireEvents", property, Variable.get("oldValue"), Variable.get(property)))
+              agent().invoke("updateWidgetAndFireEvents", property, Variable.get("oldValue"), Variable.get(property)))
           .append(returnValueOfSetter)
           .finish();
     }
@@ -180,26 +192,31 @@ public class BindableProxyGenerator {
     for (String property : bindable.getBeanDescriptor().getProperties()) {
       MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
       if (!readMethod.isFinal()) {
-        block.addStatement(field("propertyTypes").invoke("put", property,
-            readMethod.getReturnType().asBoxed().asClass()));
+        block.addStatement(field("propertyTypes").invoke(
+            "put",
+            property,
+            Stmt.newObject(PropertyType.class, readMethod.getReturnType().asBoxed().asClass(),
+                readMethod.getReturnType().isAnnotationPresent(Bindable.class))
+            )
+            );
       }
     }
     return block;
   }
 
   private ContextualStatementBuilder field(String field) {
-    return Stmt.loadClassMember("driver").loadField(field);
+    return agent().loadField(field);
   }
 
-  private ContextualStatementBuilder driver() {
-    return Stmt.loadClassMember("driver");
+  private ContextualStatementBuilder agent() {
+    return Stmt.loadClassMember("agent");
   }
 
   private ContextualStatementBuilder target() {
     return Stmt.nestedCall(new Statement() {
       @Override
       public String generate(Context context) {
-        return Stmt.loadClassMember("driver").loadField("target").generate(context);
+        return agent().loadField("target").generate(context);
       }
 
       @Override
