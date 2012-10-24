@@ -6,11 +6,8 @@ import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.demo.grocery.client.local.convert.RelativeTimeConverter;
 import org.jboss.errai.demo.grocery.client.local.convert.UsernameConverter;
-import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
@@ -33,28 +30,15 @@ public class ItemWidget extends Composite {
   @Inject private @AutoBound DataBinder<Item> itemBinder;
   @Inject private @Bound @DataField Label name;
   @Inject private @Bound @DataField Label comment;
-
-  private @Bound(converter=RelativeTimeConverter.class) @DataField Element addedOn = DOM.createSpan();
-  private @Bound(converter=UsernameConverter.class) @DataField Element addedBy = DOM.createSpan();
-
-  @Inject private DataBinder<Department> deptBinder;
-  @Inject private @DataField Label department;
+  @Inject private @Bound(property="department.name") @DataField Label department;
+  
+  private @Bound(converter=RelativeTimeConverter.class) @DataField
+  final Element addedOn = DOM.createSpan();
+  private @Bound(converter=UsernameConverter.class) @DataField
+  final Element addedBy = DOM.createSpan();
 
   @PostConstruct
   void init() {
-
-    itemBinder.getModel().setDepartment(new Department());
-    deptBinder.setModel(itemBinder.getModel().getDepartment());
-    deptBinder.bind(department, "name");
-
-    // need to switch the databinder's model when the item's department reference changes
-    itemBinder.addPropertyChangeHandler("department", new PropertyChangeHandler<Department>() {
-      @Override
-      public void onPropertyChange(PropertyChangeEvent<Department> event) {
-        deptBinder.setModel(event.getNewValue());
-      }
-    });
-
     // TODO (ERRAI-382) convert these to a method with @EventHandler("this")
     addDomHandler(new MouseOverHandler() {
       @Override
@@ -88,10 +72,6 @@ public class ItemWidget extends Composite {
    */
   public Item setItem(Item item) {
     System.out.println("ItemWidget: adopting model object " + System.identityHashCode(item));
-    if (item.getDepartment() == null) {
-      item.setDepartment(new Department());
-    }
-    deptBinder.setModel(item.getDepartment(), InitialState.FROM_MODEL);
     return itemBinder.setModel(item, InitialState.FROM_MODEL);
   }
 }

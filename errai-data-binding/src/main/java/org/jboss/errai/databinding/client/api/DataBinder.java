@@ -94,7 +94,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The bindable type, must not be null.
    */
   public static <T> DataBinder<T> forType(Class<T> modelType) {
-    return new DataBinder<T>(modelType, null);
+    return forType(modelType, null);
   }
 
   /**
@@ -118,7 +118,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The instance of a {@link Bindable} type, must not be null.
    */
   public static <T> DataBinder<T> forModel(T model) {
-    return new DataBinder<T>(model, null);
+    return forModel(model, null);
   }
 
   /**
@@ -132,7 +132,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          synchronization should be carried out.
    */
   public static <T> DataBinder<T> forModel(T model, InitialState initialState) {
-    return new DataBinder<T>(model, initialState);
+    return new DataBinder<T>(maybeUnwrapModel(model), initialState);
   }
 
   /**
@@ -246,9 +246,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     Assert.notNull(model);
 
     // ensure that we do not proxy the model twice
-    if (model instanceof BindableProxy) {
-      model = (T) ((BindableProxy<T>) model).unwrap();
-    }
+    model = maybeUnwrapModel(model);
 
     BindableProxyAgent<T> agent = ((BindableProxy<T>) this.model).getAgent();
 
@@ -278,6 +276,13 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     return ((BindableProxy<T>) this.model).getAgent().getWidget(Assert.notNull(property));
   }
 
+  private static <M> M maybeUnwrapModel(M model) {
+    if (model instanceof BindableProxy) {
+      model = (M) ((BindableProxy<M>) model).unwrap();
+    }
+    return model;
+  }
+  
   @Override
   public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
     ((BindableProxy<T>) this.model).getAgent().addPropertyChangeHandler(handler);

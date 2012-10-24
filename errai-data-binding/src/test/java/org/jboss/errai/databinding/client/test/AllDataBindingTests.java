@@ -28,6 +28,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   ConverterIntegrationTest.class,
   DataBindingIntegrationTest.class,
+  DataBindingValidatorTest.class,
   DefaultConversionTest.class,
   PropertyChangeHandlerSupportTest.class})
 public class AllDataBindingTests {

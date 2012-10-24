@@ -8,7 +8,7 @@ import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.jboss.errai.ui.test.common.client.Model;
+import org.jboss.errai.ui.test.common.client.TestModel;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -24,7 +24,7 @@ public class BindingTemplate extends Composite {
   private Label id;
 
   @Inject
-  @Bound
+  @Bound(property="child.name")
   @DataField
   private TextBox name;
 
@@ -33,10 +33,10 @@ public class BindingTemplate extends Composite {
   @DataField
   private TextBox date;
 
-  private final Model model;
+  private final TestModel model;
   
   @Inject
-  public BindingTemplate(@AutoBound DataBinder<Model> binder) {
+  public BindingTemplate(@AutoBound DataBinder<TestModel> binder) {
     model = binder.getModel();
   }
 
@@ -52,7 +52,7 @@ public class BindingTemplate extends Composite {
     return date;
   }
   
-  public Model getModel() {
+  public TestModel getModel() {
     return model;
   }
 }

@@ -56,6 +56,7 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.rebind.DataBindingValidator;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
@@ -521,10 +522,10 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         if (dataBinderRef != null) {
           String property = bound.property().equals("") ? dataField.getKey() : bound.property();
           // Check if bound property exists in data model type
-          if (!dataModelType.getBeanDescriptor().getProperties().contains(property)) {
+          if (!DataBindingValidator.isValidPropertyChain(dataModelType, property)) {
             throw new GenerationException("Invalid binding of DataField " + dataField.getKey() + " in class "
-                + ctx.getInjector().getInjectedType() + "! Property with name " + property + " not found in class "
-                + dataModelType);
+                + ctx.getInjector().getInjectedType() + "! Property " + property + " not resolvable from class "
+                + dataModelType + ". Hint: All types in a property chain must be @Bindable!");
           }
 
           Statement converter =

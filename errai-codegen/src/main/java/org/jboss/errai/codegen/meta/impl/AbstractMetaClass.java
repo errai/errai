@@ -725,6 +725,16 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       public MetaMethod getWriteMethodForProperty(final String propertyName) {
         return setterProperties.get(propertyName);
       }
+
+      @Override
+      public MetaClass getPropertyType(String propertyName) {
+        MetaMethod readMethod = getReadMethodForProperty(propertyName);
+        if (readMethod != null) {
+          return readMethod.getReturnType();
+        }
+        
+        return getWriteMethodForProperty(propertyName).getParameters()[0].getType();
+      }
     };
   }
 

@@ -135,7 +135,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     validatePropertyExpr(property);
     
     if (property.indexOf(".") > 0) {
-      createNestedBinder(widget, property, converter);
+      createNestedBinders(widget, property, converter);
+      bindings.put(property, widget);
       return;
     }
 
@@ -168,7 +169,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   @SuppressWarnings("unchecked")
-  private void createNestedBinder(final Widget widget, final String property, final Converter converter) {
+  private void createNestedBinders(final Widget widget, final String property, final Converter converter) {
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       String bindableProperty = property.substring(0, dotPos);
