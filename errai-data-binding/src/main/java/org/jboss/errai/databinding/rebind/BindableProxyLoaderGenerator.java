@@ -101,7 +101,6 @@ public class BindableProxyLoaderGenerator extends Generator {
       }
     });
 
-
     return gen;
   }
 
@@ -113,8 +112,12 @@ public class BindableProxyLoaderGenerator extends Generator {
         RebindUtils.findTranslatablePackages(context))) {
 
       if (bindable.isFinal()) {
-        log.warn("Ignoring bindable type because it is marked as final:" + bindable.getName());
-        continue;
+        throw new RuntimeException("@Bindable type cannot be final: " + bindable.getFullyQualifiedName());
+      }
+
+      if (bindable.getDeclaredConstructor() == null || !bindable.getDeclaredConstructor().isPublic()) {
+        throw new RuntimeException("@Bindable type needs a public default no-arg constructor: " 
+            + bindable.getFullyQualifiedName());
       }
 
       ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
