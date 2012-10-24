@@ -193,6 +193,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
 
     Map<String, MetaClass> dataFields = (Map<String, MetaClass>) ctx.getInjectionContext().getAttribute(
             dataFieldTypeMapName(componentType));
+    
     if (dataFields != null) {
       result.putAll(dataFields);
     }

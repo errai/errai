@@ -1,6 +1,5 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -12,12 +11,11 @@ import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
@@ -36,26 +34,17 @@ public class ItemWidget extends Composite {
   final Element addedOn = DOM.createSpan();
   private @Bound(converter=UsernameConverter.class) @DataField
   final Element addedBy = DOM.createSpan();
-
-  @PostConstruct
-  void init() {
-    // TODO (ERRAI-382) convert these to a method with @EventHandler("this")
-    addDomHandler(new MouseOverHandler() {
-      @Override
-      public void onMouseOver(MouseOverEvent event) {
-        System.out.println("MouseOver " + itemBinder.getModel().getName());
-        addStyleName("active");
-      };
-    }, MouseOverEvent.getType());
-
-    addDomHandler(new MouseOutHandler() {
-      @Override
-      public void onMouseOut(MouseOutEvent event) {
-        System.out.println("MouseOut " + itemBinder.getModel().getName());
-        removeStyleName("active");
-      };
-    }, MouseOutEvent.getType());
-
+  
+  @EventHandler
+  public void onMouseOver(MouseOverEvent event) {
+    System.out.println("MouseOver " + itemBinder.getModel().getName());
+    addStyleName("active");
+  }
+  
+  @EventHandler
+  public void onMouseOut(MouseOutEvent event) {
+    System.out.println("MouseOut " + itemBinder.getModel().getName());
+    removeStyleName("active");
   }
 
   /**

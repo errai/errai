@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Composite;
 public class QuickHandlerComponent extends Composite {
 
   @DataField
-  private AnchorElement c1 = DOM.createAnchor().cast();
+  private final AnchorElement c1 = DOM.createAnchor().cast();
 
   @Inject
   @DataField
@@ -29,9 +29,9 @@ public class QuickHandlerComponent extends Composite {
   private boolean c0EventFired = false;
   private boolean c1EventFired = false;
   private boolean c1_dupEventFired = false;
-  private boolean c2EventFired = false;
-
-  private boolean c0EventFired2 = false;
+  private boolean c2EventFired = false; 
+  private boolean thisEventFired = false;
+  private final boolean c0EventFired2 = false;
 
 
   public AnchorElement getC1() {
@@ -62,6 +62,11 @@ public class QuickHandlerComponent extends Composite {
   public void doSomethingC2(ClickEvent e) {
     c2EventFired = true;
   }
+  
+  @EventHandler
+  public void doSomethingOnThis(ClickEvent e) {
+    thisEventFired = true;
+  }
 
   public boolean isC0EventFired() {
     return c0EventFired;
@@ -83,4 +88,7 @@ public class QuickHandlerComponent extends Composite {
     return c2EventFired;
   }
 
+  public boolean isThisEventFired() {
+    return thisEventFired;
+  }
 }

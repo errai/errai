@@ -199,7 +199,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
           })));
       Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
-
+      
       generateComponentCompositions(ctx, builder, component, rootTemplateElement,
           Stmt.loadVariable(dataFieldElementsVarName), fieldsMap);
 
@@ -212,7 +212,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                                                  String dataFieldElementsVarName, Statement fieldsMap) {
 
     Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
-
+    dataFieldTypes.put("this", ctx.getType());
+    
     MetaClass declaringClass = ctx.getEnclosingType();
 
     /* Ensure that no @DataFields are handled more than once when used in combination with @SyncNative */
@@ -228,10 +229,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             + declaringClass.getFullyQualifiedName()
             + "." + method.getName() + "] must specify at least one data-field target.");
       }
-
       MetaClass eventType = method.getParameters()[0].getType();
-
-
 
       if (eventType.isAssignableTo(Event.class)) {
         /*
@@ -355,15 +353,29 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
           processedEventHandlers.add(name);
 
+          // Where will the event come from? It could be a @DataField member, or it could be the templated widget itself!
+          Statement eventSource;
+          if ("this".equals(name)) {
+            eventSource = Stmt.loadVariable("obj");
+          }
+          else {
+            eventSource = Stmt.nestedCall(fieldsMap).invoke("get", name);
+          }
+          
           if (dataFieldType.isAssignableTo(Element.class)) {
             builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component,
-                Stmt.nestedCall(fieldsMap).invoke("get", name), listenerInstance,
+                eventSource, listenerInstance,
                 Stmt.invokeStatic(eventType, "getType")));
           }
           else if (dataFieldType.isAssignableTo(hasHandlerType)) {
-            Statement widget = Cast.to(hasHandlerType, Stmt.nestedCall(fieldsMap).invoke("get", name));
+            Statement widget = Cast.to(hasHandlerType, eventSource);
             builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
                 Cast.to(handlerType, listenerInstance)));
+          }
+          else if (dataFieldType.isAssignableTo(Widget.class)) {
+            Statement widget = Cast.to(Widget.class, eventSource);
+            builder.append(Stmt.nestedCall(widget).invoke("addDomHandler",
+                listenerInstance, Stmt.invokeStatic(eventType, "getType")));
           }
           else {
             throw new GenerationException("@DataField [" + name + "] of type [" + dataFieldType.getName()

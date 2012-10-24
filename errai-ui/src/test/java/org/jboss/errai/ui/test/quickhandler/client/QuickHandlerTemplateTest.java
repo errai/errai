@@ -9,8 +9,7 @@ import com.google.gwt.dom.client.ButtonElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.event.dom.client.DomEvent;
 
 public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
 
@@ -24,6 +23,10 @@ public class QuickHandlerTemplateTest extends AbstractErraiCDITest {
     QuickHandlerTemplateTestApp app = IOC.getBeanManager().lookupBean(QuickHandlerTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
 
+    assertFalse(app.getComponent().isThisEventFired());
+    DomEvent.fireNativeEvent(generateClickEvent(), app.getComponent());
+    assertTrue(app.getComponent().isThisEventFired());
+    
     DivElement c0 = DivElement.as(Document.get().getElementById("c0"));
     assertNotNull(c0);
     AnchorElement c1 = app.getComponent().getC1();
