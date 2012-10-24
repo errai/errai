@@ -14,6 +14,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
@@ -166,7 +167,9 @@ public class AsyncTypeInjector extends AbstractInjector {
     /*
     return the instance of the bean from the creational callback.
     */
-    callbackBuilder.append(loadVariable(instanceVarName).returnValue());
+  //  callbackBuilder.append(loadVariable(instanceVarName).returnValue());
+
+    callbackBuilder.append(loadVariable("callback").invoke("callback", loadVariable(instanceVarName)));
 
     /* pop the block builder of the stack now that we're done wiring. */
     ctx.popBlockBuilder();
@@ -181,17 +184,22 @@ public class AsyncTypeInjector extends AbstractInjector {
     final Statement retVal;
 
     if (isSingleton()) {
+
+
+
       /*
        if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
        method and assign it with SimpleCreationalContext.getInstance().
        */
-      ctx.getBootstrapBuilder().privateField(instanceVarName, type).modifiers(Modifier.Final)
-          .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
+//      ctx.getBootstrapBuilder().privateField(instanceVarName, type).modifiers(Modifier.Final)
+//          .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
 
       /*
        use the variable we just assigned as the return value for this injector.
        */
-      retVal = Refs.get(instanceVarName);
+//      retVal = Refs.get(instanceVarName);
+
+      retVal = Stmt.load("<<" + instanceVarName + ">>");
     }
     else {
       /*

@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-
 /**
  * A simple utility class which provides a static reference in the client to the bean manager.
  *

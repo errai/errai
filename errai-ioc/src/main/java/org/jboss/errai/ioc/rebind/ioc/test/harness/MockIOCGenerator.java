@@ -22,6 +22,7 @@ import com.google.gwt.dev.javac.testing.GeneratorContextBuilder;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 
@@ -41,6 +42,8 @@ public class MockIOCGenerator {
   }
 
   public Class<? extends Bootstrapper> generate() {
+    ClassScanner.setReflectionsScanning(true);
+
     final String packageName = Bootstrapper.class.getPackage().getName();
     final String className = "MockBootstrapperImpl";
 
@@ -103,6 +106,9 @@ public class MockIOCGenerator {
     }
     catch (Exception e) {
       throw new RuntimeException(e);
+    }
+    finally {
+      ClassScanner.setReflectionsScanning(false);
     }
   }
 

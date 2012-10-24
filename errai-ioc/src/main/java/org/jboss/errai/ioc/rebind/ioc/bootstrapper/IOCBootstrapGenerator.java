@@ -142,6 +142,7 @@ public class IOCBootstrapGenerator {
 
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
+
       gen = generateSynchronousBootstrapper(packageName, className);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
           + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
@@ -168,7 +169,6 @@ public class IOCBootstrapGenerator {
     final InjectionContext injectionContext = setupContexts(packageName, className);
     return generateBootstrappingClassSource(injectionContext, AsyncInjectionContext.class);
   }
-
 
   private InjectionContext setupContexts(final String packageName, final String className) {
     final ReachableTypes allDeps = EnvUtil.getAllReachableClasses(context);
@@ -250,13 +250,18 @@ public class IOCBootstrapGenerator {
 
     injectionContextBuilder.processingContext(processingContext);
     injectionContextBuilder.reachableTypes(allDeps);
+
+    final String s = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.async_bean_manager");
+    if (s != null && Boolean.parseBoolean(s)) {
+      injectionContextBuilder.asyncBootstrap(true);
+    }
+
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
     defaultConfigureProcessor(injectionContext);
 
     return injectionContext;
   }
-
 
   private String generateBootstrappingClassSource(final InjectionContext injectionContext,
                                                   final Class<? extends BootstrapInjectionContext> injectionContextClass) {

@@ -355,7 +355,8 @@ public class IOCProcessorFactory {
                 injector = injectors.get(0);
               }
               else {
-                injector = new TypeInjector(instance.getType(), injectionContext);
+                injector = injectionContext.getInjectorFactory().getTypeInjector(instance.getType(), injectionContext);
+              //  injector = new TypeInjector(instance.getType(), injectionContext);
               }
 
               if (injector.isEnabled() && injector instanceof TypeInjector) {
@@ -587,7 +588,8 @@ public class IOCProcessorFactory {
           injector = injectors.get(0);
         }
         else {
-          injector = new TypeInjector(type, injectionContext);
+          injector = injectionContext.getInjectorFactory().getTypeInjector(type, injectionContext);
+        //  injector = new TypeInjector(type, injectionContext);
         }
 
         return entry.handler

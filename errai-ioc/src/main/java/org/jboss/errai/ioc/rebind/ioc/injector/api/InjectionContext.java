@@ -55,7 +55,9 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
@@ -69,6 +71,9 @@ public class InjectionContext {
   private final IOCProcessingContext processingContext;
 
   private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings = HashMultimap.create();
+
+  private final boolean async;
+  private final InjectorFactory injectorFactory;
 
   // do not refactor to a MultiMap. the resolution algorithm has dynamic replacement of injectors that is difficult
   // to achieve with a MultiMap
@@ -106,11 +111,14 @@ public class InjectionContext {
     this.processingContext = builder.processingContext;
     this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(builder.enabledAlternatives));
     this.reachableTypes = Assert.notNull(builder.reachableTypes);
+    this.async = builder.async;
+    this.injectorFactory = new InjectorFactory(this.async);
   }
 
   public static class Builder {
     private IOCProcessingContext processingContext;
     private ReachableTypes reachableTypes = ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
+    private boolean async;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
 
     public static Builder create() {
@@ -132,6 +140,10 @@ public class InjectionContext {
       return this;
     }
 
+    public Builder asyncBootstrap(final boolean async) {
+      this.async = async;
+      return this;
+    }
 
     public InjectionContext build() {
       Assert.notNull("the processingContext cannot be null", processingContext);
@@ -548,11 +560,13 @@ public class InjectionContext {
   public void addType(final MetaClass type) {
     if (injectors.containsKey(type))
       return;
-    registerInjector(new TypeInjector(type, this));
+
+    registerInjector(getInjectorFactory().getTypeInjector(type, this));
   }
 
   public void addPseudoScopeForType(final MetaClass type) {
-    final TypeInjector inj = new TypeInjector(type, this);
+    // final TypeInjector inj = new TypeInjector(type, this);
+    final AbstractInjector inj = (AbstractInjector) getInjectorFactory().getTypeInjector(type, this);
     inj.setReplaceable(true);
     registerInjector(inj);
   }
@@ -753,5 +767,13 @@ public class InjectionContext {
 
   public GraphBuilder getGraphBuilder() {
     return graphBuilder;
+  }
+
+  public InjectorFactory getInjectorFactory() {
+    return injectorFactory;
+  }
+
+  public boolean isAsync() {
+    return async;
   }
 }

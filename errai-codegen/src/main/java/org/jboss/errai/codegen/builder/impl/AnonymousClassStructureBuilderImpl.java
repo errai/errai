@@ -138,7 +138,7 @@ public class AnonymousClassStructureBuilderImpl
       throw new UndefinedMethodException("Can't override (inherited method not found):"
           + classDefinition.getFullyQualifiedNameWithTypeParms() + "." + name + "(" + types + ")");
 
-    return publicOverridesMethod(method, DefParameters.from(method, args));
+    return publicOverridesMethod(method, DefParameters.fromParameters(args));
   }
 
 

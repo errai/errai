@@ -91,7 +91,7 @@ public class Parameter extends AbstractStatement {
       return generatedCache;
 
     generatedCache = (isFinal) ? Modifier.Final.getCanonicalString() + " " : "";
-    return generatedCache += LoadClassReference.getClassReference(type, context, false) + " " + name;
+    return generatedCache += LoadClassReference.getClassReference(type, context, true) + " " + name;
   }
 
   @Override

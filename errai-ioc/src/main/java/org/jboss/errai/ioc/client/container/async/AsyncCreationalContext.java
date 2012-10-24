@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.client.container.async;
 
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
+import org.jboss.errai.ioc.client.container.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.BeanRef;
 
 import java.lang.annotation.Annotation;
@@ -63,11 +64,9 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
         }
       }, this);
 
-
       return inst;
     }
   }
-
 
   @Override
   public void finish() {

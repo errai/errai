@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import org.jboss.errai.ioc.client.container.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 
 import javax.enterprise.context.Dependent;

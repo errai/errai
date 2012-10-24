@@ -12,6 +12,11 @@ public class IOCBeanManagerLifecycle {
    * Resets the bean manager by cleanly destroying all beans and taking them out of service.
    */
   public void resetBeanManager() {
-    IOC.getBeanManager().destroyAllBeans();
+    if (IOCEnvironment.isAsync()) {
+      IOC.getAsyncBeanManager().destroyAllBeans();
+    }
+    else {
+      IOC.getBeanManager().destroyAllBeans();
+    }
   }
 }
