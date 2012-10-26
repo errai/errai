@@ -19,9 +19,13 @@ package org.jboss.errai.databinding.rebind;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -98,12 +102,13 @@ public class BindableProxyGenerator {
         .append(target().invoke("toString").returnValue())
         .finish();
 
-    generateProxyAccessorMethods(classBuilder);
+    generateAccessorMethods(classBuilder);
+    generateNonAccessorMethods(classBuilder);
 
     return classBuilder;
   }
 
-  private void generateProxyAccessorMethods(ClassStructureBuilder<?> classBuilder) {
+  private void generateAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     BlockBuilder<?> getMethod = classBuilder.publicMethod(Object.class, "get",
         Parameter.of(String.class, "property"));
 
@@ -154,24 +159,31 @@ public class BindableProxyGenerator {
 
       MetaClass paramType = setterMethod.getParameters()[0].getType();
 
-      Statement callSetterOnTarget =
-          target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
       // If the set method we are proxying returns a value, capture that value into a local variable
-      Statement returnValueOfSetter = EmptyStatement.INSTANCE;
+      Statement callSetterOnTarget = null;
+      Statement returnValueOfSetter = null;
       if (!setterMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
         callSetterOnTarget =
             Stmt.declareFinalVariable("returnValueOfSetter", setterMethod.getReturnType(), callSetterOnTarget);
         returnValueOfSetter = Stmt.nestedCall(Refs.get("returnValueOfSetter")).returnValue();
       }
+      else {
+        callSetterOnTarget =
+          target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
+        returnValueOfSetter = EmptyStatement.INSTANCE;
+      }
 
-      Statement updateNestedProxy = EmptyStatement.INSTANCE;
+      Statement updateNestedProxy = null;
       if (paramType.isAnnotationPresent(Bindable.class)) {
         updateNestedProxy =
-            Stmt.if_(Bool.expr(field("binders").invoke("containsKey", property)))
+            Stmt.if_(Bool.expr(agent("binders").invoke("containsKey", property)))
                 .append(Stmt.loadVariable(property).assignValue(Cast.to(paramType,
-                    field("binders").invoke("get", property).invoke("setModel", Variable.get(property)))))
+                    agent("binders").invoke("get", property).invoke("setModel", Variable.get(property)))))
                 .append(Stmt.loadVariable("this").invoke("set", property, Variable.get(property)))
                 .finish();
+      }
+      else {
+        updateNestedProxy = EmptyStatement.INSTANCE;
       }
 
       classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
@@ -187,24 +199,59 @@ public class BindableProxyGenerator {
     }
   }
 
+  private void generateNonAccessorMethods(ClassStructureBuilder<?> classBuilder) {
+    for (MetaMethod method : bindable.getMethods()) {
+      String methodName = method.getName();
+      if (!methodName.startsWith("get") && !methodName.startsWith("set") && !methodName.startsWith("is")
+          && !methodName.equals("hashCode") && !methodName.equals("equals") && !methodName.equals("toString")
+          && method.isPublic() && !method.isFinal()) {
+
+        Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
+        List<Statement> parmVars = new ArrayList<Statement>();
+        for (int i = 0; i < parms.length; i++) {
+          parmVars.add(Stmt.loadVariable(parms[i].getName()));
+        }
+
+        Statement callOnTarget = null;
+        Statement returnValue = null;
+        if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
+          callOnTarget = Stmt.declareFinalVariable("returnValue", method.getReturnType(), 
+              target().invoke(method, parmVars.toArray()));
+          returnValue = Stmt.nestedCall(Refs.get("returnValue")).returnValue();
+        }
+        else {
+          callOnTarget = target().invoke(method, parmVars.toArray());
+          returnValue = EmptyStatement.INSTANCE;
+        }
+        
+        classBuilder
+            .publicMethod(method.getReturnType(), methodName, parms)
+              .append(callOnTarget)
+              .append(agent().invoke("updateWidgetsAndFireEvents"))
+              .append(returnValue)
+            .finish();
+      }
+    }
+  }
+
   private Statement generatePropertiesMap() {
     BlockStatement block = new BlockStatement();
     for (String property : bindable.getBeanDescriptor().getProperties()) {
       MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
       if (!readMethod.isFinal()) {
-        block.addStatement(field("propertyTypes").invoke(
+        block.addStatement(agent("propertyTypes").invoke(
             "put",
             property,
             Stmt.newObject(PropertyType.class, readMethod.getReturnType().asBoxed().asClass(),
                 readMethod.getReturnType().isAnnotationPresent(Bindable.class))
             )
-            );
+         );
       }
     }
     return block;
   }
 
-  private ContextualStatementBuilder field(String field) {
+  private ContextualStatementBuilder agent(String field) {
     return agent().loadField(field);
   }
 

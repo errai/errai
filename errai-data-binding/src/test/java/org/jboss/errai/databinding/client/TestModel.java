@@ -85,6 +85,16 @@ public class TestModel {
     this.child = child;
   }
 
+  // this method is used to test property changes using non accessor methods
+  public void activate() {
+    this.active = true;
+  }
+
+  protected TestModel activate(boolean b) {
+    this.active = b;
+    return this;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;

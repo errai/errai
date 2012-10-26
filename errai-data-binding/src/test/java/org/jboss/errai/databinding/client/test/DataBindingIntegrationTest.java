@@ -53,8 +53,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    Convert.deregisterDefaultConverters();
     super.gwtSetUp();
+    Convert.deregisterDefaultConverters();
   }
 
   @Test
@@ -305,6 +305,28 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     valueTextBox.setValue("UI change", true);
     assertEquals("Model should not have been updated because unbind was called", "model change", model.getChild().getValue());
+  }
+  
+  @Test
+  public void testBindingUsingNonAccesssorMethod() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "active").getModel();
+
+    // change the property 'active' using a non accessor method.
+    model.activate();
+    assertTrue("Model not properly updated", model.isActive());
+    assertEquals("Widget not properly updated", "true", textBox.getText());
+  }
+  
+  @Test
+  public void testBindablePropertyChainsUsingNonAccesssorMethod() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.active").getModel();
+
+    // change the property 'active' using a non accessor method.
+    model.getChild().activate();
+    assertTrue("Model not properly updated", model.getChild().isActive());
+    assertEquals("Widget not properly updated", "true", textBox.getText());
   }
 
   @Test

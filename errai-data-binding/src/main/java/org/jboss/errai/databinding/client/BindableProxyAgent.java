@@ -64,6 +64,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final Map<String, DataBinder> binders = new HashMap<String, DataBinder>();
   final Map<String, Converter> converters = new HashMap<String, Converter>();
   final Map<String, HandlerRegistration> handlerRegistrations = new HashMap<String, HandlerRegistration>();
+  final Map<String, Object> knownValues = new HashMap<String, Object>();
   final PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
 
   final BindableProxy<T> proxy;
@@ -133,7 +134,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   @SuppressWarnings("unchecked")
   public void bind(final Widget widget, final String property, final Converter converter) {
     validatePropertyExpr(property);
-    
+
     if (property.indexOf(".") > 0) {
       createNestedBinders(widget, property, converter);
       bindings.put(property, widget);
@@ -178,7 +179,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         throw new NonExistingPropertyException(bindableProperty);
       }
       if (!propertyTypes.get(bindableProperty).isBindable()) {
-        throw new RuntimeException("The type of property " + bindableProperty + " (" 
+        throw new RuntimeException("The type of property " + bindableProperty + " ("
             + propertyTypes.get(bindableProperty).getType().getName() + ") is not a @Bindable type!");
       }
 
@@ -196,7 +197,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       proxy.set(bindableProperty, binder.getModel());
     }
   }
-  
+
   private void validatePropertyExpr(String property) {
     if (property.startsWith(".") || property.endsWith(".")) {
       throw new RuntimeException("Binding expression (property chain) cannot start or end with '.' :" + property);
@@ -219,6 +220,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     bindings.clear();
     converters.clear();
+    knownValues.clear();
   }
 
   /**
@@ -229,21 +231,42 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   public void unbind(final String property) {
     validatePropertyExpr(property);
-    
+
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
       String bindableProperty = property.substring(0, dotPos);
       DataBinder binder = binders.get(bindableProperty);
       if (binder != null) {
         binder.unbind(property.substring(dotPos + 1));
+        return;
       }
     }
 
+    knownValues.remove(property);
     bindings.remove(property);
     converters.remove(property);
     HandlerRegistration reg = handlerRegistrations.remove(property);
     if (reg != null) {
       reg.removeHandler();
+    }
+  }
+
+  /**
+   * Updates all bound widgets if necessary (if a bound property's value has changed). This method is invoked in case a
+   * bound property changes outside the property's write method (setter method).
+   * 
+   * @param <P>
+   *          The property type of the changed property.
+   */
+  <P> void updateWidgetsAndFireEvents() {
+    for (String boundProperty : bindings.keySet()) {
+      Object knownValue = knownValues.get(boundProperty);
+      Object actualValue = proxy.get(boundProperty);
+
+      if ((knownValue == null && actualValue != null) ||
+          (knownValue != null && !knownValue.equals(actualValue))) {
+        updateWidgetAndFireEvents(boundProperty, knownValue, actualValue);
+      }
     }
   }
 
@@ -278,6 +301,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       ht.setText((String) widgetValue);
     }
 
+    knownValues.put(property, newValue);
     PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, property, oldValue, newValue);
     propertyChangeHandlerSupport.notifyHandlers(event);
   }
