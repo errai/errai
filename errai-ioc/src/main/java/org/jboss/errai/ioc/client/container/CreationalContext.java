@@ -81,6 +81,14 @@ public interface CreationalContext {
    */
   void addBean(BeanRef ref, Object instance);
 
+//  /**
+//   * Registers a bean provider within the creational
+//   *
+//   * @param ref
+//   * @param provider
+//   */
+//  void addBeanProvider(BeanRef ref, BeanProvider provider);
+
   /**
    * Returns a list of all created beans within this creational context.
    *

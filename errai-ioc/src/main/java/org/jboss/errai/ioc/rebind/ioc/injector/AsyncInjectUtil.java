@@ -43,12 +43,13 @@ import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.AsyncDecoratorTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStrategy;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.DecoratorTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionTask;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.AsyncInjectionTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProxyInjector;
@@ -77,7 +78,7 @@ public class AsyncInjectUtil {
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
 
-    final List<InjectionTask> injectionTasks = new ArrayList<InjectionTask>();
+    final List<AsyncInjectionTask> injectionTasks = new ArrayList<AsyncInjectionTask>();
 
     final List<MetaConstructor> constructorInjectionPoints
         = scanForConstructorInjectionPoints(injector, ctx, type, injectionTasks);
@@ -89,7 +90,7 @@ public class AsyncInjectUtil {
 
     for (final Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
       if (type.isAnnotationPresent(a)) {
-        final DecoratorTask task = new DecoratorTask(injector, type, ctx.getDecorator(a));
+        final AsyncDecoratorTask task = new AsyncDecoratorTask(injector, type, ctx.getDecorator(a));
         injectionTasks.add(task);
       }
     }
@@ -118,7 +119,7 @@ public class AsyncInjectUtil {
           );
           callback.beanConstructed();
 
-          handleInjectionTasks(ctx, injectionTasks);
+          handleAsyncInjectionTasks(ctx, injectionTasks);
 
           doPostConstruct(ctx, injector, postConstructTasks);
           doPreDestroy(ctx, injector, preDestroyTasks);
@@ -148,7 +149,7 @@ public class AsyncInjectUtil {
 
           callback.beanConstructed();
 
-          handleInjectionTasks(ctx, injectionTasks);
+          handleAsyncInjectionTasks(ctx, injectionTasks);
 
           doPostConstruct(ctx, injector, postConstructTasks);
           doPreDestroy(ctx, injector, preDestroyTasks);
@@ -157,9 +158,9 @@ public class AsyncInjectUtil {
     }
   }
 
-  private static void handleInjectionTasks(final InjectionContext ctx,
-                                           final List<InjectionTask> tasks) {
-    for (final InjectionTask task : tasks) {
+  private static void handleAsyncInjectionTasks(final InjectionContext ctx,
+                                           final List<AsyncInjectionTask> tasks) {
+    for (final AsyncInjectionTask task : tasks) {
       if (!task.doTask(ctx)) {
         throw new InjectionFailure("could perform injection task: " + task);
       }
@@ -276,15 +277,15 @@ public class AsyncInjectUtil {
     }
   }
 
-  private static List<InjectionTask> scanForTasks(final Injector injector,
+  private static List<AsyncInjectionTask> scanForTasks(final Injector injector,
                                                   final InjectionContext ctx,
                                                   final MetaClass type) {
-    final List<InjectionTask> accumulator = new ArrayList<InjectionTask>();
+    final List<AsyncInjectionTask> accumulator = new ArrayList<AsyncInjectionTask>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
     for (final Class<? extends Annotation> decorator : decorators) {
       if (type.isAnnotationPresent(decorator)) {
-        accumulator.add(new InjectionTask(injector, type));
+        accumulator.add(new AsyncInjectionTask(injector, type));
       }
     }
 
@@ -298,16 +299,16 @@ public class AsyncInjectUtil {
                 field.getType());
 
             if (meth == null) {
-              final InjectionTask task = new InjectionTask(injector, field);
+              final AsyncInjectionTask task = new AsyncInjectionTask(injector, field);
               accumulator.add(task);
             }
             else {
-              final InjectionTask task = new InjectionTask(injector, meth);
+              final AsyncInjectionTask task = new AsyncInjectionTask(injector, meth);
               accumulator.add(task);
             }
           }
           else {
-            accumulator.add(new InjectionTask(injector, field));
+            accumulator.add(new AsyncInjectionTask(injector, field));
           }
         }
 
@@ -320,7 +321,7 @@ public class AsyncInjectUtil {
             switch (elType) {
               case FIELD:
                 if (field.isAnnotationPresent(a)) {
-                  accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
+                  accumulator.add(new AsyncDecoratorTask(injector, field, ctx.getDecorator(a)));
                 }
                 break;
             }
@@ -330,7 +331,7 @@ public class AsyncInjectUtil {
 
       for (final MetaMethod meth : visit.getDeclaredMethods()) {
         if (isInjectionPoint(ctx, meth)) {
-          accumulator.add(new InjectionTask(injector, meth));
+          accumulator.add(new AsyncInjectionTask(injector, meth));
         }
 
         for (final Class<? extends Annotation> a : decorators) {
@@ -341,13 +342,13 @@ public class AsyncInjectUtil {
             switch (elType) {
               case METHOD:
                 if (meth.isAnnotationPresent(a)) {
-                  accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
+                  accumulator.add(new AsyncDecoratorTask(injector, meth, ctx.getDecorator(a)));
                 }
                 break;
               case PARAMETER:
                 for (final MetaParameter parameter : meth.getParameters()) {
                   if (parameter.isAnnotationPresent(a)) {
-                    final DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                    final AsyncDecoratorTask task = new AsyncDecoratorTask(injector, parameter, ctx.getDecorator(a));
                     accumulator.add(task);
                   }
                 }
@@ -364,7 +365,7 @@ public class AsyncInjectUtil {
   private static List<MetaConstructor> scanForConstructorInjectionPoints(final Injector injector,
                                                                          final InjectionContext ctx,
                                                                          final MetaClass type,
-                                                                         final List<InjectionTask> tasks) {
+                                                                         final List<AsyncInjectionTask> tasks) {
     final List<MetaConstructor> accumulator = new ArrayList<MetaConstructor>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
@@ -382,13 +383,13 @@ public class AsyncInjectUtil {
           switch (elType) {
             case CONSTRUCTOR:
               if (cns.isAnnotationPresent(a)) {
-                tasks.add(new DecoratorTask(injector, cns, ctx.getDecorator(a)));
+                tasks.add(new AsyncDecoratorTask(injector, cns, ctx.getDecorator(a)));
               }
               break;
             case PARAMETER:
               for (final MetaParameter parameter : cns.getParameters()) {
                 if (parameter.isAnnotationPresent(a)) {
-                  final DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                  final AsyncDecoratorTask task = new AsyncDecoratorTask(injector, parameter, ctx.getDecorator(a));
                   tasks.add(task);
                 }
               }

@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.client.container.async;
 
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.container.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -11,6 +12,7 @@ import java.lang.annotation.Annotation;
 /**
  * @author Mike Brock
  */
+@SuppressWarnings("unchecked")
 public class AsyncInjectionContext implements BootstrapInjectionContext<AsyncBeanProvider> {
   private final AsyncBeanManager manager;
   private final AsyncCreationalContext context;
@@ -20,35 +22,69 @@ public class AsyncInjectionContext implements BootstrapInjectionContext<AsyncBea
     this.context = new AsyncCreationalContext(manager, true, ApplicationScoped.class);
   }
 
-  @Override
+
   public void addBean(final Class type,
                       final Class beanType,
                       final AsyncBeanProvider callback,
-                      final Object instance,
+                      final boolean singleton,
                       final Annotation[] qualifiers) {
+    if (singleton) {
+      callback.getInstance(new CreationalCallback() {
+        @Override
+        public void callback(final Object beanInstance) {
+           manager.addBean(type, beanType, callback, beanInstance, qualifiers);
+        }
+      }, context);
+    }
+    else {
+      manager.addBean(type, beanType, callback, null, qualifiers);
+    }
   }
 
-  @Override
   public void addBean(final Class type,
                       final Class beanType,
                       final AsyncBeanProvider callback,
-                      final Object instance,
+                      final boolean singleton,
                       final Annotation[] qualifiers,
                       final String name) {
+    if (singleton) {
+      callback.getInstance(new CreationalCallback() {
+        @Override
+        public void callback(final Object beanInstance) {
+           manager.addBean(type, beanType, callback, beanInstance, qualifiers, name);
+        }
+      }, context);
+    }
+    else {
+      manager.addBean(type, beanType, callback, null, qualifiers, name);
+    }
+
   }
 
-  @Override
   public void addBean(final Class type,
                       final Class beanType,
                       final AsyncBeanProvider callback,
-                      final Object instance,
+                      final boolean singleton,
                       final Annotation[] qualifiers,
                       final String name,
                       final boolean concrete) {
+
+    if (singleton) {
+      callback.getInstance(new CreationalCallback() {
+        @Override
+        public void callback(final Object beanInstance) {
+           manager.addBean(type, beanType, callback, beanInstance, qualifiers, name, concrete);
+        }
+      }, context);
+    }
+    else {
+      manager.addBean(type, beanType, callback, null, qualifiers, name, concrete);
+    }
+
   }
 
   @Override
   public CreationalContext getRootContext() {
-    return null;
+    return context;
   }
 }

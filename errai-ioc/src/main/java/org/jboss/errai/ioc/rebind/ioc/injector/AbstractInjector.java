@@ -183,11 +183,11 @@ public abstract class AbstractInjector implements Injector {
     throw new UnsupportedOperationException("this injector type does have any variable name associated with it");
   }
 
-  static class RegisterCache {
+  protected  static class RegisterCache {
     private final InjectionContext _injectionContextForRegister;
     private final Statement _valueRefForRegister;
 
-    RegisterCache(final InjectionContext _injectionContextForRegister, final Statement _valueRefForRegister) {
+    public RegisterCache(final InjectionContext _injectionContextForRegister, final Statement _valueRefForRegister) {
       this._injectionContextForRegister = _injectionContextForRegister;
       this._valueRefForRegister = _valueRefForRegister;
     }
@@ -202,7 +202,7 @@ public abstract class AbstractInjector implements Injector {
   }
 
 
-  private RegisterCache _registerCache;
+  protected RegisterCache _registerCache;
 
   @Override
   public void addRegistrationHook(final RegistrationHook registrationHook) {

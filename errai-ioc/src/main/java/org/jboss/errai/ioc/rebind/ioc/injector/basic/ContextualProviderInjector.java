@@ -37,7 +37,8 @@ public class ContextualProviderInjector extends TypeInjector {
                                     final MetaClass providerType,
                                     final InjectionContext context) {
     super(type, context);
-    this.providerInjector = new TypeInjector(providerType,context);
+   // this.providerInjector = new TypeInjector(providerType,context);
+    this.providerInjector = context.getInjectorFactory().getTypeInjector(providerType, context);
     context.registerInjector(providerInjector);
 
     this.testMock = context.isElementType(WiringElementType.TestMockBean, providerType);

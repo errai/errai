@@ -43,7 +43,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     }
   }
 
-  public <T> T getSingletonInstanceOrNew(final BootstrapInjectionContext<AsyncBeanProvider> injectionContext,
+  public <T> T getSingletonInstanceOrNew(final AsyncInjectionContext injectionContext,
                                          final AsyncBeanProvider<T> beanProvider,
                                          final CreationalCallback<T> creationalCallback,
                                          final Class<?> beanType,
@@ -59,7 +59,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
         @Override
         public void callback(final T beanInstance) {
           creationalCallback.callback(beanInstance);
-          injectionContext.addBean(beanType, beanType, beanProvider, beanInstance, qualifiers);
+          injectionContext.addBean(beanType, beanType, beanProvider, true, qualifiers);
 
         }
       }, this);

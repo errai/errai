@@ -143,7 +143,9 @@ public class IOCBootstrapGenerator {
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();
 
-      gen = generateSynchronousBootstrapper(packageName, className);
+      final InjectionContext injectionContext = setupContexts(packageName, className);
+
+      gen = generateBootstrappingClassSource(injectionContext);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
           + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
 
@@ -160,17 +162,22 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  private String generateSynchronousBootstrapper(final String packageName, final String className) {
-    final InjectionContext injectionContext = setupContexts(packageName, className);
-    return generateBootstrappingClassSource(injectionContext, SimpleInjectionContext.class);
-  }
+  private InjectionContext setupContexts(final String packageName,
+                                         final String className) {
+    final boolean asyncBootstrap;
 
-  private String generateAsyncBootstrapper(final String packageName, final String className) {
-    final InjectionContext injectionContext = setupContexts(packageName, className);
-    return generateBootstrappingClassSource(injectionContext, AsyncInjectionContext.class);
-  }
+    final String s = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.async_bean_manager");
+    asyncBootstrap = s != null && Boolean.parseBoolean(s);
 
-  private InjectionContext setupContexts(final String packageName, final String className) {
+    final Class<? extends BootstrapInjectionContext> contextClass;
+
+    if (asyncBootstrap) {
+      contextClass = AsyncInjectionContext.class;
+    }
+    else {
+      contextClass = SimpleInjectionContext.class;
+    }
+
     final ReachableTypes allDeps = EnvUtil.getAllReachableClasses(context);
 
     final ClassStructureBuilder<?> classStructureBuilder =
@@ -185,7 +192,7 @@ public class IOCBootstrapGenerator {
     buildContext.addInterningCallback(new BootstrapInterningCallback(classStructureBuilder, buildContext));
 
     final BlockBuilder<?> blockBuilder =
-        classStructureBuilder.publicMethod(SimpleInjectionContext.class, "bootstrapContainer")
+        classStructureBuilder.publicMethod(contextClass, "bootstrapContainer")
             .methodComment("The main IOC bootstrap method.");
 
     final IOCProcessingContext.Builder iocProcContextBuilder
@@ -245,16 +252,13 @@ public class IOCBootstrapGenerator {
     }
 
     iocProcContextBuilder.packages(packages);
+    iocProcContextBuilder.bootstrapContextClass(contextClass);
 
     final IOCProcessingContext processingContext = iocProcContextBuilder.build();
 
     injectionContextBuilder.processingContext(processingContext);
     injectionContextBuilder.reachableTypes(allDeps);
-
-    final String s = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.async_bean_manager");
-    if (s != null && Boolean.parseBoolean(s)) {
-      injectionContextBuilder.asyncBootstrap(true);
-    }
+    injectionContextBuilder.asyncBootstrap(asyncBootstrap);
 
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
@@ -263,8 +267,7 @@ public class IOCBootstrapGenerator {
     return injectionContext;
   }
 
-  private String generateBootstrappingClassSource(final InjectionContext injectionContext,
-                                                  final Class<? extends BootstrapInjectionContext> injectionContextClass) {
+  private String generateBootstrappingClassSource(final InjectionContext injectionContext) {
 
     final IOCProcessorFactory processorFactory = new IOCProcessorFactory(injectionContext);
       processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
@@ -273,9 +276,12 @@ public class IOCBootstrapGenerator {
     final ClassStructureBuilder<?> classBuilder = processingContext.getBootstrapBuilder();
     final BlockBuilder<?> blockBuilder = processingContext.getBlockBuilder();
 
+    final Class<? extends BootstrapInjectionContext> bootstrapContextClass
+        = injectionContext.getProcessingContext().getBootstrapContextClass();
+
     classBuilder.privateField(processingContext.getContextVariableReference().getName(),
         processingContext.getContextVariableReference().getType())
-        .modifiers(Modifier.Final).initializesWith(Stmt.newObject(injectionContextClass)).finish();
+        .modifiers(Modifier.Final).initializesWith(Stmt.newObject(bootstrapContextClass)).finish();
 
     classBuilder.privateField("context", CreationalContext.class).modifiers(Modifier.Final)
         .initializesWith(Stmt.loadVariable(processingContext.getContextVariableReference().getName())

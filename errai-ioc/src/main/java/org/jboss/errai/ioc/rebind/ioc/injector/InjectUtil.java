@@ -687,6 +687,10 @@ public class InjectUtil {
     return "var".concat(String.valueOf(uniqueCounter.addAndGet(1)));
   }
 
+  public static String getVarNameFromType(final MetaClass clazz) {
+    return clazz.getFullyQualifiedName().replaceAll("\\.", "_");
+  }
+
   public static List<Annotation> extractQualifiers(final InjectableInstance<? extends Annotation> injectableInstance) {
     switch (injectableInstance.getTaskType()) {
       case Field:
