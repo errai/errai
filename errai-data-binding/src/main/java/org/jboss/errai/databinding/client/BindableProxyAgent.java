@@ -57,7 +57,7 @@ import com.google.gwt.user.client.ui.Widget;
  *          The type of the target model being proxied.
  * 
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final Map<String, PropertyType> propertyTypes = new HashMap<String, PropertyType>();
   final Map<String, Widget> bindings = new HashMap<String, Widget>();
@@ -131,7 +131,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param converter
    *          the converter to use for this binding, null if default conversion should be used.
    */
-  @SuppressWarnings("unchecked")
   public void bind(final Widget widget, final String property, final Converter converter) {
     validatePropertyExpr(property);
 
@@ -162,14 +161,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
               bindings.get(property), event.getValue(), converters.get(property));
           proxy.set(property, value);
 
-          propertyChangeHandlerSupport.notifyHandlers(new PropertyChangeEvent(proxy, property, oldValue, value));
+          propertyChangeHandlerSupport.notifyHandlers(new PropertyChangeEvent<Object>(proxy, property, oldValue, value));
         }
       }));
     }
     syncState(widget, property, initialState);
   }
 
-  @SuppressWarnings("unchecked")
   private void createNestedBinders(final Widget widget, final String property, final Converter converter) {
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
@@ -183,7 +181,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
             + propertyTypes.get(bindableProperty).getType().getName() + ") is not a @Bindable type!");
       }
 
-      DataBinder binder = binders.get(bindableProperty);
+      DataBinder<Object> binder = binders.get(bindableProperty);
       if (binder == null) {
         if (proxy.get(bindableProperty) == null) {
           binder = DataBinder.forType(propertyTypes.get(bindableProperty).getType(), initialState);
@@ -284,11 +282,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param newValue
    *          The new value of the property.
    */
-  @SuppressWarnings("unchecked")
   <P> void updateWidgetAndFireEvents(final String property, final P oldValue, final P newValue) {
     Widget widget = bindings.get(property);
     if (widget instanceof HasValue) {
-      HasValue hv = (HasValue) widget;
+      HasValue<Object> hv = (HasValue<Object>) widget;
       Object widgetValue =
           Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converters.get(property));
       hv.setValue(widgetValue, true);
@@ -315,16 +312,22 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   void syncState(final InitialState initialState) {
     for (String property : bindings.keySet()) {
-      syncState(bindings.get(property), property, initialState);
+      int dotPos = property.indexOf(".");
+      if (dotPos > 0) {
+        String bindableProperty = property.substring(0, dotPos);
+        binders.get(bindableProperty).setModel(proxy.get(bindableProperty), initialState);
+      }
+      else {
+        syncState(bindings.get(property), property, initialState);
+      }
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void syncState(final Widget widget, final String property, final InitialState initialState) {
     if (initialState != null) {
       Object value = null;
       if (widget instanceof HasValue) {
-        HasValue hasValue = (HasValue) widget;
+        HasValue<Object> hasValue = (HasValue<Object>) widget;
         value = initialState.getInitialValue(proxy.get(property), hasValue.getValue());
         if (initialState == InitialState.FROM_MODEL) {
           Object widgetValue =

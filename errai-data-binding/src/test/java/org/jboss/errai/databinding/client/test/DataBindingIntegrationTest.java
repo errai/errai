@@ -255,20 +255,47 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
   }
-  
+
   @Test
   public void testBindablePropertyChainWithRootInstanceChange() {
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
-    
+
     binder.setModel(new TestModel());
     TestModel model = binder.getModel();
-    
+
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getValue());
 
     model.getChild().getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+
+  @Test
+  public void testBindablePropertyChainWithInitialStateSync() {
+    TextBox textBox = new TextBox();
+    textBox.setValue("initial ui value");
+
+    DataBinder<TestModel> binder =
+        DataBinder.forType(TestModel.class, InitialState.FROM_UI).bind(textBox, "child.name");
+    assertEquals("Model not initialized based on widget's state", "initial ui value", 
+        binder.getModel().getChild().getName());
+
+    TestModel childModel = new TestModel();
+    childModel.setName("initial model value");
+    TestModel model = new TestModel();
+    model.setChild(childModel);
+    
+    binder = DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "child.name");
+    assertEquals("Model not initialized based on widget's state", "initial model value", textBox.getValue());
+    
+    childModel = new TestModel();
+    childModel.setName("updated model value");
+    model = new TestModel();
+    model.setChild(childModel);
+    
+    binder.setModel(model, InitialState.FROM_MODEL);
+    assertEquals("Model not initialized based on widget's state", "updated model value", textBox.getValue());
   }
 
   @Test
@@ -284,10 +311,11 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     // unbind specific nested property
     binder.unbind("child.name");
     model.getChild().setName("model change");
-    assertEquals("Widget should not have been updated because unbind was called for this property", "", nameTextBox.getText());
+    assertEquals("Widget should not have been updated because unbind was called for this property", "", nameTextBox
+        .getText());
 
     nameTextBox.setValue("UI change", true);
-    assertEquals("Model should not have been updated because unbind was called for this property", "model change", 
+    assertEquals("Model should not have been updated because unbind was called for this property", "model change",
         model.getChild().getName());
 
     model.getChild().setValue("model change");
@@ -295,18 +323,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     valueTextBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
-    
+
     model.getChild().setValue("");
-    
+
     // unbind all properties
     binder.unbind();
     model.getChild().setValue("model change");
     assertEquals("Widget should not have been updated because unbind was called", "", valueTextBox.getText());
 
     valueTextBox.setValue("UI change", true);
-    assertEquals("Model should not have been updated because unbind was called", "model change", model.getChild().getValue());
+    assertEquals("Model should not have been updated because unbind was called", "model change", model.getChild()
+        .getValue());
   }
-  
+
   @Test
   public void testBindingUsingNonAccesssorMethod() {
     TextBox textBox = new TextBox();
@@ -317,7 +346,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertTrue("Model not properly updated", model.isActive());
     assertEquals("Widget not properly updated", "true", textBox.getText());
   }
-  
+
   @Test
   public void testBindablePropertyChainsUsingNonAccesssorMethod() {
     TextBox textBox = new TextBox();
@@ -435,6 +464,26 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("TextBox should be empty", "", textBox.getText());
 
     model.setValue("model change");
+
+    // This call is used by Errai JPA, to update the widgets after an entity was updated
+    // using direct field access (e.g. the id was set).
+    ((BindableProxy<?>) binder.getModel()).updateWidgets();
+    assertEquals("TextBox should have been updated", "model change", textBox.getText());
+  }
+  
+  @Test
+  public void testUpdateWidgetsWithBindablePropertyChain() {
+    TestModel grandChildModel = new TestModel();
+    TestModel childModel = new TestModel();
+    childModel.setChild(grandChildModel);
+    TestModel model = new TestModel();
+    model.setChild(childModel);
+    
+    TextBox textBox = new TextBox();
+    DataBinder<TestModel> binder = DataBinder.forModel(model).bind(textBox, "child.child.value");
+    assertEquals("TextBox should be empty", "", textBox.getText());
+
+    model.getChild().getChild().setValue("model change");
 
     // This call is used by Errai JPA, to update the widgets after an entity was updated
     // using direct field access (e.g. the id was set).
