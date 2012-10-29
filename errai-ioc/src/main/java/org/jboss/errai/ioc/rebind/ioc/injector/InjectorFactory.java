@@ -34,10 +34,14 @@ public class InjectorFactory {
     addInjector(BootstrapType.Asynchronous, WiringElementType.TopLevelProvider, AsyncProviderInjector.class);
   }
 
+  private BootstrapType getDefaultBootstrapType() {
+    return async ? BootstrapType.Asynchronous : BootstrapType.Synchronous;
+  }
+
   public Injector getInjector(final WiringElementType elementType,
                               final MetaClass type,
                               final InjectionContext context) {
-    return getTypeInjector(async ? BootstrapType.Asynchronous : BootstrapType.Synchronous, elementType, type, context);
+    return getTypeInjector(getDefaultBootstrapType(), elementType, type, context);
   }
 
   public Injector getTypeInjector(final MetaClass type,
@@ -66,6 +70,12 @@ public class InjectorFactory {
     catch (Throwable t) {
       throw new RuntimeException(t);
     }
+  }
+
+  public Injector getProviderInjector(final MetaClass type,
+                                      final MetaClass providerType,
+                                      final InjectionContext context) {
+    return getProviderInjector(async ? BootstrapType.Asynchronous : BootstrapType.Synchronous, WiringElementType.TopLevelProvider, type, providerType, context);
   }
 
   public Injector getProviderInjector(final BootstrapType bootstrapType,

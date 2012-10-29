@@ -203,7 +203,7 @@ public class IOCProcessorFactory {
                 }
 
                 injectionContext.registerInjector(
-                    new ProviderInjector(providedType, providerClassType, injectionContext)
+                    injectionContext.getInjectorFactory().getProviderInjector(providedType, providerClassType, injectionContext)
                 );
               }
               else if (MC_ContextualTypeProvider.isAssignableFrom(providerClassType)) {
