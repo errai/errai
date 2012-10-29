@@ -109,10 +109,17 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     // create the destruction callback to deregister the service when the bean is destroyed.
     final String subscrVar = InjectUtil.getUniqueVarName();
 
+    final String subscribeMethod;
+    if (EnvUtil.isPortableType(parm.getType().asClass())) {
+      subscribeMethod = "subscribe";
+    }
+    else {
+      subscribeMethod = "subscribeLocal";
+    }
 
     final Statement subscribeStatement =
         Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
-            .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, "subscribe", parmClassName,
+            .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, subscribeMethod, parmClassName,
                 callBackBlock.finish().finish()));
 
     statements.add(subscribeStatement);

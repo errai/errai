@@ -161,11 +161,22 @@ public class CDI {
     }
   }
 
-  public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback callback) {
+  public static Subscription subscribeLocal(final String eventType, final AbstractCDIEventCallback callback) {
     if (!eventObservers.containsKey(eventType)) {
       eventObservers.put(eventType, new ArrayList<MessageCallback>());
     }
     eventObservers.get(eventType).add(callback);
+
+    return new Subscription() {
+      @Override
+      public void remove() {
+        unsubscribe(eventType, callback);
+      }
+    };
+  }
+
+
+  public static Subscription subscribe(final String eventType, final AbstractCDIEventCallback callback) {
 
     if (isRemoteCommunicationEnabled()) {
       MessageBuilder.createMessage()
@@ -176,12 +187,7 @@ public class CDI {
           .noErrorHandling().sendNowWith(ErraiBus.get());
     }
 
-    return new Subscription() {
-      @Override
-      public void remove() {
-        unsubscribe(eventType, callback);
-      }
-    };
+    return subscribeLocal(eventType, callback);
   }
 
   private static void unsubscribe(final String eventType, final AbstractCDIEventCallback callback) {
