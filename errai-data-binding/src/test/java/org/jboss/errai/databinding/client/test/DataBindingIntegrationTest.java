@@ -261,8 +261,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
 
-    binder.setModel(new TestModel());
-    TestModel model = binder.getModel();
+    TestModel model = binder.setModel(new TestModel());
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getValue());
