@@ -19,7 +19,7 @@ package org.jboss.errai.databinding.client;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 

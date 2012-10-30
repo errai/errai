@@ -4,7 +4,7 @@ import org.jboss.errai.codegen.BitwiseOperator;
 import org.jboss.errai.codegen.Expression;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.BitwiseExpressionBuilder;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 /**
  * @author Mike Brock

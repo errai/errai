@@ -3,7 +3,7 @@ package org.jboss.errai.jpa.client.local.backend;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;

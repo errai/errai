@@ -25,7 +25,7 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNull;

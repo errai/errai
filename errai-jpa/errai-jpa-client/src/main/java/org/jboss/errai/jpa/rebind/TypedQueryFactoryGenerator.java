@@ -47,7 +47,7 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Implementations.StringBuilderBuilder;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.framework.Comparisons;
 import org.jboss.errai.jpa.client.local.ErraiAttribute;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;

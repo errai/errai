@@ -1,6 +1,6 @@
 package org.jboss.errai.jpa.client.local;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;

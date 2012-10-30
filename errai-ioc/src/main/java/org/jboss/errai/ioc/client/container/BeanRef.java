@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.client.QualifierUtil;
 
 import java.lang.annotation.Annotation;

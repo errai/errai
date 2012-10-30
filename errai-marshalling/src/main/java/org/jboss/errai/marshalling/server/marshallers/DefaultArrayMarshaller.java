@@ -19,7 +19,7 @@ package org.jboss.errai.marshalling.server.marshallers;
 import java.lang.reflect.Array;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
