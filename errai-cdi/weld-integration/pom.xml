@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::CDI::Weld Integration</name>
-    <groupId>org.jboss.errai</groupId>
     <artifactId>errai-weld-integration</artifactId>
     <packaging>jar</packaging>
 
@@ -47,7 +46,6 @@
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-bus</artifactId>
-                    <version>${project.version}</version>
                 </dependency>
 
                 <dependency>
@@ -129,14 +127,12 @@
                 <dependency>
                     <groupId>org.jboss.weld.se</groupId>
                     <artifactId>weld-se-core</artifactId>
-                    <version>${weld.version}</version>
                     <scope>provided</scope>
                 </dependency>
 
                 <dependency>
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
-                    <version>4.8.1</version>
                     <scope>provided</scope>
                 </dependency>
 

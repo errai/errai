@@ -68,7 +68,6 @@ public class SimpleCDIService {
    */
   private ConfigurationRequest currentConfiguration;
 
-  @SuppressWarnings("unused")
   @PostConstruct
   private void setup() {
     ConfigurationRequest cr = new ConfigurationRequest();
