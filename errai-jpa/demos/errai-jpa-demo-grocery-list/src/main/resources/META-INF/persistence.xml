@@ -7,6 +7,7 @@
   <persistence-unit name="GroceryListClient">
     <description>Entities used in the browser</description>
     <class>org.jboss.errai.demo.grocery.client.shared.Department</class>
+    <class>org.jboss.errai.demo.grocery.client.shared.GroceryList</class>
     <class>org.jboss.errai.demo.grocery.client.shared.Item</class>
     <class>org.jboss.errai.demo.grocery.client.shared.Store</class>
     <class>org.jboss.errai.demo.grocery.client.shared.User</class>

@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -15,6 +14,7 @@ import javax.persistence.TypedQuery;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.shared.Department;
+import org.jboss.errai.demo.grocery.client.shared.GroceryList;
 import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.demo.grocery.client.shared.User;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
@@ -41,9 +41,8 @@ public class ItemForm extends Composite {
 
   @Inject private EntityManager em;
   @Inject private User user;
+  @Inject private GroceryList groceryList;
 
-  @Inject private Event<Item> newItemEvent;
-  
   // injecting this data binder causes automatic binding between
   // the properties of Item and the like-named @DataField members in this class
   // Example: property "item.name" tracks the value in the TextBox "name"
@@ -51,13 +50,7 @@ public class ItemForm extends Composite {
 
   @Inject @Bound @DataField private SuggestBox name;
   @Inject @Bound @DataField private TextBox comment;
-
-  /*
-   * Not @Bound because the department name belongs to the nested Department
-   * object, not the Item.
-   */
-  @Inject @DataField private SuggestBox department;
-
+  @Inject @Bound(property="department.name") @DataField private SuggestBox department;
   @Inject @DataField private Button saveButton;
 
   private Runnable afterSaveAction;
@@ -68,11 +61,16 @@ public class ItemForm extends Composite {
     for (Item i : em.createNamedQuery("allItemsByName", Item.class).getResultList()) {
       iso.add(i.getName());
     }
-    
+
     MultiWordSuggestOracle dso = (MultiWordSuggestOracle) department.getSuggestOracle();
     for (Department d : em.createNamedQuery("allDepartments", Department.class).getResultList()) {
       dso.add(d.getName());
     }
+  }
+
+  @PreDestroy
+  void cleanup() {
+    itemBinder.unbind();
   }
 
   @SuppressWarnings("unused")
@@ -80,7 +78,7 @@ public class ItemForm extends Composite {
     System.out.println("ItemForm@" + System.identityHashCode(this) + " got new item event");
     ((MultiWordSuggestOracle) name.getSuggestOracle()).add(newItem.getName());
   }
-  
+
   /**
    * Returns the store instance that is permanently associated with this form.
    * The returned instance is bound to this store's fields: updates to the form
@@ -97,7 +95,6 @@ public class ItemForm extends Composite {
     if (item.getDepartment() == null) {
       item.setDepartment(new Department());
     }
-    department.setText(item.getDepartment().getName());
     itemBinder.setModel(item, InitialState.FROM_MODEL);
   }
 
@@ -122,23 +119,18 @@ public class ItemForm extends Composite {
     else {
       resolvedDepartment = resultList.get(0);
     }
-    itemBinder.getModel().setDepartment(resolvedDepartment);
+    Item item = itemBinder.getModel();
+    item.setDepartment(resolvedDepartment);
+    item.setAddedBy(user);
+    item.setAddedOn(new Date());
 
-    itemBinder.getModel().setAddedBy(user);
-    itemBinder.getModel().setAddedOn(new Date());
-
-    em.persist(itemBinder.getModel());
+    groceryList.getItems().add(item);
+    em.persist(groceryList);
     em.flush();
 
-    
     if (afterSaveAction != null) {
       afterSaveAction.run();
     }
-  }
-
-  @PreDestroy
-  void cleanup() {
-    itemBinder.unbind();
   }
 
   public void setAfterSaveAction(Runnable afterSaveAction) {
