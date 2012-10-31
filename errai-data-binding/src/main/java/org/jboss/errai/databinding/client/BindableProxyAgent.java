@@ -262,7 +262,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param <P>
    *          The property type of the changed property.
    */
-  <P> void updateWidgetsAndFireEvents() {
+  void updateWidgetsAndFireEvents() {
     for (String boundProperty : bindings.keySet()) {
       Object knownValue = knownValues.get(boundProperty);
       Object actualValue = proxy.get(boundProperty);
@@ -291,7 +291,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   <P> void updateWidgetAndFireEvents(final String property, final P oldValue, final P newValue) {
     Widget widget = bindings.get(property);
     if (widget instanceof HasValue) {
-      HasValue<Object> hv = (HasValue<Object>) widget;
+      HasValue hv = (HasValue) widget;
       Object widgetValue =
           Convert.toWidgetValue(widget, propertyTypes.get(property).getType(), newValue, converters.get(property));
       hv.setValue(widgetValue, true);
@@ -332,7 +332,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     if (initialState != null) {
       Object value = null;
       if (widget instanceof HasValue) {
-        HasValue<Object> hasValue = (HasValue<Object>) widget;
+        HasValue hasValue = (HasValue) widget;
         value = initialState.getInitialValue(proxy.get(property), hasValue.getValue());
         if (initialState == InitialState.FROM_MODEL) {
           Object widgetValue =
@@ -361,7 +361,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   @Override
-  public void addPropertyChangeHandler(String name, PropertyChangeHandler handler) {
+  public <P> void addPropertyChangeHandler(String name, PropertyChangeHandler<P> handler) {
     propertyChangeHandlerSupport.addPropertyChangeHandler(name, handler);
   }
 
