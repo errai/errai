@@ -22,6 +22,43 @@ import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+
+import junit.framework.AssertionFailedError;
+
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.BusLifecycleEvent;
+import org.jboss.errai.bus.client.api.BusLifecycleListener;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
@@ -50,39 +87,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import junit.framework.AssertionFailedError;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.client.util.BusTools;
-import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.api.ResourceProvider;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -709,8 +713,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  /**
+   * <h1><marquee>DON'T CALL THIS METHOD UNLESS CURRENTLY ONLINE!!!</marquee></h1>
+   */
   @Override
   public void stop(final boolean sendDisconnect) {
+    fireEvent(EventType.OFFLINE);
+    fireEvent(EventType.DISASSOCIATING);
+
     try {
       if (sendDisconnect && isRemoteCommunicationEnabled()) {
         sendBuilder.setHeader("phase", "disconnect");
@@ -986,6 +996,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   InitVotes.voteFor(ClientMessageBus.class);
                 }
 
+                fireEvent(EventType.ONLINE);
+
                 // end of FinishStateSync Timer
               }
             }.schedule(5);
@@ -1249,6 +1261,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return true;
     }
 
+    fireEvent(EventType.ASSOCIATING);
+
     try {
       LogUtil.log("sending initial handshake to remote bus");
 
@@ -1321,6 +1335,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(final Request request, final Throwable throwable) {
+      fireEvent(EventType.OFFLINE);
+
       if (handleHTTPTransportError(request, throwable, statusCode)) {
         return;
       }
@@ -1896,4 +1912,60 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return $wnd.erraiBusApplicationRoot;
     }
   }-*/;
+
+  private final List<BusLifecycleListener> lifecycleListeners = new ArrayList<BusLifecycleListener>();
+
+  @Override
+  public void addLifecycleListener(BusLifecycleListener l) {
+    lifecycleListeners.add(Assert.notNull(l));
+  }
+
+  @Override
+  public void removeLifecycleListener(BusLifecycleListener l) {
+    lifecycleListeners.remove(l);
+  }
+
+  private enum EventType {
+    ASSOCIATING {
+      @Override
+      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+        l.busAssociating(e);
+      }
+    },
+    DISASSOCIATING {
+      @Override
+      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+        l.busDisassociating(e);
+      }
+    },
+    ONLINE {
+      @Override
+      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+        l.busOnline(e);
+      }
+    },
+    OFFLINE {
+      @Override
+      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+        l.busOffline(e);
+      }
+    };
+
+    public abstract void deliverTo(BusLifecycleListener l, BusLifecycleEvent e);
+  }
+
+  private void fireEvent(EventType et) {
+    final BusLifecycleEvent e = new BusLifecycleEvent(this);
+    for (int i = lifecycleListeners.size() - 1; i >= 0; i--) {
+      try {
+        et.deliverTo(lifecycleListeners.get(i), e);
+      }
+      catch (Throwable t) {
+        logAdapter.warn("Listener threw exception: " + t);
+        t.printStackTrace();
+      }
+    }
+    System.out.println("Finished Associating event");
+  }
+
 }
