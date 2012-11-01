@@ -45,6 +45,7 @@ import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
@@ -414,5 +415,10 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public EntityWithInterfaceField testEntityWithInterfaceField(EntityWithInterfaceField e) {
     return e;
+  }
+
+  @Override
+  public ImmutableEnumContainer testImmutableEntityWithEnum(ImmutableEnumContainer iec) {
+    return iec;
   }
 }

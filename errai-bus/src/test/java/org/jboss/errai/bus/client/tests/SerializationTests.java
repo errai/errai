@@ -60,6 +60,7 @@ import org.jboss.errai.bus.client.tests.support.EnumWithState;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
@@ -2010,6 +2011,53 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testImmutableEntityWithEnum() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final ImmutableEnumContainer entity = new ImmutableEnumContainer(TestEnumA.Christian);
+
+        MessageBuilder.createCall(new RemoteCallback<ImmutableEnumContainer>() {
+          @Override
+          public void callback(ImmutableEnumContainer response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testImmutableEntityWithEnum(entity);
+      }
+    });
+  }
+  
+  public void testImmutableEntityWithEnumAndNullValue() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final ImmutableEnumContainer entity = new ImmutableEnumContainer(null);
+
+        MessageBuilder.createCall(new RemoteCallback<ImmutableEnumContainer>() {
+          @Override
+          public void callback(ImmutableEnumContainer response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testImmutableEntityWithEnum(entity);
+      }
+    });
+  }
   public void testEntityWithEnumContainerContainer() {
     runAfterInit(new Runnable() {
       @Override

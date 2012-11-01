@@ -22,7 +22,6 @@ import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -531,8 +530,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             Stmt.nestedCall(objStatement)
                     .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
 
-    final Statement falseStatement = (valStatement != null) ? Stmt.invokeStatic(Enum.class, "valueOf", toType,
-            Stmt.nestedCall(valStatement).invoke("isString").invoke("stringValue")) : Stmt.load(null);
+    final Statement falseStatement = 
+      (valStatement != null) ? 
+        new TernaryStatement(Bool.isNotNull(Stmt.nestedCall(valStatement).invoke("isString")), 
+            Stmt.invokeStatic(Enum.class, "valueOf", toType, 
+                Stmt.nestedCall(valStatement).invoke("isString").invoke("stringValue")),
+            Stmt.load(null)) 
+       : Stmt.load(null);
 
     return new TernaryStatement(Bool.isNotNull(objStatement), trueStatement, falseStatement);
   }

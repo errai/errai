@@ -162,6 +162,8 @@ public interface TestSerializationRPCService {
 
   public User testEntityWithNullField(User u);
 
+  public ImmutableEnumContainer testImmutableEntityWithEnum(ImmutableEnumContainer iec);
+  
   public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc);
   
   public EntityWithMapUsingAbstractValueType testEntityWithMapUsingAbstractValueType(EntityWithMapUsingAbstractValueType e);
