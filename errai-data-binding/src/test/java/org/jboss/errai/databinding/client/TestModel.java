@@ -21,12 +21,12 @@ import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
  * Simple bindable model for testing purposes.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Bindable
 @Portable
-public class Model {
+public class TestModel {
 
   private int id;
   private String value;
@@ -34,6 +34,7 @@ public class Model {
   private String _name;
   private Integer _age;
   private boolean active;
+  private TestModel child;
 
   public int getId() {
     return id;
@@ -63,7 +64,7 @@ public class Model {
     return _age;
   }
 
-  public Model setAge(Integer _age) {
+  public TestModel setAge(Integer _age) {
     this._age = _age;
     return this;
   }
@@ -76,6 +77,24 @@ public class Model {
     this.active = active;
   }
 
+  public TestModel getChild() {
+    return child;
+  }
+
+  public void setChild(TestModel child) {
+    this.child = child;
+  }
+
+  // this method is used to test property changes using non accessor methods
+  public void activate() {
+    this.active = true;
+  }
+
+  protected TestModel activate(boolean b) {
+    this.active = b;
+    return this;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -83,6 +102,7 @@ public class Model {
     result = prime * result + ((_age == null) ? 0 : _age.hashCode());
     result = prime * result + ((_name == null) ? 0 : _name.hashCode());
     result = prime * result + (active ? 1231 : 1237);
+    result = prime * result + ((child == null) ? 0 : child.hashCode());
     result = prime * result + id;
     result = prime * result + ((value == null) ? 0 : value.hashCode());
     return result;
@@ -96,7 +116,7 @@ public class Model {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    Model other = (Model) obj;
+    TestModel other = (TestModel) obj;
     if (_age == null) {
       if (other._age != null)
         return false;
@@ -111,6 +131,12 @@ public class Model {
       return false;
     if (active != other.active)
       return false;
+    if (child == null) {
+      if (other.child != null)
+        return false;
+    }
+    else if (!child.equals(other.child))
+      return false;
     if (id != other.id)
       return false;
     if (value == null) {
@@ -124,7 +150,7 @@ public class Model {
 
   @Override
   public String toString() {
-    return "Model [id=" + id + ", value=" + value + ", _name=" + _name + ", _age=" + _age + ", active=" + active + "]";
+    return "Model [id=" + id + ", value=" + value + ", _name=" + _name + ", _age=" + _age + ", active=" + active
+        + ", child=" + child + "]";
   }
-
 }

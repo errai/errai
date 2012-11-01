@@ -58,7 +58,6 @@ public class AsyncInjectionContext implements BootstrapInjectionContext<AsyncBea
     else {
       manager.addBean(type, beanType, callback, null, qualifiers, name);
     }
-
   }
 
   public void addBean(final Class type,

@@ -31,7 +31,7 @@ public interface WrappedPortable {
   /**
    * Unwraps and returns the actual portable instance.
    * 
-   * @return the portable object to be marshalled.
+   * @return the portable object to be marshalled, never null.
    */
   public Object unwrap();
 }

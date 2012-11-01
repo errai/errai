@@ -56,7 +56,8 @@ public class RebindUtils {
       return _tempDirectory;
     }
 
-    final File file = new File(System.getProperty("java.io.tmpdir") + "/errai/" + getClasspathHash() + "/");
+    final String useramePortion = System.getProperty("user.name").replaceAll("[^0-9a-zA-Z]", "-");
+    final File file = new File(System.getProperty("java.io.tmpdir") + "/" + useramePortion + "/errai/" + getClasspathHash() + "/");
 
     if (!file.exists()) {
       //noinspection ResultOfMethodCallIgnored

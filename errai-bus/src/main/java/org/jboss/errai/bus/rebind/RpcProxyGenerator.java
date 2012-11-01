@@ -128,7 +128,7 @@ public class RpcProxyGenerator {
       interceptedCall = remote.getAnnotation(InterceptedCall.class);
     }
 
-    Statement callContext = RPCProxyUtil.generateProxyMethodCallContext(RemoteCallContext.class,
+    Statement callContext = ProxyUtil.generateProxyMethodCallContext(RemoteCallContext.class,
             classBuilder.getClassDefinition(), method, requestLogic, interceptedCall).finish();
 
     return Stmt.try_()

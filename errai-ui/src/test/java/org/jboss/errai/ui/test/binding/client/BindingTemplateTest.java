@@ -6,7 +6,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.test.binding.client.res.BindingDateConverter;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
-import org.jboss.errai.ui.test.common.client.Model;
+import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
 import com.google.gwt.user.client.ui.Label;
@@ -42,16 +42,16 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     assertNotNull(dateTextBox);
     assertEquals("", dateTextBox.getValue());
 
-    Model model = template.getModel();
+    TestModel model = template.getModel();
     model.setId(1711);
-    model.setName("errai");
+    model.getChild().setName("errai");
     model.setLastChanged(new Date());
     assertEquals("Label (id) was not updated!", Integer.valueOf(model.getId()).toString(), idLabel.getText());
-    assertEquals("TextBox (name) was not updated!", model.getName(), nameTextBox.getValue());
+    assertEquals("TextBox (name) was not updated!", model.getChild().getName(), nameTextBox.getValue());
     assertEquals("TextBox (date) was not updated using custom converter!", "testdate", dateTextBox.getValue());
 
     nameTextBox.setValue("updated", true);
-    assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getName());
+    assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
 
     dateTextBox.setValue("updated", true);
     assertEquals("Model (lastUpdate) was not updated using custom converter!", BindingDateConverter.TEST_DATE, model

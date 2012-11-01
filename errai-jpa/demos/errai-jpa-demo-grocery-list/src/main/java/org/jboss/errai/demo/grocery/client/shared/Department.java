@@ -3,6 +3,7 @@ package org.jboss.errai.demo.grocery.client.shared;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -14,7 +15,10 @@ import org.jboss.errai.databinding.client.api.Bindable;
  */
 @Bindable
 @Entity
-@NamedQuery(name="departmentByName", query="SELECT d FROM Department d WHERE lower(name) = lower(:name) ORDER BY d.name")
+@NamedQueries({
+  @NamedQuery(name="allDepartments", query="SELECT d FROM Department d ORDER BY d.name"),
+  @NamedQuery(name="departmentByName", query="SELECT d FROM Department d WHERE lower(name) = lower(:name) ORDER BY d.name")
+})
 public class Department {
 
   @Id @GeneratedValue

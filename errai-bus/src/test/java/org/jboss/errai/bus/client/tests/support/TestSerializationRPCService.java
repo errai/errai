@@ -175,4 +175,6 @@ public interface TestSerializationRPCService {
   public LinkedHashSet<String> testLinkedHashSet(LinkedHashSet<String> set);
 
   public ImplicitEnum testImplicitEnum(ImplicitEnum e);
+  
+  public EntityWithInterfaceField testEntityWithInterfaceField(EntityWithInterfaceField e);
 }

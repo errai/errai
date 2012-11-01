@@ -28,15 +28,17 @@ import org.jboss.errai.databinding.client.api.Bindable;
  */
 @Bindable
 @Portable
-public class Model {
+public class TestModel {
 
   private Integer id;
   private String name;
   private Date lastChanged;
+  
+  private TestModel child;
 
-  public Model() {}
+  public TestModel() {}
 
-  public Model(Integer id, String name) {
+  public TestModel(Integer id, String name) {
     this.id = id;
     this.name = name;
     this.lastChanged = new Date();
@@ -64,6 +66,14 @@ public class Model {
 
   public void setLastChanged(Date lastChanged) {
     this.lastChanged = lastChanged;
+  }
+
+  public void setChild(TestModel child) {
+    this.child = child;
+  }
+
+  public TestModel getChild() {
+    return child;
   }
 
 }

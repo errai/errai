@@ -25,13 +25,13 @@ import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.EnumContainer;
 import org.jboss.errai.marshalling.tests.res.EnumContainerContainer;
 import org.jboss.errai.marshalling.tests.res.EnumTestA;
+import org.jboss.errai.marshalling.tests.res.EnumWithAbstractMethod;
 import org.jboss.errai.marshalling.tests.res.EnumWithState;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -395,10 +395,10 @@ public class ServerMarshallingTest {
   }
 
   class ServerRandomProvider implements RandomProvider {
-    private char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+    private final char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
             'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
-    private Random random = new Random(System.nanoTime());
+    private final Random random = new Random(System.nanoTime());
 
     @Override
     public boolean nextBoolean() {
@@ -546,6 +546,14 @@ public class ServerMarshallingTest {
     System.out.println(json);
     Assert.assertEquals("Failed to marshall/demarshall enum container container",
             val.toString(), ServerMarshalling.fromJSON(json).toString());
+  }
+  
+  @Test
+  // This tests guards against regressions of https://issues.jboss.org/browse/ERRAI-370
+  public void testEnumWithAbstractMethod() {
+    EnumWithAbstractMethod val = EnumWithAbstractMethod.THING2;
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall enum with abstract method", val, ServerMarshalling.fromJSON(json));
   }
 
 }

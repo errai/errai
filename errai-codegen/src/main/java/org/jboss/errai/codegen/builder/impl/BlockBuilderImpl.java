@@ -22,8 +22,11 @@ import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.BuildCallback;
+import org.jboss.errai.codegen.builder.StatementBegin;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.Stmt;
 
+import javax.management.monitor.StringMonitorMBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

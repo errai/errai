@@ -20,6 +20,7 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.get
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
+import com.google.gwt.resources.css.ast.CssProperty;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
@@ -31,8 +32,10 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
@@ -171,6 +174,22 @@ public class IOCProcessorFactory {
                                         final IOCProcessingContext context) {
 
               final MetaClass providerClassType = instance.getType();
+
+              if (providerClassType.isAnnotationPresent(EnabledByProperty.class)) {
+                final EnabledByProperty enabledByProperty = providerClassType.getAnnotation(EnabledByProperty.class);
+                final String propertyValue = enabledByProperty.value();
+                final boolean negatedTest = enabledByProperty.negated();
+
+                boolean bool = Boolean.getBoolean(propertyValue);
+                if (negatedTest) {
+                  bool = !bool;
+                }
+                if (!bool) {
+                  return;
+                }
+              }
+
+
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
               final MetaClass MC_ContextualTypeProvider = MetaClassFactory.get(ContextualTypeProvider.class);
 
@@ -232,7 +251,8 @@ public class IOCProcessorFactory {
                 }
 
                 injectionContext.registerInjector(
-                    new ContextualProviderInjector(providedType, providerClassType, injectionContext)
+                    injectionContext.getInjectorFactory()
+                        .getContextualProviderInjector(providedType, providerClassType, injectionContext)
                 );
               }
               else {
@@ -356,7 +376,7 @@ public class IOCProcessorFactory {
               }
               else {
                 injector = injectionContext.getInjectorFactory().getTypeInjector(instance.getType(), injectionContext);
-              //  injector = new TypeInjector(instance.getType(), injectionContext);
+                //  injector = new TypeInjector(instance.getType(), injectionContext);
               }
 
               if (injector.isEnabled() && injector instanceof TypeInjector) {
@@ -589,7 +609,7 @@ public class IOCProcessorFactory {
         }
         else {
           injector = injectionContext.getInjectorFactory().getTypeInjector(type, injectionContext);
-        //  injector = new TypeInjector(type, injectionContext);
+          //  injector = new TypeInjector(type, injectionContext);
         }
 
         return entry.handler

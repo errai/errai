@@ -4,6 +4,8 @@ import java.util.Set;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public interface BeanDescriptor {
   public String getBeanName();
@@ -17,4 +19,6 @@ public interface BeanDescriptor {
   public MetaMethod getReadMethodForProperty(String propertyName);
 
   public MetaMethod getWriteMethodForProperty(String propertyName);
+  
+  public MetaClass getPropertyType(String propertyName);
 }

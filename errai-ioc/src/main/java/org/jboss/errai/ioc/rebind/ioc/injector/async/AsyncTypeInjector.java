@@ -138,7 +138,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     */
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
         = newInstanceOf(beanProviderClassRef).extend()
-        .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback"),
+        .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback", true),
             Parameter.of(CreationalContext.class, "context", true));
 
 
@@ -179,9 +179,9 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     /*
     return the instance of the bean from the creational callback.
     */
-    //  callbackBuilder.append(loadVariable(instanceVarName).returnValue());
 
-  //  callbackBuilder.append(loadVariable("callback").invoke("callback", loadVariable(instanceVarName)));
+
+    callbackBuilder._(Stmt.loadVariable("vote").invoke("finish"));
 
     /* pop the block builder of the stack now that we're done wiring. */
     ctx.popBlockBuilder();
@@ -208,14 +208,18 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
        */
 //      retVal = Refs.get(instanceVarName);
 
-      retVal = Stmt.load("<<" + instanceVarName + ">>");
+//      ctx.append(loadVariable("context"))
+
+      retVal = Stmt.load(true);
     }
     else {
       /*
        the injector is a dependent scope, so use CreationContext.getInstance() as the return value.
        */
-      retVal = loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get(InjectUtil.getVarNameFromType(type)),
-          Refs.get("context"));
+      ctx.append(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get(InjectUtil.getVarNameFromType(type)),
+          Refs.get("context")));
+
+      retVal = null;
     }
 
     setRendered(true);

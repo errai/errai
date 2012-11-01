@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.jboss.errai.ui.test.common.client.Model;
+import org.jboss.errai.ui.test.common.client.TestModel;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -26,7 +26,7 @@ public class HandledComponent extends Composite {
   private final VocalWidget b3;
 
   @Inject
-  public HandledComponent(@DataField Button b1, @DataField VocalWidget b3, DataBinder<Model> binder) {
+  public HandledComponent(@DataField Button b1, @DataField VocalWidget b3, DataBinder<TestModel> binder) {
     this.b1 = b1;
     this.b3 = b3;
   }

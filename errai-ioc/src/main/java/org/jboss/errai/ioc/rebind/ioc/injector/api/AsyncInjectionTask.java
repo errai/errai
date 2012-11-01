@@ -137,6 +137,7 @@ public class AsyncInjectionTask {
         final String callbackVarName = InjectUtil.getVarNameFromType(field.getType());
 
         processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
+        processingContext.append(Stmt.loadVariable("vote").invoke("wait", Refs.get(callbackVarName)));
 
         try {
           val = AsyncInjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);

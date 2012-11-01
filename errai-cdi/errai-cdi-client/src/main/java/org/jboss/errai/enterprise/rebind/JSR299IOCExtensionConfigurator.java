@@ -49,7 +49,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
   }
 
-  public static void addTypeHeirarchyFor(IOCProcessingContext context, final Set<MetaClass> classes) {
+  public static void addTypeHeirarchyFor(final IOCProcessingContext context, final Set<MetaClass> classes) {
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
 
     for (final MetaClass subClass : classes) {
@@ -60,7 +60,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
                   .invoke("addLookup", subClass.getFullyQualifiedName(), cls.getFullyQualifiedName()));
         }
 
-        for (MetaClass interfaceClass : cls.getInterfaces()) {
+        for (final MetaClass interfaceClass : cls.getInterfaces()) {
           instanceInitializer.addStatement(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
                   .invoke("addLookup", subClass.getFullyQualifiedName(), interfaceClass.getFullyQualifiedName()));
 
@@ -68,24 +68,23 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       }
       while ((cls = cls.getSuperClass()) != null);
     }
-
   }
 
-  public void afterInitialization(IOCProcessingContext context,
-                                  InjectionContext injectionContext,
-                                  IOCProcessorFactory procFactory) {
+  public void afterInitialization(final IOCProcessingContext context,
+                                  final InjectionContext injectionContext,
+                                  final IOCProcessorFactory procFactory) {
 
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
 
     final Set<MetaClass> knownObserverTypes = new HashSet<MetaClass>();
 
-    for (MetaParameter parameter : ClassScanner.getParametersAnnotatedWith(Observes.class)) {
+    for (final MetaParameter parameter : ClassScanner.getParametersAnnotatedWith(Observes.class)) {
       knownObserverTypes.add(parameter.getType());
     }
 
     final Set<MetaClass> knownTypesWithSuperTypes = new HashSet<MetaClass>(knownObserverTypes);
-    for (MetaClass cls : knownObserverTypes) {
-      for (MetaClass subClass : ClassScanner.getSubTypesOf(cls)) {
+    for (final MetaClass cls : knownObserverTypes) {
+      for (final MetaClass subClass : ClassScanner.getSubTypesOf(cls)) {
         knownTypesWithSuperTypes.add(subClass);
       }
     }

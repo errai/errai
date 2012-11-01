@@ -34,7 +34,7 @@ public class ModuleWithInjectedDataBinder {
   private final TextBox nameTextBox = new TextBox();
 
   @Inject
-  private DataBinder<Model> dataBinder;
+  private DataBinder<TestModel> dataBinder;
 
   @PostConstruct
   public void init() {
@@ -45,11 +45,11 @@ public class ModuleWithInjectedDataBinder {
     return nameTextBox;
   }
   
-  public Model getModel() {
+  public TestModel getModel() {
     return dataBinder.getModel();
   }
   
-  public DataBinder getDataBinder() {
+  public DataBinder<TestModel> getDataBinder() {
     return dataBinder;
   }
 }

@@ -135,11 +135,13 @@ import com.google.gwt.user.client.ui.Widget;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EventHandler
 {
-   /**
-    * Specifies the element for which the corresponding event type should be be handled. The handled event type is
-    * defined by the handler method argument. This value must match either a {@link DataField} specified within the
-    * {@link Templated} {@link Composite} component (in the case of handling GWT event types,) or a
-    * <code>data-field</code> attribute in the corresponding HTML template (in the case of handling native DOM events.)
-    */
-   String[] value();
+  /**
+   * Specifies the element for which the corresponding event type should be be handled. The handled event type is
+   * defined by the handler method argument. By default, the event handler will be installed on the templated widget
+   * itself. To handle events that occur on a child widget or DOM node in the template, specify a value. This value must
+   * match either a {@link DataField} specified within the {@link Templated} {@link Composite} component (in the case of
+   * handling GWT event types,) or a <code>data-field</code> attribute in the corresponding HTML template (in the case
+   * of handling native DOM events.)
+   */
+   String[] value() default "this";
 }

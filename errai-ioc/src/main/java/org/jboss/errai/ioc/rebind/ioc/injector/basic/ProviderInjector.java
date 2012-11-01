@@ -46,7 +46,6 @@ public class ProviderInjector extends TypeInjector {
     this.providerInjector = (AbstractInjector)
         context.getInjectorFactory().getTypeInjector(providerType, context);
 
-    //  this.providerInjector = new TypeInjector(providerType, context);
     context.registerInjector(providerInjector);
     providerInjector.setEnabled(isEnabled());
 

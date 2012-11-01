@@ -16,6 +16,13 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -35,20 +42,13 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DefaultJavaDefinitionMapper {
   public static MappingDefinition map(final MetaClass toMap, final DefinitionsFactory definitionsFactory) {
-    if (toMap.isAbstract() || toMap.isInterface()) {
+    if ((toMap.isAbstract() && !toMap.isEnum()) || toMap.isInterface()) {
       throw new RuntimeException("cannot marshal an abstract class or interface: " + toMap.getFullyQualifiedName());
     }
 

@@ -18,8 +18,16 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -43,21 +51,13 @@ import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshalle
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
  * classes annotated with the {@link Portable} annotation, and custom mappings annotated with {@link CustomMapping}.
- *
+ * 
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
@@ -74,7 +74,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   // key = all types, value = list of all types which inherit from.
   private final Multimap<String, String> inheritanceMap = HashMultimap.create();
-
 
   DefinitionsFactoryImpl() {
     loadCustomMappings();
@@ -194,7 +193,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     for (final Class<?> marshallerCls : cliMarshallers) {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
         try {
-          final Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
+          final Class<?> type =
+              (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
           final MappingDefinition marshallMappingDef = new MappingDefinition(type, true);
           marshallMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
           addDefinition(marshallMappingDef);
@@ -227,7 +227,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     for (final Class<?> marshallerCls : serverMarshallers) {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
         try {
-          final Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
+          final Class<?> type =
+              (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
           final MappingDefinition definition;
 
           if (hasDefinition(type)) {
@@ -277,7 +278,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final List<MetaClass> enums = new ArrayList<MetaClass>();
 
     for (final MetaClass mappedClass : exposedClasses) {
-      if (mappedClass.isSynthetic()) continue;
+      if (mappedClass.isSynthetic())
+        continue;
 
       final Portable portable = mappedClass.getAnnotation(Portable.class);
       if (portable != null && !portable.aliasOf().equals(Object.class)) {
@@ -306,7 +308,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-
     // it is not accidental that we're not re-using the mappingAliases collection above
     // we only want to deal with the property file specified aliases here.
     for (final Map.Entry<String, String> entry : getEnvironmentConfig().getMappingAliases().entrySet()) {
@@ -327,7 +328,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       final MappingDefinition aliasDef = new MappingDefinition(
           def.getMarshallerInstance(), entry.getKey(), false
-      );
+          );
       if (def.getMarshallerInstance() instanceof DefaultDefinitionMarshaller) {
         aliasDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasDef));
       }
@@ -378,13 +379,17 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     final boolean isConcrete = !(type.isAbstract() || type.isInterface());
+    if (!type.isArray() && !type.isEnum() && !isConcrete && !hasPortableSubtypes) {
+      throw new IllegalStateException("A field of type " + type
+            + " appears in a portable class, but " + type + " has no portable implementations.");
+    }
     return (hasPortableSubtypes && !hasMarshaller) || (hasPortableSubtypes && hasMarshaller && isConcrete);
   }
 
   /**
    * Populates the inheritance map with all supertypes (except java.lang.Object) and all directly- and
    * indirectly-implemented interfaces of the given class.
-   *
+   * 
    * @param mappingClass
    */
   private void fillInheritanceMap(final MetaClass mappingClass) {

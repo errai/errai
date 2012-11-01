@@ -11,11 +11,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 
 import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.demo.grocery.client.local.ItemListPage;
 
 @Bindable
 @Entity
-@EntityListeners(ItemListPage.ItemListener.class)
+@EntityListeners(EventTranslator.ItemLifecycleListener.class)
 @NamedQuery(name="allItemsByName", query="SELECT i FROM Item i ORDER BY i.name")
 public class Item {
 

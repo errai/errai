@@ -1,10 +1,13 @@
 package org.jboss.errai.ioc.async.test.client;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.async.test.client.res.Foo;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+
+import java.sql.Time;
 
 /**
  * @author Mike Brock
@@ -22,13 +25,23 @@ public class IOCAsyncTests extends IOCClientTestCase {
   }
 
   public void testAsyncLookup() {
-    IOC.getAsyncBeanManager().lookupBean(Foo.class).getInstance(new CreationalCallback<Foo>() {
+    new Timer() {
       @Override
-      public void callback(final Foo beanInstance) {
-        assertNotNull(beanInstance);
-        assertNotNull(beanInstance.getBar());
-        finishTest();
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(Foo.class).getInstance(new CreationalCallback<Foo>() {
+          @Override
+          public void callback(final Foo beanInstance) {
+            assertNotNull(beanInstance);
+            assertNotNull(beanInstance.getBar());
+
+
+            System.out.println("foo.bar=" + beanInstance.getBar());
+            finishTest();
+          }
+        });
       }
-    });
+    }.schedule(3000);
+
+    delayTestFinish(10000);
   }
 }

@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.AImpl1;
@@ -52,16 +53,15 @@ import org.junit.Test;
  */
 public class MarshallingAPITest {
 
-
   @Before
   public void ensureMarshallingSystemInitialized() {
-    System.setProperty("errai.dev.force_reflections", "true");
+    ClassScanner.setReflectionsScanning(true);
     MappingContextSingleton.get();
   }
 
   @After
   public void tearDown() throws Exception {
-    System.setProperty("errai.dev.force_reflections", "false");
+    ClassScanner.setReflectionsScanning(false);
   }
 
   private void testEncodeDecode(Object value) {

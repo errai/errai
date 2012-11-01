@@ -21,11 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.databinding.client.Model;
+import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.api.Convert;
-import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
@@ -39,7 +39,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
- * Data binding integration tests.
+ * Tests functionality provided by the {@link DataBinder} API.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author David Cracauer <dcracauer@gmail.com>
@@ -54,12 +54,13 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+    Convert.deregisterDefaultConverters();
   }
 
   @Test
   public void testBasicBinding() {
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "value").getModel();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "value").getModel();
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getValue());
@@ -73,7 +74,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     ModuleWithInjectedDataBinder module =
         IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
 
-    Model model = module.getModel();
+    TestModel model = module.getModel();
     TextBox nameTextBox = module.getNameTextBox();
 
     model.setName("model change");
@@ -84,18 +85,18 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingOfHasText() {
+  public void testBindingOfReadOnlyField() {
     Label label = new Label();
-    Model model = DataBinder.forType(Model.class).bind(label, "id").getModel();
+    TestModel model = DataBinder.forType(TestModel.class).bind(label, "id").getModel();
 
     model.setId(1701);
     assertEquals("Widget not properly updated", "1701", label.getText());
   }
 
   @Test
-  public void testBindingOfIntegerToString() {
+  public void testBindingWithDefaultConversion() {
     TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "age").getModel();
 
     model.setAge(25);
     assertEquals("Widget not properly updated", "25", textBox.getText());
@@ -107,7 +108,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindingOfNonExistingProperty() {
     try {
-      DataBinder.forType(Model.class).bind(new TextBox(), "non-existing");
+      DataBinder.forType(TestModel.class).bind(new TextBox(), "non-existing");
       fail("Expected NonExistingPropertyException!");
     }
     catch (NonExistingPropertyException nepe) {
@@ -118,9 +119,9 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testUnbindingSpecificProperty() {
-    DataBinder<Model> binder = DataBinder.forType(Model.class);
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     TextBox textBox = new TextBox();
-    Model model = binder.bind(textBox, "value").getModel();
+    TestModel model = binder.bind(textBox, "value").getModel();
 
     binder.unbind("value");
 
@@ -133,9 +134,9 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testUnbindingAllProperties() {
-    DataBinder<Model> binder = DataBinder.forType(Model.class);
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     TextBox textBox = new TextBox();
-    Model model = binder.bind(textBox, "value").getModel();
+    TestModel model = binder.bind(textBox, "value").getModel();
 
     binder.unbind();
 
@@ -147,15 +148,15 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testMultipleBindings() {
-    DataBinder<Model> binder = DataBinder.forType(Model.class);
+  public void testBindingOfMultipleProperties() {
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     TextBox valueTextBox = new TextBox();
     binder.bind(valueTextBox, "value");
 
     TextBox nameTextBox = new TextBox();
     binder.bind(nameTextBox, "name");
 
-    Model model = binder.getModel();
+    TestModel model = binder.getModel();
 
     nameTextBox.setValue("ui.name", true);
     assertEquals("Name not properly updated", "ui.name", model.getName());
@@ -188,45 +189,17 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindableProxyMarshalling() {
-    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value").getModel();
-
-    String marshalledModel = Marshalling.toJSON(model);
-    assertEquals(model, Marshalling.fromJSON(marshalledModel, Model.class));
-  }
-
-  @Test
-  public void testBindableProxyListMarshalling() {
-    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value").getModel();
-
-    List<Model> modelList = new ArrayList<Model>();
-    modelList.add(model);
-    String marshalledModelList = Marshalling.toJSON(modelList);
-    assertEquals(modelList, Marshalling.fromJSON(marshalledModelList, List.class));
-  }
-
-  @Test
-  public void testBindableProxyMapMarshalling() {
-    Model model = DataBinder.forType(Model.class).bind(new TextBox(), "value").getModel();
-
-    Map<Model, Model> modelMap = new HashMap<Model, Model>();
-    modelMap.put(model, model);
-    String marshalledModelMap = Marshalling.toJSON(modelMap);
-    assertEquals(modelMap, Marshalling.fromJSON(marshalledModelMap, Map.class));
-  }
-
-  @Test
-  public void testBindingWithModelChange() {
-    DataBinder<Model> binder = DataBinder.forType(Model.class);
+  public void testBindingWithModelInstanceChange() {
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     TextBox textBox = new TextBox();
     binder.bind(textBox, "name");
 
-    Model model = new Model();
+    TestModel model = new TestModel();
     model.setName("initial name");
     binder.setModel(model, InitialState.FROM_MODEL);
     assertEquals("Widget not updated after model change", "initial name", textBox.getText());
 
-    model = new Model();
+    model = new TestModel();
     textBox.setText("changed name");
     binder.setModel(model, InitialState.FROM_UI);
     assertEquals("Model not updated after model change", "changed name", model.getName());
@@ -237,228 +210,166 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     textBox.setValue("initial ui value");
 
-    DataBinder<Model> binder = DataBinder.forType(Model.class, InitialState.FROM_UI).bind(textBox, "name");
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_UI).bind(textBox, "name");
     assertEquals("Model not initialized based on widget's state", "initial ui value", binder.getModel().getName());
 
-    Model model = new Model();
+    TestModel model = new TestModel();
     model.setName("initial model value");
     DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name");
     assertEquals("Model not initialized based on widget's state", "initial model value", textBox.getValue());
   }
 
   @Test
+  public void testBindablePropertyChain() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.value").getModel();
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
+
+    model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+
+  @Test
+  public void testBindablePropertyChainTwoLevelsDeep() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.child.name").getModel();
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getName());
+
+    model.getChild().getChild().setName("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+
+  @Test
+  public void testBindablePropertyChainWithNestedInstanceChange() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.value").getModel();
+
+    model.setChild(new TestModel());
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
+
+    model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+  
+  @Test
+  public void testBindablePropertyChainWithRootInstanceChange() {
+    TextBox textBox = new TextBox();
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
+    
+    binder.setModel(new TestModel());
+    TestModel model = binder.getModel();
+    
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getValue());
+
+    model.getChild().getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+
+  @Test
+  public void testBindablePropertyChainWithUnbinding() {
+    TextBox valueTextBox = new TextBox();
+    TextBox nameTextBox = new TextBox();
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class)
+        .bind(valueTextBox, "child.value")
+        .bind(nameTextBox, "child.name");
+
+    TestModel model = binder.getModel();
+
+    // unbind specific nested property
+    binder.unbind("child.name");
+    model.getChild().setName("model change");
+    assertEquals("Widget should not have been updated because unbind was called for this property", "", nameTextBox.getText());
+
+    nameTextBox.setValue("UI change", true);
+    assertEquals("Model should not have been updated because unbind was called for this property", "model change", 
+        model.getChild().getName());
+
+    model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", valueTextBox.getText());
+
+    valueTextBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
+    
+    model.getChild().setValue("");
+    
+    // unbind all properties
+    binder.unbind();
+    model.getChild().setValue("model change");
+    assertEquals("Widget should not have been updated because unbind was called", "", valueTextBox.getText());
+
+    valueTextBox.setValue("UI change", true);
+    assertEquals("Model should not have been updated because unbind was called", "model change", model.getChild().getValue());
+  }
+  
+  @Test
+  public void testBindingUsingNonAccesssorMethod() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "active").getModel();
+
+    // change the property 'active' using a non accessor method.
+    model.activate();
+    assertTrue("Model not properly updated", model.isActive());
+    assertEquals("Widget not properly updated", "true", textBox.getText());
+  }
+  
+  @Test
+  public void testBindablePropertyChainsUsingNonAccesssorMethod() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.active").getModel();
+
+    // change the property 'active' using a non accessor method.
+    model.getChild().activate();
+    assertTrue("Model not properly updated", model.getChild().isActive());
+    assertEquals("Widget not properly updated", "true", textBox.getText());
+  }
+
+  @Test
+  public void testBindableProxyMarshalling() {
+    TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
+
+    String marshalledModel = Marshalling.toJSON(model);
+    assertEquals(model, Marshalling.fromJSON(marshalledModel, TestModel.class));
+  }
+
+  @Test
+  public void testBindableProxyListMarshalling() {
+    TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
+
+    List<TestModel> modelList = new ArrayList<TestModel>();
+    modelList.add(model);
+    String marshalledModelList = Marshalling.toJSON(modelList);
+    assertEquals(modelList, Marshalling.fromJSON(marshalledModelList, List.class));
+  }
+
+  @Test
+  public void testBindableProxyMapMarshalling() {
+    TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
+
+    Map<TestModel, TestModel> modelMap = new HashMap<TestModel, TestModel>();
+    modelMap.put(model, model);
+    String marshalledModelMap = Marshalling.toJSON(modelMap);
+    assertEquals(modelMap, Marshalling.fromJSON(marshalledModelMap, Map.class));
+  }
+
+  @Test
   public void testBindableProxyToString() {
-    Model model = new Model();
+    TestModel model = new TestModel();
     model.setName("test");
 
-    DataBinder<Model> binder = DataBinder.forModel(model);
+    DataBinder<TestModel> binder = DataBinder.forModel(model);
     assertEquals(model.toString(), binder.getModel().toString());
-  }
-
-  @Test
-  public void testBindingSpecificConverter() {
-    Converter<Integer, String> converter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        return 1701;
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return "testCustomConverter";
-      }
-    };
-
-    TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age", converter).getModel();
-
-    textBox.setValue("321", true);
-    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), model.getAge());
-
-    model.setAge(123);
-    assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
-  }
-
-  @Test
-  public void testBindingSpecificConverterWithNullValues() {
-    Converter<Integer, String> converter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        return (widgetValue == null) ? -1 : 0;
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return (modelValue == null) ? "null-widget" : modelValue.toString();
-      }
-    };
-
-    TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age", converter).getModel();
-
-    textBox.setValue(null, true);
-    assertEquals("Model not properly updated using custom converter", Integer.valueOf(-1), model.getAge());
-
-    model.setAge(null);
-    assertEquals("Widget not properly updated using custom converter", "null-widget", textBox.getText());
-  }
-
-  @Test
-  public void testBindingRetainsConverterAfterModelChange() {
-    Converter<Integer, String> converter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        return 1701;
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return "testCustomConverter";
-      }
-    };
-
-    TextBox textBox = new TextBox();
-    DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "age", converter);
-
-    Model oldModel = binder.getModel();
-
-    binder.setModel(new Model());
-    textBox.setValue("321", true);
-    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1701), binder.getModel().getAge());
-
-    binder.getModel().setAge(123);
-    assertEquals("Widget not properly updated using custom converter", "testCustomConverter", textBox.getText());
-
-    assertEquals("Original model should not have been updated", null, oldModel.getAge());
-  }
-
-  @Test
-  public void testBindingSpecificConverterForReadOnlyField() {
-    Converter<Integer, String> converter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        throw new UnsupportedOperationException("Should never be called!");
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return "test";
-      }
-    };
-
-    Label label = new Label();
-    Model model = DataBinder.forModel(new Model(), InitialState.FROM_MODEL).bind(label, "age", converter).getModel();
-
-    model.setAge(123);
-    assertEquals("Widget not properly updated using custom converter", "test", label.getText());
-  }
-
-  @Test
-  public void testGlobalDefaultConverter() {
-    Converter<Integer, String> converter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        return 1701;
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return "testGlobalDefaultConverter";
-      }
-    };
-    Convert.registerDefaultConverter(Integer.class, String.class, converter);
-
-    TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
-
-    textBox.setValue("321", true);
-    assertEquals("Model not properly updated using global default converter", Integer.valueOf(1701), model.getAge());
-
-    model.setAge(123);
-    assertEquals("Widget not properly updated using global default converter",
-        "testGlobalDefaultConverter", textBox.getText());
-  }
-
-  @Test
-  public void testGlobalDefaultConverterWithNullValues() {
-    Converter<Integer, String> converter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        return (widgetValue == null) ? -1 : 0;
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return (modelValue == null) ? "null-widget" : modelValue.toString();
-      }
-    };
-
-    Convert.registerDefaultConverter(Integer.class, String.class, converter);
-
-    TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age").getModel();
-
-    textBox.setValue(null, true);
-    assertEquals("Model not properly updated using global default converter", Integer.valueOf(-1), model.getAge());
-
-    model.setAge(null);
-    assertEquals("Widget not properly updated using global default converter", "null-widget", textBox.getText());
-  }
-
-  @Test
-  public void testAutoRegisteredGlobalDefaultConverter() {
-    TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "active").getModel();
-
-    textBox.setValue("123", true);
-    assertEquals("Model not properly updated using global default converter", true, model.isActive());
-
-    model.setActive(false);
-    assertEquals("Widget not properly updated using global default converter",
-        "AutoRegisteredDefaultConverter", textBox.getText());
-  }
-
-  @Test
-  public void testOverrideGlobalDefaultConverter() {
-    Converter<Integer, String> converter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        return 1701;
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return "testGlobalDefaultConverter";
-      }
-    };
-    Convert.registerDefaultConverter(Integer.class, String.class, converter);
-
-    Converter<Integer, String> bindingConverter = new Converter<Integer, String>() {
-      @Override
-      public Integer toModelValue(String widgetValue) {
-        return 1;
-      }
-
-      @Override
-      public String toWidgetValue(Integer modelValue) {
-        return "bindingConverter";
-      }
-    };
-
-    TextBox textBox = new TextBox();
-    Model model = DataBinder.forType(Model.class).bind(textBox, "age", bindingConverter).getModel();
-
-    textBox.setValue("321", true);
-    assertEquals("Model not properly updated using custom converter", Integer.valueOf(1), model.getAge());
-
-    model.setAge(123);
-    assertEquals("Widget not properly updated using custom converter", "bindingConverter", textBox.getText());
   }
 
   @Test
   public void testGetWidget() {
     TextBox textBox = new TextBox();
-    DataBinder<Model> binder = DataBinder.forType(Model.class);
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
 
     assertNull(binder.getWidget("value"));
     binder.bind(textBox, "value");
@@ -470,7 +381,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     MockHandler handler = new MockHandler();
 
     TextBox textBox = new TextBox();
-    DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "value");
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     binder.addPropertyChangeHandler(handler);
 
     textBox.setValue("UI change", true);
@@ -496,13 +407,13 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testNewValueIsSetBeforeEventIsFired() {
     TextBox textBox = new TextBox();
-    final DataBinder<Model> binder = DataBinder.forType(Model.class).bind(textBox, "value");
+    final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     binder.getModel().setValue("Old Value");
-    class MyHandler implements PropertyChangeHandler {
+    class MyHandler implements PropertyChangeHandler<String> {
       String observedValueWhenEventFired;
 
       @Override
-      public void onPropertyChange(PropertyChangeEvent event) {
+      public void onPropertyChange(PropertyChangeEvent<String> event) {
         observedValueWhenEventFired = binder.getModel().getValue();
       }
     }
@@ -514,5 +425,20 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     binder.getModel().setValue("New New Value");
     assertEquals("New New Value", handler.observedValueWhenEventFired);
+  }
+
+  @Test
+  public void testUpdateWidgets() {
+    TestModel model = new TestModel();
+    TextBox textBox = new TextBox();
+    DataBinder<TestModel> binder = DataBinder.forModel(model).bind(textBox, "value");
+    assertEquals("TextBox should be empty", "", textBox.getText());
+
+    model.setValue("model change");
+
+    // This call is used by Errai JPA, to update the widgets after an entity was updated
+    // using direct field access (e.g. the id was set).
+    ((BindableProxy<?>) binder.getModel()).updateWidgets();
+    assertEquals("TextBox should have been updated", "model change", textBox.getText());
   }
 }

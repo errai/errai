@@ -2,12 +2,15 @@ package org.jboss.errai.ioc.rebind.ioc.injector.async;
 
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -45,19 +48,39 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
   @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
 
-    final MetaClass providerCreationalCallback
-        = MetaClassFactory.parameterizedAs(CreationalCallback.class,
-        MetaClassFactory.typeParametersOf(providerInjector.getInjectedType()));
-
-    Stmt.newObject(providerCreationalCallback).extend()
-        .publicOverridesMethod("callback", Parameter.of(providerInjector.getInjectedType(), "bean"));
 
     if (isSingleton() && provided) {
-      return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("get");
+      return Stmt.loadVariable("context").invoke("getBeanInstance", providerInjector.getInjectedType(),
+          providerInjector.getQualifyingMetadata().getQualifiers());
     }
 
     provided = true;
 
-    return Stmt.nestedCall(providerInjector.getBeanInstance(injectableInstance)).invoke("get");
+    final BlockBuilder<?> block
+        = injectableInstance.getInjectionContext().getProcessingContext().getBlockBuilder();
+    final MetaClass providerCreationalCallback
+        = MetaClassFactory.parameterizedAs(CreationalCallback.class,
+        MetaClassFactory.typeParametersOf(providerInjector.getInjectedType()));
+
+    final String varName = InjectUtil.getVarNameFromType(providerInjector.getInjectedType());
+
+    block.append(
+        Stmt.declareFinalVariable(varName, providerCreationalCallback,
+            Stmt.newObject(providerCreationalCallback).extend()
+                .publicOverridesMethod("callback", Parameter.of(providerInjector.getInjectedType(), "beanInstance"))
+                .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type))
+                    .invoke("callback", Stmt.loadVariable("beanInstance").invoke("get")))
+                   .append(Stmt.loadVariable("vote").invoke("finish", Refs.get("this")))
+                .finish().finish())
+    );
+
+    block.append(Stmt.loadVariable("vote").invoke("wait", Refs.get(varName)));
+
+    block.append(
+        Stmt.loadVariable(providerInjector.getCreationalCallbackVarName())
+            .invoke("getInstance", Refs.get(varName), Refs.get("context"))
+    );
+
+    return null;
   }
 }

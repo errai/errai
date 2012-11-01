@@ -37,32 +37,34 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 
 /**
- * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class RPCProxyUtil {
-  private RPCProxyUtil() {
-  }
+public abstract class ProxyUtil {
+  private ProxyUtil() {}
 
   /**
-     * Generates the {@link org.jboss.errai.bus.client.api.interceptor.CallContext} for method interception.
-     *
-     * @param callContextType
-     *          the type of {@link org.jboss.errai.bus.client.api.interceptor.RemoteCallContext} to use.
-     * @param proxyClass
-     *          the declaring proxy class
-     * @param method
-     *          the method that is being proxied.
-     * @param proceed
-     *          the logic that should be invoked if {@link org.jboss.errai.bus.client.api.interceptor.CallContext#proceed()} is called.
-     * @param interceptedCall
-     *          a reference to the {@link org.jboss.errai.bus.client.api.interceptor.InterceptedCall} annotation on the remote interface or method
-     * @return statement representing an anonymous implementation of the provided {@link org.jboss.errai.bus.client.api.interceptor.CallContext}
-     */
-    public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
+   * Generates the {@link org.jboss.errai.bus.client.api.interceptor.CallContext} for method interception.
+   * 
+   * @param callContextType
+   *          the type of {@link org.jboss.errai.bus.client.api.interceptor.RemoteCallContext} to use.
+   * @param proxyClass
+   *          the declaring proxy class
+   * @param method
+   *          the method that is being proxied.
+   * @param proceed
+   *          the logic that should be invoked if
+   *          {@link org.jboss.errai.bus.client.api.interceptor.CallContext#proceed()} is called.
+   * @param interceptedCall
+   *          a reference to the {@link org.jboss.errai.bus.client.api.interceptor.InterceptedCall} annotation on the
+   *          remote interface or method
+   * @return statement representing an anonymous implementation of the provided
+   *         {@link org.jboss.errai.bus.client.api.interceptor.CallContext}
+   */
+  public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
         Class<? extends RemoteCallContext> callContextType,
         MetaClass proxyClass, MetaMethod method, Statement proceed, InterceptedCall interceptedCall) {
 
-      return Stmt.newObject(callContextType).extend()
+    return Stmt.newObject(callContextType).extend()
               .publicOverridesMethod("getMethodName")
               .append(Stmt.load(method.getName()).returnValue())
               .finish()
@@ -110,17 +112,17 @@ public abstract class RPCProxyUtil {
               )
               .append(Stmt.loadVariable("this").invoke("proceed", Variable.get("interceptorCallback")))
               .finish();
-    }
+  }
 
-    private static Statement generateInterceptorStackProceedMethod(Statement proceed, InterceptedCall interceptedCall) {
-      BlockStatement proceedLogic = new BlockStatement();
-      proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
+  private static Statement generateInterceptorStackProceedMethod(Statement proceed, InterceptedCall interceptedCall) {
+    BlockStatement proceedLogic = new BlockStatement();
+    proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
-      BlockBuilder<ElseBlockBuilder> interceptorStack =
+    BlockBuilder<ElseBlockBuilder> interceptorStack =
               If.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor"));
 
-      for (Class<?> interceptor : interceptedCall.value()) {
-          interceptorStack.append(If.cond(Bool.equals(
+    for (Class<?> interceptor : interceptedCall.value()) {
+      interceptorStack.append(If.cond(Bool.equals(
               Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
               .append(Stmt.loadVariable("status").invoke("setProceeding", false))
               .append(
@@ -134,8 +136,8 @@ public abstract class RPCProxyUtil {
                       .finish())
               .finish()
           );
-      }
-      proceedLogic.addStatement(interceptorStack.finish().else_().append(proceed).finish());
-      return proceedLogic;
     }
+    proceedLogic.addStatement(interceptorStack.finish().else_().append(proceed).finish());
+    return proceedLogic;
+  }
 }

@@ -9,6 +9,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
@@ -22,7 +23,10 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
-@NamedQuery(name="selectAlbumByName", query="SELECT a FROM Album a WHERE a.name=:name")
+@NamedQueries({
+  @NamedQuery(name="selectAlbumByName", query="SELECT a FROM Album a WHERE a.name=:name"),
+  @NamedQuery(name="selectAlbumByArtist", query="SELECT a FROM Album a WHERE a.artist=:artist")
+})
 @EntityListeners(StandaloneLifecycleListener.class)
 @TestOnly @Bindable @Portable @Entity
 public class Album {

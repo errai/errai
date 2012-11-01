@@ -3,16 +3,14 @@ package org.jboss.errai.demo.grocery.client.local;
 import java.util.Iterator;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
 import javax.persistence.TypedQuery;
 
 import org.jboss.errai.demo.grocery.client.shared.Item;
+import org.jboss.errai.demo.grocery.client.shared.qual.New;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
@@ -27,19 +25,14 @@ import com.google.gwt.user.client.ui.Widget;
 @Page
 public class ItemListPage extends Composite {
 
-  // XXX need a better way of getting at this instance from the ItemListener
-  private static ItemListPage INSTANCE;
-
   @Inject IOCBeanManager bm;
   @Inject EntityManager em;
 
   @Inject @DataField VerticalPanel listContainer;
   @Inject @DataField ItemForm newItemForm;
 
-  @SuppressWarnings("unused")
   @PostConstruct
   private void initInstance() {
-    INSTANCE = this;
     refreshFromDb();
     newItemForm.setAfterSaveAction(new Runnable() {
       @Override
@@ -50,22 +43,11 @@ public class ItemListPage extends Composite {
   }
 
   @SuppressWarnings("unused")
-  @PreDestroy
-  private void deInitInstance() {
-    INSTANCE = null;
+  private void onNewItem(@Observes @New Item i) {
+    System.out.println("ItemListPage@" + System.identityHashCode(this) + " got new item: " + i);
+    refreshFromDb();
   }
-
-  // in a word, this JPA listener stuff is "yuck."
-  // TODO make a bridge from JPA lifecycle events to CDI events
-  public static class ItemListener {
-    @PostPersist @PostUpdate @PostRemove
-    public void onStoreListChange(Item s) {
-      if (INSTANCE != null) {
-        INSTANCE.refreshFromDb();
-      }
-    }
-  }
-
+  
   @PostConstruct
   void refreshFromDb() {
 

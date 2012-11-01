@@ -3,7 +3,9 @@ package org.jboss.errai.jpa.client.local;
 import org.jboss.errai.common.client.framework.Assert;
 
 import com.google.gwt.json.client.JSONException;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
 /**
@@ -112,11 +114,47 @@ public class Key<X, T> {
     return "Key [entityType=" + entityType + ", id=" + id + "]";
   }
 
+  /**
+   * Returns a JSON string representation of this key which can be turned back
+   * into a Key instance via
+   * {@link Key#fromJson(ErraiEntityManager, String, boolean)}.
+   *
+   * @see #toJsonObject()
+   * @return a JSON-formatted string. Never null.
+   */
   public String toJson() {
-    return ("{\"entityType\":\"" + entityType.getJavaType().getName()
-            + "\",\"id\":" + JsonUtil.basicValueToJson(id) + "}");
+    return toJsonObject().toString();
   }
 
+  /**
+   * Returns a JSONObject representation of this key which can be turned back
+   * into a Key instance via
+   * {@link Key#fromJsonObject(ErraiEntityManager, JSONObject, boolean)}.
+   *
+   * @see #toJson()
+   * @return a JSON object that represents this key. Never null.
+   */
+  public JSONObject toJsonObject() {
+    JSONObject keyJson = new JSONObject();
+    keyJson.put("entityType", new JSONString(entityType.getJavaType().getName()));
+    keyJson.put("id", JsonUtil.basicValueToJson(id));
+    return keyJson;
+  }
+
+  /**
+   * Returns a Key instance based on the given JSON string.
+   *
+   * @param em
+   *          The entity manager that can be used to look up the entity type
+   *          corresponding with the key.
+   * @param key
+   *          The key to parse.
+   * @param failIfNotFound
+   *          If true, and the entity type given in {@code key} is not known to
+   *          {@code em}, an IllegalArgumentException will be thrown.
+   * @return An instance of Key that corresponds with the entity type and ID of
+   *         the given JSON string.
+   */
   public static Key<?, ?> fromJson(ErraiEntityManager em, String key, boolean failIfNotFound) {
     JSONValue k;
     try {
@@ -125,14 +163,31 @@ public class Key<X, T> {
     } catch (JSONException e) {
       throw new JSONException("Input: " + key, e);
     }
+    return fromJsonObject(em, k.isObject(), failIfNotFound);
+  }
 
-    String entityClassName = k.isObject().get("entityType").isString().stringValue();
+  /**
+   * Returns a Key instance based on the given JSON object.
+   *
+   * @param em
+   *          The entity manager that can be used to look up the entity type
+   *          corresponding with the key.
+   * @param key
+   *          The properties of the key to create.
+   * @param failIfNotFound
+   *          If true, and the entity type given in {@code key} is not known to
+   *          {@code em}, an IllegalArgumentException will be thrown.
+   * @return An instance of Key that corresponds with the entity type and ID of
+   *         the given JSON object.
+   */
+  public static Key<?, ?> fromJsonObject(ErraiEntityManager em, JSONObject key, boolean failIfNotFound) {
+    String entityClassName = key.get("entityType").isString().stringValue();
     ErraiEntityType<Object> et = em.getMetamodel().entity(entityClassName, failIfNotFound);
     if (et == null) {
       return null;
     }
     ErraiSingularAttribute<?, Object> idAttr = et.getId(Object.class);
-    Object id = JsonUtil.basicValueFromJson(k.isObject().get("id"), idAttr.getJavaType());
+    Object id = JsonUtil.basicValueFromJson(key.get("id"), idAttr.getJavaType());
 
     return new Key<Object, Object>(et, id);
   }

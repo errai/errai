@@ -91,7 +91,6 @@ public class ContextualProviderInjector extends TypeInjector {
 
     final Annotation[] qualifiers = injectableInstance.getQualifiers();
 
-
     if (providerInjector.isSingleton() && providerInjector.isRendered()) {
       return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("provide", typeArgsClasses,
           qualifiers.length != 0 ? qualifiers : null);

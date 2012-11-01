@@ -47,6 +47,7 @@ import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.CustomList;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
@@ -65,6 +66,7 @@ import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
 import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.SubInterfaceImpl;
 import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
@@ -2125,6 +2127,30 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testEntityWithMapUsingSubtypeValues(e);
+      }
+    });
+  }
+  
+  public void testEntityWithInterfaceField() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final EntityWithInterfaceField ent = new EntityWithInterfaceField();
+        ent.setField(new SubInterfaceImpl("value"));
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithInterfaceField>() {
+          @Override
+          public void callback(EntityWithInterfaceField response) {
+            try {
+              assertEquals(ent, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithInterfaceField(ent);
       }
     });
   }
