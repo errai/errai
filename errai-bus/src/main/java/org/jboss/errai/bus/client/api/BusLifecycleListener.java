@@ -4,8 +4,9 @@ import org.jboss.errai.bus.client.framework.ClientMessageBus;
 
 /**
  * Errai's {@link ClientMessageBus} has three conceptual states in its
- * lifecycle; this interface allows Errai applications to observe lifecycle
- * state transitions in the bus.
+ * lifecycle: <b>local only</b>, <b>connecting</b>, and <b>connected</b>. This
+ * interface allows Errai applications to observe lifecycle state transitions in
+ * the bus.
  * <p>
  * The bus lifecycle is as follows. Every time the bus transitions from one
  * state to another, the correspondingly named event is delivered to all
@@ -24,12 +25,13 @@ import org.jboss.errai.bus.client.framework.ClientMessageBus;
  * only</b> state.
  * <p>
  * Once the bus has established a connection with the server and exchanged the
- * list of available topics with the server bus, the bus is in the <b>connected</b>
- * state, and bidirectional communication between client and server is possible.
+ * list of available topics with the server bus, the bus is in the
+ * <b>connected</b> state, and bidirectional communication between client and
+ * server is possible.
  * <p>
- * If there is a communication error when the bus is in the <b>connected</b> state,
- * the bus falls back to the <b>connecting</b> state, where it attempts to
- * reconnect to the server.
+ * If there is a communication error when the bus is in the <b>connected</b>
+ * state, the bus falls back to the <b>connecting</b> state, where it attempts
+ * to reconnect to the server.
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
