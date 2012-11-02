@@ -22,7 +22,10 @@ public class BeanVote {
     @Override
     public void run() {
       trace.printStackTrace();
-      throw new RuntimeException("time asynchronously loading bean!");
+
+      for (final CreationalCallback callback : dependencies) {
+        System.out.println(" --unsatisfied-> " + callback.toString());
+      }
     }
   };
 

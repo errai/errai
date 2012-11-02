@@ -47,17 +47,21 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
 
   @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
+    final BlockBuilder<?> block
+        = injectableInstance.getInjectionContext().getProcessingContext().getBlockBuilder();
 
 
     if (isSingleton() && provided) {
-      return Stmt.loadVariable("context").invoke("getBeanInstance", providerInjector.getInjectedType(),
-          providerInjector.getQualifyingMetadata().getQualifiers());
+      block.append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type))
+          .invoke("callback",
+              Stmt.loadVariable("context").invoke(
+                  "getBeanInstance",
+                  providerInjector.getInjectedType(), providerInjector.getQualifyingMetadata().getQualifiers()).invoke("get")));
+      return null;
     }
 
     provided = true;
 
-    final BlockBuilder<?> block
-        = injectableInstance.getInjectionContext().getProcessingContext().getBlockBuilder();
     final MetaClass providerCreationalCallback
         = MetaClassFactory.parameterizedAs(CreationalCallback.class,
         MetaClassFactory.typeParametersOf(providerInjector.getInjectedType()));
@@ -70,8 +74,12 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
                 .publicOverridesMethod("callback", Parameter.of(providerInjector.getInjectedType(), "beanInstance"))
                 .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type))
                     .invoke("callback", Stmt.loadVariable("beanInstance").invoke("get")))
-                   .append(Stmt.loadVariable("vote").invoke("finish", Refs.get("this")))
-                .finish().finish())
+                .append(Stmt.loadVariable("vote").invoke("finish", Refs.get("this")))
+                .finish()
+                .publicOverridesMethod("toString")
+                .append(Stmt.load(providerInjector.getInjectedType()).invoke("getName").returnValue())
+                .finish()
+                .finish())
     );
 
     block.append(Stmt.loadVariable("vote").invoke("wait", Refs.get(varName)));

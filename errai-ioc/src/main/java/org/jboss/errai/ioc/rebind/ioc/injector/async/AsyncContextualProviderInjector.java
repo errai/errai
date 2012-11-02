@@ -107,9 +107,13 @@ public class AsyncContextualProviderInjector extends TypeInjector {
         Stmt.declareFinalVariable(varName, providerCreationalCallback,
             Stmt.newObject(providerCreationalCallback).extend()
                 .publicOverridesMethod("callback", Parameter.of(providerInjector.getInjectedType(), "beanInstance"))
-                .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type)).invoke("callback", valueRef))
-                .append(Stmt.loadVariable("vote").invoke("finish", Refs.get("this")))
-                .finish().finish())
+                  .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type)).invoke("callback", valueRef))
+                  .append(Stmt.loadVariable("vote").invoke("finish", Refs.get("this")))
+                .finish()
+                .publicOverridesMethod("toString")
+                  .append(Stmt.load(providerInjector.getInjectedType()).invoke("getName").returnValue())
+                .finish()
+             .finish())
     );
 
     block.append(Stmt.loadVariable("vote").invoke("wait", Refs.get(varName)));

@@ -22,4 +22,8 @@ public class Foo {
   public Bar2 getBar2() {
     return bar2;
   }
+
+  public Disposer<Bar> getBarDisposer() {
+    return barDisposer;
+  }
 }

@@ -9,4 +9,8 @@ import javax.inject.Inject;
  */
 public class Bar2 {
   @Inject AsyncBeanManager manager;
+
+  public AsyncBeanManager getManager() {
+    return manager;
+  }
 }

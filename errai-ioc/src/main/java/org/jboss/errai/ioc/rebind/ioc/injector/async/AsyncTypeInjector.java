@@ -130,8 +130,6 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     */
     final MetaClass beanProviderClassRef = parameterizedAs(AsyncBeanProvider.class, typeParametersOf(type));
     final MetaClass creationalCallbackClassRef = parameterizedAs(CreationalCallback.class, typeParametersOf(type));
-
-
     /*
     begin building the creational callback, implement the "getInstance" method from the interface
     and assign its BlockBuilder to a callbackBuilder so we can work with it.

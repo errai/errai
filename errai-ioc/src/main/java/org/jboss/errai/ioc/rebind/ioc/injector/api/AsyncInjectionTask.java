@@ -131,8 +131,12 @@ public class AsyncInjectionTask {
 
         final ObjectBuilder finish = Stmt.newObject(callbackClass).extend()
             .publicOverridesMethod("callback", Parameter.of(field.getType(), "bean"))
-            .append(fieldAccessStmt)
-            .append(Stmt.loadVariable("vote").invoke("finish", Stmt.loadVariable("this"))).finish().finish();
+              .append(fieldAccessStmt)
+              .append(Stmt.loadVariable("vote").invoke("finish", Stmt.loadVariable("this")))
+            .finish()
+            .publicOverridesMethod("toString")
+              .append(Stmt.load(field.getType()).invoke("getName").returnValue()).finish()
+            .finish();
 
         final String callbackVarName = InjectUtil.getVarNameFromType(field.getType());
 

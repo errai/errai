@@ -33,7 +33,10 @@ public class IOCAsyncTests extends IOCClientTestCase {
           public void callback(final Foo beanInstance) {
             assertNotNull(beanInstance);
             assertNotNull(beanInstance.getBar());
+            assertNotNull(beanInstance.getBar2());
+            assertNotNull(beanInstance.getBarDisposer());
 
+            assertNotNull(beanInstance.getBar2().getManager());
 
             System.out.println("foo.bar=" + beanInstance.getBar());
             finishTest();

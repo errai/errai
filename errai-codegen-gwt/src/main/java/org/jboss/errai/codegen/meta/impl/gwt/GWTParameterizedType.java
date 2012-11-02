@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
 
@@ -42,7 +43,18 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   public MetaType[] getTypeParameters() {
     final List<MetaType> types = new ArrayList<MetaType>();
     for (final JClassType parm : parameterizedType.getTypeArgs()) {
-      types.add(GWTUtil.eraseOrReturn(oracle, parm));
+      if (parm.isParameterized() != null) {
+        types.add(new GWTParameterizedType(oracle, parm.isParameterized()));
+      }
+      else if (parm.isTypeParameter() != null) {
+        types.add(new GWTTypeVariable(oracle, parm.isTypeParameter()));
+      }
+      else if (parm.isGenericType() != null) {
+        types.add(new GWTGenericDeclaration(oracle, parm.isGenericType()));
+      }
+      else {
+        types.add(GWTClass.newInstance(oracle, parm));
+      }
     }
     return types.toArray(new MetaType[types.size()]);
   }
