@@ -95,6 +95,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Mike Brock
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
+
+  private enum State { LOCAL_ONLY, CONNECTING, CONNECTED }
+
   private final String clientId;
   private String sessionId;
 
@@ -168,6 +171,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   boolean rxActive = false;
 
   private boolean disconnected = false;
+
+  private State state = State.LOCAL_ONLY;
 
   private BusErrorDialog errorDialog;
 
@@ -713,13 +718,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  /**
-   * <h1><marquee>DON'T CALL THIS METHOD UNLESS CURRENTLY ONLINE!!!</marquee></h1>
-   */
   @Override
   public void stop(final boolean sendDisconnect) {
-    fireEvent(EventType.OFFLINE);
-    fireEvent(EventType.DISASSOCIATING);
+    if (state != State.LOCAL_ONLY)
+      setState(State.LOCAL_ONLY);
 
     try {
       if (sendDisconnect && isRemoteCommunicationEnabled()) {
@@ -760,15 +762,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private void initFields() {
-    initialized = false;
-    disconnected = false;
-
-    remotes.clear();
-    onSubscribeHooks.clear();
-    onUnsubscribeHooks.clear();
-  }
-
   public void setInitialized(final boolean initialized) {
     this.initialized = initialized;
   }
@@ -806,10 +799,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     cometChannelOpen = true;
 
     if (sendBuilder == null) {
-      if (!GWT.isScript()) {   // Hosted Mode
-        initFields();
-        sendBuilder = getSendBuilder();
 
+      initialized = false;
+      disconnected = false;
+      state = State.LOCAL_ONLY;
+
+      remotes.clear();
+      onSubscribeHooks.clear();
+      onUnsubscribeHooks.clear();
+
+      sendBuilder = getSendBuilder();
+      if (!GWT.isScript()) {   // Hosted Mode
         if (isReinit()) {
           setReinit(true);
           init();
@@ -820,10 +820,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           init();
           return;
         }
-      }
-      else {
-        initFields();
-        sendBuilder = getSendBuilder();
       }
     }
 
@@ -996,7 +992,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   InitVotes.voteFor(ClientMessageBus.class);
                 }
 
-                fireEvent(EventType.ONLINE);
+                setState(State.CONNECTED);
 
                 // end of FinishStateSync Timer
               }
@@ -1179,6 +1175,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private boolean handleHTTPTransportError(final Request request, final Throwable throwable, final int statusCode) {
+    setState(State.CONNECTING);
+
     class ErrorHandling {
       boolean stopDefaultErrorHandler = false;
     }
@@ -1261,7 +1259,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return true;
     }
 
-    fireEvent(EventType.ASSOCIATING);
+    setState(State.CONNECTING);
 
     try {
       LogUtil.log("sending initial handshake to remote bus");
@@ -1335,8 +1333,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(final Request request, final Throwable throwable) {
-      fireEvent(EventType.OFFLINE);
-
       if (handleHTTPTransportError(request, throwable, statusCode)) {
         return;
       }
@@ -1345,6 +1341,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         case 0:
           return;
         case 1:
+        case 404:
         case 408:
         case 502:
         case 504:
@@ -1371,11 +1368,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           }
           else {
             timeoutMessage.setText("Connection re-attempt failed!");
-            cometChannelOpen = false;
+            DefaultErrorCallback.INSTANCE.error(null, throwable);
+            stop(false);
           }
-      }
+          break;
 
-      DefaultErrorCallback.INSTANCE.error(null, throwable);
+        default:
+          // polling error is probably unrecoverable; go to local-only mode
+          DefaultErrorCallback.INSTANCE.error(null, throwable);
+          stop(false);
+      }
     }
 
     @Override
@@ -1404,6 +1406,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       try {
+        if (state != State.CONNECTED) {
+          setState(State.CONNECTED);
+        }
         processIncomingPayload(response);
         schedule();
       }
@@ -1954,18 +1959,66 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public abstract void deliverTo(BusLifecycleListener l, BusLifecycleEvent e);
   }
 
-  private void fireEvent(EventType et) {
-    final BusLifecycleEvent e = new BusLifecycleEvent(this);
-    for (int i = lifecycleListeners.size() - 1; i >= 0; i--) {
-      try {
-        et.deliverTo(lifecycleListeners.get(i), e);
+  /**
+   * Puts the bus in the given state, firing all necessary transition events.
+   */
+  private void setState(State newState) {
+    logAdapter.debug("Bus State: " + state + " -> " + newState + " (" + lifecycleListeners.size() + " listeners)");
+    if (state == newState) {
+      logAdapter.warn("Bus tried to transition from " + state + " to " + newState);
+      return;
+    }
+
+    List<EventType> events = new ArrayList<EventType>();
+
+    switch (state) {
+    case LOCAL_ONLY:
+      if (newState == State.CONNECTING) {
+        events.add(EventType.ASSOCIATING);
       }
-      catch (Throwable t) {
-        logAdapter.warn("Listener threw exception: " + t);
-        t.printStackTrace();
+      else if (newState == State.CONNECTED) {
+        events.add(EventType.ASSOCIATING);
+        events.add(EventType.ONLINE);
+      }
+      break;
+
+    case CONNECTING:
+      if (newState == State.LOCAL_ONLY) {
+        events.add(EventType.DISASSOCIATING);
+      }
+      else if (newState == State.CONNECTED) {
+        events.add(EventType.ONLINE);
+      }
+      break;
+
+    case CONNECTED:
+      if (newState == State.CONNECTING) {
+        events.add(EventType.OFFLINE);
+      }
+      else if (newState == State.LOCAL_ONLY) {
+        events.add(EventType.OFFLINE);
+        events.add(EventType.DISASSOCIATING);
+      }
+      break;
+
+      default:
+        throw new IllegalStateException("Bus is in unknown state: " + state);
+    }
+
+    state = newState;
+
+    for (EventType et : events) {
+      final BusLifecycleEvent e = new BusLifecycleEvent(this);
+      for (int i = lifecycleListeners.size() - 1; i >= 0; i--) {
+        try {
+          et.deliverTo(lifecycleListeners.get(i), e);
+        }
+        catch (Throwable t) {
+          logAdapter.warn("Listener threw exception: " + t);
+          t.printStackTrace();
+        }
       }
     }
-    System.out.println("Finished Associating event");
   }
 
 }

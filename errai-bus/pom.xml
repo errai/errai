@@ -245,11 +245,32 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.jboss.errai</groupId>
+                        <artifactId>jacoco-gwt-maven-plugin</artifactId>
+                        <version>0.5.4.201202141554</version>
+                        <executions>
+                          <execution>
+                            <id>jacoco-initialize</id>
+                            <phase>initialize</phase>
+                            <goals>
+                              <goal>prepare-agent</goal>
+                            </goals>
+                          </execution>
+                          <execution>
+                            <id>jacoco-site</id>
+                            <phase>site</phase>
+                            <goals>
+                              <goal>report</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <skipTests>false</skipTests>
                             <forkMode>always</forkMode>
-                            <argLine>-Xmx2048m -Dgwt.args='-testBeginTimeout 5'</argLine>
+                            <argLine>${argLine} -Xmx2048m -Dgwt.args='-testBeginTimeout 5'</argLine>
 
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
