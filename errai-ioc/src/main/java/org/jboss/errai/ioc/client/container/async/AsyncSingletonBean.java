@@ -54,7 +54,7 @@ public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
   }
 
   @Override
-  public void getInstance(final CreationalCallback<T> callback, final CreationalContext context) {
+  public void getInstance(final CreationalCallback<T> callback, final AsyncCreationalContext context) {
     callback.callback(instance);
   }
 

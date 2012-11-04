@@ -47,7 +47,7 @@ public interface AsyncBeanDef<T> {
    *
    * @return
    */
-  void getInstance(CreationalCallback<T> callback, CreationalContext context);
+  void getInstance(CreationalCallback<T> callback, AsyncCreationalContext context);
 
   /**
    * Returns a new instance of the bean. Calling this method overrides the underlying scope and instantiates a new

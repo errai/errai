@@ -28,10 +28,12 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
+import org.mvel2.ast.AssertNode;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,6 +62,7 @@ public class IOCProcessingContext {
 
   protected final Variable contextVariable;
   protected final Class<? extends BootstrapInjectionContext> bootstrapContextClass;
+  protected final Class<? extends CreationalContext> cretionalContextClass;
 
   protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
@@ -82,6 +85,7 @@ public class IOCProcessingContext {
     this.qualifyingMetadataFactory = builder.qualifyingMetadataFactory;
     this.gwtTarget = builder.gwtTarget;
     this.bootstrapContextClass = builder.bootstrapClass;
+    this.cretionalContextClass = builder.creationalContextClass;
     this.contextVariable = Variable.create("injContext", bootstrapContextClass);
   }
 
@@ -96,7 +100,9 @@ public class IOCProcessingContext {
     private Set<String> packages;
     private QualifyingMetadataFactory qualifyingMetadataFactory;
     private boolean gwtTarget;
+
     private Class<? extends BootstrapInjectionContext> bootstrapClass;
+    private Class<? extends CreationalContext> creationalContextClass;
 
     public static Builder create() {
       return new Builder();
@@ -114,6 +120,11 @@ public class IOCProcessingContext {
 
     public Builder bootstrapContextClass(Class<? extends BootstrapInjectionContext> bootstrapClass) {
       this.bootstrapClass = bootstrapClass;
+      return this;
+    }
+
+    public Builder creationalContextClass(Class<? extends CreationalContext> creationalContextClass) {
+      this.creationalContextClass = creationalContextClass;
       return this;
     }
 
@@ -161,6 +172,7 @@ public class IOCProcessingContext {
       Assert.notNull("blockBuilder cannot be null", blockBuilder);
       Assert.notNull("packages cannot be null", packages);
       Assert.notNull("bootstrap class must not be null", bootstrapClass);
+      Assert.notNull("creationalContextClass must not be null", creationalContextClass);
 
       if (qualifyingMetadataFactory == null) {
         qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
@@ -257,5 +269,9 @@ public class IOCProcessingContext {
 
   public Class<? extends BootstrapInjectionContext> getBootstrapContextClass() {
     return bootstrapContextClass;
+  }
+
+  public Class<? extends CreationalContext> getCretionalContextClass() {
+    return cretionalContextClass;
   }
 }

@@ -83,7 +83,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext<AsyncBea
   }
 
   @Override
-  public CreationalContext getRootContext() {
+  public AsyncCreationalContext getRootContext() {
     return context;
   }
 }

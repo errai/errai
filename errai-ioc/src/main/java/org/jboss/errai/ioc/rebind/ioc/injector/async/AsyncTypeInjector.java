@@ -17,6 +17,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.BeanVote;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
@@ -89,7 +90,6 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     }
   }
 
-
   @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     final Statement val = _getType(injectableInstance);
@@ -103,11 +103,11 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     if (isRendered()) {
       if (isSingleton() && !hasNewQualifier(injectableInstance)) {
 
-        /**
-         * if this bean is a singleton bean and there is no @New qualifier on the site we're injecting
-         * into, we merely return a reference to the singleton instance variable from the bootstrapper.
-         */
-        return Refs.get(instanceVarName);
+        final String varName = InjectUtil.getVarNameFromType(type);
+
+        return Stmt.loadVariable("context")
+            .invoke("getSingletonInstanceOrNew", Refs.get("injContext"), Refs.get(creationalCallbackVarName),
+                Refs.get(varName), type, qualifyingMetadata.getQualifiers());
       }
       else if (creationalCallbackVarName != null) {
 
@@ -137,7 +137,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
         = newInstanceOf(beanProviderClassRef).extend()
         .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback", true),
-            Parameter.of(CreationalContext.class, "context", true));
+            Parameter.of(AsyncCreationalContext.class, "context", true));
 
 
     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */

@@ -72,7 +72,7 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
   }
 
   @Override
-  public void getInstance(final CreationalCallback<T> callback, final CreationalContext context) {
+  public void getInstance(final CreationalCallback<T> callback, final AsyncCreationalContext context) {
     beanProvider.getInstance(callback, context);
   }
 

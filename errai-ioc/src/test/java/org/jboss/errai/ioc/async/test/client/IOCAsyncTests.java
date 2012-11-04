@@ -35,8 +35,13 @@ public class IOCAsyncTests extends IOCClientTestCase {
             assertNotNull(beanInstance.getBar());
             assertNotNull(beanInstance.getBar2());
             assertNotNull(beanInstance.getBarDisposer());
-
             assertNotNull(beanInstance.getBar2().getManager());
+            assertNotNull(beanInstance.getBazTheSingleton());
+            assertNotNull(beanInstance.getBar().getBazTheSingleton());
+            assertNotNull(beanInstance.getBar2().getBazTheSingleton());
+
+            assertSame(beanInstance.getBazTheSingleton(), beanInstance.getBar().getBazTheSingleton());
+            assertSame(beanInstance.getBazTheSingleton(), beanInstance.getBar2().getBazTheSingleton());
 
             System.out.println("foo.bar=" + beanInstance.getBar());
             finishTest();

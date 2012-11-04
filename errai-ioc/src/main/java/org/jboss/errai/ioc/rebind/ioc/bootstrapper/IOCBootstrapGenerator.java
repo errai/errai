@@ -60,6 +60,8 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
@@ -170,12 +172,15 @@ public class IOCBootstrapGenerator {
     asyncBootstrap = s != null && Boolean.parseBoolean(s);
 
     final Class<? extends BootstrapInjectionContext> contextClass;
+    final Class<? extends CreationalContext> creationContextClass;
 
     if (asyncBootstrap) {
       contextClass = AsyncInjectionContext.class;
+      creationContextClass = AsyncCreationalContext.class;
     }
     else {
       contextClass = SimpleInjectionContext.class;
+      creationContextClass = SimpleCreationalContext.class;
     }
 
     final ReachableTypes allDeps = EnvUtil.getAllReachableClasses(context);
@@ -253,6 +258,7 @@ public class IOCBootstrapGenerator {
 
     iocProcContextBuilder.packages(packages);
     iocProcContextBuilder.bootstrapContextClass(contextClass);
+    iocProcContextBuilder.creationalContextClass(creationContextClass);
 
     final IOCProcessingContext processingContext = iocProcContextBuilder.build();
 
@@ -283,7 +289,8 @@ public class IOCBootstrapGenerator {
         processingContext.getContextVariableReference().getType())
         .modifiers(Modifier.Final).initializesWith(Stmt.newObject(bootstrapContextClass)).finish();
 
-    classBuilder.privateField("context", CreationalContext.class).modifiers(Modifier.Final)
+    classBuilder.privateField("context", injectionContext.getProcessingContext().getCretionalContextClass())
+        .modifiers(Modifier.Final)
         .initializesWith(Stmt.loadVariable(processingContext.getContextVariableReference().getName())
             .invoke("getRootContext")).finish();
 
