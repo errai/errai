@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.util;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -132,7 +133,7 @@ public class LocalContext implements Context {
     return "LocalContext://" + context;
   }
 
-  private static final class SubContext {
+  private static final class SubContext implements Serializable {
     private final Map<String, Object> contextAttributes = new HashMap<String, Object>();
 
     public void setAttribute(String attribute, Object value) {

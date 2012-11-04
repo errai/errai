@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.security.auth;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -23,7 +24,7 @@ import java.util.Iterator;
  * <tt>AuthSubject</tt> creates an entity that requires authentication. It contains the username, full name of the user,
  * and the roles of the user
  */
-public class AuthSubject {
+public class AuthSubject implements Serializable {
   protected String username;
   protected String fullname;
   protected Collection<Object> roles;
