@@ -1,10 +1,13 @@
 package org.jboss.errai.demo.busstress.client.local;
 
+import javax.annotation.PostConstruct;
+
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.demo.busstress.client.shared.Stats;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
@@ -19,9 +22,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.inject.Inject;
 
 @EntryPoint
 public class StressTestClient extends Composite {
@@ -51,9 +54,11 @@ public class StressTestClient extends Composite {
     stopIfRunning();
   }
 
+  @UiField SimplePanel statusPanel;
+
   @UiField VerticalPanel resultsPanel;
 
-  @Inject private MessageBus bus;
+  private ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
 
   private Timer sendTimer;
 
@@ -65,8 +70,13 @@ public class StressTestClient extends Composite {
   interface StressTestClientUiBinder extends UiBinder<Widget, StressTestClient> {
   }
 
-  public StressTestClient() {
+  @PostConstruct
+  private void init() {
     initWidget(uiBinder.createAndBindUi(this));
+
+    BusStatusWidget busStatusWidget = new BusStatusWidget();
+    bus.addLifecycleListener(busStatusWidget);
+    statusPanel.add(busStatusWidget);
 
     RootPanel.get().add(this);
   }
