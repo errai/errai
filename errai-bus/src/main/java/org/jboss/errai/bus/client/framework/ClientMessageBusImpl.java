@@ -60,7 +60,6 @@ import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -1457,30 +1456,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * incoming timer to ensure the client's polling with the server is active.
    */
   private void initializeMessagingBus() {
-    GWT.runAsync(new RunAsyncCallback() {
+    if (disconnected) {
+      return;
+    }
+
+    ((RpcProxyLoader) GWT.create(RpcProxyLoader.class)).loadProxies(ClientMessageBusImpl.this);
+
+    InitVotes.voteFor(RpcProxyLoader.class);
+
+    new Timer() {
       @Override
-      public void onFailure(final Throwable reason) {
-        showError("failed to load RPC script from server", reason);
+      public void run() {
+        performPoll();
       }
-
-      @Override
-      public void onSuccess() {
-        if (disconnected) {
-          return;
-        }
-
-        ((RpcProxyLoader) GWT.create(RpcProxyLoader.class)).loadProxies(ClientMessageBusImpl.this);
-
-        InitVotes.voteFor(RpcProxyLoader.class);
-
-        new Timer() {
-          @Override
-          public void run() {
-            performPoll();
-          }
-        }.schedule(10);
-      }
-    });
+    }.schedule(10);
   }
 
   /**
@@ -1563,18 +1552,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void showError(final String message, final Throwable e) {
-    GWT.runAsync(new RunAsyncCallback() {
-      @Override
-      public void onFailure(final Throwable reason) {
-        LogUtil.nativeLog("could not load error dialog: " + reason);
-      }
-
-      @Override
-      public void onSuccess() {
-        ensureInitErrorDialog();
-        errorDialog.addError(message, "", e);
-      }
-    });
+    ensureInitErrorDialog();
+    errorDialog.addError(message, "", e);
 
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
       LogUtil.nativeLog(message);
@@ -1847,18 +1826,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private static void _showErrorConsole() {
-    GWT.runAsync(new RunAsyncCallback() {
-      @Override
-      public void onFailure(final Throwable reason) {
-        LogUtil.nativeLog("could not load script to display error dialog: " + reason);
-      }
-
-      @Override
-      public void onSuccess() {
-        ((ClientMessageBusImpl) ErraiBus.get()).ensureInitErrorDialog();
-        ((ClientMessageBusImpl) ErraiBus.get()).errorDialog.show();
-      }
-    });
+    ((ClientMessageBusImpl) ErraiBus.get()).ensureInitErrorDialog();
+    ((ClientMessageBusImpl) ErraiBus.get()).errorDialog.show();
   }
 
   /**
@@ -1963,7 +1932,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Puts the bus in the given state, firing all necessary transition events.
    */
   private void setState(State newState) {
-    logAdapter.debug("Bus State: " + state + " -> " + newState + " (" + lifecycleListeners.size() + " listeners)");
+    GWT.log("Bus State: " + state + " -> " + newState + " (" + lifecycleListeners.size() + " listeners)");
     if (state == newState) {
       logAdapter.warn("Bus tried to transition from " + state + " to " + newState);
       return;
