@@ -76,10 +76,15 @@ public interface BusLifecycleListener {
   void busOnline(BusLifecycleEvent e);
 
   /**
-   * Indicates that the bus has just transitioned from the <b>connected<b> to the
-   * <b>connecting</b> state. At the time when this event is delivered, messages
-   * intended for the remote bus will be enqueued for delivery when (and if) the
-   * bus goes back online.
+   * Indicates that the bus has just transitioned from the <b>connected<b> to
+   * the <b>connecting</b> state. In the <b>connecting</b> state, the bus will
+   * continue to attempt to reconnect to the server. If the reconnect is
+   * successful, you will receive a {@link #busOnline(BusLifecycleEvent)} event.
+   * If the bus gives up trying to reconnect, you will receive a
+   * {@link #busDisassociating(BusLifecycleEvent)} event.
+   * <p>
+   * At the time when this event is delivered, messages intended for the remote
+   * bus will be enqueued for delivery when (and if) the bus goes back online.
    *
    * @param e
    *          the object describing the event (includes a reference to the bus
