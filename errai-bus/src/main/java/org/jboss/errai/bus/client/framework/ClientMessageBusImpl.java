@@ -63,6 +63,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
@@ -207,6 +209,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
     OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
+
+    // when the window is closing, we want to stop the bus without causing any
+    // errors (unless the server is unavailable of course) (see ERRAI-225)
+    Window.addCloseHandler(new CloseHandler<Window>() {
+      @Override
+      public void onClose(CloseEvent<Window> event) {
+        if (state != State.LOCAL_ONLY) {
+          stop(true);
+        }
+      }
+    });
 
     init();
   }
@@ -588,6 +601,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *     - Messages reference.
    */
   private void transmitRemote(final String message, final List<Message> txMessages) {
+    GWT.log("transmitRemote: " + message, new Exception("don't picnic"));
+    if (state == State.LOCAL_ONLY) {
+      GWT.log("transmitRemote: not sending message. local only state");
+      return;
+    }
     if (message == null) return;
 
     try {
@@ -617,34 +635,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           @Override
           public void onResponseReceived(final Request request, final Response response) {
-            switch (statusCode = response.getStatusCode()) {
-              case 1:
-              case 404:
-              case 408:
-              case 502:
-              case 503:
-              case 504: {
-                // Sending the message failed.
-                // Although the response may still be valid
-                // Handle it gracefully
-                //noinspection ThrowableInstanceNeverThrown
+            GWT.log("transmitRemote().onResponseReceieved: " + response.getStatusText(), new Exception());
+            statusCode = response.getStatusCode();
+            if (statusCode >= 400) {
+              final TransportIOException tioe
+                  = new TransportIOException(response.getText(), response.getStatusCode(),
+                      "Failure communicating with server");
 
-                final TransportIOException tioe
-                    = new TransportIOException(response.getText(), response.getStatusCode(),
-                    "Failure communicating with server");
-
-                if (handleHTTPTransportError(request, tioe, statusCode)) {
-                  return;
-                }
-
-                LogUtil.log("connection problem. server returned status code: " + response.getStatusCode()
-                    + " (" + response.getStatusText() + ")");
-
-                for (final Message txM : txMessages) {
-                  callErrorHandler(txM, tioe);
-                }
+              if (handleHTTPTransportError(request, tioe, statusCode)) {
                 return;
               }
+
+              LogUtil.log("connection problem. server returned status code: " + response.getStatusCode()
+                      + " (" + response.getStatusText() + ")");
+
+              for (final Message txM : txMessages) {
+                callErrorHandler(txM, tioe);
+              }
+              return;
             }
 
             /**
@@ -669,6 +677,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           @Override
           public void onError(final Request request, final Throwable exception) {
+            GWT.log("transmitRemote().onError: " + statusCode, new Exception());
             handleHTTPTransportError(request, exception, statusCode);
 
             for (final Message txM : txMessages) {
@@ -1308,7 +1317,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   int maxRetries = 5;
   int retries = 0;
   int timeout = 2000;
-  int statusCode = 0;
+  int statusCode = -1;
   DialogBox timeoutDB;
   Label timeoutMessage;
 
@@ -1332,18 +1341,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(final Request request, final Throwable throwable) {
+      GWT.log("LongPollRequestCallback.onError: " + statusCode, new Exception("don't panic"));
       if (handleHTTPTransportError(request, throwable, statusCode)) {
         return;
       }
 
       switch (statusCode) {
         case 0:
-          return;
         case 1:
-        case 404:
-        case 408:
-        case 502:
-        case 504:
+        case 400:  // happens when JBossAS is going down
+        case 404:  // happens after errai app is undeployed
+        case 408:  // request timeout--probably worth retrying
+        case 500:  // we expect this may happen during restart of some non-JBoss servers
+        case 502:  // bad gateway--could happen if long poll request was proxied to a down server
+        case 503:  // temporary overload (probably on a proxy)
+        case 504:  // gateway timeout--same possibilities as 502
           if (retries <= maxRetries) {
             if (timeoutDB == null) {
               createConnectAttemptGUI();
@@ -1381,6 +1393,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     @Override
     public void onResponseReceived(final Request request, final Response response) {
+      GWT.log("LongPollRequestCallback.onResponseReceived: " + response.getStatusText(), new Exception());
       if (response.getStatusCode() != 200) {
         switch (statusCode = response.getStatusCode()) {
           case 200:
@@ -1393,6 +1406,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           case 307:
             break;
           default:
+            GWT.log("Failing out...");
             cometChannelOpen = false;
             onError(request, new TransportIOException("unexpected response code: " + statusCode, statusCode,
                 response.getStatusText()));
@@ -1400,11 +1414,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
 
+      GWT.log("Checking retry count: " + retries);
       if (retries != 0) {
         clearConnectAttemptGUI();
       }
 
       try {
+        GWT.log("Processing payload (response status: "+statusCode+")");
         if (state != State.CONNECTED) {
           setState(State.CONNECTED);
         }
@@ -1412,6 +1428,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         schedule();
       }
       catch (Throwable e) {
+        GWT.log("Processing payload FAILED", e);
         logError("bus disconnected due to fatal error", response.getText(), e);
       }
     }
@@ -1552,6 +1569,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void showError(final String message, final Throwable e) {
+    GWT.log("ShowError: " + message, e);
     ensureInitErrorDialog();
     errorDialog.addError(message, "", e);
 
@@ -1647,6 +1665,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     Panel contentPanel = new AbsolutePanel();
 
     public BusErrorDialog() {
+      GWT.log("CREATING AN ERROR DIALOG", new Exception("moo"));
       setModal(false);
 
       final VerticalPanel panel = new VerticalPanel();
