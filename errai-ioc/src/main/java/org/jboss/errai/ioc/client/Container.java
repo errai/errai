@@ -72,6 +72,7 @@ public class Container implements EntryPoint {
       }
       else {
         ((SimpleCreationalContext) rootContext).finish();
+        finishInit();
       }
 
 

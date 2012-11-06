@@ -76,15 +76,6 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
     block.append(Stmt.loadVariable("vote").invoke("wait", Refs.get(varName)));
 
     if (isSingleton() && provided) {
-//      final MetaClass creationalCallbackCls
-//          = MetaClassFactory.parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(type));
-
-//      final ObjectBuilder creationalCallback = Stmt.newObject(creationalCallbackCls).extend()
-//          .publicOverridesMethod("callback", Parameter.of(type, "cb", true))
-//          .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type)).invoke("callback", Refs.get("cb")))
-//          .finish().finish();
-
-
       block.append(
           Stmt.loadVariable("context").invoke("getSingletonInstanceOrNew",
               Refs.get("injContext"), Refs.get(providerInjector.getCreationalCallbackVarName()),
