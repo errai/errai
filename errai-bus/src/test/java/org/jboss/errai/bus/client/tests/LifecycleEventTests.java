@@ -160,6 +160,52 @@ public class LifecycleEventTests extends AbstractErraiTest {
     });
   }
 
+  public void testAppDirectedRecoveryFromPersistentNetworkError() throws Exception {
+
+    bus.addLifecycleListener(new BusLifecycleAdapter() {
+      @Override
+      public void busDisassociating(BusLifecycleEvent e) {
+        // simulate server back online after extended outage
+        // (or changing endpoint to fail over to an online server)
+        Wormhole.changeBusEndpointUrl(bus, originalBusEndpointUrl);
+
+        // explicit bus restart (in a timer so it doesn't make other listeners
+        // see events out of order due to recursive event delivery)
+        new Timer() {
+          @Override
+          public void run() {
+            bus.init();
+          }
+        }.schedule(1);
+      }
+    });
+
+    final List<EventType> expectedEventTypes = new ArrayList<EventType>();
+
+    // we expect the bus already fired an ASSOCIATING event way before we had a
+    // chance to observe it (i.e. in its constructor). So we expect the listener's
+    // log to be empty at this point.
+    assertEquals(expectedEventTypes, listener.getEventTypes());
+
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        expectedEventTypes.add(EventType.ONLINE);
+        assertEquals(expectedEventTypes, listener.getEventTypes());
+
+        // simulate 404 on bus endpoint URL
+        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+
+        expectedEventTypes.add(EventType.OFFLINE);
+        expectedEventTypes.add(EventType.DISASSOCIATING);
+        // our lifecycle listener kicks in here
+        expectedEventTypes.add(EventType.ASSOCIATING);
+        expectedEventTypes.add(EventType.ONLINE);
+        pollUntilListenerSees(expectedEventTypes);
+      }
+    });
+  }
+
   /**
    * Tests the local message delivery behaviour described in
    * {@link BusLifecycleListener#busDisassociating(BusLifecycleEvent)}: when you

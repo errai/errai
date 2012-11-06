@@ -34,6 +34,16 @@ import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
  * state, the bus falls back to the <b>connecting</b> state, where it attempts
  * to reconnect to the server.
  *
+ * <h3>Recursive event delivery</h3>
+ * <p>
+ * If you call {ClientMessageBus#stop()} or {ClientMessageBus#init()} from
+ * within one of these callback methods, be aware that this can cause another
+ * lifecycle event to be delivered before the current event has finished being
+ * delivered. This is especially important to avoid if your application employs
+ * more than one BusLifecycleListener, because some of these listeners will
+ * receive events out of order. An easy workaround for this problem is to wrap
+ * your bus.init() or bus.stop() call in a Timer with a delay of 1ms.
+ *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -59,8 +69,14 @@ public interface BusLifecycleListener {
    * The state of the bus is reset just before this event is delivered. If you
    * want local message delivery to continue working (as opposed to having all
    * message delivery--including local--deferred until the bus is connected
-   * again) then use {@link ClientMessageBusImpl#setInitialized(boolean)} with a
-   * value of <tt>true</tt> when receiving this event.
+   * again) then call {@link ClientMessageBusImpl#setInitialized(boolean)} with
+   * a value of <tt>true</tt> when receiving this event.
+   * <p>
+   * When you want to try to connect to the server again (for example, to fail
+   * over to another server, after a set timeout has elapsed, or in response to
+   * the user clicking a "Reconnect" button in the user interface), call
+   * {@link ClientMessageBusImpl#init()}. This will transition the bus back to
+   * the <b>connecting</b> state.
    *
    * @param e
    *          the object describing the event (includes a reference to the bus
