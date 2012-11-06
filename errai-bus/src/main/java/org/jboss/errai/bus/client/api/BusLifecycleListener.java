@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.client.api;
 
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 
 /**
  * Errai's {@link ClientMessageBus} has three conceptual states in its
@@ -39,7 +40,7 @@ import org.jboss.errai.bus.client.framework.ClientMessageBus;
 public interface BusLifecycleListener {
 
   /**
-   * Indicates that the bus is about to transition from the <b>local only<b> to
+   * Indicates that the bus is about to transition from the <b>local only</b> to
    * the <b>connecting</b> state. While this event is being delivered, it is
    * still permitted to change the remote endpoint URL of the server bus.
    *
@@ -50,13 +51,16 @@ public interface BusLifecycleListener {
   void busAssociating(BusLifecycleEvent e);
 
   /**
-   * Indicates that the bus is about to transition from the <b>connecting<b> to
+   * Indicates that the bus is about to transition from the <b>connecting</b> to
    * the <b>local only</b> state. This can happen automatically due to too many
    * failed connection attempts, or because the application stopped the bus
    * explicitly.
    * <p>
-   * After this event has been delivered to all listeners, the state of the bus
-   * (including subscriptions and deferred/unsent messages) will be reset.
+   * The state of the bus is reset just before this event is delivered. If you
+   * want local message delivery to continue working (as opposed to having all
+   * message delivery--including local--deferred until the bus is connected
+   * again) then use {@link ClientMessageBusImpl#setInitialized(boolean)} with a
+   * value of <tt>true</tt> when receiving this event.
    *
    * @param e
    *          the object describing the event (includes a reference to the bus
@@ -65,7 +69,7 @@ public interface BusLifecycleListener {
   void busDisassociating(BusLifecycleEvent e);
 
   /**
-   * Indicates that the bus has just transitioned from the <b>connecting<b> to
+   * Indicates that the bus has just transitioned from the <b>connecting</b> to
    * the <b>connected</b> state. At the time when this event is delivered, it is
    * possible to exchange messages with the remote bus.
    *
@@ -76,7 +80,7 @@ public interface BusLifecycleListener {
   void busOnline(BusLifecycleEvent e);
 
   /**
-   * Indicates that the bus has just transitioned from the <b>connected<b> to
+   * Indicates that the bus has just transitioned from the <b>connected</b> to
    * the <b>connecting</b> state. In the <b>connecting</b> state, the bus will
    * continue to attempt to reconnect to the server. If the reconnect is
    * successful, you will receive a {@link #busOnline(BusLifecycleEvent)} event.

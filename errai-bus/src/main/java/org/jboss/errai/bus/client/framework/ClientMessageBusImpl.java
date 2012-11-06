@@ -292,6 +292,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void sendInboundRequest(RequestCallback callback) throws RequestException {
+    GWT.log("New poll request starting", new Exception("polling for dollars"));
     sendRequest(RequestBuilder.GET, IN_SERVICE_ENTRY_POINT, null, Collections.<String,String>emptyMap(), callback);
   }
 
@@ -538,8 +539,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     logError(t.getMessage(), "none", t);
   }
 
+  /**
+   * Delivers the message to either the remote, "subscriptions", or local message callback for the message's subject.
+   *
+   * @param message the message to deliver. Not null.
+   */
   private void directStore(final Message message) {
     final String subject = message.getSubject();
+
+    // XXX nobody thinks it is correct that remote delivery causes local delivery to be canceled.
+    // we have to revisit this... we are changing things one-at-a-time.
 
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
@@ -683,7 +692,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           @Override
           public void onResponseReceived(final Request request, final Response response) {
-            GWT.log("transmitRemote().onResponseReceieved: " + response.getStatusText(), new Exception());
+            GWT.log("transmitRemote().onResponseReceieved: " + response.getStatusText());
             statusCode = response.getStatusCode();
             if (statusCode >= 400) {
               final TransportIOException tioe
@@ -725,7 +734,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           @Override
           public void onError(final Request request, final Throwable exception) {
-            GWT.log("transmitRemote().onError: " + statusCode, new Exception());
+            GWT.log("transmitRemote().onError: " + statusCode);
             handleHTTPTransportError(request, exception, statusCode);
 
             for (final Message txM : txMessages) {
@@ -747,7 +756,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  /**
+   * Sends a new GET request to the server bus, to see if there are any messages
+   * for us. Does nothing if the bus is in LOCAL_ONLY mode.
+   */
   private void performPoll() {
+    if (state == State.LOCAL_ONLY) {
+      return;
+    }
+
     try {
       if (rxActive || !cometChannelOpen) return;
       rxActive = true;
@@ -793,9 +810,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       subscriptions.clear();
     }
     finally {
-      if (state != State.LOCAL_ONLY)
-        setState(State.LOCAL_ONLY);
-
       this.lastTx = 0;
       this.toSendBuffer.clear();
       this.txActive = false;
@@ -811,6 +825,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.postInitTasks.clear();
 
       InitVotes.reset();
+
+      if (state != State.LOCAL_ONLY)
+        setState(State.LOCAL_ONLY);
     }
   }
 
@@ -1401,7 +1418,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(final Request request, final Throwable throwable) {
-      GWT.log("LongPollRequestCallback.onError: " + statusCode, new Exception("don't panic"));
+      GWT.log("LongPollRequestCallback.onError: " + statusCode);
       if (handleHTTPTransportError(request, throwable, statusCode)) {
         return;
       }
@@ -1453,7 +1470,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     @Override
     public void onResponseReceived(final Request request, final Response response) {
-      GWT.log("LongPollRequestCallback.onResponseReceived: " + response.getStatusText(), new Exception());
+      GWT.log("LongPollRequestCallback.onResponseReceived: " + response.getStatusText());
       if (response.getStatusCode() != 200) {
         switch (statusCode = response.getStatusCode()) {
           case 200:
@@ -1494,6 +1511,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void schedule() {
+      GWT.log("Scheduling new poll request", new Exception("Don't park"));
       if (!cometChannelOpen) return;
       new Timer() {
         @Override
@@ -1725,7 +1743,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     Panel contentPanel = new AbsolutePanel();
 
     public BusErrorDialog() {
-      GWT.log("CREATING AN ERROR DIALOG", new Exception("moo"));
       setModal(false);
 
       final VerticalPanel panel = new VerticalPanel();
