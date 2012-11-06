@@ -16,7 +16,6 @@ public class Foo {
   @Inject Disposer<Bar> barDisposer;
   @Inject BazTheSingleton bazTheSingleton;
 
-
   public Bar getBar() {
     return bar;
   }

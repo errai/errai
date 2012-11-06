@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.client.container;
+package org.jboss.errai.ioc.client.container.async;
 
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -499,7 +499,7 @@ public class AsyncBeanManager {
     return true;
   }
 
-  void destroyAllBeans() {
+  public void destroyAllBeans() {
     namedBeans.clear();
     beanMap.clear();
   }

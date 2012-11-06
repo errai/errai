@@ -24,7 +24,10 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.BeanRef;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 import java.lang.annotation.Annotation;
@@ -57,18 +60,34 @@ public class Container implements EntryPoint {
 
       log("IOC container bootstrapped.");
 
-      injectionContext.getRootContext().finish();
-      log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
+      final CreationalContext rootContext = injectionContext.getRootContext();
 
-      InitVotes.voteFor(Container.class);
+      if (rootContext instanceof AsyncCreationalContext) {
+        ((AsyncCreationalContext) rootContext).finish(new Runnable() {
+          @Override
+          public void run() {
+            finishInit();
+          }
+        });
+      }
+      else {
+        ((SimpleCreationalContext) rootContext).finish();
+      }
 
-      declareDebugFunction();
 
     }
     catch (Throwable t) {
       t.printStackTrace();
       throw new RuntimeException("critical error in IOC container bootstrap", t);
     }
+  }
+
+  private void finishInit() {
+    log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
+
+    InitVotes.voteFor(Container.class);
+
+    declareDebugFunction();
   }
 
   private static native void declareDebugFunction() /*-{

@@ -52,6 +52,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.AsyncInjectionTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
@@ -497,7 +498,7 @@ public class AsyncInjectUtil {
              */
             ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());
 
-            final ProxyInjector proxyInject = getOrCreateProxy(ctx, inj.getEnclosingType(), qualifyingMetadata);
+            final AsyncProxyInjector proxyInject = getOrCreateProxy(ctx, inj.getEnclosingType(), qualifyingMetadata);
 
             boolean pushedProxy = false;
 
@@ -505,7 +506,7 @@ public class AsyncInjectUtil {
               if (injectableInstance.getTaskType() == TaskType.Parameter
                   && injectableInstance.getConstructor() != null) {
                 // eek! a producer element is produced by this bean and injected into it's own constructor!
-                final ProxyInjector producedElementProxy
+                final AsyncProxyInjector producedElementProxy
                     = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
 
                 proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
@@ -559,16 +560,16 @@ public class AsyncInjectUtil {
     }
   }
 
-  public static ProxyInjector getOrCreateProxy(final InjectionContext ctx,
+  public static AsyncProxyInjector getOrCreateProxy(final InjectionContext ctx,
                                                final MetaClass clazz,
                                                final QualifyingMetadata qualifyingMetadata) {
-    final ProxyInjector proxyInjector;
+    final AsyncProxyInjector proxyInjector;
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
-      proxyInjector = (ProxyInjector)
+      proxyInjector = (AsyncProxyInjector)
           ctx.getProxiedInjector(clazz, qualifyingMetadata);
     }
     else {
-      proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
+      proxyInjector = new AsyncProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
     }
     return proxyInjector;

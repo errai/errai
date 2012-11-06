@@ -100,23 +100,23 @@ public interface CreationalContext {
    * Returns a list of the instances of every created bean within this creational context.
    *
    * @return An unmodifiable collection of every bean instance within the creational context.
-   */
+   *///  /**
+   //   * Obtains an instance of the bean within the creational context based on the specified bean type and qualifiers.
+   //   *
+   //   * @param beanType
+   //   *     the type of the bean
+   //   * @param qualifiers
+   //   *     the qualifiers fo the bean
+   //   * @param <T>
+   //   *     the type of the bean
+   //   *
+   //   * @return the actual instance of the bean
+   //   */
+   //  @SuppressWarnings("unchecked")
+   //  <T> T getBeanInstance(Class<T> beanType, Annotation[] qualifiers);
+
   Collection<Object> getAllCreatedBeanInstances();
 
-  /**
-   * Obtains an instance of the bean within the creational context based on the specified bean type and qualifiers.
-   *
-   * @param beanType
-   *     the type of the bean
-   * @param qualifiers
-   *     the qualifiers fo the bean
-   * @param <T>
-   *     the type of the bean
-   *
-   * @return the actual instance of the bean
-   */
-  @SuppressWarnings("unchecked")
-  <T> T getBeanInstance(Class<T> beanType, Annotation[] qualifiers);
 
   /**
    * Adds an unresolved proxy into the creational context. This is called to indicate a proxy was required while
@@ -140,9 +140,5 @@ public interface CreationalContext {
                           Class<?> beanType,
                           Annotation[] qualifiers);
 
-  /**
-   * Called to indicate all beans have been added to the context. Calling this method results in all post-initialization
-   * tasks (such as @PostConstruct) and proxy closures to occur.
-   */
-  void finish();
+
 }

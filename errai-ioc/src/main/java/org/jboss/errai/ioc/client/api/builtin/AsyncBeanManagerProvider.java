@@ -18,9 +18,8 @@ package org.jboss.errai.ioc.client.api.builtin;
 
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.container.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
 import javax.inject.Provider;
 import javax.inject.Singleton;

@@ -291,7 +291,7 @@ public class InjectionContext {
     return cyclingTypes.containsEntry(from, to);
   }
 
-  public void addProxiedInjector(final ProxyInjector proxyInjector) {
+  public void addProxiedInjector(final Injector proxyInjector) {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
 

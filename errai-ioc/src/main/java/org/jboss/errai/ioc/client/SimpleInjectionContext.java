@@ -68,7 +68,7 @@ public class SimpleInjectionContext implements BootstrapInjectionContext<BeanPro
     manager.addBean(type, beanType, callback, instance, qualifiers, name, concrete);
   }
 
-  public CreationalContext getRootContext() {
+  public SimpleCreationalContext getRootContext() {
     return rootContext;
   }
 }

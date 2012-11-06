@@ -20,6 +20,7 @@ package org.jboss.errai.ioc.client.container;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,6 +97,36 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
   }
 
   /**
+   * Obtains an instance of the bean within the creational context based on the specified bean type and qualifiers.
+   *
+   * @param beanType
+   *     the type of the bean
+   * @param qualifiers
+   *     the qualifiers fo the bean
+   * @param <T>
+   *     the type of the bean
+   *
+   * @return the actual instance of the bean
+   */
+  @SuppressWarnings("unchecked")
+  public <T> T getBeanInstance(final Class<T> beanType, final Annotation[] qualifiers) {
+    final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
+    if (t == null) {
+      // see if the instance is available in the bean manager
+      final Collection<IOCBeanDef<T>> beanList
+          = IOC.getBeanManager().lookupBeans(beanType, qualifiers);
+
+      if (!beanList.isEmpty()) {
+        final IOCBeanDef<T> bean = beanList.iterator().next();
+        if (bean != null && bean instanceof IOCSingletonBean) {
+          return bean.getInstance();
+        }
+      }
+    }
+    return t;
+  }
+
+  /**
    * Returns the instance of the specified bean of matching type and qualifiers, or if there is no matching bean within
    * the context, an instance of the bean will be obtained from the {@link org.jboss.errai.ioc.client.SimpleInjectionContext}. This method
    * assumes that the caller <em>knows</em> that the bean is a singleton bean. It is called directly by the
@@ -142,7 +173,6 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
    * Called to indicate all beans have been added to the context. Calling this method results in all post-initialization
    * tasks (such as @PostConstruct) and proxy closures to occur.
    */
-  @Override
   public void finish() {
     resolveAllProxies();
     fireAllInitCallbacks();

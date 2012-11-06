@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.async.test.client.res;
 
-import org.jboss.errai.ioc.client.container.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 
 import javax.inject.Inject;
 

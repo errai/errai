@@ -33,6 +33,7 @@ import org.jboss.errai.ioc.client.QualifierEqualityFactory;
 import org.jboss.errai.ioc.client.QualifierEqualityFactoryProvider;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
@@ -267,7 +268,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
               final long tm = System.currentTimeMillis();
               new IOCBeanManagerLifecycle().resetBeanManager();
               final BootstrapInjectionContext<?> ctx = bs.bootstrapContainer();
-              ctx.getRootContext().finish();
+              ((SimpleCreationalContext)ctx.getRootContext()).finish();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
             }

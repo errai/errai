@@ -1,8 +1,5 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.ioc.client.container.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.CreationalContext;
-
 import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -51,12 +48,17 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
   @Override
   public void newInstance(final CreationalCallback<T> callback) {
     final AsyncCreationalContext context = new AsyncCreationalContext(beanManager, Dependent.class);
-    try {
-      beanProvider.getInstance(callback, context);
-    }
-    finally {
-      context.finish();
-    }
+    beanProvider.getInstance(new CreationalCallback<T>() {
+      @Override
+      public void callback(final T beanInstance) {
+        context.finish(new Runnable() {
+          @Override
+          public void run() {
+            callback.callback(beanInstance);
+          }
+        });
+      }
+    }, context);
   }
 
   @Override
@@ -65,8 +67,12 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
     getInstance(new CreationalCallback<T>() {
       @Override
       public void callback(final T beanInstance) {
-        callback.callback(beanInstance);
-        context.finish();
+        context.finish(new Runnable() {
+          @Override
+          public void run() {
+            callback.callback(beanInstance);
+          }
+        });
       }
     }, context);
   }

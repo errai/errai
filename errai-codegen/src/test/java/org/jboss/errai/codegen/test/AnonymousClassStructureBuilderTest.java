@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen.test;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+
 import java.lang.annotation.Retention;
 
 import org.jboss.errai.codegen.Context;
@@ -25,7 +28,10 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.test.model.Bar;
+import org.jboss.errai.codegen.test.model.Mrshlr;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Test;
 
@@ -197,5 +203,23 @@ public class AnonymousClassStructureBuilderTest extends AbstractCodegenTest {
         .finish();
     String javaString = builder.toJavaString();
     assertEquals("package com.foo; public class A { private void method() { new Runnable() { private Object memberOfRunnable; public void run() { memberOfRunnable.hashCode(); } }; } }", javaString);
+  }
+
+  @Test
+  public void testParameterizedImplementation() throws Exception {
+    final MetaClass mrshlrClass = parameterizedAs(Mrshlr.class, typeParametersOf(Bar.class));
+
+    final ObjectBuilder builder = Stmt.newObject(mrshlrClass).extend()
+        .publicOverridesMethod("get")
+        .finish()
+        .finish();
+
+    final String javaString = builder.toJavaString();
+
+    assertEquals("new org.jboss.errai.codegen.test.model.Mrshlr<org.jboss.errai.codegen.test.model.Bar>() {\n" +
+        "  public Class<org.jboss.errai.codegen.test.model.Bar> get() {\n" +
+        "\n" +
+        "  }\n" +
+        "}", javaString);
   }
 }

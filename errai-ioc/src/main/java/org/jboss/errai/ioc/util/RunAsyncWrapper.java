@@ -12,15 +12,15 @@ import org.jboss.errai.codegen.util.Stmt;
  * @author Mike Brock
  */
 public final class RunAsyncWrapper {
-  private RunAsyncWrapper() {}
+  private RunAsyncWrapper() {
+  }
 
-  public static Statement wrap(Statement statement) {
+  public static Statement wrap(final Statement statement) {
     return Stmt.invokeStatic(GWT.class, "runAsync", ObjectBuilder.newInstanceOf(RunAsyncCallback.class).extend()
-            .publicOverridesMethod("onFailure", Parameter.of(Throwable.class, "throwable"))
-            .append(Stmt.throw_(RuntimeException.class, "failed to run asynchronously", Refs.get("throwable")))
-            .finish()
-
-            .publicOverridesMethod("onSuccess")
-            .append(statement).finish().finish());
+        .publicOverridesMethod("onFailure", Parameter.of(Throwable.class, "throwable"))
+        .append(Stmt.throw_(RuntimeException.class, "failed to run asynchronously", Refs.get("throwable")))
+        .finish()
+        .publicOverridesMethod("onSuccess")
+        .append(statement).finish().finish());
   }
 }

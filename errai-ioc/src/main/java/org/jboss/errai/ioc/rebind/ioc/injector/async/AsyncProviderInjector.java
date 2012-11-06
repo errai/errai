@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.rebind.ioc.injector.async;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Refs;
@@ -50,16 +51,6 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
     final BlockBuilder<?> block
         = injectableInstance.getInjectionContext().getProcessingContext().getBlockBuilder();
 
-
-    if (isSingleton() && provided) {
-      block.append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type))
-          .invoke("callback",
-              Stmt.loadVariable("context").invoke(
-                  "getBeanInstance",
-                  providerInjector.getInjectedType(), providerInjector.getQualifyingMetadata().getQualifiers()).invoke("get")));
-      return null;
-    }
-
     provided = true;
 
     final MetaClass providerCreationalCallback
@@ -84,11 +75,30 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
 
     block.append(Stmt.loadVariable("vote").invoke("wait", Refs.get(varName)));
 
-    block.append(
-        Stmt.loadVariable(providerInjector.getCreationalCallbackVarName())
-            .invoke("getInstance", Refs.get(varName), Refs.get("context"))
-    );
+    if (isSingleton() && provided) {
+//      final MetaClass creationalCallbackCls
+//          = MetaClassFactory.parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(type));
 
+//      final ObjectBuilder creationalCallback = Stmt.newObject(creationalCallbackCls).extend()
+//          .publicOverridesMethod("callback", Parameter.of(type, "cb", true))
+//          .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type)).invoke("callback", Refs.get("cb")))
+//          .finish().finish();
+
+
+      block.append(
+          Stmt.loadVariable("context").invoke("getSingletonInstanceOrNew",
+              Refs.get("injContext"), Refs.get(providerInjector.getCreationalCallbackVarName()),
+              Refs.get(varName), providerInjector.getInjectedType(), providerInjector.getQualifyingMetadata().getQualifiers()
+          ));
+
+    }
+    else {
+
+      block.append(
+          Stmt.loadVariable(providerInjector.getCreationalCallbackVarName())
+              .invoke("getInstance", Refs.get(varName), Refs.get("context"))
+      );
+    }
     return null;
   }
 }

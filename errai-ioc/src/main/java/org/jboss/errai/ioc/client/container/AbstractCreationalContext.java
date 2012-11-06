@@ -135,36 +135,7 @@ public abstract class AbstractCreationalContext implements CreationalContext {
     return Collections.unmodifiableCollection(wired.values());
   }
 
-  /**
-   * Obtains an instance of the bean within the creational context based on the specified bean type and qualifiers.
-   *
-   * @param beanType
-   *     the type of the bean
-   * @param qualifiers
-   *     the qualifiers fo the bean
-   * @param <T>
-   *     the type of the bean
-   *
-   * @return the actual instance of the bean
-   */
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> T getBeanInstance(final Class<T> beanType, final Annotation[] qualifiers) {
-    final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
-    if (t == null) {
-      // see if the instance is available in the bean manager
-      final Collection<IOCBeanDef<T>> beanList
-          = IOC.getBeanManager().lookupBeans(beanType, qualifiers);
 
-      if (!beanList.isEmpty()) {
-        final IOCBeanDef<T> bean = beanList.iterator().next();
-        if (bean != null && bean instanceof IOCSingletonBean) {
-          return bean.getInstance();
-        }
-      }
-    }
-    return t;
-  }
 
 
   /**

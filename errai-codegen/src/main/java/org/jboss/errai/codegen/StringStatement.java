@@ -17,22 +17,35 @@
 package org.jboss.errai.codegen;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 
 public class StringStatement extends AbstractStatement {
   private final String statement;
   private final MetaClass clazz;
 
-  public StringStatement(String statement) {
+  public StringStatement(final String statement) {
     this(statement, null);
   }
 
-  public StringStatement(String statement, MetaClass returnType) {
+  public StringStatement(final String statement, final MetaClass returnType) {
     this.statement = statement;
     this.clazz = returnType;
   }
 
+  public static StringStatement of(final String statement) {
+    return new StringStatement(statement);
+  }
+
+  public static StringStatement of(final String statement, final MetaClass returnType) {
+    return new StringStatement(statement, returnType);
+  }
+
+  public static StringStatement of(final String statement, final Class returnType) {
+    return of(statement, MetaClassFactory.get(returnType));
+  }
+
   @Override
-  public String generate(Context context) {
+  public String generate(final Context context) {
     return statement;
   }
 

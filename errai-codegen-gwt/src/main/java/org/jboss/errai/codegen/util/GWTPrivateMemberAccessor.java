@@ -53,7 +53,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
 
     methodBuilder.modifiers(appendJsni(modifiers))
             .body()
-            ._(new StringStatement(JSNIUtil.fieldAccess(field) + " = value"))
+            ._(StringStatement.of(JSNIUtil.fieldAccess(field) + " = value"))
             .finish();
   }
 
@@ -76,7 +76,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
 
     instance.modifiers(appendJsni(modifiers))
             .body()
-            ._(new StringStatement("return " + JSNIUtil.fieldAccess(field)))
+            ._(StringStatement.of("return " + JSNIUtil.fieldAccess(field)))
             .finish();
   }
 
@@ -98,7 +98,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
             .parameters(DefParameters.fromParameters(wrapperDefParms))
             .modifiers(appendJsni(modifiers))
             .body()
-            ._(new StringStatement(JSNIUtil.methodAccess(method)))
+            ._(StringStatement.of(JSNIUtil.methodAccess(method)))
             .finish();
   }
 
@@ -112,7 +112,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
             .parameters(methodDefParms)
                     .modifiers(Modifier.Static, Modifier.JSNI)
                     .body()
-                    ._(new StringStatement(JSNIUtil.methodAccess(constructor)))
+                    ._(StringStatement.of(JSNIUtil.methodAccess(constructor)))
                     .finish();
   }
 
