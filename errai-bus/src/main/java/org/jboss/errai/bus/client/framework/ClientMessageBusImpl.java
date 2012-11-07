@@ -287,7 +287,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private Request sendInboundRequest(RequestCallback callback) throws RequestException {
-    GWT.log("New poll request starting", new Exception("polling for dollars"));
     return sendRequest(RequestBuilder.GET, IN_SERVICE_ENTRY_POINT, null, Collections.<String, String> emptyMap(), callback);
   }
 
@@ -655,9 +654,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *          - Messages reference.
    */
   private void transmitRemote(final String message, final List<Message> txMessages) {
-    GWT.log("transmitRemote: " + message, new Exception("don't picnic"));
     if (state == State.LOCAL_ONLY) {
-      GWT.log("transmitRemote: not sending message. local only state");
       return;
     }
     if (message == null) return;
@@ -689,7 +686,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           @Override
           public void onResponseReceived(final Request request, final Response response) {
-            GWT.log("transmitRemote().onResponseReceieved: " + response.getStatusText());
             statusCode = response.getStatusCode();
             if (statusCode >= 400) {
               final TransportIOException tioe
@@ -731,7 +727,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           @Override
           public void onError(final Request request, final Throwable exception) {
-            GWT.log("transmitRemote().onError: " + statusCode);
             handleHTTPTransportError(new BusTransportError(request, exception, statusCode, NO_RETRY));
 
             for (final Message txM : txMessages) {
@@ -1448,7 +1443,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(final Request request, final Throwable throwable) {
-      GWT.log("LongPollRequestCallback.onError: " + statusCode);
 
       boolean willRetry = retries <= maxRetries;
       RetryInfo retryInfo = new RetryInfo(willRetry ? timeout : -1, retries);
@@ -1505,7 +1499,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     @Override
     public void onResponseReceived(final Request request, final Response response) {
-      GWT.log("LongPollRequestCallback.onResponseReceived: " + response.getStatusText());
       if (response.getStatusCode() != 200) {
         switch (statusCode = response.getStatusCode()) {
         case 200:
@@ -1518,7 +1511,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         case 307:
           break;
         default:
-          GWT.log("Failing out...");
           cometChannelOpen = false;
           onError(request,
                   new TransportIOException("unexpected response code: " + statusCode, statusCode, response
@@ -1527,26 +1519,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
 
-      GWT.log("Checking retry count: " + retries);
       if (retries != 0) {
         clearConnectAttemptGUI();
       }
 
       try {
-        GWT.log("Processing payload (response status: " + statusCode + ")");
         if (state != State.CONNECTED) {
           setState(State.CONNECTED);
         }
         processIncomingPayload(response);
         schedule();
       } catch (Throwable e) {
-        GWT.log("Processing payload FAILED", e);
         logError("bus disconnected due to fatal error", response.getText(), e);
       }
     }
 
     public void schedule() {
-      GWT.log("Scheduling new poll request", new Exception("Don't park"));
       if (!cometChannelOpen)
         return;
       new Timer() {
@@ -2085,8 +2073,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param reason The error that led to this state transition, if any. Null is permitted.
    */
   private void setState(State newState, TransportError reason) {
-    GWT.log("Bus State: " + state + " -> " + newState + " (" + lifecycleListeners.size() + " listeners)",
-            new Exception("don't pickle"));
     if (state == newState) {
       logAdapter.warn("Bus tried to transition from " + state + " to " + newState);
       return;
