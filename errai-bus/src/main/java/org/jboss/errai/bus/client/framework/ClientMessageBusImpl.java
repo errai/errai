@@ -862,11 +862,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
-   * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
-   * ClientErrorBus to dispatch errors when called.
+   * Takes this message bus from the LOCAL_ONLY state into the CONNECTING state,
+   * as long as remote communication is enabled.
+   * <p>
+   * If this bus is not in the LOCAL_ONLY state when this method is called, this
+   * method has no effect.
+   *
+   * @see #isRemoteCommunicationEnabled()
+   * @see BusLifecycleListener
    */
   @Override
   public void init() {
+    // if the bus is already initialized or is currently initializing
+    if (state != State.LOCAL_ONLY) return;
+
     declareDebugFunction();
     if (!reinit) {
       registerInitVoteCallbacks();
@@ -878,7 +887,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       initialized = false;
       disconnected = false;
-      state = State.LOCAL_ONLY;
 
       remotes.clear();
       onSubscribeHooks.clear();
