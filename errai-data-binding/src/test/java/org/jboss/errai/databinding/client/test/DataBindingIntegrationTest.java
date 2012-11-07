@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
@@ -402,6 +403,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertNull(binder.getWidget("value"));
     binder.bind(textBox, "value");
     assertEquals("Bound widget not found", textBox, binder.getWidget("value"));
+  }
+  
+  @Test
+  public void testBoundProperties() {
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class)
+      .bind(new TextBox(), "value")
+      .bind(new TextBox(), "child.child.value");
+
+    Set<String> boundProperties = binder.getBoundProperties();
+    assertNotNull("Bound properties set should not be null", boundProperties);
+    assertEquals("There should be exactly two bound properties", 2, boundProperties.size());
+    assertTrue("value should be a bound property", boundProperties.contains("value"));
+    assertTrue("child.child.value should be a bound property", boundProperties.contains("child.child.value"));
   }
 
   @Test

@@ -82,7 +82,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the set of bound properties of this proxy.
+   * Returns a set of the currently bound property names.
    * 
    * @return bound properties, an empty set if no properties have been bound.
    */
