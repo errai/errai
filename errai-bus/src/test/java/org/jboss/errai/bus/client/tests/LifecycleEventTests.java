@@ -10,16 +10,25 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.framework.TransportError;
 import org.jboss.errai.bus.client.framework.Wormhole;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener.EventType;
+import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener.RecordedEvent;
 
 import com.google.gwt.user.client.Timer;
 
 public class LifecycleEventTests extends AbstractErraiTest {
 
   private final RecordingBusLifecycleListener listener = new RecordingBusLifecycleListener();
+
+  /**
+   * Listeners that will be removed from the bus in gwtTearDown(). Tests can add their own listeners.
+   * This is important because the bus gets
+   */
+  private final List<BusLifecycleListener> listenersToRemove = new ArrayList<BusLifecycleListener>();
 
   /**
    * If set non-null by a test, this endpoint URL will be restored during teardown.
@@ -39,11 +48,14 @@ public class LifecycleEventTests extends AbstractErraiTest {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    super.gwtTearDown();
-    bus.removeLifecycleListener(listener);
+    for (BusLifecycleListener listener : listenersToRemove) {
+      bus.removeLifecycleListener(listener);
+    }
     if (originalBusEndpointUrl != null) {
       Wormhole.changeBusEndpointUrl(bus, originalBusEndpointUrl);
+      System.out.println("tearDown(): set endpoint back to " + originalBusEndpointUrl);
     }
+    super.gwtTearDown();
   }
 
   public void testNormalFullLifecycle() throws Exception {
@@ -162,7 +174,8 @@ public class LifecycleEventTests extends AbstractErraiTest {
 
   public void testAppDirectedRecoveryFromPersistentNetworkError() throws Exception {
 
-    bus.addLifecycleListener(new BusLifecycleAdapter() {
+    System.out.println("Begin testAppDirectedRecoveryFromPersistentNetworkError()");
+    final BusLifecycleListener reattacher = new BusLifecycleAdapter() {
       @Override
       public void busDisassociating(BusLifecycleEvent e) {
         // simulate server back online after extended outage
@@ -178,7 +191,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
           }
         }.schedule(1);
       }
-    });
+    };
+    bus.addLifecycleListener(reattacher);
+    listenersToRemove.add(reattacher);
 
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
@@ -202,6 +217,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
         expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         pollUntilListenerSees(expectedEventTypes);
+
+        System.out.println("End testAppDirectedRecoveryFromPersistentNetworkError()");
+
       }
     });
   }
@@ -212,6 +230,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
    * call bus.setInitialized(true), local messages are delivered offline.
    */
   public void testLocalDeliveryAfterStoppedBus() throws Exception {
+    System.out.println("Begin testLocalDeliveryAfterStoppedBus()");
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
     // we expect the bus already fired an ASSOCIATING event way before we had a
@@ -235,12 +254,14 @@ public class LifecycleEventTests extends AbstractErraiTest {
 
         // XXX in Errai 2.2, to enable local offline delivery, we have to setInitialized(true) just after the disassociating event.
         // We plan to remove setInitialized() completely in 3.0.
-        bus.addLifecycleListener(new BusLifecycleAdapter() {
+        BusLifecycleAdapter offlineInitializer = new BusLifecycleAdapter() {
           @Override
           public void busDisassociating(BusLifecycleEvent e) {
             ((ClientMessageBusImpl) bus).setInitialized(true);
           }
-        });
+        };
+        bus.addLifecycleListener(offlineInitializer);
+        listenersToRemove.add(offlineInitializer);
 
         // stop the bus and send disconnect signal to server
         bus.stop(true);
@@ -289,7 +310,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
         bus.subscribeLocal("myLocalTestSubject", new MessageCallback() {
           @Override
           public void callback(Message message) {
-            finishTest();
+            receivedLocalMessage = true;
           }
         });
 
@@ -310,7 +331,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
           }
         }).sendNowWith(bus);
 
-        assertFalse(receivedLocalMessage);
+        assertFalse("Message delivery should be deferred in this state", receivedLocalMessage);
 
         // reconnect in 500ms
         new Timer() {
@@ -343,15 +364,92 @@ public class LifecycleEventTests extends AbstractErraiTest {
     });
   }
 
+  public void testOfflineEventHasErrorInformation() throws Exception {
+    final List<EventType> expectedEventTypes = new ArrayList<EventType>();
+
+    // we expect the bus already fired an ASSOCIATING event way before we had a
+    // chance to observe it (i.e. in its constructor). So we expect the listener's
+    // log to be empty at this point.
+    assertEquals(expectedEventTypes, listener.getEventTypes());
+
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        // simulate 404 on bus endpoint URL
+        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+
+        expectedEventTypes.add(EventType.ONLINE);
+        expectedEventTypes.add(EventType.OFFLINE);
+        pollUntilListenerSees(expectedEventTypes, new Runnable() {
+
+          @Override
+          public void run() {
+            RecordedEvent recordedEvent = listener.getEvents().get(1);
+            assertEquals("Picked wrong event from recorder", EventType.OFFLINE, recordedEvent.getType());
+            BusLifecycleEvent actualEvent = recordedEvent.getEvent();
+            TransportError error = actualEvent.getReason();
+            assertNotNull("No error information", error);
+            assertEquals("Wrong status code", 404, error.getStatusCode());
+            assertNotNull("Throwable was not provided", error.getException());
+            assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
+            assertNotNull("Request object was not provided", error.getRequest());
+          }
+        });
+      }
+    });
+
+  }
+
+  public void testDisassociatingEventHasErrorInformation() throws Exception {
+    final List<EventType> expectedEventTypes = new ArrayList<EventType>();
+
+    // we expect the bus already fired an ASSOCIATING event way before we had a
+    // chance to observe it (i.e. in its constructor). So we expect the listener's
+    // log to be empty at this point.
+    assertEquals(expectedEventTypes, listener.getEventTypes());
+
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        // simulate 404 on bus endpoint URL
+        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+
+        expectedEventTypes.add(EventType.ONLINE);
+        expectedEventTypes.add(EventType.OFFLINE);
+        expectedEventTypes.add(EventType.DISASSOCIATING);
+        pollUntilListenerSees(expectedEventTypes, new Runnable() {
+
+          @Override
+          public void run() {
+            RecordedEvent recordedEvent = listener.getEvents().get(2);
+            assertEquals("Picked wrong event from recorder", EventType.DISASSOCIATING, recordedEvent.getType());
+            BusLifecycleEvent actualEvent = recordedEvent.getEvent();
+            TransportError error = actualEvent.getReason();
+            assertNotNull("No error information", error);
+            assertEquals("Wrong status code", 404, error.getStatusCode());
+            assertNotNull("Throwable was not provided", error.getException());
+            assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
+            assertNotNull("Request object was not provided", error.getRequest());
+          }
+        });
+      }
+    });
+  }
+
   private void pollUntilListenerSees(final List<EventType> expected) {
+    pollUntilListenerSees(expected, null);
+  }
 
-
+  private void pollUntilListenerSees(final List<EventType> expected, final Runnable doAfter) {
     final Timer t = new Timer() {
 
       @Override
       public void run() {
         List<EventType> actual = listener.getEventTypes();
         if (expected.equals(actual)) {
+          if (doAfter != null) {
+            doAfter.run();
+          }
           finishTest();
         }
         else {

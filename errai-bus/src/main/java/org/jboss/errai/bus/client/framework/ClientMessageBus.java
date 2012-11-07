@@ -124,11 +124,7 @@ public interface ClientMessageBus extends MessageBus {
    *
    * @param errorHandler
    *          the error handler to add.
-   * @deprecated transport errors are part of the bus lifecycle, and should be
-   *             observed via a bus lifecycle listener. See
-   *             {@link #addLifecycleListener(BusLifecycleListener)}.
    */
-  @Deprecated
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
 
 }
