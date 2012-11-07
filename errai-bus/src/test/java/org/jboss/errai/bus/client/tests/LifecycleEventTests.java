@@ -372,6 +372,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
     // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
 
+    final RecordingTransportErrorHandler errorHandler = new RecordingTransportErrorHandler();
+    bus.addTransportErrorHandler(errorHandler);
+
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -393,6 +396,11 @@ public class LifecycleEventTests extends AbstractErraiTest {
             assertNotNull("Throwable was not provided", error.getException());
             assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
             assertNotNull("Request object was not provided", error.getRequest());
+
+            List<TransportError> transportErrors = errorHandler.getTransportErrors();
+            assertEquals("Got too many errors: " + transportErrors, 1, transportErrors.size());
+            assertSame("Lifecycle listener and error handler should see exact same TransportError object",
+                    transportErrors.get(0), error);
           }
         });
       }
@@ -407,6 +415,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
     // chance to observe it (i.e. in its constructor). So we expect the listener's
     // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
+
+    final RecordingTransportErrorHandler errorHandler = new RecordingTransportErrorHandler();
+    bus.addTransportErrorHandler(errorHandler);
 
     runAfterInit(new Runnable() {
       @Override
@@ -430,6 +441,10 @@ public class LifecycleEventTests extends AbstractErraiTest {
             assertNotNull("Throwable was not provided", error.getException());
             assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
             assertNotNull("Request object was not provided", error.getRequest());
+
+            List<TransportError> transportErrors = errorHandler.getTransportErrors();
+            assertSame("Lifecycle listener and error handler should see exact same TransportError object",
+                    transportErrors.get(transportErrors.size() - 1), error);
           }
         });
       }
