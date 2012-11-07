@@ -396,6 +396,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
             assertNotNull("Throwable was not provided", error.getException());
             assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
             assertNotNull("Request object was not provided", error.getRequest());
+            assertTrue("Bus should be planning to retry failed connection attempt",
+                    error.getRetryInfo().getDelayUntilNextRetry() > 0);
+            assertEquals(0, error.getRetryInfo().getRetryCount());
 
             List<TransportError> transportErrors = errorHandler.getTransportErrors();
             assertEquals("Got too many errors: " + transportErrors, 1, transportErrors.size());
@@ -441,10 +444,19 @@ public class LifecycleEventTests extends AbstractErraiTest {
             assertNotNull("Throwable was not provided", error.getException());
             assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
             assertNotNull("Request object was not provided", error.getRequest());
+            assertEquals(-1L, error.getRetryInfo().getDelayUntilNextRetry());
+            assertTrue("Expected at least a few retries before bus gave up", error.getRetryInfo().getRetryCount() > 2);
 
             List<TransportError> transportErrors = errorHandler.getTransportErrors();
             assertSame("Lifecycle listener and error handler should see exact same TransportError object",
                     transportErrors.get(transportErrors.size() - 1), error);
+
+            int expectedRetryCount = 0;
+            for (TransportError oldError : transportErrors.subList(0, transportErrors.size() - 1)) {
+              assertTrue(oldError.getRetryInfo().getDelayUntilNextRetry() > 0);
+              assertEquals(expectedRetryCount, oldError.getRetryInfo().getRetryCount());
+              expectedRetryCount++;
+            }
           }
         });
       }
