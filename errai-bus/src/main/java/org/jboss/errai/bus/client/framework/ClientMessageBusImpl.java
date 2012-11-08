@@ -128,7 +128,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private Object webSocketChannel;
 
   public final MessageCallback remoteCallback = new RemoteMessageCallback();
-  private RequestCallback receiveCommCallback = new NoPollRequestCallback();
+
+  /**
+   * Note that this could be any subtype of LongPollRequestCallback, including
+   * ShortPollRequestCallback or NoPollRequestCallback.
+   * <p>
+   * Instance invariant: this field is never set to null.
+   */
+  private LongPollRequestCallback receiveCommCallback = new NoPollRequestCallback();
 
   private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
   private final Map<String, List<MessageCallback>> localSubscriptions = new HashMap<String, List<MessageCallback>>();
@@ -674,9 +681,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           webSocketChannel = null;
           cometChannelOpen = true;
 
-          if (receiveCommCallback instanceof LongPollRequestCallback) {
-            ((LongPollRequestCallback) receiveCommCallback).schedule();
-          }
+          receiveCommCallback.schedule();
         }
       }
 
@@ -788,11 +793,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void stop(boolean sendDisconnect, TransportError reason) {
+
+    // Ensure the polling callback does not reawaken the bus.
+    // It could be sleeping now and about to start another poll request.
+    receiveCommCallback.cancel();
+
+    // Now stop all the in-flight XHRs
     for (Request r : pendingRequests) {
       r.cancel();
     }
     pendingRequests.clear();
 
+    // Optionally tell the server we're going away (this causes two POST requests)
     try {
       if (sendDisconnect && isRemoteCommunicationEnabled()) {
         encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
@@ -1346,7 +1358,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     if (!transportError.stopDefaultErrorHandler) {
-      setState(State.CONNECTING, transportError);
+      if (state == State.CONNECTED) {
+        setState(State.CONNECTING, transportError);
+      }
+      else if (state != State.CONNECTING) {
+        logAdapter.warn("Got a transport error while in the " + state + " state");
+      }
     }
 
     return transportError.stopDefaultErrorHandler;
@@ -1359,7 +1376,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @return true if initial message was sent successfully.
    */
-
   private boolean sendInitialMessage() {
     if (!isRemoteCommunicationEnabled()) {
       LogUtil.log("initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)");
@@ -1441,6 +1457,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private class LongPollRequestCallback implements RequestCallback {
+
+    /**
+     * Subclasses MUST check this flag is still false before calling performPoll().
+     */
+    protected boolean canceled = false;
+
     @Override
     public void onError(final Request request, final Throwable throwable) {
 
@@ -1535,7 +1557,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void schedule() {
-      if (!cometChannelOpen)
+      if (canceled || !cometChannelOpen)
         return;
       new Timer() {
         @Override
@@ -1544,12 +1566,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }.schedule(25);
     }
+
+    public void cancel() {
+      canceled = true;
+    }
   }
 
   private class NoPollRequestCallback extends LongPollRequestCallback {
     @Override
     public void schedule() {
-      performPoll();
+      if (!canceled) {
+        performPoll();
+      }
     }
   }
 
@@ -1562,7 +1590,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       new Timer() {
         @Override
         public void run() {
-          performPoll();
+          if (!canceled) {
+            performPoll();
+          }
         }
       }.schedule(POLL_FREQUENCY);
     }
@@ -1676,7 +1706,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void showError(final String message, final Throwable e) {
-    GWT.log("ShowError: " + message, e);
     ensureInitErrorDialog();
     errorDialog.addError(message, "", e);
 
