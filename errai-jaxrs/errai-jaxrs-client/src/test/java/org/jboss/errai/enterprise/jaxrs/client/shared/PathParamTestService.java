@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -57,11 +58,13 @@ public interface PathParamTestService {
   
   @POST
   @Path("/{id}")
-  public Float postWithPathParam(@PathParam("id") Float id);
+  @Consumes("text/plain")
+  public Float postWithPathParam(String entity, @PathParam("id") Float id);
 
   @PUT
   @Path("/{id}")
-  public long putWithPathParam(@PathParam("id") long id);
+  @Consumes("text/plain")
+  public long putWithPathParam(Long entity, @PathParam("id") long id);
 
   @DELETE
   @Path("/{id}")

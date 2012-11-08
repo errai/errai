@@ -45,7 +45,7 @@ public interface QueryParamTestService {
   public String getWithMultipleQueryParams(@QueryParam("id1") long id1, @QueryParam("id2") long id2);
 
   @POST
-  public int postWithQueryParam(@QueryParam("id") int id);
+  public int postWithQueryParam(String entity, @QueryParam("id") int id);
 
   @PUT
   public Double putWithQueryParam(@QueryParam("id") Double id);

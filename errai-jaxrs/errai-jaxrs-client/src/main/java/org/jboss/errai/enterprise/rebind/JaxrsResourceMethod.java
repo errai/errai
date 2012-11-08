@@ -98,6 +98,6 @@ public class JaxrsResourceMethod {
   }
   
   public String getContentTypeHeader() {
-    return getHeaders().get("Content=Type");
+    return getHeaders().get("Content-Type");
   }
 }

@@ -57,7 +57,7 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testPostWithQueryParam() {
     call(QueryParamTestService.class,
-        new AssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam(1);
+        new AssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam("", 1);
   }
 
   @Test

@@ -41,7 +41,7 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
   } 
   
   @Override
-  public int postWithQueryParam(int id) {
+  public int postWithQueryParam(String entity, int id) {
     return id;
   }
 

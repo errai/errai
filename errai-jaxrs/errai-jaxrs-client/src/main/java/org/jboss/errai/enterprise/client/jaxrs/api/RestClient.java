@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
+import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
 
 import com.google.common.collect.Lists;
 
@@ -110,12 +110,12 @@ public class RestClient {
     T proxy = proxyProvider.getRemoteProxy(remoteService);
 
     if (successCodes.length > 0) {
-      ((JaxrsProxy) proxy).setSuccessCodes(Lists.newArrayList(successCodes));
+      ((AbstractJaxrsProxy) proxy).setSuccessCodes(Lists.newArrayList(successCodes));
     }
 
-    ((JaxrsProxy) proxy).setRemoteCallback(callback);
-    ((JaxrsProxy) proxy).setErrorCallback(errorCallback);
-    ((JaxrsProxy) proxy).setBaseUrl(baseUrl);
+    ((AbstractJaxrsProxy) proxy).setRemoteCallback(callback);
+    ((AbstractJaxrsProxy) proxy).setErrorCallback(errorCallback);
+    ((AbstractJaxrsProxy) proxy).setBaseUrl(baseUrl);
     return proxy;
   }
 

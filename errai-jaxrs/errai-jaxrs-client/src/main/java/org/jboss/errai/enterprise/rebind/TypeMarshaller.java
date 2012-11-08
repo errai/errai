@@ -21,6 +21,7 @@ import java.util.Map;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
@@ -101,7 +102,11 @@ public class TypeMarshaller {
       if (type.equals(statement.getType())) {
         return statement;
       }
-      return Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement)).invoke("toString");
+      ContextualStatementBuilder s = Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement));
+      if (type.equals(MetaClassFactory.get(String.class))) {
+        return s;
+      }
+      return s.invoke("toString");
     }
 
     private static Statement demarshal(MetaClass type, Statement statement) {

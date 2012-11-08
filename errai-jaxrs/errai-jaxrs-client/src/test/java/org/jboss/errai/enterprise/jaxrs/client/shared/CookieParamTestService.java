@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -37,10 +38,11 @@ public interface CookieParamTestService {
   public int getWithIntegerCookieParam(@CookieParam("myCookie") Integer val);
 
   @POST
-  public String postWithStringCookieParam(@CookieParam("myCookie") String val);
+  @Consumes("text/plain")
+  public String postWithStringCookieParam(Long entity, @CookieParam("myCookie") String val);
 
   @PUT
-  public long putWithLongCookieParam(@CookieParam("myCookie") Long val);
+  public long putWithLongCookieParam(String entity, @CookieParam("myCookie") Long val);
 
   @DELETE
   public Double deleteWithDoubleCookieParam(@CookieParam("myCookie") Double val);

@@ -111,6 +111,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
           .finish()
           .finish();
         
+        // create the call that registers the proxy provided for the generated proxy
         loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", remote, proxyProvider));
       }
     }
