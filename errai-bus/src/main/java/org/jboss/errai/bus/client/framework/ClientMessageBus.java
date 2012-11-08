@@ -112,10 +112,23 @@ public interface ClientMessageBus extends MessageBus {
    */
   public boolean isInitialized();
 
+  /**
+   * Sets the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
+   *
+   * @param logAdapter The log adapter this bus should log to. Must not be null.
+   * @deprecated Use java.util logging instead. It is supported by GWT.
+   */
+  @Deprecated
   public void setLogAdapter(LogAdapter logAdapter);
 
   public Set<String> getAllRegisteredSubjects();
 
+  /**
+   * Returns the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
+   *
+   * @deprecated Use java.util logging instead. It is supported by GWT.
+   */
+  @Deprecated
   public LogAdapter getLogAdapter();
 
   /**
