@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a division of Red Hat Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,48 +14,31 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.samples.restdemo.client.shared;
+package org.jboss.errai.enterprise.jaxrs.client.shared;
 
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 /**
- * JAX-RS service interface
+ * This service is used to test JAX-RS methods returning a {@link javax.ws.rs.core.Response} object
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Path("customers")
-public interface CustomerService {
+@Path("/test/jaxrs-response-object")
+public interface JaxrsResponseObjectTestService {
+
   @GET
   @Produces("application/json")
-  public List<Customer> listAllCustomers();
-
+  public Response get();
+ 
+  @GET
+  @Path("/error")
+  public Response getReturningError();
+  
   @POST
-  @Consumes("application/json")
   @Produces("text/plain")
-  public Response createCustomer(Customer customer);
-
-  @PUT
-  @Path("/{id}")
-  @Consumes("application/json")
-  @Produces("application/json")
-  public Customer updateCustomer(@PathParam("id") long id, Customer customer);
-
-  @DELETE
-  @Path("/{id}")
-  public void deleteCustomer(@PathParam("id") long id);
-
-  @GET
-  @Path("/{id}")
-  @Produces("application/json")
-  public Customer retrieveCustomerById(@PathParam("id") long id);
+  public Response post(String entity);
 }

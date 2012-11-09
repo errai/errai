@@ -58,6 +58,7 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testInjectedErrorHandlingTestService() {
+    delayTestFinish(5000);
     TestModule.getInstance().getErrorHandlingTestService()
         .call(
             new ResponseCallback() {

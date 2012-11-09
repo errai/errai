@@ -44,7 +44,7 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testErrorHandling() {
-    RestClient.create(ErrorHandlingTestService.class,
+    call(ErrorHandlingTestService.class,
         new RemoteCallback<Long>() {
           @Override
           public void callback(Long response) {
@@ -104,7 +104,7 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testErrorHandlingUsingResponseCallback() {
-    RestClient.create(ErrorHandlingTestService.class,
+    call(ErrorHandlingTestService.class,
         new ResponseCallback() {
           @Override
           public void callback(Response response) {
