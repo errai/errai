@@ -115,10 +115,11 @@ public class AsyncInjectionTask {
       case PrivateField:
         ctx.addExposedField(field, PrivateAccessType.Write);
 
-      case Field:
+      case Field: {
         final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
             MetaClassFactory.typeParametersOf(field.getType()));
 
+        final Statement beanRefStmt = ctx.getBeanReference(injector.getInjectedType());
         final Statement fieldAccessStmt;
 
         if (field.isStatic()) {
@@ -126,16 +127,16 @@ public class AsyncInjectionTask {
               + field.getDeclaringClass().getFullyQualifiedName() + "." + field.getName());
         }
         else {
-          fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(ctx, Refs.get(injector.getInstanceVarName()), field, Refs.get("bean"));
+          fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(ctx, beanRefStmt, field, Refs.get("bean"));
         }
 
         final ObjectBuilder finish = Stmt.newObject(callbackClass).extend()
             .publicOverridesMethod("callback", Parameter.of(field.getType(), "bean"))
-              .append(fieldAccessStmt)
-              .append(Stmt.loadVariable("vote").invoke("finish", Stmt.loadVariable("this")))
+            .append(fieldAccessStmt)
+            .append(Stmt.loadVariable("vote").invoke("finish", Stmt.loadVariable("this")))
             .finish()
             .publicOverridesMethod("toString")
-              .append(Stmt.load(field.getType()).invoke("getName").returnValue()).finish()
+            .append(Stmt.load(field.getType()).invoke("getName").returnValue()).finish()
             .finish();
 
         final String callbackVarName = InjectUtil.getVarNameFromType(field.getType());
@@ -166,11 +167,12 @@ public class AsyncInjectionTask {
         processingContext.append(val);
 
         break;
+      }
 
       case PrivateMethod:
         ctx.addExposedMethod(method);
 
-      case Method:
+      case Method: {
         for (final MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
               new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
@@ -178,13 +180,16 @@ public class AsyncInjectionTask {
 
         final Statement[] args = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
 
+        final Statement beanRef = ctx.getBeanReference(method.getDeclaringClass());
+
         processingContext.append(
             InjectUtil.invokePublicOrPrivateMethod(ctx,
-                Refs.get(injector.getInstanceVarName()),
+                beanRef,
                 method,
                 args)
         );
         break;
+      }
     }
 
     ctx.closeProxyIfOpen();

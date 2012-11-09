@@ -33,8 +33,7 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
       setEnabled(context.isReachable(type) || context.isReachable(providerType));
     }
 
-//    this.providerInjector = (AbstractInjector)
-//        context.getInjectorFactory().getTypeInjector(providerType, context);
+    context.addBeanReference(type, Refs.get(instanceVarName));
 
     this.providerInjector = new AsyncTypeInjector(providerType, context);
     context.registerInjector(providerInjector);

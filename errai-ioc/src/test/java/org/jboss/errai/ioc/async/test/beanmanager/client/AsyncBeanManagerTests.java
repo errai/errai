@@ -1,8 +1,8 @@
-package org.jboss.errai.ioc.async.test.client;
+package org.jboss.errai.ioc.async.test.beanmanager.client;
 
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.ioc.async.test.client.res.Bar;
-import org.jboss.errai.ioc.async.test.client.res.Foo;
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.Foo;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
@@ -22,7 +22,7 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ioc.async.test.AsyncTests";
+    return "org.jboss.errai.ioc.async.test.beanmanager.AsyncBeanManagerTests";
   }
 
   public void testAsyncLookup() {

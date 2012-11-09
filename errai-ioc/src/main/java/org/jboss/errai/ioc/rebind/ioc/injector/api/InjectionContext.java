@@ -91,6 +91,7 @@ public class InjectionContext {
 
   private final Set<Object> overriddenTypesAndMembers = new HashSet<Object>();
 
+  private final Map<MetaClass, Statement> beanReferenceMap = new HashMap<MetaClass, Statement>();
   private final Map<MetaParameter, Statement> inlineBeanReferenceMap = new HashMap<MetaParameter, Statement>();
 
   private final Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
@@ -755,6 +756,20 @@ public class InjectionContext {
 
   public boolean typeContainsGraphCycles(final MetaClass type) {
     return knownTypesWithCycles.contains(type.getFullyQualifiedName());
+  }
+
+  public void addBeanReference(final MetaClass ref, final Statement statement) {
+    beanReferenceMap.put(ref, statement);
+  }
+
+  public Statement getBeanReference(final MetaClass ref) {
+    Statement stmt = beanReferenceMap.get(ref);
+
+    if (stmt == null) {
+      System.out.println();
+    }
+
+    return stmt;
   }
 
   public void addInlineBeanReference(final MetaParameter ref, final Statement statement) {

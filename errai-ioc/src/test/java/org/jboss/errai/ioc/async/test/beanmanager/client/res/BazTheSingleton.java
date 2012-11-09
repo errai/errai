@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.async.test.client.res;
+package org.jboss.errai.ioc.async.test.beanmanager.client.res;
 
 import javax.inject.Singleton;
 

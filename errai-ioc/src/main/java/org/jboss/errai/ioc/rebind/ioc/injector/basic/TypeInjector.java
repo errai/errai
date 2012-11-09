@@ -41,6 +41,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -163,13 +164,12 @@ public class TypeInjector extends AbstractInjector {
     /* get the construction strategy and execute it to wire the bean */
     getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
-      public void beanConstructed() {
-        /* the bean has been constructed, so get a reference to the BeanRef and set it to the 'beanRef' variable. */
+      public void beanConstructed(final ConstructionType constructionType) {
+        final Statement beanRef = Refs.get(instanceVarName);
 
-        /* add the bean to SimpleCreationalContext */
         callbackBuilder.append(
             loadVariable("context").invoke("addBean", loadVariable("context").invoke("getBeanReference", load(type),
-                load(qualifyingMetadata.getQualifiers())), Refs.get(instanceVarName))
+                load(qualifyingMetadata.getQualifiers())), beanRef)
         );
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */

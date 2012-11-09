@@ -6,6 +6,7 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -15,18 +16,17 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
-import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.BeanVote;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -139,6 +139,10 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
         .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback", true),
             Parameter.of(AsyncCreationalContext.class, "context", true));
 
+    callbackBuilder.append(
+        Stmt.create().declareFinalVariable("vote", BeanVote.class,
+            Stmt.create().newObject(BeanVote.class))
+    );
 
     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
     ctx.pushBlockBuilder(callbackBuilder);
@@ -150,24 +154,38 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     /* get the construction strategy and execute it to wire the bean */
     AsyncInjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
-      public void beanConstructed() {
+      public void beanConstructed(final ConstructionType constructionType) {
         /* the bean has been constructed, so get a reference to the BeanRef and set it to the 'beanRef' variable. */
 
-        /* add the bean to SimpleCreationalContext */
-        callbackBuilder.append(
+        injectContext.getProcessingContext().append(
             loadVariable("context").invoke("addBean", loadVariable("context").invoke("getBeanReference", load(type),
                 load(qualifyingMetadata.getQualifiers())), Refs.get(instanceVarName))
         );
 
-        final Statement finishedCallback = Stmt.create().newObject(Runnable.class)
-            .extend().publicOverridesMethod("run")
-            .append(loadVariable("callback").invoke("callback", loadVariable(instanceVarName))).finish().finish();
+        /* add the bean to SimpleCreationalContext */
+        final Statement finishedCallback;
+        final Statement beanRef;
 
-        callbackBuilder.append(
-            Stmt.create().declareFinalVariable("vote", BeanVote.class,
-                Stmt.create().newObject(BeanVote.class, finishedCallback))
-        );
+        if (constructionType == ConstructionType.FIELD) {
+          beanRef = loadVariable(instanceVarName);
 
+          finishedCallback = Stmt.create().newObject(Runnable.class)
+              .extend().publicOverridesMethod("run")
+              .append(loadVariable("callback").invoke("callback", beanRef)).finish().finish();
+
+        }
+        else {
+          beanRef = Cast.to(type, loadVariable("vote").invoke("getConstructedObject"));
+
+          finishedCallback = Stmt.create().newObject(Runnable.class)
+              .extend().publicOverridesMethod("run")
+              .append(loadVariable("callback").invoke("callback", beanRef))
+              .finish().finish();
+        }
+
+        injectContext.addBeanReference(type, beanRef);
+
+        callbackBuilder.append(Stmt.loadVariable("vote").invoke("setOnFinish", finishedCallback));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
@@ -177,7 +195,6 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     /*
     return the instance of the bean from the creational callback.
     */
-
 
     callbackBuilder._(Stmt.loadVariable("vote").invoke("finish"));
 
@@ -198,15 +215,10 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
        if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
        method and assign it with SimpleCreationalContext.getInstance().
        */
-//      ctx.getBootstrapBuilder().privateField(instanceVarName, type).modifiers(Modifier.Final)
-//          .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
 
       /*
        use the variable we just assigned as the return value for this injector.
        */
-//      retVal = Refs.get(instanceVarName);
-
-//      ctx.append(loadVariable("context"))
 
       retVal = Stmt.load(true);
     }

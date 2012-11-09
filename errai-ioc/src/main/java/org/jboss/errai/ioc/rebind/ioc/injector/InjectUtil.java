@@ -45,6 +45,7 @@ import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStrategy;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.DecoratorTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -116,7 +117,7 @@ public class InjectUtil {
               Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements))
 
           );
-          callback.beanConstructed();
+          callback.beanConstructed(ConstructionType.CONSTRUCTOR);
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -146,7 +147,7 @@ public class InjectUtil {
 
           );
 
-          callback.beanConstructed();
+          callback.beanConstructed(ConstructionType.FIELD);
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -176,9 +177,9 @@ public class InjectUtil {
    * @param postConstructTasks
    *     -
    */
-  private static void doPostConstruct(final InjectionContext ctx,
-                                      final Injector injector,
-                                      final List<MetaMethod> postConstructTasks) {
+  static void doPostConstruct(final InjectionContext ctx,
+                              final Injector injector,
+                              final List<MetaMethod> postConstructTasks) {
 
     if (postConstructTasks.isEmpty()) return;
 
@@ -216,9 +217,9 @@ public class InjectUtil {
    * @param preDestroyTasks
    *     -
    */
-  private static void doPreDestroy(final InjectionContext ctx,
-                                   final Injector injector,
-                                   final List<MetaMethod> preDestroyTasks) {
+  static void doPreDestroy(final InjectionContext ctx,
+                           final Injector injector,
+                           final List<MetaMethod> preDestroyTasks) {
 
     if (preDestroyTasks.isEmpty()) return;
 
@@ -400,11 +401,11 @@ public class InjectUtil {
     return accumulator;
   }
 
-  private static List<MetaMethod> scanForPostConstruct(final MetaClass type) {
+  static List<MetaMethod> scanForPostConstruct(final MetaClass type) {
     return scanForAnnotatedMethod(type, PostConstruct.class);
   }
 
-  private static List<MetaMethod> scanForPreDestroy(final MetaClass type) {
+  static List<MetaMethod> scanForPreDestroy(final MetaClass type) {
     return scanForAnnotatedMethod(type, PreDestroy.class);
   }
 
@@ -428,16 +429,16 @@ public class InjectUtil {
   }
 
   @SuppressWarnings({"unchecked"})
-  private static boolean isInjectionPoint(final InjectionContext context, final HasAnnotations hasAnnotations) {
+  static boolean isInjectionPoint(final InjectionContext context, final HasAnnotations hasAnnotations) {
     return context.isElementType(WiringElementType.InjectionPoint, hasAnnotations);
   }
 
 
-  private static boolean hasDefaultConstructor(final MetaClass type) {
+  static boolean hasDefaultConstructor(final MetaClass type) {
     return type.getConstructor(new MetaClass[0]) != null;
   }
 
-  private static MetaClass[] parametersToClassTypeArray(final MetaParameter[] parms) {
+  static MetaClass[] parametersToClassTypeArray(final MetaParameter[] parms) {
     final MetaClass[] newArray = new MetaClass[parms.length];
     for (int i = 0; i < parms.length; i++) {
       newArray[i] = parms[i].getType();

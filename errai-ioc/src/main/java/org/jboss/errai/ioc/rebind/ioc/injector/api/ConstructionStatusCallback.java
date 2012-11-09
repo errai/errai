@@ -27,7 +27,7 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
  */
 public interface ConstructionStatusCallback {
   /**
-   * Called to indicate that construction has occured.
+   * Called to indicate that construction has occurred.
    */
-  public void beanConstructed();
+  public void beanConstructed(ConstructionType constructionType);
 }
