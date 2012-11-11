@@ -2,7 +2,6 @@ package org.jboss.errai.ioc.async.test.beanmanager.client.res;
 
 import org.jboss.errai.ioc.client.api.Disposer;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 

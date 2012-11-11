@@ -536,7 +536,7 @@ public class InjectUtil {
 
             inj.setEnabled(true);
             if (inj.isCreated() && !inj.isRendered()) {
-              throw new InjectionFailure("unresolveable cycle on dependent scoped bean: "
+              throw new InjectionFailure("un-resolveable cycle on dependent scoped bean: "
                   + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");
             }
 

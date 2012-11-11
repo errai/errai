@@ -2,23 +2,26 @@ package org.jboss.errai.ioc.client.container.async;
 
 import com.google.gwt.user.client.Timer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Mike Brock
  */
-public class BeanVote {
+public class AsyncBeanContext {
   private static final CreationalCallback<?> DUMMY = new CreationalCallback<Object>() {
     @Override
     public void callback(final Object beanInstance) {
     }
   };
 
-  private enum FireState {NOT_FIRED, ARMED, FIRED}
+  private enum FireState {
+    NOT_FIRED, ARMED, FIRED
+  }
 
   /**
    * These are dependencies immediately needed for construction of the bean. But for mixed injection, may not
@@ -44,7 +47,8 @@ public class BeanVote {
   private Runnable onConstructRunnable;
   private FireState constructFireState = FireState.NOT_FIRED;
 
-  private Runnable onFinishRunnable;
+
+  private final List<Runnable> onFinishRunnables = new ArrayList<Runnable>();
   private FireState finishFireState = FireState.NOT_FIRED;
 
   private Object constructedObject;
@@ -60,7 +64,7 @@ public class BeanVote {
     }
   };
 
-  public BeanVote() {
+  public AsyncBeanContext() {
     allDependencies.add(DUMMY);
     timeOut.schedule(2000);
   }
@@ -74,8 +78,8 @@ public class BeanVote {
     _constructCheck();
   }
 
-  public void setOnFinish(final Runnable runnable) {
-    this.onFinishRunnable = runnable;
+  public void addOnFinish(final Runnable runnable) {
+    onFinishRunnables.add(runnable);
     _finishCheck();
   }
 
@@ -118,7 +122,9 @@ public class BeanVote {
   }
 
   private void _constructCheck() {
-    if (constructFireState == FireState.FIRED) return;
+    if (constructFireState == FireState.FIRED) {
+      return;
+    }
 
     if (constructDependencies.isEmpty()) {
       constructFireState = FireState.ARMED;
@@ -130,14 +136,19 @@ public class BeanVote {
   }
 
   private void _finishCheck() {
-    if (finishFireState == FireState.FIRED) return;
+    if (finishFireState == FireState.FIRED) {
+      return;
+    }
 
     if (allDependencies.isEmpty()) {
       timeOut.cancel();
       constructFireState = FireState.ARMED;
 
-      if (onFinishRunnable != null) {
-        onFinishRunnable.run();
+      if (!onFinishRunnables.isEmpty()) {
+        for (final Runnable runnable : onFinishRunnables) {
+          runnable.run();
+        }
+
         constructFireState = FireState.FIRED;
       }
     }

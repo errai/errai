@@ -102,11 +102,11 @@ public class AsyncInjectUtil {
           runBlock.append(Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements)));
 
           final Statement finishedCallback = runBlock
-              .append(Stmt.loadVariable("vote").invoke("setConstructedObject", Refs.get(injector.getInstanceVarName())))
+              .append(Stmt.loadVariable("async").invoke("setConstructedObject", Refs.get(injector.getInstanceVarName())))
               .finish()
           .finish();
 
-          processingContext.append(Stmt.loadVariable("vote").invoke("setOnConstruct", finishedCallback));
+          processingContext.append(Stmt.loadVariable("async").invoke("setOnConstruct", finishedCallback));
 
           processingContext.pushBlockBuilder(runBlock);
 
@@ -442,7 +442,7 @@ public class AsyncInjectUtil {
             ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
 
         if (inlineReference) {
-          stmt = recordInlineReference(stmt, ctx, parms[i]);
+          stmt = recordInlineReference(ctx, parms[i]);
         }
       }
       catch (InjectionFailure e) {
@@ -473,17 +473,17 @@ public class AsyncInjectUtil {
 
         final Statement callback = Stmt.newObject(creationType).extend()
             .publicOverridesMethod("callback", Parameter.of(parmType, "beanInstance"))
-              .append(Stmt.loadVariable("vote").invoke("finish", Refs.get("this"), Refs.get("beanInstance")))
+              .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("beanInstance")))
             .finish()
         .finish();
 
         final BlockBuilder<?> blockBuilder = ctx.getProcessingContext().getBlockBuilder();
         final String varNameFromType = InjectUtil.getVarNameFromType(parmType);
         blockBuilder.append(Stmt.declareFinalVariable(varNameFromType, creationType, callback));
-        blockBuilder.append(Stmt.loadVariable("vote").invoke("waitConstruct", Refs.get(varNameFromType)));
+        blockBuilder.append(Stmt.loadVariable("async").invoke("waitConstruct", Refs.get(varNameFromType)));
 
         // Get the injection value.
-        final Statement injectorOrProxy = getInjectorOrProxy(
+        getInjectorOrProxy(
             ctx,
             InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx),
             parmType,
@@ -495,7 +495,6 @@ public class AsyncInjectUtil {
         // Record the statement which can be used to access the reference to the injected bean in-line.
         // For instance, for code decoration.
         stmt = recordInlineReference(
-            injectorOrProxy,
             ctx,
             parms[i]
         );
@@ -526,26 +525,13 @@ public class AsyncInjectUtil {
     return parmValues;
   }
 
-  private static Statement recordInlineReference(final Statement beanCreationStmt,
-                                                 final InjectionContext ctx,
+  private static Statement recordInlineReference(final InjectionContext ctx,
                                                  final MetaParameter parm) {
-//    final String varName = InjectUtil.getUniqueVarName();
 
-    final BlockBuilder<?> blockBuilder = ctx.getProcessingContext().getBlockBuilder();
-
-    final Statement stmt = Cast.to(parm.getType(), Stmt.loadVariable("vote").invoke("getBeanValue",
+    final Statement stmt = Cast.to(parm.getType(), Stmt.loadVariable("async").invoke("getBeanValue",
         Refs.get(InjectUtil.getVarNameFromType(parm.getType()))));
 
     ctx.addInlineBeanReference(parm, stmt);
     return stmt;
-
-
-//    ctx.getProcessingContext()
-//        .append(Stmt.declareFinalVariable(varName, parm.getType(), beanCreationStmt));
-//
-//    final Statement stmt = Refs.get(varName);
-//
-//    ctx.addInlineBeanReference(parm, stmt);
-
   }
 }

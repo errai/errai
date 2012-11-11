@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
@@ -180,7 +181,7 @@ public class IOCProcessorFactory {
                 final String propertyValue = enabledByProperty.value();
                 final boolean negatedTest = enabledByProperty.negated();
 
-                boolean bool = Boolean.getBoolean(propertyValue);
+                boolean bool = Boolean.parseBoolean(EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty(propertyValue));
                 if (negatedTest) {
                   bool = !bool;
                 }

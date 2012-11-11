@@ -13,6 +13,9 @@ public class ConstrInjBean {
   private Apple apple;
   private Pear pear;
 
+  private Peanut peanut;
+  private Cashew cashew;
+
   @Inject
   private Orange orange;
 
@@ -27,6 +30,13 @@ public class ConstrInjBean {
     this.apple = apple;
     this.pear = pear;
   }
+
+  @Inject
+  public void setPeanutAndCashew(final Peanut peanut, final Cashew cashew) {
+    this.peanut = peanut;
+    this.cashew = cashew;
+  }
+
 
   public ConstrInjBean getMyself() {
     return myself;
@@ -51,5 +61,13 @@ public class ConstrInjBean {
 
   public boolean isPostConstructFired() {
     return postConstructFired;
+  }
+
+  public Peanut getPeanut() {
+    return peanut;
+  }
+
+  public Cashew getCashew() {
+    return cashew;
   }
 }

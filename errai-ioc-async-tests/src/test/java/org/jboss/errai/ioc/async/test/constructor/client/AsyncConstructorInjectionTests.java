@@ -38,6 +38,9 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
                 assertNotNull(beanInstance.getPear());
                 assertNotNull(beanInstance.getOrange());
 
+                assertNotNull(beanInstance.getPeanut());
+                assertNotNull(beanInstance.getCashew());
+
                 assertTrue(beanInstance.isPostConstructFired());
 
                 assertSame(beanInstance, IOC.getAsyncBeanManager().getActualBeanReference(beanInstance.getMyself()));
@@ -46,6 +49,6 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
               }
             });
       }
-    }.schedule(100);
+    }.schedule(1);
   }
 }

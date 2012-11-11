@@ -1,14 +1,11 @@
 package org.jboss.errai.ioc.async.test.beanmanager.client;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Foo;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
-
-import java.sql.Time;
 
 /**
  * @author Mike Brock

@@ -16,8 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
+import com.sun.imageio.stream.StreamFinalizer;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -97,6 +100,30 @@ public class AsyncInjectionTask {
     this.parm = null;
   }
 
+  private void generateCallback(final MetaClass type, final InjectionContext ctx, final Statement... fieldAccessStmt) {
+    final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
+           MetaClassFactory.typeParametersOf(type));
+
+    final IOCProcessingContext processingContext = ctx.getProcessingContext();
+
+    final BlockBuilder<AnonymousClassStructureBuilder> statements = Stmt.newObject(callbackClass).extend()
+        .publicOverridesMethod("callback", Parameter.of(type, "bean"));
+
+    for (final Statement stmt : fieldAccessStmt) {
+      statements.append(stmt);
+    }
+
+    final ObjectBuilder finish = statements.finish()
+        .publicOverridesMethod("toString")
+        .append(Stmt.load(type).invoke("getName").returnValue()).finish()
+        .finish();
+
+    final String callbackVarName = InjectUtil.getVarNameFromType(type);
+
+    processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
+    processingContext.append(Stmt.loadVariable("async").invoke("wait", Refs.get(callbackVarName)));
+  }
+
   @SuppressWarnings({"unchecked"})
   public boolean doTask(final InjectionContext ctx) {
     final IOCProcessingContext processingContext = ctx.getProcessingContext();
@@ -116,9 +143,6 @@ public class AsyncInjectionTask {
         ctx.addExposedField(field, PrivateAccessType.Write);
 
       case Field: {
-        final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
-            MetaClassFactory.typeParametersOf(field.getType()));
-
         final Statement beanRefStmt = ctx.getBeanReference(injector.getInjectedType());
         final Statement fieldAccessStmt;
 
@@ -130,19 +154,7 @@ public class AsyncInjectionTask {
           fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(ctx, beanRefStmt, field, Refs.get("bean"));
         }
 
-        final ObjectBuilder finish = Stmt.newObject(callbackClass).extend()
-            .publicOverridesMethod("callback", Parameter.of(field.getType(), "bean"))
-            .append(fieldAccessStmt)
-            .append(Stmt.loadVariable("vote").invoke("finish", Stmt.loadVariable("this")))
-            .finish()
-            .publicOverridesMethod("toString")
-            .append(Stmt.load(field.getType()).invoke("getName").returnValue()).finish()
-            .finish();
-
-        final String callbackVarName = InjectUtil.getVarNameFromType(field.getType());
-
-        processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
-        processingContext.append(Stmt.loadVariable("vote").invoke("wait", Refs.get(callbackVarName)));
+        generateCallback(field.getType(), ctx, fieldAccessStmt, Stmt.loadVariable("async").invoke("finish", Refs.get("this")));
 
         try {
           val = AsyncInjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);
@@ -176,18 +188,27 @@ public class AsyncInjectionTask {
         for (final MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
               new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
+
+           generateCallback(parm.getType(), ctx, Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("bean")));
         }
 
-        final Statement[] args = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
+        final Statement[] args = AsyncInjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
 
         final Statement beanRef = ctx.getBeanReference(method.getDeclaringClass());
 
-        processingContext.append(
-            InjectUtil.invokePublicOrPrivateMethod(ctx,
-                beanRef,
-                method,
-                args)
-        );
+        final Statement methodCallStatement = InjectUtil.invokePublicOrPrivateMethod(ctx,
+            beanRef,
+            method,
+            args);
+
+        final Statement finishCallback = Stmt.newObject(Runnable.class).extend()
+            .publicOverridesMethod("run")
+            .append(methodCallStatement)
+            .finish()
+        .finish();
+
+        processingContext.append(Stmt.loadVariable("async").invoke("addOnFinish", finishCallback));
+
         break;
       }
     }
