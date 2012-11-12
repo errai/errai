@@ -20,10 +20,12 @@ import java.util.Map;
 
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.TernaryStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
@@ -67,7 +69,7 @@ public class TypeMarshaller {
       if (!type.equals(MetaClassFactory.get(void.class))) {
         if (type.isAssignableTo(Map.class)) {
           demarshallingStatement =
-              Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement, type.asBoxed().asClass(), 
+              Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement, type.asBoxed().asClass(),
                   MarshallingGenUtil.getConcreteMapKeyType(type.asBoxed()),
                   MarshallingGenUtil.getConcreteMapValueType(type.asBoxed()));
         }
@@ -102,11 +104,18 @@ public class TypeMarshaller {
       if (type.equals(statement.getType())) {
         return statement;
       }
-      ContextualStatementBuilder s = Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement));
-      if (type.equals(MetaClassFactory.get(String.class))) {
-        return s;
+      ContextualStatementBuilder s = null;
+      if (type.isPrimitive()) {
+        s = Stmt.nestedCall(Stmt.newObject(type.asBoxed()).withParameters(statement)).invoke("toString");
       }
-      return s.invoke("toString");
+      else {
+        s = Stmt.nestedCall(new TernaryStatement(Bool.isNull(statement), Stmt.load(""), Stmt.nestedCall(statement)));
+        if (!type.equals(MetaClassFactory.get(String.class))) {
+          s = s.invoke("toString");
+        }
+      }
+
+      return s;
     }
 
     private static Statement demarshal(MetaClass type, Statement statement) {
