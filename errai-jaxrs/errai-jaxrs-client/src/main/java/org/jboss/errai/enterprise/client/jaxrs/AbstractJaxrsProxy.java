@@ -35,7 +35,7 @@ import com.google.gwt.http.client.Response;
 
 /**
  * JAX-RS proxies are {@link RpcStub}s managed by the shared {@see RemoteServiceProxyFactory}. The implementations of
- * this class are generated.
+ * this class are generated at compile time.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -59,9 +59,9 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   public abstract ErrorCallback getErrorCallback();
 
   /**
-   * If not set explicitly, the base url is the configured default application root path {@see RestClient}.
+   * If not set explicitly, the base URL is the configured default application root path {@see RestClient}.
    * 
-   * @return the base url used to contact the remote service
+   * @return the base URL used to contact the remote service
    */
   public String getBaseUrl() {
     if (baseUrl != null) {
@@ -73,17 +73,17 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   }
 
   /**
-   * Sets the base url of the remote service and overrides the configured default application root path.
+   * Sets the base URL of the remote service and overrides the configured default application root path.
    * 
    * @param baseUrl
-   *          the base url used to contact the remote service
+   *          the base URL used to contact the remote service
    */
   public void setBaseUrl(String baseUrl) {
     this.baseUrl = baseUrl;
   }
 
   /**
-   * Returns the list of success codes used by this proxies.
+   * Returns the list of success codes used by this proxy.
    * 
    * @return list of success codes, null if no custom success codes were provided.
    */
@@ -115,18 +115,17 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
 
         @Override
         public void onResponseReceived(Request request, Response response) {
-          if (((successCodes == null) || successCodes.contains(response.getStatusCode()))
-              && ((response.getStatusCode() >= 200) && (response.getStatusCode() < 300))) {
+          int statusCode = response.getStatusCode();
+          if ((successCodes == null || successCodes.contains(statusCode)) && (statusCode >= 200 && statusCode < 300)) {
+            
             if (remoteCallback instanceof ResponseCallback) {
               ((ResponseCallback) getRemoteCallback()).callback(response);
             }
+            else if (response.getStatusCode() == 204) {
+              remoteCallback.callback(null);
+            }
             else {
-              if (response.getStatusCode() == 204) {
-                remoteCallback.callback(null);
-              }
-              else {
-                remoteCallback.callback(demarshallingCallback.demarshallResponse(response.getText()));
-              }
+              remoteCallback.callback(demarshallingCallback.demarshallResponse(response.getText()));
             }
           }
           else {
