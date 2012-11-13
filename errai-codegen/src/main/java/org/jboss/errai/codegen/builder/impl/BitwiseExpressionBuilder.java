@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BitwiseExpressionBuilder extends ExpressionBuilder<BitwiseOperator> {
-  private boolean negated;
 
   public BitwiseExpressionBuilder() {
   }

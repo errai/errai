@@ -24,10 +24,20 @@ import org.junit.runners.Suite;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ArithmeticTest.class, AnnotationEncoderTest.class, ClassBuilderTest.class,
-        AnonymousClassStructureBuilderTest.class, ContextBuilderTest.class, IfBlockBuilderTest.class,
-        InvocationBuilderTest.class, LiteralTest.class, LoopBuilderTest.class, StatementBuilderTest.class,
-        SwitchBlockBuilderTest.class, TryBlockBuilderTest.class})
+@Suite.SuiteClasses({
+  AnnotationEncoderTest.class, 
+  AnonymousClassStructureBuilderTest.class,
+  ArithmeticTest.class,
+  ContextBuilderTest.class, 
+  ClassBuilderTest.class,
+  IfBlockBuilderTest.class,
+  InvocationBuilderTest.class, 
+  LiteralTest.class, 
+  LoopBuilderTest.class, 
+  ProxyMakerTest.class,
+  StatementBuilderTest.class,
+  SwitchBlockBuilderTest.class, 
+  TryBlockBuilderTest.class})
 public class AllStatementBuilderTests {
   static {
     GenUtil.setPermissiveMode(false);

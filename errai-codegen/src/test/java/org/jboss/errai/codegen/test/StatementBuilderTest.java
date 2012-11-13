@@ -19,6 +19,16 @@ package org.jboss.errai.codegen.test;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.util.TypeLiteral;
+import javax.inject.Inject;
+
 import org.jboss.errai.codegen.AssignmentOperator;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
@@ -43,15 +53,6 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -369,11 +370,11 @@ public class StatementBuilderTest extends AbstractCodegenTest {
   @Test
   public void testAssignArrayValueWithInvalidArray() {
     try {
-      final String s = StatementBuilder.create()
-              .declareVariable("twoDimArray", String.class)
-              .loadVariable("twoDimArray", 1, 2)
-              .assignValue("test")
-              .toJavaString();
+      StatementBuilder.create()
+         .declareVariable("twoDimArray", String.class)
+         .loadVariable("twoDimArray", 1, 2)
+         .assignValue("test")
+         .toJavaString();
 
       fail("Expected InvalidTypeExcpetion");
     }
