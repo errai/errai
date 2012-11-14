@@ -6,12 +6,15 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -30,10 +33,12 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.util.RunAsyncWrapper;
 
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -107,10 +112,18 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     begin building the creational callback, implement the "getInstance" method from the interface
     and assign its BlockBuilder to a callbackBuilder so we can work with it.
     */
-    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
+    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder_
         = newInstanceOf(beanProviderClassRef).extend()
         .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback", true),
             Parameter.of(AsyncCreationalContext.class, "context", true));
+
+
+    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(RunAsyncCallback.class).extend()
+        .publicOverridesMethod("onFailure", Parameter.of(Throwable.class, "throwable"))
+        .append(Stmt.throw_(RuntimeException.class, "failed to run asynchronously", Refs.get("throwable")))
+        .finish()
+        .publicOverridesMethod("onSuccess");
+
 
     callbackBuilder.append(
         Stmt.create().declareFinalVariable("async", AsyncBeanContext.class,
@@ -178,8 +191,10 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     declare a final variable for the BeanProvider and initialize it with the anonymous class we just
     built.
     */
+    callbackBuilder_.append(Stmt.invokeStatic(GWT.class, "runAsync", callbackBuilder.finish().finish()));
+
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, beanProviderClassRef).modifiers(Modifier.Final)
-        .initializesWith(callbackBuilder.finish().finish()).finish();
+        .initializesWith(callbackBuilder_.finish().finish()).finish();
 
 
     if (isSingleton()) {
