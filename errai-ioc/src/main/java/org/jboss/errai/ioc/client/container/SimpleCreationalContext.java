@@ -36,6 +36,7 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class SimpleCreationalContext extends AbstractCreationalContext {
+
   private final IOCBeanManager beanManager;
 
   public SimpleCreationalContext(final IOCBeanManager beanManager, final Class<? extends Annotation> scopeName) {

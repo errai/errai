@@ -24,6 +24,7 @@ package org.jboss.errai.ioc.client.container;
  * @author Mike Brock
  */
 public interface BeanProvider<T> {
+
   /**
    * Returns a new instance of the bean which this <tt>BeanProvider</tt> represents. It does not however, return
    * the bean in a ready-to-use state. Any {@link InitializationCallback} tasks or {@link ProxyResolver} tasks should

@@ -78,6 +78,10 @@ public class ProxyInjector extends AbstractInjector {
   }
 
   @Override
+  public void renderProvider(InjectableInstance injectableInstance) {
+  }
+
+  @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     final IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 

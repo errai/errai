@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 /**
  * @author Mike Brock
  */
-public interface BootstrapInjectionContext<C> {
+public interface BootstrapInjectionContext {
   public CreationalContext getRootContext();
 }
 

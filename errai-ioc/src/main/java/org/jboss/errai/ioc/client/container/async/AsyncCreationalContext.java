@@ -97,9 +97,6 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
       }
     }, beanType, qualifiers);
 
-    //  @SuppressWarnings("unchecked") final T inst = (T) getBeanInstance((Class<T>) beanType, qualifiers);
-
-
   }
 
   public void finish(final Runnable finishCallback) {

@@ -107,6 +107,7 @@
         <module>errai-config</module>
         <module>errai-codegen-gwt</module>
       <module>errai-ioc-async-tests</module>
+      <module>errai-cdi-async-tests</module>
     </modules>
 
     <dependencyManagement>

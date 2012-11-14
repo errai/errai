@@ -118,12 +118,12 @@ public class IOCProcessingContext {
       return this;
     }
 
-    public Builder bootstrapContextClass(Class<? extends BootstrapInjectionContext> bootstrapClass) {
+    public Builder bootstrapContextClass(final Class<? extends BootstrapInjectionContext> bootstrapClass) {
       this.bootstrapClass = bootstrapClass;
       return this;
     }
 
-    public Builder creationalContextClass(Class<? extends CreationalContext> creationalContextClass) {
+    public Builder creationalContextClass(final Class<? extends CreationalContext> creationalContextClass) {
       this.creationalContextClass = creationalContextClass;
       return this;
     }

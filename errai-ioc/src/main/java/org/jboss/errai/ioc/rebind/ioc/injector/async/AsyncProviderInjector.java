@@ -56,19 +56,21 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
         = MetaClassFactory.parameterizedAs(CreationalCallback.class,
         MetaClassFactory.typeParametersOf(providerInjector.getInjectedType()));
 
-    final String varName = InjectUtil.getVarNameFromType(providerInjector.getInjectedType());
+    final String varName = InjectUtil.getVarNameFromType(providerInjector.getInjectedType(), injectableInstance) + "_XX1";
 
     block.append(
         Stmt.declareFinalVariable(varName, providerCreationalCallback,
             Stmt.newObject(providerCreationalCallback).extend()
                 .publicOverridesMethod("callback", Parameter.of(providerInjector.getInjectedType(), "beanInstance"))
-                .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type))
-                    .invoke("callback", Stmt.loadVariable("beanInstance").invoke("get")))
-                .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this")))
+                    .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type, injectableInstance))
+                         .invoke("callback", Stmt.loadVariable("beanInstance").invoke("get")))
+                    .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this")))
                 .finish()
+
                 .publicOverridesMethod("toString")
                 .append(Stmt.load(providerInjector.getInjectedType()).invoke("getName").returnValue())
                 .finish()
+
                 .finish())
     );
 

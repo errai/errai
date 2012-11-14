@@ -688,9 +688,31 @@ public class InjectUtil {
     return "var".concat(String.valueOf(uniqueCounter.addAndGet(1)));
   }
 
-  public static String getVarNameFromType(final MetaClass clazz) {
+  private static String getVarNameFromType(final MetaClass clazz) {
     return clazz.getFullyQualifiedName().replaceAll("\\.", "_");
   }
+
+  public static String getVarNameFromType(final MetaClass clazz, final MetaParameter parameter) {
+    return getVarNameFromType(clazz) + "_" + parameter.getName();
+  }
+
+  public static String getVarNameFromType(final MetaClass clazz, final MetaField parameter) {
+    return getVarNameFromType(clazz) + "_" + parameter.getName();
+  }
+
+  public static String getVarNameFromType(final MetaClass clazz, final InjectableInstance instance) {
+    switch (instance.getTaskType()) {
+      case PrivateField:
+      case Field:
+        return getVarNameFromType(clazz, instance.getField());
+      case Parameter:
+        return getVarNameFromType(clazz, instance.getParm());
+
+      default:
+        return getVarNameFromType(clazz);
+    }
+  }
+
 
   public static List<Annotation> extractQualifiers(final InjectableInstance<? extends Annotation> injectableInstance) {
     switch (injectableInstance.getTaskType()) {

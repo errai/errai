@@ -267,7 +267,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
 
               final long tm = System.currentTimeMillis();
               new IOCBeanManagerLifecycle().resetBeanManager();
-              final BootstrapInjectionContext<?> ctx = bs.bootstrapContainer();
+              final BootstrapInjectionContext ctx = bs.bootstrapContainer();
               ((SimpleCreationalContext)ctx.getRootContext()).finish();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");

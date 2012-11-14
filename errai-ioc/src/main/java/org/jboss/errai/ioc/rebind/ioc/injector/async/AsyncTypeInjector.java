@@ -91,35 +91,8 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
   }
 
   @Override
-  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
-    final Statement val = _getType(injectableInstance);
-    registerWithBeanManager(injectableInstance.getInjectionContext(), val);
-    return val;
-  }
-
-  private Statement _getType(final InjectableInstance injectableInstance) {
-
-    // check to see if this injector has already been injected
-    if (isRendered()) {
-      if (isSingleton() && !hasNewQualifier(injectableInstance)) {
-
-        final String varName = InjectUtil.getVarNameFromType(type);
-
-        return Stmt.loadVariable("context")
-            .invoke("getSingletonInstanceOrNew", Refs.get("injContext"), Refs.get(creationalCallbackVarName),
-                Refs.get(varName), type, qualifyingMetadata.getQualifiers());
-      }
-      else if (creationalCallbackVarName != null) {
-
-        /**
-         * if the bean is not singleton, or it's scope is overridden to be effectively dependent,
-         * we return a call CreationContext.getInstance() on the SimpleCreationalContext for this injector.
-         */
-        return loadVariable(creationalCallbackVarName).invoke("getInstance",
-            Refs.get(InjectUtil.getVarNameFromType(type)),
-            Refs.get("context"));
-      }
-    }
+  public void renderProvider(final InjectableInstance injectableInstance) {
+    if (isRendered()) return;
 
     final InjectionContext injectContext = injectableInstance.getInjectionContext();
     final IOCProcessingContext ctx = injectContext.getProcessingContext();
@@ -208,28 +181,12 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, beanProviderClassRef).modifiers(Modifier.Final)
         .initializesWith(callbackBuilder.finish().finish()).finish();
 
-    final Statement retVal;
 
     if (isSingleton()) {
-      /*
-       if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
-       method and assign it with SimpleCreationalContext.getInstance().
-       */
-
-      /*
-       use the variable we just assigned as the return value for this injector.
-       */
-
-      retVal = Stmt.load(true);
+      registerWithBeanManager(injectContext, Stmt.load(true));
     }
     else {
-      /*
-       the injector is a dependent scope, so use CreationContext.getInstance() as the return value.
-       */
-      ctx.append(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get(InjectUtil.getVarNameFromType(type)),
-          Refs.get("context")));
-
-      retVal = null;
+      registerWithBeanManager(injectContext, Stmt.load(false));
     }
 
     setRendered(true);
@@ -242,10 +199,31 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
         .handleDiscoveryOfType(injectableInstance);
 
     injectContext.markProxyClosedIfNeeded(getInjectedType(), getQualifyingMetadata());
-    /*
-      return the reference to this bean to whoever called us.
-     */
-    return retVal;
+  }
+
+  @Override
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
+    renderProvider(injectableInstance);
+
+    // check to see if this injector has already been injected
+    if (isSingleton() && !hasNewQualifier(injectableInstance)) {
+
+      final String varName = InjectUtil.getVarNameFromType(type, injectableInstance);
+
+      return Stmt.loadVariable("context")
+          .invoke("getSingletonInstanceOrNew", Refs.get("injContext"), Refs.get(creationalCallbackVarName),
+              Refs.get(varName), type, qualifyingMetadata.getQualifiers());
+    }
+    else {
+
+      /**
+       * if the bean is not singleton, or it's scope is overridden to be effectively dependent,
+       * we return a call CreationContext.getInstance() on the SimpleCreationalContext for this injector.
+       */
+      return loadVariable(creationalCallbackVarName).invoke("getInstance",
+          Refs.get(InjectUtil.getVarNameFromType(type, injectableInstance)),
+          Refs.get("context"));
+    }
   }
 
   private Set<Annotation> makeSpecialized(final InjectionContext context) {

@@ -349,12 +349,12 @@ public class AsyncInjectUtil {
                 // eek! a producer element is produced by this bean and injected into it's own constructor!
                 final AsyncProxyInjector producedElementProxy
                     = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
-
-                proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
-                    .invoke("addBean", Stmt.load(inj.getInjectedType()),
-                        qualifyingMetadata.getQualifiers(), inj.getBeanInstance(injectableInstance)));
-
-                proxyInject.getBeanInstance(injectableInstance);
+//
+//                proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
+//                    .invoke("addBean", Stmt.load(inj.getInjectedType()),
+//                        qualifyingMetadata.getQualifiers(), inj.getBeanInstance(injectableInstance)));
+//
+//                 proxyInject.getBeanInstance(injectableInstance);
 
                 return producedElementProxy.getBeanInstance(injectableInstance);
               }
@@ -478,7 +478,7 @@ public class AsyncInjectUtil {
         .finish();
 
         final BlockBuilder<?> blockBuilder = ctx.getProcessingContext().getBlockBuilder();
-        final String varNameFromType = InjectUtil.getVarNameFromType(parmType);
+        final String varNameFromType = InjectUtil.getVarNameFromType(parmType, parms[i]);
         blockBuilder.append(Stmt.declareFinalVariable(varNameFromType, creationType, callback));
         blockBuilder.append(Stmt.loadVariable("async").invoke("waitConstruct", Refs.get(varNameFromType)));
 
@@ -529,7 +529,7 @@ public class AsyncInjectUtil {
                                                  final MetaParameter parm) {
 
     final Statement stmt = Cast.to(parm.getType(), Stmt.loadVariable("async").invoke("getBeanValue",
-        Refs.get(InjectUtil.getVarNameFromType(parm.getType()))));
+        Refs.get(InjectUtil.getVarNameFromType(parm.getType(), parm))));
 
     ctx.addInlineBeanReference(parm, stmt);
     return stmt;

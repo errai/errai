@@ -39,7 +39,7 @@ public class Container implements EntryPoint {
   }
 
   // stored for debugging purposes only. overwritten every time the container is bootstrapped.
-  private static BootstrapInjectionContext<?> injectionContext;
+  private static BootstrapInjectionContext injectionContext;
 
   public void bootstrapContainer() {
     try {

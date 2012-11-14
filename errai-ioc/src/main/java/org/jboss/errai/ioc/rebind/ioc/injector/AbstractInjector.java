@@ -23,6 +23,9 @@ import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
@@ -183,7 +186,7 @@ public abstract class AbstractInjector implements Injector {
     throw new UnsupportedOperationException("this injector type does have any variable name associated with it");
   }
 
-  protected  static class RegisterCache {
+  protected static class RegisterCache {
     private final InjectionContext _injectionContextForRegister;
     private final Statement _valueRefForRegister;
 
@@ -214,23 +217,28 @@ public abstract class AbstractInjector implements Injector {
 
 
   public void registerWithBeanManager(final InjectionContext context,
-                                      final Statement valueRef) {
+                                      Statement valueRef) {
     if (!isEnabled()) {
       return;
     }
 
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       _registerCache = new RegisterCache(context, valueRef);
+
+      if (!context.isAsync() && valueRef == null && isSingleton()) {
+        valueRef = Stmt.loadStatic(SimpleInjectionContext.class, "LAZY_INIT_REF");
+      }
+
       final ContextualStatementBuilder statement;
       if (beanName == null) {
         statement = loadVariable(context.getProcessingContext().getContextVariableReference())
             .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                isSingleton() ? valueRef : null, qualifyingMetadata.render(), null, true);
+                valueRef, qualifyingMetadata.render(), null, true);
       }
       else {
         statement = loadVariable(context.getProcessingContext().getContextVariableReference())
             .invoke("addBean", getInjectedType(), getInjectedType(), Refs.get(getCreationalCallbackVarName()),
-                isSingleton() ? valueRef : null, qualifyingMetadata.render(), beanName, true);
+                valueRef, qualifyingMetadata.render(), beanName, true);
       }
 
       context.getProcessingContext().appendToEnd(statement);
@@ -297,6 +305,9 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public void addDisablingHook(final Runnable runnable) {
     disablingCallback.add(runnable);
+    if (!enabled) {
+      _runDisablingCallbacks();
+    }
   }
 
   private void _runDisablingCallbacks() {

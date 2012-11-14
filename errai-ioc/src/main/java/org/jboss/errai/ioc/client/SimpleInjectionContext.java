@@ -25,7 +25,9 @@ import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 
-public class SimpleInjectionContext implements BootstrapInjectionContext<BeanProvider> {
+public class SimpleInjectionContext implements BootstrapInjectionContext {
+  public static final Object LAZY_INIT_REF = new Object();
+
   private final IOCBeanManager manager;
   private final SimpleCreationalContext rootContext;
 

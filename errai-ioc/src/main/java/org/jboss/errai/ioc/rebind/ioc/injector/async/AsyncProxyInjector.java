@@ -58,7 +58,11 @@ public class AsyncProxyInjector extends AbstractAsyncInjector {
               .addInnerClass(new InnerClass(proxyClass));
     }
 
-    @Override
+  @Override
+  public void renderProvider(InjectableInstance injectableInstance) {
+  }
+
+  @Override
     public Statement getBeanInstance(final InjectableInstance injectableInstance) {
       final IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
@@ -84,7 +88,7 @@ public class AsyncProxyInjector extends AbstractAsyncInjector {
       setRendered(true);
 
 
-      final String var = InjectUtil.getVarNameFromType(proxiedType);
+      final String var = InjectUtil.getVarNameFromType(proxiedType, injectableInstance);
 
       pCtx.append(Stmt.loadVariable(var).invoke("callback", Refs.get(varName)));
 

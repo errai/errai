@@ -60,6 +60,10 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   }
 
   @Override
+  public void renderProvider(InjectableInstance injectableInstance) {
+  }
+
+  @Override
   public boolean isRendered() {
     return delegate.isRendered();
   }

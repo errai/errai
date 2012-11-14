@@ -118,7 +118,7 @@ public class AsyncInjectionTask {
         .append(Stmt.load(type).invoke("getName").returnValue()).finish()
         .finish();
 
-    final String callbackVarName = InjectUtil.getVarNameFromType(type);
+    final String callbackVarName = InjectUtil.getVarNameFromType(type, getInjectableInstance(ctx));
 
     processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
     processingContext.append(Stmt.loadVariable("async").invoke("wait", Refs.get(callbackVarName)));

@@ -28,6 +28,7 @@ import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -37,7 +38,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectorRegistrationListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
 import javax.enterprise.inject.Disposes;
@@ -59,11 +59,11 @@ public class ProducerInjector extends AbstractInjector {
 
   private boolean creationalCallbackRendered = false;
 
-  public ProducerInjector(final InjectionContext injectionContext,
-                          final MetaClass injectedType,
+  public ProducerInjector(final MetaClass injectedType,
                           final MetaClassMember producerMember,
-                          final QualifyingMetadata metadata,
                           final InjectableInstance producerInjectableInstance) {
+
+    final InjectionContext injectionContext = producerInjectableInstance.getInjectionContext();
 
     switch (producerInjectableInstance.getTaskType()) {
       case PrivateField:
@@ -71,7 +71,7 @@ public class ProducerInjector extends AbstractInjector {
         producerInjectableInstance.ensureMemberExposed(PrivateAccessType.Read);
     }
 
-    super.qualifyingMetadata = metadata;
+    super.qualifyingMetadata = producerInjectableInstance.getQualifyingMetadata();
     this.provider = true;
     this.injectedType = injectedType;
     this.enclosingType = producerMember.getDeclaringClass();
@@ -121,9 +121,21 @@ public class ProducerInjector extends AbstractInjector {
           }
         });
 
+   injectionContext.addInjectorRegistrationListener(injectedType,
+        new InjectorRegistrationListener() {
+          @Override
+          public void onRegister(final MetaClass type, final Injector injector) {
+            if (!(injector instanceof ProducerInjector)) {
+              injector.setEnabled(false);
+            }
+          }
+        });
+
+
     if (producerMember instanceof MetaMethod && injectionContext.isOverridden((MetaMethod) producerMember)) {
       setEnabled(false);
     }
+
 
     if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
       setRendered(true);
@@ -141,11 +153,16 @@ public class ProducerInjector extends AbstractInjector {
   }
 
   @Override
+  public void renderProvider(final InjectableInstance injectableInstance) {
+    renderGlobalProvider(injectableInstance);
+  }
+
+  @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     final InjectionContext injectionContext = injectableInstance.getInjectionContext();
 
     if (isDependent()) {
-      renderGlobalCreationalContext(injectableInstance, injectionContext);
+      renderGlobalProvider(injectableInstance);
       return registerDestructorCallback(injectionContext, injectionContext.getProcessingContext().getBlockBuilder(),
           producerInjectableInstance.getValueStatement(), disposerMethod);
     }
@@ -241,13 +258,14 @@ public class ProducerInjector extends AbstractInjector {
     return Refs.get(varName);
   }
 
-  private void renderGlobalCreationalContext(final InjectableInstance injectableInstance, final InjectionContext injectionContext) {
+  private void renderGlobalProvider(final InjectableInstance injectableInstance) {
+    final InjectionContext injectionContext = injectableInstance.getInjectionContext();
     if (!injectionContext.isTypeInjectable(producerMember.getDeclaringClass())) {
       injectionContext.getInjector(producerMember.getDeclaringClass()).addRenderingHook(
           new RenderingHook() {
             @Override
             public void onRender(final InjectableInstance instance) {
-              renderGlobalCreationalContext(injectableInstance, injectionContext);
+              renderGlobalProvider(injectableInstance);
             }
           }
       );
@@ -289,12 +307,12 @@ public class ProducerInjector extends AbstractInjector {
     registerWithBeanManager(injectionContext, null);
 
     final Injector injector = injectionContext.getInjector(producerMember.getDeclaringClass());
-    if (injector.isDependent()) {
-      injectionContext.getProcessingContext()
-          .appendToEnd(
-              Stmt.loadVariable(injector.getCreationalCallbackVarName()).invoke("getInstance", Refs.get("context"))
-          );
-    }
+    //  if (injector.isDependent()) {
+    injectionContext.getProcessingContext()
+        .appendToEnd(
+            Stmt.loadVariable(injector.getCreationalCallbackVarName()).invoke("getInstance", Refs.get("context"))
+        );
+    //  }
 
     injectionContext.getProcessingContext().popBlockBuilder();
   }
@@ -306,7 +324,7 @@ public class ProducerInjector extends AbstractInjector {
       return InjectUtil.invokePublicOrPrivateMethod(injectionContext,
           beanRef,
           producerMethod,
-          InjectUtil.resolveInjectionDependencies(
+          AsyncInjectUtil.resolveInjectionDependencies(
               producerMethod.getParameters(),
               injectionContext,
               producerMethod,

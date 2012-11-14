@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.ioc.client.SimpleInjectionContext;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -203,13 +205,33 @@ public class IOCBeanManager {
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
                       final BeanProvider<Object> callback,
-                      final Object instance,
+                      Object instance,
                       final Annotation[] qualifiers,
                       final String name,
                       final boolean concreteType) {
 
     if (concreteType) {
       concreteBeans.add(type.getName());
+    }
+
+    // HACK: if the bean was already registered in-line, recycle its reference. this is needed for singleton producers
+    // which get constructed inline and registered with the bean manager eagerly. Effectively his captures the instance
+    // which was registered inline, and copies the instance reference to a new bean reference containing the specified
+    // meta data.
+    //
+    // TODO: figure a way to clean this up.
+    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
+      final IOCBeanDef def = lookupBean(type, qualifiers);
+      if (def != null) {
+        instance = def.getInstance();
+        final Iterator<IOCBeanDef> iterator = beanMap.get(type).iterator();
+        while (iterator.hasNext()) {
+          if (iterator.next() == def) {
+            iterator.remove();
+            break;
+          }
+        }
+      }
     }
 
     if (instance != null) {

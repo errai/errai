@@ -10,7 +10,7 @@ import java.lang.annotation.Annotation;
  * @author Mike Brock
  */
 @SuppressWarnings("unchecked")
-public class AsyncInjectionContext implements BootstrapInjectionContext<AsyncBeanProvider> {
+public class AsyncInjectionContext implements BootstrapInjectionContext {
   private final AsyncBeanManager manager;
   private final AsyncCreationalContext context;
 

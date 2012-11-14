@@ -20,7 +20,6 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.get
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
-import com.google.gwt.resources.css.ast.CssProperty;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
@@ -36,7 +35,6 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
@@ -47,10 +45,9 @@ import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProducerInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
@@ -78,12 +75,12 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-public class IOCProcessorFactory {
+public class IOCConfigProcessor {
   private final Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
   private final InjectionContext injectionContext;
   private final Set<String> visitedAutoDiscoveredDependentBeans = new HashSet<String>();
 
-  public IOCProcessorFactory(final InjectionContext injectionContext) {
+  public IOCConfigProcessor(final InjectionContext injectionContext) {
     this.injectionContext = injectionContext;
   }
 
@@ -160,8 +157,25 @@ public class IOCProcessorFactory {
     }
   }
 
+  private static boolean checkIfEnabled(MetaClass clazzType) {
+    if (clazzType.isAnnotationPresent(EnabledByProperty.class)) {
+      final EnabledByProperty enabledByProperty = clazzType.getAnnotation(EnabledByProperty.class);
+      final String propertyValue = enabledByProperty.value();
+      final boolean negatedTest = enabledByProperty.negated();
+
+      boolean bool = Boolean.parseBoolean(EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty(propertyValue));
+      if (negatedTest) {
+        bool = !bool;
+      }
+      if (!bool) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @SuppressWarnings("unchecked")
-  private void inferHandlers() {
+  private void setupHandlers() {
     for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry
         : injectionContext.getAllElementMappings()) {
       switch (entry.getKey()) {
@@ -176,18 +190,8 @@ public class IOCProcessorFactory {
 
               final MetaClass providerClassType = instance.getType();
 
-              if (providerClassType.isAnnotationPresent(EnabledByProperty.class)) {
-                final EnabledByProperty enabledByProperty = providerClassType.getAnnotation(EnabledByProperty.class);
-                final String propertyValue = enabledByProperty.value();
-                final boolean negatedTest = enabledByProperty.negated();
-
-                boolean bool = Boolean.parseBoolean(EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty(propertyValue));
-                if (negatedTest) {
-                  bool = !bool;
-                }
-                if (!bool) {
-                  return;
-                }
+              if (!checkIfEnabled(providerClassType)) {
+                return;
               }
 
 
@@ -271,6 +275,13 @@ public class IOCProcessorFactory {
             public boolean handle(final InjectableInstance instance,
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
+              final List<Injector> injectors
+                  = injectionContext.getInjectors(instance.getElementTypeOrMethodReturnType());
+              for (final Injector injector : injectors) {
+                if (injector.isEnabled() && injectionContext.isTypeInjectable(injector.getEnclosingType())) {
+                  injector.renderProvider(instance);
+                }
+              }
               return true;
             }
           }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
@@ -291,6 +302,10 @@ public class IOCProcessorFactory {
                                         final Annotation annotation,
                                         final IOCProcessingContext context) {
 
+              if (!checkIfEnabled(instance.getType())) {
+                return;
+              }
+
               final MetaClass injectedType = instance.getElementTypeOrMethodReturnType();
               final MetaClassMember producerMember;
 
@@ -300,7 +315,6 @@ public class IOCProcessorFactory {
                   producerMember = instance.getMethod();
 
                   for (final MetaParameter parm : instance.getMethod().getParameters()) {
-                    control.notifyDependency(injectedType);
                     control.notifyDependencies(fillInInterface(parm.getType()));
                   }
 
@@ -313,13 +327,8 @@ public class IOCProcessorFactory {
                   throw new RuntimeException("illegal producer type");
               }
 
-              final ProducerInjector producerInjector
-                  = new ProducerInjector(
-                  injectionContext,
-                  injectedType,
-                  producerMember,
-                  instance.getQualifyingMetadata(),
-                  instance);
+              final Injector producerInjector = injectionContext.getInjectorFactory()
+                  .getProducerInjector(injectedType, producerMember, instance);
 
               injectionContext.registerInjector(producerInjector);
 
@@ -339,8 +348,8 @@ public class IOCProcessorFactory {
               final List<Injector> injectors
                   = injectionContext.getInjectors(instance.getElementTypeOrMethodReturnType());
               for (final Injector injector : injectors) {
-                if (injector.isEnabled() && injectionContext.isTypeInjectable(injector.getEnclosingType())) {
-                  injector.getBeanInstance(instance);
+                if (injector.isEnabled()) {
+                  injector.renderProvider(instance);
                 }
               }
               return true;
@@ -356,6 +365,7 @@ public class IOCProcessorFactory {
             public boolean handle(final InjectableInstance instance,
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
+
               final List<Injector> injectors = new ArrayList<Injector>(injectionContext.getInjectors(instance.getType()));
               final Injector injector;
 
@@ -377,11 +387,10 @@ public class IOCProcessorFactory {
               }
               else {
                 injector = injectionContext.getInjectorFactory().getTypeInjector(instance.getType(), injectionContext);
-                //  injector = new TypeInjector(instance.getType(), injectionContext);
               }
 
               if (injector.isEnabled() && injector instanceof TypeInjector) {
-                injector.getBeanInstance(instance);
+                injector.renderProvider(instance);
               }
               return true;
             }
@@ -396,7 +405,7 @@ public class IOCProcessorFactory {
               final Injector injector = injectionContext.getInjector(instance.getType());
 
               if (injector.isEnabled()) {
-                injector.getBeanInstance(instance);
+                injector.renderProvider(instance);
               }
               return true;
             }
@@ -408,15 +417,15 @@ public class IOCProcessorFactory {
 
   @SuppressWarnings({"unchecked"})
   public void process(final IOCProcessingContext context) {
-    inferHandlers();
+    setupHandlers();
 
     /**
      * Let's accumulate all the processing tasks.
      */
     do {
       for (final ProcessingEntry entry : processingTasksStack.pop()) {
-        final Class<? extends Annotation> annoClass = entry.annotationClass;
-        Target target = annoClass.getAnnotation(Target.class);
+        final Class<? extends Annotation> annotationClass = entry.annotationClass;
+        Target target = annotationClass.getAnnotation(Target.class);
 
         if (target == null) {
           target = new Target() {
@@ -440,14 +449,14 @@ public class IOCProcessorFactory {
           switch (elementType) {
             case TYPE: {
               Collection<MetaClass> classes;
-              if (entry.handler instanceof ProvidedClassAnnotationHandler) {
-                classes = ((ProvidedClassAnnotationHandler) entry.handler).getClasses();
-              }
-              else {
-                classes = ClassScanner.getTypesAnnotatedWith(annoClass, context.getPackages());
-              }
+//              if (entry.handler instanceof ProvidedClassAnnotationHandler) {
+//                classes = ((ProvidedClassAnnotationHandler) entry.handler).getClasses();
+//              }
+//              else {
+              classes = ClassScanner.getTypesAnnotatedWith(annotationClass, context.getPackages());
+//              }
 
-              if (annoClass.equals(Dependent.class)
+              if (annotationClass.equals(Dependent.class)
                   && Boolean.getBoolean(IOCBootstrapGenerator.EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY)
                   && injectionContext.getAllReachableTypes() != null) {
 
@@ -502,7 +511,7 @@ public class IOCProcessorFactory {
                     final Class<? extends Annotation> stereoType = clazz.asClass().asSubclass(Annotation.class);
                     for (final MetaClass stereoTypedClass :
                         ClassScanner.getTypesAnnotatedWith(stereoType)) {
-                      handleType(entry, dependencyControl, stereoTypedClass, annoClass, context);
+                      handleType(entry, dependencyControl, stereoTypedClass, annotationClass, context);
                     }
                   }
 
@@ -510,21 +519,21 @@ public class IOCProcessorFactory {
                   continue;
                 }
 
-                handleType(entry, dependencyControl, clazz, annoClass, context);
+                handleType(entry, dependencyControl, clazz, annotationClass, context);
               }
             }
             break;
 
             case METHOD: {
-              for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(annoClass, context.getPackages())) {
-                handleMethod(entry, dependencyControl, method, annoClass, context);
+              for (final MetaMethod method : ClassScanner.getMethodsAnnotatedWith(annotationClass, context.getPackages())) {
+                handleMethod(entry, dependencyControl, method, annotationClass, context);
               }
             }
             break;
 
             case FIELD: {
-              for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(annoClass, context.getPackages())) {
-                handleField(entry, dependencyControl, field, annoClass, context);
+              for (final MetaField field : ClassScanner.getFieldsAnnotatedWith(annotationClass, context.getPackages())) {
+                handleField(entry, dependencyControl, field, annotationClass, context);
               }
             }
           }
@@ -575,7 +584,7 @@ public class IOCProcessorFactory {
                           final Class<? extends Annotation> aClass,
                           final IOCProcessingContext context) {
 
-    if (type.getFullyQualifiedName().equals("java.lang.Object")) {
+    if (type.getFullyQualifiedName().equals(Object.class.getName())) {
       return;
     }
 
@@ -600,6 +609,10 @@ public class IOCProcessorFactory {
 
       @Override
       public boolean process() {
+        if (!checkIfEnabled(type)) {
+          return false;
+        }
+
         injectionContext.addType(type);
 
         final List<Injector> injectors = injectionContext.getInjectors(type);
@@ -658,6 +671,10 @@ public class IOCProcessorFactory {
 
       @Override
       public boolean process() {
+        if (!checkIfEnabled(type)) {
+          return false;
+        }
+
         injectionContext.addType(type);
 
         final Injector injector = injectionContext.getInjector(type);
@@ -706,6 +723,10 @@ public class IOCProcessorFactory {
       @SuppressWarnings("unchecked")
       @Override
       public boolean process() {
+        if (!checkIfEnabled(type)) {
+          return false;
+        }
+
         injectionContext.addType(type);
 
         final InjectableInstance injectableInstance

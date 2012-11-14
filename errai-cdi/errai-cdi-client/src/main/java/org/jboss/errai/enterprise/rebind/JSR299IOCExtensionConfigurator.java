@@ -18,17 +18,14 @@ package org.jboss.errai.enterprise.rebind;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.IOCExtension;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -42,7 +39,7 @@ import java.util.Set;
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
-                        final IOCProcessorFactory procFactory) {
+                        final IOCConfigProcessor procFactory) {
 
     injectionContext.mapElementType(WiringElementType.SingletonBean, ApplicationScoped.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
@@ -72,7 +69,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
   public void afterInitialization(final IOCProcessingContext context,
                                   final InjectionContext injectionContext,
-                                  final IOCProcessorFactory procFactory) {
+                                  final IOCConfigProcessor procFactory) {
 
     final BlockStatement instanceInitializer = context.getBootstrapClass().getInstanceInitializer();
 

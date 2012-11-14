@@ -15,6 +15,14 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
  * @author Mike Brock
  */
 public interface Injector {
+  void renderProvider(InjectableInstance injectableInstance);
+
+  /**
+   * Return a statement providing access to the injector (or null for asynchronous logic)
+   *
+   * @param injectableInstance
+   * @return
+   */
   Statement getBeanInstance(InjectableInstance injectableInstance);
 
   /**

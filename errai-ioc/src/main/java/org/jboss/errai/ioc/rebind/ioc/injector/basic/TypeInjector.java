@@ -110,58 +110,36 @@ public class TypeInjector extends AbstractInjector {
   }
 
   @Override
-  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
-    final Statement val = _getType(injectableInstance);
-    registerWithBeanManager(injectableInstance.getInjectionContext(), val);
-    return val;
-  }
-
-  private Statement _getType(final InjectableInstance injectableInstance) {
-    // check to see if this injector has already been injected
-    if (isRendered()) {
-      if (isSingleton() && !hasNewQualifier(injectableInstance)) {
-
-        /**
-         * if this bean is a singleton bean and there is no @New qualifier on the site we're injecting
-         * into, we merely return a reference to the singleton instance variable from the bootstrapper.
-         */
-        return Refs.get(instanceVarName);
-      }
-      else if (creationalCallbackVarName != null) {
-
-        /**
-         * if the bean is not singleton, or it's scope is overridden to be effectively dependent,
-         * we return a call CreationContext.getInstance() on the SimpleCreationalContext for this injector.
-         */
-        return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
-      }
+  public void renderProvider(final InjectableInstance injectableInstance) {
+    if (isRendered() && isEnabled()) {
+      return;
     }
 
     final InjectionContext injectContext = injectableInstance.getInjectionContext();
     final IOCProcessingContext ctx = injectContext.getProcessingContext();
 
-    /*
-    get a parameterized version of the BeanProvider class, parameterized with the type of
-    bean it produces.
-    */
+     /*
+     get a parameterized version of the BeanProvider class, parameterized with the type of
+     bean it produces.
+     */
     final MetaClass creationCallbackRef = parameterizedAs(BeanProvider.class, typeParametersOf(type));
 
-    /*
-    begin building the creational callback, implement the "getInstance" method from the interface
-    and assign its BlockBuilder to a callbackBuilder so we can work with it.
-    */
+     /*
+     begin building the creational callback, implement the "getInstance" method from the interface
+     and assign its BlockBuilder to a callbackBuilder so we can work with it.
+     */
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
         = newInstanceOf(creationCallbackRef).extend()
         .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
 
-    /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
+     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
     ctx.pushBlockBuilder(callbackBuilder);
 
-    /* get a new unique variable for the creational callback */
+     /* get a new unique variable for the creational callback */
     creationalCallbackVarName = InjectUtil.getNewInjectorName().concat("_")
         .concat(type.getName()).concat("_creational");
 
-    /* get the construction strategy and execute it to wire the bean */
+     /* get the construction strategy and execute it to wire the bean */
     getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
       public void beanConstructed(final ConstructionType constructionType) {
@@ -172,62 +150,74 @@ public class TypeInjector extends AbstractInjector {
                 load(qualifyingMetadata.getQualifiers())), beanRef)
         );
 
-        /* mark this injector as injected so we don't go into a loop if there is a cycle. */
+         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
       }
     });
 
-    /*
-    return the instance of the bean from the creational callback.
-    */
+     /*
+     return the instance of the bean from the creational callback.
+     */
     callbackBuilder.append(loadVariable(instanceVarName).returnValue());
 
-    /* pop the block builder of the stack now that we're done wiring. */
+     /* pop the block builder of the stack now that we're done wiring. */
     ctx.popBlockBuilder();
 
-    /*
-    declare a final variable for the BeanProvider and initialize it with the anonymous class we just
-    built.
-    */
+     /*
+     declare a final variable for the BeanProvider and initialize it with the anonymous class we just
+     built.
+     */
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
         .initializesWith(callbackBuilder.finish().finish()).finish();
 
     final Statement retVal;
 
     if (isSingleton()) {
-      /*
-       if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
-       method and assign it with SimpleCreationalContext.getInstance().
-       */
+       /*
+        if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
+        method and assign it with SimpleCreationalContext.getInstance().
+        */
       ctx.getBootstrapBuilder().privateField(instanceVarName, type).modifiers(Modifier.Final)
           .initializesWith(loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"))).finish();
 
-      /*
-       use the variable we just assigned as the return value for this injector.
-       */
-      retVal = Refs.get(instanceVarName);
+      registerWithBeanManager(injectContext, Refs.get(instanceVarName));
     }
     else {
-      /*
-       the injector is a dependent scope, so use CreationContext.getInstance() as the return value.
-       */
-      retVal = loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
+      registerWithBeanManager(injectContext, null);
     }
 
     setRendered(true);
     markRendered(injectableInstance);
 
-    /*
-      notify any component waiting for this type that is is ready now.
-     */
+     /*
+       notify any component waiting for this type that is is ready now.
+      */
     injectableInstance.getInjectionContext().getProcessingContext()
         .handleDiscoveryOfType(injectableInstance);
 
     injectContext.markProxyClosedIfNeeded(getInjectedType(), getQualifyingMetadata());
-    /*
-      return the reference to this bean to whoever called us.
-     */
-    return retVal;
+  }
+
+  @Override
+  public Statement getBeanInstance(final InjectableInstance injectableInstance) {
+    renderProvider(injectableInstance);
+
+    if (isSingleton() && !hasNewQualifier(injectableInstance)) {
+
+      /**
+       * if this bean is a singleton bean and there is no @New qualifier on the site we're injecting
+       * into, we merely return a reference to the singleton instance variable from the bootstrapper.
+       */
+      return Refs.get(instanceVarName);
+    }
+    else {
+
+      /**
+       * if the bean is not singleton, or it's scope is overridden to be effectively dependent,
+       * we return a call CreationContext.getInstance() on the SimpleCreationalContext for this injector.
+       */
+      return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
+    }
   }
 
   private Set<Annotation> makeSpecialized(final InjectionContext context) {

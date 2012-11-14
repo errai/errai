@@ -42,6 +42,11 @@ public class AsyncContextualProviderInjector extends TypeInjector {
   }
 
   @Override
+  public void renderProvider(InjectableInstance injectableInstance) {
+    providerInjector.renderProvider(injectableInstance);
+  }
+
+  @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     final MetaClass type;
     final MetaParameterizedType pType;
@@ -90,7 +95,7 @@ public class AsyncContextualProviderInjector extends TypeInjector {
         = MetaClassFactory.parameterizedAs(CreationalCallback.class,
         MetaClassFactory.typeParametersOf(providerInjector.getInjectedType()));
 
-    final String varName = InjectUtil.getVarNameFromType(providerInjector.getInjectedType());
+    final String varName = InjectUtil.getVarNameFromType(providerInjector.getInjectedType(), injectableInstance);
 
     final Statement valueRef;
 
@@ -107,7 +112,7 @@ public class AsyncContextualProviderInjector extends TypeInjector {
         Stmt.declareFinalVariable(varName, providerCreationalCallback,
             Stmt.newObject(providerCreationalCallback).extend()
                 .publicOverridesMethod("callback", Parameter.of(providerInjector.getInjectedType(), "beanInstance"))
-                  .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type)).invoke("callback", valueRef))
+                  .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type, injectableInstance)).invoke("callback", valueRef))
                   .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this")))
                 .finish()
                 .publicOverridesMethod("toString")

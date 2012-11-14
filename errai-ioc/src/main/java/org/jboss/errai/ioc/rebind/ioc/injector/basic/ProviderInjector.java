@@ -56,6 +56,11 @@ public class ProviderInjector extends TypeInjector {
   }
 
   @Override
+  public void renderProvider(InjectableInstance injectableInstance) {
+    super.renderProvider(injectableInstance);
+  }
+
+  @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
 
 
