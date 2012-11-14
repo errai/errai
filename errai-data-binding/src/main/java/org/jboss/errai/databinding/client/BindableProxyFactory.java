@@ -88,7 +88,7 @@ public class BindableProxyFactory {
 
     BindableProxyProvider proxyProvider = bindableProxyProviders.get(bindableType);
     if (proxyProvider == null) {
-      throw new RuntimeException("No proxy provider found for bindable type:" + bindableType.getName());
+      throw new RuntimeException("No proxy provider found for bindable type: " + bindableType.getName());
     }
 
     return proxyProvider;

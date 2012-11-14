@@ -127,16 +127,7 @@ public abstract class EnvUtil {
 
     exposedClasses.addAll(exposedFromScanner);
 
-    final Enumeration<URL> erraiAppProperties;
-
-    try {
-      erraiAppProperties = Thread.currentThread().getContextClassLoader()
-          .getResources("ErraiApp.properties");
-    }
-    catch (IOException e) {
-      throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
-    }
-
+    final Enumeration<URL> erraiAppProperties = getErraiAppProperties();
     while (erraiAppProperties.hasMoreElements()) {
       InputStream inputStream = null;
       try {
@@ -231,6 +222,15 @@ public abstract class EnvUtil {
     return new EnvironmentConfig(mappingAliases, exposedClasses, portableNonExposed, explicitTypes, frameworkProps);
   }
 
+  public static Enumeration<URL> getErraiAppProperties() {
+    try {
+      return Thread.currentThread().getContextClassLoader().getResources("ErraiApp.properties");
+    }
+    catch (IOException e) {
+      throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
+    }
+  }
+  
   private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
     for (final MetaClass iface : type.getInterfaces()) {
       set.add(iface);
@@ -414,8 +414,8 @@ public abstract class EnvUtil {
     }
 
     class Reachability {
-      private Set<String> packages;
-      private Set<String> negativeHits = new HashSet<String>();
+      private final Set<String> packages;
+      private final Set<String> negativeHits = new HashSet<String>();
 
       Reachability(final Set<String> packages) {
         this.packages = new HashSet<String>(packages);

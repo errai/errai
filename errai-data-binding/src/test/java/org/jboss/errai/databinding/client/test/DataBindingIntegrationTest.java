@@ -23,9 +23,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.databinding.client.BindableProxy;
+import org.jboss.errai.databinding.client.MockHandler;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -85,6 +87,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Model not properly updated", "UI change", model.getName());
   }
 
+  @Test
+  public void testBasicBindingOfNonAnnotatedType() {
+    TextBox textBox = new TextBox();
+    TestModelWithoutBindableAnnotation model = 
+      DataBinder.forType(TestModelWithoutBindableAnnotation.class).bind(textBox, "value").getModel();
+
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getValue());
+
+    model.setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+  
   @Test
   public void testBindingOfReadOnlyField() {
     Label label = new Label();
@@ -428,7 +443,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
-    assertEquals("Should have received excatly one property change event", 1, handler.events.size());
+    assertEquals("Should have received excatly one property change event", 1, handler.getEvents().size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
@@ -436,7 +451,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
-    assertEquals("Should have received excatly two property change event", 2, handler.events.size());
+    assertEquals("Should have received excatly two property change event", 2, handler.getEvents().size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(1).getPropertyName());
     assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
     assertEquals("Wrong previous value in event", "UI change", handler.getEvents().get(1).getOldValue());

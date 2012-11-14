@@ -137,7 +137,8 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
     };
 
     Label label = new Label();
-    TestModel model = DataBinder.forModel(new TestModel(), InitialState.FROM_MODEL).bind(label, "age", converter).getModel();
+    TestModel model = DataBinder.forModel(new TestModel(), InitialState.FROM_MODEL)
+      .bind(label, "age", converter).getModel();
 
     model.setAge(123);
     assertEquals("Widget not properly updated using custom converter", "test", label.getText());
