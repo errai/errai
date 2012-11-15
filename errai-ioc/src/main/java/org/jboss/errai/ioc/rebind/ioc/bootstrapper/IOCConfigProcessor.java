@@ -389,7 +389,7 @@ public class IOCConfigProcessor {
                 injector = injectionContext.getInjectorFactory().getTypeInjector(instance.getType(), injectionContext);
               }
 
-              if (injector.isEnabled() && injector instanceof TypeInjector) {
+              if (injector.isEnabled() && injector.isRegularTypeInjector()) {
                 injector.renderProvider(instance);
               }
               return true;

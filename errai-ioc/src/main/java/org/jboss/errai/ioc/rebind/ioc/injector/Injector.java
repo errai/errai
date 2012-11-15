@@ -218,4 +218,12 @@ public interface Injector {
    * @param enabled the enabled state of the bean to set (<tt>true</tt> for enabled, <tt>false</tt> for disabled).
    */
   void setEnabled(boolean enabled);
+
+
+  /**
+   * Returns true if the injector type is a regular type injector. (ie. not a proxy injector, producer injector, etc).
+   *
+   * @return true if the injector is a regular type injector.
+   */
+  boolean isRegularTypeInjector();
 }

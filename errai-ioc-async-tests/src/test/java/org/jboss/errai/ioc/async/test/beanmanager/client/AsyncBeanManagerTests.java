@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.async.test.beanmanager.client;
 
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.ADependent;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Foo;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
@@ -13,7 +14,6 @@ import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 public class AsyncBeanManagerTests extends IOCClientTestCase {
   @Override
   public void gwtSetUp() throws Exception {
-    IOCEnvironment.setAsync(true);
     super.gwtSetUp();
   }
 
@@ -68,5 +68,20 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
         finishTest();
       }
     });
+  }
+
+  public void testLookupDependentBean() {
+    delayTestFinish(10000);
+    IOC.getAsyncBeanManager().lookupBean(ADependent.class)
+        .getInstance(new CreationalCallback<ADependent>() {
+          @Override
+          public void callback(final ADependent beanInstance) {
+            assertNotNull(beanInstance);
+
+            assertEquals("foo", beanInstance.testString());
+
+            finishTest();
+          }
+        });
   }
 }

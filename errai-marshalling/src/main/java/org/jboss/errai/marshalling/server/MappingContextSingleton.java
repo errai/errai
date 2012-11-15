@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.server;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
@@ -48,6 +49,7 @@ public class MappingContextSingleton {
   private static final Logger log = getLogger("ErraiMarshalling");
 
   static {
+    ClassScanner.setReflectionsScanning(true);
     ParserFactory.registerParser(
         new Parser() {
           @Override

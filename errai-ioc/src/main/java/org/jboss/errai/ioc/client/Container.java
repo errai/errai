@@ -33,6 +33,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import java.lang.annotation.Annotation;
 
 public class Container implements EntryPoint {
+
   @Override
   public void onModuleLoad() {
     bootstrapContainer();

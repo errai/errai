@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 
 /**
@@ -30,7 +31,21 @@ public final class IOC {
   private final AsyncBeanManager asyncBeanManager;
 
   private IOC() {
-    if (IOCEnvironment.isAsync()) {
+    IOCEnvironment iocEnvironment;
+
+    try {
+      iocEnvironment = GWT.create(IOCEnvironment.class);
+    }
+    catch (UnsupportedOperationException e) {
+      iocEnvironment = new IOCEnvironment() {
+        @Override
+        public boolean isAsync() {
+          return false;
+        }
+      };
+    }
+
+    if (iocEnvironment.isAsync()) {
       asyncBeanManager = new AsyncBeanManager();
       beanManager = null;
     }

@@ -270,4 +270,9 @@ public class TypeInjector extends AbstractInjector {
   public String getCreationalCallbackVarName() {
     return creationalCallbackVarName;
   }
+
+  @Override
+  public boolean isRegularTypeInjector() {
+    return true;
+  }
 }

@@ -22,7 +22,6 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
 
   @Override
   public void gwtSetUp() throws Exception {
-    IOCEnvironment.setAsync(true);
     super.gwtSetUp();
   }
 

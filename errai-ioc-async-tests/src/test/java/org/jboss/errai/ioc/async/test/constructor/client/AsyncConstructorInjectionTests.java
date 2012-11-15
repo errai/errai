@@ -13,7 +13,6 @@ import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 public class AsyncConstructorInjectionTests extends IOCClientTestCase {
   @Override
   public void gwtSetUp() throws Exception {
-    IOCEnvironment.setAsync(true);
     super.gwtSetUp();
   }
 

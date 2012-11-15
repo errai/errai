@@ -291,4 +291,9 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
   public String getCreationalCallbackVarName() {
     return creationalCallbackVarName;
   }
+
+  @Override
+  public boolean isRegularTypeInjector() {
+    return true;
+  }
 }

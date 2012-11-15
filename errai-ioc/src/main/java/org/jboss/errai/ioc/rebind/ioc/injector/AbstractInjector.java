@@ -310,6 +310,11 @@ public abstract class AbstractInjector implements Injector {
     }
   }
 
+  @Override
+  public boolean isRegularTypeInjector() {
+    return false;
+  }
+
   private void _runDisablingCallbacks() {
     for (final Runnable run : disablingCallback) {
       run.run();
