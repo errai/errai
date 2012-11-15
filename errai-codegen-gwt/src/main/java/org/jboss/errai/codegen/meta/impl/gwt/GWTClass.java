@@ -215,9 +215,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
     final Set<String> processedMethods = new HashSet<String>();
     do {
       for (final JMethod jMethod : type.getMethods()) {
-        if (!jMethod.isPrivate() && !processedMethods.contains(jMethod.getReadableDeclaration())) {
-            meths.add(new GWTMethod(oracle, jMethod));
-            processedMethods.add(jMethod.getReadableDeclaration());
+        GWTMethod gwtMethod = new GWTMethod(oracle, jMethod);
+        String readableMethodDecl = GenUtil.getMethodString(gwtMethod);
+        if (!jMethod.isPrivate() && !processedMethods.contains(readableMethodDecl)) {
+            meths.add(gwtMethod);
+            processedMethods.add(readableMethodDecl);
         }
       }
 
