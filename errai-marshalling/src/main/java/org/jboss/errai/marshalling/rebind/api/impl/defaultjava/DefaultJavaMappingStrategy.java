@@ -162,18 +162,27 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
             for (final Mapping mapping : mappingDefinition.getInstantiationMapping().getMappings()) {
               final MetaClass type = mapping.getType().asBoxed();
-              if (context.canMarshal(type.getFullyQualifiedName())) {
                 if (type.isArray()) {
-                  constructorParameters.add(context.getArrayMarshallerCallback()
+                  MetaClass toMap = type;
+                  while (toMap.isArray()) {
+                    toMap = toMap.getComponentType();
+                  }
+                  if (context.canMarshal(toMap.getFullyQualifiedName())) {
+                    constructorParameters.add(context.getArrayMarshallerCallback()
                           .demarshall(type, extractJSONObjectProperty(mapping.getKey(), EJObject.class)));
+                  }
+                  else {
+                    throw new MarshallingException("no marshaller for type: " + toMap);
+                  }
                 }
                 else {
-                  constructorParameters.add(fieldDemarshall(mapping, EJObject.class));
+                  if (context.canMarshal(type.getFullyQualifiedName())) {
+                    constructorParameters.add(fieldDemarshall(mapping, EJObject.class));
+                  }
+                  else {
+                    throw new MarshallingException("no marshaller for type: " + type);
+                  }
                 }
-              }
-              else {
-                throw new MarshallingException("no marshaller for type: " + type);
-              }
             }
 
             if (instantiationMapping instanceof ConstructorMapping) {

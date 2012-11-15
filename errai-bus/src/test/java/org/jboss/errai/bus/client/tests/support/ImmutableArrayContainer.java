@@ -1,5 +1,7 @@
 package org.jboss.errai.bus.client.tests.support;
 
+import java.util.Arrays;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
@@ -9,15 +11,15 @@ import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Portable
-public class ImmutableEnumContainer {
+public class ImmutableArrayContainer {
 
-  private final TestEnumA test;
+  private final String[] test;
 
-  public ImmutableEnumContainer(@MapsTo("test") TestEnumA test) {
+  public ImmutableArrayContainer(@MapsTo("test") String[] test) {
     this.test = test;
   }
 
-  public TestEnumA getTest() {
+  public String[] getTest() {
     return test;
   }
 
@@ -25,7 +27,7 @@ public class ImmutableEnumContainer {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((test == null) ? 0 : test.hashCode());
+    result = prime * result + Arrays.hashCode(test);
     return result;
   }
 
@@ -37,15 +39,14 @@ public class ImmutableEnumContainer {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ImmutableEnumContainer other = (ImmutableEnumContainer) obj;
-    if (test != other.test)
+    ImmutableArrayContainer other = (ImmutableArrayContainer) obj;
+    if (!Arrays.equals(test, other.test))
       return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "ImmutableEnumContainer [test=" + test + "]";
+    return "ImmutableArrayContainer [test=" + Arrays.toString(test) + "]";
   }
-  
 }

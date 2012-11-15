@@ -179,4 +179,6 @@ public interface TestSerializationRPCService {
   public ImplicitEnum testImplicitEnum(ImplicitEnum e);
   
   public EntityWithInterfaceField testEntityWithInterfaceField(EntityWithInterfaceField e);
+  
+  public ImmutableArrayContainer testImmutableEntityWithArray(ImmutableArrayContainer e);
 }
