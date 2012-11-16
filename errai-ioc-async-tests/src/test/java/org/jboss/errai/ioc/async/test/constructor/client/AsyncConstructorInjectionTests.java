@@ -4,13 +4,13 @@ import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.async.test.constructor.client.res.ConstrInjBean;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 /**
  * @author Mike Brock
  */
 public class AsyncConstructorInjectionTests extends IOCClientTestCase {
+
   @Override
   public void gwtSetUp() throws Exception {
     super.gwtSetUp();
@@ -30,19 +30,19 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
         IOC.getAsyncBeanManager().lookupBean(ConstrInjBean.class)
             .getInstance(new CreationalCallback<ConstrInjBean>() {
               @Override
-              public void callback(final ConstrInjBean beanInstance) {
+              public void callback(final ConstrInjBean bean) {
 
-                assertNotNull(beanInstance.getMyself());
-                assertNotNull(beanInstance.getApple());
-                assertNotNull(beanInstance.getPear());
-                assertNotNull(beanInstance.getOrange());
+                assertNotNull(bean.getMyself());
+                assertNotNull(bean.getApple());
+                assertNotNull(bean.getPear());
+                assertNotNull(bean.getOrange());
 
-                assertNotNull(beanInstance.getPeanut());
-                assertNotNull(beanInstance.getCashew());
+                assertNotNull(bean.getPeanut());
+                assertNotNull(bean.getCashew());
 
-                assertTrue(beanInstance.isPostConstructFired());
+                assertTrue(bean.isPostConstructFired());
 
-                assertSame(beanInstance, IOC.getAsyncBeanManager().getActualBeanReference(beanInstance.getMyself()));
+                assertSame(bean, IOC.getAsyncBeanManager().getActualBeanReference(bean.getMyself()));
 
                 finishTest();
               }

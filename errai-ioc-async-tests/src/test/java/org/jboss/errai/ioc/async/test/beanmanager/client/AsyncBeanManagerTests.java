@@ -5,7 +5,6 @@ import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Foo;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 /**
@@ -27,28 +26,28 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
 
     IOC.getAsyncBeanManager().lookupBean(Foo.class).getInstance(new CreationalCallback<Foo>() {
       @Override
-      public void callback(final Foo beanInstance) {
-        assertNotNull(beanInstance);
-        assertNotNull(beanInstance.getBar());
-        assertNotNull(beanInstance.getBar2());
-        assertNotNull(beanInstance.getBarDisposer());
-        assertNotNull(beanInstance.getBar2().getManager());
-        assertNotNull(beanInstance.getBazTheSingleton());
-        assertNotNull(beanInstance.getBar().getBazTheSingleton());
-        assertNotNull(beanInstance.getBar2().getBazTheSingleton());
+      public void callback(final Foo bean) {
+        assertNotNull(bean);
+        assertNotNull(bean.getBar());
+        assertNotNull(bean.getBar2());
+        assertNotNull(bean.getBarDisposer());
+        assertNotNull(bean.getBar2().getManager());
+        assertNotNull(bean.getBazTheSingleton());
+        assertNotNull(bean.getBar().getBazTheSingleton());
+        assertNotNull(bean.getBar2().getBazTheSingleton());
 
-        assertSame(beanInstance.getBazTheSingleton(), beanInstance.getBar().getBazTheSingleton());
-        assertSame(beanInstance.getBazTheSingleton(), beanInstance.getBar2().getBazTheSingleton());
+        assertSame(bean.getBazTheSingleton(), bean.getBar().getBazTheSingleton());
+        assertSame(bean.getBazTheSingleton(), bean.getBar2().getBazTheSingleton());
 
-        final Object fooRef1 = IOC.getAsyncBeanManager().getActualBeanReference(beanInstance.getBar().getFoo());
-        final Object fooRef2 = IOC.getAsyncBeanManager().getActualBeanReference(beanInstance);
+        final Object fooRef1 = IOC.getAsyncBeanManager().getActualBeanReference(bean.getBar().getFoo());
+        final Object fooRef2 = IOC.getAsyncBeanManager().getActualBeanReference(bean);
 
         assertSame(fooRef1, fooRef2);
 
         // confirm post-construct fired
-        assertTrue(beanInstance.getBar().isPostContr());
+        assertTrue(bean.getBar().isPostContr());
 
-        System.out.println("foo.bar=" + beanInstance.getBar());
+        System.out.println("foo.bar=" + bean.getBar());
         finishTest();
       }
     });
@@ -58,12 +57,12 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
     delayTestFinish(10000);
     IOC.getAsyncBeanManager().lookupBean(Bar.class).getInstance(new CreationalCallback<Bar>() {
       @Override
-      public void callback(final Bar beanInstance) {
-        assertTrue(IOC.getAsyncBeanManager().isManaged(beanInstance));
+      public void callback(final Bar bean) {
+        assertTrue(IOC.getAsyncBeanManager().isManaged(bean));
 
-        IOC.getAsyncBeanManager().destroyBean(beanInstance);
+        IOC.getAsyncBeanManager().destroyBean(bean);
 
-        assertFalse(IOC.getAsyncBeanManager().isManaged(beanInstance));
+        assertFalse(IOC.getAsyncBeanManager().isManaged(bean));
 
         finishTest();
       }
@@ -75,10 +74,10 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
     IOC.getAsyncBeanManager().lookupBean(ADependent.class)
         .getInstance(new CreationalCallback<ADependent>() {
           @Override
-          public void callback(final ADependent beanInstance) {
-            assertNotNull(beanInstance);
+          public void callback(final ADependent bean) {
+            assertNotNull(bean);
 
-            assertEquals("foo", beanInstance.testString());
+            assertEquals("foo", bean.testString());
 
             finishTest();
           }

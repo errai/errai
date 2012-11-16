@@ -185,7 +185,7 @@ public abstract class AbstractCreationalContext implements CreationalContext {
    * Fires all {@link DestructionCallback}s within the context.
    */
   @SuppressWarnings("unchecked")
-  void destroyContext() {
+  public void destroyContext() {
     if (immutableContext) {
       throw new IllegalStateException("scope [" + scope.getName() + "] is an immutable scope and cannot be destroyed");
     }

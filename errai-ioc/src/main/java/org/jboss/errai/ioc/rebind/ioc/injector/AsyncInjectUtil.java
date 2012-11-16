@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
@@ -45,7 +46,9 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
+import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncInjectorResolveCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProxyInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncTypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
@@ -104,7 +107,7 @@ public class AsyncInjectUtil {
           final Statement finishedCallback = runBlock
               .append(Stmt.loadVariable("async").invoke("setConstructedObject", Refs.get(injector.getInstanceVarName())))
               .finish()
-          .finish();
+              .finish();
 
           processingContext.append(Stmt.loadVariable("async").invoke("setOnConstruct", finishedCallback));
 
@@ -291,9 +294,10 @@ public class AsyncInjectUtil {
   public static Statement getInjectorOrProxy(final InjectionContext ctx,
                                              final InjectableInstance injectableInstance,
                                              final MetaClass clazz,
-                                             final QualifyingMetadata qualifyingMetadata) {
+                                             final QualifyingMetadata qualifyingMetadata,
+                                             final AsyncInjectorResolveCallback... callbacks) {
 
-    return getInjectorOrProxy(ctx, injectableInstance, clazz, qualifyingMetadata, false);
+    return getInjectorOrProxy(ctx, injectableInstance, clazz, qualifyingMetadata, false, callbacks);
   }
 
 
@@ -301,23 +305,31 @@ public class AsyncInjectUtil {
                                              final InjectableInstance injectableInstance,
                                              final MetaClass clazz,
                                              final QualifyingMetadata qualifyingMetadata,
-                                             final boolean alwaysProxyDependent) {
+                                             final boolean alwaysProxyDependent,
+                                             final AsyncInjectorResolveCallback... callbacks) {
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+
+      for (final AsyncInjectorResolveCallback cb : callbacks) {
+        cb.onResolved(inj);
+      }
 
       /**
        * Special handling for cycles. If two beans directly depend on each other, we shimmy in a call to the
        * binding reference to check the context for the instance to avoid a hanging duplicate reference. It is to
        * ensure only one instance of each bean is created.
        */
-      if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
-        return Stmt.castTo(SimpleCreationalContext.class, Stmt.loadVariable("context")).invoke("getInstanceOrNew",
+      if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof AsyncTypeInjector) {
+        return Stmt.loadVariable("context").invoke("getInstanceOrNew",
             Refs.get(inj.getCreationalCallbackVarName()),
-            inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
+            Refs.get(InjectUtil.getVarNameFromType(inj.getInjectedType(), injectableInstance)),
+            inj.getInjectedType(),
+            inj.getQualifyingMetadata().getQualifiers());
       }
 
-      return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
+
+      return inj.getBeanInstance(injectableInstance);
     }
     else {
       //todo: refactor the BootstrapInjectionContext to provide a cleaner API for interface delegates
@@ -329,6 +341,10 @@ public class AsyncInjectUtil {
 
           if (inj.isProvider()) {
             if (inj.isStatic()) {
+              for (final AsyncInjectorResolveCallback cb : callbacks) {
+                cb.onResolved(inj);
+              }
+
               return inj.getBeanInstance(injectableInstance);
             }
 
@@ -349,12 +365,10 @@ public class AsyncInjectUtil {
                 // eek! a producer element is produced by this bean and injected into it's own constructor!
                 final AsyncProxyInjector producedElementProxy
                     = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
-//
-//                proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
-//                    .invoke("addBean", Stmt.load(inj.getInjectedType()),
-//                        qualifyingMetadata.getQualifiers(), inj.getBeanInstance(injectableInstance)));
-//
-//                 proxyInject.getBeanInstance(injectableInstance);
+
+                for (final AsyncInjectorResolveCallback cb : callbacks) {
+                  cb.onResolved(producedElementProxy);
+                }
 
                 return producedElementProxy.getBeanInstance(injectableInstance);
               }
@@ -362,6 +376,11 @@ public class AsyncInjectUtil {
                 ctx.getProcessingContext().pushBlockBuilder(proxyInject.getProxyResolverBlockBuilder());
                 pushedProxy = true;
                 ctx.markOpenProxy();
+
+                for (final AsyncInjectorResolveCallback cb : callbacks) {
+                  cb.onResolved(proxyInject);
+                }
+
                 return proxyInject.getBeanInstance(injectableInstance);
               }
             }
@@ -382,6 +401,10 @@ public class AsyncInjectUtil {
                   + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");
             }
 
+            for (final AsyncInjectorResolveCallback cb : callbacks) {
+              cb.onResolved(inj);
+            }
+
             return inj.getBeanInstance(injectableInstance);
           }
         }
@@ -392,7 +415,13 @@ public class AsyncInjectUtil {
 
       if (!ctx.isTypeInjectable(clazz)) {
         ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
-        return getOrCreateProxy(ctx, clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
+        final AsyncProxyInjector proxyInject = getOrCreateProxy(ctx, clazz, qualifyingMetadata);
+
+        for (final AsyncInjectorResolveCallback cb : callbacks) {
+          cb.onResolved(proxyInject);
+        }
+
+        return proxyInject.getBeanInstance(injectableInstance);
       }
       else {
         throw new InjectionFailure("cannot resolve injectable bean for type: " + clazz.getFullyQualifiedName()
@@ -418,14 +447,16 @@ public class AsyncInjectUtil {
 
   public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
                                                          final InjectionContext ctx,
-                                                         final MetaMethod method) {
-    return resolveInjectionDependencies(parms, ctx, method, true);
+                                                         final MetaMethod method,
+                                                         final AsyncInjectorResolveCallback... callbacks) {
+    return resolveInjectionDependencies(parms, ctx, method, true, callbacks);
   }
 
   public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
                                                          final InjectionContext ctx,
                                                          final MetaMethod method,
-                                                         final boolean inlineReference) {
+                                                         final boolean inlineReference,
+                                                         final AsyncInjectorResolveCallback... callbacks) {
 
     final MetaClass[] parmTypes = InjectUtil.parametersToClassTypeArray(parms);
     final Statement[] parmValues = new Statement[parmTypes.length];
@@ -439,7 +470,10 @@ public class AsyncInjectUtil {
             ctx);
 
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
-            ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
+            ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()), callbacks);
+
+        ctx.getProcessingContext().append(stmt);
+
 
         if (inlineReference) {
           stmt = recordInlineReference(ctx, parms[i]);
@@ -467,31 +501,42 @@ public class AsyncInjectUtil {
         ) {
       final Statement stmt;
       final MetaClass parmType = parmTypes[i];
+      final MetaParameter metaParameter = parms[i];
       try {
-        final MetaClass creationType = MetaClassFactory
-            .parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(parmType));
 
-        final Statement callback = Stmt.newObject(creationType).extend()
-            .publicOverridesMethod("callback", Parameter.of(parmType, "beanInstance"))
-              .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("beanInstance")))
-            .finish()
-        .finish();
-
-        final BlockBuilder<?> blockBuilder = ctx.getProcessingContext().getBlockBuilder();
-        final String varNameFromType = InjectUtil.getVarNameFromType(parmType, parms[i]);
-        blockBuilder.append(Stmt.declareFinalVariable(varNameFromType, creationType, callback));
-        blockBuilder.append(Stmt.loadVariable("async").invoke("waitConstruct", Refs.get(varNameFromType)));
+        final QualifyingMetadata qualifyingMetadata = ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(
+            parms[i].getAnnotations()
+        );
 
         // Get the injection value.
-        getInjectorOrProxy(
+        final BlockBuilder<?> blockBuilder = ctx.getProcessingContext().getBlockBuilder();
+
+
+        blockBuilder.append(getInjectorOrProxy(
             ctx,
             InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx),
             parmType,
-            ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(
-                parms[i].getAnnotations()
-            ),
-            true
-        );
+            qualifyingMetadata,
+            true, new AsyncInjectorResolveCallback() {
+          @Override
+          public void onResolved(final Injector resolvedInjector) {
+
+            final MetaClass injectedType = resolvedInjector.getInjectedType();
+            final MetaClass creationType = MetaClassFactory
+                .parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(injectedType));
+
+            final Statement callback = Stmt.newObject(creationType).extend()
+                .publicOverridesMethod("callback", Parameter.of(injectedType, "beanInstance"))
+                .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("beanInstance")))
+                .finish()
+                .finish();
+
+            final String varNameFromType = InjectUtil.getVarNameFromType(injectedType, metaParameter);
+            blockBuilder.append(Stmt.declareFinalVariable(varNameFromType, creationType, callback));
+            blockBuilder.append(Stmt.loadVariable("async").invoke("waitConstruct", Refs.get(varNameFromType)));
+          }
+        }
+        ));
         // Record the statement which can be used to access the reference to the injected bean in-line.
         // For instance, for code decoration.
         stmt = recordInlineReference(

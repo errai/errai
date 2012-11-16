@@ -37,8 +37,8 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
  * @author Mike Brock
  */
 public class QualifiedTypeInjectorDelegate extends AbstractInjector {
-  private final MetaClass type;
-  private final Injector delegate;
+  protected final MetaClass type;
+  protected final Injector delegate;
 
   public QualifiedTypeInjectorDelegate(final MetaClass type,
                                        final Injector delegate,

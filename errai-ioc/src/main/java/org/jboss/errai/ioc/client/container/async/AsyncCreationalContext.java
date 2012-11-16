@@ -2,8 +2,8 @@ package org.jboss.errai.ioc.client.container.async;
 
 import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
 import org.jboss.errai.ioc.client.container.BeanRef;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCSingletonBean;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.client.container.ProxyResolver;
@@ -64,7 +64,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
 
       if (!beanList.isEmpty()) {
         final AsyncBeanDef<T> bean = beanList.iterator().next();
-        if (bean != null && bean instanceof IOCSingletonBean) {
+        if (bean != null && bean instanceof AsyncSingletonBean) {
           bean.getInstance(creationalCallback);
           return;
         }
@@ -149,7 +149,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
                 addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), beanInstance);
                 resolveAllProxies(resolveFinishedCallback);
               }
-            });
+            }, this);
           }
           return;
         }
@@ -168,9 +168,5 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     for (final Object ref : getAllCreatedBeanInstances()) {
       beanManager.addBeanToContext(ref, this);
     }
-  }
-
-  public void destroyContext() {
-
   }
 }

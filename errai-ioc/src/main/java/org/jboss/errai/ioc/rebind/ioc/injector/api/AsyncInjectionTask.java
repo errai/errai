@@ -39,9 +39,12 @@ import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncInjectorResolveCallback;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
+import javax.swing.text.StringContent;
 import java.lang.annotation.Annotation;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncInjectionTask {
   protected final TaskType taskType;
@@ -100,9 +103,9 @@ public class AsyncInjectionTask {
     this.parm = null;
   }
 
-  private void generateCallback(final MetaClass type, final InjectionContext ctx, final Statement... fieldAccessStmt) {
+  private void generateCallback(final String callbackVarName, final MetaClass type, final InjectionContext ctx, final Statement... fieldAccessStmt) {
     final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
-           MetaClassFactory.typeParametersOf(type));
+        MetaClassFactory.typeParametersOf(type));
 
     final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -118,7 +121,6 @@ public class AsyncInjectionTask {
         .append(Stmt.load(type).invoke("getName").returnValue()).finish()
         .finish();
 
-    final String callbackVarName = InjectUtil.getVarNameFromType(type, getInjectableInstance(ctx));
 
     processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
     processingContext.append(Stmt.loadVariable("async").invoke("wait", Refs.get(callbackVarName)));
@@ -154,10 +156,16 @@ public class AsyncInjectionTask {
           fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(ctx, beanRefStmt, field, Refs.get("bean"));
         }
 
-        generateCallback(field.getType(), ctx, fieldAccessStmt, Stmt.loadVariable("async").invoke("finish", Refs.get("this")));
-
         try {
-          val = AsyncInjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);
+          val = AsyncInjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata,
+              new AsyncInjectorResolveCallback() {
+                @Override
+                public void onResolved(final Injector resolvedInjector) {
+                  generateCallback(InjectUtil.getVarNameFromType(resolvedInjector.getInjectedType(), field),
+                      resolvedInjector.getInjectedType(), ctx, fieldAccessStmt,
+                      Stmt.loadVariable("async").invoke("finish", Refs.get("this")));
+                }
+              });
         }
         catch (InjectionFailure e) {
           throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
@@ -188,11 +196,21 @@ public class AsyncInjectionTask {
         for (final MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
               new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
-
-           generateCallback(parm.getType(), ctx, Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("bean")));
         }
 
-        final Statement[] args = AsyncInjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
+        final AtomicInteger atomicInteger = new AtomicInteger(0);
+
+        final Statement[] args = AsyncInjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method,
+            new AsyncInjectorResolveCallback() {
+              @Override
+              public void onResolved(final Injector resolvedInjector) {
+                generateCallback(
+                    InjectUtil.getVarNameFromType(resolvedInjector.getInjectedType(), method.getParameters()[atomicInteger.getAndIncrement()]),
+                    resolvedInjector.getInjectedType(),
+                    ctx,
+                    Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("bean")));
+              }
+            });
 
         final Statement beanRef = ctx.getBeanReference(method.getDeclaringClass());
 
@@ -205,12 +223,14 @@ public class AsyncInjectionTask {
             .publicOverridesMethod("run")
             .append(methodCallStatement)
             .finish()
-        .finish();
+            .finish();
 
         processingContext.append(Stmt.loadVariable("async").invoke("addOnFinish", finishCallback));
 
         break;
       }
+      case Parameter:
+        break;
     }
 
     ctx.closeProxyIfOpen();

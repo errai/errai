@@ -6,11 +6,7 @@ import org.jboss.errai.cdi.async.test.producers.client.res.AsyncSingletonProduce
 import org.jboss.errai.cdi.async.test.producers.client.res.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
-import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-
-import java.sql.Time;
 
 /**
  * @author Mike Brock
@@ -41,13 +37,13 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
         IOC.getAsyncBeanManager().lookupBean(AsyncProducerDependentBean.class)
             .getInstance(new CreationalCallback<AsyncProducerDependentBean>() {
               @Override
-              public void callback(final AsyncProducerDependentBean beanInstance) {
-                assertNotNull(beanInstance);
+              public void callback(final AsyncProducerDependentBean bean) {
+                assertNotNull(bean);
 
-                assertNotNull(beanInstance.getMaBean());
-                assertNotNull(beanInstance.getMaBean2());
+                assertNotNull(bean.getMaBean());
+                assertNotNull(bean.getMaBean2());
 
-                assertNotSame(beanInstance.getMaBean(), beanInstance.getMaBean2());
+                assertNotSame(bean.getMaBean(), bean.getMaBean2());
 
                 finishTest();
               }
@@ -66,13 +62,13 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
         IOC.getAsyncBeanManager().lookupBean(AsyncSingletonProducerDependentBean.class)
             .getInstance(new CreationalCallback<AsyncSingletonProducerDependentBean>() {
               @Override
-              public void callback(final AsyncSingletonProducerDependentBean beanInstance) {
-                assertNotNull(beanInstance);
+              public void callback(final AsyncSingletonProducerDependentBean bean) {
+                assertNotNull(bean);
 
-                assertNotNull(beanInstance.getLaBean());
-                assertNotNull(beanInstance.getLaBean2());
+                assertNotNull(bean.getLaBean());
+                assertNotNull(bean.getLaBean2());
 
-                assertSame(beanInstance.getLaBean(), beanInstance.getLaBean2());
+                assertSame(bean.getLaBean(), bean.getLaBean2());
 
                 finishTest();
               }
@@ -91,10 +87,10 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
           IOC.getAsyncBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class)
               .getInstance(new CreationalCallback<BeanConstrConsumesOwnProducer>() {
                 @Override
-                public void callback(final BeanConstrConsumesOwnProducer beanInstance) {
-                  assertNotNull(beanInstance);
-                  assertNotNull(beanInstance.getWrappedKitten());
-                  assertNotNull(beanInstance.getWrappedKitten().getKitten());
+                public void callback(final BeanConstrConsumesOwnProducer bean) {
+                  assertNotNull(bean);
+                  assertNotNull(bean.getWrappedKitten());
+                  assertNotNull(bean.getWrappedKitten().getKitten());
 
                   finishTest();
                 }

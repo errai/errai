@@ -689,7 +689,8 @@ public class InjectUtil {
   }
 
   private static String getVarNameFromType(final MetaClass clazz) {
-    return clazz.getFullyQualifiedName().replaceAll("\\.", "_");
+    final String varName =  clazz.getFullyQualifiedName().replaceAll("\\.", "_");
+    return varName;
   }
 
   public static String getVarNameFromType(final MetaClass clazz, final MetaParameter parameter) {

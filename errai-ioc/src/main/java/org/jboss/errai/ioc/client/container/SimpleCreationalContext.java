@@ -242,17 +242,17 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
     }
   }
 
-  /**
-   * Fires all {@link DestructionCallback}s within the context.
-   */
-  @SuppressWarnings("unchecked")
-  void destroyContext() {
-    if (immutableContext) {
-      throw new IllegalStateException("scope [" + scope.getName() + "] is an immutable scope and cannot be destroyed");
-    }
-
-    for (final Tuple<Object, DestructionCallback> tuple : destructionCallbacks) {
-      tuple.getValue().destroy(tuple.getKey());
-    }
-  }
+//  /**
+//   * Fires all {@link DestructionCallback}s within the context.
+//   */
+//  @SuppressWarnings("unchecked")
+//  void destroyContext() {
+//    if (immutableContext) {
+//      throw new IllegalStateException("scope [" + scope.getName() + "] is an immutable scope and cannot be destroyed");
+//    }
+//
+//    for (final Tuple<Object, DestructionCallback> tuple : destructionCallbacks) {
+//      tuple.getValue().destroy(tuple.getKey());
+//    }
+//  }
 }

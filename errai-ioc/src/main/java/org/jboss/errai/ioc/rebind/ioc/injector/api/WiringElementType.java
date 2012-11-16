@@ -5,6 +5,7 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
  */
 public enum WiringElementType {
   Type,
+  QualifiyingType,
   SingletonBean,
   DependentBean,
   ContextualTopLevelProvider,

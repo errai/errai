@@ -453,8 +453,10 @@ public class InjectionContext {
     do {
       if (cls != type && cls.isPublic()) {
         if (processedTypes.add(cls)) {
-          final QualifiedTypeInjectorDelegate injectorDelegate =
-              new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
+
+
+          final Injector injectorDelegate =
+              getInjectorFactory().getQualifyingTypeInjector(cls, injector, cls.getParameterizedType());
 
           registerInjector(cls, injectorDelegate, processedTypes, false);
         }
@@ -466,8 +468,8 @@ public class InjectionContext {
           continue;
 
         if (processedTypes.add(iface)) {
-          final QualifiedTypeInjectorDelegate injectorDelegate =
-              new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+          final Injector injectorDelegate =
+              getInjectorFactory().getQualifyingTypeInjector(iface, injector, iface.getParameterizedType());
 
           registerInjector(iface, injectorDelegate, processedTypes, false);
         }

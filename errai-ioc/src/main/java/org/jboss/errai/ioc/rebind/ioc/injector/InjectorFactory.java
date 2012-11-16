@@ -2,16 +2,19 @@ package org.jboss.errai.ioc.rebind.ioc.injector;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProducerInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncQualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncTypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProducerInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
@@ -36,40 +39,29 @@ public class InjectorFactory {
     addInjector(BootstrapType.Synchronous, WiringElementType.TopLevelProvider, ProviderInjector.class);
     addInjector(BootstrapType.Synchronous, WiringElementType.ContextualTopLevelProvider,
         ContextualProviderInjector.class);
+    addInjector(BootstrapType.Synchronous, WiringElementType.QualifiyingType, QualifiedTypeInjectorDelegate.class);
 
     addInjector(BootstrapType.Asynchronous, WiringElementType.Type, AsyncTypeInjector.class);
     addInjector(BootstrapType.Asynchronous, WiringElementType.ProducerElement, AsyncProducerInjector.class);
     addInjector(BootstrapType.Asynchronous, WiringElementType.TopLevelProvider, AsyncProviderInjector.class);
     addInjector(BootstrapType.Asynchronous, WiringElementType.ContextualTopLevelProvider,
         AsyncContextualProviderInjector.class);
+    addInjector(BootstrapType.Asynchronous, WiringElementType.QualifiyingType, AsyncQualifiedTypeInjectorDelegate.class);
   }
 
   private BootstrapType getDefaultBootstrapType() {
     return async ? BootstrapType.Asynchronous : BootstrapType.Synchronous;
   }
 
-  public Injector getInjector(final WiringElementType elementType,
-                              final MetaClass type,
-                              final InjectionContext context) {
-    return getTypeInjector(getDefaultBootstrapType(), elementType, type, context);
-  }
-
   public Injector getTypeInjector(final MetaClass type,
                                   final InjectionContext context) {
-    return getTypeInjector(async ? BootstrapType.Asynchronous : BootstrapType.Synchronous, type, context);
-  }
-
-  public Injector getTypeInjector(final BootstrapType bootstrapType,
-                                  final MetaClass type,
-                                  final InjectionContext context) {
-    return getTypeInjector(bootstrapType, WiringElementType.Type, type, context);
+    return getTypeInjector(getDefaultBootstrapType(), type, context);
   }
 
   private Injector getTypeInjector(final BootstrapType bootstrapType,
-                                   final WiringElementType elementType,
                                    final MetaClass type,
                                    final InjectionContext context) {
-    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(elementType);
+    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(WiringElementType.Type);
 
     try {
       final Constructor<? extends Injector> constructor
@@ -85,15 +77,14 @@ public class InjectorFactory {
   public Injector getProviderInjector(final MetaClass type,
                                       final MetaClass providerType,
                                       final InjectionContext context) {
-    return getProviderInjector(async ? BootstrapType.Asynchronous : BootstrapType.Synchronous, WiringElementType.TopLevelProvider, type, providerType, context);
+    return getProviderInjector(getDefaultBootstrapType(), type, providerType, context);
   }
 
   public Injector getProviderInjector(final BootstrapType bootstrapType,
-                                      final WiringElementType elementType,
                                       final MetaClass type,
                                       final MetaClass providerType,
                                       final InjectionContext context) {
-    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(elementType);
+    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(WiringElementType.TopLevelProvider);
 
     try {
       final Constructor<? extends Injector> constructor
@@ -109,16 +100,14 @@ public class InjectorFactory {
   public Injector getContextualProviderInjector(final MetaClass type,
                                                 final MetaClass providerType,
                                                 final InjectionContext context) {
-    return getProviderInjector(async ? BootstrapType.Asynchronous : BootstrapType.Synchronous,
-        WiringElementType.ContextualTopLevelProvider, type, providerType, context);
+    return getContextualProviderInjector(getDefaultBootstrapType(), type, providerType, context);
   }
 
   public Injector getContextualProviderInjector(final BootstrapType bootstrapType,
-                                                final WiringElementType elementType,
                                                 final MetaClass type,
                                                 final MetaClass providerType,
                                                 final InjectionContext context) {
-    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(elementType);
+    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(WiringElementType.ContextualTopLevelProvider);
 
     try {
       final Constructor<? extends Injector> constructor
@@ -134,23 +123,16 @@ public class InjectorFactory {
   public Injector getProducerInjector(final MetaClass type,
                                       final MetaClassMember providerType,
                                       final InjectableInstance injectableInstance) {
-    return getProducerInjector(async ? BootstrapType.Asynchronous : BootstrapType.Synchronous,
+    return getProducerInjector(getDefaultBootstrapType(),
         type, providerType, injectableInstance);
   }
 
-  public Injector getProducerInjector(final BootstrapType bootstrapType,
-                                      final MetaClass type,
-                                      final MetaClassMember providerType,
-                                      final InjectableInstance injectableInstance) {
-    return getProducerInjector(bootstrapType, WiringElementType.ProducerElement, type, providerType, injectableInstance);
-  }
 
   public Injector getProducerInjector(final BootstrapType bootstrapType,
-                                      final WiringElementType elementType,
                                       final MetaClass type,
                                       final MetaClassMember providerType,
                                       final InjectableInstance injectableInstance) {
-    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(elementType);
+    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(WiringElementType.ProducerElement);
 
     try {
       final Constructor<? extends Injector> constructor
@@ -161,6 +143,31 @@ public class InjectorFactory {
       );
 
       return constructor.newInstance(type, providerType, injectableInstance);
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
+
+  public Injector getQualifyingTypeInjector(final MetaClass type,
+                                            final Injector delegate,
+                                            final MetaParameterizedType metaParameterizedType) {
+
+    return getQualifyingTypeInjector(getDefaultBootstrapType(), type, delegate, metaParameterizedType);
+  }
+
+  public Injector getQualifyingTypeInjector(final BootstrapType bootstrapType,
+                                            final MetaClass type,
+                                            final Injector delegate,
+                                            final MetaParameterizedType metaParameterizedType) {
+
+    final Class<? extends Injector> injectorClass = injectors.get(bootstrapType).get(WiringElementType.QualifiyingType);
+
+    try {
+      final Constructor<? extends Injector> constructor
+          = injectorClass.getConstructor(MetaClass.class, Injector.class, MetaParameterizedType.class);
+
+      return constructor.newInstance(type, delegate, metaParameterizedType);
     }
     catch (Throwable t) {
       throw new RuntimeException(t);
