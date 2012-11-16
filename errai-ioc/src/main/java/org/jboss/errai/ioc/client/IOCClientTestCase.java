@@ -31,7 +31,6 @@ public abstract class IOCClientTestCase extends GWTTestCase {
         new Container().bootstrapContainer();
       }
       catch (Throwable t) {
-        t.printStackTrace();
         throw new RuntimeException("failed to bootstrap container", t);
       }
     }

@@ -531,16 +531,14 @@ public class InjectUtil {
 
           }
           else if (inj.isSoftDisabled()
-              || (inj.isDependent() &&
-              (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType())))) {
+              || (inj.isDependent() && (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType())))) {
 
             inj.setEnabled(true);
             if (inj.isCreated() && !inj.isRendered()) {
               throw new InjectionFailure("un-resolveable cycle on dependent scoped bean: "
                   + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");
             }
-
-            return inj.getBeanInstance(injectableInstance);
+              return inj.getBeanInstance(injectableInstance);
           }
         }
       }
@@ -566,12 +564,16 @@ public class InjectUtil {
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (ProxyInjector)
           ctx.getProxiedInjector(clazz, qualifyingMetadata);
+      return proxyInjector;
     }
-    else {
+    else if (ctx.hasTopLevelType(clazz)) {
       proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
+      return proxyInjector;
     }
-    return proxyInjector;
+    else {
+      throw new InjectionFailure("can't resolve bean: " + clazz + " (" + qualifyingMetadata.toString() + ")");
+    }
   }
 
   public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
@@ -646,7 +648,7 @@ public class InjectUtil {
             "use of the @Dependent scope and @New qualifier may not " +
             "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
             "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
-            "\t Note          : this issue can be resolved by making "
+            "\t Note          : this issue can possibly be resolved by making "
             + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the " +
             "class is non-final.";
 
@@ -689,7 +691,7 @@ public class InjectUtil {
   }
 
   private static String getVarNameFromType(final MetaClass clazz) {
-    final String varName =  clazz.getFullyQualifiedName().replaceAll("\\.", "_");
+    final String varName = clazz.getFullyQualifiedName().replaceAll("\\.", "_");
     return varName;
   }
 

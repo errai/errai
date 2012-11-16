@@ -79,6 +79,8 @@ public class InjectionContext {
   // to achieve with a MultiMap
   private final Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
 
+  private final Set<MetaClass> topLevelTypes = new HashSet<MetaClass>();
+
   private final Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
   private final Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
   private final Set<String> knownTypesWithCycles = new HashSet<String>();
@@ -780,6 +782,18 @@ public class InjectionContext {
 
   public Statement getInlineBeanReference(final MetaParameter ref) {
     return inlineBeanReferenceMap.get(ref);
+  }
+
+  public void addTopLevelType(final MetaClass clazz) {
+    topLevelTypes.add(clazz);
+  }
+
+  public void addTopLevelTypes(final Collection<MetaClass> clazzes) {
+    topLevelTypes.addAll(clazzes);
+  }
+
+  public boolean hasTopLevelType(final MetaClass clazz) {
+    return topLevelTypes.contains(clazz);
   }
 
   public GraphBuilder getGraphBuilder() {

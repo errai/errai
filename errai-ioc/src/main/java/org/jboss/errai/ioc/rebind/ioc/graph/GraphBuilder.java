@@ -148,6 +148,10 @@ public class GraphBuilder {
     }
   }
 
+  public boolean hasType(MetaClass type) {
+    return dependencyMap.containsKey(type.getFullyQualifiedName());
+  }
+
   /**
    * Returns a quoted representation of the object's toString() suitable for use
    * in the GraphViz DOT language.

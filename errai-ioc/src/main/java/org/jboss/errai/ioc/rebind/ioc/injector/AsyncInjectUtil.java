@@ -437,12 +437,17 @@ public class AsyncInjectUtil {
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (AsyncProxyInjector)
           ctx.getProxiedInjector(clazz, qualifyingMetadata);
+      return proxyInjector;
+
     }
-    else {
+    else if (ctx.hasTopLevelType(clazz)) {
       proxyInjector = new AsyncProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
+      return proxyInjector;
     }
-    return proxyInjector;
+    else {
+      throw new InjectionFailure("can't resolve bean: " + clazz + " (" + qualifyingMetadata.toString() + ")");
+    }
   }
 
   public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
@@ -551,7 +556,7 @@ public class AsyncInjectUtil {
             "use of the @Dependent scope and @New qualifier may not " +
             "produce properly initalized objects for: " + parmType.getFullyQualifiedName() + "\n" +
             "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
-            "\t Note          : this issue can be resolved by making "
+            "\t Note          : this issue can possibly be resolved by making "
             + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the " +
             "class is non-final.";
 

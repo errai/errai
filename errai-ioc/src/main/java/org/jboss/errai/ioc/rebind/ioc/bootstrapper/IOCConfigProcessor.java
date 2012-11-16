@@ -449,12 +449,8 @@ public class IOCConfigProcessor {
           switch (elementType) {
             case TYPE: {
               Collection<MetaClass> classes;
-//              if (entry.handler instanceof ProvidedClassAnnotationHandler) {
-//                classes = ((ProvidedClassAnnotationHandler) entry.handler).getClasses();
-//              }
-//              else {
+
               classes = ClassScanner.getTypesAnnotatedWith(annotationClass, context.getPackages());
-//              }
 
               if (annotationClass.equals(Dependent.class)
                   && Boolean.getBoolean(IOCBootstrapGenerator.EXPERIMENTAL_INFER_DEPENDENT_BY_REACHABILITY)
@@ -504,6 +500,8 @@ public class IOCConfigProcessor {
 
                 classes = Collections.unmodifiableCollection(classes);
               }
+
+              injectionContext.addTopLevelTypes(classes);
 
               for (final MetaClass clazz : classes) {
                 if (clazz.isAnnotation()) {
