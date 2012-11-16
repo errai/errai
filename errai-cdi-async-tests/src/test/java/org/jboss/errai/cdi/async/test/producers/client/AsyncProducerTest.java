@@ -4,6 +4,7 @@ import com.google.gwt.user.client.Timer;
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncProducerDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncSingletonProducerDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.BeanConstrConsumesOwnProducer;
+import org.jboss.errai.cdi.async.test.producers.client.res.ProducedStringConsumingBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -97,6 +98,22 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
               });
         }
       }.schedule(100);
+  }
+
+  public void testProducerFromDependentBeanIntoDependentBean() {
+    delayTestFinish(10000);
+
+    IOC.getAsyncBeanManager().lookupBean(ProducedStringConsumingBean.class)
+        .getInstance(new CreationalCallback<ProducedStringConsumingBean>() {
+          @Override
+          public void callback(final ProducedStringConsumingBean beanInstance) {
+            assertNotNull(beanInstance);
+            assertEquals("Autumn", beanInstance.getAutumnString());
+            assertEquals("Petunia", beanInstance.getPetuniaString());
+
+            finishTest();
+          }
+        });
 
   }
 }

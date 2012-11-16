@@ -39,7 +39,7 @@ public abstract class AbstractCreationalContext implements CreationalContext {
 
   /**
    * Records a {@link InitializationCallback} to the creational context. All initialization callbacks are executed
-   * when the {@link #finish()} method is called.
+   * when the finish() method is called.
    *
    * @param beanInstance
    *     the instance of the bean associated with the {@link InitializationCallback}
@@ -143,7 +143,7 @@ public abstract class AbstractCreationalContext implements CreationalContext {
    * building a bean, due to a forward reference in a cycle situation. The caller is responsible, through the providing
    * of the {@link ProxyResolver} callback, for implementing its own proxy closing strategy.
    * <p/>
-   * After a creational context has added all beans to the context, calling {@link #finish()} will result in all of
+   * After a creational context has added all beans to the context, calling finish() will result in all of
    * the provided {@link ProxyResolver}s being executed.
    * <p/>
    * This method is typically called directly by the generated bootstrapper.
