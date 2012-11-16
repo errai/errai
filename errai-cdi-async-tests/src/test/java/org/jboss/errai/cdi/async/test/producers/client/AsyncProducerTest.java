@@ -22,7 +22,6 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
     super.gwtSetUp();
   }
 
-
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.async.test.producers.AsyncProducerTest";
@@ -34,7 +33,6 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
     new Timer() {
       @Override
       public void run() {
-
         IOC.getAsyncBeanManager().lookupBean(AsyncProducerDependentBean.class)
             .getInstance(new CreationalCallback<AsyncProducerDependentBean>() {
               @Override
@@ -51,7 +49,6 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
             });
       }
     }.schedule(100);
-
   }
 
   public void testSingletonProducer() {
@@ -76,7 +73,6 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
             });
       }
     }.schedule(100);
-
   }
 
   public void testBeanConstrConsumesOwnProduer() {
@@ -114,6 +110,5 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
             finishTest();
           }
         });
-
   }
 }
