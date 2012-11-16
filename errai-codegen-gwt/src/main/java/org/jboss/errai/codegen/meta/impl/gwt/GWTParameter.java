@@ -16,15 +16,16 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 
-import java.lang.annotation.Annotation;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
