@@ -206,7 +206,8 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   /**
-   * This test ensures the assumed element type is correctly inferred when generating marshallers for immutable types.
+   * This test ensures the assumed element type is correctly inferred when generating marshallers for types that use @MapsTo
+   * on List<T> parameters. See https://issues.jboss.org/browse/ERRAI-436.
    */
   @Test
   public void testJacksonDemarshallingOfImmutableTypeWithList() {

@@ -16,8 +16,7 @@
 
 package foo;
 
-public abstract class AbstractSuperTestModel {
+public abstract class AbstractSuperTestModel implements TestModelInterface {
 
-  public void compare() {
-  }
+  public void compare() {}
 }

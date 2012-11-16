@@ -27,6 +27,7 @@ public class GWTMetaClassTest extends AbstractGWTMetaClassTest {
     addTestClass("foo.TestInterface");
     addTestClass("foo.MyTestSuperClass");
     addTestClass("foo.MyTestClass");
+    addTestClass("foo.TestModelInterface");
     addTestClass("foo.AbstractSuperTestModel");
     addTestClass("foo.SuperTestModel");
     addTestClass("foo.TestModel");
@@ -35,7 +36,7 @@ public class GWTMetaClassTest extends AbstractGWTMetaClassTest {
   }
 
   @Test
-  public void confirmContractConsistency1() throws Exception {
+  public void confirmContractConsistency() throws Exception {
     final String classToTest = "foo.MyTestClass";
 
     MetaClassFactory.emptyCache();
