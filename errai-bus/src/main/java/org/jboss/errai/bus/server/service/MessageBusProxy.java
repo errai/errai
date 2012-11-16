@@ -14,7 +14,7 @@ import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

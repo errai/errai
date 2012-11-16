@@ -2,7 +2,7 @@ package org.jboss.errai.ioc.tests.wiring.client.res;
 
 import javax.inject.Inject;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 public class ConstructorInjectedBean {
 

@@ -1,4 +1,4 @@
-package org.jboss.errai.common.client.framework;
+package org.jboss.errai.jpa.client.local.backend;
 
 import java.util.Collection;
 

@@ -16,6 +16,13 @@
 
 package org.jboss.errai.codegen.test;
 
+import static org.jboss.errai.codegen.test.SwitchBlockBuilderTestResult.SWITCH_BLOCK_CHAINED_INVOCATION;
+import static org.jboss.errai.codegen.test.SwitchBlockBuilderTestResult.SWITCH_BLOCK_CHAR_CHAINED;
+import static org.jboss.errai.codegen.test.SwitchBlockBuilderTestResult.SWITCH_BLOCK_EMPTY;
+import static org.jboss.errai.codegen.test.SwitchBlockBuilderTestResult.SWITCH_BLOCK_ENUM;
+import static org.jboss.errai.codegen.test.SwitchBlockBuilderTestResult.SWITCH_BLOCK_INT;
+import static org.jboss.errai.codegen.test.SwitchBlockBuilderTestResult.SWITCH_BLOCK_INTEGER_NO_DEFAULT;
+import static org.jboss.errai.codegen.test.SwitchBlockBuilderTestResult.SWITCH_BLOCK_INT_FALLTHROUGH;
 import static org.junit.Assert.fail;
 
 import org.jboss.errai.codegen.Context;
@@ -29,7 +36,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class SwitchBlockBuilderTest extends AbstractCodegenTest implements SwitchBlockBuilderTestResult {
+public class SwitchBlockBuilderTest extends AbstractCodegenTest {
   public enum TestEnum {
     A, B;
   }

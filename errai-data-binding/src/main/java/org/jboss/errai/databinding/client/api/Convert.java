@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.ConverterRegistrationKey;
 
 import com.google.gwt.i18n.client.DateTimeFormat;

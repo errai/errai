@@ -28,6 +28,7 @@ import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ImmutableEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
 import org.junit.Test;
@@ -202,6 +203,17 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             finishTest();
           }
         }).postJacksonMap(jackson);
+  }
+
+  /**
+   * This test ensures the assumed element type is correctly inferred when generating marshallers for types that use @MapsTo
+   * on List<T> parameters. See https://issues.jboss.org/browse/ERRAI-436.
+   */
+  @Test
+  public void testJacksonDemarshallingOfImmutableTypeWithList() {
+    final ImmutableEntity ftd = new ImmutableEntity.Builder().build();
+    String jackson = "{\"entities\":[{\"id\":1, \"name\":\"name1\"}, {\"id\":2, \"name\":\"name2\"}]}";
+    assertEquals(ftd, MarshallingWrapper.fromJSON(jackson, ImmutableEntity.class));
   }
 
 }

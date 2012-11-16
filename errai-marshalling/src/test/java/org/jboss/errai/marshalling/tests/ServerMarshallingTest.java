@@ -27,6 +27,7 @@ import org.jboss.errai.marshalling.tests.res.EnumContainerContainer;
 import org.jboss.errai.marshalling.tests.res.EnumTestA;
 import org.jboss.errai.marshalling.tests.res.EnumWithAbstractMethod;
 import org.jboss.errai.marshalling.tests.res.EnumWithState;
+import org.jboss.errai.marshalling.tests.res.ImmutableEnumContainer;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
@@ -555,5 +556,20 @@ public class ServerMarshallingTest {
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall enum with abstract method", val, ServerMarshalling.fromJSON(json));
   }
-
+  
+  @Test
+  public void testImmutableEnumContainer() {
+    ImmutableEnumContainer val = new ImmutableEnumContainer(EnumTestA.FIRST);
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall enum container",
+            val, ServerMarshalling.fromJSON(json));
+  }
+  
+  @Test
+  public void testImmutableEnumContainerWithNullRefs() {
+    ImmutableEnumContainer val = new ImmutableEnumContainer(null);
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall immutable enum container with nulls",
+            val, ServerMarshalling.fromJSON(json));
+  }
 }

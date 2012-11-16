@@ -17,6 +17,7 @@ package org.jboss.errai.databinding.client.test;
 
 import static org.junit.Assert.assertEquals;
 
+import org.jboss.errai.databinding.client.MockHandler;
 import org.jboss.errai.databinding.client.PropertyChangeHandlerSupport;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.junit.Before;
@@ -45,9 +46,9 @@ public class PropertyChangeHandlerSupportTest {
     PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource1, "foo", 1, 2);
 
     support.notifyHandlers(event1);
-    assertEquals(1, mh1.events.size());
-    assertEquals(event1, mh1.events.get(0));
-    assertEquals(eventSource1, mh1.events.get(0).getSource());
+    assertEquals(1, mh1.getEvents().size());
+    assertEquals(event1, mh1.getEvents().get(0));
+    assertEquals(eventSource1, mh1.getEvents().get(0).getSource());
 
     MockHandler mh2 = new MockHandler();
 
@@ -57,12 +58,12 @@ public class PropertyChangeHandlerSupportTest {
     PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource2, "foo", 2, 3);
 
     support.notifyHandlers(event2);
-    assertEquals(2, mh1.events.size());
-    assertEquals(event2, mh1.events.get(1));
-    assertEquals(eventSource2, mh1.events.get(1).getSource());
-    assertEquals(1, mh2.events.size());
-    assertEquals(event2, mh2.events.get(0));
-    assertEquals(eventSource2, mh2.events.get(0).getSource());
+    assertEquals(2, mh1.getEvents().size());
+    assertEquals(event2, mh1.getEvents().get(1));
+    assertEquals(eventSource2, mh1.getEvents().get(1).getSource());
+    assertEquals(1, mh2.getEvents().size());
+    assertEquals(event2, mh2.getEvents().get(0));
+    assertEquals(eventSource2, mh2.getEvents().get(0).getSource());
   }
 
   @Test
@@ -76,20 +77,20 @@ public class PropertyChangeHandlerSupportTest {
     Object eventSource1 = new Object();
     PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource1, "foo", 1, 2);
     support.notifyHandlers(event1);
-    assertEquals(0, mh1.events.size());
-    assertEquals(1, mh2.events.size());
-    assertEquals(event1, mh2.events.get(0));
-    assertEquals(eventSource1, mh2.events.get(0).getSource());
+    assertEquals(0, mh1.getEvents().size());
+    assertEquals(1, mh2.getEvents().size());
+    assertEquals(event1, mh2.getEvents().get(0));
+    assertEquals(eventSource1, mh2.getEvents().get(0).getSource());
 
     Object eventSource2 = new Object();
     PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource2, "bar", 2, 3);
     support.notifyHandlers(event2);
-    assertEquals(1, mh1.events.size());
-    assertEquals(event2, mh1.events.get(0));
-    assertEquals(eventSource2, mh1.events.get(0).getSource());
-    assertEquals(1, mh2.events.size());
-    assertEquals(event1, mh2.events.get(0));
-    assertEquals(eventSource1, mh2.events.get(0).getSource());
+    assertEquals(1, mh1.getEvents().size());
+    assertEquals(event2, mh1.getEvents().get(0));
+    assertEquals(eventSource2, mh1.getEvents().get(0).getSource());
+    assertEquals(1, mh2.getEvents().size());
+    assertEquals(event1, mh2.getEvents().get(0));
+    assertEquals(eventSource1, mh2.getEvents().get(0).getSource());
   }
 
   @Test
@@ -100,19 +101,19 @@ public class PropertyChangeHandlerSupportTest {
     Object eventSource1 = new Object();
     PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource1, "foo", 1, 2);
     support.notifyHandlers(event1);
-    assertEquals(1, mh1.events.size());
-    assertEquals(event1, mh1.events.get(0));
-    assertEquals(eventSource1, mh1.events.get(0).getSource());
+    assertEquals(1, mh1.getEvents().size());
+    assertEquals(event1, mh1.getEvents().get(0));
+    assertEquals(eventSource1, mh1.getEvents().get(0).getSource());
 
     support.removePropertyChangeHandler(mh1);
 
-    mh1.events.clear();
+    mh1.getEvents().clear();
 
     Object eventSource2 = new Object();
     PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource2, "foo", 2, 3);
 
     support.notifyHandlers(event2);
-    assertEquals(0, mh1.events.size());
+    assertEquals(0, mh1.getEvents().size());
   }
 
   @Test
@@ -124,17 +125,17 @@ public class PropertyChangeHandlerSupportTest {
     Object eventSource = new Object();
     PropertyChangeEvent<Integer> event1 = new PropertyChangeEvent<Integer>(eventSource, "bar", 1, 2);
     support.notifyHandlers(event1);
-    assertEquals(2, mh1.events.size());
+    assertEquals(2, mh1.getEvents().size());
 
     support.removePropertyChangeHandler("bar", mh1);
     PropertyChangeEvent<Integer> event2 = new PropertyChangeEvent<Integer>(eventSource, "bar", 2, 3);
     support.notifyHandlers(event2);
-    assertEquals(3, mh1.events.size());
+    assertEquals(3, mh1.getEvents().size());
 
     support.removePropertyChangeHandler("bar", mh1);
     PropertyChangeEvent<Integer> event3 = new PropertyChangeEvent<Integer>(eventSource, "bar", 3, 4);
     support.notifyHandlers(event3);
-    assertEquals(3, mh1.events.size());
+    assertEquals(3, mh1.getEvents().size());
   }
 
   @Test
@@ -146,6 +147,6 @@ public class PropertyChangeHandlerSupportTest {
     support.notifyHandlers(new PropertyChangeEvent<Integer>(eventSource, "foo", null, null));
     support.notifyHandlers(new PropertyChangeEvent<Integer>(eventSource, "foo", 1, 1));
     support.notifyHandlers(new PropertyChangeEvent<String>(eventSource, "foo", "test", "test"));
-    assertEquals(0, mh1.events.size());
+    assertEquals(0, mh1.getEvents().size());
   }
 }

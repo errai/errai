@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.ws.rs.core.Response;
+
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
@@ -45,10 +47,10 @@ public class CustomerServiceImpl implements CustomerService {
   };
 
   @Override
-  public long createCustomer(Customer customer) {
+  public Response createCustomer(Customer customer) {
     customer.setId(id.incrementAndGet());
     customers.put(customer.getId(), customer);
-    return customer.getId();
+    return Response.ok(customer.getId()).build();
   }
 
   @Override

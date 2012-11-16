@@ -37,7 +37,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 
 /**
- * EntryPoint to our tag cloud demo.
+ * EntryPoint to the Errai CDI tag cloud demo.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -55,7 +55,7 @@ public class TagCloudDemoClient {
 
   private static final String TWITTER_BASE_SEARCH_URL = "http://twitter.com/search?q=%23";
 
-  private FlowPanel tagCloudPanel = new FlowPanel();
+  private final FlowPanel tagCloudPanel = new FlowPanel();
   private Map<String, Anchor> tags;
   private TagCloud cloud;
 
@@ -196,23 +196,23 @@ public class TagCloudDemoClient {
   }
 
   private native void resize(String tag, String size) /*-{
-                                                      $wnd.$(tag).animate({fontSize: size}, 200, function() {});
-                                                      }-*/;
+    $wnd.$(tag).animate({fontSize: size}, 200, function() {});
+  }-*/;
 
   private native void bounceResize(String tag, String size, String maxSize) /*-{
-                                                                            $wnd.$(tag).animate({fontSize: maxSize}, 300, function() {
-                                                                            $wnd.$(tag).animate({fontSize: size}, 500, function() {})});
-                                                                            }-*/;
+    $wnd.$(tag).animate({fontSize: maxSize}, 300, function() {
+    $wnd.$(tag).animate({fontSize: size}, 500, function() {})});
+  }-*/;
 
   private native void fadeIn(String tag) /*-{
-                                         $wnd.$(tag).hide().fadeIn(800, function() {});
-                                         }-*/;
+    $wnd.$(tag).hide().fadeIn(800, function() {});
+  }-*/;
 
   private native void fadeOut(String tag) /*-{
-                                          $wnd.$(tag).fadeOut(800, function() {$wnd.$(tag).remove()});
-                                          }-*/;
+    $wnd.$(tag).fadeOut(800, function() {$wnd.$(tag).remove()});
+  }-*/;
 
   private native void remove(String tag) /*-{
-                                         $wnd.$(tag).remove();
-                                         }-*/;
+    $wnd.$(tag).remove();
+  }-*/;
 }

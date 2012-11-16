@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.tests;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
+import org.jboss.errai.bus.client.framework.Wormhole;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
@@ -41,25 +41,26 @@ public class ErrorHandlingTest extends AbstractErraiTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    originalServiceEntryPoint = ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT;
-
   }
 
   @Override
   protected void gwtTearDown() throws Exception {
     super.gwtTearDown();
-
-    ((ClientMessageBusImpl)bus).IN_SERVICE_ENTRY_POINT = originalServiceEntryPoint;
+    if (originalServiceEntryPoint != null) {
+      Wormhole.changeBusEndpointUrl(bus, originalServiceEntryPoint);
+    }
   }
 
   public void testBasicErrorHandling() {
     caught = null;
 
     runAfterInit(new Runnable() {
+      @Override
       public void run() {
 
-        // this is just to get a status code other than 200 -> TransportIOException
-        ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT = "invalid.url";
+        // this is just to get a status code other than 200 ->
+        // TransportIOException
+        originalServiceEntryPoint = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
 
         bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
           @Override
@@ -68,11 +69,9 @@ public class ErrorHandlingTest extends AbstractErraiTest {
             assertNotNull("Throwable is null.", caught);
             try {
               throw caught;
-            }
-            catch (TransportIOException e) {
+            } catch (TransportIOException e) {
               finishTest();
-            }
-            catch (Throwable throwable) {
+            } catch (Throwable throwable) {
               fail("Received wrong Throwable.");
             }
           }

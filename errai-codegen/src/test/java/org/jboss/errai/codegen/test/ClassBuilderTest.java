@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.test;
 
+import static org.jboss.errai.codegen.test.ClassBuilderTestResult.*;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
@@ -34,11 +35,11 @@ import org.junit.Test;
 
 /**
  * Tests the {@link ClassBuilder} API.
- *
+ * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilderTestResult {
+public class ClassBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testDefineClassImplementingInterface() {
@@ -293,6 +294,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithMethodHavingThrowsDeclaration() {
+    @SuppressWarnings("unchecked")
     final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
@@ -466,11 +468,10 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
             CLASS_WITH_COLLIDING_IMPORTS_WITH_JAVA_LANG_FIRST, cls);
   }
 
-
   @Test
   public void testThisReferenceWithStmtLoadVariable() {
-    final ClassStructureBuilder<? extends ClassStructureBuilder<?>> body
-            = ClassBuilder.define("org.foo.Foo").publicScope().body();
+    final ClassStructureBuilder<? extends ClassStructureBuilder<?>> body =
+        ClassBuilder.define("org.foo.Foo").publicScope().body();
 
     final String cls = body
             .publicMethod(body.getClassDefinition(), "getThis")
@@ -498,7 +499,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
             .annotatedWith(new SuppressWarnings() {
               @Override
               public String[] value() {
-                return new String[] {"blah"};
+                return new String[] { "blah" };
               }
 
               @Override

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.tests;
 
 import java.util.Set;
 
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
+import org.jboss.errai.bus.client.framework.Wormhole;
 
 /**
  * Tests for the correct behaviour in case remote communication was disabled in the client bus.
- *  
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DisabledRemoteCommunicationTest extends AbstractErraiTest {
@@ -31,7 +31,7 @@ public class DisabledRemoteCommunicationTest extends AbstractErraiTest {
   public String getModuleName() {
     return "org.jboss.errai.bus.ErraiBusTests";
   }
-  
+
   @Override
   protected void gwtSetUp() throws Exception {
     // Disable remote communication
@@ -48,9 +48,10 @@ public class DisabledRemoteCommunicationTest extends AbstractErraiTest {
 
   public void testDisableRemoteCommunication() {
     runAfterInit(new Runnable() {
+      @Override
       public void run() {
-        Set<String> remoteSubscriptions = ((ClientMessageBusImpl)bus).getRemoteSubscriptions();
-        
+        Set<String> remoteSubscriptions = Wormhole.getRemoteSubscriptions(bus);
+
         assertNotNull(remoteSubscriptions);
         assertTrue("Expected to find no remote subscriptions", remoteSubscriptions.isEmpty());
 
@@ -59,7 +60,7 @@ public class DisabledRemoteCommunicationTest extends AbstractErraiTest {
       }
     });
   }
-  
+
   public native void setRemoteCommunicationEnabled(boolean enabled) /*-{
     $wnd.erraiBusRemoteCommunicationEnabled = enabled;
   }-*/;

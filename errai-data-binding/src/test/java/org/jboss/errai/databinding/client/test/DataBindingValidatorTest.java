@@ -26,7 +26,7 @@ import org.jboss.errai.databinding.rebind.DataBindingValidator;
 import org.junit.Test;
 
 /**
- * Tests for {@link DataBindingValidator}.
+ * Tests for the {@link DataBindingValidator} rebind utility.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>

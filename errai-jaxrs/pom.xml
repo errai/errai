@@ -46,7 +46,7 @@
 
   <properties>
     <slf4j.version>1.6.1</slf4j.version>
-    <resteasy.version>2.2.3.GA</resteasy.version>
+    <resteasy.version>2.3.5.Final</resteasy.version>
   </properties>
 
   <modules>

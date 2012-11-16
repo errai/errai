@@ -42,7 +42,7 @@ public interface HeaderParamTestService {
       @HeaderParam("header2") Float header2);
 
   @POST
-  public String postWithHeaderParam(@HeaderParam("header") String header);
+  public String postWithHeaderParam(String entity, @HeaderParam("header") String header);
 
   @PUT
   public String putWithHeaderParam(@HeaderParam("header") String header);

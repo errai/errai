@@ -16,10 +16,11 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import java.util.Set;
+
+import org.jboss.errai.bus.client.api.BusLifecycleListener;
 import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.SessionExpirationListener;
-
-import java.util.Set;
 
 /**
  * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
@@ -38,22 +39,70 @@ public interface ClientMessageBus extends MessageBus {
   public void addPostInitTask(Runnable run);
 
   /**
-   * Adds a {@link SessionExpirationListener} to this bus instance. 
-   * 
-   * @param listener  listener to add, must not be null
+   * Adds a {@link SessionExpirationListener} to this bus instance.
+   *
+   * @param listener
+   *          listener to add, must not be null
+   * @deprecated session expiration is part of the bus lifecycle, and should be
+   *             observed via a bus lifecycle listener. See
+   *             {@link #addLifecycleListener(BusLifecycleListener)}.
    */
+  @Deprecated
   public void addSessionExpirationListener(SessionExpirationListener listener);
 
   /**
-   * Adds a {@link PreInitializationListener} to this bus instance. It will be notified before the bus
-   * initialization starts the first time and on each subsequent reconnect.
-   * 
-   * @param listener  listener to add, must not be null
+   * Adds the given listener instance to this bus. The listener will be notified
+   * each time the bus transitions to a different lifecycle state.
+   *
+   * @param l
+   *          The listener that wants to receive lifecycle notifications. Must
+   *          not be null. If the same listener is added more than once, it will
+   *          receive the corresponding number of callbacks upon each lifecycle
+   *          event.
    */
+  public void addLifecycleListener(BusLifecycleListener l);
+
+  /**
+   * Removes the given listener from this bus. The listener will no longer
+   * receive lifecycle events from this bus.
+   *
+   * @param l
+   *          The listener to remove. If the listener was added more than one
+   *          time, removing it will decrease by one the number of notifications
+   *          that listener receices for each event. If the listener was not
+   *          already registered to receive events, this method has no effect.
+   */
+  public void removeLifecycleListener(BusLifecycleListener l);
+
+  /**
+   * Adds a {@link PreInitializationListener} to this bus instance. It will be
+   * notified before the bus initialization starts the first time and on each
+   * subsequent reconnect.
+   *
+   * @param listener
+   *          listener to add, must not be null
+   * @deprecated bus initialization and reconnection are part of the bus
+   *             lifecycle, and should be observed via a bus lifecycle listener.
+   *             See {@link #addLifecycleListener(BusLifecycleListener)}.
+   */
+  @Deprecated
   public void addPreInitializationListener(PreInitializationListener listener);
 
+  /**
+   * Takes this bus out of the "local only" state, causing it to try and connect
+   * with the server (unless remote communication is globally disabled).
+   *
+   * @see ClientMessageBusImpl#isRemoteCommunicationEnabled()
+   */
   public void init();
 
+  /**
+   * Takes this bus into the "local only" state.
+   *
+   * @param sendDisconnectToServer
+   *          if true, the server will be notified that we are breaking the
+   *          connection. Else, no attempt will be made to notify the server.
+   */
   public void stop(boolean sendDisconnectToServer);
 
   /**
@@ -63,16 +112,32 @@ public interface ClientMessageBus extends MessageBus {
    */
   public boolean isInitialized();
 
+  /**
+   * Sets the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
+   *
+   * @param logAdapter The log adapter this bus should log to. Must not be null.
+   * @deprecated Use java.util logging instead. It is supported by GWT.
+   */
+  @Deprecated
   public void setLogAdapter(LogAdapter logAdapter);
 
   public Set<String> getAllRegisteredSubjects();
 
+  /**
+   * Returns the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
+   *
+   * @deprecated Use java.util logging instead. It is supported by GWT.
+   */
+  @Deprecated
   public LogAdapter getLogAdapter();
 
   /**
-   * Adds a global transport error handler to deal with any errors which arise from communication between the bus
-   * and the server
-   * @param errorHandler the error handler to add.
+   * Adds a global transport error handler to deal with any errors which arise
+   * from communication between the bus and the server
+   *
+   * @param errorHandler
+   *          the error handler to add.
    */
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
+
 }

@@ -16,20 +16,27 @@
 
 package org.jboss.errai.bus.client;
 
-import org.jboss.errai.bus.client.api.*;
+import java.util.Collections;
+import java.util.Set;
+
+import org.jboss.errai.bus.client.api.BusLifecycleListener;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.LogAdapter;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.client.framework.TransportErrorHandler;
 
-import java.util.Collections;
-import java.util.Set;
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 
 /**
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
@@ -137,6 +144,14 @@ public class
 
         @Override
         public void addTransportErrorHandler(TransportErrorHandler errorHandler) {
+        }
+
+        @Override
+        public void addLifecycleListener(BusLifecycleListener l) {
+        }
+
+        @Override
+        public void removeLifecycleListener(BusLifecycleListener l) {
         }
       };
     }

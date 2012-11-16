@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.Multimap;
 
-import org.jboss.errai.common.client.framework.ErraiAppAttribs;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;

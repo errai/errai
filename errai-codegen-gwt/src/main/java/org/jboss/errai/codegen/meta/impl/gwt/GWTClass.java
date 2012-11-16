@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,19 +38,7 @@ import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 
-import com.google.gwt.core.ext.typeinfo.JArrayType;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JEnumType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JGenericType;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.core.ext.typeinfo.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -223,15 +212,25 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
+    final Set<String> processedMethods = new HashSet<String>();
     do {
       for (final JMethod jMethod : type.getMethods()) {
-        if (!jMethod.isPrivate()) {
-          meths.add(new GWTMethod(oracle, jMethod));
+        GWTMethod gwtMethod = new GWTMethod(oracle, jMethod);
+        String readableMethodDecl = GenUtil.getMethodString(gwtMethod);
+        if (!jMethod.isPrivate() && !processedMethods.contains(readableMethodDecl)) {
+            meths.add(gwtMethod);
+            processedMethods.add(readableMethodDecl);
         }
       }
 
       for (final JClassType interfaceType : type.getImplementedInterfaces()) {
-        meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, interfaceType).getMethods()));
+        for (MetaMethod ifaceMethod : Arrays.asList(GWTClass.newInstance(oracle, interfaceType).getMethods())) {
+          String readableMethodDecl = GenUtil.getMethodString(ifaceMethod);
+          if (!processedMethods.contains(readableMethodDecl)) {
+            meths.add(ifaceMethod);
+            processedMethods.add(readableMethodDecl);
+          }   
+        }
       }
     }
     while ((type = type.getSuperclass()) != null && !type.getQualifiedSourceName().equals("java.lang.Object"));

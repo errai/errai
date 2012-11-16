@@ -41,6 +41,7 @@ import org.junit.Test;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@SuppressWarnings("serial")
 public class InvocationBuilderTest extends AbstractCodegenTest {
 
   @Test

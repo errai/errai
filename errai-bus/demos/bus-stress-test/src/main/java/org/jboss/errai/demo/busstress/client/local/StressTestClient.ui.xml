@@ -57,6 +57,8 @@
             </g:row>
         </g:Grid>
 
+        <g:SimplePanel ui:field="statusPanel"/>
+        
         <h1>Results</h1>
         <g:VerticalPanel width="100%" ui:field="resultsPanel"/>
 

@@ -16,7 +16,9 @@
 
 package org.jboss.errai.databinding.client.api;
 
-import org.jboss.errai.common.client.framework.Assert;
+import java.util.Set;
+
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyAgent;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
@@ -33,7 +35,6 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@SuppressWarnings("unchecked")
 public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   private T model;
@@ -177,7 +178,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
     Assert.notNull(widget);
     Assert.notNull(property);
-    ((BindableProxy<T>) this.model).getAgent().bind(widget, property, converter);
+    getAgent().bind(widget, property, converter);
     return this;
   }
 
@@ -191,7 +192,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   public DataBinder<T> unbind(String property) {
-    ((BindableProxy<T>) this.model).getAgent().unbind(property);
+    getAgent().unbind(property);
     return this;
   }
 
@@ -201,7 +202,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   public DataBinder<T> unbind() {
-    ((BindableProxy<T>) this.model).getAgent().unbind();
+    getAgent().unbind();
     return this;
   }
 
@@ -242,26 +243,25 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *         {@link #forType(Class)}) if changes should be automatically synchronized with the UI (also accessible using
    *         {@link #getModel()}).
    */
+  @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
     Assert.notNull(model);
 
     // ensure that we do not proxy the model twice
     model = maybeUnwrapModel(model);
 
-    BindableProxyAgent<T> agent = ((BindableProxy<T>) this.model).getAgent();
-
     // create a new proxy and copy the bindings
-    BindableProxy<T> proxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(
-        model, (initialState != null) ? initialState : agent.getInitialState());
+    BindableProxy<T> newProxy = (BindableProxy<T>) BindableProxyFactory.getBindableProxy(
+        model, (initialState != null) ? initialState : getAgent().getInitialState());
 
-    for (String boundProperty : agent.getBoundProperties()) {
-      proxy.getAgent().bind(agent.getWidget(boundProperty), boundProperty, agent.getConverter(boundProperty));
+    for (String boundProperty : getBoundProperties()) {
+      newProxy.getAgent().bind(getWidget(boundProperty), boundProperty, getAgent().getConverter(boundProperty));
     }
 
     // unbind the old proxied model
-    agent.unbind();
+    unbind();
 
-    this.model = (T) proxy;
+    this.model = (T) newProxy;
     return this.model;
   }
 
@@ -273,9 +273,39 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    * @return The widget currently bound to the provided property or null if no widget was bound.
    */
   public Widget getWidget(String property) {
-    return ((BindableProxy<T>) this.model).getAgent().getWidget(Assert.notNull(property));
+    return getAgent().getWidget(Assert.notNull(property));
   }
 
+  /**
+   * Returns a set of the currently bound property names.
+   * 
+   * @return bound properties, an empty set if no properties have been bound.
+   */
+  public Set<String> getBoundProperties() {
+    return getAgent().getBoundProperties();
+  }
+  
+  @Override
+  public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
+    getAgent().addPropertyChangeHandler(handler);
+  }
+
+  @Override
+  public void removePropertyChangeHandler(PropertyChangeHandler<?> handler) {
+    getAgent().removePropertyChangeHandler(handler);
+  }
+
+  @Override
+  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
+    getAgent().addPropertyChangeHandler(property, handler);
+  }
+
+  @Override
+  public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
+    getAgent().removePropertyChangeHandler(property, handler);
+  }
+  
+  @SuppressWarnings("unchecked")
   private static <M> M maybeUnwrapModel(M model) {
     if (model instanceof BindableProxy) {
       model = (M) ((BindableProxy<M>) model).unwrap();
@@ -283,24 +313,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
     return model;
   }
   
-  @Override
-  public void addPropertyChangeHandler(PropertyChangeHandler<?> handler) {
-    ((BindableProxy<T>) this.model).getAgent().addPropertyChangeHandler(handler);
-  }
-
-  @Override
-  public void removePropertyChangeHandler(PropertyChangeHandler<?> handler) {
-    ((BindableProxy<T>) this.model).getAgent().removePropertyChangeHandler(handler);
-  }
-
-  @Override
-  public <P> void addPropertyChangeHandler(String property, PropertyChangeHandler<P> handler) {
-    ((BindableProxy<T>) this.model).getAgent().addPropertyChangeHandler(property, handler);
-  }
-
-  @Override
-  public void removePropertyChangeHandler(String property, PropertyChangeHandler<?> handler) {
-    ((BindableProxy<T>) this.model).getAgent().removePropertyChangeHandler(property, handler);
+  @SuppressWarnings("unchecked")
+  private BindableProxyAgent<T> getAgent() {
+    return ((BindableProxy<T>) this.model).getAgent();
   }
 
 }

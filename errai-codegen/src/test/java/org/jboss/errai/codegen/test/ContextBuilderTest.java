@@ -56,6 +56,7 @@ public class ContextBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testDeclareVariableWithTypeLiteral() {
+    @SuppressWarnings("serial")
     String declaration = ContextBuilder.create(Context.create().autoImport())
         .declareVariable("list", new TypeLiteral<List<String>>() {})
         .finish()

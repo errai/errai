@@ -20,14 +20,14 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.LogAdapter;
-
-import com.google.gwt.junit.client.GWTTestCase;
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.api.tasks.ClientTaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
+
+import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
 
 /**
  * Base test class for testing ErraiBus-based code. Located in the main distribution so it can be extended
@@ -73,18 +73,22 @@ public abstract class AbstractErraiTest extends GWTTestCase {
       System.out.println("GET()");
       bus = (ClientMessageBusImpl) ErraiBus.get();
       bus.setLogAdapter(new LogAdapter() {
+        @Override
         public void warn(String message) {
           System.out.println("WARN: " + message);
         }
 
+        @Override
         public void info(String message) {
           System.out.println("INFO: " + message);
         }
 
+        @Override
         public void debug(String message) {
           System.out.println("DEBUG: " + message);
         }
 
+        @Override
         public void error(String message, Throwable t) {
           System.out.println("ERROR: " + message);
           if (t != null) t.printStackTrace();
@@ -107,10 +111,32 @@ public abstract class AbstractErraiTest extends GWTTestCase {
     bus.stop(true);
   }
 
+  /**
+   * Invokes the given Runnable after the bus has finished initializing (it's
+   * online and connected to the server).
+   * <p>
+   * You must call {@link #finishTest()} within your runnable, or the test will
+   * time out.
+   *
+   * @param r the stuff to run once the bus is online.
+   */
   protected void runAfterInit(final Runnable r) {
     runAfterInit(r, 90000);
   }
-  
+
+  /**
+   * Invokes the given Runnable after the bus has finished initializing (it's
+   * online and connected to the server).
+   * <p>
+   * You must call {@link #finishTest()} within your runnable, or the test will
+   * time out.
+   *
+   * @param r
+   *          the stuff to run once the bus is online.
+   * @param timeout
+   *          the number of milliseconds to allow the bus to connect before
+   *          timing out.
+   */
   protected void runAfterInit(final Runnable r, final int timeout) {
     final Timer t = new Timer() {
 

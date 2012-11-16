@@ -17,7 +17,16 @@
 package org.jboss.errai.databinding.rebind;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -34,8 +43,8 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
@@ -93,13 +102,7 @@ public class BindableProxyLoaderGenerator extends Generator {
 
     log.info("generating bindable proxy loader class.");
     final String gen = generate(context);
-
-    ThreadUtil.execute(new Runnable() {
-      @Override
-      public void run() {
-        RebindUtils.writeStringToFile(cacheFile, gen);
-      }
-    });
+    RebindUtils.writeStringToFile(cacheFile, gen);
 
     return gen;
   }
@@ -108,15 +111,19 @@ public class BindableProxyLoaderGenerator extends Generator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
-    for (MetaClass bindable : ClassScanner.getTypesAnnotatedWith(Bindable.class,
-        RebindUtils.findTranslatablePackages(context))) {
+    Collection<MetaClass> annotatedBindableTypes =
+        ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context));
+    
+    Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
+    bindableTypes.addAll(getBindableTypesFromErraiAppProperties());
 
+    for (MetaClass bindable : bindableTypes) {
       if (bindable.isFinal()) {
         throw new RuntimeException("@Bindable type cannot be final: " + bindable.getFullyQualifiedName());
       }
 
       if (bindable.getDeclaredConstructor() == null || !bindable.getDeclaredConstructor().isPublic()) {
-        throw new RuntimeException("@Bindable type needs a public default no-arg constructor: " 
+        throw new RuntimeException("@Bindable type needs a public default no-arg constructor: "
             + bindable.getFullyQualifiedName());
       }
 
@@ -144,6 +151,54 @@ public class BindableProxyLoaderGenerator extends Generator {
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     return classBuilder.toJavaString();
+  }
+
+  /**
+   * Reads all bindable types from all ErraiApp.properties files on the classpath.
+   * 
+   * @return a set of meta classes representing the configured bindable types.
+   */
+  private Set<MetaClass> getBindableTypesFromErraiAppProperties() {
+    final Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
+
+    final Enumeration<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
+    while (erraiAppProperties.hasMoreElements()) {
+      InputStream inputStream = null;
+      try {
+        final URL url = erraiAppProperties.nextElement();
+        log.debug("Checking " + url.getFile() + " for bindable types...");
+        inputStream = url.openStream();
+
+        final ResourceBundle props = new PropertyResourceBundle(inputStream);
+        for (final String key : props.keySet()) {
+          if (key.equals("errai.ui.bindableTypes")) {
+            for (final String s : props.getString(key).split(" ")) {
+              try {
+                bindableTypes.add(MetaClassFactory.get(s.trim()));
+              }
+              catch (Exception e) {
+                throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
+              }
+            }
+            break;
+          }
+        }
+      }
+      catch (IOException e) {
+        throw new RuntimeException("Error reading ErraiApp.properties", e);
+      }
+      finally {
+        if (inputStream != null) {
+          try {
+            inputStream.close();
+          }
+          catch (IOException e) {
+            log.warn("Failed to close input stream", e);
+          }
+        }
+      }
+    }
+    return bindableTypes;
   }
 
   private void generateDefaultConverterRegistrations(final MethodBlockBuilder<?> loadProxies,

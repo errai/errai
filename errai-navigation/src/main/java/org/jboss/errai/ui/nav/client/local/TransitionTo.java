@@ -1,6 +1,6 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.gwt.user.client.ui.Widget;

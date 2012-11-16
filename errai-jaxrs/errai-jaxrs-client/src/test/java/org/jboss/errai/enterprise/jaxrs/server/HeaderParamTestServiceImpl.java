@@ -36,8 +36,8 @@ public class HeaderParamTestServiceImpl implements HeaderParamTestService {
   } 
   
   @Override
-  public String postWithHeaderParam(String id) {
-    return id;
+  public String postWithHeaderParam(String entity, String id) {
+    return entity + "/" + id;
   }
 
   @Override

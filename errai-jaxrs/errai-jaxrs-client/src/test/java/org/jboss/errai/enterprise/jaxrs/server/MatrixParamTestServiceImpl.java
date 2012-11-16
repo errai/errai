@@ -36,8 +36,8 @@ public class MatrixParamTestServiceImpl implements MatrixParamTestService {
   }
 
   @Override
-  public String postWithMatrixParams(String first, String last) {
-    return first + "/" + last;
+  public String postWithMatrixParams(String entity, String first, String last) {
+    return entity+ "/" + first + "/" + last;
   }
 
   @Override

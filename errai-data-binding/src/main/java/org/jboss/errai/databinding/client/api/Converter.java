@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
- * Contract for converters than can perform model value to widget value transformations and vice versa.
+ * Contract for converters that perform model value to widget value transformations and vice versa.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  *

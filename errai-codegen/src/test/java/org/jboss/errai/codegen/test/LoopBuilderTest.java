@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.test;
 
+import static org.jboss.errai.codegen.test.LoopBuilderTestResult.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -45,7 +46,8 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class LoopBuilderTest extends AbstractCodegenTest implements LoopBuilderTestResult {
+@SuppressWarnings("serial")
+public class LoopBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testForeachLoopWithStringInParameterizedList() {

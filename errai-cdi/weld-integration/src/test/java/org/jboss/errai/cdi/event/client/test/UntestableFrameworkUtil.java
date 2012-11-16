@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.framework;
+package org.jboss.errai.cdi.event.client.test;
 
-/**
- * @author Mike Brock
- */
-public abstract class ErraiAppAttribs {
-  public static final String JUNIT_PACKAGE_ONLY = "org.junit_test_only";
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+
+public class UntestableFrameworkUtil {
+
+  public static native ClientMessageBusImpl installAlternativeBusImpl(ClientMessageBusImpl replacementBus) /*-{
+    var oldBus = @org.jboss.errai.bus.client.ErraiBus::bus;
+    @org.jboss.errai.bus.client.ErraiBus::bus = replacementBus;
+    return oldBus;
+  }-*/;
 }
