@@ -68,18 +68,18 @@ public class BindableProxyGenerator {
         .body();
 
     classBuilder
-        .privateField("agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
+        .privateField("__agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
         .finish()
         .publicConstructor(Parameter.of(InitialState.class, "initialState"))
         .callThis(Stmt.newObject(bindable), Variable.get("initialState"))
         .finish()
         .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(InitialState.class, "initialState"))
-        .append(Stmt.loadVariable("agent").assignValue(
+        .append(Stmt.loadVariable("__agent").assignValue(
             Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
                 Variable.get("this"), Variable.get("target"), Variable.get("initialState"))))
         .append(generatePropertiesMap())
         .finish()
-        .publicMethod(BindableProxyAgent.class, "getAgent")
+        .publicMethod(BindableProxyAgent.class, "getProxyAgent")
         .append(agent().returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")
@@ -278,7 +278,7 @@ public class BindableProxyGenerator {
   }
 
   private ContextualStatementBuilder agent() {
-    return Stmt.loadClassMember("agent");
+    return Stmt.loadClassMember("__agent");
   }
 
   private ContextualStatementBuilder target() {
