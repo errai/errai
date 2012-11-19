@@ -314,7 +314,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     while (field == null && (type = type.getSuperclass()) != null
         && !type.getQualifiedSourceName().equals("java.lang.Object")) {
       JField superTypeField = type.findField(name);
-      if (!superTypeField.isPrivate()) {
+      if (superTypeField != null && !superTypeField.isPrivate()) {
         field = superTypeField;
       }
 
