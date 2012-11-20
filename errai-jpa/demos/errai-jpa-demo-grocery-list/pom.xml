@@ -645,7 +645,7 @@
               <forkMode>pertest</forkMode>
 
               <!-- Note: to run the test in a real browser, set -DargLine='-Dgwt.args="-runStyle Manual:1"' -->
-              <argLine>-Xmx2048m ${argLine}</argLine>
+              <argLine>-Xmx1500m ${argLine}</argLine>
 
 
               <systemProperties>
