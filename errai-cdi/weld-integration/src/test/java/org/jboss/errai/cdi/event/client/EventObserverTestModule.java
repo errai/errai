@@ -1,5 +1,16 @@
 package org.jboss.errai.cdi.event.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PreDestroy;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.inject.Inject;
+
 import org.jboss.errai.cdi.client.event.FinishEvent;
 import org.jboss.errai.cdi.client.event.StartEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
@@ -8,16 +19,6 @@ import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Test module used by {@see EventObserverIntegrationTest}.
  * 
@@ -25,7 +26,7 @@ import java.util.Map;
  */
 @EntryPoint
 public class EventObserverTestModule extends EventTestObserverSuperClass {
-  private Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
+  private final Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
   
   private int busReadyEventsReceived = 0;
   private Runnable verifier;
@@ -33,7 +34,7 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
   
   @Inject
   private Event<StartEvent> startEvent;
-
+  
   @PreDestroy
   private void destroy() {
     destroyed = true;
