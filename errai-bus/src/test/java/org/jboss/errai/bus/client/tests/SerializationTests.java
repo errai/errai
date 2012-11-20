@@ -20,11 +20,64 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.*;
+import org.jboss.errai.bus.client.tests.support.AImpl1;
+import org.jboss.errai.bus.client.tests.support.AImpl2;
+import org.jboss.errai.bus.client.tests.support.AbstractClassA;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.BuilderEntity;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceArrayField;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.EnumContainer;
+import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
+import org.jboss.errai.bus.client.tests.support.EnumWithState;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntity;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImmutableArrayContainer;
+import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
+import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
+import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
+import org.jboss.errai.bus.client.tests.support.Person;
+import org.jboss.errai.bus.client.tests.support.Student;
+import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.SubInterface;
+import org.jboss.errai.bus.client.tests.support.SubInterfaceImpl;
+import org.jboss.errai.bus.client.tests.support.SubMoron;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TestingTick;
+import org.jboss.errai.bus.client.tests.support.TestingTickCache;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.User;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -959,7 +1012,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testLinkedHashMap() {
     runAfterInit(new Runnable() {
       @Override
@@ -1984,7 +2037,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testImmutableEntityWithEnumAndNullValue() {
     runAfterInit(new Runnable() {
       @Override
@@ -2040,20 +2093,20 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   //Serves as regression test for ERRAI-403
   public void testEntityWithMapUsingAbstractValueType() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
 
-        final EntityWithMapUsingAbstractValueType e = new EntityWithMapUsingAbstractValueType(); 
-        
+        final EntityWithMapUsingAbstractValueType e = new EntityWithMapUsingAbstractValueType();
+
         final Map<String, AbstractClassA> data = new HashMap<String, AbstractClassA>();
         data.put("1", new AImpl1(4711));
         data.put("2", new AImpl2("4711"));
         e.setData(data);
-        
+
         MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingAbstractValueType>() {
           @Override
           public void callback(EntityWithMapUsingAbstractValueType response) {
@@ -2070,20 +2123,20 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   //Serves as regression test for ERRAI-403
   public void testEntityWithMapUsingAbstractKeyType() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
 
-        final EntityWithMapUsingAbstractKeyType e = new EntityWithMapUsingAbstractKeyType(); 
-        
+        final EntityWithMapUsingAbstractKeyType e = new EntityWithMapUsingAbstractKeyType();
+
         final Map<AbstractClassA, String> data = new HashMap<AbstractClassA, String>();
         data.put(new AImpl1(4711), "1");
         data.put(new AImpl2("4711"), "2");
         e.setData(data);
-        
+
         MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingAbstractKeyType>() {
           @Override
           public void callback(EntityWithMapUsingAbstractKeyType response) {
@@ -2100,7 +2153,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testEntityWithMapUsingSubtypeValues() {
     runAfterInit(new Runnable() {
       @Override
@@ -2108,7 +2161,7 @@ public class SerializationTests extends AbstractErraiTest {
         final Map<String, Person> map = new HashMap<String, Person>();
         map.put("1", new Student(1, "student"));
         map.put("2", new User(2, "user"));
-        
+
         final EntityWithMapUsingSubtypeValues e = new EntityWithMapUsingSubtypeValues();
         e.setData(map);
 
@@ -2128,7 +2181,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testEntityWithInterfaceField() {
     runAfterInit(new Runnable() {
       @Override
@@ -2152,7 +2205,31 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
+  public void testEntityWithInterfaceArrayField() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final EntityWithInterfaceArrayField ent = new EntityWithInterfaceArrayField();
+        ent.setArrayField(new SubInterface[] {new SubInterfaceImpl("value0"), null, new SubInterfaceImpl("value2")});
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithInterfaceArrayField>() {
+          @Override
+          public void callback(EntityWithInterfaceArrayField response) {
+            try {
+              assertEquals(ent, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithInterfaceArrayField(ent);
+      }
+    });
+  }
+
   public void testImmutableEntityWithArray() {
     runAfterInit(new Runnable() {
       @Override

@@ -33,6 +33,7 @@ import org.jboss.errai.marshalling.tests.res.EntityWithAbstractFieldType;
 import org.jboss.errai.marshalling.tests.res.EntityWithInheritedPublicFields;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterface;
 import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArray;
+import org.jboss.errai.marshalling.tests.res.EntityWithInterfaceArrayInPublicField;
 import org.jboss.errai.marshalling.tests.res.EntityWithMapUsingArrayValues;
 import org.jboss.errai.marshalling.tests.res.EntityWithPortableSubtypesInArray;
 import org.jboss.errai.marshalling.tests.res.EntityWithPublicFields;
@@ -166,6 +167,20 @@ public class MarshallingAPITest {
     ewia.setA(a);
 
     testEncodeDecode(ewia);
+  }
+
+  @Test
+  public void testEntityWithInterfaceArrayInPublicField() {
+    EntityWithInterfaceArrayInPublicField ewiaipf = new EntityWithInterfaceArrayInPublicField();
+
+    InterfaceA[] a = new InterfaceA[4];
+    a[0] = new AImpl1(4711);
+    a[1] = null;
+    a[2] = new AImpl2("admin");
+    a[3] = new ASubImpl1(11f);
+    ewiaipf.a = a;
+
+    testEncodeDecode(ewiaipf);
   }
 
   @Test
