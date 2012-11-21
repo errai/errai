@@ -307,6 +307,8 @@ public class IOCConfigProcessor {
               }
 
               final MetaClass injectedType = instance.getElementTypeOrMethodReturnType();
+              injectionContext.addTopLevelType(injectedType);
+
               final MetaClassMember producerMember;
 
               switch (instance.getTaskType()) {
@@ -331,6 +333,7 @@ public class IOCConfigProcessor {
                   .getProducerInjector(injectedType, producerMember, instance);
 
               injectionContext.registerInjector(producerInjector);
+
 
               control.masqueradeAs(injectedType);
 
