@@ -35,7 +35,7 @@ public class TestModel {
   private Integer _age;
   private boolean active;
   private TestModel child;
-
+  
   public int getId() {
     return id;
   }

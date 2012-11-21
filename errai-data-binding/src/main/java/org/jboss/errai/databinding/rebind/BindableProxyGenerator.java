@@ -159,7 +159,7 @@ public class BindableProxyGenerator {
   private void generateSetter(ClassStructureBuilder<?> classBuilder, String property, BlockBuilder<?> setMethod) {
     MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
     MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
-    if (setterMethod != null && !setterMethod.isFinal()) {
+    if (getterMethod != null && setterMethod != null && !setterMethod.isFinal()) {
       setMethod.append(
           If.cond(Stmt.loadVariable("property").invoke("equals", property))
               .append(
@@ -260,7 +260,7 @@ public class BindableProxyGenerator {
     BlockStatement block = new BlockStatement();
     for (String property : bindable.getBeanDescriptor().getProperties()) {
       MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-      if (!readMethod.isFinal()) {
+      if (readMethod != null && !readMethod.isFinal()) {
         block.addStatement(agent("propertyTypes").invoke(
             "put",
             property,
