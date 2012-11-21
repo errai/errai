@@ -11,6 +11,7 @@ This demo app shows how to use the following technologies together:
  * ErraiJPA
  * ErraiUI
  * Errai Data Binding
+ * Bean Validation (TODO)
  * Twitter Bootstrap
 
 Try It Out
@@ -45,6 +46,7 @@ This app is currently a work in progress. The following items remain to be done:
    * Basic add/remove functionality
    * Defining the order of departments within the store
    * Google Maps integration for setting store's location
+ * Use Bean Validation annotations on the Store, Department, Item entities; validate before submitting to local storage
  * Sync data to server using Errai Data Sync
    * List sharing among users, with push updates
  * HTML5 offline support (app cache manifest)
