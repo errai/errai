@@ -9,8 +9,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -78,7 +83,7 @@ public class NavigationGraphGenerator extends Generator {
                 "Page names must be unique, but " + prevPageWithThisName + " and " + pageClass +
                 " are both named [" + pageName + "]");
       }
-      Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
+      Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName, template.subList(1, template.size()));
       if (annotation.startingPage() == true) {
         defaultPages.add(pageClass);
 
@@ -154,17 +159,59 @@ public class NavigationGraphGenerator extends Generator {
    * @param pageName
    *          The name of the page (normally obtained by a call to
    *          {@link #parsePageUriTemplate(MetaClass, String)}).
+   * @param stateParamNames
+   *          The names of the state parameters for the page in question
+   *          (normally obtained by a call to
+   *          {@link #parsePageUriTemplate(MetaClass, String)}).
    */
-  private ObjectBuilder generateNewInstanceOfPageImpl(MetaClass pageClass, String pageName) {
-    return ObjectBuilder.newInstanceOf(PageNode.class).extend()
+  private ObjectBuilder generateNewInstanceOfPageImpl(MetaClass pageClass, String pageName, List<String> stateParamNames) {
+    AnonymousClassStructureBuilder pageImplBuilder = ObjectBuilder.newInstanceOf(
+            MetaClassFactory.parameterizedAs(PageNode.class, MetaClassFactory.typeParametersOf(pageClass))).extend();
+
+    pageImplBuilder
         .publicMethod(String.class, "name")
             .append(Stmt.loadLiteral(pageName).returnValue()).finish()
         .publicMethod(Class.class, "contentType")
             .append(Stmt.loadLiteral(pageClass).returnValue()).finish()
-        .publicMethod(Widget.class, "content")
+        .publicMethod(pageClass, "content")
             .append(Stmt.nestedCall(Refs.get("bm"))
-                    .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish()
-        .finish();
+                    .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish();
+
+    appendGetStateMethod(pageImplBuilder, pageClass, stateParamNames);
+    appendPutStateMethod(pageImplBuilder, pageClass, stateParamNames);
+
+    return pageImplBuilder.finish();
+  }
+
+  private void appendGetStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<String> stateParamNames) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(List.class, "getState",
+            Parameter.of(pageClass, "widget"))
+            .body();
+
+    method.append(Stmt.declareVariable("state", Stmt.newObject(ArrayList.class)));
+
+    for (String paramName : stateParamNames) {
+      // TODO use getters when possible; convert everything to strings (use/reuse data binding?)
+      method.append(
+              Stmt.loadVariable("state").invoke("add", Stmt.loadVariable("widget").loadField(paramName)));
+    }
+    method.append(Stmt.loadVariable("state").returnValue());
+    method.finish();
+  }
+
+  private void appendPutStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<String> stateParamNames) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "putState",
+            Parameter.of(pageClass, "widget"),
+            Parameter.of(MetaClassFactory.get(new TypeLiteral<List<String>>() {}), "state"))
+            .body();
+
+    int idx = 0;
+    for (String paramName : stateParamNames) {
+      // TODO use setters when possible; perform type coercion
+      method.append(Stmt.loadVariable("widget").loadField(paramName).assignValue(Stmt.castTo(String.class, Stmt.loadVariable("state").invoke("get", idx))));
+      idx++;
+    }
+    method.finish();
   }
 
   static List<String> parsePageUriTemplate(MetaClass pageType, String uriTemplate) {

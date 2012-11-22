@@ -1,5 +1,9 @@
 package org.jboss.errai.ui.nav.client.local;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -41,43 +45,46 @@ public class Navigation {
     History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
       public void onValueChange(ValueChangeEvent<String> event) {
-        PageNode page = navGraph.getPage(event.getValue());
-        makePageVisible(page);
+
+        // TODO what about backing up current history? we might already be "back" in the nav stack already
+
+        List<String> tokens = parseHistoryToken(event.getValue());
+        PageNode toPage = navGraph.getPage(tokens.get(0));
+        Widget widget = toPage.content();
+        toPage.putState(widget, tokens.subList(1, tokens.size()));
+
+        contentPanel.clear();
+        contentPanel.add(widget);
       }
     });
 
-    String initialToken = History.getToken();
-    PageNode initialPage = navGraph.getPage(initialToken);
+    List<String> initialTokens = parseHistoryToken(History.getToken());
+    PageNode initialPage = navGraph.getPage(initialTokens.get(0));
     if (initialPage == null) {
       initialPage = navGraph.getPage(""); // Default page
     }
-    goTo(initialPage);
+    goTo(initialPage, initialTokens.subList(1, initialTokens.size()).toArray(new String[initialTokens.size() - 1]));
   }
 
   /**
    * Goes to
    * @param toPage
    */
-  public void goTo(Class<? extends Widget> toPage) {
+  public void goTo(Class<? extends Widget> toPage, String ... state) {
     PageNode toPageInstance = navGraph.getPage(toPage);
-    goTo(toPageInstance);
+    goTo(toPageInstance, state);
   }
 
-  public void goTo(PageNode toPage) {
-    makePageVisible(toPage);
-    History.newItem(toPage.name(), false);
-  }
+  public void goTo(PageNode toPage, String ... state) {
 
-  /**
-   * Internal subroutine that makes the given page's widget visible but does not
-   * manipulate the navigation history.
-   *
-   * @param page
-   *          The page to show. Not null.
-   */
-  private void makePageVisible(PageNode page) {
+    // TODO preserve state of current page
+
+    Widget widget = toPage.content();
+    toPage.putState(widget, Arrays.asList(state));
+
     contentPanel.clear();
-    contentPanel.add(page.content());
+    contentPanel.add(widget);
+    History.newItem(toPage.name(), false);
   }
 
   /**
@@ -92,6 +99,55 @@ public class Navigation {
    */
   public Widget getContentPanel() {
     return contentPanel;
+  }
+
+  /**
+   * Breaks up the given history token at all unescaped '\' characters.
+   *
+   * @param token
+   *          The history token to parse. Must be non-null.
+   * @return A list of size >= 1. The first entry is always the page name.
+   *         Remaining entries are extra state info.
+   */
+  private static List<String> parseHistoryToken(String token) {
+    StringBuilder nextPart = new StringBuilder();
+    List<String> parts = new ArrayList<String>();
+    for (int i = 0; i < token.length(); i++) {
+      char ch = token.charAt(i);
+      if (ch == '\\') {
+        nextPart.append(token.charAt(i + 1));
+        i++;
+      }
+      else if (ch == '/') {
+        parts.add(nextPart.toString());
+        nextPart = new StringBuilder();
+      }
+      else {
+        nextPart.append(ch);
+      }
+    }
+    parts.add(nextPart.toString());
+    return parts;
+  }
+
+  private static String makeHistoryToken(String pageName, List<String> extraInfo) {
+    StringBuilder sb = new StringBuilder();
+    appendEscaped(sb, pageName);
+    for (String state : extraInfo) {
+      sb.append("/");
+      appendEscaped(sb, state);
+    }
+    return sb.toString();
+  }
+
+  private static void appendEscaped(StringBuilder sb, String state) {
+    for (int i = 0; i < state.length(); i++) {
+      char ch = state.charAt(i);
+      if (ch == '/') {
+        sb.append('\\');
+      }
+      sb.append(ch);
+    }
   }
 
 }

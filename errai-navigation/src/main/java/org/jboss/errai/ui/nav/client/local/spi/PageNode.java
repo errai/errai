@@ -1,5 +1,7 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
+import java.util.List;
+
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -13,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public interface PageNode {
+public interface PageNode<W extends Widget> {
 
   /**
    * Returns the name of this page.
@@ -30,12 +32,18 @@ public interface PageNode {
    *         the exact runtime type as returned by {@link #contentType()}. Never
    *         null.
    */
-  public Widget content();
+  public W content();
 
   /**
    * Returns the type of widget that this page node's {@link #content()} method will produce.
    *
    * @return The type of widget that supplies this page's content. Never null.
    */
-  public Class<? extends Widget> contentType();
+  public Class<W> contentType();
+
+  // XXX 1: maybe show() and hide() are better? thaw() and freeze()? start() and stop()?
+  // XXX 2: should this be a [Multi]Map that includes the parameter names from the template (rather than a List of just values?)
+  // TODO javadoc
+  public void putState(W widget, List<String> state);
+  public List<String> getState(W widget);
 }
