@@ -302,6 +302,9 @@ public class NavigationGraphGenerator extends Generator {
     else if (fromType.asBoxed().isAssignableTo(Number.class)) {
       return Stmt.invokeStatic(String.class, "valueOf", fromValue);
     }
+    else if (fromType.asBoxed().isAssignableTo(Boolean.class)) {
+      return Stmt.invokeStatic(Boolean.class, "toString", fromValue);
+    }
     else {
       throw new UnsupportedOperationException("@PageState fields of type " + fromType.getFullyQualifiedName() + " are not supported");
     }
@@ -315,8 +318,11 @@ public class NavigationGraphGenerator extends Generator {
     if (toType.isAssignableTo(String.class)) {
       return stringValue;
     }
-    else if (toType.asBoxed().isAssignableTo(Integer.class)) {
-      return Stmt.invokeStatic(Integer.class, "valueOf", stringValue);
+    else if (toType.asBoxed().isAssignableTo(Number.class)) {
+      return Stmt.invokeStatic(toType.asBoxed(), "valueOf", stringValue);
+    }
+    else if (toType.asBoxed().isAssignableTo(Boolean.class)) {
+      return Stmt.invokeStatic(Boolean.class, "valueOf", stringValue);
     }
     else {
       throw new UnsupportedOperationException("@PageState fields of type " + toType.getFullyQualifiedName() + " are not supported");
@@ -325,8 +331,8 @@ public class NavigationGraphGenerator extends Generator {
 
   private Statement defaultValueStatement(MetaClass type) {
     if (type.isPrimitive()) {
-      if (type.isAssignableTo(int.class)) {
-        return Stmt.load(0);
+      if (type.asBoxed().isAssignableTo(Number.class)) {
+        return Stmt.castTo(type, Stmt.load(0));
       }
       else if (type.isAssignableTo(boolean.class)) {
         return Stmt.load(false);

@@ -28,14 +28,33 @@ public class PageStateTest extends AbstractErraiCDITest {
   public void testPassAllStateTokens() throws Exception {
     PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
     assertNull(page.getStringThing());
+    assertEquals((byte) 0, page.getByteThing());
+    assertEquals((short) 0, page.getShortThing());
     assertEquals(0, page.getIntThing());
+    assertEquals(0L, page.getLongThing());
+    assertEquals(0f, page.getFloatThing(), 0f);
+    assertEquals(0.0, page.getDoubleThing(), 0.0);
+    assertEquals(false, page.getBoolThing());
 
-    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of(
-            "stringThing", "string",
-            "intThing", "123"));
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>builder()
+            .put("stringThing", "string")
+            .put("byteThing", "12")
+            .put("shortThing", "123")
+            .put("intThing", "1234")
+            .put("longThing", "12345")
+            .put("floatThing", "1.2")
+            .put("doubleThing", "1.23")
+            .put("boolThing", "true")
+            .build());
 
     assertEquals("string", page.getStringThing());
-    assertEquals(123, page.getIntThing());
+    assertEquals((byte) 12, page.getByteThing());
+    assertEquals((short) 123, page.getShortThing());
+    assertEquals(1234, page.getIntThing());
+    assertEquals(12345L, page.getLongThing());
+    assertEquals(1.2f, page.getFloatThing(), 0f);
+    assertEquals(1.23, page.getDoubleThing(), 0.0);
+    assertEquals(true, page.getBoolThing());
   }
 
   /**

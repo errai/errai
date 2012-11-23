@@ -11,11 +11,14 @@ import com.google.gwt.user.client.ui.SimplePanel;
 @Page
 public class PageWithExtraState extends SimplePanel {
 
-  @PageState
-  private String stringThing;
-
-  @PageState
-  private int intThing;
+  @PageState private String stringThing;
+  @PageState private byte byteThing;
+  @PageState private short shortThing;
+  @PageState private int intThing;
+  @PageState private long longThing;
+  @PageState private double doubleThing;
+  @PageState private float floatThing;
+  @PageState private boolean boolThing;
 
   // TODO include fields for all the types we want to support
 
@@ -23,7 +26,31 @@ public class PageWithExtraState extends SimplePanel {
     return stringThing;
   }
 
+  public byte getByteThing() {
+    return byteThing;
+  }
+
+  public short getShortThing() {
+    return shortThing;
+  }
+
   public int getIntThing() {
     return intThing;
+  }
+
+  public long getLongThing() {
+    return longThing;
+  }
+
+  public double getDoubleThing() {
+    return doubleThing;
+  }
+
+  public float getFloatThing() {
+    return floatThing;
+  }
+
+  public boolean getBoolThing() {
+    return boolThing;
   }
 }
