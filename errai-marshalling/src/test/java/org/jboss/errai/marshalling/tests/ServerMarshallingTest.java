@@ -3,11 +3,13 @@ package org.jboss.errai.marshalling.tests;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -342,6 +344,20 @@ public class ServerMarshallingTest {
   @Test
   public void testEmptyMap() {
     testEncodeDecodeDynamic(Collections.emptyMap());
+  }
+
+  @Test
+  public void testMapWithBigIntegerAsKey() {
+	  Map<BigInteger, String> map = new HashMap<BigInteger, String>();
+	  map.put(new BigInteger("10"), "10 value");
+	  testEncodeDecodeDynamic(map);
+  }
+
+  @Test
+  public void testMapWithBigDecimalAsKey() {
+	  Map<BigDecimal, String> map = new HashMap<BigDecimal, String>();
+	  map.put(new BigDecimal("10"), "10 value");
+	  testEncodeDecodeDynamic(map);
   }
 
   @Test
