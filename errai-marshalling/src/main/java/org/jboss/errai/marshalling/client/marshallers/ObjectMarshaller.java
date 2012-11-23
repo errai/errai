@@ -83,6 +83,20 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
     else if (o.isString() != null) {
       return o.isString().stringValue();
     }
+    else if (o.isBoolean() !=null ) {
+    	return o.isBoolean().booleanValue();
+    }
+    else if (o.isNumber() != null ) {
+    	//this is tricky!
+    	double doubleVal = o.isNumber().doubleValue();
+    	double intVal = o.isNumber().intValue();
+    	String doubleValStr = String.valueOf(doubleVal);
+    	if (String.valueOf(intVal).equals(doubleValStr))
+    		return intVal;
+    	if (doubleValStr.contains("."))
+    		return doubleVal;
+    	return Long.valueOf(doubleValStr);
+    }
 
     return null;
   }
