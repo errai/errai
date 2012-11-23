@@ -153,8 +153,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         buf.append("\"").append(entry.getKey()).append("\"");
       }
       else if (entry.getKey() != null) {
-        if (entry.getKey() instanceof Number || entry.getKey() instanceof Boolean
-            || entry.getKey() instanceof Character) {
+        if ((entry.getKey() instanceof Number && !(entry.getKey() instanceof BigInteger || entry.getKey() instanceof BigDecimal))
+        		|| entry.getKey() instanceof Boolean || entry.getKey() instanceof Character) {
           keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getKey());
         }
         else {
