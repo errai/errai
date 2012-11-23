@@ -16,8 +16,9 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.List;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -60,6 +61,12 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
 
       if (encodedType == null) {
         if (targetType == null) {
+          if (jsObject.containsKey(SerializationParts.QUALIFIED_VALUE)) {
+            // the object we're decoding is a wrapper with ^ObjectID and ^Value, but no type information.
+            // just bypass this layer and return the "meat"
+            return demarshall(Object.class, jsObject.get(SerializationParts.QUALIFIED_VALUE), ctx);
+          }
+          // without a ^Value property, this must be a Map
           return MapMarshaller.INSTANCE.demarshall(o, ctx);
         }
         else if (ctx.getMarshallerInstance(targetType.getName()) != null) {
@@ -78,10 +85,20 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
       return ctx.getMarshallerInstance(encodedType).demarshall(o, ctx);
     }
     else if (o.isArray() != null) {
-      return new ListMarshaller().demarshall(o, ctx);
+      String assumedElementType = ctx.getAssumedElementType();
+      ctx.setAssumedElementType(Object.class.getName());
+      List result =  new ListMarshaller().doDemarshall(o.isArray(), ctx);
+      ctx.setAssumedElementType(assumedElementType);
+      return result;
     }
     else if (o.isString() != null) {
       return o.isString().stringValue();
+    }
+    else if (o.isBoolean() != null ) {
+      return o.isBoolean().booleanValue();
+    }
+    else if (o.isNumber() != null ) {
+      return o.isNumber().doubleValue();
     }
 
     return null;
