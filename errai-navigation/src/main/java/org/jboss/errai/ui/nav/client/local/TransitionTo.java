@@ -3,6 +3,7 @@ package org.jboss.errai.ui.nav.client.local;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -49,6 +50,6 @@ public final class TransitionTo<P extends Widget> {
    * to the {@code toPage} of this transition.
    */
   public void go() {
-    navigation.goTo(toPageWidgetType);
+    navigation.goTo(toPageWidgetType, ImmutableMultimap.<String,String>of());
   }
 }

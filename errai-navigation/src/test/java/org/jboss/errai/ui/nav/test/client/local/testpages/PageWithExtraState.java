@@ -3,17 +3,27 @@ package org.jboss.errai.ui.nav.test.client.local.testpages;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageState;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 
 @ApplicationScoped
-@Page(path="{stringThing}/{intThing}")
+@Page
 public class PageWithExtraState extends SimplePanel {
 
-  // TODO encapsulate
-  public String stringThing;
+  @PageState
+  private String stringThing;
 
-  // TODO encapsulate and make it an int
-  public String intThing;
+  @PageState
+  private String intThing; // TODO make it an actual int
 
+  // TODO include fields for all the types we want to support
+
+  public String getStringThing() {
+    return stringThing;
+  }
+
+  public String getIntThing() {
+    return intThing;
+  }
 }

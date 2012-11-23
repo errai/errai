@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
 
+import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -25,18 +26,25 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -74,8 +82,7 @@ public class NavigationGraphGenerator extends Generator {
                 "of Widget.");
       }
       Page annotation = pageClass.getAnnotation(Page.class);
-      List<String> template = parsePageUriTemplate(pageClass, annotation.path());
-      String pageName = template.get(0);
+      String pageName = annotation.path().equals("") ? pageClass.getName() : annotation.path();
 
       MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
       if (prevPageWithThisName != null) {
@@ -83,7 +90,7 @@ public class NavigationGraphGenerator extends Generator {
                 "Page names must be unique, but " + prevPageWithThisName + " and " + pageClass +
                 " are both named [" + pageName + "]");
       }
-      Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName, template.subList(1, template.size()));
+      Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
       if (annotation.startingPage() == true) {
         defaultPages.add(pageClass);
 
@@ -157,14 +164,9 @@ public class NavigationGraphGenerator extends Generator {
    * @param pageClass
    *          The class providing the widget content for the page.
    * @param pageName
-   *          The name of the page (normally obtained by a call to
-   *          {@link #parsePageUriTemplate(MetaClass, String)}).
-   * @param stateParamNames
-   *          The names of the state parameters for the page in question
-   *          (normally obtained by a call to
-   *          {@link #parsePageUriTemplate(MetaClass, String)}).
+   *          The name of the page (to be used in the URL history fragment).
    */
-  private ObjectBuilder generateNewInstanceOfPageImpl(MetaClass pageClass, String pageName, List<String> stateParamNames) {
+  private ObjectBuilder generateNewInstanceOfPageImpl(MetaClass pageClass, String pageName) {
     AnonymousClassStructureBuilder pageImplBuilder = ObjectBuilder.newInstanceOf(
             MetaClassFactory.parameterizedAs(PageNode.class, MetaClassFactory.typeParametersOf(pageClass))).extend();
 
@@ -177,98 +179,67 @@ public class NavigationGraphGenerator extends Generator {
             .append(Stmt.nestedCall(Refs.get("bm"))
                     .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish();
 
-    appendGetStateMethod(pageImplBuilder, pageClass, stateParamNames);
-    appendPutStateMethod(pageImplBuilder, pageClass, stateParamNames);
+    List<MetaField> pageStateFields = new ArrayList<MetaField>();
+    for (MetaField field : pageClass.getFields()) {
+      if (field.isAnnotationPresent(PageState.class)) {
+        pageStateFields.add(field);
+      }
+    }
+
+    appendGetStateMethod(pageImplBuilder, pageClass, pageStateFields);
+    appendPutStateMethod(pageImplBuilder, pageClass, pageStateFields);
 
     return pageImplBuilder.finish();
   }
 
-  private void appendGetStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<String> stateParamNames) {
-    BlockBuilder<?> method = pageImplBuilder.publicMethod(List.class, "getState",
+  private void appendGetStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(Multimap.class, "getState",
             Parameter.of(pageClass, "widget"))
             .body();
 
-    method.append(Stmt.declareVariable("state", Stmt.newObject(ArrayList.class)));
+    method.append(Stmt.declareVariable("state", Stmt.invokeStatic(HashMultimap.class, "create")));
 
-    for (String paramName : stateParamNames) {
-      // TODO use getters when possible; convert everything to strings (use/reuse data binding?)
-      method.append(
-              Stmt.loadVariable("state").invoke("add", Stmt.loadVariable("widget").loadField(paramName)));
+    for (MetaField field : pageStateFields) {
+      // XXX use getters when possible? would be more consistent with other Errai modules...
+      // FIXME convert everything to strings
+      PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Read, "jsni", pageImplBuilder, field, new Modifier[] {});
+      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
+      Statement fieldValueStmt = Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"));
+      method.append(Stmt.loadVariable("state").invoke("put", field.getName(), fieldValueStmt));
     }
     method.append(Stmt.loadVariable("state").returnValue());
     method.finish();
   }
 
-  private void appendPutStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<String> stateParamNames) {
+  private void appendPutStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
     BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "putState",
             Parameter.of(pageClass, "widget"),
-            Parameter.of(MetaClassFactory.get(new TypeLiteral<List<String>>() {}), "state"))
+            Parameter.of(MetaClassFactory.get(new TypeLiteral<Multimap<String,String>>() {}), "state"))
             .body();
 
     int idx = 0;
-    for (String paramName : stateParamNames) {
-      // TODO use setters when possible; perform type coercion
-      method.append(Stmt.loadVariable("widget").loadField(paramName).assignValue(Stmt.castTo(String.class, Stmt.loadVariable("state").invoke("get", idx))));
+    for (MetaField field : pageStateFields) {
+      PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field, new Modifier[] {});
+      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
+
+      // XXX use setters when possible? would be more consistent with other Errai modules...
+      // TODO perform type coercion
+      if (field.getType().isAssignableTo(Collection.class)) {
+        throw new UnsupportedOperationException("not implemented yet"); //TODO
+      }
+      else {
+        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("get", field.getName())));
+        method.append(
+          If.cond(Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.load(null))).finish()
+            .else_()
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.castTo(field.getType(), Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next"))))
+              .finish()
+          );
+      }
       idx++;
     }
     method.finish();
-  }
-
-  static List<String> parsePageUriTemplate(MetaClass pageType, String uriTemplate) {
-    List<String> retval = new ArrayList<String>();
-    StringBuilder name = new StringBuilder();
-    int i = 0;
-    while (i < uriTemplate.length() && uriTemplate.charAt(i) != '/' && uriTemplate.charAt(i) != '{') {
-      name.append(uriTemplate.charAt(i));
-      i++;
-    }
-
-    if (name.length() == 0) {
-      name.append(pageType.getName());
-    }
-    retval.add(name.toString());
-
-    StringBuilder pathParam = null;
-    while (i < uriTemplate.length()) {
-      char ch = uriTemplate.charAt(i);
-      if (ch == '{') {
-        if (pathParam != null) {
-          throw new IllegalArgumentException("Found '{' inside parameter at position " + i + " of " + uriTemplate);
-        }
-        pathParam = new StringBuilder();
-      }
-      else if (ch == '}') {
-        if (pathParam == null) {
-          throw new IllegalArgumentException("Found '}' outside parameter at position " + i + " of " + uriTemplate);
-        }
-        if (pathParam.length() == 0) {
-          throw new IllegalArgumentException("Found nameless parameter at position " + i + " of " + uriTemplate);
-        }
-        retval.add(pathParam.toString());
-        pathParam = null;
-      }
-      else if (pathParam != null) {
-        if (pathParam.length() == 0 && Character.isJavaIdentifierStart(ch)) {
-          pathParam.append(ch);
-        }
-        else if (pathParam.length() > 0 && Character.isJavaIdentifierPart(ch)) {
-          pathParam.append(ch);
-        }
-        else {
-          throw new IllegalArgumentException("Found invalid Java identifier character '" + ch + "' in parameter name at position " + i + " of " + uriTemplate);
-        }
-      }
-      else {
-        if (ch != '/') {
-          throw new IllegalArgumentException("Found unexpected character '" + ch + "' outside a parameter at position " + i + " of " + uriTemplate);
-        }
-      }
-      i++;
-    }
-    if (pathParam != null) {
-      throw new IllegalArgumentException("Found unterminated parameter at position " + i + " of " + uriTemplate);
-    }
-    return retval;
   }
 
   /**

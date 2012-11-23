@@ -35,19 +35,19 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testPageWithDefaultName() throws Exception {
-    PageNode pageA = navGraph.getPage("PageA");
+    PageNode<?> pageA = navGraph.getPage("PageA");
     assertNotNull(pageA);
     assertEquals("PageA", pageA.name());
   }
 
   public void testPageWithProvidedName() throws Exception {
-    PageNode pageB = navGraph.getPage("page_b");
+    PageNode<?> pageB = navGraph.getPage("page_b");
     assertNotNull(pageB);
     assertEquals("page_b", pageB.name());
   }
 
   public void testCircularReferences() throws Exception {
-    PageNode cr1Node = navGraph.getPage(CircularRef1.class);
+    PageNode<?> cr1Node = navGraph.getPage(CircularRef1.class);
     CircularRef1 cr1 = (CircularRef1) cr1Node.content();
     TransitionTo<CircularRef2> transitionToCR2 = cr1.getLink();
     Class<CircularRef2> cr2Type = transitionToCR2.toPageType();

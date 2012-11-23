@@ -58,6 +58,11 @@
          <scope>provided</scope>
       </dependency>
 
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava-gwt</artifactId>
+      </dependency>
+
       <!-- GWT -->
       <dependency>
          <groupId>com.google.gwt</groupId>

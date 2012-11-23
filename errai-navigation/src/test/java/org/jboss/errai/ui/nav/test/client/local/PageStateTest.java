@@ -6,6 +6,8 @@ import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.nav.test.client.local.testpages.PageWithExtraState;
 
+import com.google.common.collect.ImmutableMultimap;
+
 public class PageStateTest extends AbstractErraiCDITest {
 
   private IOCBeanManager beanManager = IOC.getBeanManager();
@@ -25,12 +27,14 @@ public class PageStateTest extends AbstractErraiCDITest {
 
   public void testPassAllStateTokens() throws Exception {
     PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
-    assertNull(page.stringThing);
-    assertNull(page.intThing);
+    assertNull(page.getStringThing());
+    assertNull(page.getIntThing());
 
-    navigation.goTo(PageWithExtraState.class, "string", "int");
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of(
+            "stringThing", "string",
+            "intThing", "int"));
 
-    assertEquals("string", page.stringThing);
-    assertEquals("int", page.intThing);
+    assertEquals("string", page.getStringThing());
+    assertEquals("int", page.getIntThing());
   }
 }
