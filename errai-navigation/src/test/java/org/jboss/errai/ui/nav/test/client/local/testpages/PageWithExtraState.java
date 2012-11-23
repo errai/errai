@@ -15,7 +15,7 @@ public class PageWithExtraState extends SimplePanel {
   private String stringThing;
 
   @PageState
-  private String intThing; // TODO make it an actual int
+  private int intThing;
 
   // TODO include fields for all the types we want to support
 
@@ -23,7 +23,7 @@ public class PageWithExtraState extends SimplePanel {
     return stringThing;
   }
 
-  public String getIntThing() {
+  public int getIntThing() {
     return intThing;
   }
 }

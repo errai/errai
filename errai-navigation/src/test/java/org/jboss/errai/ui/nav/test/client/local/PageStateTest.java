@@ -28,13 +28,32 @@ public class PageStateTest extends AbstractErraiCDITest {
   public void testPassAllStateTokens() throws Exception {
     PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
     assertNull(page.getStringThing());
-    assertNull(page.getIntThing());
+    assertEquals(0, page.getIntThing());
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of(
             "stringThing", "string",
-            "intThing", "int"));
+            "intThing", "123"));
 
     assertEquals("string", page.getStringThing());
-    assertEquals("int", page.getIntThing());
+    assertEquals(123, page.getIntThing());
   }
+
+  /**
+   * If there are multiple values for the same key, but the corresponding
+   * {@code @PageState} field in the page is not a collection, the field should
+   * get the <i>first</i> value for its key.
+   */
+  public void testScalarGetsFirstValueInToken() throws Exception {
+    PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+    assertNull(page.getStringThing());
+
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of(
+            "nonexistent", "====",
+            "stringThing", "string0",
+            "stringThing", "string1",
+            "stringThing", "string2"));
+
+    assertEquals("string0", page.getStringThing());
+  }
+
 }

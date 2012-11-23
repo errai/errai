@@ -204,7 +204,7 @@ public class NavigationGraphGenerator extends Generator {
       // FIXME convert everything to strings
       PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Read, "jsni", pageImplBuilder, field, new Modifier[] {});
       String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
-      Statement fieldValueStmt = Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"));
+      Statement fieldValueStmt = paramToStringStatement(field.getType(), Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget")));
       method.append(Stmt.loadVariable("state").invoke("put", field.getName(), fieldValueStmt));
     }
     method.append(Stmt.loadVariable("state").returnValue());
@@ -231,9 +231,9 @@ public class NavigationGraphGenerator extends Generator {
         method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("get", field.getName())));
         method.append(
           If.cond(Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
-              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.load(null))).finish()
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), defaultValueStatement(field.getType()))).finish()
             .else_()
-              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.castTo(field.getType(), Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next"))))
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), paramFromStringStatement(field.getType(), Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next"))))
               .finish()
           );
       }
@@ -294,4 +294,51 @@ public class NavigationGraphGenerator extends Generator {
     }
     return fields;
   }
+
+  private static Statement paramToStringStatement(MetaClass fromType, Statement fromValue) {
+    if (fromType.isAssignableTo(String.class)) {
+      return Stmt.castTo(String.class, fromValue);
+    }
+    else if (fromType.asBoxed().isAssignableTo(Number.class)) {
+      return Stmt.invokeStatic(String.class, "valueOf", fromValue);
+    }
+    else {
+      throw new UnsupportedOperationException("@PageState fields of type " + fromType.getFullyQualifiedName() + " are not supported");
+    }
+  }
+
+  private static Statement paramFromStringStatement(MetaClass toType, Statement stringValue) {
+
+    // make sure it's really a string
+    stringValue = Stmt.castTo(String.class, stringValue);
+
+    if (toType.isAssignableTo(String.class)) {
+      return stringValue;
+    }
+    else if (toType.asBoxed().isAssignableTo(Integer.class)) {
+      return Stmt.invokeStatic(Integer.class, "valueOf", stringValue);
+    }
+    else {
+      throw new UnsupportedOperationException("@PageState fields of type " + toType.getFullyQualifiedName() + " are not supported");
+    }
+  }
+
+  private Statement defaultValueStatement(MetaClass type) {
+    if (type.isPrimitive()) {
+      if (type.isAssignableTo(int.class)) {
+        return Stmt.load(0);
+      }
+      else if (type.isAssignableTo(boolean.class)) {
+        return Stmt.load(false);
+      }
+      else {
+        throw new UnsupportedOperationException("Don't know how to make a default value for @PageState field of type " + type.getFullyQualifiedName());
+      }
+    }
+    else {
+      return Stmt.load(null);
+    }
+  }
+
+
 }
