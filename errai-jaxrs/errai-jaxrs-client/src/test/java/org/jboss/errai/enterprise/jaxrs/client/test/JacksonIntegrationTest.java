@@ -225,12 +225,12 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 	}
 
 	@Test
-	public void testJacksonDemarshallingOfObject() {
-		final ImmutableEntity ftd = new ImmutableEntity.Builder().build();
-		final String DOC = "{\n" + "\"key1\" : null,\n" + "\"key2\" : true,\n"
+	@SuppressWarnings("unchecked")
+	public void testJacksonDemarshallingOfKeywords() {
+		final String json = "{\n" + "\"key1\" : null,\n" + "\"key2\" : true,\n"
 				+ "\"key3\" : false,\n" + "\"key4\" : [ false, null, true ]\n"
 				+ "}";
-		Map<String, Object> result = MarshallingWrapper.fromJSON(DOC,
+		Map<String, Object> result = MarshallingWrapper.fromJSON(json,
 				Map.class, String.class, Object.class);
 		assertEquals(result.size(), 4);
 		assertNull(result.get("key1"));
@@ -242,7 +242,5 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 		assertFalse((Boolean) list.get(0));
 		assertNull(list.get(1));
 		assertTrue((Boolean) list.get(2));
-		
-		System.out.println("WOOOOOOOOOOOOOO!");
 	}
 }
