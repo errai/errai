@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
@@ -21,17 +22,20 @@ import java.util.Map;
  */
 public class AsyncCreationalContext extends AbstractCreationalContext {
   private final AsyncBeanManager beanManager;
+  private final AsyncBeanContext beanContext = new AsyncBeanContext();
 
   public AsyncCreationalContext(final AsyncBeanManager beanManager,
                                 final Class<? extends Annotation> scope) {
     super(scope);
     this.beanManager = beanManager;
+    beanContext.setComment("CreationalContext " + scope.getName());
   }
 
   public AsyncCreationalContext(final AsyncBeanManager beanManager, final boolean immutableContext,
                                 final Class<? extends Annotation> scope) {
     super(immutableContext, scope);
     this.beanManager = beanManager;
+    beanContext.setComment("CreationalContext " + scope.getName());
   }
 
   @Override
@@ -100,18 +104,26 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   }
 
   public void finish(final Runnable finishCallback) {
-    resolveAllProxies(new Runnable() {
+    beanContext.addOnFinish(new Runnable() {
       @Override
       public void run() {
-        fireAllInitCallbacks();
-        registerAllBeans();
 
-        finishCallback.run();
+        LogUtil.log("finishing creational context ...");
+        resolveAllProxies(new Runnable() {
+          @Override
+          public void run() {
+            fireAllInitCallbacks();
+            registerAllBeans();
+            finishCallback.run();
+          }
+        });
       }
     });
+    getBeanContext().finish();
   }
 
   private void resolveAllProxies(final Runnable resolveFinishedCallback) {
+    LogUtil.log("begin resolving proxies ...");
 
     final Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator
         = new LinkedHashMap<BeanRef, List<ProxyResolver>>(unresolvedProxies).entrySet().iterator();
@@ -168,5 +180,9 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     for (final Object ref : getAllCreatedBeanInstances()) {
       beanManager.addBeanToContext(ref, this);
     }
+  }
+
+  public AsyncBeanContext getBeanContext() {
+    return beanContext;
   }
 }

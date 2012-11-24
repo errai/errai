@@ -75,12 +75,11 @@ public class Container implements EntryPoint {
         ((SimpleCreationalContext) rootContext).finish();
         finishInit();
       }
-
-
     }
     catch (Throwable t) {
       t.printStackTrace();
-      throw new RuntimeException("critical error in IOC container bootstrap", t);
+      throw new RuntimeException("critical error in IOC container bootstrap: " + t.getClass().getName() + ": "
+       + t.getMessage());
     }
   }
 

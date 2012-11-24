@@ -23,6 +23,8 @@ import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.Finishable;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -32,6 +34,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -117,10 +120,15 @@ public class AsyncInjectUtil {
 
           handleAsyncInjectionTasks(ctx, injectionTasks);
 
+          pushFinishRunnable(ctx);
+
+          processingContext.append(Stmt.invokeStatic(LogUtil.class, "log", "lifecycle callback registered for: " + type.getFullyQualifiedName()));
+
           InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
           InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
 
-          processingContext.popBlockBuilder();
+          processingContext.popBlockBuilder(); // once for the finish runnable
+          processingContext.popBlockBuilder(); // once for the constructed object callback
         }
       };
     }
@@ -149,11 +157,30 @@ public class AsyncInjectUtil {
 
           handleAsyncInjectionTasks(ctx, injectionTasks);
 
+          pushFinishRunnable(ctx);
+
+          processingContext.append(Stmt.invokeStatic(LogUtil.class, "log", "lifecycle callback registered for: " + type.getFullyQualifiedName()));
+
           InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
           InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
+
+          processingContext.popBlockBuilder();
         }
       };
     }
+  }
+
+  private static void pushFinishRunnable(final InjectionContext ctx) {
+    final BlockBuilder<?> blockBuilder = ctx.getProcessingContext().getBlockBuilder();
+
+    final BlockBuilder<AnonymousClassStructureBuilder> run = Stmt.newObject(Runnable.class)
+        .extend().publicOverridesMethod("run");
+
+    ctx.getProcessingContext().pushBlockBuilder(run);
+
+    final ObjectBuilder objectBuilder = run.finish().finish();
+
+    blockBuilder.append(Stmt.loadVariable("async").invoke("addOnFinish", objectBuilder));
   }
 
   private static void handleAsyncInjectionTasks(final InjectionContext ctx,
@@ -164,7 +191,6 @@ public class AsyncInjectUtil {
       }
     }
   }
-
 
   private static List<AsyncInjectionTask> scanForTasks(final Injector injector,
                                                        final InjectionContext ctx,

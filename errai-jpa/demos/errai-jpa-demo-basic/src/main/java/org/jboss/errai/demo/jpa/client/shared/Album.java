@@ -13,7 +13,7 @@ import javax.persistence.NamedQuery;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @NamedQueries ({
-  @NamedQuery(name="allAlbums", query="SELECT a FROM Album a ORDER BY a.releaseDate, a.artist"),
+  @NamedQuery(name="allAlbums", query="SELECT a FROM Album a ORDER BY a.name DESC"),
   @NamedQuery(name="albumByName", query="SELECT a FROM Album a WHERE a.name=:name")
 })
 @Portable @Entity

@@ -18,7 +18,6 @@ public interface AsyncBeanDef<T> {
    */
   public Class<T> getType();
 
-
   /**
    * Returns the actual bean class represented by this bean.
    *
@@ -63,7 +62,6 @@ public interface AsyncBeanDef<T> {
    * @return
    */
   public Set<Annotation> getQualifiers();
-
 
   /**
    * Returns true if the beans qualifiers match the specified set of qualifiers.

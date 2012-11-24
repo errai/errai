@@ -1,5 +1,8 @@
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.common.client.util.LogUtil;
+import sun.rmi.runtime.Log;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -135,9 +138,6 @@ public abstract class AbstractCreationalContext implements CreationalContext {
     return Collections.unmodifiableCollection(wired.values());
   }
 
-
-
-
   /**
    * Adds an unresolved proxy into the creational context. This is called to indicate a proxy was required while
    * building a bean, due to a forward reference in a cycle situation. The caller is responsible, through the providing
@@ -170,14 +170,26 @@ public abstract class AbstractCreationalContext implements CreationalContext {
     unresolvedProxies.get(ref).add(proxyResolver);
   }
 
-
   /**
    * Fires all {@link InitializationCallback}s which were declared during creation of the beans.
    */
   @SuppressWarnings("unchecked")
   protected void fireAllInitCallbacks() {
+//    LogUtil.log("Init callback firing order: ");
+//    for (final Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
+//      LogUtil.log(" -> " + entry.getKey().getClass().getName());
+//    }
+
     for (final Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
-      entry.getValue().init(entry.getKey());
+      try {
+     //   LogUtil.log("invoking init-callback for " + entry.getKey().getClass().getName());
+
+        entry.getValue().init(entry.getKey());
+      }
+      catch (Throwable t) {
+        LogUtil.log("error initializing bean: " + entry.getKey().getClass().getName() + ": " + t.getMessage());
+        throw new RuntimeException("error in bean initialization", t);
+      }
     }
   }
 

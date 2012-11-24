@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -18,7 +19,6 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
     this.manager = IOC.getAsyncBeanManager();
     this.context = new AsyncCreationalContext(manager, true, ApplicationScoped.class);
   }
-
 
   public void addBean(final Class type,
                       final Class beanType,
@@ -45,12 +45,15 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
                       final Annotation[] qualifiers,
                       final String name) {
     if (singleton) {
-      callback.getInstance(new CreationalCallback() {
+      final CreationalCallback creationalCallback = new CreationalCallback() {
         @Override
         public void callback(final Object beanInstance) {
-           manager.addBean(type, beanType, callback, beanInstance, qualifiers, name);
+          context.getBeanContext().finish(this);
+          manager.addBean(type, beanType, callback, beanInstance, qualifiers, name);
         }
-      }, context);
+      };
+      context.getBeanContext().wait(creationalCallback);
+      callback.getInstance(creationalCallback, context);
     }
     else {
       manager.addBean(type, beanType, callback, null, qualifiers, name);
@@ -65,13 +68,22 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
                       final String name,
                       final boolean concrete) {
 
+
     if (singleton) {
-      callback.getInstance(new CreationalCallback() {
+      final CreationalCallback creationalCallback = new CreationalCallback() {
         @Override
         public void callback(final Object beanInstance) {
-           manager.addBean(type, beanType, callback, beanInstance, qualifiers, name, concrete);
+          context.getBeanContext().finish(this);
+          manager.addBean(type, beanType, callback, beanInstance, qualifiers, name, concrete);
         }
-      }, context);
+
+        @Override
+        public String toString() {
+          return type.getName();
+        }
+      };
+      context.getBeanContext().wait(creationalCallback);
+      callback.getInstance(creationalCallback, context);
     }
     else {
       manager.addBean(type, beanType, callback, null, qualifiers, name, concrete);

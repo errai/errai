@@ -809,7 +809,7 @@
           <logLevel>INFO</logLevel>
           <runTarget>index.html</runTarget>
           <extraJvmArgs>
-            -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:CompileThreshold=100 -XX:+UseNUMA
+            -d32 -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:CompileThreshold=100 -XX:+UseNUMA
 <!--             -Derrai.codegen.permissive=true -Derrai.codegen.printOut=true
  -->          </extraJvmArgs>
           <soyc>false</soyc>

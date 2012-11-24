@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.common.client.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +14,16 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class AsyncBeanContext {
+  private String comment;
+
   private static final CreationalCallback<?> DUMMY = new CreationalCallback<Object>() {
     @Override
     public void callback(final Object beanInstance) {
+    }
+
+    @Override
+    public String toString() {
+      return "INIT_PLACEHOLDER";
     }
   };
 
@@ -42,11 +50,9 @@ public class AsyncBeanContext {
   /**
    * For debug tracing.
    */
-  private final Throwable trace = new Throwable();
 
   private Runnable onConstructRunnable;
   private FireState constructFireState = FireState.NOT_FIRED;
-
 
   private final List<Runnable> onFinishRunnables = new ArrayList<Runnable>();
   private FireState finishFireState = FireState.NOT_FIRED;
@@ -56,17 +62,19 @@ public class AsyncBeanContext {
   private final Timer timeOut = new Timer() {
     @Override
     public void run() {
-      trace.printStackTrace();
+      timeOut.cancel();
+      LogUtil.log("FAILED FOR: " + comment);
 
+      LogUtil.log("unsatisfied dependencies:");
       for (final CreationalCallback callback : allDependencies) {
-        System.out.println(" --unsatisfied-> " + callback.toString());
+        LogUtil.log(" --unsatisfied-> " + callback.toString());
       }
     }
   };
 
   public AsyncBeanContext() {
     allDependencies.add(DUMMY);
-    timeOut.schedule(2000);
+    timeOut.schedule(10000);
   }
 
   public void setConstructedObject(final Object constructedObject) {
@@ -79,7 +87,7 @@ public class AsyncBeanContext {
   }
 
   public void addOnFinish(final Runnable runnable) {
-    onFinishRunnables.add(runnable);
+    onFinishRunnables.add(0, runnable);
     _finishCheck();
   }
 
@@ -137,6 +145,7 @@ public class AsyncBeanContext {
 
   private void _finishCheck() {
     if (finishFireState == FireState.FIRED) {
+      LogUtil.log("finish did not fire because state is already FIRED");
       return;
     }
 
@@ -146,11 +155,20 @@ public class AsyncBeanContext {
 
       if (!onFinishRunnables.isEmpty()) {
         for (final Runnable runnable : onFinishRunnables) {
-          runnable.run();
+          try {
+            runnable.run();
+          }
+          catch (Throwable t) {
+            t.printStackTrace();
+          }
         }
 
         constructFireState = FireState.FIRED;
       }
     }
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
   }
 }
