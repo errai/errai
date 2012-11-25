@@ -86,9 +86,24 @@ public class AsyncBeanContext {
     _constructCheck();
   }
 
-  public void addOnFinish(final Runnable runnable) {
-    onFinishRunnables.add(0, runnable);
-    _finishCheck();
+  public void appendRunOnFinish(final Runnable runnable) {
+    if (finishFireState == FireState.FIRED) {
+      runnable.run();
+    }
+    else {
+      onFinishRunnables.add(runnable);
+      _finishCheck();
+    }
+  }
+
+  public void runOnFinish(final Runnable runnable) {
+    if (finishFireState == FireState.FIRED) {
+      runnable.run();
+    }
+    else {
+      onFinishRunnables.add(0, runnable);
+      _finishCheck();
+    }
   }
 
   public void waitConstruct(final CreationalCallback<?> callbackInstance) {
@@ -154,6 +169,8 @@ public class AsyncBeanContext {
       constructFireState = FireState.ARMED;
 
       if (!onFinishRunnables.isEmpty()) {
+        constructFireState = FireState.FIRED;
+
         for (final Runnable runnable : onFinishRunnables) {
           try {
             runnable.run();
@@ -163,12 +180,15 @@ public class AsyncBeanContext {
           }
         }
 
-        constructFireState = FireState.FIRED;
       }
     }
   }
 
   public void setComment(String comment) {
     this.comment = comment;
+  }
+
+  public boolean isWaitedOn(final CreationalCallback<?> callback) {
+    return allDependencies.contains(callback);
   }
 }

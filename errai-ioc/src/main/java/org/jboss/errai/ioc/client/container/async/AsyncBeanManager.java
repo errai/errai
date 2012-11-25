@@ -320,6 +320,7 @@ public class AsyncBeanManager {
     if (!beanMap.containsKey(bean.getType())) {
       beanMap.put(bean.getType(), new ArrayList<AsyncBeanDef>());
     }
+
     beanMap.get(bean.getType()).add(bean);
     return bean;
   }

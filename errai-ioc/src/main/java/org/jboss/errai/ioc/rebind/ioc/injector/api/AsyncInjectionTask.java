@@ -225,7 +225,7 @@ public class AsyncInjectionTask {
             .finish()
             .finish();
 
-        processingContext.append(Stmt.loadVariable("async").invoke("addOnFinish", finishCallback));
+        processingContext.append(Stmt.loadVariable("async").invoke("runOnFinish", finishCallback));
 
         break;
       }

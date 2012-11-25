@@ -41,7 +41,6 @@ public class Rule {
     return before(Arrays.asList(annos));
   }
 
-
   public static List<RuleDef> after(Collection<Class<? extends Annotation>>... annos) {
     List<RuleDef> rules = new ArrayList<RuleDef>(10);
     for (Collection<Class<? extends Annotation>> a : annos) {
@@ -52,7 +51,6 @@ public class Rule {
 
     return rules;
   }
-
 
   public static List<RuleDef> after(Class<? extends Annotation>... annos) {
     return after(Arrays.asList(annos));

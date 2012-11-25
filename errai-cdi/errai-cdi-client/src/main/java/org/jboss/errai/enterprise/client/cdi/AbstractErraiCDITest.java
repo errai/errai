@@ -23,6 +23,7 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -53,6 +54,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
+    new IOCBeanManagerLifecycle().resetBeanManager();
     new CDI().__resetSubsystem();
     new Container().onModuleLoad();
     new CDIClientBootstrap().onModuleLoad();

@@ -93,7 +93,6 @@ public class AsyncProxyInjector extends AbstractAsyncInjector {
       pCtx.append(Stmt.loadVariable(var).invoke("callback", Refs.get(varName)));
 
       return null;
-   //   return loadVariable(varName);
     }
 
     @Override

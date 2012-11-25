@@ -46,7 +46,6 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
     manager.addBean(type, beanType, callback, instance, qualifiers);
   }
 
-
   @SuppressWarnings("unchecked")
   public void addBean(final Class type,
                       final Class beanType,

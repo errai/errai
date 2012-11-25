@@ -1,17 +1,16 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
 import org.jboss.errai.ioc.client.container.BeanRef;
-import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCSingletonBean;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.client.container.ProxyResolver;
 import org.jboss.errai.ioc.client.container.Tuple;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,21 +59,70 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   public <T> void getBeanInstance(final CreationalCallback<T> creationalCallback,
                                   final Class<T> beanType,
                                   final Annotation[] qualifiers) {
-    final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
-    if (t == null) {
-      // see if the instance is available in the bean manager
-      final Collection<AsyncBeanDef<T>> beanList
-          = IOC.getAsyncBeanManager().lookupBeans(beanType, qualifiers);
+    final Runnable getBeanInstanceCallback = new Runnable() {
+      @Override
+      public void run() {
+        final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
+        if (t == null) {
+          // see if the instance is available in the bean manager
+          final Collection<AsyncBeanDef<T>> beanList
+              = IOC.getAsyncBeanManager().lookupBeans(beanType, qualifiers);
 
-      if (!beanList.isEmpty()) {
-        final AsyncBeanDef<T> bean = beanList.iterator().next();
-        if (bean != null && bean instanceof AsyncSingletonBean) {
-          bean.getInstance(creationalCallback);
-          return;
+          if (!beanList.isEmpty()) {
+            final AsyncBeanDef<T> bean = beanList.iterator().next();
+            if (bean != null && bean instanceof AsyncSingletonBean) {
+              bean.getInstance(creationalCallback);
+              return;
+            }
+          }
         }
+        creationalCallback.callback(t);
       }
+    };
+
+    if (beanContext.isWaitedOn(creationalCallback)) {
+      System.out.println("WAITED ON!");
+      beanContext.appendRunOnFinish(getBeanInstanceCallback);
     }
-    creationalCallback.callback(t);
+    else {
+      getBeanInstanceCallback.run();
+    }
+  }
+
+  private final Map<AsyncBeanProvider, List<CreationalCallback>> singletonWaitList
+      = new HashMap<AsyncBeanProvider, List<CreationalCallback>>();
+
+  private boolean isWaitedOn(final AsyncBeanProvider beanProvider) {
+    return singletonWaitList.containsKey(beanProvider);
+  }
+
+  public <T> void addWait(final AsyncBeanProvider<T> beanProvider, final CreationalCallback<T> callback) {
+    List<CreationalCallback> callbackList = singletonWaitList.get(beanProvider);
+    if (callbackList == null) {
+      singletonWaitList.put(beanProvider, callbackList = new ArrayList<CreationalCallback>());
+    }
+    if (callback != null) {
+      callbackList.add(callback);
+    }
+  }
+
+  /**
+   * Notify all waiting callbacks for the instance result from the specified bean provider.
+   *
+   * @param beanProvider
+   * @param instance
+   * @param <T>
+   */
+  @SuppressWarnings({"unchecked"})
+  public <T> void notifyAllWaiting(final AsyncBeanProvider<T> beanProvider, final T instance) {
+    final List<CreationalCallback> callbackList = singletonWaitList.get(beanProvider);
+
+    if (callbackList != null) {
+      for (final CreationalCallback<T> callback : callbackList) {
+        callback.callback(instance);
+      }
+      singletonWaitList.remove(beanProvider);
+    }
   }
 
   public <T> void getSingletonInstanceOrNew(final AsyncInjectionContext injectionContext,
@@ -90,13 +138,26 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           creationalCallback.callback(inst);
         }
         else {
-          beanProvider.getInstance(new CreationalCallback<T>() {
+          if (isWaitedOn(beanProvider)) {
+            addWait(beanProvider, creationalCallback);
+            return;
+          }
+          else {
+            addWait(beanProvider, null);
+          }
+
+          final CreationalCallback<T> callback = new CreationalCallback<T>() {
             @Override
             public void callback(final T beanInstance) {
-              injectionContext.addBean(beanType, beanType, beanProvider, true, qualifiers);
+              injectionContext.addBean(beanType, beanType, beanProvider, beanInstance, qualifiers);
               creationalCallback.callback(beanInstance);
+              notifyAllWaiting(beanProvider, beanInstance);
+              getBeanContext().finish(this);
             }
-          }, AsyncCreationalContext.this);
+          };
+          getBeanContext().wait(callback);
+
+          beanProvider.getInstance(callback, AsyncCreationalContext.this);
         }
       }
     }, beanType, qualifiers);
@@ -104,11 +165,9 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   }
 
   public void finish(final Runnable finishCallback) {
-    beanContext.addOnFinish(new Runnable() {
+    beanContext.runOnFinish(new Runnable() {
       @Override
       public void run() {
-
-        LogUtil.log("finishing creational context ...");
         resolveAllProxies(new Runnable() {
           @Override
           public void run() {
@@ -123,7 +182,6 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   }
 
   private void resolveAllProxies(final Runnable resolveFinishedCallback) {
-    LogUtil.log("begin resolving proxies ...");
 
     final Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator
         = new LinkedHashMap<BeanRef, List<ProxyResolver>>(unresolvedProxies).entrySet().iterator();

@@ -612,7 +612,6 @@ public class InjectionContext {
     return getAnnotationsForElementType(type).contains(annotation);
   }
 
-
   /**
    * Overloaded version to check GWT's JClassType classes.
    *

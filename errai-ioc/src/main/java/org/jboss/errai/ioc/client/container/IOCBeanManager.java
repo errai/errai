@@ -151,7 +151,6 @@ public class IOCBeanManager {
     addBean(type, beanType, callback, instance, qualifiers, null, true);
   }
 
-
   /**
    * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
    * Adding beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
@@ -179,7 +178,6 @@ public class IOCBeanManager {
 
     addBean(type, beanType, callback, instance, qualifiers, name, true);
   }
-
 
   /**
    * Register a bean with the manager with a name as well as specifying whether the bean should be treated a concrete
@@ -241,7 +239,6 @@ public class IOCBeanManager {
       registerDependentBean(type, beanType, callback, qualifiers, name, concreteType);
     }
   }
-
 
   /**
    * Destroy a bean and all other beans associated with its creational context in the bean manager.
@@ -501,7 +498,6 @@ public class IOCBeanManager {
       throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
     }
   }
-
 
   /**
    * Associates a {@link DestructionCallback} with a bean instance. If the bean manager cannot find a valid

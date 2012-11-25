@@ -18,11 +18,13 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanContext;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+import org.jboss.errai.ioc.client.test.FakeGWT;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
@@ -171,7 +173,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
 
         injectContext.addBeanReference(type, beanRef);
 
-        callbackBuilder.append(Stmt.loadVariable("async").invoke("addOnFinish", finishedCallback));
+        callbackBuilder.append(Stmt.loadVariable("async").invoke("runOnFinish", finishedCallback));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
@@ -191,7 +193,17 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     declare a final variable for the BeanProvider and initialize it with the anonymous class we just
     built.
     */
-    callbackBuilder_.append(Stmt.invokeStatic(GWT.class, "runAsync", callbackBuilder.finish().finish()));
+
+    final ObjectBuilder objectBuilder = callbackBuilder.finish().finish();
+
+    final String frameworkOrSystemProperty
+        = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.testing.simulated_loadasync_latency");
+    if (Boolean.parseBoolean(frameworkOrSystemProperty)) {
+      callbackBuilder_.append(Stmt.invokeStatic(FakeGWT.class, "runAsync", objectBuilder));
+    }
+    else {
+      callbackBuilder_.append(Stmt.invokeStatic(GWT.class, "runAsync", objectBuilder));
+    }
 
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, beanProviderClassRef).modifiers(Modifier.Final)
         .initializesWith(callbackBuilder_.finish().finish()).finish();

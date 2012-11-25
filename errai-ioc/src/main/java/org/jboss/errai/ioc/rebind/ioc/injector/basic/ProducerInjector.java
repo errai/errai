@@ -131,11 +131,9 @@ public class ProducerInjector extends AbstractInjector {
           }
         });
 
-
     if (producerMember instanceof MetaMethod && injectionContext.isOverridden((MetaMethod) producerMember)) {
       setEnabled(false);
     }
-
 
     if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
       setRendered(true);
@@ -307,12 +305,10 @@ public class ProducerInjector extends AbstractInjector {
     registerWithBeanManager(injectionContext, null);
 
     final Injector injector = injectionContext.getInjector(producerMember.getDeclaringClass());
-    //  if (injector.isDependent()) {
     injectionContext.getProcessingContext()
         .appendToEnd(
             Stmt.loadVariable(injector.getCreationalCallbackVarName()).invoke("getInstance", Refs.get("context"))
         );
-    //  }
 
     injectionContext.getProcessingContext().popBlockBuilder();
   }

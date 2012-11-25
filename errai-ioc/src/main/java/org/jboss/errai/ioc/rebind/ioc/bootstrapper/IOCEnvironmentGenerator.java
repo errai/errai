@@ -83,7 +83,6 @@ public class IOCEnvironmentGenerator extends Generator {
                                       final TreeLogger logger,
                                       final GeneratorContext generatorContext) {
 
-
     final PrintWriter printWriter = generatorContext.tryCreate(logger, packageName, className);
     if (printWriter == null) {
       return;
@@ -94,9 +93,6 @@ public class IOCEnvironmentGenerator extends Generator {
     final String s = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.async_bean_manager");
     asyncBootstrap = s != null && Boolean.parseBoolean(s);
 
-
-    final TypeOracle oracle = generatorContext.getTypeOracle();
-
     final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder
         = ClassBuilder.define(packageName + "." + className).publicScope()
         .implementsInterface(IOCEnvironment.class)
@@ -105,16 +101,7 @@ public class IOCEnvironmentGenerator extends Generator {
         .append(Stmt.load(asyncBootstrap).returnValue())
         .finish();
 
-
     final String csq = builder.toJavaString();
-
-    System.out.println(csq);
-
-//    final File fileCacheDir = RebindUtils.getErraiCacheDir();
-//    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-//    RebindUtils.writeStringToFile(cacheFile, csq);
-//
-
     printWriter.append(csq);
     generatorContext.commit(logger, printWriter);
   }

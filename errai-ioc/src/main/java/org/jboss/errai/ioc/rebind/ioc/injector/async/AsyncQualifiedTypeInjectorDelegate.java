@@ -20,7 +20,6 @@ public class AsyncQualifiedTypeInjectorDelegate extends QualifiedTypeInjectorDel
     super(type, delegate, parameterizedType);
   }
 
-
   @Override
   public void registerWithBeanManager(final InjectionContext context, final Statement valueRef) {
 

@@ -177,10 +177,6 @@ public abstract class AbstractInjector implements Injector {
     return qualifyingTypeInformation;
   }
 
-  public void setQualifyingTypeInformation(final MetaParameterizedType qualifyingTypeInformation) {
-    this.qualifyingTypeInformation = qualifyingTypeInformation;
-  }
-
   @Override
   public String getInstanceVarName() {
     throw new UnsupportedOperationException("this injector type does have any variable name associated with it");

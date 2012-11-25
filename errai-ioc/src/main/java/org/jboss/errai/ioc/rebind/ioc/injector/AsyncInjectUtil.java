@@ -122,8 +122,6 @@ public class AsyncInjectUtil {
 
           pushFinishRunnable(ctx);
 
-          processingContext.append(Stmt.invokeStatic(LogUtil.class, "log", "lifecycle callback registered for: " + type.getFullyQualifiedName()));
-
           InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
           InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
 
@@ -159,8 +157,6 @@ public class AsyncInjectUtil {
 
           pushFinishRunnable(ctx);
 
-          processingContext.append(Stmt.invokeStatic(LogUtil.class, "log", "lifecycle callback registered for: " + type.getFullyQualifiedName()));
-
           InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
           InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
 
@@ -180,7 +176,7 @@ public class AsyncInjectUtil {
 
     final ObjectBuilder objectBuilder = run.finish().finish();
 
-    blockBuilder.append(Stmt.loadVariable("async").invoke("addOnFinish", objectBuilder));
+    blockBuilder.append(Stmt.loadVariable("async").invoke("runOnFinish", objectBuilder));
   }
 
   private static void handleAsyncInjectionTasks(final InjectionContext ctx,

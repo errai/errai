@@ -26,14 +26,17 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Container implements EntryPoint {
-
   @Override
   public void onModuleLoad() {
     bootstrapContainer();
@@ -44,6 +47,7 @@ public class Container implements EntryPoint {
 
   public void bootstrapContainer() {
     try {
+      init = false;
       InitVotes.waitFor(Container.class);
 
       QualifierUtil.initFromFactoryProvider(new QualifierEqualityFactoryProvider() {
@@ -52,8 +56,6 @@ public class Container implements EntryPoint {
           return GWT.create(QualifierEqualityFactory.class);
         }
       });
-
-      new IOCBeanManagerLifecycle().resetBeanManager();
 
       log("IOC bootstrapper successfully initialized.");
 
@@ -79,16 +81,39 @@ public class Container implements EntryPoint {
     catch (Throwable t) {
       t.printStackTrace();
       throw new RuntimeException("critical error in IOC container bootstrap: " + t.getClass().getName() + ": "
-       + t.getMessage());
+          + t.getMessage());
     }
   }
 
+  private static final List<Runnable> afterInit = new ArrayList<Runnable>();
+  private static boolean init = false;
+
   private void finishInit() {
+    init = true;
     log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
-
     InitVotes.voteFor(Container.class);
-
     declareDebugFunction();
+
+    new CallbacksRunnable().run();
+  }
+
+  private static class CallbacksRunnable implements Runnable {
+    @Override
+    public void run() {
+      final Iterator<Runnable> runnableIterator = afterInit.iterator();
+      while (runnableIterator.hasNext()) {
+        runnableIterator.next().run();
+        runnableIterator.remove();
+      }
+    }
+  }
+
+  public static void runAfterInit(final Runnable runnable) {
+    if (init) {
+      runnable.run();
+    }
+
+    afterInit.add(runnable);
   }
 
   private static native void declareDebugFunction() /*-{

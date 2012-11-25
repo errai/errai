@@ -4,6 +4,7 @@ import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.ioc.client.Container;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 public class HelloWorldClientTest extends AbstractErraiTest {
 
@@ -15,6 +16,8 @@ public class HelloWorldClientTest extends AbstractErraiTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+
+    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.

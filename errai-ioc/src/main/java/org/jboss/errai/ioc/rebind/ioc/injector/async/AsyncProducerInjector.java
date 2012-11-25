@@ -215,7 +215,7 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
 
     final Statement producerCreationalCallback = blockBuilder.finish().finish();
 
-    statements.append(Stmt.loadVariable("async").invoke("addOnFinish", Stmt.newObject(Runnable.class)
+    statements.append(Stmt.loadVariable("async").invoke("runOnFinish", Stmt.newObject(Runnable.class)
         .extend().publicOverridesMethod("run")
         .append(Stmt.declareFinalVariable(producerBeanCBVar, callbackMC, producerCreationalCallback))
         .append(AsyncInjectUtil.getInjectorOrProxy(injectionContext, injectableInstance,
@@ -251,47 +251,12 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
       );
     }
     else {
-
       callbackBuilder.append(
           Stmt.loadVariable("context")
             .invoke("getInstanceOrNew", Refs.get(creationalCallbackVarName), Refs.get(InjectUtil.getVarNameFromType(injectedType, injectableInstance)),
                 injectedType, qualifyingMetadata.getQualifiers())
       );
     }
-
-
-
-//    final MetaClass beanProviderMC = parameterizedAs(AsyncBeanProvider.class,
-//        typeParametersOf(injectedType));
-//
-//    final MetaClass callbackMC = parameterizedAs(CreationalCallback.class,
-//        typeParametersOf(injectedType));
-//
-//    final String var = InjectUtil.getUniqueVarName() + "_XX2";
-//
-//    callbackBuilder.append(Stmt.declareFinalVariable(var, beanProviderMC,
-//        ObjectBuilder.newInstanceOf(beanProviderMC)
-//            .extend()
-//            .publicOverridesMethod("getInstance", Parameter.finalOf(callbackMC, "callback"), Parameter.finalOf(AsyncCreationalContext.class, "pContext"))
-//            ._(Stmt.declareVariable(injectedType)
-//                .named(var).initializeWith(producerInjectableInstance.getValueStatement()))
-//            ._(loadVariable("context").invoke("addBean",
-//                loadVariable("context").invoke("getBeanReference",
-//                    Stmt.load(injectedType),
-//                    Stmt.load(qualifyingMetadata.getQualifiers())), Refs.get(var)))
-//            .finish().finish())
-//    );
-//
-//
-//    registerDestructorCallback(
-//        injectionContext,
-//        callbackBuilder,
-//        castTo(AsyncCreationalContext.class, loadVariable("context")).invoke("getSingletonInstanceOrNew",
-//            Stmt.loadVariable("injContext"),
-//            Stmt.loadVariable("callback"),
-//            Stmt.load(injectedType),
-//            Stmt.load(qualifyingMetadata.getQualifiers())),
-//        disposerMethod);
 
     return null;
   }

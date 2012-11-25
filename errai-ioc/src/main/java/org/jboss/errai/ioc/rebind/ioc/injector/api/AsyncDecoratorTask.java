@@ -59,33 +59,33 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
   @SuppressWarnings({"unchecked"})
   @Override
   public boolean doTask(final InjectionContext ctx) {
-    Annotation anno = null;
+    Annotation annotation = null;
 
     for (final IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
       switch (taskType) {
         case PrivateField:
         case Field:
-          anno = field.getAnnotation(dec.decoratesWith());
+          annotation = field.getAnnotation(dec.decoratesWith());
           break;
         case PrivateMethod:
         case Method:
-          anno = method.getAnnotation(dec.decoratesWith());
-          if (anno == null && field != null) {
-            anno = field.getAnnotation(dec.decoratesWith());
+          annotation = method.getAnnotation(dec.decoratesWith());
+          if (annotation == null && field != null) {
+            annotation = field.getAnnotation(dec.decoratesWith());
           }
-          else if (anno == null && parm != null) {
-            anno = parm.getAnnotation(dec.decoratesWith());
+          else if (annotation == null && parm != null) {
+            annotation = parm.getAnnotation(dec.decoratesWith());
           }
           break;
         case Type:
-          anno = type.getAnnotation(dec.decoratesWith());
+          annotation = type.getAnnotation(dec.decoratesWith());
           break;
         case Parameter:
-          anno = parm.getAnnotation(dec.decoratesWith());
+          annotation = parm.getAnnotation(dec.decoratesWith());
           break;
       }
 
-      for (final Statement stmt : dec.generateDecorator(new InjectableInstance(anno, taskType, constructor, method, field, type,
+      for (final Statement stmt : dec.generateDecorator(new InjectableInstance(annotation, taskType, constructor, method, field, type,
               parm, injector, ctx))) {
         ctx.getProcessingContext().append(stmt);
       }

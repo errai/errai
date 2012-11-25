@@ -151,7 +151,6 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
    *
    * @see #getInstanceOrNew(BeanProvider, Class, java.lang.annotation.Annotation[])
    */
-
   public <T> T getSingletonInstanceOrNew(final SimpleInjectionContext injectionContext,
                                          final BeanProvider<T> callback,
                                          final Class<?> beanType,
@@ -168,7 +167,6 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
       return inst;
     }
   }
-
 
   /**
    * Called to indicate all beans have been added to the context. Calling this method results in all post-initialization
@@ -241,18 +239,4 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
       beanManager.addBeanToContext(ref, this);
     }
   }
-
-//  /**
-//   * Fires all {@link DestructionCallback}s within the context.
-//   */
-//  @SuppressWarnings("unchecked")
-//  void destroyContext() {
-//    if (immutableContext) {
-//      throw new IllegalStateException("scope [" + scope.getName() + "] is an immutable scope and cannot be destroyed");
-//    }
-//
-//    for (final Tuple<Object, DestructionCallback> tuple : destructionCallbacks) {
-//      tuple.getValue().destroy(tuple.getKey());
-//    }
-//  }
 }

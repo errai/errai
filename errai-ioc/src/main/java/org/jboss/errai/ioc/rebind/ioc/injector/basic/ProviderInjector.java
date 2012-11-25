@@ -62,8 +62,6 @@ public class ProviderInjector extends TypeInjector {
 
   @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
-
-
     if (isSingleton() && provided) {
       return Stmt.loadVariable(providerInjector.getInstanceVarName()).invoke("get");
     }

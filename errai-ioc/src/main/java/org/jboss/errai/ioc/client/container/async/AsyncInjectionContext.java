@@ -22,16 +22,27 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
 
   public void addBean(final Class type,
                       final Class beanType,
+                      final AsyncBeanProvider provider,
+                      final Object instance,
+                      final Annotation[] qualifiers) {
+    manager.addBean(type, beanType, provider, instance, qualifiers);
+  }
+
+  public void addBean(final Class type,
+                      final Class beanType,
                       final AsyncBeanProvider callback,
                       final boolean singleton,
                       final Annotation[] qualifiers) {
     if (singleton) {
-      callback.getInstance(new CreationalCallback() {
+      final CreationalCallback creationalCallback = new CreationalCallback() {
         @Override
         public void callback(final Object beanInstance) {
-           manager.addBean(type, beanType, callback, beanInstance, qualifiers);
+          manager.addBean(type, beanType, callback, beanInstance, qualifiers);
+          context.getBeanContext().finish(this);
         }
-      }, context);
+      };
+      context.getBeanContext().wait(creationalCallback);
+      callback.getInstance(creationalCallback, context);
     }
     else {
       manager.addBean(type, beanType, callback, null, qualifiers);
@@ -40,41 +51,16 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
 
   public void addBean(final Class type,
                       final Class beanType,
-                      final AsyncBeanProvider callback,
-                      final boolean singleton,
-                      final Annotation[] qualifiers,
-                      final String name) {
-    if (singleton) {
-      final CreationalCallback creationalCallback = new CreationalCallback() {
-        @Override
-        public void callback(final Object beanInstance) {
-          context.getBeanContext().finish(this);
-          manager.addBean(type, beanType, callback, beanInstance, qualifiers, name);
-        }
-      };
-      context.getBeanContext().wait(creationalCallback);
-      callback.getInstance(creationalCallback, context);
-    }
-    else {
-      manager.addBean(type, beanType, callback, null, qualifiers, name);
-    }
-  }
-
-  public void addBean(final Class type,
-                      final Class beanType,
-                      final AsyncBeanProvider callback,
+                      final AsyncBeanProvider provider,
                       final boolean singleton,
                       final Annotation[] qualifiers,
                       final String name,
                       final boolean concrete) {
 
-
     if (singleton) {
       final CreationalCallback creationalCallback = new CreationalCallback() {
         @Override
         public void callback(final Object beanInstance) {
-          context.getBeanContext().finish(this);
-          manager.addBean(type, beanType, callback, beanInstance, qualifiers, name, concrete);
         }
 
         @Override
@@ -82,11 +68,10 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
           return type.getName();
         }
       };
-      context.getBeanContext().wait(creationalCallback);
-      callback.getInstance(creationalCallback, context);
+      context.getSingletonInstanceOrNew(this, provider, creationalCallback, beanType, qualifiers);
     }
     else {
-      manager.addBean(type, beanType, callback, null, qualifiers, name, concrete);
+      manager.addBean(type, beanType, provider, null, qualifiers, name, concrete);
     }
 
   }
