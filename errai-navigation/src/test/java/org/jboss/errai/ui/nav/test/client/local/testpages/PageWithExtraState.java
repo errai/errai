@@ -12,13 +12,24 @@ import com.google.gwt.user.client.ui.SimplePanel;
 public class PageWithExtraState extends SimplePanel {
 
   @PageState private String stringThing;
-  @PageState private byte byteThing;
-  @PageState private short shortThing;
-  @PageState private int intThing;
-  @PageState private long longThing;
-  @PageState private double doubleThing;
-  @PageState private float floatThing;
+
+  // primitives
+  @PageState private byte    byteThing;
+  @PageState private short   shortThing;
+  @PageState private int     intThing;
+  @PageState private long    longThing;
+  @PageState private double  doubleThing;
+  @PageState private float   floatThing;
   @PageState private boolean boolThing;
+
+  // boxed primitives
+  @PageState private Byte    boxedByteThing;
+  @PageState private Short   boxedShortThing;
+  @PageState private Integer boxedIntThing;
+  @PageState private Long    boxedLongThing;
+  @PageState private Double  boxedDoubleThing;
+  @PageState private Float   boxedFloatThing;
+  @PageState private Boolean boxedBoolThing;
 
   // TODO include fields for all the types we want to support
 
@@ -52,5 +63,33 @@ public class PageWithExtraState extends SimplePanel {
 
   public boolean getBoolThing() {
     return boolThing;
+  }
+
+  public Byte getBoxedByteThing() {
+    return boxedByteThing;
+  }
+
+  public Short getBoxedShortThing() {
+    return boxedShortThing;
+  }
+
+  public Integer getBoxedIntThing() {
+    return boxedIntThing;
+  }
+
+  public Long getBoxedLongThing() {
+    return boxedLongThing;
+  }
+
+  public Double getBoxedDoubleThing() {
+    return boxedDoubleThing;
+  }
+
+  public Float getBoxedFloatThing() {
+    return boxedFloatThing;
+  }
+
+  public Boolean getBoxedBoolThing() {
+    return boxedBoolThing;
   }
 }

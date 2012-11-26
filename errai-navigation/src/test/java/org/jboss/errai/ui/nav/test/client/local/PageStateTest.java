@@ -25,9 +25,9 @@ public class PageStateTest extends AbstractErraiCDITest {
     navigation = beanManager.lookupBean(Navigation.class).getInstance();
   }
 
-  public void testPassAllStateTokens() throws Exception {
-    PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+  private static void assertAllFieldsHaveDefaultValues(PageWithExtraState page) {
     assertNull(page.getStringThing());
+
     assertEquals((byte) 0, page.getByteThing());
     assertEquals((short) 0, page.getShortThing());
     assertEquals(0, page.getIntThing());
@@ -35,6 +35,25 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(0f, page.getFloatThing(), 0f);
     assertEquals(0.0, page.getDoubleThing(), 0.0);
     assertEquals(false, page.getBoolThing());
+
+    assertNull(page.getBoxedByteThing());
+    assertNull(page.getBoxedShortThing());
+    assertNull(page.getBoxedIntThing());
+    assertNull(page.getBoxedLongThing());
+    assertNull(page.getBoxedFloatThing());
+    assertNull(page.getBoxedDoubleThing());
+    assertNull(page.getBoxedBoolThing());
+  }
+
+  /**
+   * If a {@code @PageState} field has no corresponding parameter in the history
+   * token, its value should be set to default (0 or null) when we call
+   * putState().
+   */
+  public void testAbsentParameterGivesDefault() throws Exception {
+    PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+
+    assertAllFieldsHaveDefaultValues(page);
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>builder()
             .put("stringThing", "string")
@@ -45,9 +64,46 @@ public class PageStateTest extends AbstractErraiCDITest {
             .put("floatThing", "1.2")
             .put("doubleThing", "1.23")
             .put("boolThing", "true")
+            .put("boxedByteThing", "12")
+            .put("boxedShortThing", "123")
+            .put("boxedIntThing", "1234")
+            .put("boxedLongThing", "12345")
+            .put("boxedFloatThing", "1.2")
+            .put("boxedDoubleThing", "1.23")
+            .put("boxedBoolThing", "true")
+            .build());
+
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>of());
+
+    // this is the point of the test: the empty goTo() should have reset all state fields
+    assertAllFieldsHaveDefaultValues(page);
+  }
+
+  public void testPassAllStateTokens() throws Exception {
+    PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+
+    assertAllFieldsHaveDefaultValues(page);
+
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>builder()
+            .put("stringThing", "string")
+            .put("byteThing", "12")
+            .put("shortThing", "123")
+            .put("intThing", "1234")
+            .put("longThing", "12345")
+            .put("floatThing", "1.2")
+            .put("doubleThing", "1.23")
+            .put("boolThing", "true")
+            .put("boxedByteThing", "12")
+            .put("boxedShortThing", "123")
+            .put("boxedIntThing", "1234")
+            .put("boxedLongThing", "12345")
+            .put("boxedFloatThing", "1.2")
+            .put("boxedDoubleThing", "1.23")
+            .put("boxedBoolThing", "true")
             .build());
 
     assertEquals("string", page.getStringThing());
+
     assertEquals((byte) 12, page.getByteThing());
     assertEquals((short) 123, page.getShortThing());
     assertEquals(1234, page.getIntThing());
@@ -55,6 +111,14 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(1.2f, page.getFloatThing(), 0f);
     assertEquals(1.23, page.getDoubleThing(), 0.0);
     assertEquals(true, page.getBoolThing());
+
+    assertEquals(Byte.valueOf("12"), page.getBoxedByteThing());
+    assertEquals(Short.valueOf("123"), page.getBoxedShortThing());
+    assertEquals(Integer.valueOf("1234"), page.getBoxedIntThing());
+    assertEquals(Long.valueOf("12345"), page.getBoxedLongThing());
+    assertEquals(Float.valueOf("1.2"), page.getBoxedFloatThing(), 0f);
+    assertEquals(Double.valueOf("1.23"), page.getBoxedDoubleThing(), 0.0);
+    assertEquals(Boolean.TRUE, page.getBoxedBoolThing());
   }
 
   /**
