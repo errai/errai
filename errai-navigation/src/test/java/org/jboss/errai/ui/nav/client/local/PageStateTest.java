@@ -1,12 +1,15 @@
-package org.jboss.errai.ui.nav.test.client.local;
+package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
-import org.jboss.errai.ui.nav.client.local.Navigation;
-import org.jboss.errai.ui.nav.test.client.local.testpages.PageWithExtraState;
+import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
+import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
 public class PageStateTest extends AbstractErraiCDITest {
 
@@ -15,7 +18,7 @@ public class PageStateTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ui.nav.test.NavigationTest";
+    return "org.jboss.errai.ui.nav.NavigationTest";
   }
 
   @Override
@@ -84,7 +87,7 @@ public class PageStateTest extends AbstractErraiCDITest {
 
     assertAllFieldsHaveDefaultValues(page);
 
-    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>builder()
+    ImmutableMultimap<String, String> stateValues = ImmutableMultimap.<String,String>builder()
             .put("stringThing", "string")
             .put("byteThing", "12")
             .put("shortThing", "123")
@@ -100,8 +103,11 @@ public class PageStateTest extends AbstractErraiCDITest {
             .put("boxedFloatThing", "1.2")
             .put("boxedDoubleThing", "1.23")
             .put("boxedBoolThing", "true")
-            .build());
+            .build();
 
+    navigation.goTo(PageWithExtraState.class, stateValues);
+
+    // ensure all values were set on the page object
     assertEquals("string", page.getStringThing());
 
     assertEquals((byte) 12, page.getByteThing());
@@ -119,6 +125,10 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(Float.valueOf("1.2"), page.getBoxedFloatThing(), 0f);
     assertEquals(Double.valueOf("1.23"), page.getBoxedDoubleThing(), 0.0);
     assertEquals(Boolean.TRUE, page.getBoxedBoolThing());
+
+    // finally, ensure getState() properly reconstitutes the map we started with
+    PageNode<PageWithExtraState> pageNode = navigation.getNavGraph().getPage(PageWithExtraState.class);
+    assertEquals(stateValues, ImmutableMultimap.copyOf(pageNode.getState(page)));
   }
 
   /**
@@ -137,6 +147,19 @@ public class PageStateTest extends AbstractErraiCDITest {
             "stringThing", "string2"));
 
     assertEquals("string0", page.getStringThing());
+  }
+
+  public void testReadNullsWithGetState() throws Exception {
+    PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+
+    assertAllFieldsHaveDefaultValues(page);
+
+    NavigationGraph navGraph = navigation.getNavGraph();
+    PageNode<PageWithExtraState> pageNode = navGraph.getPage(PageWithExtraState.class);
+    Multimap<String, String> state = pageNode.getState(page);
+    assertTrue("Default state map should only contain the primitives, but was: " + state,
+            state.keySet().equals(ImmutableSet.of(
+                    "byteThing", "shortThing", "intThing", "longThing", "floatThing", "doubleThing", "boolThing")));
   }
 
 }

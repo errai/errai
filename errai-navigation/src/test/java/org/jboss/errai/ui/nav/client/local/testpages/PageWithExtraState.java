@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.nav.test.client.local.testpages;
+package org.jboss.errai.ui.nav.client.local.testpages;
 
 import javax.enterprise.context.ApplicationScoped;
 

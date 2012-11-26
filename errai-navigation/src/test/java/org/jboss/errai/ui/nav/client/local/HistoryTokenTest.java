@@ -1,6 +1,4 @@
-package org.jboss.errai.ui.nav.test.client.local;
-
-import org.jboss.errai.ui.nav.client.local.HistoryToken;
+package org.jboss.errai.ui.nav.client.local;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -10,7 +8,7 @@ public class HistoryTokenTest extends GWTTestCase {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ui.nav.test.NavigationTest";
+    return "org.jboss.errai.ui.nav.NavigationTest";
   }
 
   public void testNameOnly() throws Exception {

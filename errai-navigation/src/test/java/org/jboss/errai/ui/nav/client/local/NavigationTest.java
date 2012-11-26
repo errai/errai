@@ -1,11 +1,10 @@
-package org.jboss.errai.ui.nav.test.client.local;
+package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
-import org.jboss.errai.ui.nav.test.client.local.testpages.CircularRef1;
-import org.jboss.errai.ui.nav.test.client.local.testpages.CircularRef2;
+import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
+import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 
 import com.google.gwt.core.client.GWT;
 
@@ -15,7 +14,7 @@ public class NavigationTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ui.nav.test.NavigationTest";
+    return "org.jboss.errai.ui.nav.NavigationTest";
   }
 
   @Override

@@ -2,9 +2,7 @@ package org.jboss.errai.ui.nav.client.local;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
@@ -29,9 +27,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class Navigation {
 
   private Panel contentPanel = new SimplePanel();
-
-  @Inject
-  private IOCBeanManager bm;
 
   private NavigationGraph navGraph = GWT.create(NavigationGraph.class);
 
@@ -62,15 +57,41 @@ public class Navigation {
   }
 
   /**
-   * Goes to
+   * Looks up the PageNode instance that provides content for the given widget
+   * type, sets the state on that page, then makes the widget visible in the
+   * content area.
+   *
    * @param toPage
+   *          The content type of the page node to look up and display.
+   *          Normally, this is a Widget subclass that has been annotated with
+   *          {@code @Page}.
+   * @param state
+   *          The state information to set on the page node before showing it.
+   *          Normally the map keys correspond with the names of fields
+   *          annotated with {@code @PageState} in the widget class.
    */
   public <W extends Widget> void goTo(Class<W> toPage, Multimap<String,String> state) {
     PageNode<W> toPageInstance = navGraph.getPage(toPage);
     goTo(toPageInstance, state);
   }
 
-  public <W extends Widget> void goTo(PageNode<W> toPage, Multimap<String,String> state) {
+  /**
+   * Sets the state on the given PageNode, then makes its widget visible in the
+   * content area.
+   *
+   * @param toPage
+   *          The page node to display. Normally, the implementation of PageNode
+   *          is generated at compile time based on a Widget subclass that has
+   *          been annotated with {@code @Page}. Anything calling this method
+   *          must ensure that the given PageNode has been entered into the
+   *          navigation graph, or later navigation back to {@code toPage} will
+   *          fail.
+   * @param state
+   *          The state information to set on the page node before showing it.
+   *          Normally the map keys correspond with the names of fields
+   *          annotated with {@code @PageState} in the widget class.
+   */
+  private <W extends Widget> void goTo(PageNode<W> toPage, Multimap<String,String> state) {
 
     // TODO preserve state of current page
 
@@ -94,5 +115,13 @@ public class Navigation {
    */
   public Widget getContentPanel() {
     return contentPanel;
+  }
+
+  /**
+   * Returns the navigation graph that provides PageNode instances to this Navigation instance.
+   */
+  // should this method be public? should we expose a way to set the nav graph?
+  NavigationGraph getNavGraph() {
+    return navGraph;
   }
 }

@@ -204,8 +204,20 @@ public class NavigationGraphGenerator extends Generator {
       // FIXME convert everything to strings
       PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Read, "jsni", pageImplBuilder, field, new Modifier[] {});
       String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
-      Statement fieldValueStmt = paramToStringStatement(field.getType(), Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget")));
-      method.append(Stmt.loadVariable("state").invoke("put", field.getName(), fieldValueStmt));
+      Statement actualFieldValueStmt = Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"));
+      Statement putFieldValueInMap = Stmt.loadVariable("state")
+              .invoke("put", field.getName(), paramToStringStatement(field.getType(), actualFieldValueStmt));
+
+      if (field.getType().isPrimitive()) {
+        // no null check. just do it.
+        method.append(putFieldValueInMap);
+      }
+      else {
+        // need null check; leave nulls out of map
+        method.append(Stmt.if_(Bool.isNotNull(actualFieldValueStmt))
+                .append(putFieldValueInMap)
+                .finish());
+      }
     }
     method.append(Stmt.loadVariable("state").returnValue());
     method.finish();
