@@ -199,7 +199,7 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
 
         final InjectableInstance parmInjectableInstance = InjectableInstance.getParameterInjectedInstance(metaParameter, this, injectionContext);
 
-        statements.append(AsyncInjectUtil.getInjectorOrProxy(injectionContext, parmInjectableInstance, metaParameter.getType(), qualifyingMetadata));
+     //   statements.append(AsyncInjectUtil.getInjectorOrProxy(injectionContext, parmInjectableInstance, metaParameter.getType(), qualifyingMetadata));
       }
     }
 

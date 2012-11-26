@@ -119,7 +119,6 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
         .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback", true),
             Parameter.of(AsyncCreationalContext.class, "context", true));
 
-
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(RunAsyncCallback.class).extend()
         .publicOverridesMethod("onFailure", Parameter.of(Throwable.class, "throwable"))
         .append(Stmt.throw_(RuntimeException.class, "failed to run asynchronously", Refs.get("throwable")))

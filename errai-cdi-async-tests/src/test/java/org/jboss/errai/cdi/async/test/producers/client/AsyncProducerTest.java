@@ -1,10 +1,8 @@
 package org.jboss.errai.cdi.async.test.producers.client;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncProducerDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncSingletonProducerDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.BeanConstrConsumesOwnProducer;
-import org.jboss.errai.cdi.async.test.producers.client.res.ProducedStringConsumingBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
