@@ -253,7 +253,9 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     else {
       callbackBuilder.append(
           Stmt.loadVariable("context")
-            .invoke("getInstanceOrNew", Refs.get(creationalCallbackVarName), Refs.get(InjectUtil.getVarNameFromType(injectedType, injectableInstance)),
+            .invoke("getSingletonInstanceOrNew", Refs.get("injContext"),
+                Refs.get(creationalCallbackVarName),
+                Refs.get(InjectUtil.getVarNameFromType(injectedType, injectableInstance)),
                 injectedType, qualifyingMetadata.getQualifiers())
       );
     }

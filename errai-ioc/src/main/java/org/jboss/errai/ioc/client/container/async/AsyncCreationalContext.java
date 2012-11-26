@@ -47,20 +47,6 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     beanManager.addProxyReference(proxyRef, realRef);
   }
 
-  public <T> void getInstanceOrNew(final AsyncBeanProvider<T> beanProvider,
-                                   final CreationalCallback<T> creationalCallback,
-                                   final Class<?> beanType,
-                                   final Annotation[] qualifiers) {
-    final BeanRef ref = getBeanReference(beanType, qualifiers);
-
-    if (wired.containsKey(ref)) {
-      creationalCallback.callback((T) wired.get(ref));
-    }
-    else {
-      beanProvider.getInstance(creationalCallback, this);
-    }
-  }
-
   public <T> void getBeanInstance(final CreationalCallback<T> creationalCallback,
                                   final Class<T> beanType,
                                   final Annotation[] qualifiers) {
@@ -91,9 +77,12 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
    * Add a {@link CreationalCallback} to the wait queue. Or <tt>null</tt> to indicate that the first dependency
    * on that bean has begun to load it.
    *
-   * @param beanRef the bean reference for the callback.
-   * @param callback the instance of the bean.
-   * @param <T> the type of the bean.
+   * @param beanRef
+   *     the bean reference for the callback.
+   * @param callback
+   *     the instance of the bean.
+   * @param <T>
+   *     the type of the bean.
    */
   public <T> void addWait(final BeanRef beanRef, final CreationalCallback<T> callback) {
     List<CreationalCallback> callbackList = singletonWaitList.get(beanRef);
@@ -108,9 +97,12 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   /**
    * Notify all waiting callbacks for the instance result from the specified bean provider.
    *
-   * @param beanRef the bean reference for the callback.
-   * @param instance the instance of the bean.
-   * @param <T> the type of the bean.
+   * @param beanRef
+   *     the bean reference for the callback.
+   * @param instance
+   *     the instance of the bean.
+   * @param <T>
+   *     the type of the bean.
    */
   @SuppressWarnings({"unchecked"})
   public <T> void notifyAllWaiting(final BeanRef beanRef, final T instance) {
@@ -131,17 +123,18 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
    * one instance of the specified bean is ever created and returned to the specified {@link CreationalCallback}.
    *
    * @param injectionContext
-   *    the current {@link AsyncInjectionContext}
+   *     the current {@link AsyncInjectionContext}
    * @param beanProvider
-   *    the reference to the {@link AsyncBeanProvider} which is capable of creating a new instance.
+   *     the reference to the {@link AsyncBeanProvider} which is capable of creating a new instance.
    * @param creationalCallback
-   *    the reference to the {@link CreationalCallback} which the instance will be provided to when the bean
-   *    has finished loading.
+   *     the reference to the {@link CreationalCallback} which the instance will be provided to when the bean
+   *     has finished loading.
    * @param beanType
-   *    the type of the bean.
+   *     the type of the bean.
    * @param qualifiers
-   *    the qualifiers for the bean.
-   * @param <T> the parameterized bean type.
+   *     the qualifiers for the bean.
+   * @param <T>
+   *     the parameterized bean type.
    */
   public <T> void getSingletonInstanceOrNew(final AsyncInjectionContext injectionContext,
                                             final AsyncBeanProvider<T> beanProvider,
@@ -161,7 +154,6 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           // if the bean is already waited on, it means that there is an asynchronous load for the bean
           // already in progress from some other dependent resource or bean.
           if (isWaitedOn(beanRef)) {
-
             // put the CreationalCallback into the wait queue.
             addWait(beanRef, creationalCallback);
             return;
@@ -191,8 +183,22 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
         }
       }
     }, beanType, qualifiers);
-
   }
+
+  public <T> void getInstanceOrNew(final AsyncBeanProvider<T> beanProvider,
+                                   final CreationalCallback<T> creationalCallback,
+                                   final Class<?> beanType,
+                                   final Annotation[] qualifiers) {
+    final BeanRef ref = getBeanReference(beanType, qualifiers);
+
+    if (wired.containsKey(ref)) {
+      creationalCallback.callback((T) wired.get(ref));
+    }
+    else {
+      beanProvider.getInstance(creationalCallback, this);
+    }
+  }
+
 
   public void finish(final Runnable finishCallback) {
     beanContext.runOnFinish(new Runnable() {

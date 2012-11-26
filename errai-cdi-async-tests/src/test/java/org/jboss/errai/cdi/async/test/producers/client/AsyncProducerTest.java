@@ -65,7 +65,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
                 assertNotNull(bean.getLaBean());
                 assertNotNull(bean.getLaBean2());
 
-                assertSame(bean.getLaBean(), bean.getLaBean2());
+                assertSame(bean.getLaBean() + " != " + bean.getLaBean2(), bean.getLaBean(), bean.getLaBean2());
 
                 finishTest();
               }
