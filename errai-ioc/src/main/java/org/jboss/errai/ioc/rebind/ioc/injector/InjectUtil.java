@@ -177,11 +177,11 @@ public class InjectUtil {
    * @param postConstructTasks
    *     -
    */
-  static void doPostConstruct(final InjectionContext ctx,
+  static boolean doPostConstruct(final InjectionContext ctx,
                               final Injector injector,
                               final List<MetaMethod> postConstructTasks) {
 
-    if (postConstructTasks.isEmpty()) return;
+    if (postConstructTasks.isEmpty()) return false;
 
     final MetaClass initializationCallbackType =
         parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
@@ -205,6 +205,8 @@ public class InjectUtil {
 
     pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
+
+    return true;
   }
 
   /**
@@ -217,11 +219,11 @@ public class InjectUtil {
    * @param preDestroyTasks
    *     -
    */
-  static void doPreDestroy(final InjectionContext ctx,
+  static boolean doPreDestroy(final InjectionContext ctx,
                            final Injector injector,
                            final List<MetaMethod> preDestroyTasks) {
 
-    if (preDestroyTasks.isEmpty()) return;
+    if (preDestroyTasks.isEmpty()) return false;
 
     final MetaClass destructionCallbackType =
         parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
@@ -242,6 +244,8 @@ public class InjectUtil {
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
+
+    return true;
   }
 
   private static void renderLifeCycleEvents(final Class<? extends Annotation> type,

@@ -161,28 +161,35 @@ public class AsyncBeanContext {
 
   private void _finishCheck() {
     if (finishFireState == FireState.FIRED) {
-      LogUtil.log("finish did not fire because state is already FIRED");
+      LogUtil.log("WARNING: finish did not fire because state is already FIRED");
       return;
     }
 
     if (allDependencies.isEmpty()) {
-      timeOut.cancel();
-      finishFireState = FireState.ARMED;
+      new Timer() {
+        @Override
+        public void run() {
+          if (allDependencies.isEmpty()) {
+            timeOut.cancel();
+            finishFireState = FireState.ARMED;
 
-      if (!onFinishRunnables.isEmpty()) {
-        finishFireState = FireState.FIRED;
+            if (!onFinishRunnables.isEmpty()) {
+              finishFireState = FireState.FIRED;
 
-        final Iterator<Runnable> runnableIterable = onFinishRunnables.iterator();
-        while (runnableIterable.hasNext()) {
-          try {
-            runnableIterable.next().run();
+              final Iterator<Runnable> runnableIterable = onFinishRunnables.iterator();
+              while (runnableIterable.hasNext()) {
+                try {
+                  runnableIterable.next().run();
+                }
+                catch (Throwable t) {
+                  t.printStackTrace();
+                }
+                runnableIterable.remove();
+              }
+            }
           }
-          catch (Throwable t) {
-            t.printStackTrace();
-          }
-          runnableIterable.remove();
         }
-      }
+      }.schedule(1); // yield.
     }
   }
 

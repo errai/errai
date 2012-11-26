@@ -59,9 +59,11 @@ public class Container implements EntryPoint {
 
       log("IOC bootstrapper successfully initialized.");
 
-      injectionContext = ((Bootstrapper) GWT.create(Bootstrapper.class)).bootstrapContainer();
+      if (GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync()) {
+        log("bean manager initialized in async mode.");
+      }
 
-      log("IOC container bootstrapped.");
+      injectionContext = ((Bootstrapper) GWT.create(Bootstrapper.class)).bootstrapContainer();
 
       final CreationalContext rootContext = injectionContext.getRootContext();
 
@@ -93,8 +95,9 @@ public class Container implements EntryPoint {
     log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
     InitVotes.voteFor(Container.class);
     declareDebugFunction();
-
     new CallbacksRunnable().run();
+
+    log("bean manager now in service.");
   }
 
   private static class CallbacksRunnable implements Runnable {
@@ -113,14 +116,14 @@ public class Container implements EntryPoint {
    * necessary to use this method from within beans themselves. But if you are generated out-of-container calls
    * into the bean manager (such as for testing), it may be necessary to use this method to ensure that the beans
    * you wish to lookup have been loaded.
-   * <p>
+   * <p/>
    * Use of this method is really only necessary when using the bean manager in asynchronous mode as wiring of the
    * container synchronously does not yield during bootstrapping operations.
-   * <p>
+   * <p/>
    * If the bean manager is already initialized when you call this method, the <tt>Runnable</tt> is invoked immediately.
    *
    * @param runnable
-   *    the {@link Runnable} to execute after bean manager initialization.
+   *     the {@link Runnable} to execute after bean manager initialization.
    */
   public static void runAfterInit(final Runnable runnable) {
     if (init) {

@@ -120,12 +120,15 @@ public class AsyncInjectUtil {
 
           handleAsyncInjectionTasks(ctx, injectionTasks);
 
-          pushFinishRunnable(ctx);
+          if (!postConstructTasks.isEmpty() || !preDestroyTasks.isEmpty()) {
+            pushFinishRunnable(ctx);
 
-          InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
-          InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
+            InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
+            InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
 
-          processingContext.popBlockBuilder(); // once for the finish runnable
+            processingContext.popBlockBuilder(); // once for the finish runnable
+          }
+
           processingContext.popBlockBuilder(); // once for the constructed object callback
         }
       };
@@ -155,12 +158,14 @@ public class AsyncInjectUtil {
 
           handleAsyncInjectionTasks(ctx, injectionTasks);
 
-          pushFinishRunnable(ctx);
+          if (!postConstructTasks.isEmpty() || !preDestroyTasks.isEmpty()) {
+            pushFinishRunnable(ctx);
 
-          InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
-          InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
+            InjectUtil.doPostConstruct(ctx, injector, postConstructTasks);
+            InjectUtil.doPreDestroy(ctx, injector, preDestroyTasks);
 
-          processingContext.popBlockBuilder();
+            processingContext.popBlockBuilder();
+          }
         }
       };
     }
