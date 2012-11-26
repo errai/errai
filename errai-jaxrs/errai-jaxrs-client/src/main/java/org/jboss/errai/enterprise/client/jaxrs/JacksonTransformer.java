@@ -194,7 +194,6 @@ public class JacksonTransformer {
     JSONValue val = JSONParser.parseStrict(jackson);
     val = fromJackson(val, null, null, new int[1]);
 
-    System.out.println(val.toString());
     return val.toString();
   }
 
