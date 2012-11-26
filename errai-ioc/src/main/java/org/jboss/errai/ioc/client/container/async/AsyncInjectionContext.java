@@ -25,6 +25,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
                       final AsyncBeanProvider provider,
                       final Object instance,
                       final Annotation[] qualifiers) {
+
     manager.addBean(type, beanType, provider, instance, qualifiers);
   }
 

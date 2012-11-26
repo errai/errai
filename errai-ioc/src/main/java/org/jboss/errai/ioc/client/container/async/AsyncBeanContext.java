@@ -5,6 +5,7 @@ import org.jboss.errai.common.client.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -166,29 +167,26 @@ public class AsyncBeanContext {
 
     if (allDependencies.isEmpty()) {
       timeOut.cancel();
-      constructFireState = FireState.ARMED;
+      finishFireState = FireState.ARMED;
 
       if (!onFinishRunnables.isEmpty()) {
-        constructFireState = FireState.FIRED;
+        finishFireState = FireState.FIRED;
 
-        for (final Runnable runnable : onFinishRunnables) {
+        final Iterator<Runnable> runnableIterable = onFinishRunnables.iterator();
+        while (runnableIterable.hasNext()) {
           try {
-            runnable.run();
+            runnableIterable.next().run();
           }
           catch (Throwable t) {
             t.printStackTrace();
           }
+          runnableIterable.remove();
         }
-
       }
     }
   }
 
   public void setComment(String comment) {
     this.comment = comment;
-  }
-
-  public boolean isWaitedOn(final CreationalCallback<?> callback) {
-    return allDependencies.contains(callback);
   }
 }

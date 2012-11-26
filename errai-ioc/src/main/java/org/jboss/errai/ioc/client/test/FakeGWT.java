@@ -20,7 +20,7 @@ public class FakeGWT {
         trace = _trace;
         callback.onSuccess();
       }
-    }.schedule(Random.nextInt(150) + 1);
+    }.schedule(Random.nextInt(50) + 1);
   }
 }
 

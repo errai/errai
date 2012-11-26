@@ -6,6 +6,7 @@ import org.jboss.errai.cdi.async.test.producers.client.res.AsyncSingletonProduce
 import org.jboss.errai.cdi.async.test.producers.client.res.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.async.test.producers.client.res.ProducedStringConsumingBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
@@ -30,7 +31,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
   public void testProducer() {
     delayTestFinish(10000);
 
-    new Timer() {
+    Container.runAfterInit(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(AsyncProducerDependentBean.class)
@@ -48,13 +49,13 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
               }
             });
       }
-    }.schedule(100);
+    });
   }
 
   public void testSingletonProducer() {
     delayTestFinish(10000);
 
-    new Timer() {
+    Container.runAfterInit(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(AsyncSingletonProducerDependentBean.class)
@@ -72,43 +73,48 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
               }
             });
       }
-    }.schedule(100);
+    });
   }
 
   public void testBeanConstrConsumesOwnProduer() {
     delayTestFinish(10000);
 
-      new Timer() {
-        @Override
-        public void run() {
-          IOC.getAsyncBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class)
-              .getInstance(new CreationalCallback<BeanConstrConsumesOwnProducer>() {
-                @Override
-                public void callback(final BeanConstrConsumesOwnProducer bean) {
-                  assertNotNull(bean);
-                  assertNotNull(bean.getWrappedKitten());
-                  assertNotNull(bean.getWrappedKitten().getKitten());
+    Container.runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class)
+            .getInstance(new CreationalCallback<BeanConstrConsumesOwnProducer>() {
+              @Override
+              public void callback(final BeanConstrConsumesOwnProducer bean) {
+                assertNotNull(bean);
+                assertNotNull(bean.getWrappedKitten());
+                assertNotNull(bean.getWrappedKitten().getKitten());
 
-                  finishTest();
-                }
-              });
-        }
-      }.schedule(100);
+                finishTest();
+              }
+            });
+      }
+    });
   }
 
   public void testProducerFromDependentBeanIntoDependentBean() {
     delayTestFinish(10000);
 
-    IOC.getAsyncBeanManager().lookupBean(ProducedStringConsumingBean.class)
-        .getInstance(new CreationalCallback<ProducedStringConsumingBean>() {
-          @Override
-          public void callback(final ProducedStringConsumingBean beanInstance) {
-            assertNotNull(beanInstance);
-            assertEquals("Autumn", beanInstance.getAutumnString());
-            assertEquals("Petunia", beanInstance.getPetuniaString());
+    Container.runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class)
+            .getInstance(new CreationalCallback<BeanConstrConsumesOwnProducer>() {
+              @Override
+              public void callback(final BeanConstrConsumesOwnProducer bean) {
+                assertNotNull(bean);
+                assertNotNull(bean.getWrappedKitten());
+                assertNotNull(bean.getWrappedKitten().getKitten());
 
-            finishTest();
-          }
-        });
+                finishTest();
+              }
+            });
+      }
+    });
   }
 }

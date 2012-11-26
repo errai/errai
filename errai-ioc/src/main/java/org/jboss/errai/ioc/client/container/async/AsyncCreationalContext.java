@@ -22,6 +22,9 @@ import java.util.Map;
 public class AsyncCreationalContext extends AbstractCreationalContext {
   private final AsyncBeanManager beanManager;
   private final AsyncBeanContext beanContext = new AsyncBeanContext();
+  private final Map<AsyncBeanProvider, List<CreationalCallback>> singletonWaitList
+      = new HashMap<AsyncBeanProvider, List<CreationalCallback>>();
+
 
   public AsyncCreationalContext(final AsyncBeanManager beanManager,
                                 final Class<? extends Annotation> scope) {
@@ -59,43 +62,37 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   public <T> void getBeanInstance(final CreationalCallback<T> creationalCallback,
                                   final Class<T> beanType,
                                   final Annotation[] qualifiers) {
-    final Runnable getBeanInstanceCallback = new Runnable() {
-      @Override
-      public void run() {
-        final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
-        if (t == null) {
-          // see if the instance is available in the bean manager
-          final Collection<AsyncBeanDef<T>> beanList
-              = IOC.getAsyncBeanManager().lookupBeans(beanType, qualifiers);
 
-          if (!beanList.isEmpty()) {
-            final AsyncBeanDef<T> bean = beanList.iterator().next();
-            if (bean != null && bean instanceof AsyncSingletonBean) {
-              bean.getInstance(creationalCallback);
-              return;
-            }
-          }
+    final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
+    if (t == null) {
+      // see if the instance is available in the bean manager
+      final Collection<AsyncBeanDef<T>> beanList
+          = IOC.getAsyncBeanManager().lookupBeans(beanType, qualifiers);
+
+      if (!beanList.isEmpty()) {
+        final AsyncBeanDef<T> bean = beanList.iterator().next();
+        if (bean != null && bean instanceof AsyncSingletonBean) {
+          bean.getInstance(creationalCallback);
+          return;
         }
-        creationalCallback.callback(t);
       }
-    };
-
-    if (beanContext.isWaitedOn(creationalCallback)) {
-      System.out.println("WAITED ON!");
-      beanContext.appendRunOnFinish(getBeanInstanceCallback);
     }
-    else {
-      getBeanInstanceCallback.run();
-    }
+    creationalCallback.callback(t);
   }
 
-  private final Map<AsyncBeanProvider, List<CreationalCallback>> singletonWaitList
-      = new HashMap<AsyncBeanProvider, List<CreationalCallback>>();
 
   private boolean isWaitedOn(final AsyncBeanProvider beanProvider) {
     return singletonWaitList.containsKey(beanProvider);
   }
 
+  /**
+   * Add a {@link CreationalCallback} to the wait queue. Or <tt>null</tt> to indicate that the first dependency
+   * on that bean has begun to load it.
+   *
+   * @param beanProvider a reference to the {@link AsyncBeanProvider} responsible for loading this bean.
+   * @param callback the instance of the bean.
+   * @param <T> the type of the bean.
+   */
   public <T> void addWait(final AsyncBeanProvider<T> beanProvider, final CreationalCallback<T> callback) {
     List<CreationalCallback> callbackList = singletonWaitList.get(beanProvider);
     if (callbackList == null) {
@@ -109,9 +106,9 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   /**
    * Notify all waiting callbacks for the instance result from the specified bean provider.
    *
-   * @param beanProvider
-   * @param instance
-   * @param <T>
+   * @param beanProvider a reference to the {@link AsyncBeanProvider} responsible for loading this bean.
+   * @param instance the instance of the bean.
+   * @param <T> the type of the bean.
    */
   @SuppressWarnings({"unchecked"})
   public <T> void notifyAllWaiting(final AsyncBeanProvider<T> beanProvider, final T instance) {
@@ -125,6 +122,25 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     }
   }
 
+  /**
+   * Implements the singleton loading logic for beans. Because of the lack of ordering guarantees in
+   * asynchronous loading, all attempts to load a reference to a singleton should happen via this method within
+   * the bean manager. Within the <tt>CreationalContext</tt>, calling this method will insure that only
+   * one instance of the specified bean is ever created and returned to the specified {@link CreationalCallback}.
+   *
+   * @param injectionContext
+   *    the current {@link AsyncInjectionContext}
+   * @param beanProvider
+   *    the reference to the {@link AsyncBeanProvider} which is capable of creating a new instance.
+   * @param creationalCallback
+   *    the reference to the {@link CreationalCallback} which the instance will be provided to when the bean
+   *    has finished loading.
+   * @param beanType
+   *    the type of the bean.
+   * @param qualifiers
+   *    the qualifiers for the bean.
+   * @param <T> the parameterized bean type.
+   */
   public <T> void getSingletonInstanceOrNew(final AsyncInjectionContext injectionContext,
                                             final AsyncBeanProvider<T> beanProvider,
                                             final CreationalCallback<T> creationalCallback,
@@ -138,11 +154,16 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           creationalCallback.callback(inst);
         }
         else {
+          // if the bean is already waited on, it means that there is an asynchronous load for the bean
+          // already in progress from some other dependent resource or bean.
           if (isWaitedOn(beanProvider)) {
+
+            // put the CreationalCallback into the wait queue.
             addWait(beanProvider, creationalCallback);
             return;
           }
           else {
+            // add a null wait to signify that we have begun the loading process on this bean.
             addWait(beanProvider, null);
           }
 
@@ -152,11 +173,16 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
               injectionContext.addBean(beanType, beanType, beanProvider, beanInstance, qualifiers);
               creationalCallback.callback(beanInstance);
               notifyAllWaiting(beanProvider, beanInstance);
+
+              // notify we're ready!
               getBeanContext().finish(this);
             }
           };
+
+          // the context cannot finish loading until all outer singletons are loaded.
           getBeanContext().wait(callback);
 
+          // load a new bean!
           beanProvider.getInstance(callback, AsyncCreationalContext.this);
         }
       }
