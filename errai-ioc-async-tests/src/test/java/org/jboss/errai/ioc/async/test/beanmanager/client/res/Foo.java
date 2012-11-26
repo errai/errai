@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.async.test.beanmanager.client.res;
 
 import org.jboss.errai.ioc.client.api.Disposer;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -8,7 +9,7 @@ import javax.inject.Singleton;
 /**
  * @author Mike Brock
  */
-@Singleton
+@Singleton @LoadAsync
 public class Foo {
   @Inject Bar bar;
   @Inject Bar2 bar2;

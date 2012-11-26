@@ -19,6 +19,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanContext;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
@@ -114,25 +115,35 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     begin building the creational callback, implement the "getInstance" method from the interface
     and assign its BlockBuilder to a callbackBuilder so we can work with it.
     */
-    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder_
+    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder
         = newInstanceOf(beanProviderClassRef).extend()
         .publicOverridesMethod("getInstance", Parameter.of(creationalCallbackClassRef, "callback", true),
             Parameter.of(AsyncCreationalContext.class, "context", true));
 
-    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(RunAsyncCallback.class).extend()
-        .publicOverridesMethod("onFailure", Parameter.of(Throwable.class, "throwable"))
-        .append(Stmt.throw_(RuntimeException.class, "failed to run asynchronously", Refs.get("throwable")))
-        .finish()
-        .publicOverridesMethod("onSuccess");
 
+    final boolean loadAsync = type.isAnnotationPresent(LoadAsync.class);
 
-    callbackBuilder.append(
+    final BlockBuilder<AnonymousClassStructureBuilder> targetBlock;
+
+    if (loadAsync) {
+      final BlockBuilder<AnonymousClassStructureBuilder> asyncBuilder = ObjectBuilder.newInstanceOf(RunAsyncCallback.class).extend()
+          .publicOverridesMethod("onFailure", Parameter.of(Throwable.class, "throwable"))
+          .append(Stmt.throw_(RuntimeException.class, "failed to run asynchronously", Refs.get("throwable")))
+          .finish()
+          .publicOverridesMethod("onSuccess");
+
+      targetBlock = asyncBuilder;
+    }
+    else {
+      targetBlock = callbackBuilder;
+    }
+        /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
+    ctx.pushBlockBuilder(targetBlock);
+
+    targetBlock.append(
         Stmt.create().declareFinalVariable("async", AsyncBeanContext.class,
             Stmt.create().newObject(AsyncBeanContext.class))
     );
-
-    /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */
-    ctx.pushBlockBuilder(callbackBuilder);
 
     /* get a new unique variable for the creational callback */
     creationalCallbackVarName = InjectUtil.getNewInjectorName().concat("_")
@@ -172,7 +183,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
 
         injectContext.addBeanReference(type, beanRef);
 
-        callbackBuilder.append(Stmt.loadVariable("async").invoke("runOnFinish", finishedCallback));
+        targetBlock.append(Stmt.loadVariable("async").invoke("runOnFinish", finishedCallback));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
@@ -183,30 +194,29 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     return the instance of the bean from the creational callback.
     */
 
-    callbackBuilder._(Stmt.loadVariable("async").invoke("finish"));
+    targetBlock._(Stmt.loadVariable("async").invoke("finish"));
 
     /* pop the block builder of the stack now that we're done wiring. */
     ctx.popBlockBuilder();
 
+    if (loadAsync) {
+      final ObjectBuilder objectBuilder = targetBlock.finish().finish();
+
+      final String frameworkOrSystemProperty
+          = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.testing.simulated_loadasync_latency");
+      if (Boolean.parseBoolean(frameworkOrSystemProperty)) {
+        callbackBuilder.append(Stmt.invokeStatic(FakeGWT.class, "runAsync", objectBuilder));
+      }
+      else {
+        callbackBuilder.append(Stmt.invokeStatic(GWT.class, "runAsync", objectBuilder));
+      }
+    }
     /*
-    declare a final variable for the BeanProvider and initialize it with the anonymous class we just
-    built.
+      declare a final variable for the BeanProvider and initialize it with the anonymous class we just
+      built.
     */
-
-    final ObjectBuilder objectBuilder = callbackBuilder.finish().finish();
-
-    final String frameworkOrSystemProperty
-        = EnvUtil.getEnvironmentConfig().getFrameworkOrSystemProperty("errai.ioc.testing.simulated_loadasync_latency");
-    if (Boolean.parseBoolean(frameworkOrSystemProperty)) {
-      callbackBuilder_.append(Stmt.invokeStatic(FakeGWT.class, "runAsync", objectBuilder));
-    }
-    else {
-      callbackBuilder_.append(Stmt.invokeStatic(GWT.class, "runAsync", objectBuilder));
-    }
-
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, beanProviderClassRef).modifiers(Modifier.Final)
-        .initializesWith(callbackBuilder_.finish().finish()).finish();
-
+        .initializesWith(callbackBuilder.finish().finish()).finish();
 
     if (isSingleton()) {
       registerWithBeanManager(injectContext, Stmt.load(true));

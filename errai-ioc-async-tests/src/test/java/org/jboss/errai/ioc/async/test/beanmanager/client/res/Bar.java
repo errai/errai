@@ -1,11 +1,14 @@
 package org.jboss.errai.ioc.async.test.beanmanager.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
+@LoadAsync
 public class Bar {
   @Inject Foo foo;
   @Inject BazTheSingleton bazTheSingleton;

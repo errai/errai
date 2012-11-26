@@ -16,11 +16,14 @@
 
 package org.jboss.errai.ioc.async.test.scopes.dependent.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
+@LoadAsync
 public class DependentScopedBeanWithDependencies {
   private DependentScopedBean bean;
 
