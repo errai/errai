@@ -1,5 +1,9 @@
 package org.jboss.errai.ui.nav.client.local;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
@@ -7,6 +11,7 @@ import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -46,6 +51,15 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertNull(page.getBoxedFloatThing());
     assertNull(page.getBoxedDoubleThing());
     assertNull(page.getBoxedBoolThing());
+
+    assertNotNull(page.getStringCollection());
+    assertNotNull(page.getStringList());
+    assertNotNull(page.getStringSet());
+    assertNotNull(page.getIntList());
+    assertTrue(page.getStringCollection().isEmpty());
+    assertTrue(page.getStringList().isEmpty());
+    assertTrue(page.getStringSet().isEmpty());
+    assertTrue(page.getIntList().isEmpty());
   }
 
   /**
@@ -74,6 +88,18 @@ public class PageStateTest extends AbstractErraiCDITest {
             .put("boxedFloatThing", "1.2")
             .put("boxedDoubleThing", "1.23")
             .put("boxedBoolThing", "true")
+            .put("stringList", "0")
+            .put("stringList", "1")
+            .put("stringList", "0")
+            .put("stringSet", "0")
+            .put("stringSet", "1")
+            .put("stringSet", "0")
+            .put("stringCollection", "0")
+            .put("stringCollection", "1")
+            .put("stringCollection", "0")
+            .put("intList", "0")
+            .put("intList", "1")
+            .put("intList", "0")
             .build());
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>of());
@@ -103,6 +129,18 @@ public class PageStateTest extends AbstractErraiCDITest {
             .put("boxedFloatThing", "1.2")
             .put("boxedDoubleThing", "1.23")
             .put("boxedBoolThing", "true")
+            .put("stringList", "0")
+            .put("stringList", "1")
+            .put("stringList", "0")
+            .put("stringSet", "0")
+            .put("stringSet", "1")
+            .put("stringSet", "0")
+            .put("stringCollection", "0")
+            .put("stringCollection", "1")
+            .put("stringCollection", "0")
+            .put("intList", "0")
+            .put("intList", "1")
+            .put("intList", "0")
             .build();
 
     navigation.goTo(PageWithExtraState.class, stateValues);
@@ -126,9 +164,23 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(Double.valueOf("1.23"), page.getBoxedDoubleThing(), 0.0);
     assertEquals(Boolean.TRUE, page.getBoxedBoolThing());
 
+    assertEquals(Arrays.asList("0", "1", "0"), page.getStringList());
+    assertEquals(Arrays.asList("0", "1", "0"), page.getStringCollection());
+    assertEquals(new HashSet<String>(Arrays.asList("0", "1", "0")), page.getStringSet());
+    assertEquals(Arrays.asList(0, 1, 0), page.getIntList());
+
     // finally, ensure getState() properly reconstitutes the map we started with
     PageNode<PageWithExtraState> pageNode = navigation.getNavGraph().getPage(PageWithExtraState.class);
-    assertEquals(stateValues, ImmutableMultimap.copyOf(pageNode.getState(page)));
+    Multimap<String, String> refetchedState = pageNode.getState(page);
+    Multimap<String, String> expectedState = ArrayListMultimap.create(stateValues);
+
+    // the set loses an entry during conversion (that's correct behaviour); test it separately
+    Set<String> expectedSet = new HashSet<String>(expectedState.removeAll("stringSet"));
+    Set<String> actualSet = new HashSet<String>(refetchedState.removeAll("stringSet"));
+    assertEquals(expectedSet, actualSet);
+
+    // and everything that remains should come out identically
+    assertEquals(expectedState, refetchedState);
   }
 
   /**

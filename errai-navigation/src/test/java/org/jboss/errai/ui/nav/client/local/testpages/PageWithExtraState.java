@@ -1,5 +1,11 @@
 package org.jboss.errai.ui.nav.client.local.testpages;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.ui.nav.client.local.Page;
@@ -31,7 +37,13 @@ public class PageWithExtraState extends SimplePanel {
   @PageState private Float   boxedFloatThing;
   @PageState private Boolean boxedBoolThing;
 
-  // TODO include fields for all the types we want to support
+  // all supported collection types, of String
+  @PageState private Collection<String> stringCollection = new ArrayList<String>();
+  @PageState private List<String> stringList = new ArrayList<String>();
+  @PageState private Set<String> stringSet = new HashSet<String>();
+
+  // random spot check to ensure collections of a numeric type work
+  @PageState private List<Integer> intList = new ArrayList<Integer>();
 
   public String getStringThing() {
     return stringThing;
@@ -92,4 +104,21 @@ public class PageWithExtraState extends SimplePanel {
   public Boolean getBoxedBoolThing() {
     return boxedBoolThing;
   }
+
+  public Collection<String> getStringCollection() {
+    return stringCollection;
+  }
+
+  public List<String> getStringList() {
+    return stringList;
+  }
+
+  public Set<String> getStringSet() {
+    return stringSet;
+  }
+
+  public List<Integer> getIntList() {
+    return intList;
+  }
+
 }

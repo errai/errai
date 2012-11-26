@@ -58,6 +58,14 @@
          <scope>provided</scope>
       </dependency>
 
+      <!-- Utility methods from Errai Marshalling are required at GWT compile (rebind) time -->
+      <dependency>
+         <groupId>org.jboss.errai</groupId>
+         <artifactId>errai-marshalling</artifactId>
+         <version>${project.version}</version>
+         <scope>provided</scope>
+      </dependency>
+
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava-gwt</artifactId>

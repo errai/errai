@@ -6,8 +6,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -35,15 +37,16 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -197,16 +200,26 @@ public class NavigationGraphGenerator extends Generator {
             Parameter.of(pageClass, "widget"))
             .body();
 
-    method.append(Stmt.declareVariable("state", Stmt.invokeStatic(HashMultimap.class, "create")));
+    method.append(Stmt.declareVariable("state", Stmt.invokeStatic(ArrayListMultimap.class, "create")));
 
     for (MetaField field : pageStateFields) {
-      // XXX use getters when possible? would be more consistent with other Errai modules...
-      // FIXME convert everything to strings
       PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Read, "jsni", pageImplBuilder, field, new Modifier[] {});
       String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
       Statement actualFieldValueStmt = Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"));
-      Statement putFieldValueInMap = Stmt.loadVariable("state")
-              .invoke("put", field.getName(), paramToStringStatement(field.getType(), actualFieldValueStmt));
+      Statement putFieldValueInMap;
+
+      if (field.getType().isAssignableTo(Collection.class)) {
+        MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(field.getType());
+
+        putFieldValueInMap = Stmt.nestedCall(actualFieldValueStmt).foreach("elem", Object.class)
+                .append(Stmt.loadVariable("state")
+                        .invoke("put", field.getName(), paramToStringStatement(elementType, Stmt.loadVariable("elem"))))
+                .finish();
+      }
+      else {
+        putFieldValueInMap = Stmt.loadVariable("state")
+                .invoke("put", field.getName(), paramToStringStatement(field.getType(), actualFieldValueStmt));
+      }
 
       if (field.getType().isPrimitive()) {
         // no null check. just do it.
@@ -234,18 +247,44 @@ public class NavigationGraphGenerator extends Generator {
       PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field, new Modifier[] {});
       String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
 
-      // XXX use setters when possible? would be more consistent with other Errai modules...
-      // TODO perform type coercion
-      if (field.getType().isAssignableTo(Collection.class)) {
-        throw new UnsupportedOperationException("not implemented yet"); //TODO
+      MetaClass erasedFieldType = field.getType().getErased();
+      if (erasedFieldType.isAssignableTo(Collection.class)) {
+        MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(field.getType());
+        if (elementType == null) {
+          throw new UnsupportedOperationException(
+                  "Found a @PageState field with a Collection type but without a concrete type parameter. " +
+                  "Collection-typed @PageState fields must specify a concrete type parameter.");
+        }
+        if (erasedFieldType.equals(MetaClassFactory.get(Set.class))) {
+          method.append(Stmt.declareVariable(field.getName(), Stmt.newObject(HashSet.class)));
+        }
+        else if (erasedFieldType.equals(MetaClassFactory.get(List.class))
+                || erasedFieldType.equals(MetaClassFactory.get(Collection.class))) {
+          method.append(Stmt.declareVariable(field.getName(), Stmt.newObject(ArrayList.class)));
+        }
+        else {
+          throw new UnsupportedOperationException(
+                  "Found a @PageState field which is a collection of type " + erasedFieldType.getFullyQualifiedName() +
+                  ". For collection-valued fields, only the exact types java.util.Collection, java.util.Set, and " +
+                  "java.util.List are supported at this time.");
+        }
+
+        // for (String fv{idx} : state.get({fieldName}))
+        method.append(
+          Stmt.loadVariable("state").invoke("get", field.getName()).foreach("elem", Object.class)
+            .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
+            .append(Stmt.loadVariable(field.getName()).invoke("add", paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
+            .finish()
+          );
+        method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.loadVariable(field.getName())));
       }
       else {
         method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("get", field.getName())));
         method.append(
           If.cond(Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
-              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), defaultValueStatement(field.getType()))).finish()
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), defaultValueStatement(erasedFieldType))).finish()
             .else_()
-              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), paramFromStringStatement(field.getType(), Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next"))))
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), paramFromStringStatement(erasedFieldType, Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next"))))
               .finish()
           );
       }
