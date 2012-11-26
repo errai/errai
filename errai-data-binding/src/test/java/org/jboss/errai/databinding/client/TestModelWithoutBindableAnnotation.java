@@ -17,13 +17,14 @@
 package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.junit.Ignore;
 
 /**
  * Simple bindable model for testing purposes (needs to be configured as bindable type in ErraiApp.properties).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Portable
+@Portable @Ignore
 public class TestModelWithoutBindableAnnotation {
 
   private String value;

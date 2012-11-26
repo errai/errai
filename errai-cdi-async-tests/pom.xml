@@ -25,17 +25,20 @@
 
 
   <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <weld.version>1.1.6.Final</weld.version>
-      <jetty.version>6.1.25</jetty.version>
-      <slf4j.version>1.6.1</slf4j.version>
-      <validation.api.version>1.0.0.GA</validation.api.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <weld.version>1.1.6.Final</weld.version>
+    <jetty.version>6.1.25</jetty.version>
+    <slf4j.version>1.6.1</slf4j.version>
+    <validation.api.version>1.0.0.GA</validation.api.version>
   </properties>
 
 
   <profiles>
     <profile>
       <id>integration-test</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <properties>
         <profile.testOutputDirectory>war/WEB-INF/classes</profile.testOutputDirectory>
       </properties>
