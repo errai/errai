@@ -32,6 +32,7 @@ import org.jboss.errai.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.codegen.builder.callstack.LoadField;
 import org.jboss.errai.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.codegen.builder.callstack.ReturnValue;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 
@@ -80,6 +81,11 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
 
   @Override
   public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType) {
+    return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
+  }
+
+  @Override
+  public BlockBuilder<StatementEnd> foreach(String loopVarName, MetaClass loopVarType) {
     return new LoopBuilderImpl(context, callElementBuilder).foreach(loopVarName, loopVarType);
   }
 
@@ -158,10 +164,10 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     appendCallElement(new AssignVariable(operator, statement));
     return this;
   }
-  
+
   @Override
   public String toString() {
     return "[Statement:" + callElementBuilder + "]";
-    
+
   }
 }
