@@ -3,7 +3,9 @@ package org.jboss.errai.ui.nav.client.local;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ui.nav.client.local.testpages.PageA;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedLifecycleMethods;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLifecycleMethods;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithPageShowingHistoryTokenMethod;
 
@@ -47,6 +49,24 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals(0, page.beforeHideCallCount);
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String, String>of());
+    assertEquals(1, page.beforeHideCallCount);
+  }
+
+  public void testPageWithInheritedLifecycleMethods() throws Exception {
+    PageWithInheritedLifecycleMethods page = beanManager.lookupBean(PageWithInheritedLifecycleMethods.class).getInstance();
+    page.beforeShowCallCount = 0;
+    page.beforeHideCallCount = 0;
+
+    navigation.goTo(PageWithInheritedLifecycleMethods.class, ImmutableMultimap.of("state", "inheritedfoo"));
+
+    assertEquals(1, page.beforeShowCallCount);
+    assertEquals(0, page.beforeHideCallCount);
+    //assertEquals("inheritedfoo", page.stateWhenBeforeShowWasCalled);
+
+    // navigate away to test for pageHiding()
+    navigation.goTo(PageA.class, ImmutableMultimap.<String,String>of());
+
+    assertEquals(1, page.beforeShowCallCount);
     assertEquals(1, page.beforeHideCallCount);
   }
 
