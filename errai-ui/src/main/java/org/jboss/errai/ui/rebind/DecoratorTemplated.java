@@ -236,7 +236,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
             + declaringClass.getFullyQualifiedName()
             + "] must have exactly one parameter of a type extending either ["
-            + DomEvent.class.getName() + "] or [" + NativeEvent.class.getName() + "]" );
+            + DomEvent.class.getName() + "] or [" + NativeEvent.class.getName() + "]." );
       }
 
       if (eventType.isAssignableTo(Event.class)) {
@@ -343,6 +343,12 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
         for (String name : targetDataFieldNames) {
           MetaClass dataFieldType = dataFieldTypes.get(name);
+          
+          if (dataFieldType == null) {
+            throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
+                + declaringClass.getFullyQualifiedName()
+                + "] handles a GWT event type but the specified @DataField [" + name + "] was not found.");
+          }
 
           if (processedNativeHandlers.contains(name)) {
             throw new GenerationException(

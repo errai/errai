@@ -155,6 +155,10 @@ public final class TemplateUtil {
   public static void setupNativeEventListener(Composite component, Element element, EventListener listener,
           int eventsToSink) {
 
+    if (element == null) {
+      throw new RuntimeException("A native event source was specified in " + component.getClass().getName()
+          + " but the corresponding data-field does not exist!");
+    }
     DOM.setEventListener((com.google.gwt.user.client.Element) element, listener);
     DOM.sinkEvents((com.google.gwt.user.client.Element) element, eventsToSink);
   }
