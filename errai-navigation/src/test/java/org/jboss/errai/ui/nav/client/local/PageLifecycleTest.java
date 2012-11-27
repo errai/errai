@@ -54,20 +54,20 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
 
   public void testPageWithInheritedLifecycleMethods() throws Exception {
     PageWithInheritedLifecycleMethods page = beanManager.lookupBean(PageWithInheritedLifecycleMethods.class).getInstance();
-    page.beforeShowCallCount = 0;
-    page.beforeHideCallCount = 0;
+    page.beforePageShowCallCount = 0;
+    page.beforePageHideCallCount = 0;
 
-    navigation.goTo(PageWithInheritedLifecycleMethods.class, ImmutableMultimap.of("state", "inheritedfoo"));
+    navigation.goTo(PageWithInheritedLifecycleMethods.class, ImmutableMultimap.of("inheritedState", "inheritedfoo"));
 
-    assertEquals(1, page.beforeShowCallCount);
-    assertEquals(0, page.beforeHideCallCount);
-    //assertEquals("inheritedfoo", page.stateWhenBeforeShowWasCalled);
+    assertEquals(1, page.beforePageShowCallCount);
+    assertEquals(0, page.beforePageHideCallCount);
+    assertEquals("inheritedfoo", page.stateWhenBeforeShowWasCalled);
 
     // navigate away to test for pageHiding()
     navigation.goTo(PageA.class, ImmutableMultimap.<String,String>of());
 
-    assertEquals(1, page.beforeShowCallCount);
-    assertEquals(1, page.beforeHideCallCount);
+    assertEquals(1, page.beforePageShowCallCount);
+    assertEquals(1, page.beforePageHideCallCount);
   }
 
   public void testPageShowingMethodWithHistoryTokenParam() throws Exception {

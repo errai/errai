@@ -7,6 +7,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedState;
 
 import com.google.common.collect.ImmutableMultimap;
 
@@ -164,6 +165,12 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(Arrays.asList(0, 1, 0), page.getIntList());
   }
 
+  public void testInheritedStateFieldsAreWritten() throws Exception {
+    PageWithInheritedState page = beanManager.lookupBean(PageWithInheritedState.class).getInstance();
+    assertNull(page.getMyState());
+    navigation.goTo(PageWithInheritedState.class, ImmutableMultimap.of("inheritedState", "inherit this!"));
+    assertEquals("inherit this!", page.getMyState());
+  }
   /**
    * If there are multiple values for the same key, but the corresponding
    * {@code @PageState} field in the page is not a collection, the field should

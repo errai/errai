@@ -183,15 +183,8 @@ public class NavigationGraphGenerator extends Generator {
             .append(Stmt.nestedCall(Refs.get("bm"))
                     .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish();
 
-    List<MetaField> pageStateFields = new ArrayList<MetaField>();
-    for (MetaField field : pageClass.getFields()) {
-      if (field.isAnnotationPresent(PageState.class)) {
-        pageStateFields.add(field);
-      }
-    }
-
     appendPageHidingMethod(pageImplBuilder, pageClass);
-    appendPageShowingMethod(pageImplBuilder, pageClass, pageStateFields);
+    appendPageShowingMethod(pageImplBuilder, pageClass);
 
     return pageImplBuilder.finish();
   }
@@ -238,14 +231,14 @@ public class NavigationGraphGenerator extends Generator {
     method.finish();
   }
 
-  private void appendPageShowingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
+  private void appendPageShowingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
     BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "pageShowing",
             Parameter.of(pageClass, "widget"),
             Parameter.of(HistoryToken.class, "state"))
             .body();
 
     int idx = 0;
-    for (MetaField field : pageStateFields) {
+    for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
       PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field, new Modifier[] {});
       String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
 

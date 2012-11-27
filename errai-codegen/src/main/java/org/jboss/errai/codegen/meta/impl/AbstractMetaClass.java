@@ -393,6 +393,22 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return Collections.unmodifiableList(methods); // in case we want to cache this in the future
   }
 
+  // docs inherited from superclass
+  @Override
+  public final List<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
+    final List<MetaField> fields = new ArrayList<MetaField>();
+    MetaClass scanTarget = this;
+    while (scanTarget != null) {
+      for (final MetaField m : scanTarget.getDeclaredFields()) {
+        if (m.isAnnotationPresent(annotation)) {
+          fields.add(m);
+        }
+      }
+      scanTarget = scanTarget.getSuperClass();
+    }
+    return Collections.unmodifiableList(fields); // in case we want to cache this in the future
+  }
+
   public T getEnclosedMetaObject() {
     return enclosedMetaObject;
   }
@@ -732,7 +748,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         if (readMethod != null) {
           return readMethod.getReturnType();
         }
-        
+
         return getWriteMethodForProperty(propertyName).getParameters()[0].getType();
       }
     };
