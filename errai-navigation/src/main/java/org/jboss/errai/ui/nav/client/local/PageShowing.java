@@ -12,14 +12,16 @@ import java.lang.annotation.Target;
  * panel: after the widget's {@code @PageState} fields have been updated and
  * before it is displayed in the navigation content panel.
  * <p>
- * The target method is permitted two kinds of arguments, both optional: a
- * {@code String}-typed argument will receive the entire unparsed history token
- * that caused this page to display; a {@link HistoryToken}-typed argument will
- * receive the parsed version of the same information.
+ * The target method is permitted an optional parameter of type
+ * {@link HistoryToken}. If the parameter is present, the framework will pass in
+ * the history token that caused the page to show. This is useful in cases where
+ * not all history token key names are known at compile time, so
+ * {@code @PageState} fields can't be declared to accept their values.
  * <p>
  * The target method's return type must be {@code void}.
  * <p>
- * The target method can have any access type: public, protected, default, or private.
+ * The target method can have any access type: public, protected, default, or
+ * private.
  * <p>
  * If the target method throws an exception when called, behaviour is undefined.
  *

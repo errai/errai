@@ -25,7 +25,7 @@ import com.google.gwt.http.client.URL;
 public class HistoryToken {
 
   private final String pageName;
-  private final Multimap<String, String> state;
+  private final ImmutableMultimap<String, String> state;
 
   private HistoryToken(String pageName, ImmutableMultimap<String, String> state) {
     this.pageName = Assert.notNull(pageName);
@@ -91,6 +91,10 @@ public class HistoryToken {
     return new HistoryToken(URL.decodePathSegment(pageName.toString()), builder.build());
   }
 
+  /**
+   * Returns this history token's name and state parameters in the format that
+   * can be parsed by {@link #parse(String)}.
+   */
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -117,4 +121,39 @@ public class HistoryToken {
   public Multimap<String, String> getState() {
     return state;
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((pageName == null) ? 0 : pageName.hashCode());
+    result = prime * result + ((state == null) ? 0 : state.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    HistoryToken other = (HistoryToken) obj;
+    if (pageName == null) {
+      if (other.pageName != null)
+        return false;
+    }
+    else if (!pageName.equals(other.pageName))
+      return false;
+    if (state == null) {
+      if (other.state != null)
+        return false;
+    }
+    else if (!state.equals(other.state))
+      return false;
+    return true;
+  }
+
+
 }

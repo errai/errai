@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -27,6 +25,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Bool;
@@ -39,6 +38,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageHiding;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
@@ -49,7 +49,6 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -242,7 +241,7 @@ public class NavigationGraphGenerator extends Generator {
   private void appendPageShowingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
     BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "pageShowing",
             Parameter.of(pageClass, "widget"),
-            Parameter.of(MetaClassFactory.get(new TypeLiteral<Multimap<String,String>>() {}), "state"))
+            Parameter.of(HistoryToken.class, "state"))
             .body();
 
     int idx = 0;
@@ -274,7 +273,7 @@ public class NavigationGraphGenerator extends Generator {
 
         // for (String fv{idx} : state.get({fieldName}))
         method.append(
-          Stmt.loadVariable("state").invoke("get", field.getName()).foreach("elem", Object.class)
+          Stmt.loadVariable("state").invoke("getState").invoke("get", field.getName()).foreach("elem", Object.class)
             .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
             .append(Stmt.loadVariable(field.getName()).invoke("add", paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
             .finish()
@@ -282,7 +281,7 @@ public class NavigationGraphGenerator extends Generator {
         method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.loadVariable(field.getName())));
       }
       else {
-        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("get", field.getName())));
+        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("getState").invoke("get", field.getName())));
         method.append(
           If.cond(Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
               .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), defaultValueStatement(erasedFieldType))).finish()
@@ -300,8 +299,31 @@ public class NavigationGraphGenerator extends Generator {
               "A @Page can have at most 1 @PageShowing method, but " + pageClass + " has " + pageShowingMethods.size());
     }
     for (MetaMethod pageShowingMethod : pageShowingMethods) {
+      if (!pageShowingMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
+        throw new UnsupportedOperationException(
+                "@PageShowing methods must have a void return type, but " +
+                pageShowingMethod.getDeclaringClass().getFullyQualifiedName() + "." + pageShowingMethod.getName() +
+                " returns " + pageShowingMethod.getReturnType().getFullyQualifiedName());
+      }
+
+      // assemble parameters for private method invoker (first param is the widget instance)
       PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, pageShowingMethod, new Modifier[] {});
-      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(pageShowingMethod), Stmt.loadVariable("widget")));
+      Object[] paramValues = new Object[pageShowingMethod.getParameters().length + 1];
+      paramValues[0] = Stmt.loadVariable("widget");
+
+      for (int i = 1; i < paramValues.length; i++) {
+        MetaParameter paramSpec = pageShowingMethod.getParameters()[i - 1];
+        if (paramSpec.getType().equals(MetaClassFactory.get(HistoryToken.class))) {
+          paramValues[i] = Stmt.loadVariable("state");
+        }
+        else {
+          throw new UnsupportedOperationException(
+                  "@PageShowing method " +
+                  pageShowingMethod.getDeclaringClass().getFullyQualifiedName() + "." + pageShowingMethod.getName() +
+                  " has an illegal parameter of type " + paramSpec.getType().getFullyQualifiedName());
+        }
+      }
+      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(pageShowingMethod), paramValues));
     }
 
     method.finish();

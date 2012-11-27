@@ -1,5 +1,6 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
+import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
 import com.google.common.collect.Multimap;
@@ -54,7 +55,7 @@ public interface PageNode<W extends Widget> {
    *          the state of the page, parsed from the history token on the URL.
    *          Never null.
    */
-  public void pageShowing(W widget, Multimap<String,String> state);
+  public void pageShowing(W widget, HistoryToken state);
 
   /**
    * Called by the framework when this page node is about to be displayed

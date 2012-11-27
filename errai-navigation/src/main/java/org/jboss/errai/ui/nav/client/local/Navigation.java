@@ -31,19 +31,11 @@ public class Navigation {
 
   protected PageNode<Widget> currentPage;
 
-  /**
-   * An interlock that prevents our history listener from doing its normal thing
-   * while we rewrite history.
-   */
-  private boolean rewriteInProgress;
-
   @PostConstruct
   private void init() {
     History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
       public void onValueChange(ValueChangeEvent<String> event) {
-
-        if (rewriteInProgress) return;
 
         HistoryToken token = HistoryToken.parse(event.getValue());
         PageNode<Widget> toPage = navGraph.getPage(token.getPageName());
@@ -51,7 +43,7 @@ public class Navigation {
           GWT.log("Got invalid page name \"" + token.getPageName() + "\" in URL history token. Falling back to default page.");
           toPage = navGraph.getPage(""); // guaranteed at compile time to exist
         }
-        show(toPage, token.getState());
+        show(toPage, token);
 
       }
     });
@@ -72,11 +64,12 @@ public class Navigation {
    * @param state
    *          The state information to set on the page node before showing it.
    *          Normally the map keys correspond with the names of fields
-   *          annotated with {@code @PageState} in the widget class.
+   *          annotated with {@code @PageState} in the widget class, but this is
+   *          not required.
    */
   public <W extends Widget> void goTo(Class<W> toPage, Multimap<String,String> state) {
     PageNode<W> toPageInstance = navGraph.getPage(toPage);
-    show(toPageInstance, state);
+    show(toPageInstance, HistoryToken.of(toPageInstance.name(), state));
     History.newItem(toPageInstance.name(), false); // TODO needs to be full history token
   }
 
@@ -93,14 +86,20 @@ public class Navigation {
    *          navigation graph, or later navigation back to {@code toPage} will
    *          fail.
    * @param state
-   *          The state information to set on the page node before showing it.
-   *          Normally the map keys correspond with the names of fields
-   *          annotated with {@code @PageState} in the widget class.
+   *          The state information to pass to the page node before showing it.
    */
-  private <W extends Widget> void show(PageNode<W> toPage, Multimap<String,String> state) {
+  private <W extends Widget> void show(PageNode<W> toPage, HistoryToken state) {
 
     if (currentPage != null) {
-      currentPage.pageHiding(contentPanel.getWidget());
+      Widget currentWidget = contentPanel.getWidget();
+      if (currentWidget == null) {
+        // this could happen if someone was manipulating the DOM behind our backs
+        GWT.log("Current widget vanished from navigation content panel. " +
+                "Not delivering pageHiding event to " + currentPage + ".");
+      }
+      else {
+        currentPage.pageHiding(currentWidget);
+      }
     }
 
     W widget = toPage.content();

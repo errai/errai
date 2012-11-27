@@ -5,6 +5,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithLifecycleMethods;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithPageShowingHistoryTokenMethod;
 
 import com.google.common.collect.ImmutableMultimap;
 
@@ -49,7 +50,15 @@ public class PageLifecycleTest extends AbstractErraiCDITest {
     assertEquals(1, page.beforeHideCallCount);
   }
 
-  public void testPageShowingMethodWithStringParam() throws Exception {
+  public void testPageShowingMethodWithHistoryTokenParam() throws Exception {
+    PageWithPageShowingHistoryTokenMethod page = beanManager.lookupBean(PageWithPageShowingHistoryTokenMethod.class).getInstance();
+    assertNull(page.mostRecentStateToken);
+    assertEquals(0, page.beforeShowCallCount);
 
+    navigation.goTo(PageWithPageShowingHistoryTokenMethod.class, ImmutableMultimap.of("state", "footastic"));
+    assertEquals(1, page.beforeShowCallCount);
+
+    HistoryToken expectedToken = HistoryToken.of("PageWithPageShowingHistoryTokenMethod", ImmutableMultimap.of("state", "footastic"));
+    assertEquals(expectedToken, page.mostRecentStateToken);
   }
 }
