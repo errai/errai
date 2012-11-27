@@ -75,6 +75,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.resources.client.ClientBundle;
@@ -229,7 +230,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             + declaringClass.getFullyQualifiedName()
             + "." + method.getName() + "] must specify at least one data-field target.");
       }
-      MetaClass eventType = method.getParameters()[0].getType();
+      
+      MetaClass eventType = (method.getParameters().length == 1) ? method.getParameters()[0].getType() : null;
+      if (eventType == null || (!eventType.isAssignableTo(Event.class)) && !eventType.isAssignableTo(DomEvent.class)) {
+        throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
+            + declaringClass.getFullyQualifiedName()
+            + "] must have exactly one parameter of a type extending either ["
+            + DomEvent.class.getName() + "] or [" + NativeEvent.class.getName() + "]" );
+      }
 
       if (eventType.isAssignableTo(Event.class)) {
         /*
@@ -301,14 +309,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         /*
          * We have a GWT Widget type
          */
-        if (method.getParameters().length != 1
-            || !method.getParameters()[0].getType().isAssignableTo(DomEvent.class)) {
-          throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
-              + declaringClass.getFullyQualifiedName()
-              + "] must have at least one parameter of a type extending ["
-              + DomEvent.class.getName() + "]");
-        }
-
         MetaClass handlerType;
         try {
           handlerType = getHandlerForEvent(eventType);
