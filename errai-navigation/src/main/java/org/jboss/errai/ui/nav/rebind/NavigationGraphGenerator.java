@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Bool;
@@ -39,12 +40,13 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageHiding;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
@@ -189,55 +191,56 @@ public class NavigationGraphGenerator extends Generator {
       }
     }
 
-    appendGetStateMethod(pageImplBuilder, pageClass, pageStateFields);
-    appendPutStateMethod(pageImplBuilder, pageClass, pageStateFields);
+    appendPageHidingMethod(pageImplBuilder, pageClass);
+    appendPageShowingMethod(pageImplBuilder, pageClass, pageStateFields);
 
     return pageImplBuilder.finish();
   }
 
-  private void appendGetStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
-    BlockBuilder<?> method = pageImplBuilder.publicMethod(Multimap.class, "getState",
+  /**
+   * Appends the method that calls the {@code @PageHiding} method of the widget.
+   *
+   * @param pageImplBuilder
+   *          The class builder for the implementation of PageNode we are adding
+   *          the method to.
+   * @param pageClass
+   *          The "content type" (Widget subclass) of the page. This is the type
+   *          the user annotated with {@code @Page}.
+   */
+  private void appendPageHidingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
+
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "pageHiding",
             Parameter.of(pageClass, "widget"))
             .body();
 
-    method.append(Stmt.declareVariable("state", Stmt.invokeStatic(ArrayListMultimap.class, "create")));
-
-    for (MetaField field : pageStateFields) {
-      PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Read, "jsni", pageImplBuilder, field, new Modifier[] {});
-      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
-      Statement actualFieldValueStmt = Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"));
-      Statement putFieldValueInMap;
-
-      if (field.getType().isAssignableTo(Collection.class)) {
-        MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(field.getType());
-
-        putFieldValueInMap = Stmt.nestedCall(actualFieldValueStmt).foreach("elem", Object.class)
-                .append(Stmt.loadVariable("state")
-                        .invoke("put", field.getName(), paramToStringStatement(elementType, Stmt.loadVariable("elem"))))
-                .finish();
-      }
-      else {
-        putFieldValueInMap = Stmt.loadVariable("state")
-                .invoke("put", field.getName(), paramToStringStatement(field.getType(), actualFieldValueStmt));
-      }
-
-      if (field.getType().isPrimitive()) {
-        // no null check. just do it.
-        method.append(putFieldValueInMap);
-      }
-      else {
-        // need null check; leave nulls out of map
-        method.append(Stmt.if_(Bool.isNotNull(actualFieldValueStmt))
-                .append(putFieldValueInMap)
-                .finish());
-      }
+    List<MetaMethod> pageHidingMethods = pageClass.getMethodsAnnotatedWith(PageHiding.class);
+    if (pageHidingMethods.size() > 1) {
+      throw new UnsupportedOperationException(
+              "A @Page can have at most 1 @PageHiding method, but " + pageClass + " has " + pageHidingMethods.size());
     }
-    method.append(Stmt.loadVariable("state").returnValue());
+    for (MetaMethod pageHidingMethod : pageHidingMethods) {
+      if (!pageHidingMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
+        throw new UnsupportedOperationException(
+                "@PageHiding methods must have a void return type, but " +
+                pageHidingMethod.getDeclaringClass().getFullyQualifiedName() + "." + pageHidingMethod.getName() +
+                " returns " + pageHidingMethod.getReturnType().getFullyQualifiedName());
+      }
+      if (pageHidingMethod.getParameters().length != 0) {
+        throw new UnsupportedOperationException(
+                "@PageHiding methods cannot take parameters, but " +
+                pageHidingMethod.getDeclaringClass().getFullyQualifiedName() + "." + pageHidingMethod.getName() +
+                " does.");
+      }
+
+      PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, pageHidingMethod, new Modifier[] {});
+      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(pageHidingMethod), Stmt.loadVariable("widget")));
+    }
+
     method.finish();
   }
 
-  private void appendPutStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
-    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "putState",
+  private void appendPageShowingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "pageShowing",
             Parameter.of(pageClass, "widget"),
             Parameter.of(MetaClassFactory.get(new TypeLiteral<Multimap<String,String>>() {}), "state"))
             .body();
@@ -290,6 +293,17 @@ public class NavigationGraphGenerator extends Generator {
       }
       idx++;
     }
+
+    List<MetaMethod> pageShowingMethods = pageClass.getMethodsAnnotatedWith(PageShowing.class);
+    if (pageShowingMethods.size() > 1) {
+      throw new UnsupportedOperationException(
+              "A @Page can have at most 1 @PageShowing method, but " + pageClass + " has " + pageShowingMethods.size());
+    }
+    for (MetaMethod pageShowingMethod : pageShowingMethods) {
+      PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, pageShowingMethod, new Modifier[] {});
+      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(pageShowingMethod), Stmt.loadVariable("widget")));
+    }
+
     method.finish();
   }
 
@@ -344,21 +358,6 @@ public class NavigationGraphGenerator extends Generator {
       fields.addAll(Arrays.asList(c.getDeclaredFields()));
     }
     return fields;
-  }
-
-  private static Statement paramToStringStatement(MetaClass fromType, Statement fromValue) {
-    if (fromType.isAssignableTo(String.class)) {
-      return Stmt.castTo(String.class, fromValue);
-    }
-    else if (fromType.asBoxed().isAssignableTo(Number.class)) {
-      return Stmt.invokeStatic(String.class, "valueOf", fromValue);
-    }
-    else if (fromType.asBoxed().isAssignableTo(Boolean.class)) {
-      return Stmt.invokeStatic(Boolean.class, "toString", fromValue);
-    }
-    else {
-      throw new UnsupportedOperationException("@PageState fields of type " + fromType.getFullyQualifiedName() + " are not supported");
-    }
   }
 
   private static Statement paramFromStringStatement(MetaClass toType, Statement stringValue) {

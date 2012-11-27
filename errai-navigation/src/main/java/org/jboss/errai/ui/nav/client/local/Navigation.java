@@ -11,7 +11,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -26,9 +25,17 @@ import com.google.gwt.user.client.ui.Widget;
 @ApplicationScoped
 public class Navigation {
 
-  private Panel contentPanel = new SimplePanel();
+  private SimplePanel contentPanel = new SimplePanel();
 
   private NavigationGraph navGraph = GWT.create(NavigationGraph.class);
+
+  protected PageNode<Widget> currentPage;
+
+  /**
+   * An interlock that prevents our history listener from doing its normal thing
+   * while we rewrite history.
+   */
+  private boolean rewriteInProgress;
 
   @PostConstruct
   private void init() {
@@ -36,24 +43,21 @@ public class Navigation {
       @Override
       public void onValueChange(ValueChangeEvent<String> event) {
 
-        // TODO what about backing up current history? we might already be "back" in the nav stack already
+        if (rewriteInProgress) return;
 
         HistoryToken token = HistoryToken.parse(event.getValue());
         PageNode<Widget> toPage = navGraph.getPage(token.getPageName());
-        Widget widget = toPage.content();
-        toPage.putState(widget, token.getState());
+        if (toPage == null) {
+          GWT.log("Got invalid page name \"" + token.getPageName() + "\" in URL history token. Falling back to default page.");
+          toPage = navGraph.getPage(""); // guaranteed at compile time to exist
+        }
+        show(toPage, token.getState());
 
-        contentPanel.clear();
-        contentPanel.add(widget);
       }
     });
 
-    HistoryToken initialToken = HistoryToken.parse(History.getToken());
-    PageNode<Widget> initialPage = navGraph.getPage(initialToken.getPageName());
-    if (initialPage == null) {
-      initialPage = navGraph.getPage(""); // Default page
-    }
-    goTo(initialPage, initialToken.getState());
+    // finally, we bootstrap the navigation system (this invokes the callback above)
+    History.fireCurrentHistoryState();
   }
 
   /**
@@ -72,12 +76,14 @@ public class Navigation {
    */
   public <W extends Widget> void goTo(Class<W> toPage, Multimap<String,String> state) {
     PageNode<W> toPageInstance = navGraph.getPage(toPage);
-    goTo(toPageInstance, state);
+    show(toPageInstance, state);
+    History.newItem(toPageInstance.name(), false); // TODO needs to be full history token
   }
 
   /**
-   * Sets the state on the given PageNode, then makes its widget visible in the
-   * content area.
+   * Captures a backup of the current page state in history, sets the state on
+   * the given PageNode from the given state token, then makes its widget
+   * visible in the content area.
    *
    * @param toPage
    *          The page node to display. Normally, the implementation of PageNode
@@ -91,16 +97,18 @@ public class Navigation {
    *          Normally the map keys correspond with the names of fields
    *          annotated with {@code @PageState} in the widget class.
    */
-  private <W extends Widget> void goTo(PageNode<W> toPage, Multimap<String,String> state) {
+  private <W extends Widget> void show(PageNode<W> toPage, Multimap<String,String> state) {
 
-    // TODO preserve state of current page
+    if (currentPage != null) {
+      currentPage.pageHiding(contentPanel.getWidget());
+    }
 
     W widget = toPage.content();
-    toPage.putState(widget, state);
+    toPage.pageShowing(widget, state);
 
     contentPanel.clear();
+    setCurrentPage(toPage);
     contentPanel.add(widget);
-    History.newItem(toPage.name(), false);
   }
 
   /**
@@ -123,5 +131,16 @@ public class Navigation {
   // should this method be public? should we expose a way to set the nav graph?
   NavigationGraph getNavGraph() {
     return navGraph;
+  }
+
+  /**
+   * Just sets the currentPage field. This method exists primarily to get around
+   * a generics Catch-22.
+   *
+   * @param currentPage the new value for currentPage.
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private void setCurrentPage(PageNode currentPage) {
+    this.currentPage = currentPage;
   }
 }

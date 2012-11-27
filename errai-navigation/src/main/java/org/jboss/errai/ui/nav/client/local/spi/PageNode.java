@@ -40,9 +40,34 @@ public interface PageNode<W extends Widget> {
    */
   public Class<W> contentType();
 
-  // XXX 1: maybe show() and hide() are better? thaw() and freeze()? start() and stop()?
-  // XXX 2: should this be a [Multi]Map that includes the parameter names from the template (rather than a List of just values?)
-  // TODO javadoc
-  public void putState(W widget, Multimap<String,String> state);
-  public Multimap<String,String> getState(W widget);
+  /**
+   * Called by the framework when this page node is about to be displayed in the
+   * navigation content panel.
+   * <p>
+   * If this method throws an exception when called, framework behaviour is
+   * undefined.
+   *
+   * @param widget
+   *          the widget instance that was just returned from a call to
+   *          {@link #content()}. Never null.
+   * @param state
+   *          the state of the page, parsed from the history token on the URL.
+   *          Never null.
+   */
+  public void pageShowing(W widget, Multimap<String,String> state);
+
+  /**
+   * Called by the framework when this page node is about to be displayed
+   * removed from the navigation content panel.
+   * <p>
+   * If this method returns null or throws an exception when called, framework
+   * behaviour is undefined.
+   *
+   * @param widget
+   *          the widget instance (which is currently in the navigation content
+   *          panel) that was previously used in the call to
+   *          {@link #pageShowing(Widget, Multimap)}. Never null.
+   */
+  public void pageHiding(W widget);
+
 }
