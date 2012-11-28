@@ -27,6 +27,7 @@ import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
 import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
+import org.jboss.errai.jpa.test.entity.CascadeFrom;
 import org.jboss.errai.jpa.test.entity.Format;
 import org.jboss.errai.jpa.test.entity.Genre;
 import org.jboss.errai.jpa.test.entity.StandaloneLifecycleListener;
@@ -758,4 +759,34 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNotNull(album.getId());
     assertEquals(String.valueOf(album.getId()), box.getText());
   }
+
+  public void testNullCollectionInEntity() throws Exception {
+    Artist artist = new Artist();
+    artist.setId(4433443L);
+    artist.setGenres(null);
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(artist);
+    em.flush();
+    em.detach(artist);
+
+    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    assertNotNull(fetchedArtist.getGenres());
+    assertEquals(0, fetchedArtist.getGenres().size());
+  }
+
+  public void testNullSingularReferenceInEntity() throws Exception {
+    CascadeFrom from = new CascadeFrom();
+    from.setAll(null);
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(from);
+    em.flush();
+    em.detach(from);
+
+    CascadeFrom fetchedFrom = em.find(CascadeFrom.class, Long.valueOf(from.getId()));
+    assertNull(fetchedFrom.getAll());
+  }
+
 }
