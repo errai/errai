@@ -88,6 +88,9 @@ public class TestModel {
   // this method is used to test property changes using non accessor methods
   public void activate() {
     this.active = true;
+    if (child != null) {
+      child.activate();
+    }
   }
 
   protected TestModel activate(boolean b) {

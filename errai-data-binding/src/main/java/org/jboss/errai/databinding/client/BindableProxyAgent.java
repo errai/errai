@@ -264,9 +264,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   void updateWidgetsAndFireEvents() {
     for (String boundProperty : bindings.keySet()) {
+      // we don't need to handle property chains here, since the nested binders/proxies take care of that
+      if (boundProperty.contains(".")) continue;
+      
       Object knownValue = knownValues.get(boundProperty);
+      
       Object actualValue = proxy.get(boundProperty);
-
       if ((knownValue == null && actualValue != null) ||
           (knownValue != null && !knownValue.equals(actualValue))) {
         updateWidgetAndFireEvents(boundProperty, knownValue, actualValue);
