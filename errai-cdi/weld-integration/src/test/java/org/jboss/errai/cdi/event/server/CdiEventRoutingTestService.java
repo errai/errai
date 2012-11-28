@@ -1,15 +1,15 @@
 package org.jboss.errai.cdi.event.server;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+
 import org.jboss.errai.cdi.client.event.FunEvent;
 import org.jboss.errai.cdi.client.event.FunFinishEvent;
 import org.jboss.errai.cdi.client.event.FunStartEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
 
 @ApplicationScoped
 public class CdiEventRoutingTestService {

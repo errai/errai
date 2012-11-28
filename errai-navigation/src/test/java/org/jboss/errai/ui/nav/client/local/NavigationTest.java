@@ -1,11 +1,10 @@
-package org.jboss.errai.ui.nav.test.client.local;
+package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
-import org.jboss.errai.ui.nav.test.client.local.testpages.CircularRef1;
-import org.jboss.errai.ui.nav.test.client.local.testpages.CircularRef2;
+import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
+import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 
 import com.google.gwt.core.client.GWT;
 
@@ -15,7 +14,7 @@ public class NavigationTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ui.nav.test.NavigationTest";
+    return "org.jboss.errai.ui.nav.NavigationTest";
   }
 
   @Override
@@ -35,19 +34,19 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testPageWithDefaultName() throws Exception {
-    PageNode pageA = navGraph.getPage("PageA");
+    PageNode<?> pageA = navGraph.getPage("PageA");
     assertNotNull(pageA);
     assertEquals("PageA", pageA.name());
   }
 
   public void testPageWithProvidedName() throws Exception {
-    PageNode pageB = navGraph.getPage("page_b");
+    PageNode<?> pageB = navGraph.getPage("page_b");
     assertNotNull(pageB);
     assertEquals("page_b", pageB.name());
   }
 
   public void testCircularReferences() throws Exception {
-    PageNode cr1Node = navGraph.getPage(CircularRef1.class);
+    PageNode<?> cr1Node = navGraph.getPage(CircularRef1.class);
     CircularRef1 cr1 = (CircularRef1) cr1Node.content();
     TransitionTo<CircularRef2> transitionToCR2 = cr1.getLink();
     Class<CircularRef2> cr2Type = transitionToCR2.toPageType();

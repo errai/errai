@@ -68,18 +68,18 @@ public class BindableProxyGenerator {
         .body();
 
     classBuilder
-        .privateField("agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
+        .privateField("__agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
         .finish()
         .publicConstructor(Parameter.of(InitialState.class, "initialState"))
         .callThis(Stmt.newObject(bindable), Variable.get("initialState"))
         .finish()
         .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(InitialState.class, "initialState"))
-        .append(Stmt.loadVariable("agent").assignValue(
+        .append(Stmt.loadVariable("__agent").assignValue(
             Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
                 Variable.get("this"), Variable.get("target"), Variable.get("initialState"))))
         .append(generatePropertiesMap())
         .finish()
-        .publicMethod(BindableProxyAgent.class, "getAgent")
+        .publicMethod(BindableProxyAgent.class, "getProxyAgent")
         .append(agent().returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")
@@ -159,7 +159,7 @@ public class BindableProxyGenerator {
   private void generateSetter(ClassStructureBuilder<?> classBuilder, String property, BlockBuilder<?> setMethod) {
     MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
     MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
-    if (setterMethod != null && !setterMethod.isFinal()) {
+    if (getterMethod != null && setterMethod != null && !setterMethod.isFinal()) {
       setMethod.append(
           If.cond(Stmt.loadVariable("property").invoke("equals", property))
               .append(
@@ -260,7 +260,7 @@ public class BindableProxyGenerator {
     BlockStatement block = new BlockStatement();
     for (String property : bindable.getBeanDescriptor().getProperties()) {
       MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-      if (!readMethod.isFinal()) {
+      if (readMethod != null && !readMethod.isFinal()) {
         block.addStatement(agent("propertyTypes").invoke(
             "put",
             property,
@@ -278,7 +278,7 @@ public class BindableProxyGenerator {
   }
 
   private ContextualStatementBuilder agent() {
-    return Stmt.loadClassMember("agent");
+    return Stmt.loadClassMember("__agent");
   }
 
   private ContextualStatementBuilder target() {

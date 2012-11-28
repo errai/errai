@@ -149,7 +149,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          Must not be null.
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
-   *           If {@code widget} does not have a property with the given name.
+   *           If the {@code widget} does not have a property with the given name.
    */
   public DataBinder<T> bind(final Widget widget, final String property) {
     bind(widget, property, null);
@@ -171,7 +171,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
-   *           If {@code widget} does not have a property with the given name.
+   *           If the {@code widget} does not have a property with the given name.
    */
   public DataBinder<T> bind(final Widget widget, final String property,
       @SuppressWarnings("rawtypes") final Converter converter) {
@@ -255,7 +255,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
         model, (initialState != null) ? initialState : getAgent().getInitialState());
 
     for (String boundProperty : getBoundProperties()) {
-      newProxy.getAgent().bind(getWidget(boundProperty), boundProperty, getAgent().getConverter(boundProperty));
+      newProxy.getProxyAgent().bind(getWidget(boundProperty), boundProperty, getAgent().getConverter(boundProperty));
     }
 
     // unbind the old proxied model
@@ -315,7 +315,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   
   @SuppressWarnings("unchecked")
   private BindableProxyAgent<T> getAgent() {
-    return ((BindableProxy<T>) this.model).getAgent();
+    return ((BindableProxy<T>) this.model).getProxyAgent();
   }
 
 }

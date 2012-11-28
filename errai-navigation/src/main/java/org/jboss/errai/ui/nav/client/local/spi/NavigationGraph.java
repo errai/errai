@@ -2,6 +2,7 @@ package org.jboss.errai.ui.nav.client.local.spi;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
@@ -30,7 +31,7 @@ public abstract class NavigationGraph {
    * Maps page names to the classes that implement them. The subclass's
    * constructor is responsible for populating this map.
    */
-  protected final Map<String, PageNode> pagesByName = new HashMap<String, PageNode>();
+  protected final Map<String, PageNode<? extends Widget>> pagesByName = new HashMap<String, PageNode<? extends Widget>>();
 
   /**
    * Returns an instance of the given page type. If the page is an
@@ -41,8 +42,9 @@ public abstract class NavigationGraph {
    * @param name The page name, as defined by the implementation of page.
    * @return The appropriate instance of the page.
    */
-  public PageNode getPage(String name) {
-    PageNode page = pagesByName.get(name);
+  public <W extends Widget> PageNode<W> getPage(String name) {
+    @SuppressWarnings("unchecked")
+    PageNode<W> page = (PageNode<W>) pagesByName.get(name);
     if (page == null) {
       throw new IllegalArgumentException("Page not found: \"" + name + "\"");
     }
@@ -58,14 +60,15 @@ public abstract class NavigationGraph {
    * @param type The Class object for the bean that implements the page.
    * @return The appropriate instance of the page.
    */
-  public PageNode getPage(Class<? extends Widget> type) {
+  public <W extends Widget> PageNode<W> getPage(Class<W> type) {
     // TODO this could be made more efficient if we had a pagesByWidgetType map
-    for (Map.Entry<String, PageNode> e : pagesByName.entrySet()) {
+    for (Entry<String, PageNode<? extends Widget>> e : pagesByName.entrySet()) {
       if (e.getValue().contentType().equals(type)) {
-        return e.getValue();
+        @SuppressWarnings("unchecked")
+        PageNode<W> page = (PageNode<W>) e.getValue();
+        return page;
       }
     }
     throw new IllegalArgumentException("No page with a widget type of " + type.getName() + " exists");
   }
-
 }

@@ -22,30 +22,12 @@ import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 import junit.framework.AssertionFailedError;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.BusLifecycleEvent;
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.RetryInfo;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -78,18 +60,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -1435,28 +1406,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   int retries = 0;
   int timeout = 2000;
   int statusCode = -1;
-  DialogBox timeoutDB;
-  Label timeoutMessage;
-
-  private void createConnectAttemptGUI() {
-    timeoutDB = new DialogBox();
-    timeoutMessage = new Label();
-    timeoutDB.add(timeoutMessage);
-    RootPanel.get().add(timeoutDB);
-    timeoutDB.show();
-    timeoutDB.center();
-  }
-
-  private void clearConnectAttemptGUI() {
-    timeoutDB.hide();
-    RootPanel.get().remove(timeoutDB);
-    timeoutDB = null;
-    timeoutMessage = null;
-    retries = 0;
-  }
 
   private class LongPollRequestCallback implements RequestCallback {
-
     /**
      * Subclasses MUST check this flag is still false before calling performPoll().
      */
@@ -1464,7 +1415,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     @Override
     public void onError(final Request request, final Throwable throwable) {
-
       boolean willRetry = retries <= maxRetries;
       RetryInfo retryInfo = new RetryInfo(willRetry ? timeout : -1, retries);
       final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);
@@ -1484,13 +1434,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       case 503: // temporary overload (probably on a proxy)
       case 504: // gateway timeout--same possibilities as 502
         if (willRetry) {
-          if (timeoutDB == null) {
-            createConnectAttemptGUI();
-          }
-
-          final String message = "Attempting reconnection -- Retries: " + (maxRetries - retries);
-          logAdapter.warn(message);
-          timeoutMessage.setText(message);
+          logAdapter.warn("Attempting reconnection -- Retries: " + (maxRetries - retries));
           retries++;
 
           new Timer() {
@@ -1505,7 +1449,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           return;
         }
         else {
-          timeoutMessage.setText("Connection re-attempt failed!");
           DefaultErrorCallback.INSTANCE.error(null, throwable);
           stop(false, transportError);
         }
@@ -1522,7 +1465,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void onResponseReceived(final Request request, final Response response) {
       if (response.getStatusCode() != 200) {
         switch (statusCode = response.getStatusCode()) {
-        case 200:
         case 300:
         case 301:
         case 302:
@@ -1540,10 +1482,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
 
-      if (retries != 0) {
-        clearConnectAttemptGUI();
-      }
-
+      retries = 0;
+      
       try {
         if (state != State.CONNECTED) {
           setState(State.CONNECTED);
@@ -2156,5 +2096,4 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
   }
-
 }

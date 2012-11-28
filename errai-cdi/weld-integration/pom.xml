@@ -83,10 +83,6 @@
 
                 <!-- Weld -->
                 <dependency>
-                    <groupId>org.jboss.weld.se</groupId>
-                    <artifactId>weld-se-core</artifactId>
-                </dependency>
-                <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>
                     <artifactId>weld-servlet-core</artifactId>
                     <scope>compile</scope>
@@ -223,7 +219,7 @@
                             <useManifestOnlyJar>false</useManifestOnlyJar>
                             <forkMode>pertest</forkMode>
                            <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail.-->
-                            <argLine>-Xmx2048m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
+                            <argLine>-Xmx1500m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
 
                             <systemProperties>
                                 <!-- Must disable long polling for automated tests to succeed -->
@@ -347,7 +343,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>
-                    <artifactId>weld-servlet</artifactId>
+                    <artifactId>weld-servlet-core</artifactId>
                     <version>${weld.version}</version>
                     <scope>compile</scope>
                 </dependency>
@@ -391,6 +387,12 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                     <version>${slf4j.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <version>${slf4j.version}</version>
+                    <scope>test</scope>
                 </dependency>
 
                 <dependency>

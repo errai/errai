@@ -38,7 +38,19 @@ import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 
-import com.google.gwt.core.ext.typeinfo.*;
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JEnumType;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JGenericType;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -229,7 +241,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
           if (!processedMethods.contains(readableMethodDecl)) {
             meths.add(ifaceMethod);
             processedMethods.add(readableMethodDecl);
-          }   
+          }
         }
       }
     }
@@ -311,20 +323,9 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     JField field = type.findField(name);
-    while (field == null && (type = type.getSuperclass()) != null
-        && !type.getQualifiedSourceName().equals("java.lang.Object")) {
-      JField superTypeField = type.findField(name);
-      if (!superTypeField.isPrivate()) {
-        field = superTypeField;
-      }
-
-      for (final JClassType interfaceType : type.getImplementedInterfaces()) {
-        field = interfaceType.findField(name);
-      }
-    }
 
     if (field == null) {
-      throw new RuntimeException("no such field: " + name + " in class: " + this);
+      return null;
     }
 
     return new GWTField(oracle, field);

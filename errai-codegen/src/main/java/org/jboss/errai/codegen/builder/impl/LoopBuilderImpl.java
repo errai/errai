@@ -44,7 +44,7 @@ import org.jboss.errai.codegen.util.GenUtil;
 
 /**
  * StatementBuilder to generate loops.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoopBuilderImpl extends AbstractStatementBuilder implements ContextualLoopBuilder, LoopBuilder {
@@ -64,7 +64,8 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
     return foreach(loopVarName, MetaClassFactory.get(loopVarType));
   }
 
-  private BlockBuilder<StatementEnd> foreach(final String loopVarName, final MetaClass loopVarType) {
+  @Override
+  public BlockBuilder<StatementEnd> foreach(final String loopVarName, final MetaClass loopVarType) {
     final BlockStatement body = new BlockStatement();
 
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
@@ -162,7 +163,7 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
   @Override
   public BlockBuilder<StatementEnd> for_(final Statement initializer, final BooleanExpression condition,
       final Statement countingExpression) {
-    
+
     final BlockStatement body = new BlockStatement();
     appendCallElement(new ConditionalBlockCallElement(new ForLoop(condition, body, initializer, countingExpression)));
     return createLoopBody(body);

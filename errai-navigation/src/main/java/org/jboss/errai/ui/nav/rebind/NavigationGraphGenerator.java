@@ -6,11 +6,19 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.codegen.Modifier;
+import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -20,18 +28,26 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -69,8 +85,7 @@ public class NavigationGraphGenerator extends Generator {
                 "of Widget.");
       }
       Page annotation = pageClass.getAnnotation(Page.class);
-      List<String> template = parsePageUriTemplate(pageClass, annotation.path());
-      String pageName = template.get(0);
+      String pageName = annotation.path().equals("") ? pageClass.getName() : annotation.path();
 
       MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
       if (prevPageWithThisName != null) {
@@ -152,76 +167,130 @@ public class NavigationGraphGenerator extends Generator {
    * @param pageClass
    *          The class providing the widget content for the page.
    * @param pageName
-   *          The name of the page (normally obtained by a call to
-   *          {@link #parsePageUriTemplate(MetaClass, String)}).
+   *          The name of the page (to be used in the URL history fragment).
    */
   private ObjectBuilder generateNewInstanceOfPageImpl(MetaClass pageClass, String pageName) {
-    return ObjectBuilder.newInstanceOf(PageNode.class).extend()
+    AnonymousClassStructureBuilder pageImplBuilder = ObjectBuilder.newInstanceOf(
+            MetaClassFactory.parameterizedAs(PageNode.class, MetaClassFactory.typeParametersOf(pageClass))).extend();
+
+    pageImplBuilder
         .publicMethod(String.class, "name")
             .append(Stmt.loadLiteral(pageName).returnValue()).finish()
         .publicMethod(Class.class, "contentType")
             .append(Stmt.loadLiteral(pageClass).returnValue()).finish()
-        .publicMethod(Widget.class, "content")
+        .publicMethod(pageClass, "content")
             .append(Stmt.nestedCall(Refs.get("bm"))
-                    .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish()
-        .finish();
+                    .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish();
+
+    List<MetaField> pageStateFields = new ArrayList<MetaField>();
+    for (MetaField field : pageClass.getFields()) {
+      if (field.isAnnotationPresent(PageState.class)) {
+        pageStateFields.add(field);
+      }
+    }
+
+    appendGetStateMethod(pageImplBuilder, pageClass, pageStateFields);
+    appendPutStateMethod(pageImplBuilder, pageClass, pageStateFields);
+
+    return pageImplBuilder.finish();
   }
 
-  static List<String> parsePageUriTemplate(MetaClass pageType, String uriTemplate) {
-    List<String> retval = new ArrayList<String>();
-    StringBuilder name = new StringBuilder();
-    int i = 0;
-    while (i < uriTemplate.length() && uriTemplate.charAt(i) != '/' && uriTemplate.charAt(i) != '{') {
-      name.append(uriTemplate.charAt(i));
-      i++;
-    }
+  private void appendGetStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(Multimap.class, "getState",
+            Parameter.of(pageClass, "widget"))
+            .body();
 
-    if (name.length() == 0) {
-      name.append(pageType.getName());
-    }
-    retval.add(name.toString());
+    method.append(Stmt.declareVariable("state", Stmt.invokeStatic(ArrayListMultimap.class, "create")));
 
-    StringBuilder pathParam = null;
-    while (i < uriTemplate.length()) {
-      char ch = uriTemplate.charAt(i);
-      if (ch == '{') {
-        if (pathParam != null) {
-          throw new IllegalArgumentException("Found '{' inside parameter at position " + i + " of " + uriTemplate);
-        }
-        pathParam = new StringBuilder();
-      }
-      else if (ch == '}') {
-        if (pathParam == null) {
-          throw new IllegalArgumentException("Found '}' outside parameter at position " + i + " of " + uriTemplate);
-        }
-        if (pathParam.length() == 0) {
-          throw new IllegalArgumentException("Found nameless parameter at position " + i + " of " + uriTemplate);
-        }
-        retval.add(pathParam.toString());
-        pathParam = null;
-      }
-      else if (pathParam != null) {
-        if (pathParam.length() == 0 && Character.isJavaIdentifierStart(ch)) {
-          pathParam.append(ch);
-        }
-        else if (pathParam.length() > 0 && Character.isJavaIdentifierPart(ch)) {
-          pathParam.append(ch);
-        }
-        else {
-          throw new IllegalArgumentException("Found invalid Java identifier character '" + ch + "' in parameter name at position " + i + " of " + uriTemplate);
-        }
+    for (MetaField field : pageStateFields) {
+      PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Read, "jsni", pageImplBuilder, field, new Modifier[] {});
+      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
+      Statement actualFieldValueStmt = Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"));
+      Statement putFieldValueInMap;
+
+      if (field.getType().isAssignableTo(Collection.class)) {
+        MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(field.getType());
+
+        putFieldValueInMap = Stmt.nestedCall(actualFieldValueStmt).foreach("elem", Object.class)
+                .append(Stmt.loadVariable("state")
+                        .invoke("put", field.getName(), paramToStringStatement(elementType, Stmt.loadVariable("elem"))))
+                .finish();
       }
       else {
-        if (ch != '/') {
-          throw new IllegalArgumentException("Found unexpected character '" + ch + "' outside a parameter at position " + i + " of " + uriTemplate);
-        }
+        putFieldValueInMap = Stmt.loadVariable("state")
+                .invoke("put", field.getName(), paramToStringStatement(field.getType(), actualFieldValueStmt));
       }
-      i++;
+
+      if (field.getType().isPrimitive()) {
+        // no null check. just do it.
+        method.append(putFieldValueInMap);
+      }
+      else {
+        // need null check; leave nulls out of map
+        method.append(Stmt.if_(Bool.isNotNull(actualFieldValueStmt))
+                .append(putFieldValueInMap)
+                .finish());
+      }
     }
-    if (pathParam != null) {
-      throw new IllegalArgumentException("Found unterminated parameter at position " + i + " of " + uriTemplate);
+    method.append(Stmt.loadVariable("state").returnValue());
+    method.finish();
+  }
+
+  private void appendPutStateMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, List<MetaField> pageStateFields) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, "putState",
+            Parameter.of(pageClass, "widget"),
+            Parameter.of(MetaClassFactory.get(new TypeLiteral<Multimap<String,String>>() {}), "state"))
+            .body();
+
+    int idx = 0;
+    for (MetaField field : pageStateFields) {
+      PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field, new Modifier[] {});
+      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
+
+      MetaClass erasedFieldType = field.getType().getErased();
+      if (erasedFieldType.isAssignableTo(Collection.class)) {
+        MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(field.getType());
+        if (elementType == null) {
+          throw new UnsupportedOperationException(
+                  "Found a @PageState field with a Collection type but without a concrete type parameter. " +
+                  "Collection-typed @PageState fields must specify a concrete type parameter.");
+        }
+        if (erasedFieldType.equals(MetaClassFactory.get(Set.class))) {
+          method.append(Stmt.declareVariable(field.getName(), Stmt.newObject(HashSet.class)));
+        }
+        else if (erasedFieldType.equals(MetaClassFactory.get(List.class))
+                || erasedFieldType.equals(MetaClassFactory.get(Collection.class))) {
+          method.append(Stmt.declareVariable(field.getName(), Stmt.newObject(ArrayList.class)));
+        }
+        else {
+          throw new UnsupportedOperationException(
+                  "Found a @PageState field which is a collection of type " + erasedFieldType.getFullyQualifiedName() +
+                  ". For collection-valued fields, only the exact types java.util.Collection, java.util.Set, and " +
+                  "java.util.List are supported at this time.");
+        }
+
+        // for (String fv{idx} : state.get({fieldName}))
+        method.append(
+          Stmt.loadVariable("state").invoke("get", field.getName()).foreach("elem", Object.class)
+            .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
+            .append(Stmt.loadVariable(field.getName()).invoke("add", paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
+            .finish()
+          );
+        method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.loadVariable(field.getName())));
+      }
+      else {
+        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("get", field.getName())));
+        method.append(
+          If.cond(Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), defaultValueStatement(erasedFieldType))).finish()
+            .else_()
+              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), paramFromStringStatement(erasedFieldType, Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next"))))
+              .finish()
+          );
+      }
+      idx++;
     }
-    return retval;
+    method.finish();
   }
 
   /**
@@ -276,4 +345,57 @@ public class NavigationGraphGenerator extends Generator {
     }
     return fields;
   }
+
+  private static Statement paramToStringStatement(MetaClass fromType, Statement fromValue) {
+    if (fromType.isAssignableTo(String.class)) {
+      return Stmt.castTo(String.class, fromValue);
+    }
+    else if (fromType.asBoxed().isAssignableTo(Number.class)) {
+      return Stmt.invokeStatic(String.class, "valueOf", fromValue);
+    }
+    else if (fromType.asBoxed().isAssignableTo(Boolean.class)) {
+      return Stmt.invokeStatic(Boolean.class, "toString", fromValue);
+    }
+    else {
+      throw new UnsupportedOperationException("@PageState fields of type " + fromType.getFullyQualifiedName() + " are not supported");
+    }
+  }
+
+  private static Statement paramFromStringStatement(MetaClass toType, Statement stringValue) {
+
+    // make sure it's really a string
+    stringValue = Stmt.castTo(String.class, stringValue);
+
+    if (toType.isAssignableTo(String.class)) {
+      return stringValue;
+    }
+    else if (toType.asBoxed().isAssignableTo(Number.class)) {
+      return Stmt.invokeStatic(toType.asBoxed(), "valueOf", stringValue);
+    }
+    else if (toType.asBoxed().isAssignableTo(Boolean.class)) {
+      return Stmt.invokeStatic(Boolean.class, "valueOf", stringValue);
+    }
+    else {
+      throw new UnsupportedOperationException("@PageState fields of type " + toType.getFullyQualifiedName() + " are not supported");
+    }
+  }
+
+  private Statement defaultValueStatement(MetaClass type) {
+    if (type.isPrimitive()) {
+      if (type.asBoxed().isAssignableTo(Number.class)) {
+        return Stmt.castTo(type, Stmt.load(0));
+      }
+      else if (type.isAssignableTo(boolean.class)) {
+        return Stmt.load(false);
+      }
+      else {
+        throw new UnsupportedOperationException("Don't know how to make a default value for @PageState field of type " + type.getFullyQualifiedName());
+      }
+    }
+    else {
+      return Stmt.load(null);
+    }
+  }
+
+
 }

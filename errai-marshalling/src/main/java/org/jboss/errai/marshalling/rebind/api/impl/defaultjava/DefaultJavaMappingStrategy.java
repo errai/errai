@@ -179,7 +179,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                   if (context.canMarshal(type.getFullyQualifiedName())) {
                     Statement s = maybeAddAssumedTypes(tryBuilder, "c" + constructorParameters.size(),
                         mapping, fieldDemarshall(mapping, EJObject.class));
-                    
+
                     constructorParameters.add(s);
                   }
                   else {
@@ -297,7 +297,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           final BlockBuilder<ElseBlockBuilder> ifBlockBuilder = Stmt.if_(Bool.and(
                   Bool.expr(loadVariable("obj").invoke("containsKey", memberMapping.getKey())),
                   Bool.notExpr(loadVariable("obj").invoke("get", memberMapping.getKey()).invoke("isNull"))));
-          
+
           maybeAddAssumedTypes(ifBlockBuilder, null, memberMapping, bindingStatement);
           tryBuilder.append(ifBlockBuilder.finish());
         }
@@ -334,7 +334,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     final MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(mapping.getType());
     final MetaClass mapKeyType = MarshallingGenUtil.getConcreteMapKeyType(mapping.getType());
     final MetaClass mapValueType = MarshallingGenUtil.getConcreteMapValueType(mapping.getType());
-    
+
     boolean assumedMapTypesSet = false;
     if (elementType != null) {
       blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
@@ -359,10 +359,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", (String) null));
       blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", (String) null));
     }
-    
+
     return (varName != null) ? Stmt.loadVariable(varName) : statement;
   }
-  
+
   public Statement fieldDemarshall(final Mapping mapping, final Class<?> fromType) {
     return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
   }
@@ -473,7 +473,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       final MetaClass targetType = GenUtil.getPrimitiveWrapper(mapping.getType());
       final MetaClass compType = targetType.isArray() ? targetType.getOuterComponentType().asBoxed() : targetType.asBoxed();
 
-      if (!(targetType.isAbstract() || targetType.isInterface() || targetType.isEnum()) && !context.canMarshal(compType.getFullyQualifiedName())) {
+      if (!(compType.isAbstract() || compType.isInterface() || compType.isEnum()) && !context.canMarshal(compType.getFullyQualifiedName())) {
         throw new NoAvailableMarshallerException(compType.getFullyQualifiedName());
       }
 
@@ -550,12 +550,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             Stmt.nestedCall(objStatement)
                     .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
 
-    final Statement falseStatement = 
-      (valStatement != null) ? 
-        new TernaryStatement(Bool.isNotNull(Stmt.nestedCall(valStatement).invoke("isString")), 
-            Stmt.invokeStatic(Enum.class, "valueOf", toType, 
+    final Statement falseStatement =
+      (valStatement != null) ?
+        new TernaryStatement(Bool.isNotNull(Stmt.nestedCall(valStatement).invoke("isString")),
+            Stmt.invokeStatic(Enum.class, "valueOf", toType,
                 Stmt.nestedCall(valStatement).invoke("isString").invoke("stringValue")),
-            Stmt.load(null)) 
+            Stmt.load(null))
        : Stmt.load(null);
 
     return new TernaryStatement(Bool.isNotNull(objStatement), trueStatement, falseStatement);

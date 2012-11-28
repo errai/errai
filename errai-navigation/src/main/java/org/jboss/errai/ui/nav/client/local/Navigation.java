@@ -2,12 +2,11 @@ package org.jboss.errai.ui.nav.client.local;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -29,55 +28,79 @@ public class Navigation {
 
   private Panel contentPanel = new SimplePanel();
 
-  @SuppressWarnings("unused")
-  @Inject
-  private IOCBeanManager bm;
-
   private NavigationGraph navGraph = GWT.create(NavigationGraph.class);
 
-  @SuppressWarnings("unused")
   @PostConstruct
   private void init() {
     History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
       public void onValueChange(ValueChangeEvent<String> event) {
-        PageNode page = navGraph.getPage(event.getValue());
-        makePageVisible(page);
+
+        // TODO what about backing up current history? we might already be "back" in the nav stack already
+
+        HistoryToken token = HistoryToken.parse(event.getValue());
+        PageNode<Widget> toPage = navGraph.getPage(token.getPageName());
+        Widget widget = toPage.content();
+        toPage.putState(widget, token.getState());
+
+        contentPanel.clear();
+        contentPanel.add(widget);
       }
     });
 
-    String initialToken = History.getToken();
-    PageNode initialPage = navGraph.getPage(initialToken);
+    HistoryToken initialToken = HistoryToken.parse(History.getToken());
+    PageNode<Widget> initialPage = navGraph.getPage(initialToken.getPageName());
     if (initialPage == null) {
       initialPage = navGraph.getPage(""); // Default page
     }
-    goTo(initialPage);
+    goTo(initialPage, initialToken.getState());
   }
 
   /**
-   * Goes to
-   * @param toPage
-   */
-  public void goTo(Class<? extends Widget> toPage) {
-    PageNode toPageInstance = navGraph.getPage(toPage);
-    goTo(toPageInstance);
-  }
-
-  public void goTo(PageNode toPage) {
-    makePageVisible(toPage);
-    History.newItem(toPage.name(), false);
-  }
-
-  /**
-   * Internal subroutine that makes the given page's widget visible but does not
-   * manipulate the navigation history.
+   * Looks up the PageNode instance that provides content for the given widget
+   * type, sets the state on that page, then makes the widget visible in the
+   * content area.
    *
-   * @param page
-   *          The page to show. Not null.
+   * @param toPage
+   *          The content type of the page node to look up and display.
+   *          Normally, this is a Widget subclass that has been annotated with
+   *          {@code @Page}.
+   * @param state
+   *          The state information to set on the page node before showing it.
+   *          Normally the map keys correspond with the names of fields
+   *          annotated with {@code @PageState} in the widget class.
    */
-  private void makePageVisible(PageNode page) {
+  public <W extends Widget> void goTo(Class<W> toPage, Multimap<String,String> state) {
+    PageNode<W> toPageInstance = navGraph.getPage(toPage);
+    goTo(toPageInstance, state);
+  }
+
+  /**
+   * Sets the state on the given PageNode, then makes its widget visible in the
+   * content area.
+   *
+   * @param toPage
+   *          The page node to display. Normally, the implementation of PageNode
+   *          is generated at compile time based on a Widget subclass that has
+   *          been annotated with {@code @Page}. Anything calling this method
+   *          must ensure that the given PageNode has been entered into the
+   *          navigation graph, or later navigation back to {@code toPage} will
+   *          fail.
+   * @param state
+   *          The state information to set on the page node before showing it.
+   *          Normally the map keys correspond with the names of fields
+   *          annotated with {@code @PageState} in the widget class.
+   */
+  private <W extends Widget> void goTo(PageNode<W> toPage, Multimap<String,String> state) {
+
+    // TODO preserve state of current page
+
+    W widget = toPage.content();
+    toPage.putState(widget, state);
+
     contentPanel.clear();
-    contentPanel.add(page.content());
+    contentPanel.add(widget);
+    History.newItem(toPage.name(), false);
   }
 
   /**
@@ -94,4 +117,11 @@ public class Navigation {
     return contentPanel;
   }
 
+  /**
+   * Returns the navigation graph that provides PageNode instances to this Navigation instance.
+   */
+  // should this method be public? should we expose a way to set the nav graph?
+  NavigationGraph getNavGraph() {
+    return navGraph;
+  }
 }
