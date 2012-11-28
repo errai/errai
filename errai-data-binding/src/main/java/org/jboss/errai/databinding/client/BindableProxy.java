@@ -34,7 +34,7 @@ public interface BindableProxy<T> extends WrappedPortable, HasProperties {
    * 
    * @return the proxy's agent, never null.
    */
-  public BindableProxyAgent<T> getAgent();
+  public BindableProxyAgent<T> getProxyAgent();
 
   /**
    * Updates all widgets bound to the model instance associated with this proxy (see

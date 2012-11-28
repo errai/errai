@@ -48,6 +48,7 @@ public class JacksonTestServiceImpl implements JacksonTestService {
   public String postJacksonList(String jackson) {
     ObjectMapper mapper = new ObjectMapper();
     try {
+      @SuppressWarnings("unchecked")
       List<User> users = mapper.readValue(jackson, List.class);
       return mapper.writeValueAsString(users);
     }
@@ -61,6 +62,7 @@ public class JacksonTestServiceImpl implements JacksonTestService {
   public String postJacksonListOfBytes(String jackson) {
     ObjectMapper mapper = new ObjectMapper();
     try {
+      @SuppressWarnings("unchecked")
       List<Byte> users = mapper.readValue(jackson, List.class);
       return mapper.writeValueAsString(users);
     }
@@ -87,6 +89,7 @@ public class JacksonTestServiceImpl implements JacksonTestService {
   public String postJacksonMap(String jackson) {
     ObjectMapper mapper = new ObjectMapper();
     try {
+      @SuppressWarnings("unchecked")
       Map<String, User> users = mapper.readValue(jackson, Map.class);
       return mapper.writeValueAsString(users);
     }

@@ -18,17 +18,18 @@ package org.jboss.errai.common.client.api.extension;
 
 import static org.jboss.errai.common.client.util.LogUtil.log;
 
-import com.google.gwt.core.client.GWT;
-import org.jboss.errai.common.client.api.tasks.AsyncTask;
-import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.util.TimeUnit;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.TimeUnit;
+
+import com.google.gwt.core.client.GWT;
 
 /**
  * The <tt>InitVotes</tt> class provides the central algorithm around which disparate services within the Errai
@@ -216,7 +217,7 @@ public final class InitVotes {
 
       armed = true;
       _initWait = false;
-      if (initTimeout != null) {
+      if (initTimeout != null && !initTimeout.isCancelled()) {
         initTimeout.cancel(true);
       }
 

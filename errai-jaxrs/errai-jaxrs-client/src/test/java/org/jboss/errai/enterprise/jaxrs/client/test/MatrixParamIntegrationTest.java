@@ -50,7 +50,7 @@ public class MatrixParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testPostWithMatrixParams() {
     call(MatrixParamTestService.class,
-        new AssertionCallback<String>("@POST with @MatrixParams failed", "1/2")).postWithMatrixParams("1", "2");
+        new AssertionCallback<String>("@POST with @MatrixParams failed", "entity/1/2")).postWithMatrixParams("entity", "1", "2");
   }
 
   @Test

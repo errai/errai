@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.api.interceptor;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 /**
  * Represents the context of an intercepted method call.

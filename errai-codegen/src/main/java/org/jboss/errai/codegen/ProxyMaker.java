@@ -19,6 +19,13 @@ package org.jboss.errai.codegen;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.throw_;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -37,16 +44,10 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * @author Mike Brock
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ProxyMaker {
 
   public static BuildMetaClass makeProxy(final String proxyClassName, final Class cls) {
@@ -200,7 +201,7 @@ public class ProxyMaker {
       builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o")).body()
           ._(
               If.isNull(loadVariable(proxyVar))
-                  ._(throw_(IllegalStateException.class, "call to equal() on an unclosed proxy."))
+                  ._(throw_(IllegalStateException.class, "call to equals() on an unclosed proxy."))
                   .finish()
                   .else_()
                   ._(Stmt.loadVariable(proxyVar).invoke("equals", Refs.get("o")).returnValue())

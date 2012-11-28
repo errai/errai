@@ -79,13 +79,13 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testPostWithPathParam() {
     call(PathParamTestService.class,
-        new AssertionCallback<Float>("@POST with @PathParam failed", 1f)).postWithPathParam(1f);
+        new AssertionCallback<Float>("@POST with @PathParam failed", 1f)).postWithPathParam("", 1f);
   }
 
   @Test
   public void testPutWithPathParam() {
     call(PathParamTestService.class,
-        new AssertionCallback<Long>("@PUT with @PathParam failed", 1l)).putWithPathParam(1l);
+        new AssertionCallback<Long>("@PUT with @PathParam failed", 3l)).putWithPathParam(2l, 1l);
   }
 
   @Test

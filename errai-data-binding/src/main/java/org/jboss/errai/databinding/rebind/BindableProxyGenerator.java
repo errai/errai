@@ -43,6 +43,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyAgent;
+import org.jboss.errai.databinding.client.HasProperties;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -67,18 +68,18 @@ public class BindableProxyGenerator {
         .body();
 
     classBuilder
-        .privateField("agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
+        .privateField("__agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
         .finish()
         .publicConstructor(Parameter.of(InitialState.class, "initialState"))
         .callThis(Stmt.newObject(bindable), Variable.get("initialState"))
         .finish()
         .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(InitialState.class, "initialState"))
-        .append(Stmt.loadVariable("agent").assignValue(
+        .append(Stmt.loadVariable("__agent").assignValue(
             Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
                 Variable.get("this"), Variable.get("target"), Variable.get("initialState"))))
         .append(generatePropertiesMap())
         .finish()
-        .publicMethod(BindableProxyAgent.class, "getAgent")
+        .publicMethod(BindableProxyAgent.class, "getProxyAgent")
         .append(agent().returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")
@@ -108,6 +109,10 @@ public class BindableProxyGenerator {
     return classBuilder;
   }
 
+  /**
+   * Generates accessor methods for all Java bean properties plus the corresponding code for the method implementations
+   * of {@link HasProperties}.
+   */
   private void generateAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     BlockBuilder<?> getMethod = classBuilder.publicMethod(Object.class, "get",
         Parameter.of(String.class, "property"));
@@ -126,6 +131,10 @@ public class BindableProxyGenerator {
     setMethod.append(nonExistingPropertyException).finish();
   }
 
+  /**
+   * Generates a getter method for the provided property plus the corresponding code for the implementation of
+   * {@link HasProperties#get(String)}.
+   */
   private void generateGetter(ClassStructureBuilder<?> classBuilder, String property,
       BlockBuilder<?> getMethod) {
 
@@ -143,10 +152,14 @@ public class BindableProxyGenerator {
     }
   }
 
+  /**
+   * Generates a getter method for the provided property plus the corresponding code for the implementation of
+   * {@link HasProperties#set(String, Object)}.
+   */
   private void generateSetter(ClassStructureBuilder<?> classBuilder, String property, BlockBuilder<?> setMethod) {
     MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
     MetaMethod setterMethod = bindable.getBeanDescriptor().getWriteMethodForProperty(property);
-    if (setterMethod != null && !setterMethod.isFinal()) {
+    if (getterMethod != null && setterMethod != null && !setterMethod.isFinal()) {
       setMethod.append(
           If.cond(Stmt.loadVariable("property").invoke("equals", property))
               .append(
@@ -169,7 +182,7 @@ public class BindableProxyGenerator {
       }
       else {
         callSetterOnTarget =
-          target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
+            target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
         returnValueOfSetter = EmptyStatement.INSTANCE;
       }
 
@@ -199,6 +212,12 @@ public class BindableProxyGenerator {
     }
   }
 
+  /**
+   * Generates proxy methods overriding public non-final methods that are not also property accessor methods. The
+   * purpose of this is to allow the proxies to react on model changes that happen outside the getters and setters of
+   * the bean. These methods will cause a comparison of all bound properties and trigger the appropriate UI updates and
+   * property change events.
+   */
   private void generateNonAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     for (MetaMethod method : bindable.getMethods()) {
       String methodName = method.getName();
@@ -215,7 +234,7 @@ public class BindableProxyGenerator {
         Statement callOnTarget = null;
         Statement returnValue = null;
         if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
-          callOnTarget = Stmt.declareFinalVariable("returnValue", method.getReturnType(), 
+          callOnTarget = Stmt.declareFinalVariable("returnValue", method.getReturnType(),
               target().invoke(method, parmVars.toArray()));
           returnValue = Stmt.nestedCall(Refs.get("returnValue")).returnValue();
         }
@@ -223,7 +242,7 @@ public class BindableProxyGenerator {
           callOnTarget = target().invoke(method, parmVars.toArray());
           returnValue = EmptyStatement.INSTANCE;
         }
-        
+
         classBuilder
             .publicMethod(method.getReturnType(), methodName, parms)
               .append(callOnTarget)
@@ -234,18 +253,21 @@ public class BindableProxyGenerator {
     }
   }
 
+  /**
+   * Generates the code to collect all existing properties and their type.
+   */
   private Statement generatePropertiesMap() {
     BlockStatement block = new BlockStatement();
     for (String property : bindable.getBeanDescriptor().getProperties()) {
       MetaMethod readMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
-      if (!readMethod.isFinal()) {
+      if (readMethod != null && !readMethod.isFinal()) {
         block.addStatement(agent("propertyTypes").invoke(
             "put",
             property,
             Stmt.newObject(PropertyType.class, readMethod.getReturnType().asBoxed().asClass(),
                 readMethod.getReturnType().isAnnotationPresent(Bindable.class))
             )
-         );
+            );
       }
     }
     return block;
@@ -256,7 +278,7 @@ public class BindableProxyGenerator {
   }
 
   private ContextualStatementBuilder agent() {
-    return Stmt.loadClassMember("agent");
+    return Stmt.loadClassMember("__agent");
   }
 
   private ContextualStatementBuilder target() {

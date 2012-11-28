@@ -21,18 +21,7 @@ import static java.util.Collections.unmodifiableCollection;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Stereotype;
@@ -48,7 +37,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.config.rebind.ReachableTypes;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
@@ -60,12 +49,15 @@ import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 public class InjectionContext {
+  private static final Logger log = LoggerFactory.getLogger(InjectionContext.class);
   private final IOCProcessingContext processingContext;
 
   private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings = HashMultimap.create();
@@ -571,7 +563,13 @@ public class InjectionContext {
   }
 
   public boolean isElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
-    return getMatchingAnnotationForElementType(type, hasAnnotations) != null;
+    Annotation matchingAnnotation = getMatchingAnnotationForElementType(type, hasAnnotations);
+    if (matchingAnnotation != null && type == WiringElementType.NotSupported) {
+      log.error(hasAnnotations + " was annotated with " + matchingAnnotation.annotationType().getName()
+          + " which is not supported in client-side Errai code!");
+    }
+    
+    return matchingAnnotation != null;
   }
 
   public boolean isElementType(final WiringElementType type, final Class<? extends Annotation> annotation) {

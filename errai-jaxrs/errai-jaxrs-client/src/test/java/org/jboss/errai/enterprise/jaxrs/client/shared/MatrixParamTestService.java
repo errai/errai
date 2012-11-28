@@ -41,7 +41,7 @@ public interface MatrixParamTestService {
   public String getWithMatrixParams(@MatrixParam("first") long first, @MatrixParam("last") long last);
 
   @POST
-  public String postWithMatrixParams(@MatrixParam("first") String first, @MatrixParam("last") String last);
+  public String postWithMatrixParams(String entity, @MatrixParam("first") String first, @MatrixParam("last") String last);
   
   @PUT
   public String putWithMatrixParams(@MatrixParam("first") String first, @MatrixParam("middle") String middle, 

@@ -3,11 +3,13 @@ package org.jboss.errai.marshalling.tests;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -27,6 +29,7 @@ import org.jboss.errai.marshalling.tests.res.EnumContainerContainer;
 import org.jboss.errai.marshalling.tests.res.EnumTestA;
 import org.jboss.errai.marshalling.tests.res.EnumWithAbstractMethod;
 import org.jboss.errai.marshalling.tests.res.EnumWithState;
+import org.jboss.errai.marshalling.tests.res.ImmutableEnumContainer;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
@@ -344,6 +347,20 @@ public class ServerMarshallingTest {
   }
 
   @Test
+  public void testMapWithBigIntegerAsKey() {
+	  Map<BigInteger, String> map = new HashMap<BigInteger, String>();
+	  map.put(new BigInteger("10"), "10 value");
+	  testEncodeDecodeDynamic(map);
+  }
+
+  @Test
+  public void testMapWithBigDecimalAsKey() {
+	  Map<BigDecimal, String> map = new HashMap<BigDecimal, String>();
+	  map.put(new BigDecimal("10"), "10 value");
+	  testEncodeDecodeDynamic(map);
+  }
+
+  @Test
   public void testSynchronizedSortedMap() {
     TreeMap<String, String> map = new TreeMap<String, String>();
     map.put("a", "a");
@@ -555,5 +572,20 @@ public class ServerMarshallingTest {
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall enum with abstract method", val, ServerMarshalling.fromJSON(json));
   }
-
+  
+  @Test
+  public void testImmutableEnumContainer() {
+    ImmutableEnumContainer val = new ImmutableEnumContainer(EnumTestA.FIRST);
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall enum container",
+            val, ServerMarshalling.fromJSON(json));
+  }
+  
+  @Test
+  public void testImmutableEnumContainerWithNullRefs() {
+    ImmutableEnumContainer val = new ImmutableEnumContainer(null);
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall immutable enum container with nulls",
+            val, ServerMarshalling.fromJSON(json));
+  }
 }

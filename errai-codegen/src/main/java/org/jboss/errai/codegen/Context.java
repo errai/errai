@@ -25,7 +25,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;

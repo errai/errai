@@ -12,6 +12,7 @@ import java.lang.annotation.Target;
  * system.
  *
  * @see TransitionTo
+ * @see PageState
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Target(ElementType.TYPE)
@@ -20,38 +21,9 @@ import java.lang.annotation.Target;
 public @interface Page {
 
   /**
-   * The URI template that identifies this page. This is a literal string
-   * consisting of any combination of characters excluding / (forward slash) and
-   * &#123; (open brace bracket). If omitted, the page name is the same as the
-   * target class's simple name.
-   * 
-   * <h4>Example</h4>
-   * 
-   * <pre>
-   *   {@code @Page}
-   *   public class Product extends Composite {
-   *     ...
-   *   }
-   * </pre>
-   * <p>
-   * The above example declares a page that can be reached at
-   * {@code http://example.com/app/#Product} (the name defaults to the target
-   * class's simple name).
-   * </p>
-   * <br>
-   * 
-   * <pre>
-   *   {@code @Page("products")}
-   *   public class Product extends Composite {
-   *     ...
-   *   }
-   * </pre>
-   * <p>
-   * The above example declares a page that can be reached at
-   * {@code http://example.com/app/#products}.
-   * </p>
+   * The path component that identifies this page. If not specified, the page's
+   * name will be the simple name of the class.
    */
-  // NOTE TO FUTURE SELF: look in git history just before 2.1.0.Final release for docs that include state tokens
   String path() default "";
 
   /**

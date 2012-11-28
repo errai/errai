@@ -26,7 +26,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 @SuppressWarnings("rawtypes")
 public class PropertyType {
 
-  private final Class<?> type;
+  private final Class type;
   private final boolean bindable;
 
   public PropertyType(Class type, boolean bindable) {

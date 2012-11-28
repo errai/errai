@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 

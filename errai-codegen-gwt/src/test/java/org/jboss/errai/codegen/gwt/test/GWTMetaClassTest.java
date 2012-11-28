@@ -1,15 +1,23 @@
 package org.jboss.errai.codegen.gwt.test;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.junit.Test;
+
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock
@@ -22,12 +30,16 @@ public class GWTMetaClassTest extends AbstractGWTMetaClassTest {
     addTestClass("foo.TestInterface");
     addTestClass("foo.MyTestSuperClass");
     addTestClass("foo.MyTestClass");
+    addTestClass("foo.TestModelInterface");
+    addTestClass("foo.AbstractSuperTestModel");
+    addTestClass("foo.SuperTestModel");
+    addTestClass("foo.TestModel");
 
     mockacle = generateMockacle();
   }
 
   @Test
-  public void confirmContractConsistency1() throws Exception {
+  public void confirmContractConsistency() throws Exception {
     final String classToTest = "foo.MyTestClass";
 
     MetaClassFactory.emptyCache();
@@ -58,7 +70,8 @@ public class GWTMetaClassTest extends AbstractGWTMetaClassTest {
       System.out.println(method.toString());
     }
 
-    assertArrayEquals(gwtMC.getDeclaredMethods(), javaMC.getDeclaredMethods());
+    assertEquals(new HashSet<MetaMethod>(Arrays.asList(gwtMC.getDeclaredMethods())),
+                 new HashSet<MetaMethod>(Arrays.asList(javaMC.getDeclaredMethods())));
 
     final MetaClass gwtSuperMC = gwtMC.getSuperClass();
     final MetaClass javaSuperMC = javaMC.getSuperClass();
@@ -67,6 +80,21 @@ public class GWTMetaClassTest extends AbstractGWTMetaClassTest {
     assertEquals(1, gwtSuperMC.getInterfaces().length);
     assertEquals(1, javaSuperMC.getInterfaces().length);
 
-    assertArrayEquals(gwtSuperMC.getInterfaces(), javaSuperMC.getInterfaces());
+    assertEquals(new HashSet<MetaClass>(Arrays.asList(gwtSuperMC.getInterfaces())),
+                 new HashSet<MetaClass>(Arrays.asList(javaSuperMC.getInterfaces())));
+  }
+  
+  @Test
+  public void testNoDuplicateMethodsInClassHierarchy() throws NotFoundException {
+    final MetaClass gwtMC = GWTClass.newInstance(mockacle, mockacle.getType("foo.TestModel"));
+    
+    List<MetaMethod> foundCompareMethods = new ArrayList<MetaMethod>();
+    for (MetaMethod m : gwtMC.getMethods()) {
+      if (m.getName().equals("compare")) {
+        foundCompareMethods.add(m);
+      }
+    }
+    
+    assertEquals("Only one compare method should have been found", 1, foundCompareMethods.size());
   }
 }

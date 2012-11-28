@@ -1,7 +1,9 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
+import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
+import com.google.common.collect.Multimap;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -13,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public interface PageNode {
+public interface PageNode<W extends Widget> {
 
   /**
    * Returns the name of this page.
@@ -30,12 +32,43 @@ public interface PageNode {
    *         the exact runtime type as returned by {@link #contentType()}. Never
    *         null.
    */
-  public Widget content();
+  public W content();
 
   /**
    * Returns the type of widget that this page node's {@link #content()} method will produce.
    *
    * @return The type of widget that supplies this page's content. Never null.
    */
-  public Class<? extends Widget> contentType();
+  public Class<W> contentType();
+
+  /**
+   * Called by the framework when this page node is about to be displayed in the
+   * navigation content panel.
+   * <p>
+   * If this method throws an exception when called, framework behaviour is
+   * undefined.
+   *
+   * @param widget
+   *          the widget instance that was just returned from a call to
+   *          {@link #content()}. Never null.
+   * @param state
+   *          the state of the page, parsed from the history token on the URL.
+   *          Never null.
+   */
+  public void pageShowing(W widget, HistoryToken state);
+
+  /**
+   * Called by the framework when this page node is about to be displayed
+   * removed from the navigation content panel.
+   * <p>
+   * If this method returns null or throws an exception when called, framework
+   * behaviour is undefined.
+   *
+   * @param widget
+   *          the widget instance (which is currently in the navigation content
+   *          panel) that was previously used in the call to
+   *          {@link #pageShowing(Widget, Multimap)}. Never null.
+   */
+  public void pageHiding(W widget);
+
 }

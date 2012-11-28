@@ -113,7 +113,7 @@
                   <configuration>
                      <skipTests>false</skipTests>
                      <forkMode>always</forkMode>
-                     <argLine>-Xmx2048m ${argLine}</argLine>
+                     <argLine>-Xmx1500m ${argLine}</argLine>
 
                      <additionalClasspathElements>
                         <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>

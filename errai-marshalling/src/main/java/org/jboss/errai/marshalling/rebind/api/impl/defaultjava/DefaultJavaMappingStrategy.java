@@ -22,7 +22,6 @@ import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,18 +162,30 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
             for (final Mapping mapping : mappingDefinition.getInstantiationMapping().getMappings()) {
               final MetaClass type = mapping.getType().asBoxed();
-              if (context.canMarshal(type.getFullyQualifiedName())) {
                 if (type.isArray()) {
-                  constructorParameters.add(context.getArrayMarshallerCallback()
+                  MetaClass toMap = type;
+                  while (toMap.isArray()) {
+                    toMap = toMap.getComponentType();
+                  }
+                  if (context.canMarshal(toMap.getFullyQualifiedName())) {
+                    constructorParameters.add(context.getArrayMarshallerCallback()
                           .demarshall(type, extractJSONObjectProperty(mapping.getKey(), EJObject.class)));
+                  }
+                  else {
+                    throw new MarshallingException("no marshaller for type: " + toMap);
+                  }
                 }
                 else {
-                  constructorParameters.add(fieldDemarshall(mapping, EJObject.class));
+                  if (context.canMarshal(type.getFullyQualifiedName())) {
+                    Statement s = maybeAddAssumedTypes(tryBuilder, "c" + constructorParameters.size(),
+                        mapping, fieldDemarshall(mapping, EJObject.class));
+
+                    constructorParameters.add(s);
+                  }
+                  else {
+                    throw new MarshallingException("no marshaller for type: " + type);
+                  }
                 }
-              }
-              else {
-                throw new MarshallingException("no marshaller for type: " + type);
-              }
             }
 
             if (instantiationMapping instanceof ConstructorMapping) {
@@ -287,32 +298,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                   Bool.expr(loadVariable("obj").invoke("containsKey", memberMapping.getKey())),
                   Bool.notExpr(loadVariable("obj").invoke("get", memberMapping.getKey()).invoke("isNull"))));
 
-          final MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(memberMapping.getType());
-          final MetaClass mapKeyType = MarshallingGenUtil.getConcreteMapKeyType(memberMapping.getType());
-          final MetaClass mapValueType = MarshallingGenUtil.getConcreteMapValueType(memberMapping.getType());
-          
-          boolean assumedMapTypesSet = false;
-          if (elementType != null) {
-            ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
-          }
-          else {
-            if (mapKeyType != null && mapValueType != null) {
-              ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", mapKeyType.getFullyQualifiedName()));
-              ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", mapValueType.getFullyQualifiedName()));
-              assumedMapTypesSet = true;
-            }
-          }
-
-          ifBlockBuilder.append(bindingStatement);
-
-          if (elementType != null) {
-            ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", (String) null));
-          }
-          else if (assumedMapTypesSet) {
-            ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", (String) null));
-            ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", (String) null));
-          }
-
+          maybeAddAssumedTypes(ifBlockBuilder, null, memberMapping, bindingStatement);
           tryBuilder.append(ifBlockBuilder.finish());
         }
 
@@ -342,6 +328,39 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         return classStructureBuilder.finish();
       }
     };
+  }
+
+  public Statement maybeAddAssumedTypes(BlockBuilder<?> blockBuilder, String varName, Mapping mapping, Statement statement) {
+    final MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(mapping.getType());
+    final MetaClass mapKeyType = MarshallingGenUtil.getConcreteMapKeyType(mapping.getType());
+    final MetaClass mapValueType = MarshallingGenUtil.getConcreteMapValueType(mapping.getType());
+
+    boolean assumedMapTypesSet = false;
+    if (elementType != null) {
+      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
+    }
+    else if (mapKeyType != null && mapValueType != null) {
+      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", mapKeyType.getFullyQualifiedName()));
+      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", mapValueType.getFullyQualifiedName()));
+      assumedMapTypesSet = true;
+    }
+
+    if (varName != null) {
+      blockBuilder.append(Stmt.declareFinalVariable(varName, mapping.getType(), statement));
+    }
+    else {
+      blockBuilder.append(statement);
+    }
+
+    if (elementType != null) {
+      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", (String) null));
+    }
+    else if (assumedMapTypesSet) {
+      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", (String) null));
+      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", (String) null));
+    }
+
+    return (varName != null) ? Stmt.loadVariable(varName) : statement;
   }
 
   public Statement fieldDemarshall(final Mapping mapping, final Class<?> fromType) {
@@ -454,7 +473,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       final MetaClass targetType = GenUtil.getPrimitiveWrapper(mapping.getType());
       final MetaClass compType = targetType.isArray() ? targetType.getOuterComponentType().asBoxed() : targetType.asBoxed();
 
-      if (!(targetType.isAbstract() || targetType.isInterface() || targetType.isEnum()) && !context.canMarshal(compType.getFullyQualifiedName())) {
+      if (!(compType.isAbstract() || compType.isInterface() || compType.isEnum()) && !context.canMarshal(compType.getFullyQualifiedName())) {
         throw new NoAvailableMarshallerException(compType.getFullyQualifiedName());
       }
 
@@ -531,8 +550,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             Stmt.nestedCall(objStatement)
                     .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
 
-    final Statement falseStatement = (valStatement != null) ? Stmt.invokeStatic(Enum.class, "valueOf", toType,
-            Stmt.nestedCall(valStatement).invoke("isString").invoke("stringValue")) : Stmt.load(null);
+    final Statement falseStatement =
+      (valStatement != null) ?
+        new TernaryStatement(Bool.isNotNull(Stmt.nestedCall(valStatement).invoke("isString")),
+            Stmt.invokeStatic(Enum.class, "valueOf", toType,
+                Stmt.nestedCall(valStatement).invoke("isString").invoke("stringValue")),
+            Stmt.load(null))
+       : Stmt.load(null);
 
     return new TernaryStatement(Bool.isNotNull(objStatement), trueStatement, falseStatement);
   }

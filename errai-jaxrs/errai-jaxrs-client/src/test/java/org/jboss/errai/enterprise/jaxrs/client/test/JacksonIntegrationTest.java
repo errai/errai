@@ -28,6 +28,7 @@ import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ImmutableEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
 import org.junit.Test;
@@ -202,6 +203,44 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             finishTest();
           }
         }).postJacksonMap(jackson);
+  }
+
+  /**
+   * This test ensures the assumed element type is correctly inferred when generating marshallers for types that use @MapsTo
+   * on List<T> parameters. See https://issues.jboss.org/browse/ERRAI-436.
+   */
+  @Test
+  public void testJacksonDemarshallingOfImmutableTypeWithList() {
+    final ImmutableEntity ftd = new ImmutableEntity.Builder().build();
+    String jackson = "{\"entities\":[{\"id\":1, \"name\":\"name1\"}, {\"id\":2, \"name\":\"name2\"}]}";
+    assertEquals(ftd, MarshallingWrapper.fromJSON(jackson, ImmutableEntity.class));
+  }
+
+  /**
+   * Guards against regressions of: https://issues.jboss.org/browse/ERRAI-443
+   */
+  @Test
+  public void testJacksonDemarshallingOfMapWithArrayValue() {
+    final String json =
+        "{\"key1\" : null, \"key2\" : true, \"key3\" : false, \"key4\" : [ false, null, true ], \"key5\": { \"mapKey\": \"mapValue\"}}";
+    Map<String, Object> result = MarshallingWrapper.fromJSON(json, Map.class, String.class, Object.class);
+
+    assertEquals("Wrong result size: " + result.toString(), 5, result.size());
+    assertNull("key1 should be null", result.get("key1"));
+    assertTrue("key2 should be true", (Boolean) result.get("key2"));
+    assertFalse("key3 should be false", (Boolean) result.get("key3"));
+
+    List<?> list = (List<?>) result.get("key4");
+    assertNotNull("key4 should not be null", list);
+    assertEquals("Wrong list size", list.size(), 3);
+    assertFalse((Boolean) list.get(0));
+    assertNull(list.get(1));
+    assertTrue((Boolean) list.get(2));
+
+    Map<?, ?> map = (Map<?, ?>) result.get("key5");
+    assertEquals("Wrong map size", map.size(), 1);
+    assertNotNull("key5 should not be null", map);
+    assertEquals("mapValue", map.get("mapKey"));
   }
 
 }

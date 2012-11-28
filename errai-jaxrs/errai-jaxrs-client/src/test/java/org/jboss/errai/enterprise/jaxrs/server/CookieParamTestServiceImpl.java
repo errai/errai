@@ -31,13 +31,13 @@ public class CookieParamTestServiceImpl implements CookieParamTestService {
   }
 
   @Override
-  public String postWithStringCookieParam(String val) {
-    return val;
+  public String postWithStringCookieParam(Long entity, String cookie) {
+    return cookie;
   }
 
   @Override
-  public long putWithLongCookieParam(Long val) {
-    return val;
+  public long putWithLongCookieParam(String entity, Long cookie) {
+    return cookie;
   }
   
   @Override

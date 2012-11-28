@@ -25,7 +25,7 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
- * {@link IOCProvider} to make {@link DataBinder}s injectable.
+ * {@link IOCProvider} to make {@link DataBinder} instances injectable.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

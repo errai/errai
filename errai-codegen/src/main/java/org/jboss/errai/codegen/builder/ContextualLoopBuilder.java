@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.builder;
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -26,12 +27,13 @@ import org.jboss.errai.codegen.Statement;
 public interface ContextualLoopBuilder extends Statement, Builder {
   public BlockBuilder<StatementEnd> foreach(String loopVarName);
   public BlockBuilder<StatementEnd> foreach(String loopVarName, Class<?> loopVarType);
+  public BlockBuilder<StatementEnd> foreach(String loopVarName, MetaClass loopVarType);
 
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition);
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition, Statement countingExpression);
-  
+
   public BlockBuilder<WhileBuilder> do_();
-  
+
   public BlockBuilder<StatementEnd> while_();
   public BlockBuilder<StatementEnd> while_(BooleanOperator op, Statement rhs);
   public BlockBuilder<StatementEnd> while_(BooleanOperator op, Object rhs);

@@ -18,7 +18,7 @@ package org.jboss.errai.databinding.client;
 
 /**
  * Implementations of this interface allow for dynamic access of their JavaBean properties by name. Since this is a GWT
- * client-side class, all implementations must be code generated in the absence of Java reflection.
+ * client-side interface, all implementations must be code generated in the absence of Java reflection.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

@@ -50,22 +50,19 @@ public class CookieParamIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testPostWithCookieParam() {
-    Cookies.setCookie("myCookie", "1701");
     call(CookieParamTestService.class,
-        new AssertionCallback<String>("@POST with @CookieParam failed", "1701")).postWithStringCookieParam(null);
+        new AssertionCallback<String>("@POST with @CookieParam failed", "1701")).postWithStringCookieParam(1702l, "1701");
   }
 
   @Test
   public void testPutWithCookieParam() {
-    Cookies.setCookie("myCookie", "1701");
     call(CookieParamTestService.class,
-        new AssertionCallback<Long>("@PUT with @CookieParam failed", 1701l)).putWithLongCookieParam(null);
+        new AssertionCallback<Long>("@PUT with @CookieParam failed", 1701l)).putWithLongCookieParam("1702", 1701l);
   }
 
   @Test
   public void testDeleteWithCookieParam() {
-    Cookies.setCookie("myCookie", "1701");
     call(CookieParamTestService.class,
-        new AssertionCallback<Double>("@DELETE with @CookieParam failed", 1701.0)).deleteWithDoubleCookieParam(null);
+        new AssertionCallback<Double>("@DELETE with @CookieParam failed", 1701.0)).deleteWithDoubleCookieParam(1701d);
   }
 }

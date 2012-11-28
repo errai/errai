@@ -34,6 +34,7 @@ import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceArrayField;
 import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
 import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
@@ -45,6 +46,8 @@ import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImmutableArrayContainer;
+import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
 import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
@@ -413,6 +416,21 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public EntityWithInterfaceField testEntityWithInterfaceField(EntityWithInterfaceField e) {
+    return e;
+  }
+
+  @Override
+  public EntityWithInterfaceArrayField testEntityWithInterfaceArrayField(EntityWithInterfaceArrayField e) {
+    return e;
+  }
+
+  @Override
+  public ImmutableEnumContainer testImmutableEntityWithEnum(ImmutableEnumContainer iec) {
+    return iec;
+  }
+
+  @Override
+  public ImmutableArrayContainer testImmutableEntityWithArray(ImmutableArrayContainer e) {
     return e;
   }
 }

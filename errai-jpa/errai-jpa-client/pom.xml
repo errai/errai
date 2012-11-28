@@ -63,6 +63,13 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava-gwt</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
+    </dependency>
     
   </dependencies>
 
@@ -79,7 +86,7 @@
             <configuration>
               <skipTests>false</skipTests>
               <forkMode>always</forkMode>
-              <argLine>-Xms1g -Xmx2g -XX:MaxPermSize=128m ${argLine}</argLine>
+              <argLine>-Xms1g -Xmx1500m -XX:MaxPermSize=128m ${argLine}</argLine>
 
               <additionalClasspathElements>
                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>

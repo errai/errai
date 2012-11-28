@@ -19,8 +19,19 @@ package org.jboss.errai.bus.client.tests.support;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class Person {
+public class Person implements Lifeform {
 
+  // this field is "shadowed by" Lifeform.getPublicSuperField().
+  // This situation is a regression test for ERRAI-439.
   public String publicSuperField = "publicSuperField";
-  
+
+  @Override
+  public String getPublicSuperField() {
+    return publicSuperField;
+  }
+
+  public void setPublicSuperField(String publicSuperField) {
+    this.publicSuperField = publicSuperField;
+  }
+
 }

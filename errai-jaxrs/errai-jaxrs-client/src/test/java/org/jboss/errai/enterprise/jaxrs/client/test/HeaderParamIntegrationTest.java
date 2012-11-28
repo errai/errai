@@ -50,7 +50,7 @@ public class HeaderParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testPostWithHeaderParam() {
     call(HeaderParamTestService.class,
-        new AssertionCallback<String>("@POST with @HeaderParam failed", "1")).postWithHeaderParam("1");
+        new AssertionCallback<String>("@POST with @HeaderParam failed", "entity/1")).postWithHeaderParam("entity", "1");
   }
 
   @Test

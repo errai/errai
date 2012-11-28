@@ -46,6 +46,10 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, successCodes);
   }
+  
+  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, ErrorCallback errorCallback, Integer... successCodes) {
+    return RestClient.create(remote, callback, errorCallback, successCodes);
+  }
 
   protected <T, R> T call(Class<T> remote, String baseUrl, RemoteCallback<R> callback, Integer... successCodes) {
     return RestClient.create(remote, baseUrl, callback, errorCallback, successCodes);

@@ -74,7 +74,11 @@ public abstract class Marshalling {
       return NumbersUtils.qualifiedNumericEncoding(obj);
     }
     else {
-      return MarshallUtil.getMarshaller(obj, session).marshall(obj, session);
+      final Marshaller<Object> marshaller = MarshallUtil.getMarshaller(obj, session);
+      if (marshaller == null) {
+        throw new RuntimeException("No marshaller for type: "+obj.getClass().getName());
+      }
+      return marshaller.marshall(obj, session);
     }
   }
 
@@ -150,6 +154,9 @@ public abstract class Marshalling {
       session.setAssumedElementType(assumedElementType.getName());
     }
     final Marshaller<Object> marshallerInstance = session.getMarshallerInstance(type.getName());
+    if (marshallerInstance == null) {
+        throw new RuntimeException("No marshaller for type: " + type.getName());
+    }
     return (T) marshallerInstance.demarshall(parsedValue, session);
   }
 
@@ -177,6 +184,9 @@ public abstract class Marshalling {
     session.setAssumedMapValueType(assumedMapValueType.getName());
 
     final Marshaller<Object> marshallerInstance = session.getMarshallerInstance(type.getName());
+    if (marshallerInstance == null) {
+      throw new RuntimeException("No marshaller for type: " + type.getName());
+    }
     return (T) marshallerInstance.demarshall(parsedValue, session);
   }
 

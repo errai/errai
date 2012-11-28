@@ -18,9 +18,14 @@
 package org.jboss.errai.bus.client.framework;
 
 /**
+ * Simple logging interface for client-side logging. This interface will be
+ * removed (in favour of GWT's built-in java.util logging support) in Errai 3.0.
+ *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Mar 17, 2010
+ * @deprecated Use java.util logging instead. It is supported by GWT.
  */
+@Deprecated
 public interface LogAdapter {
   void warn(String message);
 

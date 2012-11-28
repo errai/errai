@@ -16,21 +16,86 @@
 
 package org.jboss.errai.codegen.test;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.test.model.ToProxyBean;
-import org.junit.Ignore;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author Mike Brock
+ * Tests for the {@link ProxyMaker}.
+ *
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ProxyMakerTest extends AbstractCodegenTest {
 
-  @Ignore @Test
-  public void testBasicProxy() {
-    String s = new InnerClass(ProxyMaker.makeProxy("ToProxy_Proxy", ToProxyBean.class)).generate(Context.create());
-    System.out.println(s);
+  /**
+   * Because JDK7 doesn't return reflection members in the order they were
+   * declared in source, we have to make a list of all the expected chunks in
+   * the generated sources, then verify that they were all present while
+   * ignoring the order of the fields and methods.
+   */
+  private static final List<String> expectedChunks = Arrays.asList(
+          "public class ToProxy_Proxy extends org.jboss.errai.codegen.test.model.ToProxyBean {\n" +
+          "  private org.jboss.errai.codegen.test.model.ToProxyBean $$_proxy_$$;\n",
+
+          "  public String getName() {\n" +
+          "    return $$_proxy_$$.getName();\n" +
+          "  }\n",
+
+          "  public org.jboss.errai.codegen.test.model.Integer getBlah() {\n" +
+          "    return $$_proxy_$$.getBlah();\n" +
+          "  }\n",
+
+          "  public String toString() {\n" +
+          "    return $$_proxy_$$.toString();\n" +
+          "  }\n",
+
+          "  public int hashCode() {\n" +
+          "    if ($$_proxy_$$ == null) {\n" +
+          "      throw new IllegalStateException(\"call to hashCode() on an unclosed proxy.\");\n" +
+          "    } else {\n" +
+          "      return $$_proxy_$$.hashCode();\n" +
+          "    }\n" +
+          "  }\n",
+
+          "  public boolean equals(Object o) {\n" +
+          "    if ($$_proxy_$$ == null) {\n" +
+          "      throw new IllegalStateException(\"call to equals() on an unclosed proxy.\");\n" +
+          "    } else {\n" +
+          "      return $$_proxy_$$.equals(o);\n" +
+          "    }\n" +
+          "  }\n",
+
+          "  public void __$setProxiedInstance$(org.jboss.errai.codegen.test.model.ToProxyBean proxy) {\n" +
+          "    $$_proxy_$$ = proxy;\n" +
+          "  }\n",
+          "}\n");
+
+  @Test
+  public void testProxyGeneration() {
+    String proxy = new InnerClass(ProxyMaker.makeProxy("ToProxy_Proxy", ToProxyBean.class)).generate(Context.create());
+
+    int totalChars = 0;
+    for (String expectedChunk : expectedChunks) {
+      assertTrue("Generated code was missing a chunk:\n" + expectedChunk + "\n----- Actual generated proxy was:\n" + proxy,
+              proxy.contains(expectedChunk));
+      totalChars += countNonWhitespace(expectedChunk);
+    }
+
+    // finally, a length check will ensure there were no extra chunks we weren't expecting
+    Assert.assertEquals(
+            "Found wrong number of non-whitespace chars in generated proxy:\n" + proxy,
+            totalChars, countNonWhitespace(proxy));
+  }
+
+  private static int countNonWhitespace(String s) {
+    return s.replaceAll("\\s", "").length();
   }
 }

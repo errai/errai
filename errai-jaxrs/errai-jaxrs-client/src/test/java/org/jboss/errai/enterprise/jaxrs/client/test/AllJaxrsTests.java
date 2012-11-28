@@ -35,6 +35,7 @@ import org.junit.runners.Suite;
     HeaderParamIntegrationTest.class,
     InterceptorIntegrationTest.class,
     JacksonIntegrationTest.class,
+    JaxrsResponseObjectIntegrationTest.class,
     MatrixParamIntegrationTest.class,
     PathParamIntegrationTest.class,
     PlainMethodIntegrationTest.class,

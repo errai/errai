@@ -33,22 +33,27 @@ public class SimpleMapping implements Mapping {
       throw new NullPointerException("key is null");
     }
 
-    this.type = this.targetType = targetType.getErased().asBoxed();
+    this.type = targetType.asBoxed(); 
+    this.targetType = targetType.getErased().asBoxed();
     this.key = key;
   }
 
+  @Override
   public String getKey() {
     return key;
   }
 
+  @Override
   public MetaClass getType() {
     return type;
   }
 
+  @Override
   public void setType(final MetaClass type) {
     this.type = type.asBoxed();
   }
 
+  @Override
   public MetaClass getTargetType() {
     return targetType;
   }

@@ -48,13 +48,13 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   }
   
   @Override
-  public Float postWithPathParam(Float id) {
+  public Float postWithPathParam(String entity, Float id) {
     return id;
   }
 
   @Override
-  public long putWithPathParam(long id) {
-    return id;
+  public long putWithPathParam(Long entity, long id) {
+    return entity+id;
   }
 
   @Override

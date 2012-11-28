@@ -88,6 +88,13 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
 runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -123,7 +130,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                                  prevents subsequent tests from succeeding -->
                             <forkMode>pertest</forkMode>
 
-                            <argLine>-Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+                            <argLine>-Xmx1500m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
 
                             <systemProperties>
                                 <property>

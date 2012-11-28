@@ -17,7 +17,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 @Entity
 @NamedQueries({
   @NamedQuery(name="allDepartments", query="SELECT d FROM Department d ORDER BY d.name"),
-  @NamedQuery(name="departmentByName", query="SELECT d FROM Department d WHERE lower(name) = lower(:name) ORDER BY d.name")
+  @NamedQuery(name="departmentByName", query="SELECT d FROM Department d WHERE lower(d.name) = lower(:name) ORDER BY d.name")
 })
 public class Department {
 

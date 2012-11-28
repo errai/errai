@@ -41,6 +41,12 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
+  public void testGetWithNullQueryParam() {
+    call(QueryParamTestService.class,
+        new AssertionCallback<String>("@GET with @QueryParam failed", "")).getWithStringQueryParam(null);
+  }
+  
+  @Test
   public void testGetWithEncodedQueryParam() {
     String queryParamSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
     call(QueryParamTestService.class,
@@ -57,7 +63,7 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testPostWithQueryParam() {
     call(QueryParamTestService.class,
-        new AssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam(1);
+        new AssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam("", 1);
   }
 
   @Test

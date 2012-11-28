@@ -3,7 +3,7 @@ package org.jboss.errai.jpa.client.local;
 import javax.persistence.Parameter;
 import javax.persistence.TypedQuery;
 
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 
 import com.google.common.collect.ImmutableBiMap;
 

@@ -276,10 +276,6 @@
           <artifactId>errai-bus</artifactId>
           <exclusions>
             <exclusion>
-              <groupId>org.slf4j</groupId>
-              <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-            <exclusion>
               <groupId>junit</groupId>
               <artifactId>junit</artifactId>
             </exclusion>
@@ -645,7 +641,7 @@
               <forkMode>pertest</forkMode>
 
               <!-- Note: to run the test in a real browser, set -DargLine='-Dgwt.args="-runStyle Manual:1"' -->
-              <argLine>-Xmx2048m ${argLine}</argLine>
+              <argLine>-Xmx1500m ${argLine}</argLine>
 
 
               <systemProperties>

@@ -105,7 +105,7 @@ public interface TestSerializationRPCService {
   public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map);
 
   public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map);
-  
+
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
 
   public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent);
@@ -162,19 +162,25 @@ public interface TestSerializationRPCService {
 
   public User testEntityWithNullField(User u);
 
+  public ImmutableEnumContainer testImmutableEntityWithEnum(ImmutableEnumContainer iec);
+
   public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc);
-  
+
   public EntityWithMapUsingAbstractValueType testEntityWithMapUsingAbstractValueType(EntityWithMapUsingAbstractValueType e);
 
   public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(EntityWithMapUsingAbstractKeyType e);
-  
+
   public EntityWithMapUsingSubtypeValues testEntityWithMapUsingSubtypeValues(EntityWithMapUsingSubtypeValues e);
-  
+
   public LinkedHashMap<String,Integer> testLinkedHashMap(LinkedHashMap<String,Integer> map);
 
   public LinkedHashSet<String> testLinkedHashSet(LinkedHashSet<String> set);
 
   public ImplicitEnum testImplicitEnum(ImplicitEnum e);
-  
+
   public EntityWithInterfaceField testEntityWithInterfaceField(EntityWithInterfaceField e);
+
+  public EntityWithInterfaceArrayField testEntityWithInterfaceArrayField(EntityWithInterfaceArrayField e);
+
+  public ImmutableArrayContainer testImmutableEntityWithArray(ImmutableArrayContainer e);
 }

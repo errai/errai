@@ -377,6 +377,37 @@ public class ErraiJpaTest extends GWTTestCase {
     assertSame(fetchedArtist, cascadeFetchedAlbum.getArtist());
   }
 
+  public void testPersistNullOneToMany() {
+    // artist is the container
+    Artist artist = new Artist();
+    artist.setId(98L); // Artist uses user-assigned/non-generated IDs
+    artist.setName("The Beatles");
+
+    // this one has the null artist
+    Album album = new Album();
+    album.setName("Mystery Album");
+    album.setArtist(null);
+    album.setReleaseDate(new Date(-9366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(artist);
+    em.persist(album);
+    em.flush();
+
+    // sanity check
+    assertNotNull(album.getId());
+
+    // ensure everything's in the persistence context
+    assertSame(artist, em.find(Artist.class, artist.getId()));
+    assertSame(album, em.find(Album.class, album.getId()));
+
+    em.clear();
+
+    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    assertNull(fetchedAlbum2.getArtist());
+  }
+
   public void testFetchAssociatedEntityAlreadyInPersistenceContext() {
     // make them
     Artist artist = new Artist();

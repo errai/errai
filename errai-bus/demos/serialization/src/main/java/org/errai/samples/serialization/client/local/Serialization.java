@@ -16,22 +16,27 @@
 
 package org.errai.samples.serialization.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.*;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.errai.samples.serialization.client.shared.Record;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.util.List;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 @EntryPoint
 public class Serialization {
@@ -41,7 +46,8 @@ public class Serialization {
   private final FlexTable table = new FlexTable();
 
   @Service("ClientEndpoint")
-  public final MessageCallback clientEndpoint = new MessageCallback() {
+  private final MessageCallback clientEndpoint = new MessageCallback() {
+    @Override
     public void callback(Message message) {
       List<Record> records = message.get(List.class, "Records");
 
@@ -73,6 +79,7 @@ public class Serialization {
     VerticalPanel p = new VerticalPanel();
 
     Button button = new Button("Load Objects", new ClickHandler() {
+      @Override
       public void onClick(ClickEvent clickEvent) {
         MessageBuilder.createMessage()
             .toSubject("ObjectService")

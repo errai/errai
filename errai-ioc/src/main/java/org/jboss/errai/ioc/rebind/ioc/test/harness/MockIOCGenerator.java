@@ -20,7 +20,7 @@ package org.jboss.errai.ioc.rebind.ioc.test.harness;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.javac.testing.GeneratorContextBuilder;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
-import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;

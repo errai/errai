@@ -463,6 +463,37 @@ public class QueryTest extends GWTTestCase {
     assertEquals(album1.toString(), q.getSingleResult().toString());
   }
 
+  public void testFilterByNullEntityReference() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Artist beatles = new Artist();
+    beatles.setId(9L);
+    beatles.setName("The Beatles");
+
+    Album album1 = new Album();
+    album1.setArtist(beatles);
+    album1.setName("Hey Jude / Revolution");
+    album1.setFormat(Format.SINGLE);
+    album1.setReleaseDate(new Date(-42580800000L));
+
+    Album album2 = new Album();
+    album2.setArtist(null);
+    album2.setName("Marcel Marceau's Greatest Hits");
+    album2.setFormat(Format.LP);
+    album2.setReleaseDate(new Date(-32580800000L));
+
+    em.persist(beatles);
+    em.persist(album1);
+    em.persist(album2);
+
+    em.flush();
+
+    TypedQuery<Album> q = em.createNamedQuery("selectAlbumByArtist", Album.class);
+    q.setParameter("artist", null);
+
+    assertEquals(album2.toString(), q.getSingleResult().toString());
+  }
+
   public void testAnd() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 

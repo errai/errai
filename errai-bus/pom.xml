@@ -79,13 +79,11 @@
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>${validation.api.version}</version>
         </dependency>
 
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>${validation.api.version}</version>
             <classifier>sources</classifier>
         </dependency>
 
@@ -108,13 +106,14 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.1</version>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.1</version>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -213,7 +212,6 @@
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>persistence-api</artifactId>
-            <version>1.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -237,7 +235,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
 
     </dependencies>
@@ -249,11 +246,32 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.jboss.errai</groupId>
+                        <artifactId>jacoco-gwt-maven-plugin</artifactId>
+                        <version>0.5.4.201202141554</version>
+                        <executions>
+                          <execution>
+                            <id>jacoco-initialize</id>
+                            <phase>initialize</phase>
+                            <goals>
+                              <goal>prepare-agent</goal>
+                            </goals>
+                          </execution>
+                          <execution>
+                            <id>jacoco-site</id>
+                            <phase>site</phase>
+                            <goals>
+                              <goal>report</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <skipTests>false</skipTests>
                             <forkMode>always</forkMode>
-                            <argLine>-Xmx2048m -Dgwt.args='-testBeginTimeout 5'</argLine>
+                            <argLine>${argLine} -Xmx1500m -Dgwt.args='-testBeginTimeout 5'</argLine>
 
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>

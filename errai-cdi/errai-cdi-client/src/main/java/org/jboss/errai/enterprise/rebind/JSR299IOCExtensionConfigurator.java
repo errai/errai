@@ -16,13 +16,20 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Produces;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -33,17 +40,16 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
-import java.util.HashSet;
-import java.util.Set;
-
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
+  @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
                         final IOCProcessorFactory procFactory) {
 
+    injectionContext.mapElementType(WiringElementType.NotSupported, ConversationScoped.class);
+    injectionContext.mapElementType(WiringElementType.NotSupported, RequestScoped.class);
+    injectionContext.mapElementType(WiringElementType.NotSupported, SessionScoped.class);
+    
     injectionContext.mapElementType(WiringElementType.SingletonBean, ApplicationScoped.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
 
@@ -71,6 +77,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
   }
 
+  @Override
   public void afterInitialization(IOCProcessingContext context,
                                   InjectionContext injectionContext,
                                   IOCProcessorFactory procFactory) {
