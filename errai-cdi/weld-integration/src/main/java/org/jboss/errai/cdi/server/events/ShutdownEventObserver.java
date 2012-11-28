@@ -18,10 +18,8 @@ package org.jboss.errai.cdi.server.events;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -52,29 +50,35 @@ public class ShutdownEventObserver implements ObserverMethod {
     this.bus = bus;
   }
 
+  @Override
   public Class<?> getBeanClass() {
     return ShutdownEventObserver.class;
   }
 
+  @Override
   public Type getObservedType() {
     return BeforeShutdown.class;
   }
 
+  @Override
   public Set<Annotation> getObservedQualifiers() {
     return Collections.emptySet();
   }
 
+  @Override
   public Reception getReception() {
     return Reception.ALWAYS;
   }
 
+  @Override
   public TransactionPhase getTransactionPhase() {
-    return null;
+    return TransactionPhase.IN_PROGRESS;
   }
 
+  @Override
   public void notify(Object o) {
 
-    // unsubscribe bean endpoints        
+    // unsubscribe bean endpoints
     for (AnnotatedType<?> svc : managedTypes.getServiceEndpoints()) {
       final String subject = CDIServerUtil.resolveServiceName(svc.getJavaClass());
       log.debug("unsubscribe: " + subject);
