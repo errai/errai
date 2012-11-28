@@ -4,6 +4,7 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -11,7 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Thinking of the application flow as a directed graph, {@link PageNode}s are the
  * nodes and PageTransitions are the edges.
  * <p>
- * To create an instance of this class, use the {@code Page#addTransition} method.
+ * Instances of this class are normally obtained via dependency injection.
  * <p>
  * Instances of this class are immutable.
  *
@@ -47,9 +48,24 @@ public final class TransitionTo<P extends Widget> {
 
   /**
    * Transitions the application's view from the current page (whatever it is)
-   * to the {@code toPage} of this transition.
+   * to the {@code toPage} of this transition, passing no extra state
+   * information.
    */
   public void go() {
     navigation.goTo(toPageWidgetType, ImmutableMultimap.<String,String>of());
   }
+
+  /**
+   * Transitions the application's view from the current page (whatever it is)
+   * to the {@code toPage} of this transition, passing the given extra state
+   * information.
+   *
+   * @param state
+   *          Extra state information that should be passed to the page before
+   *          it is displayed. Must not be null.
+   */
+  public void go(Multimap<String,String> state) {
+    navigation.goTo(toPageWidgetType, state);
+  }
+
 }
