@@ -10,12 +10,13 @@ import java.util.Collection;
 public class Comparisons {
 
   /**
-   * Tests two potentially null object references for equality.
+   * Tests two potentially null object references for equality using approximate
+   * JPQL/SQL null semantics.
    * <p>
-   * Specifically, this method returns true if and only if any of the
-   * following conditions are met:
+   * Specifically, this method returns true if and only if both arguments are
+   * non-null and either of the following conditions are met:
    * <ol>
-   * <li>{@code o1 == o2} (satisfied if {@code o1} and {@code o2} are both null)
+   * <li>{@code o1 == o2}
    * <li>{@code o1.equals(o2)}
    * </ol>
    *
@@ -28,7 +29,7 @@ public class Comparisons {
    */
   // MAINTAINERS BEWARE: Errai JPA generates code that uses this method.
   public static boolean nullSafeEquals(Object o1, Object o2) {
-    return (o1 == o2) || (o1 != null && o1.equals(o2));
+    return o1 != null && o2 != null && (o1 == o2 || o1.equals(o2));
   }
 
   /**

@@ -491,7 +491,7 @@ public class QueryTest extends GWTTestCase {
     TypedQuery<Album> q = em.createNamedQuery("selectAlbumByArtist", Album.class);
     q.setParameter("artist", null);
 
-    assertEquals(album2.toString(), q.getSingleResult().toString());
+    assertTrue(q.getResultList().isEmpty());
   }
 
   public void testAnd() {
