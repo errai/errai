@@ -36,6 +36,9 @@ public class TestModel {
   private boolean active;
   private TestModel child;
   
+  // this field tests for the case there's a field name collision in the generated proxy
+  private String agent;
+  
   public int getId() {
     return id;
   }

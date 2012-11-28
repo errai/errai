@@ -129,7 +129,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * proxy (see {@link #setModel(Object, InitialState)}).
    * 
    * @param widget
-   *          the widget to bind, must not be null.
+   *          the widget to bind to, must not be null.
    * @param property
    *          the property of the model to bind the widget to, must not be null.
    * @param converter
@@ -166,13 +166,27 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
                   converters.get(property));
           proxy.set(property, value);
 
-          propertyChangeHandlerSupport.notifyHandlers(new PropertyChangeEvent<Object>(proxy, property, oldValue, value));
+          propertyChangeHandlerSupport
+              .notifyHandlers(new PropertyChangeEvent<Object>(proxy, property, oldValue, value));
         }
       }));
     }
     syncState(widget, property, initialState);
   }
 
+  /**
+   * Creates a data binder for a nested property to support property chains. The nested data binder is initialized with
+   * the current value of the specified property, or with a new instance of the property type if the value is null. The
+   * proxies value for this property is then replaced with the proxy managed by the nested data binder.
+   * 
+   * @param widget
+   *          the widget to bind to, must not be null.
+   * @param property
+   *          the property of the model to bind the widget to, must not be null. The property must be of a @Bindable
+   *          type.
+   * @param converter
+   *          the converter to use for this binding, null if default conversion should be used.
+   */
   private void createNestedBinders(final Widget widget, final String property, final Converter converter) {
     int dotPos = property.indexOf(".");
     if (dotPos > 0) {
@@ -257,7 +271,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Updates all bound widgets if necessary (if a bound property's value has changed). This method is invoked in case a
-   * bound property changed outside the property's write method (setter method).
+   * bound property changed outside the property's write method (using a non accessor method).
    * 
    * @param <P>
    *          The property type of the changed property.
@@ -265,10 +279,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   void updateWidgetsAndFireEvents() {
     for (String boundProperty : bindings.keySet()) {
       // we don't need to handle property chains here, since the nested binders/proxies take care of that
-      if (boundProperty.contains(".")) continue;
-      
+      if (boundProperty.contains("."))
+        continue;
+
       Object knownValue = knownValues.get(boundProperty);
-      
+
       Object actualValue = proxy.get(boundProperty);
       if ((knownValue == null && actualValue != null) ||
           (knownValue != null && !knownValue.equals(actualValue))) {
@@ -302,7 +317,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     else if (widget instanceof HasText) {
       HasText ht = (HasText) widget;
       Object widgetValue =
-          Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converters.get(property));
+          Convert
+              .toWidgetValue(String.class, propertyTypes.get(property).getType(), newValue, converters.get(property));
       ht.setText((String) widgetValue);
     }
 
@@ -348,7 +364,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         value = initialState.getInitialValue(proxy.get(property), hasText.getText());
         if (initialState == InitialState.FROM_MODEL) {
           Object widgetValue =
-              Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), value, converters.get(property));
+              Convert.toWidgetValue(String.class, propertyTypes.get(property).getType(), value, converters
+                  .get(property));
           hasText.setText((String) widgetValue);
         }
       }
