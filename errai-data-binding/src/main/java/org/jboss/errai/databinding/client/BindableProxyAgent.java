@@ -177,7 +177,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Creates a data binder for a nested property to support property chains. The nested data binder is initialized with
    * the current value of the specified property, or with a new instance of the property type if the value is null. The
-   * proxies value for this property is then replaced with the proxy managed by the nested data binder.
+   * proxy's value for this property is then replaced with the proxy managed by the nested data binder.
    * 
    * @param widget
    *          the widget to bind to, must not be null.

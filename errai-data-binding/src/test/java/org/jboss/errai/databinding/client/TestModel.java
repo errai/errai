@@ -37,6 +37,7 @@ public class TestModel {
   private TestModel child;
   
   // this field tests for the case there's a field name collision in the generated proxy
+  @SuppressWarnings("unused")
   private String agent;
   
   public int getId() {
