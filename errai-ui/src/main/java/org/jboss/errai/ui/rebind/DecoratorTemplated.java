@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,7 +72,6 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import static org.jboss.errai.common.client.util.LogUtil.log;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
@@ -96,6 +96,9 @@ import com.google.gwt.user.client.ui.Widget;
 @CodeDecorator
 public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
+  
+  private static final Logger logger = Logger.getLogger(DecoratorTemplated.class.getName());
+
 
   public DecoratorTemplated(Class<Templated> decoratesWith) {
     super(decoratesWith);
@@ -434,9 +437,9 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] returns void.");
     }
 
-    log("eventType: " + eventType.getClass() + " -- " + eventType);
-    log("method: " + method.getClass() + " -- " + method);
-    log("returnType: " + returnType.getClass() + " -- " + returnType);
+    logger.info("eventType: " + eventType.getClass() + " -- " + eventType);
+    logger.info("method: " + method.getClass() + " -- " + method);
+    logger.info("returnType: " + returnType.getClass() + " -- " + returnType);
 
     MetaParameterizedType parameterizedType = returnType.getParameterizedType();
     if (parameterizedType == null) {
@@ -444,7 +447,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] does not return Type<? extends EventHandler>..");
     }
 
-    log("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
+    logger.info("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
 
     MetaType[] argTypes = parameterizedType.getTypeParameters();
     if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass
