@@ -99,11 +99,15 @@ public class HistoryToken {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(URL.encodePathSegment(pageName));
-    sb.append(';');
-    for (Map.Entry<String, String> entry : state.entries()) {
-      sb.append(URL.encodePathSegment(entry.getKey()));
-      sb.append("=");
-      sb.append(URL.encodePathSegment(entry.getValue()));
+    if (!state.isEmpty()) {
+      boolean first = true;
+      for (Map.Entry<String, String> entry : state.entries()) {
+        sb.append(first ? ';' : '&');
+        sb.append(URL.encodePathSegment(entry.getKey()));
+        sb.append("=");
+        sb.append(URL.encodePathSegment(entry.getValue()));
+        first = false;
+      }
     }
     return sb.toString();
   }

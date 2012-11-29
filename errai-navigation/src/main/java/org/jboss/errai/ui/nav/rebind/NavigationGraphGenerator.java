@@ -239,6 +239,12 @@ public class NavigationGraphGenerator extends Generator {
 
     int idx = 0;
     for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
+      PageState psAnno = field.getAnnotation(PageState.class);
+      String fieldName = field.getName();
+      String queryParamName = psAnno.value();
+      if (queryParamName == null || queryParamName.trim().isEmpty()) {
+        queryParamName = fieldName;
+      }
       PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field, new Modifier[] {});
       String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
 
@@ -251,11 +257,11 @@ public class NavigationGraphGenerator extends Generator {
                   "Collection-typed @PageState fields must specify a concrete type parameter.");
         }
         if (erasedFieldType.equals(MetaClassFactory.get(Set.class))) {
-          method.append(Stmt.declareVariable(field.getName(), Stmt.newObject(HashSet.class)));
+          method.append(Stmt.declareVariable(fieldName, Stmt.newObject(HashSet.class)));
         }
         else if (erasedFieldType.equals(MetaClassFactory.get(List.class))
                 || erasedFieldType.equals(MetaClassFactory.get(Collection.class))) {
-          method.append(Stmt.declareVariable(field.getName(), Stmt.newObject(ArrayList.class)));
+          method.append(Stmt.declareVariable(fieldName, Stmt.newObject(ArrayList.class)));
         }
         else {
           throw new UnsupportedOperationException(
@@ -266,15 +272,15 @@ public class NavigationGraphGenerator extends Generator {
 
         // for (String fv{idx} : state.get({fieldName}))
         method.append(
-          Stmt.loadVariable("state").invoke("getState").invoke("get", field.getName()).foreach("elem", Object.class)
+          Stmt.loadVariable("state").invoke("getState").invoke("get", queryParamName).foreach("elem", Object.class)
             .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
-            .append(Stmt.loadVariable(field.getName()).invoke("add", paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
+            .append(Stmt.loadVariable(fieldName).invoke("add", paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
             .finish()
           );
-        method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.loadVariable(field.getName())));
+        method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.loadVariable(fieldName)));
       }
       else {
-        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("getState").invoke("get", field.getName())));
+        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("getState").invoke("get", queryParamName)));
         method.append(
           If.cond(Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
               .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), defaultValueStatement(erasedFieldType))).finish()

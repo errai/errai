@@ -32,4 +32,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface PageState {
 
+  /**
+   * Provides a way to map the field name to a different value for the query parameter.  If
+   * not specified, the name of the field will be used as the name of the query parameter.
+   */
+  String value() default "";
+
 }
