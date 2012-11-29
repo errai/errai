@@ -21,74 +21,20 @@
         <directory>src/main/resources</directory>
       </resource>
     </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skipTests>false</skipTests>
-          <additionalClasspathElements>
-            <additionalClasspathElement>${basedir}/${testOutputDirectory}/</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-          </additionalClasspathElements>
-          <useManifestOnlyJar>false</useManifestOnlyJar>
-          <forkMode>pertest</forkMode>
-          <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false</argLine>
-
-          <systemProperties>
-            <!-- Must disable long polling for automated tests to succeed -->
-            <property>
-              <name>errai.hosted_mode_testing</name>
-              <value>true</value>
-            </property>
-            <!-- Do not accidently package server test marshallers when building 
-              Errai -->
-            <property>
-              <name>errai.marshalling.server.classOutput.enabled</name>
-              <value>false</value>
-            </property>
-          </systemProperties>
-          <includes>
-            <include>**/AllDataBindingTests.java</include>
-          </includes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>jacoco-gwt-maven-plugin</artifactId>
-        <version>0.5.4.201202141554</version>
-        <executions>
-          <execution>
-            <id>jacoco-initialize</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>jacoco-site</id>
-            <phase>site</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
   </build>
 
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
-		<version>${project.version}</version>
+      <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-marshalling</artifactId>
-		<version>${project.version}</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -128,4 +74,65 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/${testOutputDirectory}/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+              </additionalClasspathElements>
+              <useManifestOnlyJar>false</useManifestOnlyJar>
+              <forkMode>pertest</forkMode>
+              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false</argLine>
+
+              <systemProperties>
+                <!-- Must disable long polling for automated tests to succeed -->
+                <property>
+                  <name>errai.hosted_mode_testing</name>
+                  <value>true</value>
+                </property>
+                <!-- Do not accidently package server test marshallers when building Errai -->
+                <property>
+                  <name>errai.marshalling.server.classOutput.enabled</name>
+                  <value>false</value>
+                </property>
+              </systemProperties>
+              <includes>
+                <include>**/AllDataBindingTests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>jacoco-gwt-maven-plugin</artifactId>
+            <version>0.5.4.201202141554</version>
+            <executions>
+              <execution>
+                <id>jacoco-initialize</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>jacoco-site</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

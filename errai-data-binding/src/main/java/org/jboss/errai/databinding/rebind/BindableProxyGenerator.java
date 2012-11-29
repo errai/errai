@@ -50,7 +50,8 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 
 /**
- * Generates a proxy for a {@link Bindable} type.
+ * Generates a proxy for a {@link Bindable} type. A bindable proxy subclasses the bindable type and overrides all
+ * non-final methods to trigger UI updates and fire property change events when required.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -60,7 +61,7 @@ public class BindableProxyGenerator {
 
   public BindableProxyGenerator(MetaClass bindable) {
     this.bindable = bindable;
-    this.agentField = inferAgentFieldName();
+    this.agentField = inferSafeAgentFieldName();
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -275,18 +276,18 @@ public class BindableProxyGenerator {
     return block;
   }
 
-  private ContextualStatementBuilder agent(String field) {
-    return agent().loadField(field);
-  }
-
-  private String inferAgentFieldName() {
+  private String inferSafeAgentFieldName() {
     String fieldName = "agent";
-    while(bindable.getInheritedField(fieldName) != null) {
+    while (bindable.getInheritedField(fieldName) != null) {
       fieldName = "_" + fieldName;
     }
     return fieldName;
   }
-  
+
+  private ContextualStatementBuilder agent(String field) {
+    return agent().loadField(field);
+  }
+
   private ContextualStatementBuilder agent() {
     return Stmt.loadClassMember(agentField);
   }

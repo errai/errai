@@ -30,9 +30,11 @@ public class TestModel {
 
   private int id;
   private String value;
+  
   // the _ here is used to test proper JavaBean property discovery
   private String _name;
   private Integer _age;
+  
   private boolean active;
   private TestModel child;
   

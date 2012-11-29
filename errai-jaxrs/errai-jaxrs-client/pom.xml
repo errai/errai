@@ -22,8 +22,7 @@
       </resource>
     </resources>
     <plugins>
-      <!-- exclude JAX-RS API overrides as they'd pollute the server classpath 
-        in GWTTestCases -->
+      <!-- exclude JAX-RS API overrides as they'd pollute the server classpath in GWTTestCases -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
