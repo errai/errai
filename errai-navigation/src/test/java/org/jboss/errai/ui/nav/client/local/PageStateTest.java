@@ -8,6 +8,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithRenamedStateFields;
 
 import com.google.common.collect.ImmutableMultimap;
 
@@ -189,4 +190,15 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals("string0", page.getStringThing());
   }
 
+  public void testFieldWithGivenName() throws Exception {
+    PageWithRenamedStateFields page = beanManager.lookupBean(PageWithRenamedStateFields.class).getInstance();
+    assertNull(page.getField());
+
+    navigation.goTo(PageWithRenamedStateFields.class, ImmutableMultimap.of("givenName", "value"));
+    assertEquals("value", page.getField());
+
+    // and ensure the field doesn't respond to its real name
+    navigation.goTo(PageWithRenamedStateFields.class, ImmutableMultimap.of("field", "value"));
+    assertNull(page.getField());
+  }
 }
