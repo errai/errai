@@ -19,8 +19,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.jboss.errai.common.client.util.LogUtil.log;
-
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -56,11 +54,11 @@ public final class TemplateUtil {
       throw new IllegalStateException("Template [" + templateFile
               + "] did not contain data-field attribute for field [" + componentType + "." + fieldName + "]");
     }
-    log("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
+    System.out.println("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
 
     if (!element.getTagName().equals(field.getElement().getTagName())) {
-      log("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
+      System.out.println("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
               + field.getElement().getTagName() + "]");
     }
     Element parentElement = element.getParentElement();
@@ -99,7 +97,7 @@ public final class TemplateUtil {
   }
 
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
-        component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
+		component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
   }-*/;
 
   public static Element getRootTemplateElement(String templateContents, final String rootField) {
@@ -107,7 +105,7 @@ public final class TemplateUtil {
     parserDiv.setInnerHTML(templateContents);
 
     if (rootField != null && !rootField.trim().isEmpty()) {
-      log("Locating root element: " + rootField);
+      System.out.println("Locating root element: " + rootField);
       VisitContext<Element> context = Visit.breadthFirst(parserDiv, new Visitor<Element>() {
         @Override
         public void visit(VisitContextMutable<Element> context, Element element) {
@@ -129,7 +127,7 @@ public final class TemplateUtil {
       }
     }
 
-    log(parserDiv.getInnerHTML().trim());
+    System.out.println(parserDiv.getInnerHTML().trim());
 
     return parserDiv.getFirstChildElement();
   }
@@ -137,7 +135,7 @@ public final class TemplateUtil {
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
     final Map<String, Element> childTemplateElements = new LinkedHashMap<String, Element>();
 
-    log("Searching template for fields.");
+    System.out.println("Searching template for fields.");
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
@@ -145,7 +143,7 @@ public final class TemplateUtil {
       @Override
       public void visit(VisitContextMutable<Object> context, Element element) {
         if (element.hasAttribute("data-field")) {
-          log("Located field: " + element.getAttribute("data-field"));
+          System.out.println("Located field: " + element.getAttribute("data-field"));
           childTemplateElements.put(element.getAttribute("data-field"), element);
         }
       }
@@ -195,7 +193,7 @@ public final class TemplateUtil {
   }
 
   private static native JsArray<Node> getAttributes(Element elem) /*-{
-        return elem.attributes;
+		return elem.attributes;
   }-*/;
 
 }
