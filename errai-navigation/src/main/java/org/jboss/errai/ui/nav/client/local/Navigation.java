@@ -69,8 +69,9 @@ public class Navigation {
    */
   public <W extends Widget> void goTo(Class<W> toPage, Multimap<String,String> state) {
     PageNode<W> toPageInstance = navGraph.getPage(toPage);
-    show(toPageInstance, HistoryToken.of(toPageInstance.name(), state));
-    History.newItem(toPageInstance.name(), false); // TODO needs to be full history token
+    HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
+    show(toPageInstance, token);
+    History.newItem(token.toString(), false);
   }
 
   /**
