@@ -71,6 +71,7 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import static org.jboss.errai.common.client.util.LogUtil.log;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
@@ -433,9 +434,9 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] returns void.");
     }
 
-    System.out.println("eventType: " + eventType.getClass() + " -- " + eventType);
-    System.out.println("method: " + method.getClass() + " -- " + method);
-    System.out.println("returnType: " + returnType.getClass() + " -- " + returnType);
+    log("eventType: " + eventType.getClass() + " -- " + eventType);
+    log("method: " + method.getClass() + " -- " + method);
+    log("returnType: " + returnType.getClass() + " -- " + returnType);
 
     MetaParameterizedType parameterizedType = returnType.getParameterizedType();
     if (parameterizedType == null) {
@@ -443,7 +444,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] does not return Type<? extends EventHandler>..");
     }
 
-    System.out.println("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
+    log("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
 
     MetaType[] argTypes = parameterizedType.getTypeParameters();
     if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass
