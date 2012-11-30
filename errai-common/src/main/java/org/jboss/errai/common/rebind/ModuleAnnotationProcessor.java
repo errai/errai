@@ -18,8 +18,6 @@ package org.jboss.errai.common.rebind;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
@@ -57,18 +55,18 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
       final Set<String> currentElements = new LinkedHashSet<String>(allKnownElements.size());
       Writer writer = null;
       try {
-        FileObject fo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf", null);
+        FileObject fo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf");
 
         BufferedReader reader = null;
         try {
-          File existingFile = new File(fo.toUri());
-          if (existingFile.canRead()) {
-            reader = new BufferedReader(new FileReader(existingFile));
-            String line;
-            while((line = reader.readLine()) != null) {
-              currentElements.add(line);
-            }
+          reader = new BufferedReader(fo.openReader(false));
+          String line;
+          while ((line = reader.readLine()) != null) {
+            currentElements.add(line);
           }
+        } catch (Exception e) {
+          // assume file didn't exist (no way to check this using the FileObject interface,
+          // and it throws an UNCHECKED EXCEPTION if you try to open a reader for a nonexistant file)
         } finally {
           closeQuietly(reader);
         }
