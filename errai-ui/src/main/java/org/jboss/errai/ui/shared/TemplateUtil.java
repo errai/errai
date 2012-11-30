@@ -18,6 +18,7 @@ package org.jboss.errai.ui.shared;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
@@ -36,6 +37,8 @@ import com.google.gwt.user.client.ui.Widget;
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public final class TemplateUtil {
+  private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
+
   private TemplateUtil() {
   }
 
@@ -54,11 +57,11 @@ public final class TemplateUtil {
       throw new IllegalStateException("Template [" + templateFile
               + "] did not contain data-field attribute for field [" + componentType + "." + fieldName + "]");
     }
-    System.out.println("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
+    logger.info("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
 
     if (!element.getTagName().equals(field.getElement().getTagName())) {
-      System.out.println("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
+      logger.warning("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
               + field.getElement().getTagName() + "]");
     }
     Element parentElement = element.getParentElement();
@@ -105,7 +108,7 @@ public final class TemplateUtil {
     parserDiv.setInnerHTML(templateContents);
 
     if (rootField != null && !rootField.trim().isEmpty()) {
-      System.out.println("Locating root element: " + rootField);
+      logger.info("Locating root element: " + rootField);
       VisitContext<Element> context = Visit.breadthFirst(parserDiv, new Visitor<Element>() {
         @Override
         public void visit(VisitContextMutable<Element> context, Element element) {
@@ -127,7 +130,7 @@ public final class TemplateUtil {
       }
     }
 
-    System.out.println(parserDiv.getInnerHTML().trim());
+    logger.info(parserDiv.getInnerHTML().trim());
 
     return parserDiv.getFirstChildElement();
   }
@@ -135,7 +138,7 @@ public final class TemplateUtil {
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
     final Map<String, Element> childTemplateElements = new LinkedHashMap<String, Element>();
 
-    System.out.println("Searching template for fields.");
+    logger.info("Searching template for fields.");
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
@@ -143,7 +146,7 @@ public final class TemplateUtil {
       @Override
       public void visit(VisitContextMutable<Object> context, Element element) {
         if (element.hasAttribute("data-field")) {
-          System.out.println("Located field: " + element.getAttribute("data-field"));
+          logger.info("Located field: " + element.getAttribute("data-field"));
           childTemplateElements.put(element.getAttribute("data-field"), element);
         }
       }
