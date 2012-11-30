@@ -3,11 +3,15 @@ package org.jboss.errai.ioc.async.test.beanmanager.client;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.ADependent;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Foo;
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.TestInterface;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+
+import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -98,4 +102,20 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
       }
     });
   }
+
+  public void testLookupFromSuperTypes() {
+    delayTestFinish(10000);
+
+    Container.runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Collection<AsyncBeanDef<TestInterface>> asyncBeanDefs = IOC.getAsyncBeanManager().lookupBeans(TestInterface.class);
+
+        assertEquals(2, asyncBeanDefs.size());
+
+        finishTest();
+      }
+    });
+  }
 }
+

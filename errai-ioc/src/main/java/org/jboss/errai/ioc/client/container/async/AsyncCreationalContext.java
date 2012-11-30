@@ -116,6 +116,14 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     }
   }
 
+  public <T> void getSingletonInstanceOrNew(final AsyncInjectionContext injectionContext,
+                                            final AsyncBeanProvider<T> beanProvider,
+                                            final CreationalCallback<T> creationalCallback,
+                                            final Class<T> beanType,
+                                            final Annotation[] qualifiers) {
+    getSingletonInstanceOrNew(injectionContext, beanProvider, creationalCallback, beanType, beanType, qualifiers);
+  }
+
   /**
    * Implements the singleton loading logic for beans. Because of the lack of ordering guarantees in
    * asynchronous loading, all attempts to load a reference to a singleton should happen via this method within
@@ -139,6 +147,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
   public <T> void getSingletonInstanceOrNew(final AsyncInjectionContext injectionContext,
                                             final AsyncBeanProvider<T> beanProvider,
                                             final CreationalCallback<T> creationalCallback,
+                                            final Class type,
                                             final Class<T> beanType,
                                             final Annotation[] qualifiers) {
 
@@ -146,6 +155,14 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
       @Override
       public void callback(final T inst) {
         if (inst != null) {
+          /**
+           * If the beanType != type, then this is an aliased reference and we should record it. Otherwise,
+           * it must be a lazily initialized singleton reference, and therefore shouldn't be recorded.
+           */
+          if (!beanType.equals(type)) {
+            injectionContext.addBean(type, beanType, beanProvider, inst, qualifiers);
+          }
+
           creationalCallback.callback(inst);
         }
         else {
@@ -166,7 +183,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           final CreationalCallback<T> callback = new CreationalCallback<T>() {
             @Override
             public void callback(final T beanInstance) {
-              injectionContext.addBean(beanType, beanType, beanProvider, beanInstance, qualifiers);
+              injectionContext.addBean(type, beanType, beanProvider, beanInstance, qualifiers);
               creationalCallback.callback(beanInstance);
               notifyAllWaiting(beanRef, beanInstance);
 

@@ -47,5 +47,6 @@ public abstract class AbstractAsyncInjector extends AbstractInjector {
       for (final RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
       }
-    }  }
+    }
+  }
 }

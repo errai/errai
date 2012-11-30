@@ -169,8 +169,6 @@ public class TypeInjector extends AbstractInjector {
     ctx.getBootstrapBuilder().privateField(creationalCallbackVarName, creationCallbackRef).modifiers(Modifier.Final)
         .initializesWith(callbackBuilder.finish().finish()).finish();
 
-    final Statement retVal;
-
     if (isSingleton()) {
        /*
         if the injector is for a singleton, we create a variable to hold the singleton reference in the bootstrapper
