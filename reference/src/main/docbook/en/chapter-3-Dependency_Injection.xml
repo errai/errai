@@ -104,19 +104,55 @@ public class TimeService {
         <emphasis role="italics">top-level</emphasis>
         providers will be available for injection in any managed component within the container.
       </para>
-      <para>Out of the box, Errai IOC implements three default top-level providers:</para>
+      <para>
+        Out of the box, Errai IOC implements these default top-level providers, all defined in the
+        <code>org.jboss.errai.ioc.client.api.builtin</code>
+        package:
+      </para>
       <itemizedlist>
          <listitem>
             <para>
-               <code>org.jboss.errai.ioc.client.api.builtin.MessageBusProvider       :</code>
-            Makes an instance of
-            <code>MessageBus</code>
+               <code>CallerProvider         :</code>
+            Makes RPC
+            <code>Caller&lt;T&gt;</code>
+            objects available for injection.
+          </para>
+         </listitem>
+         <listitem>
+            <para>
+               <code>DisposerProvider       :</code>
+            Makes Errai IoC
+            <code>Disposer&lt;T&gt;</code>
+            objects available for injection.
+          </para>
+         </listitem>
+         <listitem>
+            <para>
+               <code>InitBallotProvider     :</code>
+            Makes instances of
+            <code>InitBallot</code>
             available for injection.
           </para>
          </listitem>
          <listitem>
             <para>
-               <code>org.jboss.errai.ioc.client.api.builtin.RequestDispatchProvider  :</code>
+               <code>IOCBeanManagerProvider :</code>
+            Makes Errai's client-side bean manager,
+            <code>IOCBeanManager</code>
+            , available for injection.
+          </para>
+         </listitem>
+         <listitem>
+            <para>
+               <code>MessageBusProvider     :</code>
+            Makes Errai's client-side
+            <code>MessageBus</code>
+            singleton available for injection.
+          </para>
+         </listitem>
+         <listitem>
+            <para>
+               <code>RequestDispatcherProvider :</code>
             Makes an instance of the
             <code>RequestDispatcher</code>
             available for injection.
@@ -124,9 +160,17 @@ public class TimeService {
          </listitem>
          <listitem>
             <para>
-               <code>org.jboss.errai.ioc.client.api.builtin.ConsumerProvider         :</code>
-            Makes event
-            <code>Consumer&lt;?&gt;</code>
+               <code>RootPanelProvider      :</code>
+            Makes GWT's
+            <code>RootPanel</code>
+            singleton injectable.
+          </para>
+         </listitem>
+         <listitem>
+            <para>
+               <code>SenderProvider         :</code>
+            Makes MessageBus
+            <code>Sender&lt;T&gt;</code>
             objects available for injection.
           </para>
          </listitem>
@@ -182,7 +226,7 @@ Guice.createInjector(new AbstractModule() {
       </para>
       <para>The classpath will be searched for all annotated providers at compile time.</para>
       <important>
-         <para>Top-level providers are treated as regular beans. And as such may inject dependencies – particularly from other top-level providers – as necessary.</para>
+         <para>Top-level providers are regular beans, so they can inject dependencies–particularly from other top-level providers–as necessary.</para>
       </important>
    </section>
    <section id="sid-5931332">
@@ -406,9 +450,7 @@ public void MyClientBean {
             <code>MyRpcInterface</code>
             . For more information on defining RPC proxies see
             <xref linkend="sid-5931313"/>
-            and
-            <xref linkend="sid-9470107"/>
-            in Errai JAX-RS.
+            and Creating Requests in Errai JAX-RS.
           </para>
          </section>
       </section>

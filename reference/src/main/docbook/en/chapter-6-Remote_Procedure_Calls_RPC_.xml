@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="sid-5931313">
    <title>Remote Procedure Calls (RPC)</title>
-   <para>ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach to exposing services to the clients.</para>
+   <para>ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach for exposing services to the clients.</para>
    <para>Please note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</para>
    <para>Creating a service is straight forward. It requires the definition of a remote interface, and a service class which implements it. See the following:</para>
    <informalexample>
@@ -132,7 +132,7 @@ MessageBuilder.createCall(
    </section>
    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-ClientsideInterceptors">
       <title>Client-side Interceptors</title>
-      <para>Client-side remote call interceptors provide the ability to manipulate or bypass the remote call before it's being sent. This is useful for implementing crosscutting concerns like caching e.g. when the remote call should be avoided if the data is already cached locally.</para>
+      <para>Client-side remote call interceptors provide the ability to manipulate or bypass the remote call before it's being sent. This is useful for implementing crosscutting concerns like caching, for example when the remote call should be avoided if the data is already cached locally.</para>
       <para>
         To have a remote call intercepted, either an interface method or the remote interface type has to be annotated with
         <code>@InterceptedCall</code>
@@ -177,9 +177,13 @@ public class MyCacheInterceptor implements RpcInterceptor {
         method provides access to the intercepted method's name and read/write access to the parameter values provided at the call site.
       </para>
       <para>
-        Calling proceed executes the next interceptor in the chain or the actual remote call if all interceptors have been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of this method accepting a
+        Calling
+        <code>proceed</code>
+        executes the next interceptor in the chain or the actual remote call if all interceptors have already been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of
+        <code>proceed</code>
+        accepting a
         <code>RemoteCallback</code>
-        has to be used.
+        has to be used instead.
       </para>
       <para>
         The result of the remote call can be manipulated by calling

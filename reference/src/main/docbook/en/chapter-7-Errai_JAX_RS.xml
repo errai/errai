@@ -34,15 +34,15 @@
       <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5833096">Quickstart Guide</ulink>
       for details.
     </para>
-   <section id="sid-47972396">
+   <section id="sid-19398997_ErraiJAX-RS-ServerSidePrerequisites">
       <title>Server-Side Prerequisites</title>
-      <section id="sid-47972396_Server-SidePrerequisites-ServerSideJAXRSProvider">
-         <title>Server-Side JAX-RS Provider</title>
+      <section id="sid-19398997_ErraiJAX-RS-ServerSideJAXRSImplementation">
+         <title>Server-Side JAX-RS Implementation</title>
          <para>Errai's JAX-RS support consists mostly of features that make the client side easier and more reliable to maintain. You will need to use an existing third-party JAX-RS implementation on the server side. All Java EE 6 application servers include such a module out-of-the-box. If you are developing an application that you intend to deploy on a plain servlet container, you will have to choose a JAX-RS implementation (for example, RestEasy) and configure it properly in your web.xml.</para>
          <para>Alternatively, you could keep your REST resource layer in a completely separate web application hosted on the same server (perhaps build an Errai JAX-RS client against an existing REST service you developed previously). In this case, you could factor out the shared JAX-RS interface into a shared library, leaving the implementation in the non-Errai application.</para>
          <para>Finally, you can take advantage of the cross-origin resource sharing (CoRS) feature in modern browsers and use Errai JAX-RS to send requests to a third-party server. The third-party server would have to be configured to allow cross-domain requests. In this case, you would write a JAX-RS-Annotated interface describing the remote REST resources, but you would not create an implementation of that interface.</para>
       </section>
-      <section id="sid-47972396_Server-SidePrerequisites-SharedJAXRSInterface">
+      <section id="sid-19398997_ErraiJAX-RS-SharedJAXRSInterface">
          <title>Shared JAX-RS Interface</title>
          <para>For Errai's JAX-RS support to work, an interface that bears the JAX-RS annotations must be contained within a GWT module in your project. You will also want these interfaces visible to server-side code so that your JAX-RS resource classes can implement them. This keeps the whole setup typesafe, and reduces duplication to the bare minimum. The natural solution, then is to put the JAX-RS interfaces under the client.shared package within your GWT module:</para>
          <itemizedlist>
@@ -162,7 +162,7 @@ public class CustomerServiceImpl implements CustomerService {
          </important>
       </section>
    </section>
-   <section id="sid-9470107">
+   <section id="sid-19398997_ErraiJAX-RS-CreatingRequests">
       <title>Creating Requests</title>
       <para>This section assumes you have already set up the CustomerService JAX-RS endpoint as described in the previous section.</para>
       <para>
@@ -185,13 +185,13 @@ Button create = new Button("Create", new ClickHandler() {
       </example>
       <para>
         For details on the callback mechanism see
-        <xref linkend="sid-9470124"/>
+        <link linkend="sid-19398997_ErraiJAX-RS-HandlingResponses">Handling Responses</link>
         .
       </para>
       <note>
          <para>The JAX-RS interfaces need to be visible to the GWT compiler and must therefore reside within the client packages (e.g. client.shared).</para>
       </note>
-      <section id="sid-9470107_CreatingRequests-ProxyInjection">
+      <section id="sid-19398997_ErraiJAX-RS-ProxyInjection">
          <title>Proxy Injection</title>
          <para>
           Injectable proxies can be used as an alternative to calling
@@ -216,7 +216,7 @@ customerService.call(callback).listAllCustomers();
          </informalexample>
       </section>
    </section>
-   <section id="sid-9470124">
+   <section id="sid-19398997_ErraiJAX-RS-HandlingResponses">
       <title>Handling Responses</title>
       <para>
         An instance of Errai's
@@ -245,13 +245,15 @@ RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
         <code>RemoteCallback</code>
         is the
         <code>ResponseCallback</code>
-        which provides access to the
+        which can be used as an alternative. It provides access to the
         <code>Response</code>
-        object representing the underlying HTTP response. This is useful when more details of the HTTP response are needed, such as headers, the status code, etc. This
+        object representing the underlying HTTP response. This is useful when more details of the HTTP response are needed, such as headers, the status code, etc. The
         <code>ResponseCallback</code>
-        can be provided as an alternative to the
-        <code>RemoteCallback</code>
-        for the method result.
+        can also be used for JAX-RS interface methods that return a
+        <code>javax.ws.rs.core.Response</code>
+        type. The
+        <code>MarshallingWrapper</code>
+        class can be used to demarshall the response body to an entity of the desired type.
       </para>
       <informalexample>
          <programlisting language="java">
@@ -297,7 +299,7 @@ ErrorCallback errorCallback = new ErrorCallback() {
 </programlisting>
       </informalexample>
    </section>
-   <section id="sid-50233520">
+   <section id="sid-19398997_ErraiJAX-RS-ClientsideInterceptors">
       <title>Client-side Interceptors</title>
       <para>Client-side remote call interceptors provide the ability to manipulate or bypass the request before it's being sent. This is useful for implementing crosscutting concerns like caching or security features e.g:</para>
       <itemizedlist>
@@ -359,9 +361,11 @@ public class MyCacheInterceptor implements RestClientInterceptor {
       <para>
         Calling
         <code>proceed</code>
-        executes the next interceptor in the chain or the actual remote call if all interceptors have been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of this method accepting a
+        executes the next interceptor in the chain or the actual remote call if all interceptors have already been executed. If access to the result of the (asynchronous) remote call is needed in the interceptor, one of the overloaded versions of
+        <code>proceed</code>
+        accepting a
         <code>RemoteCallback</code>
-        has to be used.
+        has to be used instead.
       </para>
       <para>
         The result of the remote call can be manipulated by calling
@@ -377,7 +381,7 @@ public class MyCacheInterceptor implements RestClientInterceptor {
         provided at the call site.
       </para>
    </section>
-   <section id="sid-9470133">
+   <section id="sid-19398997_ErraiJAX-RS-WireFormat">
       <title>Wire Format</title>
       <para>
         Errai's JSON format will be used to serialize/deserialize your custom types. See
@@ -386,13 +390,13 @@ public class MyCacheInterceptor implements RestClientInterceptor {
       </para>
       <para>
         Alternatively, a Jackson compatible JSON format can be used on the wire. See
-        <xref linkend="sid-9470135"/>
+        <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link>
         for details on how to enable Jackson marshalling.
       </para>
    </section>
-   <section id="sid-9470135">
-      <title>Errai JAX-RS Configuration</title>
-      <section id="sid-9470135_ErraiJAX-RSConfiguration-ConfiguringthedefaultrootpathofJAXRSendpoints">
+   <section id="sid-19398997_ErraiJAX-RS-Configuration">
+      <title>Configuration</title>
+      <section id="sid-19398997_ErraiJAX-RS-ConfiguringthedefaultrootpathofJAXRSendpoints">
          <title>Configuring the default root path of JAX-RS endpoints</title>
          <para>
           All paths specified using the
@@ -424,7 +428,7 @@ RestClient.setApplicationRoot("/MyJaxRsEndpointPath");
          </informalexample>
          <para>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</para>
       </section>
-      <section id="sid-9470135_ErraiJAX-RSConfiguration-EnablingJacksonmarshalling">
+      <section id="sid-19398997_ErraiJAX-RS-EnablingJacksonmarshalling">
          <title>Enabling Jackson marshalling</title>
          <para>
           The following options are available for activating Jackson marshalling on the client. Note that this is a client-side configuration, the JAX-RS endpoint is assumed to already return a Jackson representation (Jackson is supported by all JAX-RS implementations). The

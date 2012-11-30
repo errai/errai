@@ -10,7 +10,7 @@
                <para>Compile time referential safety (i.e. “no broken links”)</para>
             </listitem>
             <listitem>
-               <para>Can generate storyboard of the application’s navigation flow at compile time</para>
+               <para>Generates a storyboard of the application’s navigation flow at compile time</para>
             </listitem>
          </itemizedlist>
       </listitem>
@@ -29,7 +29,7 @@
          <para>Integrates cleanly with Errai UI templates, but also works well with other view technologies.</para>
       </listitem>
       <listitem>
-         <para>Builds on Errai CDI</para>
+         <para>Builds on Errai IoC &amp; CDI</para>
       </listitem>
    </itemizedlist>
    <section id="sid-54493676_ErraiUINavigation-GettingStarted">
@@ -78,7 +78,9 @@
         singleton offers control over the navigation system as a whole.
       </para>
       <para>
-        The Navigation singleton owns a GWT Panel, called the
+        The
+        <code>Navigation</code>
+        singleton owns a GWT Panel called the
         <emphasis role="italics">navigation panel</emphasis>
         . This panel always contains a widget corresponding to the the fragment ID (the part after the # symbol) in the browser's location bar. Whenever the fragment ID changes for any reason (for example, because the user pressed the back button, navigated to a bookmarked URL, or simply typed a fragment ID by hand), the widget in the navigation panel is replaced by the widget associated with that fragment ID. Likewise, when the application asks the navigation system to follow a link, the fragment ID in the browser's location bar is updated to reflect the new current page.
       </para>
@@ -116,6 +118,16 @@ public class ItemListPage extends Composite {
 }
 </programlisting>
          </informalexample>
+         <important>
+            <title>Navigation and Errai UI</title>
+            <para>
+            Any widget can be a page. This includes Errai UI
+            <code>@Templated</code>
+            classes! Simply annotate any Errai UI templated class with
+            <code>@Page</code>
+            , and it will become a page that can be navigated to.
+          </para>
+         </important>
          <section id="sid-54493676_ErraiUINavigation-TheStartingPage">
             <title>The Starting Page</title>
             <para>
@@ -146,13 +158,130 @@ public class WelcomePage extends Composite {
          </section>
          <section id="sid-54493676_ErraiUINavigation-PageLifecycle">
             <title>Page Lifecycle</title>
-            <para>The lifecycle of a Page instance is governed by CDI scope: Dependent and implict-scoped beans are instantiated each time the user navigates to them, and Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.</para>
             <para>
-            Any widget can be a page. This includes Errai UI
-            <code>@Templated</code>
-            classes! Simply annotate any Errai UI templated class with
-            <code>@Page</code>
-            , and it will become a page that can be navigated to.
+            The
+            <code>@PageShowing</code>
+            and
+            <code>@PageHiding</code>
+            annotations allow a page widget to be notified when it is about to be displayed or hidden:
+          </para>
+            <informalexample>
+               <programlisting language="java">
+@Page
+public class ItemPage extends VerticalPanel {
+
+  @PageShowing
+  private void preparePage() {
+  }
+
+  @PageHiding
+  private void unpreparePage() {
+  }
+
+  // Anything goes...
+}
+</programlisting>
+            </informalexample>
+            <para>
+            The
+            <code>@PageShowing</code>
+            method is invoked just before the page widget is inserted into the navigation content panel (thus it is not yet attached to the live DOM tree.) The
+            <code>@PageShowing</code>
+            method is permitted one optional parameter of type
+            <code>HistoryToken</code>
+            —more on this in the next section.
+          </para>
+            <para>
+            The
+            <code>@PageHiding</code>
+            method is invoked just before the page widget is removed from the navigation content panel (thus it is still attached to the live DOM tree.)
+          </para>
+            <para>The lifespan of a Page instance is governed by CDI scope: Dependent and implict-scoped page beans are instantiated each time the user navigates to them, whereas Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.</para>
+         </section>
+         <section id="sid-54493676_ErraiUINavigation-PageStateParameters">
+            <title>Page State Parameters</title>
+            <para>A page widget will often represent a view on on instance of a class of things. For example, there might be an ItemPage that displays a particular item available at a store. In cases like this, it's important that the bookmarkable navigation URL includes not only the name of the page but also an identifier for the particular item being displayed.</para>
+            <para>This is where page state parameters come in. Consider the following page widget:</para>
+            <informalexample>
+               <programlisting language="java">
+@Page
+public class ItemPage extends VerticalPanel {
+
+  @PageState
+  private int itemId;
+
+  // Anything goes...
+}
+</programlisting>
+            </informalexample>
+            <para>
+            This page would be reachable at a URL like
+            <code>
+                  <ulink url="http://www.company.com/store/#ItemPage;itemId=4"/>
+               </code>
+            . Before the page was displayed, the Errai UI Navigation framework would write the
+            <code>int</code>
+            value
+            <code>4</code>
+            into the
+            <code>itemId</code>
+            field.
+          </para>
+            <para>
+            There are three ways to pass state information to a page: by passing a Multimap to
+            <code>TransitionTo.go()</code>
+            ; by passing a Multimap to
+            <code>Navigation.goTo()</code>
+            , or by including the state information in the fragment identifier of a hyperlink as illustrated in the previous paragraph (use the
+            <code>HistoryToken</code>
+            class to construct such a fragment ID properly.)
+          </para>
+            <para>
+            A page widget can have any number of
+            <code>@PageState</code>
+            fields. The fields can be of any primitive or boxed primitive type (except
+            <code>char</code>
+            or
+            <code>Character</code>
+            ),
+            <code>String</code>
+            , or a
+            <code>Collection</code>
+            ,
+            <code>List</code>
+            , or
+            <code>Set</code>
+            of the allowable scalar types. Nested collections are not supported.
+          </para>
+            <para>
+               <code>@PageState</code>
+            fields can be private, protected, default access, or public. They are always updated by direct field access; never via a setter method. The updates occur just before the
+            <code>@PageShowing</code>
+            method is invoked.
+          </para>
+            <para>
+            In addition to receiving page state information via direct writes to
+            <code>@PageState</code>
+            fields, you can also receive the whole Multimap in the
+            <code>@PageShowing</code>
+            method through a parameter of type
+            <code>HistoryToken</code>
+            . Whether or not the
+            <code>@PageShowing</code>
+            method has such a parameter, the
+            <code>@PageState</code>
+            fields will still be written as usual.
+          </para>
+            <para>
+            Page state values are represented in the URL much like HTML form parameters: as key=value pairs separated by the ampersand (
+            <code>&amp;</code>
+            ) character. Multi-valued page state fields are represented by repeated occurrences of the same key. If a key corresponding to a
+            <code>@PageState</code>
+            field is absent from the state information passed to the page, the framework writes a default value:
+            <code>null</code>
+            for scalar Object fields, the JVM default (0 or false) for primitives, and an empty collection for collection-valued fields. To construct and parse state tokens programmatically, use the
+            <code>HistoryToken</code>
+            class.
           </para>
          </section>
       </section>
@@ -213,7 +342,7 @@ public class WelcomePage extends Composite {
       <section id="sid-54493676_ErraiUINavigation-InstallingtheNavigationPanelintotheUserInterface">
          <title>Installing the Navigation Panel into the User Interface</title>
          <para>
-          Now that you've created several pages and injected some links between them, there is one last step to seeing the results in the user interface: you must add the navigation panel somewhere in the document. The best place to do this is during application startup, for example in the
+          Now that you've created several pages and injected some links between them, there is one last step to seeing the results in the user interface: you must add the navigation panel somewhere in the document. The best time to do this is during application startup, for example in the
           <code>@PostConstruct</code>
           method of your
           <code>@EntryPoint</code>
