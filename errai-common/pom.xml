@@ -96,18 +96,4 @@
         </dependency>
 
     </dependencies>
-    
-    <build>
-		<plugins>
-		      <plugin>
-		        <artifactId>maven-compiler-plugin</artifactId>
-		        <!-- javac should not try to apply the ModuleAnnotationProcessor defined in this project
-		        Enabled by default, it would fail the compilation in JDK 6 and worse, 
-		        would silently fail the compilation but not the build in JDK7 -->
-		        <configuration>
-		          <proc>none</proc>
-		        </configuration>
-		      </plugin>
-		</plugins>
-    </build>
 </project>

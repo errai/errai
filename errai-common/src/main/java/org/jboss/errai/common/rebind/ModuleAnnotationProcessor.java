@@ -16,16 +16,6 @@
 
 package org.jboss.errai.common.rebind;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -35,6 +25,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -53,59 +47,24 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
     allKnownElements.addAll(roundEnvironment.getRootElements());
 
     if (roundEnvironment.processingOver()) {
-
-      final Set<String> currentElements = new LinkedHashSet<String>(allKnownElements.size());
-      Writer writer = null;
-      try {
-        FileObject fo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf", null);
-
-        BufferedReader reader = null;
-        try {
-          File existingFile = new File(fo.toUri());
-          if (existingFile.canRead()) {
-            reader = new BufferedReader(new FileReader(existingFile));
-            String line;
-            while((line = reader.readLine()) != null) {
-              currentElements.add(line);
-            }
-          }
-        } finally {
-          closeQuietly(reader);
-        }
-
-        boolean hasContentChanged = false;
-        for (final Element e : allKnownElements) {
-          if (currentElements.add(e.toString())) {
-            hasContentChanged = true;
-          }
-        }
-
-        if (hasContentChanged) {
-          StringBuilder newContent = new StringBuilder();
-          for(String e : currentElements) {
-            newContent.append(e).append('\n');
-          }
-          writer = fo.openWriter();
-          writer.write(newContent.toString());
-        }
-
-      } catch (IOException e) {
-        e.printStackTrace();
-
-      } finally {
-        closeQuietly(writer);
+      final StringBuilder builder = new StringBuilder();
+      for (final Element e : allKnownElements) {
+        builder.append(e.toString()).append('\n');
       }
+
+      try {
+        final FileObject fo
+                = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf", null);
+
+        final Writer writer = fo.openWriter();
+        writer.write(builder.toString());
+        writer.close();
+      }
+      catch (IOException e) {
+        e.printStackTrace();
+      }
+
     }
     return false;
-  }
-
-  private void closeQuietly(Closeable closeable) {
-    if (closeable !=null) {
-      try {
-        closeable.close();
-      } catch (Exception e) {
-        //ignore
-      }
-    }
   }
 }
