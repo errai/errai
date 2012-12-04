@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Label;
 
 @Dependent
 @Templated("#main")
-public class ItemWidget extends Composite {
+public class GroceryItemWidget extends Composite implements HasModel<Item> {
 
   @Inject private @AutoBound DataBinder<Item> itemBinder;
   @Inject private @Bound @DataField Label name;
@@ -59,8 +59,9 @@ public class ItemWidget extends Composite {
    *         proxy. If you modify the item directly (rather than via the proxy)
    *         then this UI widget will not update.
    */
-  public Item setItem(Item item) {
+  @Override
+  public void setModel(Item item) {
     System.out.println("ItemWidget: adopting model object " + System.identityHashCode(item));
-    return itemBinder.setModel(item, InitialState.FROM_MODEL);
+    itemBinder.setModel(item, InitialState.FROM_MODEL);
   }
 }
