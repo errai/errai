@@ -6,7 +6,6 @@
     <artifactId>errai-marshalling</artifactId>
     <packaging>jar</packaging>
 
-    <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
@@ -44,26 +43,17 @@
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
             <version>1</version>
-            <!--<scope>provided</scope> -->
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>jsr250-api</artifactId>
             <version>1.0</version>
-            <!--<scope>provided</scope> -->
         </dependency>
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
             <version>1.0-SP4</version>
-            <!--<scope>provided</scope>-->
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
-        <!--<artifactId>ecj</artifactId>-->
-        <!--<version>3.7.1</version>-->
-        <!--</dependency>-->
-
 
         <dependency>
             <groupId>com.google.gwt</groupId>
