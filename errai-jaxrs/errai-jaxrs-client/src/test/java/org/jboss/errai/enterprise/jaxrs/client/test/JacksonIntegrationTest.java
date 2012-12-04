@@ -194,7 +194,6 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     call(JacksonTestService.class,
         new RemoteCallback<String>() {
-          @SuppressWarnings("unchecked")
           @Override
           public void callback(String jackson) {
             assertNotNull("Server failed to parse JSON using Jackson", jackson);

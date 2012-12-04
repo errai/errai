@@ -26,7 +26,7 @@ import org.jboss.errai.ioc.client.api.Caller;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
- * EntryPoint used for caller injection.
+ * EntryPoint to test caller injection.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
