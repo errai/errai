@@ -54,8 +54,7 @@ Release Steps
         % rm src/main/docbook/en/chapter-*
         % cp $newdocs/chapter-* src/main/docbook/en/
         % git add src
-     ```
-      
+     ``` 
   * Don't upload to JBoss FTP server! The release upload script will do this later.
 
 1. Update quickstart docs to reflect the new version number
