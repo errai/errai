@@ -11,7 +11,8 @@ import com.google.gwt.user.client.ui.Widget;
 @Dependent
 @Page
 public class CircularRef2 extends Widget {
-  @Inject TransitionTo<CircularRef1> linkToCR1;
+  // this field is public to protect against regressions of ERRAI-450
+  @Inject public TransitionTo<CircularRef1> linkToCR1;
 
   // you would never do this in real life; this is just exposing the field for test purposes!
   public TransitionTo<CircularRef1> getLink() {

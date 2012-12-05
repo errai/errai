@@ -16,10 +16,9 @@ public class PageTransitionProvider implements ContextualTypeProvider<Transition
   @Inject Navigation navigation;
 
   @Override
-  public TransitionTo<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  public TransitionTo provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     Class<Widget> toPageType = (Class<Widget>) typeargs[0];
-
     return new TransitionTo<Widget>(navigation, toPageType);
   }
 
