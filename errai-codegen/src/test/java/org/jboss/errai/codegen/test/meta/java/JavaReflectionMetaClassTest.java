@@ -12,7 +12,7 @@ public class JavaReflectionMetaClassTest extends AbstractMetaClassTest {
   }
 
   @Override
-  protected Class<? extends MetaClass> getTypeOFMetaClassBeingTested() {
+  protected Class<? extends MetaClass> getTypeOfMetaClassBeingTested() {
     return JavaReflectionClass.class;
   }
 

@@ -56,7 +56,7 @@ public abstract class AbstractMetaClassTest {
    */
   private MetaClass getMetaClass(Class<?> javaClass) {
     MetaClass impl = getMetaClassImpl(javaClass);
-    assertEquals(getTypeOFMetaClassBeingTested(), impl.getClass());
+    assertEquals(getTypeOfMetaClassBeingTested(), impl.getClass());
     return impl;
   }
 
@@ -71,7 +71,7 @@ public abstract class AbstractMetaClassTest {
   /**
    * Returns the type of MetaClass that will be returned from {@link #getMetaClassImpl(Class)}.
    */
-  protected abstract Class<? extends MetaClass> getTypeOFMetaClassBeingTested();
+  protected abstract Class<? extends MetaClass> getTypeOfMetaClassBeingTested();
 
   @Test
   public void testInternalNameForOneDimensionalPrimitiveArray() {
@@ -136,12 +136,16 @@ public abstract class AbstractMetaClassTest {
 
   @Test
   public void testIsAssignableFromComparisonForNested() {
-    ObjectWithNested objectWithNested = new ObjectWithNested();
-
     MetaClass interfaceClass = getMetaClass(TestInterface.class);
-    MetaClass metaClass = getMetaClass(objectWithNested.getMyNestedInterface().getClass());
+    MetaClass metaHolderClass = getMetaClass(ObjectWithNested.class);
 
-    assertTrue("should be assignable", interfaceClass.isAssignableFrom(metaClass));
+    // dig out the nested interface from the holder class and ensure it's what we were looking for
+    MetaClass nestedInterface = metaHolderClass.getDeclaredClasses()[0];
+    assertEquals("MyNestedInterface", nestedInterface.getName());
+    assertEquals(getTypeOfMetaClassBeingTested(), nestedInterface.getClass());
+
+    assertTrue("MyNestedInterface should be assignable from TestInterface",
+            interfaceClass.isAssignableFrom(nestedInterface));
   }
 
   @Test
