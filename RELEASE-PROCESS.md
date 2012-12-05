@@ -31,12 +31,14 @@ Release Steps
   * Copy and commit the docbook files in /reference. Clean out the old chapters first
      (otherwise there will be old cruft left over if any chapters were renamed or renumbered):
 
+      ```
          % cd reference
          % rm src/main/docbook/en/chapter-*
          % cp $newdocs/*.xml src/main/docbook/en/
          % mvn clean xml:transform
          % cp target/generated-resources/xml/xslt/en/*.xml src/main/docbook/en/
          % git add src
+      ```
   * Edit the version numbers in Book_Info.xml to reflect release version
   * Don't upload to JBoss FTP server! The release upload script will do this later.
 
@@ -47,10 +49,13 @@ Release Steps
      each name and one of each number (there will be old cruft left over if any chapters
      were renamed or renumbered)
 
-         % cd quickstart
-         % rm src/main/docbook/en/chapter-*
-         % cp $newdocs/chapter-* src/main/docbook/en/
-         % git add src
+     ```
+        % cd quickstart
+        % rm src/main/docbook/en/chapter-*
+        % cp $newdocs/chapter-* src/main/docbook/en/
+        % git add src
+     ```
+      
   * Don't upload to JBoss FTP server! The release upload script will do this later.
 
 1. Update quickstart docs to reflect the new version number
@@ -87,8 +92,10 @@ Release Steps
      AS7 has to be running.
   * Now test the archetypes you just installed (use instructions from quickstart guides)
   * Check generated app's pom.xml for correct version
-
-          % mvn gwt:run
+ 
+    ```
+    % mvn gwt:run
+    ```
 
 1. Create the a-la-carte binary Errai distribution and docs
 
