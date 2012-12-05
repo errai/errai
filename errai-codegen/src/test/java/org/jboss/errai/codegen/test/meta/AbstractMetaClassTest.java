@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.test;
+package org.jboss.errai.codegen.test.meta;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.test.model.ObjectWithNested;
 import org.jboss.errai.codegen.test.model.TestInterface;
 import org.jboss.errai.codegen.test.model.tree.Child;
@@ -39,38 +36,67 @@ import org.junit.Test;
 import org.mvel2.util.NullType;
 
 /**
- * Epic team effort!
+ * Subclassable container for the test cases that guarantee an implementation of
+ * MetaClass conforms to the general contract. Each implementation of MetaClass
+ * should have a corresponding subclass of this test. This way, every
+ * implementation of MetaClass will be subjected to the same set of tests.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class MetaClassTest {
+public abstract class AbstractMetaClassTest {
+
+  /**
+   * Requests the MetaClass impl from the subclass and checks that it's the
+   * expected subtype of MetaClass before returning it.
+   *
+   * @param javaClass
+   * @return
+   */
+  private MetaClass getMetaClass(Class<?> javaClass) {
+    MetaClass impl = getMetaClassImpl(javaClass);
+    assertEquals(getTypeOFMetaClassBeingTested(), impl.getClass());
+    return impl;
+  }
+
+  /**
+   * Returns a MetaClass object--of the type being tested--that represents {@code javaClass}.
+   *
+   * @param javaClass The Java class type being requested.
+   * @return an instance of the subtype of MetaClass that's being tested.
+   */
+  protected abstract MetaClass getMetaClassImpl(Class<?> javaClass);
+
+  /**
+   * Returns the type of MetaClass that will be returned from {@link #getMetaClassImpl(Class)}.
+   */
+  protected abstract Class<? extends MetaClass> getTypeOFMetaClassBeingTested();
 
   @Test
   public void testInternalNameForOneDimensionalPrimitiveArray() {
-   String internalName = MetaClassFactory.get(char[].class).getInternalName();
+   String internalName = getMetaClass(char[].class).getInternalName();
    assertEquals("Wrong internal name generated for one-dimensional primitive array",
        "[C", internalName);
   }
 
   @Test
   public void testInternalNameForOneDimensionalObjectArray() {
-   String internalName = MetaClassFactory.get(String[].class).getInternalName();
+   String internalName = getMetaClass(String[].class).getInternalName();
    assertEquals("Wrong internal name generated for one-dimensional object array",
        "[Ljava/lang/String;", internalName);
   }
 
   @Test
   public void testInternalNameForMultiDimensionalPrimitiveArray() {
-   String internalName = MetaClassFactory.get(char[][].class).getInternalName();
+   String internalName = getMetaClass(char[][].class).getInternalName();
    assertEquals("Wrong internal name generated for multidimensional primitive array",
        "[[C", internalName);
   }
 
   @Test
   public void testInternalNameForMultiDimensionalObjectArray() {
-   String internalName = MetaClassFactory.get(String[][].class).getInternalName();
+   String internalName = getMetaClass(String[][].class).getInternalName();
    assertEquals("Wrong internal name generated for multidimensional object array",
        "[[Ljava/lang/String;", internalName);
   }
@@ -80,8 +106,8 @@ public class MetaClassTest {
 	  // This test checks the valid case:
 	  // Object example = null;
 
-	  MetaClass metaObject = MetaClassFactory.get(Object.class);
-	  MetaClass metaNull = MetaClassFactory.get(NullType.class);
+	  MetaClass metaObject = getMetaClass(Object.class);
+	  MetaClass metaNull = getMetaClass(NullType.class);
 
 	  assertTrue(metaObject.isAssignableFrom(metaNull));
   }
@@ -91,8 +117,8 @@ public class MetaClassTest {
 	  // This test checks the valid case:
 	  // Child example = null;
 
-	  MetaClass metaChild = MetaClassFactory.get(Child.class);
-	  MetaClass metaNull = MetaClassFactory.get(NullType.class);
+	  MetaClass metaChild = getMetaClass(Child.class);
+	  MetaClass metaNull = getMetaClass(NullType.class);
 
 	  assertTrue(metaChild.isAssignableFrom(metaNull));
   }
@@ -102,8 +128,8 @@ public class MetaClassTest {
 	  // This test checks the valid case:
 	  // Child example = null;
 
-	  MetaClass metaChild = MetaClassFactory.get(Child.class);
-	  MetaClass metaNull = MetaClassFactory.get(NullType.class);
+	  MetaClass metaChild = getMetaClass(Child.class);
+	  MetaClass metaNull = getMetaClass(NullType.class);
 
 	  assertTrue(metaNull.isAssignableTo(metaChild));
   }
@@ -112,8 +138,8 @@ public class MetaClassTest {
   public void testIsAssignableFromComparisonForNested() {
     ObjectWithNested objectWithNested = new ObjectWithNested();
 
-    MetaClass interfaceClass = MetaClassFactory.get(TestInterface.class);
-    MetaClass metaClass = MetaClassFactory.get(objectWithNested.getMyNestedInterface().getClass());
+    MetaClass interfaceClass = getMetaClass(TestInterface.class);
+    MetaClass metaClass = getMetaClass(objectWithNested.getMyNestedInterface().getClass());
 
     assertTrue("should be assignable", interfaceClass.isAssignableFrom(metaClass));
   }
@@ -123,7 +149,7 @@ public class MetaClassTest {
     // This test checks the valid case:
     // Child example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
+    MetaClass metaChild = getMetaClass(Child.class);
 
     assertTrue(metaChild.isAssignableFrom(metaChild));
   }
@@ -133,7 +159,7 @@ public class MetaClassTest {
     // This test checks the valid case:
     // Child example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
+    MetaClass metaChild = getMetaClass(Child.class);
 
     assertTrue(metaChild.isAssignableTo(metaChild));
   }
@@ -143,8 +169,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     // Parent example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaParent = MetaClassFactory.get(Parent.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaParent = getMetaClass(Parent.class);
 
     assertTrue(metaParent.isAssignableFrom(metaChild));
   }
@@ -154,8 +180,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new Parent();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaParent = MetaClassFactory.get(Parent.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaParent = getMetaClass(Parent.class);
 
     assertFalse(metaChild.isAssignableFrom(metaParent));
   }
@@ -165,8 +191,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     // Grandparent example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaGrandparent = MetaClassFactory.get(Grandparent.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaGrandparent = getMetaClass(Grandparent.class);
 
     assertTrue(metaGrandparent.isAssignableFrom(metaChild));
   }
@@ -176,8 +202,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new Grandparent();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaGrandparent = MetaClassFactory.get(Grandparent.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaGrandparent = getMetaClass(Grandparent.class);
 
     assertFalse(metaChild.isAssignableFrom(metaGrandparent));
   }
@@ -190,8 +216,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     // ParentInterface example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaUncle = MetaClassFactory.get(ParentInterface.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaUncle = getMetaClass(ParentInterface.class);
 
     assertTrue(metaUncle.isAssignableFrom(metaChild));
   }
@@ -201,8 +227,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new ParentInterface() {};
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaUncle = MetaClassFactory.get(ParentInterface.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaUncle = getMetaClass(ParentInterface.class);
 
     assertFalse(metaChild.isAssignableFrom(metaUncle));
   }
@@ -215,8 +241,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     // ParentSuperInterface1 example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaUncleInLaw = MetaClassFactory.get(ParentSuperInterface1.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface1.class);
 
     assertTrue(metaUncleInLaw.isAssignableFrom(metaChild));
   }
@@ -226,8 +252,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new ParentSuperInterface1() {};
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaUncleInLaw = MetaClassFactory.get(ParentSuperInterface1.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface1.class);
 
     assertFalse(metaChild.isAssignableFrom(metaUncleInLaw));
   }
@@ -240,8 +266,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     // ParentSuperInterface2 example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaUncleInLaw = MetaClassFactory.get(ParentSuperInterface2.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface2.class);
 
     assertTrue(metaUncleInLaw.isAssignableFrom(metaChild));
   }
@@ -251,8 +277,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new ParentSuperInterface2() {};
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaUncleInLaw = MetaClassFactory.get(ParentSuperInterface2.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaUncleInLaw = getMetaClass(ParentSuperInterface2.class);
 
     assertFalse(metaChild.isAssignableFrom(metaUncleInLaw));
   }
@@ -265,8 +291,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     // GrandparentInterface example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaGreatUncle = MetaClassFactory.get(GrandparentInterface.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaGreatUncle = getMetaClass(GrandparentInterface.class);
 
     assertTrue(metaGreatUncle.isAssignableFrom(metaChild));
   }
@@ -276,8 +302,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new GrandparentInterface() {};
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaGreatUncle = MetaClassFactory.get(GrandparentInterface.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaGreatUncle = getMetaClass(GrandparentInterface.class);
 
     assertFalse(metaChild.isAssignableFrom(metaGreatUncle));
   }
@@ -290,8 +316,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     //GrandparentSuperInterface example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaGreatUncleInLaw = MetaClassFactory.get(GrandparentSuperInterface.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaGreatUncleInLaw = getMetaClass(GrandparentSuperInterface.class);
 
     assertTrue(metaGreatUncleInLaw.isAssignableFrom(metaChild));
   }
@@ -301,8 +327,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new GrandparentSuperInterface() {};
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaGreatUncleInLaw = MetaClassFactory.get(GrandparentSuperInterface.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaGreatUncleInLaw = getMetaClass(GrandparentSuperInterface.class);
 
     assertFalse(metaChild.isAssignableFrom(metaGreatUncleInLaw));
   }
@@ -312,8 +338,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     //Object example = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaObject = MetaClassFactory.get(Object.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaObject = getMetaClass(Object.class);
 
     assertTrue(metaObject.isAssignableFrom(metaChild));
   }
@@ -323,8 +349,8 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // Child child = new Object();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaObject = MetaClassFactory.get(Object.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaObject = getMetaClass(Object.class);
 
     assertFalse(metaChild.isAssignableFrom(metaObject));
   }
@@ -334,8 +360,8 @@ public class MetaClassTest {
     // This test checks the valid case:
     // Object example = new IsolatedInterface() {};
 
-    MetaClass metaInterface = MetaClassFactory.get(IsolatedInterface.class);
-    MetaClass metaObject = MetaClassFactory.get(Object.class);
+    MetaClass metaInterface = getMetaClass(IsolatedInterface.class);
+    MetaClass metaObject = getMetaClass(Object.class);
 
     assertTrue(metaObject.isAssignableFrom(metaInterface));
   }
@@ -345,19 +371,19 @@ public class MetaClassTest {
     // This test checks the disallowed case:
     // IsolatedInterface ii = new Object();
 
-    MetaClass metaInterface = MetaClassFactory.get(IsolatedInterface.class);
-    MetaClass metaObject = MetaClassFactory.get(Object.class);
+    MetaClass metaInterface = getMetaClass(IsolatedInterface.class);
+    MetaClass metaObject = getMetaClass(Object.class);
 
     assertFalse(metaInterface.isAssignableFrom(metaObject));
   }
-  
+
   @Test
   public void testUncleIsAssignableToChild() {
     // This test checks the allowed case:
 	// ParentInterface pi = new Child();
 
-    MetaClass metaChild = MetaClassFactory.get(Child.class);
-    MetaClass metaUncle = MetaClassFactory.get(ParentInterface.class);
+    MetaClass metaChild = getMetaClass(Child.class);
+    MetaClass metaUncle = getMetaClass(ParentInterface.class);
 
     assertTrue(metaChild.isAssignableTo(metaUncle));
   }
