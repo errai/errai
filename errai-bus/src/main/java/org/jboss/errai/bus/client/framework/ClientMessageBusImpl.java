@@ -197,7 +197,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     // errors (unless the server is unavailable of course) (see ERRAI-225)
     Window.addCloseHandler(new CloseHandler<Window>() {
       @Override
-      public void onClose(CloseEvent<Window> event) {
+      public void onClose(final CloseEvent<Window> event) {
         if (state != State.LOCAL_ONLY) {
           stop(true);
         }
@@ -242,19 +242,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
 
-    for (Map.Entry<String, String> header : extraHeaders.entrySet()) {
+    for (final Map.Entry<String, String> header : extraHeaders.entrySet()) {
       builder.setHeader(header.getKey(), header.getValue());
     }
 
     final Request request = builder.sendRequest(payload, new RequestCallback() {
       @Override
-      public void onResponseReceived(Request request, Response response) {
+      public void onResponseReceived(final Request request, final Response response) {
         pendingRequests.remove(request);
         callback.onResponseReceived(request, response);
       }
 
       @Override
-      public void onError(Request request, Throwable exception) {
+      public void onError(final Request request, final Throwable exception) {
         pendingRequests.remove(request);
         callback.onError(request, exception);
       }
@@ -263,7 +263,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return request;
   }
 
-  private Request sendInboundRequest(RequestCallback callback) throws RequestException {
+  private Request sendInboundRequest(final RequestCallback callback) throws RequestException {
     return sendRequest(RequestBuilder.GET, IN_SERVICE_ENTRY_POINT, null, Collections.<String, String> emptyMap(), callback);
   }
 
@@ -762,14 +762,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     stop(sendDisconnect, null);
   }
 
-  private void stop(boolean sendDisconnect, TransportError reason) {
+  private void stop(final boolean sendDisconnect, final TransportError reason) {
 
     // Ensure the polling callback does not reawaken the bus.
     // It could be sleeping now and about to start another poll request.
     receiveCommCallback.cancel();
 
     // Now stop all the in-flight XHRs
-    for (Request r : pendingRequests) {
+    for (final Request r : pendingRequests) {
       r.cancel();
     }
     pendingRequests.clear();
@@ -1322,7 +1322,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private boolean handleHTTPTransportError(BusTransportError transportError) {
+  private boolean handleHTTPTransportError(final BusTransportError transportError) {
     for (final TransportErrorHandler handler : transportErrorHandlers) {
       handler.onError(transportError);
     }
@@ -1363,7 +1363,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       // problems (for example with CORS requests, locked down intermediate proxies, old
       // browsers, etc). It seems that we send this header if-and-only-if CommandType is
       // ConnectToQueue. We should look at making the server message bus not require it.
-      Map<String, String> connectHeader = Collections.singletonMap("phase", "connection");
+      final Map<String, String> connectHeader = Collections.singletonMap("phase", "connection");
       sendOutboundRequest(
               "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\", \"PriorityProcessing\":\"1\"}",
               connectHeader, new RequestCallback() {
@@ -1415,8 +1415,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     @Override
     public void onError(final Request request, final Throwable throwable) {
-      boolean willRetry = retries <= maxRetries;
-      RetryInfo retryInfo = new RetryInfo(willRetry ? timeout : -1, retries);
+      final boolean willRetry = retries <= maxRetries;
+      final RetryInfo retryInfo = new RetryInfo(willRetry ? timeout : -1, retries);
       final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);
 
       if (handleHTTPTransportError(transportError)) {
@@ -1990,37 +1990,37 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final List<BusLifecycleListener> lifecycleListeners = new ArrayList<BusLifecycleListener>();
 
   @Override
-  public void addLifecycleListener(BusLifecycleListener l) {
+  public void addLifecycleListener(final BusLifecycleListener l) {
     lifecycleListeners.add(Assert.notNull(l));
   }
 
   @Override
-  public void removeLifecycleListener(BusLifecycleListener l) {
+  public void removeLifecycleListener(final BusLifecycleListener l) {
     lifecycleListeners.remove(l);
   }
 
   private enum EventType {
     ASSOCIATING {
       @Override
-      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+      public void deliverTo(final BusLifecycleListener l, final BusLifecycleEvent e) {
         l.busAssociating(e);
       }
     },
     DISASSOCIATING {
       @Override
-      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+      public void deliverTo(final BusLifecycleListener l, final BusLifecycleEvent e) {
         l.busDisassociating(e);
       }
     },
     ONLINE {
       @Override
-      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+      public void deliverTo(final BusLifecycleListener l, final BusLifecycleEvent e) {
         l.busOnline(e);
       }
     },
     OFFLINE {
       @Override
-      public void deliverTo(BusLifecycleListener l, BusLifecycleEvent e) {
+      public void deliverTo(final BusLifecycleListener l, final BusLifecycleEvent e) {
         l.busOffline(e);
       }
     };
@@ -2031,7 +2031,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Puts the bus in the given state, firing all necessary transition events with no <tt>reason</tt> field.
    */
-  private void setState(State newState) {
+  private void setState(final State newState) {
     setState(newState, null);
   }
 
@@ -2040,13 +2040,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param reason The error that led to this state transition, if any. Null is permitted.
    */
-  private void setState(State newState, TransportError reason) {
+  private void setState(final State newState, final TransportError reason) {
     if (state == newState) {
       logAdapter.warn("Bus tried to transition from " + state + " to " + newState);
       return;
     }
 
-    List<EventType> events = new ArrayList<EventType>();
+    final List<EventType> events = new ArrayList<EventType>();
 
     switch (state) {
     case LOCAL_ONLY:
@@ -2084,7 +2084,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     state = newState;
 
-    for (EventType et : events) {
+    for (final EventType et : events) {
       final BusLifecycleEvent e = new BusLifecycleEvent(this, reason);
       for (int i = lifecycleListeners.size() - 1; i >= 0; i--) {
         try {

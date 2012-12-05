@@ -133,12 +133,19 @@ public class Container implements EntryPoint {
     afterInit.add(runnable);
   }
 
+  /**
+   * Declares the JavaScript-accessible debugging function to query the status of the bean manager at runtime. The
+   * JSNI method internally calls {@link #displayBeanManagerStatus()}.
+   */
   private static native void declareDebugFunction() /*-{
     $wnd.errai_bean_manager_status = function () {
       @org.jboss.errai.ioc.client.Container::displayBeanManagerStatus()();
     }
   }-*/;
 
+  /**
+   * Displays the the bean manager status to the JavaScript debugging console in the browser.
+   */
   private static void displayBeanManagerStatus() {
     displayDebuggerUtilityTitle("BeanManager Status");
 
@@ -151,6 +158,12 @@ public class Container implements EntryPoint {
     displaySeparator();
   }
 
+  /**
+   * Converts the specified annotation array to a string representation. Used to display the bean manager status.
+   *
+   * @param annotations
+   * @return
+   */
   private static String annotationsToString(final Annotation[] annotations) {
     final StringBuilder sb = new StringBuilder("[");
     for (int i = 0; i < annotations.length; i++) {
