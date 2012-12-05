@@ -64,4 +64,21 @@ public abstract class AbstractMetaParameterizedType implements MetaParameterized
 
     return true;
   }
+
+  @Override
+  public final String toString() {
+    final StringBuilder buf = new StringBuilder("<");
+    final MetaType[] parms = getTypeParameters();
+    for (int i = 0; i < parms.length; i++) {
+      if (parms[i] instanceof MetaClass) {
+        buf.append(((MetaClass) parms[i]).getFullyQualifiedName());
+      }
+      else {
+        buf.append(parms[i].toString());
+      }
+      if (i + 1 < parms.length) buf.append(',');
+    }
+    return buf.append('>').toString();
+  }
+
 }

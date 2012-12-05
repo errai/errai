@@ -207,9 +207,12 @@ public class DefaultJavaDefinitionMapper {
           continue;
         }
 
-        final Field fld = field.asField();
-        if (fld != null) {
+        try {
+          final Field fld = field.asField();
           fld.setAccessible(true);
+        }
+        catch (IllegalStateException e) {
+          // field is not known to the current classloader. continue anyway.
         }
 
         if (writeKeys.contains(field.getName()) && readKeys.contains(field.getName())) {

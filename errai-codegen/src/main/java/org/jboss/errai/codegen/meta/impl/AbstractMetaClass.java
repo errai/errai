@@ -39,15 +39,20 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
 import org.mvel2.util.ReflectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractMetaClass<T> extends MetaClass {
+  private static final Logger logger = LoggerFactory.getLogger(AbstractMetaClass.class);
+
   private final T enclosedMetaObject;
   protected MetaParameterizedType parameterizedType;
   protected MetaParameterizedType genericSuperClass;
@@ -75,6 +80,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           final MetaParameterizedType parameterizedTypeParameter = (MetaParameterizedType) typeParameter;
           buf.append(((MetaClass) parameterizedTypeParameter.getRawType()).getFullyQualifiedName());
           buf.append(getTypeParmsString(parameterizedTypeParameter));
+        }
+        else if (typeParameter instanceof MetaWildcardType) {
+          buf.append(((MetaWildcardType) typeParameter).toString());
         }
         else {
           buf.append(((MetaClass) typeParameter).getFullyQualifiedName());
@@ -580,6 +588,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return _erasedCache != null ? _erasedCache : (_erasedCache = MetaClassFactory.get(getFullyQualifiedName(), true));
     }
     catch (Exception e) {
+      logger.warn("Not erasing type " + this + " due to exception", e);
       return this;
     }
   }

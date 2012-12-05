@@ -17,10 +17,55 @@
 package org.jboss.errai.codegen.meta;
 
 /**
+ * Represents a wildcard type such as {@code ?}, {@code ? extends List} or
+ * {@code ? super MyType}.
+ *
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public interface MetaWildcardType extends MetaType {
+
+  /**
+   * Returns the Java source code representation of this wildcard, for example
+   * "? extends java.util.Collection" or "? super org.xyz.Foo".
+   */
+  @Override
+  public String getName();
+
+  /**
+   * Equivalent to {@link #getName()}.
+   */
+  @Override
+  public String toString();
+
+  /**
+   * Returns the lower bounds of this wildcard type. Examples:
+   * <ul>
+   * <li>{@code <?>} has no lower bounds
+   * <li>{@code <? extends List>} has no lower bounds
+   * <li>{@code <? super List>} has a lower bound of <tt>{List}</tt>
+   * <li>{@code <? super List & Futzable>} has a lower bound of
+   * <tt>{List, Futzable}</tt>
+   * </ul>
+   *
+   * @return The lower bounds of this wildcard type. The return value is never
+   *         null--if the wildcard has no lower bounds, an empty array is
+   *         returned.
+   */
   public MetaType[] getLowerBounds();
 
+  /**
+   * Returns the upper bounds of this wildcard type. Examples:
+   * <ul>
+   * <li>{@code <?>} has no upper bounds
+   * <li>{@code <? extends List>} has an upper bound of <tt>{List}</tt>
+   * <li>{@code <? super List>} has no upper bounds
+   * <li>{@code <? extends List & Futzable>} upper bounds of <tt>{List, Futzable}</tt>
+   * </ul>
+   *
+   * @return The upper bounds of this wildcard type. The return value is never
+   *         null--if the wildcard has no upper bounds, an empty array is
+   *         returned.
+   */
   public MetaType[] getUpperBounds();
 }

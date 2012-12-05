@@ -42,7 +42,21 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   public MetaType[] getTypeParameters() {
     final List<MetaType> types = new ArrayList<MetaType>();
     for (final JClassType parm : parameterizedType.getTypeArgs()) {
-      types.add(GWTUtil.eraseOrReturn(oracle, parm));
+      if (parm.isWildcard() != null) {
+        types.add(new GWTWildcardType(oracle, parm.isWildcard()));
+      }
+      else if (parm.isTypeParameter() != null) {
+        types.add(new GWTTypeVariable(oracle, parm.isTypeParameter()));
+      }
+      else if (parm.isClassOrInterface() != null
+              || parm.isEnum() != null
+              || parm.isPrimitive() != null
+              || parm.isRawType() != null) {
+        types.add(GWTClass.newInstance(oracle, parm));
+      }
+      else {
+        throw new IllegalArgumentException("Unsupported kind of type parameter " + parm + " in type " + this);
+      }
     }
     return types.toArray(new MetaType[types.size()]);
   }
@@ -55,11 +69,6 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   @Override
   public MetaType getRawType() {
     return GWTClass.newInstance(oracle, parameterizedType.getRawType());
-  }
-
-  @Override
-  public String toString() {
-    return getName();
   }
 
   @Override

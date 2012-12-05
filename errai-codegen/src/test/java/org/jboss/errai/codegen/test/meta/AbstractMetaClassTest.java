@@ -18,9 +18,18 @@ package org.jboss.errai.codegen.test.meta;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaWildcardType;
+import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
 import org.jboss.errai.codegen.test.model.ObjectWithNested;
 import org.jboss.errai.codegen.test.model.TestInterface;
 import org.jboss.errai.codegen.test.model.tree.Child;
@@ -34,6 +43,8 @@ import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface1;
 import org.jboss.errai.codegen.test.model.tree.ParentSuperInterface2;
 import org.junit.Test;
 import org.mvel2.util.NullType;
+
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
 
 /**
  * Subclassable container for the test cases that guarantee an implementation of
@@ -390,6 +401,106 @@ public abstract class AbstractMetaClassTest {
     MetaClass metaUncle = getMetaClass(ParentInterface.class);
 
     assertTrue(metaChild.isAssignableTo(metaUncle));
+  }
+
+  @Test
+  public void testNoDuplicateMethodsInClassHierarchy() throws NotFoundException {
+    final MetaClass child = getMetaClass(Child.class);
+
+    List<MetaMethod> foundMethods = new ArrayList<MetaMethod>();
+    for (MetaMethod m : child.getMethods()) {
+      if (m.getName().equals("interfaceMethodOverriddenMultipleTimes")) {
+        foundMethods.add(m);
+      }
+    }
+
+    assertEquals("Only one copy of the method should have been found", 1, foundMethods.size());
+  }
+
+  @Test
+  public void testSuperClass() throws Exception {
+    final MetaClass child = getMetaClass(Child.class);
+    final MetaClass parent = child.getSuperClass();
+
+    assertEquals(getMetaClass(Parent.class), parent);
+  }
+
+  @Test
+  public void testNamingMethods() throws Exception {
+    final MetaClass child = getMetaClass(Child.class);
+
+    assertEquals(Child.class.getSimpleName(), child.getName());
+    assertEquals(Child.class.getName(), child.getFullyQualifiedName());
+    assertEquals(Child.class.getName(), child.getCanonicalName());
+    assertEquals("L" + Child.class.getName().replace('.', '/') + ";", child.getInternalName());
+  }
+
+  @Test
+  public void testAccessModifiersForPublicTopLevelClass() throws Exception {
+    final MetaClass child = getMetaClass(Child.class);
+
+    assertTrue(child.isPublic());
+    assertFalse(child.isProtected());
+    assertFalse(child.isPrivate());
+
+    assertTrue(child.isDefaultInstantiable());
+  }
+
+  // TODO: add private, pkg private, protected methods to Child, Parent, Grandparent, and test getDeclaredMethods()
+//    System.out.println("--gwt methods--");
+//    for (MetaMethod method : Child.class.getName().getDeclaredMethods()) {
+//      System.out.println(method.toString());
+//    }
+//    assertEquals(new HashSet<MetaMethod>(Arrays.asList(Child.class.getName().getDeclaredMethods())),
+//            new HashSet<MetaMethod>(Arrays.asList(javaMC.getDeclaredMethods())));
+
+  @Test
+  public void testGetInterfaces() throws Exception {
+    final MetaClass grandparent = getMetaClass(Grandparent.class);
+    assertEquals(1, grandparent.getInterfaces().length);
+    assertEquals(
+            Arrays.asList(getMetaClass(GrandparentInterface.class)),
+            Arrays.asList(grandparent.getInterfaces()));
+  }
+
+  @Test
+  public void testFieldWithStringTypeParam() throws Exception {
+    final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
+    MetaField field = metaClass.getDeclaredField("hasStringParam");
+    assertNotNull(field);
+
+    assertEquals("Collection", field.getType().getName());
+    assertEquals("java.util.Collection", field.getType().getFullyQualifiedName());
+    assertEquals("<java.lang.String>", field.getType().getParameterizedType().toString());
+    assertEquals("java.util.Collection<java.lang.String>", field.getType().getFullyQualifiedNameWithTypeParms());
+    assertEquals("java.util.Collection", field.getType().getErased().getFullyQualifiedNameWithTypeParms());
+    assertEquals(
+            Arrays.asList(getMetaClass(String.class)),
+            Arrays.asList(field.getType().getParameterizedType().getTypeParameters()));
+  }
+
+  @Test
+  public void testFieldWithStringBoundedWildcardTypeParam() throws Exception {
+    final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
+    MetaField field = metaClass.getDeclaredField("hasWildcardExtendsStringParam");
+    assertNotNull(field);
+
+    assertEquals("Collection", field.getType().getName());
+    assertEquals("java.util.Collection", field.getType().getFullyQualifiedName());
+    assertEquals("<? extends java.lang.String>", field.getType().getParameterizedType().toString());
+    assertEquals("java.util.Collection<? extends java.lang.String>", field.getType().getFullyQualifiedNameWithTypeParms());
+    assertEquals("java.util.Collection", field.getType().getErased().getFullyQualifiedNameWithTypeParms());
+
+    assertEquals(1, field.getType().getParameterizedType().getTypeParameters().length);
+    MetaWildcardType typeParam = (MetaWildcardType) field.getType().getParameterizedType().getTypeParameters()[0];
+
+    assertEquals("Should have no lower bound",
+            Arrays.asList(),
+            Arrays.asList(typeParam.getLowerBounds()));
+
+    assertEquals("Upper bound should be java.lang.String",
+            Arrays.asList(getMetaClass(String.class)),
+            Arrays.asList(typeParam.getUpperBounds()));
   }
 
 }

@@ -16,13 +16,12 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JArrayType;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
@@ -31,11 +30,13 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.EnvUtil;
 
-import java.lang.ref.SoftReference;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -90,9 +91,7 @@ public class GWTUtil {
     if (t.isTypeParameter() != null) {
       return MetaClassFactory.get(Object.class);
     }
-    else {
-      return GWTClass.newInstance(oracle, t);
-    }
+    return GWTClass.newInstance(oracle, t);
   }
 
   public static MetaType fromType(final TypeOracle oracle, final JType t) {

@@ -16,14 +16,15 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JGenericType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
 
-import java.lang.annotation.Annotation;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JGenericType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -42,6 +43,10 @@ public class GWTField extends MetaField {
   @Override
   public MetaClass getType() {
     return GWTUtil.eraseOrReturn(oracle, field.getType());
+//    if (field.getType().isWildcard() != null) {
+//      return new GWTWildcardType(oracle, field.getType().isWildcard());
+//    }
+//    return GWTClass.newInstance(oracle, field.getType());
   }
 
   @Override
