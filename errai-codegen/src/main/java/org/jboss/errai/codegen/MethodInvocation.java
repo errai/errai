@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.literal.TypeLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -26,9 +29,6 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.mvel2.util.NullType;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Represents a method invocation statement.
@@ -137,7 +137,25 @@ public class MethodInvocation extends AbstractStatement {
   private void resolveTypeVariable(final MetaType methodParmType, final MetaType callParmType) {
     if (methodParmType instanceof MetaTypeVariable) {
       final MetaTypeVariable typeVar = (MetaTypeVariable) methodParmType;
-      typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
+      final MetaClass resolvedType;
+      if (callParmType instanceof MetaClass) {
+        resolvedType = (MetaClass) callParmType;
+      }
+      else if (callParmType instanceof MetaWildcardType) {
+        MetaType[] upperBounds = ((MetaWildcardType) callParmType).getUpperBounds();
+        if (upperBounds != null && upperBounds.length == 1 && upperBounds[0] instanceof MetaClass) {
+          resolvedType = (MetaClass) upperBounds[0];
+        }
+        else {
+          // it's either unbounded (? or ? super X) or has fancy bounds like ? extends X & Y
+          // so we'll fall back on good old java.lang.Object
+          resolvedType = MetaClassFactory.get(Object.class);
+        }
+      }
+      else {
+        throw new IllegalArgumentException("Call parameter \"" + callParmType + "\" is of unexpected metatype " + callParmType.getClass());
+      }
+      typeVariables.put(typeVar.getName(), resolvedType);
     }
     else if (methodParmType instanceof MetaParameterizedType) {
       final MetaType parameterizedCallParmType;
