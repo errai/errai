@@ -10,7 +10,9 @@ import org.jboss.errai.codegen.test.model.PrimitiveFieldContainer;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
- * The GWT implementation of the overall MetaClass test.
+ * The GWT implementation of the overall MetaClass test. Inherits all the tests
+ * from AbstractMetaClassTest and runs them against GWTClass. Don't remove this
+ * test! It actually does something!
  *
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
@@ -32,6 +34,7 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
     f.addTestClass("org.jboss.errai.codegen.test.model.TestInterface");
     f.addTestClass("org.jboss.errai.codegen.test.model.ObjectWithNested");
     f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithGenericCollections");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ParameterizedClass");
     f.addTestClass(PrimitiveFieldContainer.class.getName());
 
     mockacle = f.generateMockacle();

@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.test.meta;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -32,6 +33,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
 import org.jboss.errai.codegen.test.model.ObjectWithNested;
+import org.jboss.errai.codegen.test.model.ParameterizedClass;
 import org.jboss.errai.codegen.test.model.TestInterface;
 import org.jboss.errai.codegen.test.model.tree.Child;
 import org.jboss.errai.codegen.test.model.tree.Grandparent;
@@ -508,5 +510,18 @@ public abstract class AbstractMetaClassTest {
   public void testEraseNonGenericType() throws Exception {
     final MetaClass child = getMetaClass(Child.class);
     assertSame(child, child.getErased());
+  }
+
+  @Test
+  public void testEraseParameterizedTopLevelType() throws Exception {
+    final MetaClass parameterized = getMetaClass(ParameterizedClass.class);
+    assertEquals("ParameterizedClass", parameterized.getName());
+    assertEquals("org.jboss.errai.codegen.test.model.ParameterizedClass", parameterized.getFullyQualifiedName());
+    assertNull(parameterized.getParameterizedType());
+
+    // I think this would be correct, but right now we get the raw type name
+    //assertEquals("org.jboss.errai.codegen.test.model.ParameterizedClass<T>", parameterized.getFullyQualifiedNameWithTypeParms());
+
+    assertEquals("org.jboss.errai.codegen.test.model.ParameterizedClass", parameterized.getErased().getFullyQualifiedNameWithTypeParms());
   }
 }

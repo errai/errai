@@ -277,15 +277,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaClass getErased() {
-    try {
-      if (getParameterizedType() == null) {
-        return this;
-      }
-      else {
-        return new GWTClass(oracle, oracle.getType(getFullyQualifiedName()), true);
-      }
-    } catch (NotFoundException e) {
-      throw new RuntimeException(e);
+    if (getParameterizedType() == null) {
+      return this;
+    }
+    else {
+      return new GWTClass(oracle, getEnclosedMetaObject().getErasedType(), true);
     }
   }
 
