@@ -15,9 +15,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gwt.version>2.4.0</gwt.version>
     <weld.version>1.1.6.Final</weld.version>
-    <gwt.maven.version>2.4.0</gwt.maven.version>
     <mvel.version>2.1.Beta8</mvel.version>
     <jetty.version>6.1.25</jetty.version>
     <slf4j.version>1.6.1</slf4j.version>
