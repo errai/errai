@@ -101,7 +101,7 @@ public class AnonymousClassStructureBuilderImpl
                 }
 
                 final StringBuilder buf = new StringBuilder(256);
-                final String returnType = getClassReference(method.getReturnType(), context);
+                final String returnType = getClassReference(method.getReturnType().getErased(), context);
 
                 buf.append("public ").append(returnType)
                     .append(" ")
