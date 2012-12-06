@@ -72,9 +72,7 @@
               <useManifestOnlyJar>false</useManifestOnlyJar>
               <forkMode>pertest</forkMode>
               <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail.-->
-              <argLine>-Xmx2048m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5'
-                -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true
-              </argLine>
+              <argLine>-Xmx2048m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
 
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
