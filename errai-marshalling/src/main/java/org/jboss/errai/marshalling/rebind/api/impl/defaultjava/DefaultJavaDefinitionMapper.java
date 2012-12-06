@@ -222,7 +222,7 @@ public class DefaultJavaDefinitionMapper {
         final MetaClass type = field.getType().getErased();
         final MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
 
-        if (!(type.isAbstract() || type.isInterface() || type.isEnum()) && !definitionsFactory.isExposedClass(compType)) {
+        if (!(compType.isAbstract() || compType.isInterface() || compType.isEnum()) && !definitionsFactory.isExposedClass(compType)) {
           throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
                   + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
                   + compType.getFullyQualifiedName());
