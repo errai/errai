@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.test.meta;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -503,4 +504,9 @@ public abstract class AbstractMetaClassTest {
             Arrays.asList(typeParam.getUpperBounds()));
   }
 
+  @Test
+  public void testEraseNonGenericType() throws Exception {
+    final MetaClass child = getMetaClass(Child.class);
+    assertSame(child, child.getErased());
+  }
 }

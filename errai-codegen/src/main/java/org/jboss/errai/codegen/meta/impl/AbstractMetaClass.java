@@ -582,17 +582,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private MetaClass _erasedCache;
 
-  @Override
-  public MetaClass getErased() {
-    try {
-      return _erasedCache != null ? _erasedCache : (_erasedCache = MetaClassFactory.get(getFullyQualifiedName(), true));
-    }
-    catch (Exception e) {
-      logger.warn("Not erasing type " + this + " due to exception", e);
-      return this;
-    }
-  }
-
   private Boolean _isPrimitiveWrapper;
 
   @Override

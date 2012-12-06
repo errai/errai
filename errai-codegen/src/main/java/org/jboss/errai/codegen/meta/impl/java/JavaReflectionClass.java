@@ -103,6 +103,9 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public MetaClass getErased() {
+    if (getEnclosedMetaObject().getTypeParameters().length == 0) {
+      return this;
+    }
     return new JavaReflectionClass(getEnclosedMetaObject(), true);
   }
 
