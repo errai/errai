@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,16 +16,6 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
-import org.jboss.weld.manager.BeanManagerImpl;
-
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Qualifier;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -33,6 +23,17 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.util.TypeLiteral;
+import javax.inject.Qualifier;
+
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.jboss.weld.manager.BeanManagerImpl;
 
 /**
  * @author Mike Brock
@@ -93,23 +94,16 @@ public class ConversationalEventImpl<T> implements ConversationalEvent<T>, Seria
   }
 
   @Override
-  public void fire(T event) {
-    // fire wrapper event bound for client.
-    manager.fireEvent(ConversationalEventWrapper.class,
-            new ConversationalEventWrapper(event, rawType, qualifiersForWire, bus));
-
-    // fire event normally within the container.
-    manager.fireEvent(type, event, qualifiers);
-  }
-
   public ConversationalEvent<T> select(Annotation... qualifiers) {
     return selectEvent(this.getType(), qualifiers);
   }
 
+  @Override
   public <U extends T> ConversationalEvent<U> select(Class<U> subtype, Annotation... qualifiers) {
     return selectEvent(subtype, qualifiers);
   }
 
+  @Override
   public <U extends T> ConversationalEvent<U> select(TypeLiteral<U> subtype, Annotation... qualifiers) {
     return selectEvent(subtype.getType(), qualifiers);
   }

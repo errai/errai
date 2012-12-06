@@ -134,25 +134,11 @@
       </section>
       <section id="sid-54493688_ErraiJPA-METAINF%2Fpersistence.xml">
          <title>INF/persistence.xml</title>
-         <para>You need to have a META-INF/persistence.xml file on the classpath that defines a persistence unit. This persistence unit should declare every entity class you want to use with the client-side JPA provider.</para>
-         <para>Example:</para>
-         <informalexample>
-            <programlisting language="xml">
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;persistence version="2.0"
-   xmlns="http://java.sun.com/xml/ns/persistence"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"&gt;
-
-  &lt;persistence-unit name="ErraiJpaDemo"&gt;
-    &lt;description&gt;Entities used in the browser&lt;/description&gt;
-    &lt;class&gt;com.company.app.client.shared.Album&lt;/class&gt;
-    &lt;class&gt;com.company.app.client.shared.Artist&lt;/class&gt;
-    &lt;class&gt;com.company.app.client.shared.Genre&lt;/class&gt;
-  &lt;/persistence-unit&gt;
-&lt;/persistence&gt;
-</programlisting>
-         </informalexample>
+         <para>
+          Errai ignores META-INF/persistence.xml for purposes of client-side JPA. Instead, Errai scans all Java packages that are part of your GWT modules for classes annotated with
+          <code>@Entity</code>
+          . This allows you the freedom of defining a persistence.xml that includes both shared entity classes that you use on the client and the server, plus server-only entities that are defined in a server-only package.
+        </para>
       </section>
       <section id="sid-54493688_ErraiJPA-DeclaringanEntityClass">
          <title>Declaring an Entity Class</title>
@@ -865,13 +851,6 @@ public class StandaloneLifecycleListener {
          <para>The following features are not yet implemented, but could conceivably be implemented in a future Errai JPA release:</para>
          <itemizedlist>
             <listitem>
-               <para>
-              Many
-              <code>persistence.xml</code>
-              settings are not honoured; need to use annotations for these
-            </para>
-            </listitem>
-            <listitem>
                <para>Flush modes other than immediate</para>
             </listitem>
             <listitem>
@@ -968,13 +947,6 @@ public class StandaloneLifecycleListener {
          <title>Other Caveats for Errai 2.1 JPA</title>
          <para>We hope to remedy these shortcomings in a future release.</para>
          <itemizedlist>
-            <listitem>
-               <para>
-              The
-              <code>persistence.xml</code>
-              file is not optional. It must list all the entity types that Errai should know about
-            </para>
-            </listitem>
             <listitem>
                <para>In Dev Mode, changes to entity classes are not discovered on page refresh. You need to restart Dev Mode.</para>
             </listitem>

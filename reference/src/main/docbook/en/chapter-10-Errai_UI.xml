@@ -437,19 +437,23 @@ This text will be ignored.
       <section id="sid-51806600_ErraiUI-Concepts">
          <title>Concepts</title>
          <para>
-          Each of the three supported approaches for event handling function on the same basic programming model. Event handler methods, annotated with
+          Each of the three scenarios mentioned above use the same basic programming model for event handling: Errai UI wires methods annotated with
           <code>@EventHandler("my-data-field")</code>
-          , are created and dynamically wired to the corresponding
+          (
+          <emphasis role="italics">event handler methods</emphasis>
+          ) to handle events on the corresponding
           <code>@DataField("my-data-field")</code>
-          in the same component.
+          in the same component. Event handler methods annotated with a bare
+          <code>@EventHandler</code>
+          annotation (no annotation parameter) are wired to receive events on the @Templated component itself.
         </para>
       </section>
       <section id="sid-51806600_ErraiUI-GWTeventsonWidgets">
          <title>GWT events on Widgets</title>
          <para>
-          Probably the simplest and most common use-case, this approach handles GWT Event classes for Widgets that explicitly handle the given event type. In the case that a Widget does not handle the Event type given in the
+          Probably the simplest and most common use-case, this approach handles GWT Event classes for Widgets that explicitly handle the given event type. If a Widget does not handle the Event type given in the
           <code>@EventHandler</code>
-          method signature, the application will fail to compile and appropriate errors will be displayed.
+          method's signature, the application will fail to compile and appropriate errors will be displayed.
         </para>
          <informalexample>
             <programlisting language="java">
@@ -515,7 +519,7 @@ public class ElementHandlerComponent extends Composite {
          <para>
           The
           <code>@SinkNative</code>
-          annotation is used to select native events (as a bit mask) of which the method should handle; this sink behaves the same as when using
+          annotation specifies (as a bit mask) which native events the method should handle; this sink behaves the same in Errai UI as it would with
           <code>DOM.sinkEvents(Element e, int bits)</code>
           . Note that a
           <code>@DataField</code>
@@ -554,22 +558,24 @@ public class QuickHandlerComponent extends Composite {
    <section id="sid-51806600_ErraiUI-DataBinding">
       <title>Data Binding</title>
       <para>
-        A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks cause a significant amount of boilerplate code which can be alleviated by Errai. Errai's
+        A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks require a significant amount of boilerplate code which can be alleviated by Errai. Errai's
         <link linkend="sid-51282340">data binding module</link>
-        provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when integrated with Errai UI.
+        provides the ability to bind model objects to user interface fields, so they will be kept in sync automatically. While the module can be used on its own, it can cut even more boilerplate when integrated with Errai UI.
       </para>
       <para>
         In the following example, all
         <code>@DataFields</code>
         annotated with
         <code>@Bound</code>
-        will automatically be bound to properties of the data model (a
+        have their contents bound to properties of the data model (a
         <code>User</code>
         object). The model object is provided by an injected
         <code>DataBinder</code>
-        instance which has to be annotated with
+        instance annotated with
         <code>@AutoBound</code>
-        for the automatic bindings to be carried out. Both field and constructor injection can be used.
+        , which indicates automatic binding should be carried out. This works whether the
+        <code>DataBinder</code>
+        is injected into a field or a constructor.
       </para>
       <informalexample>
          <programlisting language="java">
@@ -605,49 +611,107 @@ public class LoginForm extends Composite {
         <code>setPassword</code>
         is called).
       </para>
-      <para>
-        By default, the bindings are carried out based on the
-        <code>@DataField</code>
-        names. So, in the example above, the
-        <code>@DataField</code>
-        username is automatically bound to the JavaBean property username of the model object. The
-        <code>@Bound</code>
-        annotation also allows for specifying the property to bind to. In the following example, the password field is bound the JavaBean property named pass, assuming such a property exists in the
-        <code>User</code>
-        class.
-      </para>
-      <informalexample>
-         <programlisting language="java">
-@Inject
-@Bound(property="pass")
-@DataField
-private PasswordTextBox password;
+      <section id="sid-51806600_ErraiUI-Default%2CSimple%2CandChainedPropertyBindings">
+         <title>Default, Simple, and Chained Property Bindings</title>
+         <para>
+          By default, bindings are determined by matching
+          <code>@DataField</code>
+          names to property names on the model object. In the example above, the
+          <code>@DataField</code>
+            <code>username</code>
+          was automatically bound to the JavaBeans property
+          <code>username</code>
+          of the model object. If the
+          <code>@DataField</code>
+          name does not match the model property name, you can use the
+          <code>property</code>
+          attribute of the
+          <code>@Bound</code>
+          annotation to specify the name of the property. The property can be a simple name (for example, "name") or a property chain (for example,
+          <code>user.address.streetName</code>
+          ). When binding to a property chain, all properties but the last in the chain must refer to @Bindable values.
+        </para>
+         <para>The following example illustrates all three scenarios:</para>
+         <informalexample>
+            <programlisting language="java">
+@Bindable
+public class Address {
+  private String line1;
+  private String line2;
+  private String city;
+  private String stateProv;
+  private String country;
+
+  // getters and setters
+}
+
+@Bindable
+public class Customer {
+  private String name;
+  private Date dob;
+  private Address address;
+
+  // getters and setters
+}
+
+@Templated
+public class UserWidget {
+  @Inject @AutoBound DataBinder&lt;Customer&gt; customer;
+  @Inject @Bound TextBox name;
+  @Inject @Bound("dob") DatePicker dateOfBirth;
+  @Inject @Bound("address.city") TextBox city;
+}
 </programlisting>
-      </informalexample>
-      <para>
-        The
-        <code>@Bound</code>
-        annotation further allows to specify a converter to use for the binding (see
-        <link linkend="sid-51282340_DataBinding-SpecifyingConverters">Specifying Converters</link>
-        for details). This is how a binding specific converter can be specified on a data field:
-      </para>
-      <informalexample>
-         <programlisting language="java">
+         </informalexample>
+         <para>
+          In
+          <code>UserWidget</code>
+          above, the
+          <code>name</code>
+          text box is bound to
+          <code>customer.name</code>
+          using the default name matching; the
+          <code>dateOfBirth</code>
+          date picker is bound to
+          <code>customer.dob</code>
+          using a simple property name mapping; finally, the
+          <code>city</code>
+          text box is bound to
+          <code>customer.address.city</code>
+          using a property chain. Note that the
+          <code>Address</code>
+          class is required to be
+          <code>@Bindable</code>
+          in this case.
+        </para>
+      </section>
+      <section id="sid-51806600_ErraiUI-DataConverters">
+         <title>Data Converters</title>
+         <para>
+          The
+          <code>@Bound</code>
+          annotation further allows to specify a converter to use for the binding (see
+          <link linkend="sid-51282340_DataBinding-SpecifyingConverters">Specifying Converters</link>
+          for details). This is how a binding specific converter can be specified on a data field:
+        </para>
+         <informalexample>
+            <programlisting language="java">
 @Inject
 @Bound(converter=MyDateConverter.class)
 @DataField
 private TextBox date;
 </programlisting>
-      </informalexample>
-      <para>
-        Errai's
-        <code>DataBinder</code>
-        also allows to register
-        <code>PropertyChangeHandlers</code>
-        for the cases where keeping the model and UI in sync is not enough and additional logic needs to be executed (see
-        <link linkend="sid-51282340_DataBinding-PropertyChangeHandlers">Property Change Handlers</link>
-        for details).
-      </para>
+         </informalexample>
+         <para>
+          Errai's
+          <code>DataBinder</code>
+          also allows to register
+          <code>PropertyChangeHandlers</code>
+          for the cases where keeping the model and UI in sync is not enough and additional logic needs to be executed (see
+          <link linkend="sid-51282340_DataBinding-PropertyChangeHandlers">Property Change Handlers</link>
+          for details).
+        </para>
+      </section>
    </section>
    <section id="sid-51806600_ErraiUI-NestCompositecomponents">
       <title>Nest Composite components</title>

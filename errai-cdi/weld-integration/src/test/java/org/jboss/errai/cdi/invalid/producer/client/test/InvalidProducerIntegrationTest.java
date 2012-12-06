@@ -1,5 +1,12 @@
 package org.jboss.errai.cdi.invalid.producer.client.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependency;
@@ -8,13 +15,6 @@ import org.jboss.errai.ioc.rebind.ioc.test.harness.MockIOCGenerator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Tests scenarios in which no valid producer can be found to satisfy an injection point.
@@ -25,13 +25,11 @@ public class InvalidProducerIntegrationTest {
 
   @Before
   public void setup() {
-    System.setProperty("errai.dev.force_reflections", "true");
     System.setProperty(EnvUtil.SYSPROP_USE_REACHABILITY_ANALYSIS, "false");
   }
 
   @After
   public void tearDown() {
-    System.setProperty("errai.dev.force_reflections", "false");
     System.setProperty(EnvUtil.SYSPROP_USE_REACHABILITY_ANALYSIS, "true");
   }
 

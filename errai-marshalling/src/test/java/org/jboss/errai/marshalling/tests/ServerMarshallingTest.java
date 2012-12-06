@@ -33,8 +33,6 @@ import org.jboss.errai.marshalling.tests.res.ImmutableEnumContainer;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -45,16 +43,6 @@ public class ServerMarshallingTest {
   static {
     System.setProperty("errai.devel.nocache", "true");
     System.out.println("Working Dir: " + new File("").getAbsoluteFile().getAbsolutePath());
-  }
-
-  @Before
-  public void setUp() throws Exception {
-    System.setProperty("errai.dev.force_reflections", "true");
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    System.setProperty("errai.dev.force_reflections", "false");
   }
 
   @SuppressWarnings("unchecked")

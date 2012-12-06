@@ -50,15 +50,29 @@
    </section>
    <section id="sid-23036402">
       <title>Client Configuration</title>
-      <para>In some cases it might be desirable to prevent the client bus from communicating with the server. One use case for this is when all communication with the server is handled using JAX-RS and the constant long polling requests for message exchange are not needed.</para>
-      <para>To turn off remote communication in the client bus the following JavaScript variable can be set in the HTML host page:</para>
-      <informalexample>
-         <programlisting language="xml">
+      <section id="sid-23036402_ClientConfiguration-Disablingremotecommunication">
+         <title>Disabling remote communication</title>
+         <para>In some cases it might be desirable to prevent the client bus from communicating with the server. One use case for this is when all communication with the server is handled using JAX-RS and the constant long polling requests for message exchange are not needed.</para>
+         <para>To turn off remote communication in the client bus the following JavaScript variable can be set in the HTML host page:</para>
+         <informalexample>
+            <programlisting language="xml">
 &lt;script type="text/javascript"&gt;
   erraiBusRemoteCommunicationEnabled = false;
 &lt;/script&gt;
 </programlisting>
-      </informalexample>
+         </informalexample>
+      </section>
+      <section id="sid-23036402_ClientConfiguration-Configuringanalternativeremoteremotebusendpoint">
+         <title>Configuring an alternative remote remote bus endpoint</title>
+         <para>By default the remote bus is expected at the GWT web application's context path. In case the remote bus is part of a different web application or deployed on a different server, the following configuration can be used in the HTML host page to configure the remote bus endpoint used on the client.</para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;script type="text/javascript"&gt;
+  erraiBusApplicationRoot = "/MyRemoteMessageBusEnpoint";
+&lt;/script&gt;
+</programlisting>
+         </informalexample>
+      </section>
    </section>
    <section id="sid-5931354">
       <title>ErraiApp.properties</title>

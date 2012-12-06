@@ -1,7 +1,6 @@
 package org.jboss.errai.jpa.rebind;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -10,7 +9,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,13 +17,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -53,8 +51,6 @@ import javax.persistence.metamodel.Type;
 
 import org.apache.commons.collections.OrderedMap;
 import org.hibernate.ejb.HibernatePersistence;
-import org.hibernate.ejb.packaging.PersistenceMetadata;
-import org.hibernate.ejb.packaging.PersistenceXmlLoader;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Modifier;
@@ -119,7 +115,7 @@ public class ErraiEntityManagerGenerator extends Generator {
           String typeName) throws UnableToCompleteException {
 
     GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-    EntityManagerFactory emf = createHibernateEntityManagerFactory();
+    EntityManagerFactory emf = createHibernateEntityManagerFactory(logger, context);
     try {
       final ClassStructureBuilder<?> classBuilder = generateEntityManagerClass(
               logger, context, emf);
@@ -247,40 +243,18 @@ public class ErraiEntityManagerGenerator extends Generator {
     pmm.finish();
   }
 
-  public static EntityManagerFactory createHibernateEntityManagerFactory() {
-
-    // this is a Set on purpose: two copies of the same persistence.xml will often be present
-    // because GWT likes having source directories on the classpath.
-    Set<String> persistenceUnits = new LinkedHashSet<String>();
-
-    try {
-      for (URL url : Collections.list(ErraiEntityManagerGenerator.class.getClassLoader().getResources("META-INF/persistence.xml"))) {
-        try {
-          for (PersistenceMetadata pm : PersistenceXmlLoader.deploy(url, Collections.emptyMap(), null)) {
-            persistenceUnits.add(pm.getName());
-          }
-        } catch (Exception e) {
-          throw new RuntimeException("Failed to parse the persistence unit at " + url + " -- skipping it");
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to locate META-INF/persistence.xml", e);
-    }
-
-    if (persistenceUnits.isEmpty()) {
-      throw new RuntimeException(
-              "Can't generate an ErraiEntityManager because no META-INF/persistence.xml" +
-              " resources were found on the classpath");
-    }
-    if (persistenceUnits.size() > 1) {
-      throw new RuntimeException("Found more than one persistence unit on the classpath: " + persistenceUnits);
-    }
+  public static EntityManagerFactory createHibernateEntityManagerFactory(TreeLogger logger, GeneratorContext context) {
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
     properties.put("javax.persistence.validation.mode", "none");
 
-    return new HibernatePersistence().createEntityManagerFactory(persistenceUnits.iterator().next(), properties);
+    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    List<String> managedTypeNames = new ArrayList<String>();
+    for (Class<?> entity : scanner.getTypesAnnotatedWith(Entity.class, RebindUtils.findTranslatablePackages(context))) {
+      managedTypeNames.add(entity.getName());
+    }
+    return new HibernatePersistence().createContainerEntityManagerFactory(new ErraiPersistenceUnitInfo(managedTypeNames), properties);
   }
 
   private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm) {

@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated field holds information about the state of the
- * current page. The navigation system will read the field value when navigating
- * away from the page and restore it when navigating back to the page.
+ * current page. The navigation framework writes state information from the
+ * history token to the field when navigating to the page.
  * <p>
  * The target field must be one of the following types that are supported by the
  * navigation system:
@@ -31,5 +31,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Documented
 public @interface PageState {
+
+  /**
+   * Provides a way to map the field name to a different value for the query parameter.  If
+   * not specified, the name of the field will be used as the name of the query parameter.
+   */
+  String value() default "";
 
 }

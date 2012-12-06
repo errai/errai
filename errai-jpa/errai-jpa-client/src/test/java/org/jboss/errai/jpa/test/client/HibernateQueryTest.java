@@ -63,9 +63,4 @@ public class HibernateQueryTest extends QueryTest {
     // disabled because when hibernate runs this test against h2, the default escape character is '\'
     // but jpa2 4.6.10 implies that by default, there should be no escape character
   }
-
-  @Override
-  public void testFilterByNullEntityReference() {
-    // FIXME disabled, but Hibernate does the right thing (JPQL null != JPQL null) and Errai should follow suit.
-  }
 }

@@ -6,9 +6,9 @@
    <para>Errai CDI does not currently implement all life cycles specified in JSR-299 or interceptors. These deficiencies may be addressed in future versions.</para>
    <important>
       <para>
-        The Errai CDI extension itself is implemented on top of the Errai IOC Framework (see
+        Errai CDI is implemented as an extension on top of the Errai IOC Framework (see
         <xref linkend="sid-5931402"/>
-        ), which itself implements the JSR-330 specification. Inclusion of the CDI module your GWT project will result in the extensions automatically being loaded and made available to your application.
+        ), which itself implements JSR-330. Inclusion of the CDI module your GWT project will result in the extensions automatically being loaded and made available to your application.
       </para>
    </important>
    <note>
@@ -23,7 +23,7 @@
         <code>@PostConstruct</code>
         are not working for your classes, double-check that you have an
         <code>ErraiApp.properties</code>
-        in every JAR and directory that contains classes Errai should know about.
+        at the root of every JAR and directory tree that contains classes Errai should know about.
       </para>
    </note>
    <section id="sid-5931498">

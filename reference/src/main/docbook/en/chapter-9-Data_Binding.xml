@@ -41,6 +41,14 @@ public class Customer {
 }
 </programlisting>
       </example>
+      <important>
+         <para>
+          If you cannot annotate your classes with
+          <code>@Bindable</code>
+          , you can alternatively specify bindable types in your ErraiApp.properties using a whitespace-separated list of fully qualified class names:
+          <code>errai.ui.bindableTypes=org.example.Model1 org.example.Model2</code>
+        </para>
+      </important>
    </section>
    <section id="sid-51282340_DataBinding-InitializingaDataBinder">
       <title>Initializing a DataBinder</title>
@@ -99,7 +107,15 @@ DataBinder&lt;Customer&gt; dataBinder = DataBinder.forModel(existingCustomerObje
         <code>bind</code>
         method on a
         <code>DataBinder</code>
-        instance, thereby specifying which widgets should be bound to which properties of the model. Note that when using Errai UI these bindings are created automatically based on matching data-field and model property names.
+        instance, thereby specifying which widgets should be bound to which properties of the model. It is possible to use property chains for bindings, given that all nested properties are of bindable types. When binding to
+        <code>customer.address.streetName</code>
+        , for example, both
+        <code>customer</code>
+        and
+        <code>address</code>
+        have to be of a type annotated with
+        <code>@Bindable</code>
+        .
       </para>
       <informalexample>
          <programlisting language="java">
@@ -144,6 +160,9 @@ public class CustomerView {
       <note>
          <para>It's important to retrieve the model instance using dataBinder.getModel() before making changes to it as the data binder will provide a proxy to the model to ensure that changes will update the corresponding UI components.</para>
       </note>
+      <tip>
+         <para>When using Errai UI, bindings can be created automatically based on matching data-fields and model property names.</para>
+      </tip>
    </section>
    <section id="sid-51282340_DataBinding-SpecifyingConverters">
       <title>Specifying Converters</title>

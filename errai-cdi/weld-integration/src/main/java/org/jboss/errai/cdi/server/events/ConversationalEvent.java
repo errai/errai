@@ -26,15 +26,6 @@ import javax.enterprise.util.TypeLiteral;
 public interface ConversationalEvent<T> {
 
   /**
-   * <p>Fires an event with the specified qualifiers and notifies
-   * observers.</p>
-   *
-   * @param event the event object
-   * @throws IllegalArgumentException if the runtime type of the event object contains a type variable
-   */
-  public void fire(T event);
-
-  /**
    * <p>Obtains a child <tt>Event</tt> for the given additional
    * required qualifiers.</p>
    *

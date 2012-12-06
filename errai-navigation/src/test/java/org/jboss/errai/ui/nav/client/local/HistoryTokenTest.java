@@ -46,4 +46,23 @@ public class HistoryTokenTest extends GWTTestCase {
     assertEquals("value", token.getState().get("key").iterator().next());
   }
 
+  public void testToStringNoParams() throws Exception {
+    String encodedToken = HistoryToken.of("PageName", ImmutableMultimap.<String, String>of()).toString();
+    assertEquals("PageName", encodedToken);
+  }
+
+  public void testToString1Param() throws Exception {
+    String encodedToken = HistoryToken.of("PageName",
+            ImmutableMultimap.<String, String>of("p1", "v1"))
+            .toString();
+    assertEquals("PageName;p1=v1", encodedToken);
+  }
+
+  public void testToString2Params() throws Exception {
+    String encodedToken = HistoryToken.of("PageName",
+            ImmutableMultimap.<String, String>of("p1", "v1", "p2", "v2"))
+            .toString();
+    assertEquals("PageName;p1=v1&p2=v2", encodedToken);
+  }
+
 }

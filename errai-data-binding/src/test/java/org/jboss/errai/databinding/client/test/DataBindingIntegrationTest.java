@@ -367,6 +367,17 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.active").getModel();
 
+    // change the property 'active' on the model and all children using a non accessor method.
+    model.activate();
+    assertTrue("Model not properly updated", model.getChild().isActive());
+    assertEquals("Widget not properly updated", "true", textBox.getText());
+  }
+  
+  @Test
+  public void testBindablePropertyChainsUsingNonAccesssorMethodOnChild() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.active").getModel();
+
     // change the property 'active' using a non accessor method.
     model.getChild().activate();
     assertTrue("Model not properly updated", model.getChild().isActive());

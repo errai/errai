@@ -2,19 +2,15 @@ package org.jboss.errai.ui.nav.client.local;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
-import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
-import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithRenamedStateFields;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 
 public class PageStateTest extends AbstractErraiCDITest {
 
@@ -168,21 +164,14 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals(Arrays.asList("0", "1", "0"), page.getStringCollection());
     assertEquals(new HashSet<String>(Arrays.asList("0", "1", "0")), page.getStringSet());
     assertEquals(Arrays.asList(0, 1, 0), page.getIntList());
-
-    // finally, ensure getState() properly reconstitutes the map we started with
-    PageNode<PageWithExtraState> pageNode = navigation.getNavGraph().getPage(PageWithExtraState.class);
-    Multimap<String, String> refetchedState = pageNode.getState(page);
-    Multimap<String, String> expectedState = ArrayListMultimap.create(stateValues);
-
-    // the set loses an entry during conversion (that's correct behaviour); test it separately
-    Set<String> expectedSet = new HashSet<String>(expectedState.removeAll("stringSet"));
-    Set<String> actualSet = new HashSet<String>(refetchedState.removeAll("stringSet"));
-    assertEquals(expectedSet, actualSet);
-
-    // and everything that remains should come out identically
-    assertEquals(expectedState, refetchedState);
   }
 
+  public void testInheritedStateFieldsAreWritten() throws Exception {
+    PageWithInheritedState page = beanManager.lookupBean(PageWithInheritedState.class).getInstance();
+    assertNull(page.getMyState());
+    navigation.goTo(PageWithInheritedState.class, ImmutableMultimap.of("inheritedState", "inherit this!"));
+    assertEquals("inherit this!", page.getMyState());
+  }
   /**
    * If there are multiple values for the same key, but the corresponding
    * {@code @PageState} field in the page is not a collection, the field should
@@ -201,17 +190,15 @@ public class PageStateTest extends AbstractErraiCDITest {
     assertEquals("string0", page.getStringThing());
   }
 
-  public void testReadNullsWithGetState() throws Exception {
-    PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+  public void testFieldWithGivenName() throws Exception {
+    PageWithRenamedStateFields page = beanManager.lookupBean(PageWithRenamedStateFields.class).getInstance();
+    assertNull(page.getField());
 
-    assertAllFieldsHaveDefaultValues(page);
+    navigation.goTo(PageWithRenamedStateFields.class, ImmutableMultimap.of("givenName", "value"));
+    assertEquals("value", page.getField());
 
-    NavigationGraph navGraph = navigation.getNavGraph();
-    PageNode<PageWithExtraState> pageNode = navGraph.getPage(PageWithExtraState.class);
-    Multimap<String, String> state = pageNode.getState(page);
-    assertTrue("Default state map should only contain the primitives, but was: " + state,
-            state.keySet().equals(ImmutableSet.of(
-                    "byteThing", "shortThing", "intThing", "longThing", "floatThing", "doubleThing", "boolThing")));
+    // and ensure the field doesn't respond to its real name
+    navigation.goTo(PageWithRenamedStateFields.class, ImmutableMultimap.of("field", "value"));
+    assertNull(page.getField());
   }
-
 }

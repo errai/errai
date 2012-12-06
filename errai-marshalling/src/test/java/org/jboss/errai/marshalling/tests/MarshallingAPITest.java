@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.*;
@@ -30,7 +29,6 @@ import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,13 +41,7 @@ public class MarshallingAPITest {
 
   @Before
   public void ensureMarshallingSystemInitialized() {
-    ClassScanner.setReflectionsScanning(true);
     MappingContextSingleton.get();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    ClassScanner.setReflectionsScanning(false);
   }
 
   private void testEncodeDecode(Object value) {

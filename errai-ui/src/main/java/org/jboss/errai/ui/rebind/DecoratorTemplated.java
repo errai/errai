@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,6 +76,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.DomEvent.Type;
 import com.google.gwt.resources.client.ClientBundle;
@@ -94,6 +96,9 @@ import com.google.gwt.user.client.ui.Widget;
 @CodeDecorator
 public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
+  
+  private static final Logger logger = Logger.getLogger(DecoratorTemplated.class.getName());
+
 
   public DecoratorTemplated(Class<Templated> decoratesWith) {
     super(decoratesWith);
@@ -229,7 +234,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             + declaringClass.getFullyQualifiedName()
             + "." + method.getName() + "] must specify at least one data-field target.");
       }
-      MetaClass eventType = method.getParameters()[0].getType();
+      
+      MetaClass eventType = (method.getParameters().length == 1) ? method.getParameters()[0].getType() : null;
+      if (eventType == null || (!eventType.isAssignableTo(Event.class)) && !eventType.isAssignableTo(DomEvent.class)) {
+        throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
+            + declaringClass.getFullyQualifiedName()
+            + "] must have exactly one parameter of a type extending either ["
+            + DomEvent.class.getName() + "] or [" + NativeEvent.class.getName() + "]." );
+      }
 
       if (eventType.isAssignableTo(Event.class)) {
         /*
@@ -301,14 +313,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         /*
          * We have a GWT Widget type
          */
-        if (method.getParameters().length != 1
-            || !method.getParameters()[0].getType().isAssignableTo(DomEvent.class)) {
-          throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
-              + declaringClass.getFullyQualifiedName()
-              + "] must have at least one parameter of a type extending ["
-              + DomEvent.class.getName() + "]");
-        }
-
         MetaClass handlerType;
         try {
           handlerType = getHandlerForEvent(eventType);
@@ -343,6 +347,12 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
         for (String name : targetDataFieldNames) {
           MetaClass dataFieldType = dataFieldTypes.get(name);
+          
+          if (dataFieldType == null) {
+            throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
+                + declaringClass.getFullyQualifiedName()
+                + "] handles a GWT event type but the specified @DataField [" + name + "] was not found.");
+          }
 
           if (processedNativeHandlers.contains(name)) {
             throw new GenerationException(
@@ -427,9 +437,9 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] returns void.");
     }
 
-    System.out.println("eventType: " + eventType.getClass() + " -- " + eventType);
-    System.out.println("method: " + method.getClass() + " -- " + method);
-    System.out.println("returnType: " + returnType.getClass() + " -- " + returnType);
+    logger.info("eventType: " + eventType.getClass() + " -- " + eventType);
+    logger.info("method: " + method.getClass() + " -- " + method);
+    logger.info("returnType: " + returnType.getClass() + " -- " + returnType);
 
     MetaParameterizedType parameterizedType = returnType.getParameterizedType();
     if (parameterizedType == null) {
@@ -437,7 +447,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] does not return Type<? extends EventHandler>..");
     }
 
-    System.out.println("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
+    logger.info("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
 
     MetaType[] argTypes = parameterizedType.getTypeParameters();
     if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass

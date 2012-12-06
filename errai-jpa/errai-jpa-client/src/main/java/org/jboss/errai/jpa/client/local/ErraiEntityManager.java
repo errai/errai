@@ -34,7 +34,7 @@ import org.jboss.errai.marshalling.client.api.MarshallerFramework;
  * populates the metamodel with the type and attribute information required for
  * enumerating and creating entity instances, and enumerating, reading, and
  * writing their fields.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public abstract class ErraiEntityManager implements EntityManager {
@@ -346,7 +346,10 @@ public abstract class ErraiEntityManager implements EntityManager {
     }
     R relatedEntity = cascadeAcross.get(owningEntity);
     System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + relatedEntity + "?");
-    if (cascadeAcross.cascades(cascadeType)) {
+    if (relatedEntity == null) {
+      System.out.println("    No (because it's null)");
+    }
+    else if (cascadeAcross.cascades(cascadeType)) {
       System.out.println("    Yes");
       if (cascadeAcross.isCollection()) {
         for (Object element : (Iterable<?>) relatedEntity) {
@@ -359,7 +362,7 @@ public abstract class ErraiEntityManager implements EntityManager {
     }
     else {
       System.out.println("    No");
-      if (relatedEntity != null && cascadeType == CascadeType.PERSIST && !contains(relatedEntity)) {
+      if (cascadeType == CascadeType.PERSIST && !contains(relatedEntity)) {
         throw new IllegalStateException(
                 "Entity " + owningEntity + " references an unsaved entity via relationship attribute [" +
                 cascadeAcross.getName() + "]. Save related attribute before flushing or change" +
@@ -500,10 +503,10 @@ public abstract class ErraiEntityManager implements EntityManager {
     Key<X, ?> key = Key.get(this, entityClass, primaryKey);
     return find(key, properties);
   }
-  
+
   /**
    * Retrieves the entity instance identified by the given Key.
-   * 
+   *
    * @param key The key to look up. Must not be null.
    * @param properties JPA hints (standard and Errai-specific) for the lookup.
    * @return the entity instance, or null if the entity cannot be found.

@@ -50,15 +50,18 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 
 /**
- * Generates a proxy for a {@link Bindable} type.
+ * Generates a proxy for a {@link Bindable} type. A bindable proxy subclasses the bindable type and overrides all
+ * non-final methods to trigger UI updates and fire property change events when required.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyGenerator {
   private final MetaClass bindable;
+  private final String agentField;
 
   public BindableProxyGenerator(MetaClass bindable) {
     this.bindable = bindable;
+    this.agentField = inferSafeAgentFieldName();
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -68,13 +71,13 @@ public class BindableProxyGenerator {
         .body();
 
     classBuilder
-        .privateField("__agent", parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
+        .privateField(agentField, parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)))
         .finish()
         .publicConstructor(Parameter.of(InitialState.class, "initialState"))
         .callThis(Stmt.newObject(bindable), Variable.get("initialState"))
         .finish()
         .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(InitialState.class, "initialState"))
-        .append(Stmt.loadVariable("__agent").assignValue(
+        .append(Stmt.loadVariable(agentField).assignValue(
             Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
                 Variable.get("this"), Variable.get("target"), Variable.get("initialState"))))
         .append(generatePropertiesMap())
@@ -273,12 +276,20 @@ public class BindableProxyGenerator {
     return block;
   }
 
+  private String inferSafeAgentFieldName() {
+    String fieldName = "agent";
+    while (bindable.getInheritedField(fieldName) != null) {
+      fieldName = "_" + fieldName;
+    }
+    return fieldName;
+  }
+
   private ContextualStatementBuilder agent(String field) {
     return agent().loadField(field);
   }
 
   private ContextualStatementBuilder agent() {
-    return Stmt.loadClassMember("__agent");
+    return Stmt.loadClassMember(agentField);
   }
 
   private ContextualStatementBuilder target() {

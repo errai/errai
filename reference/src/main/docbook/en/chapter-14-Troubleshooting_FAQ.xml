@@ -46,4 +46,40 @@
         .
       </para>
    </section>
+   <section id="sid-32473113_Troubleshooting%26FAQ-I%27mgetting%22java.lang.RuntimeException%3ATherearenoproxyprovidersregisteredyet.%22inmy@PostConstructmethod%21">
+      <title>I'm getting "java.lang.RuntimeException: There are no proxy providers registered yet." in my @PostConstruct method!</title>
+      <para>
+        <emphasis role="strong">Answer:</emphasis>
+        You can't invoke RPC methods via
+        <code>Caller&lt;?&gt;</code>
+        or by other means until after the Errai Bus has finished its initial handshake. Try changing your
+        <code>@PostConstruct</code>
+        annotation to
+        <code>@AfterInitialization</code>
+        . This will cause your method to be invoked later—after the bus handshake has completed.
+      </para>
+      <para>
+        If this doesn't help, it is also possible that the proxies were never generated in the first place. Check in
+        <code>.errai/RpcProxyLoaderImpl.java</code>
+        to see if proxy code exists for the
+        <code>@Remote</code>
+        and/or
+        <code>@Path</code>
+        interface in question. If not, your
+        <code>@Remote</code>
+        interfaces were not present on the GWT compiler's classpath when your application module was compiled. Double-check your GWT compilation classpath: all
+        <code>@Remote</code>
+        interfaces must be visible to (in or inherited by) the GWT module that contains the
+        <code>Caller&lt;?&gt;</code>
+        types. Pay special attention that your
+        <code>@Remote</code>
+        and
+        <code>@Path</code>
+        interfaces are not in a package excluded from the GWT module (by default, every subpackage other than
+        <code>client</code>
+        and
+        <code>shared</code>
+        is invisible to the GWT compiler).
+      </para>
+   </section>
 </chapter>

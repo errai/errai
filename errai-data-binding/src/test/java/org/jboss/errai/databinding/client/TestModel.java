@@ -32,11 +32,17 @@ public class TestModel {
 
   private int id;
   private String value;
+  
   // the _ here is used to test proper JavaBean property discovery
   private String _name;
   private Integer _age;
+  
   private boolean active;
   private TestModel child;
+  
+  // this field tests for the case there's a field name collision in the generated proxy
+  @SuppressWarnings("unused")
+  private String agent;
   
   public int getId() {
     return id;
@@ -90,6 +96,9 @@ public class TestModel {
   // this method is used to test property changes using non accessor methods
   public void activate() {
     this.active = true;
+    if (child != null) {
+      child.activate();
+    }
   }
 
   protected TestModel activate(boolean b) {

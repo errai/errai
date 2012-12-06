@@ -1,15 +1,21 @@
 package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 
-import com.google.gwt.core.client.GWT;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.user.client.Window;
 
 public class NavigationTest extends AbstractErraiCDITest {
 
+  private IOCBeanManager beanManager;
+  private Navigation navigation;
   private NavigationGraph navGraph;
 
   @Override
@@ -21,7 +27,9 @@ public class NavigationTest extends AbstractErraiCDITest {
   protected void gwtSetUp() throws Exception {
     disableBus = true;
     super.gwtSetUp();
-    navGraph = GWT.create(NavigationGraph.class);
+    beanManager = IOC.getBeanManager();
+    navigation = beanManager.lookupBean(Navigation.class).getInstance();
+    navGraph = navigation.getNavGraph();
   }
 
   public void testMissingPage() throws Exception {
@@ -51,5 +59,10 @@ public class NavigationTest extends AbstractErraiCDITest {
     TransitionTo<CircularRef2> transitionToCR2 = cr1.getLink();
     Class<CircularRef2> cr2Type = transitionToCR2.toPageType();
     assertEquals(CircularRef2.class, cr2Type);
+  }
+
+  public void testUrlUpdatesWithPageChange() throws Exception {
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of("intThing", "42"));
+    assertEquals("#PageWithExtraState;intThing=42", Window.Location.getHash());
   }
 }
