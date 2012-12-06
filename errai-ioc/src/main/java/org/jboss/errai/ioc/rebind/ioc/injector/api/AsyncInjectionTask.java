@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import com.sun.imageio.stream.StreamFinalizer;
+import java.lang.annotation.Annotation;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -41,10 +43,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncInjectorResolveCallback;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
-import javax.swing.text.StringContent;
-import java.lang.annotation.Annotation;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncInjectionTask {
   protected final TaskType taskType;
