@@ -273,7 +273,7 @@ public final class SnapshotMaker {
         final Context subContext = Context.create(context);
         subContext.addLiteralizableMetaClasses(typesToRecurseOn);
 
-        final AnonymousClassStructureBuilder builder = ObjectBuilder.newInstanceOf(typeToExtend, context)
+        final AnonymousClassStructureBuilder builder = ObjectBuilder.newInstanceOf(typeToExtend.getErased(), context)
             .extend();
         unfinishedSnapshots.add(o);
         for (MetaMethod method : sortedMethods) {
