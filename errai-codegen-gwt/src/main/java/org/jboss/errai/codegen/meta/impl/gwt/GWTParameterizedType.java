@@ -51,11 +51,13 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
       else if (parm.isClassOrInterface() != null
               || parm.isEnum() != null
               || parm.isPrimitive() != null
-              || parm.isRawType() != null) {
+              || parm.isRawType() != null
+              || parm.isArray() != null
+              || parm.isAnnotation() != null) {
         types.add(GWTClass.newInstance(oracle, parm));
       }
       else {
-        throw new IllegalArgumentException("Unsupported kind of type parameter " + parm + " in type " + this);
+        throw new IllegalArgumentException("Unsupported kind of type parameter " + parm + " in type " + parameterizedType.getName());
       }
     }
     return types.toArray(new MetaType[types.size()]);
