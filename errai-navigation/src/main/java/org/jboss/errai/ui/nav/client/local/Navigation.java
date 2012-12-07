@@ -33,6 +33,8 @@ public class Navigation {
 
   @PostConstruct
   private void init() {
+    if (navGraph.isEmpty()) return;
+
     History.addValueChangeHandler(new ValueChangeHandler<String>() {
       @Override
       public void onValueChange(ValueChangeEvent<String> event) {
