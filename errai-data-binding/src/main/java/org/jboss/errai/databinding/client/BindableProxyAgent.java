@@ -41,24 +41,24 @@ import com.google.gwt.user.client.ui.Widget;
  * <ul>
  * <li>Carry out an initial state sync between the bound widgets and the target model, if specified (see
  * {@link DataBinder#DataBinder(Object, InitialState)})</li>
- * 
+ *
  * <li>Update the bound widget when a setter method is invoked on the model (see
  * {@link #updateWidgetAndFireEvents(String, Object, Object)}). Works for widgets that either implement {@link HasValue}
  * or {@link HasText})</li>
- * 
+ *
  * <li>Update the bound widgets when a non-accessor method is invoked on the model (by comparing all bound properties to
  * detect changes). See {@link #updateWidgetsAndFireEvents()}. Works for widgets that either implement {@link HasValue}
  * or {@link HasText})</li>
- * 
+ *
  * <li>Update the target model in response to value change events (only works for bound widgets that implement
  * {@link HasValue})</li>
  * <ul>
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
+ *
  * @param <T>
  *          The type of the target model being proxied.
- * 
+ *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
@@ -69,7 +69,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final Map<String, HandlerRegistration> handlerRegistrations = new HashMap<String, HandlerRegistration>();
   final Map<String, Object> knownValues = new HashMap<String, Object>();
 
-  final PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
+  PropertyChangeHandlerSupport propertyChangeHandlerSupport = new PropertyChangeHandlerSupport();
 
   final BindableProxy<T> proxy;
   final T target;
@@ -82,8 +82,28 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
+   * Makes the settings of this BindableProxyAgent match those of the given
+   * agent.
+   * <p>
+   * IMPORTANT NOTE: this is currently implemented by sharing the
+   * PropertyChangeHandler registrations with the given agent. You should
+   * discard all references to the "from" agent after calling this method.
+   *
+   * @param other
+   *          the agent to copy/share settings from. Should not be used after
+   *          you pass it to this method.
+   */
+  public void shareStateWith(BindableProxyAgent<T> other) {
+    for (String boundProperty : other.getBoundProperties()) {
+      bind(other.getWidget(boundProperty), boundProperty, other.getConverter(boundProperty));
+    }
+
+    propertyChangeHandlerSupport = other.propertyChangeHandlerSupport;
+  }
+
+  /**
    * Returns a set of the currently bound property names.
-   * 
+   *
    * @return bound properties, an empty set if no properties have been bound.
    */
   public Set<String> getBoundProperties() {
@@ -93,7 +113,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Returns the widget currently bound to the provided property (see
    * {@link BindableProxy#bind(Widget, String, Converter)}).
-   * 
+   *
    * @param property
    *          the name of the model property
    * @return the widget currently bound to the provided property or null if no widget was bound to the property.
@@ -105,7 +125,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Returns the converter used for the binding of the provided property (see
    * {@link BindableProxy#bind(Widget, String, Converter)}).
-   * 
+   *
    * @param property
    *          the name of the model property
    * @return the converter used for the bound property or null if the property was not bound or no converter was
@@ -117,7 +137,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Returns the {@link InitialState} configured when the proxy was created.
-   * 
+   *
    * @return initial state, can be null.
    */
   public InitialState getInitialState() {
@@ -127,7 +147,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Binds the provided widget to the specified property (or property chain) of the model instance associated with this
    * proxy (see {@link #setModel(Object, InitialState)}).
-   * 
+   *
    * @param widget
    *          the widget to bind to, must not be null.
    * @param property
@@ -177,7 +197,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * Creates a data binder for a nested property to support property chains. The nested data binder is initialized with
    * the current value of the specified property, or with a new instance of the property type if the value is null. The
    * proxy's value for this property is then replaced with the proxy managed by the nested data binder.
-   * 
+   *
    * @param widget
    *          the widget to bind to, must not be null.
    * @param property
@@ -242,7 +262,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Unbinds the property with the given name.
-   * 
+   *
    * @param property
    *          the name of the model property to unbind, must not be null.
    */
@@ -271,7 +291,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Updates all bound widgets if necessary (if a bound property's value has changed). This method is invoked in case a
    * bound property changed outside the property's write method (using a non accessor method).
-   * 
+   *
    * @param <P>
    *          The property type of the changed property.
    */
@@ -293,7 +313,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Updates bound widgets and fires {@link PropertyChangeEvent}s.
-   * 
+   *
    * @param <P>
    *          The property type of the changed property.
    * @param source
@@ -328,7 +348,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Synchronizes the state of the model and the bound widgets based on the value of the provided {@link InitialState}.
-   * 
+   *
    * @param initialState
    *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
    *          synchronization should be carried out.
