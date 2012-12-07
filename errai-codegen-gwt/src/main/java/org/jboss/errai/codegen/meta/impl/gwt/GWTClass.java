@@ -69,6 +69,10 @@ public class GWTClass extends AbstractMetaClass<JType> {
     super(classType);
     this.oracle = oracle;
 
+    if (classType.getQualifiedSourceName().contains(" ")) {
+      throw new IllegalArgumentException("Cannot represent \"" + classType + "\" as a class. Try a different meta type such as GWTWildcardType or GWTTypeVaraible.");
+    }
+
     final JParameterizedType parameterizedType = classType.isParameterized();
     if (!erased) {
       if (parameterizedType != null) {
@@ -269,6 +273,16 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     return methodList.toArray(new MetaField[methodList.size()]);
+  }
+
+  @Override
+  public MetaClass getErased() {
+    if (getParameterizedType() == null) {
+      return this;
+    }
+    else {
+      return new GWTClass(oracle, getEnclosedMetaObject().getErasedType(), true);
+    }
   }
 
   @Override

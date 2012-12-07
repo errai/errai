@@ -162,8 +162,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           Object oldValue = proxy.get(property);
 
           Object value =
-              Convert.toModelValue(propertyTypes.get(property).getType(), bindings.get(property), event.getValue(),
-                  converters.get(property));
+              Convert.toModelValue(propertyTypes.get(property).getType(), widget, event.getValue(), converter);
           proxy.set(property, value);
 
           propertyChangeHandlerSupport

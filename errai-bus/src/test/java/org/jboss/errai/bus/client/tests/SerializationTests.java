@@ -1101,8 +1101,15 @@ public class SerializationTests extends AbstractErraiTest {
         listOffFloats.add(1.1f);
         listOffFloats.add(1.2f);
 
+        List<String> listOfStrings = new ArrayList<String>();
+        listOfStrings.add("str1");
+        listOfStrings.add(null);
+        listOfStrings.add("str2");
+
         ent.setObject(new Group());
         ent.setListOfFloats(listOffFloats);
+        ent.setListWithLowerBoundWildcard(listOfStrings);
+
         MessageBuilder.createCall(new RemoteCallback<EntityWithGenericCollections>() {
           @Override
           public void callback(EntityWithGenericCollections response) {

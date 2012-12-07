@@ -206,6 +206,14 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract MetaClass asArrayOf(int dimensions);
 
+  /**
+   * Returns a MetaClass that represents the same class as this one, but
+   * guaranteed to have no type parameters.
+   *
+   * @return A raw MetaClass representing the same class as this MetaClass. If
+   *         this class has no type parameters in the first place, the receiving
+   *         MetaClass instance is returned.
+   */
   public abstract MetaClass getErased();
 
   public abstract boolean isPrimitiveWrapper();

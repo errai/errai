@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Provides the API to programmatically bind properties of a data model instance (any POJO annotated with
+ * Provides an API to programmatically bind properties of a data model instance (any POJO annotated with
  * {@link Bindable}) to UI fields/widgets. The properties of the model and the UI components will automatically be kept
  * in sync for as long as they are bound.
  * 
@@ -40,7 +40,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   private T model;
 
   /**
-   * Creates a {@link DataBinder} for a newly created model instance of the provided type (see {@link #forType(Class)}).
+   * Creates a {@link DataBinder} for a new model instance of the provided type (see {@link #forType(Class)}).
    * 
    * @param modelType
    *          The bindable type, must not be null.
@@ -50,7 +50,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Creates a {@link DataBinder} for a newly created model instance of the provided type (see {@link #forType(Class)}),
+   * Creates a {@link DataBinder} for a new model instance of the provided type (see {@link #forType(Class)}),
    * initializing either model or UI widgets from the values defined by {@link InitialState} (see
    * {@link #forModel(Object, InitialState)}).
    * 
@@ -89,7 +89,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Creates a {@link DataBinder} for a newly created model instance of the provided type.
+   * Creates a {@link DataBinder} for a new model instance of the provided type.
    * 
    * @param modelType
    *          The bindable type, must not be null.
@@ -99,7 +99,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Creates a {@link DataBinder} for a newly created model instance of the provided type, initializing either model or
+   * Creates a {@link DataBinder} for a new model instance of the provided type, initializing either model or
    * UI widgets from the values defined by {@link InitialState}.
    * 
    * @param modelType
@@ -137,7 +137,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
+   * Binds the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
    * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
    * 
@@ -157,7 +157,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
+   * Binds the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
    * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
    * 
@@ -197,7 +197,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Unbinds the widget and model bound by previous calls to {@link #bind(HasValue, Object, String)}.
+   * Unbinds all widgets bound by previous calls to {@link #bind(HasValue, Object, String)}.
    * 
    * @return the same {@link DataBinder} instance to support call chaining.
    */

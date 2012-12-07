@@ -19,7 +19,6 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaParameterizedType;
 
@@ -43,17 +42,22 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   public MetaType[] getTypeParameters() {
     final List<MetaType> types = new ArrayList<MetaType>();
     for (final JClassType parm : parameterizedType.getTypeArgs()) {
-      if (parm.isParameterized() != null) {
-        types.add(new GWTParameterizedType(oracle, parm.isParameterized()));
+      if (parm.isWildcard() != null) {
+        types.add(new GWTWildcardType(oracle, parm.isWildcard()));
       }
       else if (parm.isTypeParameter() != null) {
         types.add(new GWTTypeVariable(oracle, parm.isTypeParameter()));
       }
-      else if (parm.isGenericType() != null) {
-        types.add(new GWTGenericDeclaration(oracle, parm.isGenericType()));
+      else if (parm.isClassOrInterface() != null
+              || parm.isEnum() != null
+              || parm.isPrimitive() != null
+              || parm.isRawType() != null
+              || parm.isArray() != null
+              || parm.isAnnotation() != null) {
+        types.add(GWTClass.newInstance(oracle, parm));
       }
       else {
-        types.add(GWTClass.newInstance(oracle, parm));
+        throw new IllegalArgumentException("Unsupported kind of type parameter " + parm + " in type " + parameterizedType.getName());
       }
     }
     return types.toArray(new MetaType[types.size()]);
@@ -67,11 +71,6 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   @Override
   public MetaType getRawType() {
     return GWTClass.newInstance(oracle, parameterizedType.getRawType());
-  }
-
-  @Override
-  public String toString() {
-    return getName();
   }
 
   @Override

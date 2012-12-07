@@ -133,7 +133,7 @@ public class MarshallingGenUtil {
   /**
    * Returns the map key type of the given metaclass under the following conditions:
    * <ul>
-   * <li>toType is a {@link Map} 
+   * <li>toType is a {@link Map}
    * <li>toType's key type is not a wildcard
    * <li>toType's key type is a non-abstract (concrete) type
    * </ul>
@@ -148,11 +148,11 @@ public class MarshallingGenUtil {
     }
     return null;
   }
-  
+
   /**
    * Returns the map key value of the given metaclass under the following conditions:
    * <ul>
-   * <li>toType is a {@link Map} 
+   * <li>toType is a {@link Map}
    * <li>toType's value type is not a wildcard
    * <li>toType's value type is a non-abstract (concrete) type
    * </ul>
@@ -167,7 +167,7 @@ public class MarshallingGenUtil {
     }
     return null;
   }
-  
+
   private static MetaClass getConcreteTypeParameter(MetaClass toType, int typeParamIndex, int typeParamsSize) {
     if (toType.getParameterizedType() != null) {
       MetaType[] typeParms = toType.getParameterizedType().getTypeParameters();
@@ -187,7 +187,7 @@ public class MarshallingGenUtil {
     }
     return null;
   }
-  
+
   public static Collection<MetaClass> getDefaultArrayMarshallers() {
     final List<MetaClass> l = new ArrayList<MetaClass>();
 
