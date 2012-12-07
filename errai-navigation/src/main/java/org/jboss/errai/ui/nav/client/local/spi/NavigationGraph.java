@@ -71,4 +71,11 @@ public abstract class NavigationGraph {
     }
     throw new IllegalArgumentException("No page with a widget type of " + type.getName() + " exists");
   }
+
+  /**
+   * Returns true if and only if there are no pages in this nagivation graph.
+   */
+  public boolean isEmpty() {
+    return pagesByName.isEmpty();
+  }
 }

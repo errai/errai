@@ -118,7 +118,7 @@ public class NavigationGraphGenerator extends Generator {
 
     renderNavigationToDotFile(pageNames);
 
-    if (defaultPages.size() == 0) {
+    if (pages.size() > 0 && defaultPages.size() == 0) {
       throw new GenerationException(
               "No @Page classes have startingPage=true. Exactly one @Page class" +
               " must be designated as the starting page.");

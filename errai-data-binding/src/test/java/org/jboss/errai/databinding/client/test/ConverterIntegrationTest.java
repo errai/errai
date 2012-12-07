@@ -94,7 +94,7 @@ public class ConverterIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingRetainsConverterAfterModelInstanceChange() {
+  public void testBinderRetainsConverterAfterModelInstanceChange() {
     Converter<Integer, String> converter = new Converter<Integer, String>() {
       @Override
       public Integer toModelValue(String widgetValue) {

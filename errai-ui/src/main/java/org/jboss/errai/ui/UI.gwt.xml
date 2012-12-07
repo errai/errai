@@ -24,6 +24,7 @@
   <inherits name="org.jboss.errai.databinding.DataBinding" />
   
   <inherits name="com.google.gwt.logging.Logging"/>
+  <set-property name="gwt.logging.popupHandler" value="DISABLED"/>
   
   <source path="client" />
   <source path="shared" />
