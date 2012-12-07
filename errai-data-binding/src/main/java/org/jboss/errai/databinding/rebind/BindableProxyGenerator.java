@@ -156,7 +156,7 @@ public class BindableProxyGenerator {
   }
 
   /**
-   * Generates a getter method for the provided property plus the corresponding code for the implementation of
+   * Generates a setter method for the provided property plus the corresponding code for the implementation of
    * {@link HasProperties#set(String, Object)}.
    */
   private void generateSetter(ClassStructureBuilder<?> classBuilder, String property, BlockBuilder<?> setMethod) {

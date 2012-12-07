@@ -432,7 +432,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
   
   @Test
-  public void testBoundProperties() {
+  public void testGetBoundProperties() {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class)
       .bind(new TextBox(), "value")
       .bind(new TextBox(), "child.child.value");
@@ -470,7 +470,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
   
   @Test
-  public void testBindingRetainsPropertyChangeHandlersAfterModelInstanceChange() {
+  public void testBinderRetainsPropertyChangeHandlersAfterModelInstanceChange() {
     MockHandler handler = new MockHandler();
 
     TextBox textBox = new TextBox();

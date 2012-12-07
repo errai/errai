@@ -107,7 +107,7 @@ public class JsonUtil {
   @SuppressWarnings("unchecked")
   public static <Y> Y basicValueFromJson(JSONValue jsonValue, Class<Y> expectedType) {
     Y value;
-    if (jsonValue.isNull() != null) {
+    if (jsonValue == null || jsonValue.isNull() != null) {
       value = null;
     }
     else if (expectedType == String.class) {
