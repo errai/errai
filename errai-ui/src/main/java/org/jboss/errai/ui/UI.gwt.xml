@@ -23,7 +23,7 @@
   <inherits name='org.jboss.errai.enterprise.CDI'/>
   <inherits name="org.jboss.errai.databinding.DataBinding" />
   
-  <inherits name="com.google.gwt.logging.Logging"/>
+  <!--<inherits name="com.google.gwt.logging.Logging"/>-->
   
   <source path="client" />
   <source path="shared" />
