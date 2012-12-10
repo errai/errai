@@ -17,6 +17,7 @@ package org.jboss.errai.ui.rebind;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,7 +97,7 @@ import com.google.gwt.user.client.ui.Widget;
 @CodeDecorator
 public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
-  
+
   private static final Logger logger = Logger.getLogger(DecoratorTemplated.class.getName());
 
 
@@ -204,7 +205,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
           })));
       Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
-      
+
       generateComponentCompositions(ctx, builder, component, rootTemplateElement,
           Stmt.loadVariable(dataFieldElementsVarName), fieldsMap);
 
@@ -218,7 +219,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
     Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
     dataFieldTypes.put("this", ctx.getType());
-    
+
     MetaClass declaringClass = ctx.getEnclosingType();
 
     /* Ensure that no @DataFields are handled more than once when used in combination with @SyncNative */
@@ -234,7 +235,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             + declaringClass.getFullyQualifiedName()
             + "." + method.getName() + "] must specify at least one data-field target.");
       }
-      
+
       MetaClass eventType = (method.getParameters().length == 1) ? method.getParameters()[0].getType() : null;
       if (eventType == null || (!eventType.isAssignableTo(Event.class)) && !eventType.isAssignableTo(DomEvent.class)) {
         throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
@@ -347,7 +348,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
         for (String name : targetDataFieldNames) {
           MetaClass dataFieldType = dataFieldTypes.get(name);
-          
+
           if (dataFieldType == null) {
             throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
                 + declaringClass.getFullyQualifiedName()
@@ -371,7 +372,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           else {
             eventSource = Stmt.nestedCall(fieldsMap).invoke("get", name);
           }
-          
+
           if (dataFieldType.isAssignableTo(Element.class)) {
             builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component,
                 eventSource, listenerInstance,
@@ -521,9 +522,22 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      */
     Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
     for (Entry<String, Statement> field : dataFields.entrySet()) {
+      String dataFieldName = field.getKey();
       builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
           .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
-          dataFieldElements, field.getKey()));
+          dataFieldElements, dataFieldName));
+      // Check for attribute overrides configured for this data field.
+      Map<String, String> attributeOverrides = getAttributeOverrides(ctx, dataFieldName);
+      for (Entry<String, String> override : attributeOverrides.entrySet()) {
+        String attrName = override.getKey();
+        String attrValue = override.getValue();
+        logger.info("Overriding attribute [" + attrName + "] with value ["
+                + attrValue + "] for data field ["
+                + ctx.getEnclosingType().getFullyQualifiedName() + "."
+                + dataFieldName + "]");
+        builder.append(Stmt.invokeStatic(TemplateUtil.class, "overrideAttribute",
+                Cast.to(Widget.class, field.getValue()), attrName, attrValue));
+      }
     }
 
     /*
@@ -684,6 +698,52 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
 
     return result;
+  }
+
+  /**
+   * The name of the injection context variable holding the attribute overrides map for a
+   * given named data field.
+   * @param instance
+   * @param dataFieldName
+   */
+  protected static String attributeOverridesName(InjectableInstance<?> instance, String dataFieldName) {
+    MetaClass type = instance.getEnclosingType();
+    String key = DecoratorTemplated.class.getName() + "_ATTR_OVERRIDES_" + type.getName() + ":" + dataFieldName;
+    return key;
+  }
+
+  /**
+   * Sets an override for an attribute for a templated data field.
+   * @param instance
+   * @param dataFieldName
+   * @param attributeName
+   * @param attributeValue
+   */
+  @SuppressWarnings({ "unchecked" })
+  public static void setAttributeOverride(InjectableInstance<?> instance, String dataFieldName,
+          String attributeName, String attributeValue) {
+    String key = attributeOverridesName(instance, dataFieldName);
+    Map<String, String> attributeOverrides = (Map<String, String>) instance.getInjectionContext().getAttribute(key);
+    if (attributeOverrides == null) {
+      attributeOverrides = new HashMap<String, String>();
+      instance.getInjectionContext().setAttribute(key, attributeOverrides);
+    }
+    attributeOverrides.put(attributeName, attributeValue);
+  }
+
+  /**
+   * Gets the attribute overrides for the given data field name (if any).  This method
+   * always returns a valid Map, even if no attribute overrides have been set for the
+   * data field.
+   */
+  @SuppressWarnings("unchecked")
+  private static Map<String, String> getAttributeOverrides(InjectableInstance<?> instance, String dataFieldName) {
+    String key = attributeOverridesName(instance, dataFieldName);
+    Map<String, String> attributeOverrides = (Map<String, String>) instance.getInjectionContext().getAttribute(key);
+    if (attributeOverrides == null) {
+      attributeOverrides = Collections.EMPTY_MAP;
+    }
+    return attributeOverrides;
   }
 
 }

@@ -8,6 +8,8 @@
    <inherits name="org.jboss.errai.ioc.Container" />
    <inherits name="org.jboss.errai.enterprise.CDI" />
 
+   <inherits name="com.google.gwt.logging.Logging"/>
+
    <generate-with class="org.jboss.errai.ui.nav.rebind.NavigationGraphGenerator">
      <when-type-is class="org.jboss.errai.ui.nav.client.local.spi.NavigationGraph"/>
    </generate-with>
