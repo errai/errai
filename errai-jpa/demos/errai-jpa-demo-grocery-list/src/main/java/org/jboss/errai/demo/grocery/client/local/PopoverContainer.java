@@ -82,7 +82,6 @@ public class PopoverContainer extends Composite {
    * Adds this popover to the document so it can be made visible. This method is
    * called automatically when this bean is created.
    */
-  @SuppressWarnings("unused")
   @PostConstruct
   private void init() {
     RootPanel.get().add(this);
@@ -92,7 +91,6 @@ public class PopoverContainer extends Composite {
    * Removes this popover from the document so it does not leak resources. This
    * method is called automatically when this bean is destroyed.
    */
-  @SuppressWarnings("unused")
   @PreDestroy
   private void destroy() {
     RootPanel.get().remove(this);
