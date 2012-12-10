@@ -954,6 +954,15 @@
           </filesets>
         </configuration>
       </plugin>
+
+      <!-- We do not want to deploy the .war files for demos to Maven Central. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
 
     <pluginManagement>
