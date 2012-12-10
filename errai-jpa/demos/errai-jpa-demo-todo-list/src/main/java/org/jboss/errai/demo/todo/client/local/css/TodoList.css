@@ -1,0 +1,76 @@
+body {
+	background-color: #777;
+	font-family: helvetica, sans-serif;
+	text-align: center;
+}
+
+h1 {
+	color: #f60;
+	font-size: 60px;
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+div.mainContentArea {
+	margin: auto;
+	border: 20px solid #fff;
+	box-shadow: 5px 5px 7px #333;
+	border-radius: 15px;
+	background-color: #fff;
+	width: 600px;
+}
+
+div.mainContentArea > input {
+	font-size: 40px;
+	width: 100%;
+	margin-bottom: 20px;
+}
+.itemsContainer {
+	width: 100%;
+}
+
+div.item {
+	width: 100%;
+	font-size: 35px;
+	text-align: left;
+	margin-top: 10px;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 7px;
+}
+
+div.item input {
+	width: 20px;
+	height: 32px;
+	margin-left: 10px;
+	vertical-align: top;
+}
+
+div.item span {
+	width: 85%;
+	display: inline-block;
+}
+
+div.item .done {
+	text-decoration: line-through;
+	color: #aaa;
+}
+
+div.mainContentArea button {
+	font-size: 20px;
+	margin-top: 20px;
+	margin-bottom: 10px;
+}
+
+/* Don't forget the phones! */
+@media only screen and (max-width: 600px), only screen and (max-device-width: 600px) {
+	h1 {
+		text-align: left;
+		font-size: 30px;
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+	div.mainContentArea {
+		width: 100%;
+		border: 1px solid white;
+	}
+}

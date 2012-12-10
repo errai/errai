@@ -1,0 +1,164 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-jpa-parent</artifactId>
+    <version>2.2.0-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
+  </parent>
+
+  <name>Errai::JPA::Demos::To-Do List</name>
+  <artifactId>errai-jpa-demo-todo-list</artifactId>
+  <packaging>war</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javaee-all</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+  
+    <outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
+    
+    <plugins>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <configuration>
+          <runTarget>index.html</runTarget>
+          <extraJvmArgs>-Xmx1g -XX:MaxPermSize=256m</extraJvmArgs>
+          <hostedWebapp>src/main/webapp/</hostedWebapp>
+          <logLevel>DEBUG</logLevel>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>resources</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>gwt-clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.1.1</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+          <warName>${project.artifactId}</warName>
+
+          <!-- Exclude GWT client local classes from the deployment, lest
+            classpath scanners such as Hibernate and Weld get confused when the webapp 
+            is bootstrapping. -->
+          <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
+
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>src/main/webapp/WEB-INF/classes</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/webapp/WEB-INF/lib</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/webapp/WEB-INF/deploy</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/webapp/TodoList</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/webapp/css</directory>
+            </fileset>
+            <fileset>
+              <directory>src/main/gwt-unitCache</directory>
+            </fileset>
+            <fileset>
+              <directory>.errai</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>css-resources</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <inherited>false</inherited>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>src/main/java/org/jboss/errai/demo/todo/client/local/css</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+              <outputDirectory>src/main/webapp/css</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>gwt-maven-plugin</artifactId>
+                    <versionRange>[2.4.0,)</versionRange>
+                    <goals>
+                      <goal>resources</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
