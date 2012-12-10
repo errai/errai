@@ -53,6 +53,13 @@
 
       <dependency>
          <groupId>org.jboss.errai</groupId>
+         <artifactId>errai-ui</artifactId>
+         <version>${project.version}</version>
+         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.jboss.errai</groupId>
          <artifactId>errai-javax-enterprise</artifactId>
          <version>${project.version}</version>
          <scope>provided</scope>
@@ -110,6 +117,21 @@
          <groupId>org.jboss.errai</groupId>
          <artifactId>errai-weld-integration</artifactId>
          <version>${project.version}</version>
+         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.jboss.errai</groupId>
+         <artifactId>errai-data-binding</artifactId>
+         <version>${project.version}</version>
+         <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.jboss.errai</groupId>
+         <artifactId>errai-ui</artifactId>
+         <version>${project.version}</version>
+         <classifier>sources</classifier>
          <scope>provided</scope>
       </dependency>
    </dependencies>

@@ -94,6 +94,16 @@ public final class TemplateUtil {
     }
   }
 
+  /**
+   * Overrides the value of a single attribute on a widget.
+   * @param field
+   * @param attributeName
+   * @param attributeValue
+   */
+  public static void overrideAttribute(Widget field, String attributeName, String attributeValue) {
+    field.getElement().setAttribute(attributeName, attributeValue);
+  }
+
   public static void initWidget(Composite component, Element wrapped, Collection<Widget> dataFields) {
     initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
     DOM.setEventListener(component.getElement(), component);

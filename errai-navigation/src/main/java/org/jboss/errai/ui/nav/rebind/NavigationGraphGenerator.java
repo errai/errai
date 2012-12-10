@@ -43,6 +43,7 @@ import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageHiding;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.local.Transition;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -359,6 +360,14 @@ public class NavigationGraphGenerator extends Generator {
 
             // entry for the link between nodes
             out.println("\"" + pageName + "\" -> \"" + targetPageName + "\" [label=\"" + field.getName() + "\"]");
+          } else if (field.getAnnotation(Transition.class) != null) {
+              Transition t = field.getAnnotation(Transition.class);
+              Class<? extends Widget> targetClass = t.value();
+              Page page = targetClass.getAnnotation(Page.class);
+              String targetPageName = page.path() == null ? targetClass.getSimpleName() : page.path();
+
+              // entry for the link between nodes
+              out.println("\"" + pageName + "\" -> \"" + targetPageName + "\" [label=\"" + field.getName() + "\"]");
           }
         }
       }

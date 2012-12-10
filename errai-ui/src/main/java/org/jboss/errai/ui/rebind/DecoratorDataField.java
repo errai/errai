@@ -77,7 +77,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
     dataFieldTypeMap(ctx, ctx.getEnclosingType()).put(name, type);
   }
 
-  private String getTemplateDataFieldName(DataField annotation, String deflt) {
+  public static String getTemplateDataFieldName(DataField annotation, String deflt) {
     String value = Strings.nullToEmpty(annotation.value()).trim();
     return value.isEmpty() ? deflt : value;
   }
