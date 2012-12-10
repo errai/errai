@@ -38,7 +38,7 @@ div.item {
 	margin-bottom: 7px;
 }
 
-div.item input {
+div.item input, div.item span.gwt-CheckBox {
 	width: 20px;
 	height: 32px;
 	margin-left: 10px;
