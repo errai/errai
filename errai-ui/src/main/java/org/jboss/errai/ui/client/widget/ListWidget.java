@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.demo.grocery.client.local;
+package org.jboss.errai.ui.client.widget;
 
 import java.util.Iterator;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
@@ -35,9 +34,9 @@ import com.google.gwt.user.client.ui.Widget;
  * A type of widget that displays and manages a child widget for each item in a list of model objects. The widget
  * instances are managed by Errai's IOC container and are arranged in a {@link ComplexPanel}. By default a
  * {@link VerticalPanel} is used, but an alternative can be specified using {@link #ListWidget(ComplexPanel)}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
+ *
  * @param <M>
  *          the model type
  * @param <W>
@@ -46,8 +45,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite {
 
-  @Inject
-  private IOCBeanManager bm;
+  private final IOCBeanManager bm = IOC.getBeanManager();
 
   private final ComplexPanel panel;
 
@@ -63,11 +61,11 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   /**
    * Sets the list of model objects. A widget instance of type <W> will be added to the panel for each object in the
    * list.
-   * 
+   *
    * @param items
    *          The list of model objects. If null or empty all existing child widgets will be removed.
    */
-  protected void setItems(List<M> items) {
+  public void setItems(List<M> items) {
     // clean up the old widgets before we add new ones (this will eventually become a feature of the framework:
     // ERRAI-375)
     Iterator<Widget> it = panel.iterator();
@@ -90,7 +88,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   /**
    * Returns the class object for the item widget type <W> to look up new instances of the widget using the client-side
    * bean manager.
-   * 
+   *
    * @return the item widget type.
    */
   protected abstract Class<W> getItemWidgetType();

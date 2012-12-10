@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.demo.grocery.client.local;
+package org.jboss.errai.ui.client.widget;
 
 /**
  * Indicates that the implementing widget class displays an instance of type <M>.

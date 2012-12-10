@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.demo.grocery.client.shared.GroceryList;
 import org.jboss.errai.demo.grocery.client.shared.Item;
+import org.jboss.errai.ui.client.widget.ListWidget;
 
 public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
 

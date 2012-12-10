@@ -8,6 +8,7 @@ import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.local.convert.RelativeTimeConverter;
 import org.jboss.errai.demo.grocery.client.local.convert.UsernameConverter;
 import org.jboss.errai.demo.grocery.client.shared.Item;
+import org.jboss.errai.ui.client.widget.HasModel;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
