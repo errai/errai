@@ -93,7 +93,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          the agent to copy/share settings from. Should not be used after
    *          you pass it to this method.
    */
-  public void shareStateWith(BindableProxyAgent<T> other) {
+  public void copyStateFrom(BindableProxyAgent<T> other) {
     for (String boundProperty : other.getBoundProperties()) {
       bind(other.getWidget(boundProperty), boundProperty, other.getConverter(boundProperty));
     }
