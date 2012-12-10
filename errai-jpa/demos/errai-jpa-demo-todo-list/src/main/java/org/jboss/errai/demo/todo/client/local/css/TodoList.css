@@ -20,11 +20,12 @@ div.mainContentArea {
 	width: 600px;
 }
 
-div.mainContentArea > input {
+div.mainContentArea>input {
 	font-size: 40px;
 	width: 100%;
 	margin-bottom: 20px;
 }
+
 .itemsContainer {
 	width: 100%;
 }
@@ -62,15 +63,26 @@ div.mainContentArea button {
 }
 
 /* Don't forget the phones! */
-@media only screen and (max-width: 600px), only screen and (max-device-width: 600px) {
+@media only screen and (max-width: 600px) , only screen and
+	(max-device-width: 600px) {
+	body {
+		margin: 0px;
+	}
 	h1 {
 		text-align: left;
 		font-size: 30px;
-		margin-top: 5px;
-		margin-bottom: 5px;
+		margin-left: 6px;
+		margin-top: 8px;
+		margin-bottom: 8px;
 	}
 	div.mainContentArea {
 		width: 100%;
-		border: 1px solid white;
+		border: none;
+		box-shadow: none;
+		border-radius: 0px;
+	}
+	div.mainContentArea>input {
+		font-size: 30px;
+		margin-bottom: 15px;
 	}
 }
