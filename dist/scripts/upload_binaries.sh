@@ -57,7 +57,7 @@ echo "Uploading documentation..."
 echo "Copying images from a previous release (yecch...)"
 
 tmpdir=`mktemp -d tmp_author_downloaded`
-(cd $tmpdir && scp -rp errai@filemgmt.jboss.org:/docs_htdocs/errai/2.0.Beta3/errai/reference/html/author .)
+(cd $tmpdir && scp -rp errai@filemgmt.jboss.org:/docs_htdocs/errai/2.2.0.CR1/errai/reference/html/author .)
 (cd $tmpdir && scp -rp author errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference/html)
 (cd $tmpdir && scp -rp author errai@filemgmt.jboss.org:/docs_htdocs/errai/$version/errai/reference/html_single)
 
