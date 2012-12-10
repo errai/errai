@@ -59,6 +59,24 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   }
 
   /**
+   * Returns the class object for the item widget type <W> to look up new instances of the widget using the client-side
+   * bean manager.
+   *
+   * @return the item widget type.
+   */
+  protected abstract Class<W> getItemWidgetType();
+  
+  
+  /**
+   * Returns the panel that contains all item widgets.
+   * 
+   * @return the item widget panel, never null.
+   */
+  protected ComplexPanel getPanel() {
+    return panel;
+  }
+  
+  /**
    * Sets the list of model objects. A widget instance of type <W> will be added to the panel for each object in the
    * list.
    *
@@ -84,12 +102,4 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       panel.add((Widget) widget);
     }
   }
-
-  /**
-   * Returns the class object for the item widget type <W> to look up new instances of the widget using the client-side
-   * bean manager.
-   *
-   * @return the item widget type.
-   */
-  protected abstract Class<W> getItemWidgetType();
 }
