@@ -65,4 +65,9 @@ public class GroceryItemWidget extends Composite implements HasModel<Item> {
     System.out.println("ItemWidget: adopting model object " + System.identityHashCode(item));
     itemBinder.setModel(item, InitialState.FROM_MODEL);
   }
+
+  @Override
+  public Item getModel() {
+    return itemBinder.getModel();
+  }
 }

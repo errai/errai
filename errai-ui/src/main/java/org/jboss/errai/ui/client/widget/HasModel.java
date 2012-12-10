@@ -17,7 +17,7 @@
 package org.jboss.errai.ui.client.widget;
 
 /**
- * Indicates that the implementing widget class displays an instance of type <M>.
+ * Indicates that the implementing widget displays an instance of type <M>.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * 
@@ -27,9 +27,17 @@ package org.jboss.errai.ui.client.widget;
 public interface HasModel<M> {
 
   /**
+   * Returns the model instance associated with this widget.
+   * 
+   * @return the model instance, or null if no instance is associated with this widget.
+   */
+  public M getModel();
+
+  /**
    * Associate the model instance with this widget.
    * 
-   * @param model the model instance.
+   * @param model
+   *          the model instance.
    */
   public void setModel(M model);
 }
