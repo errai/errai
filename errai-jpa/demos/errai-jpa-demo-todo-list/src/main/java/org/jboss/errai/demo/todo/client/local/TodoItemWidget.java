@@ -14,8 +14,10 @@ import org.jboss.errai.ui.client.widget.HasModel;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -54,11 +56,17 @@ public class TodoItemWidget extends Composite implements HasModel<TodoItem> {
   }
 
   private void updateDoneStyle() {
-    if (itemBinder.getModel().isDone()) {
+    if (getModel().isDone()) {
       text.addStyleName("done");
     }
     else {
       text.removeStyleName("done");
     }
+  }
+
+  @EventHandler
+  private void onClick(ClickEvent e) {
+    TodoItem item = getModel();
+    item.setDone(!item.isDone());
   }
 }
