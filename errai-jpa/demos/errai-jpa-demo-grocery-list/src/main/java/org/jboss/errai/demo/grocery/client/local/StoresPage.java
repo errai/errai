@@ -46,14 +46,12 @@ public class StoresPage extends Composite {
   @Inject @DataField
   private Button addStoreButton;
 
-  @SuppressWarnings("unused")
   @PostConstruct
   private void initInstance() {
     INSTANCE = this;
     refreshFromDb();
   }
 
-  @SuppressWarnings("unused")
   @PreDestroy
   private void deInitInstance() {
     INSTANCE = null;

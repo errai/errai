@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
 
 import com.google.gwt.user.client.ui.RootPanel;
@@ -16,6 +17,9 @@ public class BindingTemplateTestApp {
 
   @Inject
   private BindingTemplate template;
+  
+  @Inject
+  private BindingListWidget listWidget;
 
   @PostConstruct
   public void setup() {
@@ -24,5 +28,9 @@ public class BindingTemplateTestApp {
 
   public BindingTemplate getTemplate() {
     return template;
+  }
+  
+  public BindingListWidget getListWidget() {
+    return listWidget;
   }
 }

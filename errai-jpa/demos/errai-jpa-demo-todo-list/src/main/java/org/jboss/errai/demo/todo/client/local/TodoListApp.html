@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<!--
+     This is the template for the main page layout.
+     It houses the page border/background/margin areas.
+ -->
+
+<html>
+<head>
+<title>Errai To-Do List!</title>
+<link rel=stylesheet href="css/TodoList.css">
+</head>
+<body>
+  <div data-field=main>
+    <h1>Get it done with Errai.</h1>
+    <div data-field=mainContentArea class=mainContentArea>
+      <input data-field=newItemBox placeholder="New To-Do Item">
+      <div data-field=itemContainer class=itemsContainer>
+        <div data-field=item class=item>
+          <input data-field=done type=checkbox>
+          <span data-field=text>Shave the Yak</span>
+        </div>
+        
+        <!-- This item is just for design reference. It's not used in the template. -->
+        <div class=item>
+          <input data-field=checkbox type=checkbox checked>
+          <span data-field=itemName class=done>Perm the Llama</span>
+        </div>
+
+        <!-- This item is just for design reference. It's not used in the template. -->
+        <div class=item>
+          <input data-field=checkbox type=checkbox checked>
+          <span data-field=itemName class=done>Make long lines wrap properly and not interfere with the checkbox column</span>
+        </div>
+
+      </div>
+      
+      <button data-field=archiveButton>Archive Finished Items</button>
+    </div>
+  </div>
+</body>
+</html>

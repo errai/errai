@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.5//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/2.5/distro-source/core/src/gwt-module.dtd">
+<module rename-to="TodoList">
+    <inherits name="org.jboss.errai.enterprise.All"/>
+    
+    <source path="client"/>
+    <source path="shared"/>
+    
+</module>
