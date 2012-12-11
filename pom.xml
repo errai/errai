@@ -108,6 +108,7 @@
         <module>errai-javaee-all</module>
         <module>errai-config</module>
         <module>errai-codegen-gwt</module>
+        <module>errai-cordova</module>
     </modules>
 
     <dependencyManagement>
