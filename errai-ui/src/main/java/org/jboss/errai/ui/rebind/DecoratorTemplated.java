@@ -68,6 +68,7 @@ import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
+import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
@@ -96,7 +97,7 @@ import com.google.gwt.user.client.ui.Widget;
 @CodeDecorator
 public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
-  
+
   private static final Logger logger = Logger.getLogger(DecoratorTemplated.class.getName());
 
 
@@ -178,6 +179,18 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
 
       /*
+       * Internationalize the template, using either the default bundle or the
+       * one specified by the @Bundle annotation.
+       */
+      String bundleName = "erraiBundle";
+      Bundle bundle = ctx.getAnnotation(Bundle.class);
+      if (bundle != null) {
+        bundleName = bundle.value();
+      }
+      builder.append(Stmt.invokeStatic(TemplateUtil.class,
+              "i18nRootTemplateElement", rootTemplateElement, bundleName));
+
+      /*
        * Get a reference to the actual Composite component being created
        */
       Statement component = Refs.get(ctx.getInjector().getInstanceVarName());
@@ -204,7 +217,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
           })));
       Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
-      
+
       generateComponentCompositions(ctx, builder, component, rootTemplateElement,
           Stmt.loadVariable(dataFieldElementsVarName), fieldsMap);
 
@@ -218,7 +231,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
     Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
     dataFieldTypes.put("this", ctx.getType());
-    
+
     MetaClass declaringClass = ctx.getEnclosingType();
 
     /* Ensure that no @DataFields are handled more than once when used in combination with @SyncNative */
@@ -234,7 +247,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             + declaringClass.getFullyQualifiedName()
             + "." + method.getName() + "] must specify at least one data-field target.");
       }
-      
+
       MetaClass eventType = (method.getParameters().length == 1) ? method.getParameters()[0].getType() : null;
       if (eventType == null || (!eventType.isAssignableTo(Event.class)) && !eventType.isAssignableTo(DomEvent.class)) {
         throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
@@ -347,7 +360,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
         for (String name : targetDataFieldNames) {
           MetaClass dataFieldType = dataFieldTypes.get(name);
-          
+
           if (dataFieldType == null) {
             throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
                 + declaringClass.getFullyQualifiedName()
@@ -371,7 +384,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           else {
             eventSource = Stmt.nestedCall(fieldsMap).invoke("get", name);
           }
-          
+
           if (dataFieldType.isAssignableTo(Element.class)) {
             builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component,
                 eventSource, listenerInstance,

@@ -24,6 +24,7 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -33,7 +34,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public final class TemplateUtil {
@@ -198,5 +199,54 @@ public final class TemplateUtil {
   private static native JsArray<Node> getAttributes(Element elem) /*-{
 		return elem.attributes;
   }-*/;
+
+  /**
+   * Internationalizes the template.  This is done by visiting all of the Elements
+   * in the template and processing those with an 'i18n' attribute.  If the Element
+   * has such an attribute, then the value of that attribute is used as the key into
+   * an i18n bundle.  The key is used to lookup the replacement value for the Element.
+   * The replacement value is set as the inner text or inner html of the element,
+   * replacing its previous contents.
+   *
+   * Note: this all happens prior to the compositing step.  So it's possible that the
+   * i18n replacement could change the template in a way that made it no longer
+   * compatible with, for example, the data fields processing.  It is up to the
+   * developer to not hang herself.  Note also that processing in this way also opens
+   * up the opportunity to provide more than simple text as the replacement for a
+   * particular Element.  For example, this provides a mechanism by which developers
+   * can internationalize any html content, such as images.
+   *
+   * @param templateRoot
+   * @param bundleName
+   */
+  public static void i18nRootTemplateElement(final Element templateRoot, final String bundleName) {
+    try {
+      final Dictionary bundle = Dictionary.getDictionary(bundleName);
+      logger.info("Internationalizing template.");
+      Visit.breadthFirst(templateRoot, new Visitor<Element>() {
+        @Override
+        public void visit(VisitContextMutable<Element> context, Element element) {
+          if (element.hasAttribute("i18n")) {
+            String i18nKey = element.getAttribute("i18n");
+            element.removeAttribute("i18n");
+            try {
+              String i18nValue = bundle.get(i18nKey);
+              if (i18nValue.contains("<")) {
+                element.setInnerHTML(i18nValue);
+              } else {
+                element.setInnerText(i18nValue);
+              }
+            } catch (RuntimeException e) {
+              // Do nothing - keep the template value.  Not sure if this is the right
+              // thing or if some attribute should be added to the Element to indicate
+              // there was an error...
+            }
+          }
+        }
+      });
+    } catch (RuntimeException e) {
+      logger.severe(e.getMessage());
+    }
+  }
 
 }
