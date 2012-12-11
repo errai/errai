@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 
 @Dependent
 @Templated("TodoListApp.html#item")
-public class ItemWidget extends Composite implements HasModel<TodoItem> {
+public class TodoItemWidget extends Composite implements HasModel<TodoItem> {
 
   @Inject Event<TodoItem> itemChangedEvent;
 
