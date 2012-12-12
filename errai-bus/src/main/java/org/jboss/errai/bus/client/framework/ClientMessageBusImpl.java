@@ -237,7 +237,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           final RequestCallback callback) throws RequestException {
     final RequestBuilder builder = new RequestBuilder(
         method,
-        URL.encode(getApplicationRoot() + serviceEntryPoint) + "?z=" + getNextRequestNumber()
+        URL.encode(getApplicationLocation(serviceEntryPoint)) + "?z=" + getNextRequestNumber()
     );
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
@@ -1964,6 +1964,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       $wnd.erraiBusApplicationRoot = path;
     }
   }-*/;
+
+  protected String getApplicationLocation(String serviceEntryPoint) {
+    return getApplicationRoot() + serviceEntryPoint;
+  }
 
   /**
    * Returns the application root for the remote message bus endpoints.
