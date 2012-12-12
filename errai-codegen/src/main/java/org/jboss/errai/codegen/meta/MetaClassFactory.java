@@ -258,15 +258,22 @@ public final class MetaClassFactory {
   }
 
   public static MetaClass parameterizedAs(final MetaClass clazz, final MetaParameterizedType parameterizedType) {
-    return cloneToBuildMetaClass(clazz, parameterizedType);
+    return parameterizedAs(clazz, parameterizedType, true);
+  }
+
+  public static MetaClass parameterizedAs(final MetaClass clazz,
+                                          final MetaParameterizedType parameterizedType,
+                                          final boolean reifyRecursively) {
+    return cloneToBuildMetaClass(clazz, parameterizedType, reifyRecursively);
   }
 
   private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz) {
-    return cloneToBuildMetaClass(clazz, null);
+    return cloneToBuildMetaClass(clazz, null, false);
   }
 
   private static BuildMetaClass cloneToBuildMetaClass(final MetaClass clazz,
-                                                      final MetaParameterizedType parameterizedType) {
+                                                      final MetaParameterizedType parameterizedType,
+                                                      final boolean reifyRecursively) {
     final BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create(), clazz.getFullyQualifiedName());
 
     buildMetaClass.setReifiedFormOf(clazz);
@@ -311,12 +318,37 @@ public final class MetaClassFactory {
     }
 
     for (final MetaMethod method : clazz.getDeclaredMethods()) {
+
       MetaClass returnType = method.getReturnType();
       if (method.getGenericReturnType() instanceof MetaTypeVariable) {
         final MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericReturnType();
         final MetaClass tVarVal = getTypeVariableValue(typeVariable, buildMetaClass);
         if (tVarVal != null) {
           returnType = tVarVal;
+        }
+      }
+      else if (method.getGenericReturnType() instanceof MetaParameterizedType) {
+        final MetaParameterizedType metaParameterizedType
+            = (MetaParameterizedType) method.getGenericReturnType();
+
+        final List<MetaType> typeVarValues = new ArrayList<MetaType>();
+        boolean defaultOnly = true;
+        for (final MetaType metaType : metaParameterizedType.getTypeParameters()) {
+          if (metaType instanceof MetaTypeVariable) {
+            final MetaTypeVariable typeVariable = (MetaTypeVariable) metaType;
+            final MetaClass tVarVar = getTypeVariableValue(typeVariable, buildMetaClass);
+            if (tVarVar != null) {
+              defaultOnly = false;
+              typeVarValues.add(tVarVar);
+            }
+            else {
+              typeVarValues.add(MetaClassFactory.get(Object.class));
+            }
+          }
+        }
+
+        if (reifyRecursively && !defaultOnly) {
+          returnType = parameterizedAs(returnType, typeParametersOf(typeVarValues.toArray(new MetaType[typeVarValues.size()])), false);
         }
       }
 

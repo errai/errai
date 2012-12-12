@@ -62,11 +62,11 @@ import javax.enterprise.util.TypeLiteral;
  */
 public class StatementBuilder extends AbstractStatementBuilder implements StatementBegin {
 
-  public StatementBuilder(Context context) {
+  public StatementBuilder(final Context context) {
     super(context);
 
     if (context != null) {
-      for (Variable v : context.getDeclaredVariables()) {
+      for (final Variable v : context.getDeclaredVariables()) {
         if (v.getName().matches("(this|super)")) continue;
         appendCallElement(new DeclareVariable(v));
       }
@@ -78,12 +78,12 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new StatementBuilder(null);
   }
 
-  public static StatementBegin create(Context context) {
+  public static StatementBegin create(final Context context) {
     return new StatementBuilder(context);
   }
 
   @Override
-  public VariableDeclarationStart declareVariable(Class<?> type) {
+  public VariableDeclarationStart declareVariable(final Class<?> type) {
     return declareVariable(MetaClassFactory.get(type));
   }
 
@@ -101,19 +101,19 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
       }
 
       @Override
-      public VariableDeclarationInitializer<StatementBuilder> named(String name) {
+      public VariableDeclarationInitializer<StatementBuilder> named(final String name) {
         this.name = name;
         return this;
       }
 
       @Override
-      public StatementBuilder initializeWith(Object initialization) {
+      public StatementBuilder initializeWith(final Object initialization) {
         this.initialization = initialization;
         return finish();
       }
 
       @Override
-      public StatementBuilder initializeWith(Statement initialization) {
+      public StatementBuilder initializeWith(final Statement initialization) {
         this.initialization = initialization;
         return finish();
       }
@@ -133,68 +133,68 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public StatementBuilder declareVariable(String name, Class<?> type) {
+  public StatementBuilder declareVariable(final String name, final Class<?> type) {
     return declareVariable(Variable.create(name, type));
   }
 
   @Override
-  public StatementBuilder declareVariable(String name, TypeLiteral<?> type) {
+  public StatementBuilder declareVariable(final String name, final TypeLiteral<?> type) {
     return declareVariable(Variable.create(name, type));
   }
 
   @Override
-  public StatementBuilder declareVariable(String name, Object initialization) {
+  public StatementBuilder declareVariable(final String name, final Object initialization) {
     return declareVariable(Variable.create(name, initialization));
   }
 
   @Override
-  public StatementBuilder declareVariable(String name, MetaClass type, Object initialization) {
+  public StatementBuilder declareVariable(final String name, final MetaClass type, final Object initialization) {
     return declareVariable(Variable.create(name, type, initialization));
   }
 
   @Override
-  public StatementBuilder declareVariable(String name, Class<?> type, Object initialization) {
+  public StatementBuilder declareVariable(final String name, final Class<?> type, final Object initialization) {
     return declareVariable(Variable.create(name, type, initialization));
   }
 
   @Override
-  public StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization) {
+  public StatementBuilder declareVariable(final String name, final TypeLiteral<?> type, final Object initialization) {
     return declareVariable(Variable.create(name, type, initialization));
   }
 
 
   @Override
-  public StatementBuilder declareFinalVariable(String name, Class<?> type) {
+  public StatementBuilder declareFinalVariable(final String name, final Class<?> type) {
     return declareVariable(Variable.createFinal(name, type));
   }
 
   @Override
-  public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type) {
+  public StatementBuilder declareFinalVariable(final String name, final TypeLiteral<?> type) {
     return declareVariable(Variable.createFinal(name, type));
   }
 
   @Override
-  public StatementBuilder declareFinalVariable(String name, MetaClass type, Object initialization) {
+  public StatementBuilder declareFinalVariable(final String name, final MetaClass type, final Object initialization) {
     return declareVariable(Variable.createFinal(name, type, initialization));
   }
 
   @Override
-  public StatementBuilder declareFinalVariable(String name, Class<?> type, Object initialization) {
+  public StatementBuilder declareFinalVariable(final String name, final Class<?> type, final Object initialization) {
     return declareVariable(Variable.createFinal(name, type, initialization));
   }
 
   @Override
-  public StatementBuilder declareFinalVariable(String name, TypeLiteral<?> type, Object initialization) {
+  public StatementBuilder declareFinalVariable(final String name, final TypeLiteral<?> type, final Object initialization) {
     return declareVariable(Variable.createFinal(name, type, initialization));
   }
 
-  private StatementBuilder declareVariable(Variable v) {
+  private StatementBuilder declareVariable(final Variable v) {
     appendCallElement(new DeclareVariable(v));
     return this;
   }
 
   @Override
-  public VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes) {
+  public VariableReferenceContextualStatementBuilder loadVariable(final String name, final Object... indexes) {
     if (name.matches("(this.)(.)*"))
       return loadClassMember(name.replaceFirst("(this.)", ""), indexes);
 
@@ -203,26 +203,26 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes) {
+  public VariableReferenceContextualStatementBuilder loadClassMember(final String name, final Object... indexes) {
     appendCallElement(new LoadVariable(name, true, indexes));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
-  public ContextualStatementBuilder loadLiteral(Object o) {
+  public ContextualStatementBuilder loadLiteral(final Object o) {
     appendCallElement(new LoadLiteral(o));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
-  public ContextualStatementBuilder load(Object o) {
+  public ContextualStatementBuilder load(final Object o) {
     appendCallElement(new DynamicLoad(o));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
-  public ContextualStatementBuilder loadClassReference(Object o) {
-    MetaClass c;
+  public ContextualStatementBuilder loadClassReference(final Object o) {
+    final MetaClass c;
     if (o instanceof MetaClass) {
       c = (MetaClass) o;
     }
@@ -237,75 +237,75 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public ContextualStatementBuilder invokeStatic(MetaClass clazz, String methodName, Object... parameters) {
+  public ContextualStatementBuilder invokeStatic(final MetaClass clazz, final String methodName, final Object... parameters) {
     appendCallElement(new LoadClassReference(clazz));
     appendCallElement(new MethodCall(methodName, parameters, true));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
-  public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
+  public ContextualStatementBuilder invokeStatic(final Class<?> clazz, final String methodName, final Object... parameters) {
     return invokeStatic(MetaClassFactory.get(clazz), methodName, parameters);
   }
 
   @Override
-  public ContextualStatementBuilder loadStatic(Class<?> clazz, String fieldName) {
+  public ContextualStatementBuilder loadStatic(final Class<?> clazz, final String fieldName) {
     return loadStatic(MetaClassFactory.get(clazz), fieldName);
   }
 
   @Override
-  public ContextualStatementBuilder loadStatic(MetaClass clazz, String fieldName) {
+  public ContextualStatementBuilder loadStatic(final MetaClass clazz, final String fieldName) {
     appendCallElement(new LoadClassReference(clazz));
     appendCallElement(new LoadField(fieldName));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
-  public ContextualStatementBuilder nestedCall(Statement statement) {
+  public ContextualStatementBuilder nestedCall(final Statement statement) {
     appendCallElement(new LoadNested(statement));
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
   @Override
-  public ObjectBuilder newObject(Class<?> type) {
+  public ObjectBuilder newObject(final Class<?> type) {
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
   }
 
   @Override
-  public ObjectBuilder newObject(MetaClass type) {
+  public ObjectBuilder newObject(final MetaClass type) {
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
   }
 
   @Override
-  public ObjectBuilder newObject(TypeLiteral<?> type) {
+  public ObjectBuilder newObject(final TypeLiteral<?> type) {
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
   }
 
   @Override
-  public Statement newObject(Class<?> type, Object... parameters) {
+  public Statement newObject(final Class<?> type, final Object... parameters) {
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder)
         .withParameters(parameters);
   }
 
   @Override
-  public Statement newObject(MetaClass type, Object... parameters) {
+  public Statement newObject(final MetaClass type, final Object... parameters) {
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder)
         .withParameters(parameters);
   }
 
   @Override
-  public Statement newObject(TypeLiteral<?> type, Object... parameters) {
+  public Statement newObject(final TypeLiteral<?> type, final Object... parameters) {
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder)
         .withParameters(parameters);
   }
 
   @Override
-  public ArrayInitializationBuilder newArray(MetaClass componentType, Object... dimensions) {
+  public ArrayInitializationBuilder newArray(final MetaClass componentType, final Object... dimensions) {
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
   }
 
   @Override
-  public ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions) {
+  public ArrayInitializationBuilder newArray(final Class<?> componentType, final Object... dimensions) {
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
   }
 
@@ -315,33 +315,33 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression stmt) {
+  public BlockBuilder<ElseBlockBuilder> if_(final BooleanExpression stmt) {
     return new IfBlockBuilderImpl(context, callElementBuilder).if_(stmt);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> while_(BooleanExpression stmt) {
+  public BlockBuilder<StatementEnd> while_(final BooleanExpression stmt) {
     return new LoopBuilderImpl(context, callElementBuilder).while_(stmt);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(final BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(condition);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
+  public BlockBuilder<StatementEnd> for_(final Statement initializer, final BooleanExpression condition) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition);
   }
 
   @Override
-  public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
-                                         Statement countingExpression) {
+  public BlockBuilder<StatementEnd> for_(final Statement initializer, final BooleanExpression condition,
+                                         final Statement countingExpression) {
     return new LoopBuilderImpl(context, callElementBuilder).for_(initializer, condition, countingExpression);
   }
 
   @Override
-  public CaseBlockBuilder switch_(Statement statement) {
+  public CaseBlockBuilder switch_(final Statement statement) {
     return new SwitchBlockBuilderImpl(context, callElementBuilder).switch_(statement);
   }
 
@@ -351,19 +351,19 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public StatementEnd throw_(Class<? extends Throwable> throwableType, Object... parameters) {
+  public StatementEnd throw_(final Class<? extends Throwable> throwableType, final Object... parameters) {
     appendCallElement(new ThrowException(throwableType, parameters));
     return this;
   }
 
   @Override
-  public StatementEnd throw_(String exceptionVarName) {
+  public StatementEnd throw_(final String exceptionVarName) {
     appendCallElement(new ThrowException(exceptionVarName));
     return this;
   }
 
   @Override
-  public StatementEnd label(String label) {
+  public StatementEnd label(final String label) {
     appendCallElement(new DefineLabel(label));
     return this;
   }
@@ -375,7 +375,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public StatementEnd break_(String label) {
+  public StatementEnd break_(final String label) {
     appendCallElement(new BranchCallElement(new BreakStatement(label)));
     return this;
   }
@@ -387,7 +387,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
-  public StatementEnd continue_(String label) {
+  public StatementEnd continue_(final String label) {
     appendCallElement(new BranchCallElement(new ContinueStatement(label)));
     return this;
   }
@@ -401,7 +401,7 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
       }
 
       @Override
-      public String generate(Context context) {
+      public String generate(final Context context) {
         return toJavaString();
       }
 
@@ -412,16 +412,16 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     };
   }
 
-  public ContextualStatementBuilder castTo(Class<?> type, Statement statement) {
+  public ContextualStatementBuilder castTo(final Class<?> type, final Statement statement) {
     return nestedCall(Cast.to(type, statement));
   }
 
-  public ContextualStatementBuilder castTo(MetaClass type, Statement statement) {
+  public ContextualStatementBuilder castTo(final MetaClass type, final Statement statement) {
     return nestedCall(Cast.to(type, statement));
   }
 
   @Override
-  public Statement codeComment(String comment) {
+  public Statement codeComment(final String comment) {
     return new Comment(comment);
   }
 }

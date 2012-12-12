@@ -32,6 +32,10 @@
         <when-type-assignable class="org.jboss.errai.ioc.client.QualifierEqualityFactory" />
     </generate-with>
 
+  <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCEnvironmentGenerator">
+      <when-type-assignable class="org.jboss.errai.ioc.client.container.IOCEnvironment" />
+  </generate-with>
+
     <super-source path="compat"/>
     <source path="client"/>
 </module>

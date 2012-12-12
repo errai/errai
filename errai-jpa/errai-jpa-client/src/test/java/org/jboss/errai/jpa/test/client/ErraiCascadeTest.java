@@ -4,6 +4,7 @@ package org.jboss.errai.jpa.test.client;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.CascadeFrom;
@@ -38,6 +39,8 @@ public class ErraiCascadeTest extends GWTTestCase {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+
+    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.

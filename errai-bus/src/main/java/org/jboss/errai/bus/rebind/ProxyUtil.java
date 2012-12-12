@@ -80,11 +80,11 @@ public abstract class ProxyUtil {
                       .publicOverridesMethod("callback", Parameter.of(Object.class, "response"))
                       .append(Stmt.declareVariable(RemoteCallback.class).named("intCallback")
                           .initializeWith(Stmt.loadVariable("interceptorCallback")))
-                      .append(new StringStatement("setResult(response)"))
+                      .append(StringStatement.of("setResult(response)"))
                       .append(Stmt.loadVariable("intCallback").invoke("callback",
-                          new StringStatement("getResult()", MetaClassFactory.get(Object.class))))
+                          StringStatement.of("getResult()", Object.class)))
                       .append(Stmt.loadVariable("providedCallback").invoke("callback",
-                          new StringStatement("getResult()", MetaClassFactory.get(Object.class))))
+                          StringStatement.of("getResult()", Object.class)))
                       .finish()
                       .finish())
               )

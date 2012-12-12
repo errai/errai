@@ -39,17 +39,21 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStrategy;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.DecoratorTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProxyInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
@@ -113,7 +117,7 @@ public class InjectUtil {
               Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements))
 
           );
-          callback.beanConstructed();
+          callback.beanConstructed(ConstructionType.CONSTRUCTOR);
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -143,7 +147,7 @@ public class InjectUtil {
 
           );
 
-          callback.beanConstructed();
+          callback.beanConstructed(ConstructionType.FIELD);
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -173,11 +177,11 @@ public class InjectUtil {
    * @param postConstructTasks
    *     -
    */
-  private static void doPostConstruct(final InjectionContext ctx,
-                                      final Injector injector,
-                                      final List<MetaMethod> postConstructTasks) {
+  static boolean doPostConstruct(final InjectionContext ctx,
+                              final Injector injector,
+                              final List<MetaMethod> postConstructTasks) {
 
-    if (postConstructTasks.isEmpty()) return;
+    if (postConstructTasks.isEmpty()) return false;
 
     final MetaClass initializationCallbackType =
         parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
@@ -201,6 +205,8 @@ public class InjectUtil {
 
     pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
+
+    return true;
   }
 
   /**
@@ -213,11 +219,11 @@ public class InjectUtil {
    * @param preDestroyTasks
    *     -
    */
-  private static void doPreDestroy(final InjectionContext ctx,
-                                   final Injector injector,
-                                   final List<MetaMethod> preDestroyTasks) {
+  static boolean doPreDestroy(final InjectionContext ctx,
+                           final Injector injector,
+                           final List<MetaMethod> preDestroyTasks) {
 
-    if (preDestroyTasks.isEmpty()) return;
+    if (preDestroyTasks.isEmpty()) return false;
 
     final MetaClass destructionCallbackType =
         parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
@@ -238,6 +244,8 @@ public class InjectUtil {
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
+
+    return true;
   }
 
   private static void renderLifeCycleEvents(final Class<? extends Annotation> type,
@@ -397,11 +405,11 @@ public class InjectUtil {
     return accumulator;
   }
 
-  private static List<MetaMethod> scanForPostConstruct(final MetaClass type) {
+  static List<MetaMethod> scanForPostConstruct(final MetaClass type) {
     return scanForAnnotatedMethod(type, PostConstruct.class);
   }
 
-  private static List<MetaMethod> scanForPreDestroy(final MetaClass type) {
+  static List<MetaMethod> scanForPreDestroy(final MetaClass type) {
     return scanForAnnotatedMethod(type, PreDestroy.class);
   }
 
@@ -425,16 +433,16 @@ public class InjectUtil {
   }
 
   @SuppressWarnings({"unchecked"})
-  private static boolean isInjectionPoint(final InjectionContext context, final HasAnnotations hasAnnotations) {
+  static boolean isInjectionPoint(final InjectionContext context, final HasAnnotations hasAnnotations) {
     return context.isElementType(WiringElementType.InjectionPoint, hasAnnotations);
   }
 
 
-  private static boolean hasDefaultConstructor(final MetaClass type) {
+  static boolean hasDefaultConstructor(final MetaClass type) {
     return type.getConstructor(new MetaClass[0]) != null;
   }
 
-  private static MetaClass[] parametersToClassTypeArray(final MetaParameter[] parms) {
+  static MetaClass[] parametersToClassTypeArray(final MetaParameter[] parms) {
     final MetaClass[] newArray = new MetaClass[parms.length];
     for (int i = 0; i < parms.length; i++) {
       newArray[i] = parms[i].getType();
@@ -466,7 +474,7 @@ public class InjectUtil {
        * ensure only one instance of each bean is created.
        */
       if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
-        return Stmt.loadVariable("context").invoke("getInstanceOrNew",
+        return Stmt.castTo(SimpleCreationalContext.class, Stmt.loadVariable("context")).invoke("getInstanceOrNew",
             Refs.get(inj.getCreationalCallbackVarName()),
             inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
       }
@@ -474,7 +482,7 @@ public class InjectUtil {
       return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
     }
     else {
-      //todo: refactor the InjectionContext to provide a cleaner API for interface delegates
+      //todo: refactor the BootstrapInjectionContext to provide a cleaner API for interface delegates
 
       // try to inject it
       try {
@@ -527,16 +535,14 @@ public class InjectUtil {
 
           }
           else if (inj.isSoftDisabled()
-              || (inj.isDependent() &&
-              (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType())))) {
+              || (inj.isDependent() && (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType())))) {
 
             inj.setEnabled(true);
             if (inj.isCreated() && !inj.isRendered()) {
-              throw new InjectionFailure("unresolveable cycle on dependent scoped bean: "
+              throw new InjectionFailure("un-resolveable cycle on dependent scoped bean: "
                   + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");
             }
-
-            return inj.getBeanInstance(injectableInstance);
+              return inj.getBeanInstance(injectableInstance);
           }
         }
       }
@@ -562,12 +568,16 @@ public class InjectUtil {
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (ProxyInjector)
           ctx.getProxiedInjector(clazz, qualifyingMetadata);
+      return proxyInjector;
     }
-    else {
+    else if (ctx.hasTopLevelType(clazz)) {
       proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
+      return proxyInjector;
     }
-    return proxyInjector;
+    else {
+      throw new InjectionFailure("can't resolve bean: " + clazz + " (" + qualifyingMetadata.toString() + ")");
+    }
   }
 
   public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
@@ -642,7 +652,7 @@ public class InjectUtil {
             "use of the @Dependent scope and @New qualifier may not " +
             "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
             "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
-            "\t Note          : this issue can be resolved by making "
+            "\t Note          : this issue can possibly be resolved by making "
             + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the " +
             "class is non-final.";
 
@@ -683,6 +693,33 @@ public class InjectUtil {
   public static String getUniqueVarName() {
     return "var".concat(String.valueOf(uniqueCounter.addAndGet(1)));
   }
+
+  private static String getVarNameFromType(final MetaClass clazz) {
+    final String varName = clazz.getFullyQualifiedName().replaceAll("\\.", "_");
+    return varName;
+  }
+
+  public static String getVarNameFromType(final MetaClass clazz, final MetaParameter parameter) {
+    return getVarNameFromType(clazz) + "_" + parameter.getName();
+  }
+
+  public static String getVarNameFromType(final MetaClass clazz, final MetaField parameter) {
+    return getVarNameFromType(clazz) + "_" + parameter.getName();
+  }
+
+  public static String getVarNameFromType(final MetaClass clazz, final InjectableInstance instance) {
+    switch (instance.getTaskType()) {
+      case PrivateField:
+      case Field:
+        return getVarNameFromType(clazz, instance.getField());
+      case Parameter:
+        return getVarNameFromType(clazz, instance.getParm());
+
+      default:
+        return getVarNameFromType(clazz);
+    }
+  }
+
 
   public static List<Annotation> extractQualifiers(final InjectableInstance<? extends Annotation> injectableInstance) {
     switch (injectableInstance.getTaskType()) {

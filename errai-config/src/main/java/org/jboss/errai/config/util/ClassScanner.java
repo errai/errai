@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
  * @author Mike Brock
  */
 public final class ClassScanner {
+  private static boolean reflectionsScanning = false;
+
   private ClassScanner() {
   }
 
@@ -68,18 +70,21 @@ public final class ClassScanner {
       }
     });
 
-    final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
-      @Override
-      public void run() {
-        for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-          result.add(MetaClassFactory.get(cls));
-        }
-      }
-    });
 
     try {
       factoryFuture.get();
-      reflectionsFuture.get();
+
+      if (reflectionsScanning) {
+        final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
+          @Override
+          public void run() {
+            for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
+              result.add(MetaClassFactory.get(cls));
+            }
+          }
+        });
+        reflectionsFuture.get();
+      }
     }
     catch (Exception ignored) {
     }
@@ -153,7 +158,7 @@ public final class ClassScanner {
       }
     });
 
-    if (EnvUtil.isProdMode()) {
+    if (reflectionsScanning && EnvUtil.isProdMode()) {
       final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
         @Override
         public void run() {
@@ -269,5 +274,9 @@ public final class ClassScanner {
     else {
       iterator.remove();
     }
+  }
+
+  public static void setReflectionsScanning(final boolean bool) {
+    reflectionsScanning = bool;
   }
 }

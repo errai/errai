@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -28,10 +29,10 @@ public abstract class IOCClientTestCase extends GWTTestCase {
     @Override
     public void bootstrap() {
       try {
+        new IOCBeanManagerLifecycle().resetBeanManager();
         new Container().bootstrapContainer();
       }
       catch (Throwable t) {
-        t.printStackTrace();
         throw new RuntimeException("failed to bootstrap container", t);
       }
     }
@@ -41,7 +42,6 @@ public abstract class IOCClientTestCase extends GWTTestCase {
   }
 
   protected void bootstrapContainer() {
-
     initializer.bootstrap();
   }
 
@@ -56,7 +56,6 @@ public abstract class IOCClientTestCase extends GWTTestCase {
   @Override
   public void gwtSetUp() throws Exception {
     try {
-      super.gwtSetUp();
       InitVotes.reset();
       bootstrapContainer();
     }

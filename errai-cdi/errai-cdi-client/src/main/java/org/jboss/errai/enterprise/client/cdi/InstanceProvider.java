@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
@@ -27,7 +28,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Iterator;
 
-@IOCProvider @Singleton
+@IOCProvider
+@Singleton
+@EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
 public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
   @Override
@@ -47,22 +50,22 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
     return new InstanceImpl(typeargs[0], qualifiers);
   }
 
-  static class InstanceImpl<U> implements Instance<Object> {
+  static class InstanceImpl implements Instance<Object> {
     private final Class type;
     private final Annotation[] qualifiers;
 
-    InstanceImpl(Class type, Annotation[] qualifiers) {
+    InstanceImpl(final Class type, final Annotation[] qualifiers) {
       this.type = type;
       this.qualifiers = qualifiers;
     }
 
     @Override
-    public Instance<Object> select(Annotation... qualifiers) {
+    public Instance<Object> select(final Annotation... qualifiers) {
       return new InstanceImpl(type, qualifiers);
     }
 
     @Override
-    public <U extends Object> Instance<U> select(Class<U> subtype, Annotation... qualifiers) {
+    public Instance select(final Class subtype, final Annotation... qualifiers) {
       return new InstanceImpl(type, qualifiers);
     }
 
@@ -83,7 +86,7 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
     @Override
     public Object get() {
-      IOCBeanDef bean = IOC.getBeanManager().lookupBean(type, qualifiers);
+      final IOCBeanDef bean = IOC.getBeanManager().lookupBean(type, qualifiers);
       if (bean == null) {
         return null;
       }

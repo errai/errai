@@ -33,7 +33,7 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
                            final Annotation[] qualifiers,
                            final String name,
                            final boolean concrete,
-                           final CreationalCallback<T> callback,
+                           final BeanProvider<T> callback,
                            final T instance) {
 
     super(beanManager, type, beanType, qualifiers, name, concrete, callback);
@@ -62,7 +62,7 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
                                           final Annotation[] qualifiers,
                                           final String name,
                                           final boolean concrete,
-                                          final CreationalCallback<T> callback,
+                                          final BeanProvider<T> callback,
                                           final T instance) {
 
     return new IOCSingletonBean<T>(beanManager, type, beanType, qualifiers, name, concrete, callback, instance);

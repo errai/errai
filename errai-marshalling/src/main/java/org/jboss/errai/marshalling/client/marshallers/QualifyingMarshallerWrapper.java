@@ -45,11 +45,11 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
   public T[] getEmptyArray() {
     return delegate.getEmptyArray();
   }
-  
+
   @Override
   public T doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     final EJObject obj = o.isObject();
-    
+
     if (obj != null) {
       final String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
       if (ctx.hasObject(objId)) {
@@ -64,12 +64,14 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
       return ctx.recordObject(objId, delegate.demarshall(val, ctx));
     }
     else {
-      // This is only to support Jackson's char[] and byte[] representations
-      if (o.isString() != null) {
-        if (getTypeHandled().equals(byte.class)) {
+      // This is to support one-dimensional Jackson char and byte array representations which cannot be wrapped in
+      // an JSON object by the transfomer because they are indistinguishable from plain Strings.
+      Class<?> componentType = getTypeHandled().getComponentType();
+      if (o.isString() != null && componentType != null) {
+        if (componentType.equals(byte.class)) {
           return (T) Base64Util.decode(o.isString().stringValue());
         }
-        else if (getTypeHandled().equals(char.class)) {
+        else if (componentType.equals(char.class)) {
           return (T) o.isString().stringValue().toCharArray();
         }
       }

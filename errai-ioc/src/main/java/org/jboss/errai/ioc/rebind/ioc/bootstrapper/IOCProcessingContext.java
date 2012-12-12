@@ -18,7 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -28,11 +27,13 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
+import org.jboss.errai.ioc.client.BootstrapInjectionContext;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
+import org.mvel2.ast.AssertNode;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,9 +60,9 @@ public class IOCProcessingContext {
   protected final TreeLogger treeLogger;
   protected final GeneratorContext generatorContext;
 
-  protected final SourceWriter writer;
-
-  protected final Variable contextVariable = Variable.create("injContext", BootstrapperInjectionContext.class);
+  protected final Variable contextVariable;
+  protected final Class<? extends BootstrapInjectionContext> bootstrapContextClass;
+  protected final Class<? extends CreationalContext> cretionalContextClass;
 
   protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
@@ -70,7 +71,6 @@ public class IOCProcessingContext {
   private IOCProcessingContext(final Builder builder) {
     this.treeLogger = builder.treeLogger;
     this.generatorContext = builder.generatorContext;
-    this.writer = builder.sourceWriter;
     this.context = builder.context;
     this.bootstrapClass = builder.bootstrapClassInstance;
     this.bootstrapBuilder = builder.bootstrapBuilder;
@@ -83,12 +83,14 @@ public class IOCProcessingContext {
     this.packages = builder.packages;
     this.qualifyingMetadataFactory = builder.qualifyingMetadataFactory;
     this.gwtTarget = builder.gwtTarget;
+    this.bootstrapContextClass = builder.bootstrapClass;
+    this.cretionalContextClass = builder.creationalContextClass;
+    this.contextVariable = Variable.create("injContext", bootstrapContextClass);
   }
 
   public static class Builder {
     private TreeLogger treeLogger;
     private GeneratorContext generatorContext;
-    private SourceWriter sourceWriter;
     private Context context;
     private BuildMetaClass bootstrapClassInstance;
     private ClassStructureBuilder bootstrapBuilder;
@@ -96,6 +98,9 @@ public class IOCProcessingContext {
     private Set<String> packages;
     private QualifyingMetadataFactory qualifyingMetadataFactory;
     private boolean gwtTarget;
+
+    private Class<? extends BootstrapInjectionContext> bootstrapClass;
+    private Class<? extends CreationalContext> creationalContextClass;
 
     public static Builder create() {
       return new Builder();
@@ -111,8 +116,13 @@ public class IOCProcessingContext {
       return this;
     }
 
-    public Builder sourceWriter(final SourceWriter sourceWriter) {
-      this.sourceWriter = sourceWriter;
+    public Builder bootstrapContextClass(final Class<? extends BootstrapInjectionContext> bootstrapClass) {
+      this.bootstrapClass = bootstrapClass;
+      return this;
+    }
+
+    public Builder creationalContextClass(final Class<? extends CreationalContext> creationalContextClass) {
+      this.creationalContextClass = creationalContextClass;
       return this;
     }
 
@@ -153,12 +163,14 @@ public class IOCProcessingContext {
 
     public IOCProcessingContext build() {
       Assert.notNull("treeLogger cannot be null", treeLogger);
-      Assert.notNull("sourceWriter cannot be null", sourceWriter);
+      // Assert.notNull("sourceWriter cannot be null", sourceWriter);
       Assert.notNull("context cannot be null", context);
       Assert.notNull("bootstrapClassInstance cannot be null", bootstrapClassInstance);
       Assert.notNull("bootstrapBuilder cannot be null", bootstrapBuilder);
       Assert.notNull("blockBuilder cannot be null", blockBuilder);
       Assert.notNull("packages cannot be null", packages);
+      Assert.notNull("bootstrap class must not be null", bootstrapClass);
+      Assert.notNull("creationalContextClass must not be null", creationalContextClass);
 
       if (qualifyingMetadataFactory == null) {
         qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
@@ -176,13 +188,13 @@ public class IOCProcessingContext {
     return getBlockBuilder().append(statement);
   }
 
-  public void globalInsertBefore(final Statement statement) {
-    blockBuilder.get(0).insertBefore(statement);
-  }
-
-  public BlockBuilder<?> globalAppend(final Statement statement) {
-    return blockBuilder.get(0).append(statement);
-  }
+//  public void globalInsertBefore(final Statement statement) {
+//    blockBuilder.get(0).insertBefore(statement);
+//  }
+//
+//  public BlockBuilder<?> globalAppend(final Statement statement) {
+//    return blockBuilder.get(0).append(statement);
+//  }
 
   public void pushBlockBuilder(final BlockBuilder<?> blockBuilder) {
     this.blockBuilder.push(blockBuilder);
@@ -251,5 +263,13 @@ public class IOCProcessingContext {
       listener.onDiscovery(this, injectionPoint);
     }
     discovered.add(injectionPoint.getType());
+  }
+
+  public Class<? extends BootstrapInjectionContext> getBootstrapContextClass() {
+    return bootstrapContextClass;
+  }
+
+  public Class<? extends CreationalContext> getCretionalContextClass() {
+    return cretionalContextClass;
   }
 }

@@ -15,6 +15,14 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
  * @author Mike Brock
  */
 public interface Injector {
+  void renderProvider(InjectableInstance injectableInstance);
+
+  /**
+   * Return a statement providing access to the injector (or null for asynchronous logic)
+   *
+   * @param injectableInstance
+   * @return
+   */
   Statement getBeanInstance(InjectableInstance injectableInstance);
 
   /**
@@ -45,7 +53,7 @@ public interface Injector {
   boolean isAlternative();
 
   /**
-   * Checks if the injector's CreationalCallback already been rendered.
+   * Checks if the injector's BeanProvider already been rendered.
    * @return true if the creational callback has already been rendered.
    */
   boolean isRendered();
@@ -112,7 +120,7 @@ public interface Injector {
   /**
    * The unique variable name for the bean instance. Usually used to reference the bean during the wiring of the
    * bean within the CreationalContext.getInstance() method body. This variable name is also used to provide
-   * a name to variable which holds a refeerence to singleton isntances.
+   * a name to variable which holds a reference to singleton instances.
    *
    * @return the unique variable name for a bean in the bootstrapper and CreationalContext.getInstance() method.
    */
@@ -127,30 +135,30 @@ public interface Injector {
   String getPostInitCallbackVar();
 
   /**
-   * Sets a variable name reference to the InitializationCallback to associate with the CreationalCallback for this bean.
+   * Sets a variable name reference to the InitializationCallback to associate with the BeanProvider for this bean.
    *
    * @param var a unique variable name pointing to an instance of InitializationCallback.
    */
   void setPostInitCallbackVar(String var);
 
   /**
-   * The unique variable name for the DestructionCallback associated with the CreationalCallback for this bean.
+   * The unique variable name for the DestructionCallback associated with the BeanProvider for this bean.
    *
    * @return the unique variable name for a DestructionCallback instance. Null if none.
    */
   String getPreDestroyCallbackVar();
 
   /**
-   * Sets a variable name reference to the DestructionCallback to associate with this CreationalCallback for this bean.
+   * Sets a variable name reference to the DestructionCallback to associate with this BeanProvider for this bean.
    *
    * @param preDestroyCallbackVar a unique variable name pointing to an instance of InitializationCallback
    */
   void setPreDestroyCallbackVar(String preDestroyCallbackVar);
 
   /**
-   * The unique variable name for a CreationalCallback associated with this bean.
+   * The unique variable name for a BeanProvider associated with this bean.
    *
-   * @return the unique variable name for the CreationalCallback.
+   * @return the unique variable name for the BeanProvider.
    */
   public String getCreationalCallbackVarName();
 
@@ -210,4 +218,12 @@ public interface Injector {
    * @param enabled the enabled state of the bean to set (<tt>true</tt> for enabled, <tt>false</tt> for disabled).
    */
   void setEnabled(boolean enabled);
+
+
+  /**
+   * Returns true if the injector type is a regular type injector. (ie. not a proxy injector, producer injector, etc).
+   *
+   * @return true if the injector is a regular type injector.
+   */
+  boolean isRegularTypeInjector();
 }

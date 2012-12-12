@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.demo.jpa.client.shared.Album;
 import org.jboss.errai.demo.jpa.client.shared.Artist;
 import org.jboss.errai.demo.jpa.client.shared.Format;
@@ -42,6 +43,7 @@ public class Main {
         refreshUI();
       }
     });
+
 
     albumsWidget.setEditHandler(new RowOperationHandler<Album>() {
       @Override
@@ -115,6 +117,7 @@ public class Main {
     });
 
     preFillDatabaseIfEmpty();
+
     refreshUI();
 
     RootPanel.get().add(resetEverythingButton);
@@ -238,5 +241,4 @@ public class Main {
       em.flush();
     }
   }
-
 }

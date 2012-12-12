@@ -100,7 +100,7 @@ public class LoadClassReference extends AbstractCallElement {
       erased = ((MetaClass) metaClass).getErased();
     }
     else {
-      return metaClass.getName();
+      return "Object";
     }
 
     String fqcn = erased.getCanonicalName();
