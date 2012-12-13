@@ -68,6 +68,12 @@
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -134,7 +140,7 @@
         </dependency>
       </dependencies>
     </profile>
-    
+
     <profile>
       <id>jboss6</id>
 
@@ -254,7 +260,7 @@
           <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
           <webResources>
             <resource>
-               <!-- this is relative to the pom.xml directory -->
+              <!-- this is relative to the pom.xml directory -->
               <directory>src/${webDescriptor}</directory>
             </resource>
           </webResources>
