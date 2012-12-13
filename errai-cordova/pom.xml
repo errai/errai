@@ -9,113 +9,113 @@
    governing permissions and ~ limitations under the License. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <parent>
-      <artifactId>errai-parent</artifactId>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>errai-parent</artifactId>
+    <groupId>org.jboss.errai</groupId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>errai-cordova</artifactId>
+  <name>Errai::Cordova</name>
+
+  <properties>
+    <junit.version>4.8.1</junit.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
       <groupId>org.jboss.errai</groupId>
-      <version>2.2.0-SNAPSHOT</version>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
+      <artifactId>errai-bus</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
-   <artifactId>errai-cordova</artifactId>
-   <name>Errai::Cordova</name>
+    <!-- GWT -->
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-	<properties>
-        <junit.version>4.8.1</junit.version>
-	</properties>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-   <dependencies>
-       <dependency>
-           <groupId>org.jboss.errai</groupId>
-           <artifactId>errai-bus</artifactId>
-           <version>${project.version}</version>
-       </dependency>
+    <!-- Test Deps -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-       <!-- GWT -->
-       <dependency>
-           <groupId>com.google.gwt</groupId>
-           <artifactId>gwt-user</artifactId>
-           <scope>provided</scope>
-       </dependency>
+  </dependencies>
 
-       <dependency>
-           <groupId>com.google.gwt</groupId>
-           <artifactId>gwt-dev</artifactId>
-           <scope>provided</scope>
-       </dependency>
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+              <forkMode>always</forkMode>
+              <argLine>-Xmx1500m ${argLine}</argLine>
 
-       <!-- Test Deps -->
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-         <scope>provided</scope>
-      </dependency>
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+              </additionalClasspathElements>
+              <useSystemClassLoader>false</useSystemClassLoader>
+              <useManifestOnlyJar>true</useManifestOnlyJar>
 
-   </dependencies>
+              <systemProperties>
+                <property>
+                  <name>java.io.tmpdir</name>
+                  <value>${project.build.directory}</value>
+                </property>
+                <property>
+                  <name>log4j.output.dir</name>
+                  <value>${project.build.directory}</value>
+                </property>
 
-   <profiles>
-      <profile>
-         <id>integration-test</id>
-         <build>
-            <plugins>
-               <plugin>
-                  <artifactId>maven-surefire-plugin</artifactId>
-                  <configuration>
-                     <skipTests>false</skipTests>
-                     <forkMode>always</forkMode>
-                     <argLine>-Xmx1500m ${argLine}</argLine>
-
-                     <additionalClasspathElements>
-                        <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-                        <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-                     </additionalClasspathElements>
-                     <useSystemClassLoader>false</useSystemClassLoader>
-                     <useManifestOnlyJar>true</useManifestOnlyJar>
-
-                     <systemProperties>
-                        <property>
-                           <name>java.io.tmpdir</name>
-                           <value>${project.build.directory}</value>
-                        </property>
-                        <property>
-                           <name>log4j.output.dir</name>
-                           <value>${project.build.directory}</value>
-                        </property>
-
-                        <!-- Do not accidently package server test marshallers 
-                           when building Errai -->
-                        <property>
-                           <name>errai.marshalling.server.classOutput.enabled</name>
-                           <value>false</value>
-                        </property>
+                <!-- Do not accidently package server test marshallers
+             when building Errai -->
+                <property>
+                  <name>errai.marshalling.server.classOutput.enabled</name>
+                  <value>false</value>
+                </property>
 
 
-                        <!-- Must disable long polling for automated tests 
-                           to succeed -->
-                        <property>
-                           <name>org.jboss.errai.bus.do_long_poll</name>
-                           <value>false</value>
-                        </property>
+                <!-- Must disable long polling for automated tests
+              to succeed -->
+                <property>
+                  <name>org.jboss.errai.bus.do_long_poll</name>
+                  <value>false</value>
+                </property>
 
-                        <!-- Disable caching of generated code -->
-                        <property>
-                           <name>errai.devel.nocache</name>
-                           <value>true</value>
-                        </property>
-                     </systemProperties>
+                <!-- Disable caching of generated code -->
+                <property>
+                  <name>errai.devel.nocache</name>
+                  <value>true</value>
+                </property>
+              </systemProperties>
 
-                     <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                     </includes>
-                  </configuration>
-               </plugin>
-            </plugins>
-         </build>
-      </profile>
-   </profiles>
+              <includes>
+                <include>**/*Test.java</include>
+                <include>**/*Tests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

@@ -31,7 +31,11 @@
 
     <entry-point class='org.jboss.errai.bus.client.ErraiBus'/>
 
-    <replace-with class="org.jboss.errai.bus.client.framework.ClientMessageBusImpl">
+    <replace-with class="org.jboss.errai.bus.client.framework.Configuration.NotSpecified">
+        <when-type-is class="org.jboss.errai.bus.client.framework.Configuration"/>
+    </replace-with>
+
+  <replace-with class="org.jboss.errai.bus.client.framework.ClientMessageBusImpl">
         <when-type-is class="org.jboss.errai.bus.client.framework.MessageBus"/>
     </replace-with>
 

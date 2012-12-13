@@ -17,12 +17,6 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
-  <define-property name="configured" values="true, false" />
-
-  <replace-with class="org.jboss.errai.ui.cordova.Configuration.Dummy">
-    <when-type-is class="org.jboss.errai.ui.cordova.Configuration"/>
-  </replace-with>
-
   <replace-with class="org.jboss.errai.ui.cordova.LocationAwareClientMessageBus">
     <when-type-is class="org.jboss.errai.bus.client.framework.MessageBus"/>
   </replace-with>

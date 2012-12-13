@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.cordova;
+package org.jboss.errai.bus.client.framework;
 
 /**
  * Configuration interface to specify server location url
@@ -25,7 +25,10 @@ public interface Configuration {
 
   String getRemoteLocation();
 
-  public class Dummy implements Configuration {
+  /**
+   * Configuration implementation that indicates that the configuration has not been set
+   */
+  public class NotSpecified implements Configuration {
 
     @Override
     public String getRemoteLocation() {

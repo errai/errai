@@ -16,36 +16,28 @@
 
 package org.jboss.errai.ui.cordova;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.framework.Configuration;
 
 import java.util.logging.Logger;
 
 /**
- * Overrides the standard ClientMessageBus implementation in a way that the user can specify the address of the server.
+ * Overrides the standard ClientMessageBus implementation that throws exception when the user did not specify the endpoint
  *
  * @author Erik Jan de Wit
  */
 public class LocationAwareClientMessageBus extends ClientMessageBusImpl {
   private static final Logger LOG = Logger.getLogger(LocationAwareClientMessageBus.class.getName());
-  private Configuration configuration;
 
   @Override
   protected String getApplicationLocation(String serviceEntryPoint) {
-    configuration = getConfiguration();
-    if (configuration instanceof Configuration.Dummy) {
+    Configuration configuration = getConfiguration();
+    if (configuration instanceof Configuration.NotSpecified) {
       throw new IllegalArgumentException("you need to implement Configuration in order to point to the server location");
     }
 
     LOG.info("url end point " + configuration.getRemoteLocation());
 
-    return configuration.getRemoteLocation() + serviceEntryPoint;
-  }
-
-  private Configuration getConfiguration() {
-    if (configuration == null) {
-      configuration = GWT.create(Configuration.class);
-    }
-    return configuration;
+    return super.getApplicationLocation(serviceEntryPoint);
   }
 }
