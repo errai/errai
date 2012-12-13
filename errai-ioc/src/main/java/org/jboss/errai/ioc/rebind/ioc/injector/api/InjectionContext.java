@@ -44,10 +44,12 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
-import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProxyInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.QualifiedTypeInjectorDelegate;
+import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,9 +64,14 @@ public class InjectionContext {
 
   private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings = HashMultimap.create();
 
+  private final boolean async;
+  private final InjectorFactory injectorFactory;
+
   // do not refactor to a MultiMap. the resolution algorithm has dynamic replacement of injectors that is difficult
   // to achieve with a MultiMap
   private final Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
+
+  private final Set<MetaClass> topLevelTypes = new HashSet<MetaClass>();
 
   private final Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
   private final Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
@@ -76,8 +83,9 @@ public class InjectionContext {
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
 
-  private final Set<Object> overridenTypesAndMembers = new HashSet<Object>();
+  private final Set<Object> overriddenTypesAndMembers = new HashSet<Object>();
 
+  private final Map<MetaClass, Statement> beanReferenceMap = new HashMap<MetaClass, Statement>();
   private final Map<MetaParameter, Statement> inlineBeanReferenceMap = new HashMap<MetaParameter, Statement>();
 
   private final Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
@@ -98,11 +106,14 @@ public class InjectionContext {
     this.processingContext = builder.processingContext;
     this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(builder.enabledAlternatives));
     this.reachableTypes = Assert.notNull(builder.reachableTypes);
+    this.async = builder.async;
+    this.injectorFactory = new InjectorFactory(this.async);
   }
 
   public static class Builder {
     private IOCProcessingContext processingContext;
     private ReachableTypes reachableTypes = ReachableTypes.EVERYTHING_REACHABLE_INSTANCE;
+    private boolean async;
     private final HashSet<String> enabledAlternatives = new HashSet<String>();
 
     public static Builder create() {
@@ -124,6 +135,10 @@ public class InjectionContext {
       return this;
     }
 
+    public Builder asyncBootstrap(final boolean async) {
+      this.async = async;
+      return this;
+    }
 
     public InjectionContext build() {
       Assert.notNull("the processingContext cannot be null", processingContext);
@@ -135,11 +150,11 @@ public class InjectionContext {
   public Injector getProxiedInjector(final MetaClass type, final QualifyingMetadata metadata) {
     //todo: figure out why I was doing this.
     final MetaClass erased = type.getErased();
-    final Collection<Injector> injs = proxiedInjectors.get(erased);
+    final Collection<Injector> injectors = proxiedInjectors.get(erased);
     final List<Injector> matching = new ArrayList<Injector>();
 
-    if (injs != null) {
-      for (final Injector inj : injs) {
+    if (injectors != null) {
+      for (final Injector inj : injectors) {
         if (inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
         }
@@ -185,10 +200,10 @@ public class InjectionContext {
 
     if (matching.size() > 1 && type.isConcrete()) {
       // perform second pass
-      final Iterator<Injector> secondIter = matching.iterator();
-      while (secondIter.hasNext()) {
-        if (!secondIter.next().getInjectedType().equals(erased))
-          secondIter.remove();
+      final Iterator<Injector> secondIterator = matching.iterator();
+      while (secondIterator.hasNext()) {
+        if (!secondIterator.next().getInjectedType().equals(erased))
+          secondIterator.remove();
       }
     }
 
@@ -197,10 +212,10 @@ public class InjectionContext {
     }
     else if (matching.size() > 1) {
       if (alternativeBeans) {
-        final Iterator<Injector> matchIter = matching.iterator();
-        while (matchIter.hasNext()) {
-          if (!enabledAlternatives.contains(matchIter.next().getInjectedType().getFullyQualifiedName())) {
-            matchIter.remove();
+        final Iterator<Injector> matchIterator = matching.iterator();
+        while (matchIterator.hasNext()) {
+          if (!enabledAlternatives.contains(matchIterator.next().getInjectedType().getFullyQualifiedName())) {
+            matchIterator.remove();
           }
         }
       }
@@ -271,11 +286,19 @@ public class InjectionContext {
     return cyclingTypes.containsEntry(from, to);
   }
 
-  public void addProxiedInjector(final ProxyInjector proxyInjector) {
+  public void addProxiedInjector(final Injector proxyInjector) {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
 
-  public void markProxyClosedIfNeeded(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  /**
+   * Marks the proxy for te specified type and qualifying metadata closed.
+   *
+   * @param injectorType
+   * @param qualifyingMetadata
+   */
+  public void markProxyClosedIfNeeded(final MetaClass injectorType,
+                                      final QualifyingMetadata qualifyingMetadata) {
+
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       final Collection<Injector> collection = proxiedInjectors.get(injectorType.getErased());
       final Iterator<Injector> iterator = collection.iterator();
@@ -290,7 +313,9 @@ public class InjectionContext {
     }
   }
 
-  public boolean isProxiedInjectorRegistered(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  public boolean isProxiedInjectorRegistered(final MetaClass injectorType,
+                                             final QualifyingMetadata qualifyingMetadata) {
+
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : proxiedInjectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
@@ -301,7 +326,9 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isInjectorRegistered(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  public boolean isInjectorRegistered(final MetaClass injectorType,
+                                      final QualifyingMetadata qualifyingMetadata) {
+
     if (injectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
@@ -312,7 +339,9 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isInjectableQualified(final MetaClass injectorType, final QualifyingMetadata qualifyingMetadata) {
+  public boolean isInjectableQualified(final MetaClass injectorType,
+                                       final QualifyingMetadata qualifyingMetadata) {
+
     if (injectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
@@ -331,10 +360,6 @@ public class InjectionContext {
     return Collections.unmodifiableList(injectorList);
   }
 
-  public Injector getInjector(final Class<?> injectorType) {
-    return getInjector(MetaClassFactory.get(injectorType));
-  }
-
   public Injector getInjector(final MetaClass type) {
     final MetaClass erased = type.getErased();
     if (!injectors.containsKey(erased)) {
@@ -342,33 +367,33 @@ public class InjectionContext {
     }
 
     final List<Injector> injectorList = new ArrayList<Injector>(injectors.get(erased));
-    final Iterator<Injector> iter = injectorList.iterator();
+    final Iterator<Injector> iterator = injectorList.iterator();
     Injector inj;
 
     if (injectorList.size() > 1) {
-      while (iter.hasNext()) {
-        inj = iter.next();
+      while (iterator.hasNext()) {
+        inj = iterator.next();
 
         if (type.getParameterizedType() != null) {
           if (inj.getQualifyingTypeInformation() != null) {
             if (!type.getParameterizedType().isAssignableFrom(inj.getQualifyingTypeInformation())) {
-              iter.remove();
+              iterator.remove();
             }
           }
         }
 
         if (!inj.isEnabled()) {
-          iter.remove();
+          iterator.remove();
         }
       }
     }
 
     if (injectorList.size() > 1) {
       // perform second pass
-      final Iterator<Injector> secondIter = injectorList.iterator();
-      while (secondIter.hasNext()) {
-        if (!secondIter.next().getInjectedType().equals(erased))
-          secondIter.remove();
+      final Iterator<Injector> secondIterator = injectorList.iterator();
+      while (secondIterator.hasNext()) {
+        if (!secondIterator.next().getInjectedType().equals(erased))
+          secondIterator.remove();
       }
     }
 
@@ -387,20 +412,24 @@ public class InjectionContext {
     registerInjector(injector.getInjectedType(), injector, new HashSet<MetaClass>(), true);
   }
 
-  private void registerInjector(final MetaClass type, final Injector injector, final Set<MetaClass> processedTypes, final boolean allowOverride) {
+  private void registerInjector(final MetaClass type,
+                                final Injector injector,
+                                final Set<MetaClass> processedTypes,
+                                final boolean allowOverride) {
+
     List<Injector> injectorList = injectors.get(type.getErased());
 
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
     }
     else if (allowOverride) {
-      final Iterator<Injector> iter = injectorList.iterator();
+      final Iterator<Injector> iterator = injectorList.iterator();
 
-      while (iter.hasNext()) {
-        final Injector inj = iter.next();
+      while (iterator.hasNext()) {
+        final Injector inj = iterator.next();
 
         if (inj.isPseudo()) {
-          iter.remove();
+          iterator.remove();
         }
       }
     }
@@ -411,14 +440,17 @@ public class InjectionContext {
     notifyInjectorRegistered(injector);
   }
 
-  private void registerInjectorsForSuperTypesAndInterfaces(final MetaClass type, final Injector injector,
+  private void registerInjectorsForSuperTypesAndInterfaces(final MetaClass type,
+                                                           final Injector injector,
                                                            final Set<MetaClass> processedTypes) {
     MetaClass cls = type;
     do {
       if (cls != type && cls.isPublic()) {
         if (processedTypes.add(cls)) {
-          final QualifiedTypeInjectorDelegate injectorDelegate =
-              new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
+
+
+          final Injector injectorDelegate =
+              getInjectorFactory().getQualifyingTypeInjector(cls, injector, cls.getParameterizedType());
 
           registerInjector(cls, injectorDelegate, processedTypes, false);
         }
@@ -430,8 +462,8 @@ public class InjectionContext {
           continue;
 
         if (processedTypes.add(iface)) {
-          final QualifiedTypeInjectorDelegate injectorDelegate =
-              new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+          final Injector injectorDelegate =
+              getInjectorFactory().getQualifyingTypeInjector(iface, injector, iface.getParameterizedType());
 
           registerInjector(iface, injectorDelegate, processedTypes, false);
         }
@@ -499,19 +531,19 @@ public class InjectionContext {
   }
 
   public void declareOverridden(final MetaClass type) {
-    overridenTypesAndMembers.add(type);
+    overriddenTypesAndMembers.add(type);
   }
 
   public void declareOverridden(final MetaMethod method) {
-    overridenTypesAndMembers.add(method);
+    overriddenTypesAndMembers.add(method);
   }
 
   public boolean isOverridden(final MetaClass type) {
-    return overridenTypesAndMembers.contains(type);
+    return overriddenTypesAndMembers.contains(type);
   }
 
   public boolean isOverridden(final MetaMethod method) {
-    return overridenTypesAndMembers.contains(method);
+    return overriddenTypesAndMembers.contains(method);
   }
 
   public Map<MetaField, PrivateAccessType> getPrivateFieldsToExpose() {
@@ -525,11 +557,13 @@ public class InjectionContext {
   public void addType(final MetaClass type) {
     if (injectors.containsKey(type))
       return;
-    registerInjector(new TypeInjector(type, this));
+
+    registerInjector(getInjectorFactory().getTypeInjector(type, this));
   }
 
-  public void addPsuedoScopeForType(final MetaClass type) {
-    final TypeInjector inj = new TypeInjector(type, this);
+  public void addPseudoScopeForType(final MetaClass type) {
+    // final TypeInjector inj = new TypeInjector(type, this);
+    final AbstractInjector inj = (AbstractInjector) getInjectorFactory().getTypeInjector(type, this);
     inj.setReplaceable(true);
     registerInjector(inj);
   }
@@ -576,7 +610,6 @@ public class InjectionContext {
     return getAnnotationsForElementType(type).contains(annotation);
   }
 
-
   /**
    * Overloaded version to check GWT's JClassType classes.
    *
@@ -585,7 +618,8 @@ public class InjectionContext {
    *
    * @return
    */
-  public boolean isElementType(final WiringElementType type, final com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
+  public boolean isElementType(final WiringElementType type,
+                               final com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
     final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
     for (final Annotation a : hasAnnotations.getAnnotations()) {
       if (annotationsForElementType.contains(a.annotationType())) {
@@ -595,7 +629,9 @@ public class InjectionContext {
     return false;
   }
 
-  public Annotation getMatchingAnnotationForElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
+  public Annotation getMatchingAnnotationForElementType(final WiringElementType type,
+                                                        final HasAnnotations hasAnnotations) {
+
     final Collection<Class<? extends Annotation>> annotationsForElementType = getAnnotationsForElementType(type);
     final Set<Annotation> annotationSet
         = new HashSet<Annotation>(Arrays.asList(hasAnnotations.getAnnotations()));
@@ -695,8 +731,8 @@ public class InjectionContext {
     return isReachable(clazz.getFullyQualifiedName());
   }
 
-  public boolean isReachable(final String fqnc) {
-    return reachableTypes.isEmpty() || reachableTypes.contains(fqnc);
+  public boolean isReachable(final String fqcn) {
+    return reachableTypes.isEmpty() || reachableTypes.contains(fqcn);
   }
 
   public Collection<String> getAllReachableTypes() {
@@ -723,6 +759,20 @@ public class InjectionContext {
     return knownTypesWithCycles.contains(type.getFullyQualifiedName());
   }
 
+  public void addBeanReference(final MetaClass ref, final Statement statement) {
+    beanReferenceMap.put(ref, statement);
+  }
+
+  public Statement getBeanReference(final MetaClass ref) {
+    Statement stmt = beanReferenceMap.get(ref);
+
+    if (stmt == null) {
+      System.out.println();
+    }
+
+    return stmt;
+  }
+
   public void addInlineBeanReference(final MetaParameter ref, final Statement statement) {
     inlineBeanReferenceMap.put(ref, statement);
   }
@@ -731,7 +781,27 @@ public class InjectionContext {
     return inlineBeanReferenceMap.get(ref);
   }
 
+  public void addTopLevelType(final MetaClass clazz) {
+    topLevelTypes.add(clazz);
+  }
+
+  public void addTopLevelTypes(final Collection<MetaClass> clazzes) {
+    topLevelTypes.addAll(clazzes);
+  }
+
+  public boolean hasTopLevelType(final MetaClass clazz) {
+    return topLevelTypes.contains(clazz);
+  }
+
   public GraphBuilder getGraphBuilder() {
     return graphBuilder;
+  }
+
+  public InjectorFactory getInjectorFactory() {
+    return injectorFactory;
+  }
+
+  public boolean isAsync() {
+    return async;
   }
 }

@@ -15,7 +15,6 @@ import java.lang.annotation.RetentionPolicy;
  * @author Mike Brock
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Qualifier
 @java.lang.annotation.Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 public @interface LoadAsync {
 }

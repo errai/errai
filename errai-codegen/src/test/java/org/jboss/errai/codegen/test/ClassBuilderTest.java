@@ -50,6 +50,7 @@ public class ClassBuilderTest extends AbstractCodegenTest {
             .privateField("name", String.class)
             .finish()
             .toJavaString();
+    System.out.println(cls);
 
     assertEquals("failed to generate class definition implementing an interface", CLASS_IMPLEMENTING_INTERFACE, cls);
   }

@@ -20,9 +20,11 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
@@ -84,6 +86,11 @@ public class GWTMethod extends MetaMethod {
     if (type != null) {
       return new GWTTypeVariable(oracle, type);
     }
+    final JParameterizedType parameterized = method.getReturnType().isParameterized();
+    if (parameterized != null) {
+      return new GWTParameterizedType(oracle, parameterized);
+    }
+
     return null;
   }
 

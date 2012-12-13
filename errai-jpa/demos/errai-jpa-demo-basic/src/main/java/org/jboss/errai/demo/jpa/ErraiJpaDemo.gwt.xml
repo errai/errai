@@ -7,4 +7,8 @@
   <inherits name="org.jboss.errai.enterprise.CDI" />
   <inherits name='com.google.gwt.user.theme.clean.Clean'/>
 
+  <set-property name="user.agent" value="gecko1_8,safari"/>
+
+
+
 </module>

@@ -25,6 +25,7 @@ import org.jboss.errai.ioc.client.Container;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.junit.client.GWTTestCase;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 /**
  * Base class for Errai JAX-RS tests.
@@ -37,6 +38,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
  
   @Override
   protected void gwtSetUp() throws Exception {
+    new IOCBeanManagerLifecycle().resetBeanManager();
     new Container().bootstrapContainer();
     RestClient.setApplicationRoot(jaxRsApplicationRoot);
     RestClient.setJacksonMarshallingActive(false);

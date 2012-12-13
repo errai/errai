@@ -49,5 +49,15 @@ public class EnvironmentConfig {
   public Map<String, String> getFrameworkProperties() {
     return frameworkProperties;
   }
+
+  public String getFrameworkOrSystemProperty(String property) {
+    final String value = frameworkProperties.get(property);
+    if (value == null) {
+      return System.getProperty(property);
+    }
+    else {
+      return value;
+    }
+  }
 }
 

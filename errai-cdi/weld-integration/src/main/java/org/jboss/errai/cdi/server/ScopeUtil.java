@@ -28,7 +28,7 @@ import org.jboss.weld.context.http.HttpSessionContext;
  * @author Mike Brock
  */
 public class ScopeUtil {
-  public static QueueSession getSessionFrom(Message message) {
+  public static QueueSession getSessionFrom(final Message message) {
     return message.getResource(QueueSession.class, "Session");
   }
 
@@ -50,7 +50,7 @@ public class ScopeUtil {
     getRequestContext(message).associate(getHttpServletRequest(message));
   }
 
-  private static HttpServletRequest getHttpServletRequest(Message message) {
+  private static HttpServletRequest getHttpServletRequest(final Message message) {
     return message.getResource(HttpServletRequest.class,
             HttpServletRequest.class.getName());
   }

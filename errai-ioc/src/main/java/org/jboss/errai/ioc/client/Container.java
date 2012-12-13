@@ -24,9 +24,17 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.BeanRef;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.ioc.client.container.IOCEnvironment;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Container implements EntryPoint {
   @Override
@@ -35,10 +43,11 @@ public class Container implements EntryPoint {
   }
 
   // stored for debugging purposes only. overwritten every time the container is bootstrapped.
-  private static BootstrapperInjectionContext injectionContext;
+  private static BootstrapInjectionContext injectionContext;
 
   public void bootstrapContainer() {
     try {
+      init = false;
       InitVotes.waitFor(Container.class);
 
       QualifierUtil.initFromFactoryProvider(new QualifierEqualityFactoryProvider() {
@@ -48,34 +57,95 @@ public class Container implements EntryPoint {
         }
       });
 
-      new IOCBeanManagerLifecycle().resetBeanManager();
-
       log("IOC bootstrapper successfully initialized.");
+
+      if (GWT.<IOCEnvironment>create(IOCEnvironment.class).isAsync()) {
+        log("bean manager initialized in async mode.");
+      }
 
       injectionContext = ((Bootstrapper) GWT.create(Bootstrapper.class)).bootstrapContainer();
 
-      log("IOC container bootstrapped.");
+      final CreationalContext rootContext = injectionContext.getRootContext();
 
-      injectionContext.getRootContext().finish();
-      log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
-
-      InitVotes.voteFor(Container.class);
-
-      declareDebugFunction();
-
+      if (rootContext instanceof AsyncCreationalContext) {
+        ((AsyncCreationalContext) rootContext).finish(new Runnable() {
+          @Override
+          public void run() {
+            finishInit();
+          }
+        });
+      }
+      else {
+        ((SimpleCreationalContext) rootContext).finish();
+        finishInit();
+      }
     }
     catch (Throwable t) {
       t.printStackTrace();
-      throw new RuntimeException("critical error in IOC container bootstrap", t);
+      throw new RuntimeException("critical error in IOC container bootstrap: " + t.getClass().getName() + ": "
+          + t.getMessage());
     }
   }
 
+  private static final List<Runnable> afterInit = new ArrayList<Runnable>();
+  private static boolean init = false;
+
+  private void finishInit() {
+    init = true;
+    log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
+    InitVotes.voteFor(Container.class);
+    declareDebugFunction();
+    new CallbacksRunnable().run();
+
+    log("bean manager now in service.");
+  }
+
+  private static class CallbacksRunnable implements Runnable {
+    @Override
+    public void run() {
+      final Iterator<Runnable> runnableIterator = afterInit.iterator();
+      while (runnableIterator.hasNext()) {
+        runnableIterator.next().run();
+        runnableIterator.remove();
+      }
+    }
+  }
+
+  /**
+   * Runs the specified {@link Runnable} only after the bean manager has fully initialized. It is generally not
+   * necessary to use this method from within beans themselves. But if you are generated out-of-container calls
+   * into the bean manager (such as for testing), it may be necessary to use this method to ensure that the beans
+   * you wish to lookup have been loaded.
+   * <p/>
+   * Use of this method is really only necessary when using the bean manager in asynchronous mode as wiring of the
+   * container synchronously does not yield during bootstrapping operations.
+   * <p/>
+   * If the bean manager is already initialized when you call this method, the <tt>Runnable</tt> is invoked immediately.
+   *
+   * @param runnable
+   *     the {@link Runnable} to execute after bean manager initialization.
+   */
+  public static void runAfterInit(final Runnable runnable) {
+    if (init) {
+      runnable.run();
+    }
+
+    afterInit.add(runnable);
+  }
+
+  /**
+   * Declares the JavaScript-accessible debugging function to query the status of the bean manager at runtime. The
+   * JSNI method internally calls {@link #displayBeanManagerStatus()}.
+   */
   private static native void declareDebugFunction() /*-{
     $wnd.errai_bean_manager_status = function () {
       @org.jboss.errai.ioc.client.Container::displayBeanManagerStatus()();
     }
   }-*/;
 
+  /**
+   * Displays the the bean manager status to the JavaScript debugging console in the browser.
+   */
   private static void displayBeanManagerStatus() {
     displayDebuggerUtilityTitle("BeanManager Status");
 
@@ -88,6 +158,12 @@ public class Container implements EntryPoint {
     displaySeparator();
   }
 
+  /**
+   * Converts the specified annotation array to a string representation. Used to display the bean manager status.
+   *
+   * @param annotations
+   * @return
+   */
   private static String annotationsToString(final Annotation[] annotations) {
     final StringBuilder sb = new StringBuilder("[");
     for (int i = 0; i < annotations.length; i++) {

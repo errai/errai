@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.client.api.builtin;
 
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.Disposer;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
@@ -14,6 +15,7 @@ import java.lang.annotation.Annotation;
  */
 @IOCProvider
 @Singleton
+@EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
 public class DisposerProvider implements ContextualTypeProvider<Disposer> {
   @Inject
   IOCBeanManager beanManager;

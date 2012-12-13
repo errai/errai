@@ -101,7 +101,7 @@ public class AnonymousClassStructureBuilderImpl
                 }
 
                 final StringBuilder buf = new StringBuilder(256);
-                final String returnType = getClassReference(method.getReturnType().getErased(), context);
+                final String returnType = getClassReference(method.getReturnType(), context);
 
                 buf.append("public ").append(returnType)
                     .append(" ")
@@ -138,7 +138,7 @@ public class AnonymousClassStructureBuilderImpl
       throw new UndefinedMethodException("Can't override (inherited method not found):"
           + classDefinition.getFullyQualifiedNameWithTypeParms() + "." + name + "(" + types + ")");
 
-    return publicOverridesMethod(method, DefParameters.from(method, args));
+    return publicOverridesMethod(method, DefParameters.fromParameters(args));
   }
 
 

@@ -132,7 +132,7 @@ public class BindableProxyLoaderGenerator extends Generator {
       Statement proxyProvider =
           ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
               .extend()
-              .publicOverridesMethod("getBindableProxy", Parameter.of(bindable, "model"),
+              .publicOverridesMethod("getBindableProxy", Parameter.of(Object.class, "model"),
                   Parameter.of(InitialState.class, "state"))
               .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
                   .withParameters(Cast.to(bindable, Stmt.loadVariable("model")), Variable.get("state"))).returnValue())

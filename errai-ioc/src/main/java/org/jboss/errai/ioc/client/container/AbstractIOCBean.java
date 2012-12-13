@@ -74,5 +74,5 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
     return QualifierUtil.containsAll(annotations, qualifiers);
   }
   
-  public abstract T getInstance();
+//  public abstract T getInstance();
 }

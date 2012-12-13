@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.junit.Ignore;
 
 /**
  * Simple bindable model for testing purposes.
@@ -26,6 +27,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
  */
 @Bindable
 @Portable
+@Ignore
 public class TestModel {
 
   private int id;

@@ -31,61 +31,61 @@ import java.lang.annotation.Annotation;
 public class DecoratorTask extends InjectionTask {
   private final IOCDecoratorExtension[] IOCExtensions;
 
-  public DecoratorTask(Injector injector, MetaClass type, IOCDecoratorExtension[] decs) {
+  public DecoratorTask(final Injector injector, final MetaClass type, final IOCDecoratorExtension[] decs) {
     super(injector, type);
     this.IOCExtensions = decs;
   }
 
-  public DecoratorTask(Injector injector, MetaField field, IOCDecoratorExtension[] decs) {
+  public DecoratorTask(final Injector injector, final MetaField field, final IOCDecoratorExtension[] decs) {
     super(injector, field);
     this.IOCExtensions = decs;
   }
 
-  public DecoratorTask(Injector injector, MetaConstructor constr, IOCDecoratorExtension[] decs) {
+  public DecoratorTask(final Injector injector, final MetaConstructor constr, final IOCDecoratorExtension[] decs) {
     super(injector, constr);
     this.IOCExtensions = decs;
   }
 
-  public DecoratorTask(Injector injector, MetaMethod method, IOCDecoratorExtension[] decs) {
+  public DecoratorTask(final Injector injector, final MetaMethod method, final IOCDecoratorExtension[] decs) {
     super(injector, method);
     this.IOCExtensions = decs;
   }
 
-  public DecoratorTask(Injector injector, MetaParameter parm, IOCDecoratorExtension[] decs) {
+  public DecoratorTask(final Injector injector, final MetaParameter parm, final IOCDecoratorExtension[] decs) {
     super(injector, parm);
     this.IOCExtensions = decs;
   }
 
   @SuppressWarnings({"unchecked"})
   @Override
-  public boolean doTask(InjectionContext ctx) {
-    Annotation anno = null;
+  public boolean doTask(final InjectionContext ctx) {
+    Annotation annotation = null;
 
-    for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
+    for (final IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
       switch (taskType) {
         case PrivateField:
         case Field:
-          anno = field.getAnnotation(dec.decoratesWith());
+          annotation = field.getAnnotation(dec.decoratesWith());
           break;
         case PrivateMethod:
         case Method:
-          anno = method.getAnnotation(dec.decoratesWith());
-          if (anno == null && field != null) {
-            anno = field.getAnnotation(dec.decoratesWith());
+          annotation = method.getAnnotation(dec.decoratesWith());
+          if (annotation == null && field != null) {
+            annotation = field.getAnnotation(dec.decoratesWith());
           }
-          else if (anno == null && parm != null) {
-            anno = parm.getAnnotation(dec.decoratesWith());
+          else if (annotation == null && parm != null) {
+            annotation = parm.getAnnotation(dec.decoratesWith());
           }
           break;
         case Type:
-          anno = type.getAnnotation(dec.decoratesWith());
+          annotation = type.getAnnotation(dec.decoratesWith());
           break;
         case Parameter:
-          anno = parm.getAnnotation(dec.decoratesWith());
+          annotation = parm.getAnnotation(dec.decoratesWith());
           break;
       }
 
-      for (Statement stmt : dec.generateDecorator(new InjectableInstance(anno, taskType, constructor, method, field, type,
+      for (final Statement stmt : dec.generateDecorator(new InjectableInstance(annotation, taskType, constructor, method, field, type,
               parm, injector, ctx))) {
         ctx.getProcessingContext().append(stmt);
       }

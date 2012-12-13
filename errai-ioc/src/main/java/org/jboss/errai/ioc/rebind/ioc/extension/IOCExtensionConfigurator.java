@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 /**
@@ -44,7 +44,7 @@ public interface IOCExtensionConfigurator {
    * @param injectionContext
    * @param procFactory
    */
-  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory);
 
   /**
    * THis method is called <em>after</em> the container has initialized all configuration, and <em>before</em> any
@@ -54,5 +54,5 @@ public interface IOCExtensionConfigurator {
    * @param injectionContext
    * @param procFactory
    */
-  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory);
 }

@@ -63,7 +63,7 @@ public class AlbumForm extends Composite {
 
     updateUIFromAlbum();
 
-    Grid g = new Grid(5, 2);
+    final Grid g = new Grid(5, 2);
 
     int row = 0;
     g.setText(row, 0, "Name:");

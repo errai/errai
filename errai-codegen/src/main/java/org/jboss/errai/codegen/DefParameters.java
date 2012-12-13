@@ -45,12 +45,12 @@ public class DefParameters extends AbstractStatement {
     return new DefParameters(parameters);
   }
   
-  public static DefParameters from(final MetaMethod method, final Parameter... mergeNames) {
+  public static DefParameters from(final MetaMethod method, final Parameter... parms) {
     final List<Parameter> parameters = new ArrayList<Parameter>();
 
     int i = 0;
     for (final MetaParameter parm : method.getParameters()) {
-      parameters.add(Parameter.of(parm.getType(), mergeNames[i].getName(), mergeNames[i++].isFinal()));
+      parameters.add(Parameter.of(parm.getType(), parms[i].getName(), parms[i++].isFinal()));
     }
     return new DefParameters(parameters);
   }

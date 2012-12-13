@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.ioc.client.SimpleInjectionContext;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,7 +77,7 @@ public class IOCBeanManager {
 
   private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
                                                     final Class<?> beanType,
-                                                    final CreationalCallback<Object> callback,
+                                                    final BeanProvider<Object> callback,
                                                     final Object instance,
                                                     final Annotation[] qualifiers,
                                                     final String name,
@@ -86,7 +88,7 @@ public class IOCBeanManager {
 
   private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
                                                     final Class<?> beanType,
-                                                    final CreationalCallback<Object> callback,
+                                                    final BeanProvider<Object> callback,
                                                     final Annotation[] qualifiers,
                                                     final String name,
                                                     final boolean concrete) {
@@ -96,7 +98,7 @@ public class IOCBeanManager {
 
   private void registerSingletonBean(final Class<Object> type,
                                      final Class<?> beanType,
-                                     final CreationalCallback<Object> callback,
+                                     final BeanProvider<Object> callback,
                                      final Object instance,
                                      final Annotation[] qualifiers,
                                      final String beanName,
@@ -108,7 +110,7 @@ public class IOCBeanManager {
 
   private void registerDependentBean(final Class<Object> type,
                                      final Class<?> beanType,
-                                     final CreationalCallback<Object> callback,
+                                     final BeanProvider<Object> callback,
                                      final Annotation[] qualifiers,
                                      final String beanName,
                                      final boolean concrete) {
@@ -142,13 +144,12 @@ public class IOCBeanManager {
    */
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final CreationalCallback<Object> callback,
+                      final BeanProvider<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers) {
 
     addBean(type, beanType, callback, instance, qualifiers, null, true);
   }
-
 
   /**
    * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
@@ -170,14 +171,13 @@ public class IOCBeanManager {
    */
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final CreationalCallback<Object> callback,
+                      final BeanProvider<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name) {
 
     addBean(type, beanType, callback, instance, qualifiers, name, true);
   }
-
 
   /**
    * Register a bean with the manager with a name as well as specifying whether the bean should be treated a concrete
@@ -202,14 +202,34 @@ public class IOCBeanManager {
    */
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final CreationalCallback<Object> callback,
-                      final Object instance,
+                      final BeanProvider<Object> callback,
+                      Object instance,
                       final Annotation[] qualifiers,
                       final String name,
                       final boolean concreteType) {
 
     if (concreteType) {
       concreteBeans.add(type.getName());
+    }
+
+    // HACK: if the bean was already registered in-line, recycle its reference. this is needed for singleton producers
+    // which get constructed inline and registered with the bean manager eagerly. Effectively his captures the instance
+    // which was registered inline, and copies the instance reference to a new bean reference containing the specified
+    // meta data.
+    //
+    // TODO: figure a way to clean this up.
+    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
+      final IOCBeanDef def = lookupBean(type, qualifiers);
+      if (def != null) {
+        instance = def.getInstance();
+        final Iterator<IOCBeanDef> iterator = beanMap.get(type).iterator();
+        while (iterator.hasNext()) {
+          if (iterator.next() == def) {
+            iterator.remove();
+            break;
+          }
+        }
+      }
     }
 
     if (instance != null) {
@@ -220,7 +240,6 @@ public class IOCBeanManager {
     }
   }
 
-
   /**
    * Destroy a bean and all other beans associated with its creational context in the bean manager.
    *
@@ -229,7 +248,8 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
-    final CreationalContext creationalContext = creationalContextMap.get(getActualBeanReference(ref));
+    final SimpleCreationalContext creationalContext =
+        (SimpleCreationalContext) creationalContextMap.get(getActualBeanReference(ref));
 
     if (creationalContext == null) {
       return;
@@ -478,7 +498,6 @@ public class IOCBeanManager {
       throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
     }
   }
-
 
   /**
    * Associates a {@link DestructionCallback} with a bean instance. If the bean manager cannot find a valid

@@ -73,6 +73,8 @@ public class ReachabilityTest {
     final Set<String> quickTypeDependencyList
         = QuickDeps.getQuickTypeDependencyList(source, FakeBean.class.getClassLoader());
 
+    System.out.println(quickTypeDependencyList);
+
     final Set<String> expected = new HashSet<String>(
         Arrays.asList(
             "org.jboss.errai.codegen.test.model.FakeBean",

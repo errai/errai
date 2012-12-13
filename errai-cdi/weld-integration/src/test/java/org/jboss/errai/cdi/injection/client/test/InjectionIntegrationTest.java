@@ -58,7 +58,7 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
   }
 
   public void testMvpInjections() {
-    Contacts mvpModule = IOC.getBeanManager().lookupBean(Contacts.class).getInstance();
+    final Contacts mvpModule = IOC.getBeanManager().lookupBean(Contacts.class).getInstance();
     assertNotNull("Field injection of AppController failed", mvpModule.getAppController());
   }
 

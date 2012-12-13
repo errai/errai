@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.EntityWithBigIntegerId;
 import org.jboss.errai.jpa.test.entity.EntityWithBoxedIntId;
@@ -38,6 +39,8 @@ public class IdGeneratorTest extends GWTTestCase {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
+
+    new IOCBeanManagerLifecycle().resetBeanManager();
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.

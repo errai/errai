@@ -376,7 +376,7 @@ public class MarshallerGeneratorFactory {
         .newObject(parameterizedAs(Marshaller.class, typeParametersOf(arrayType))).extend();
 
     classStructureBuilder.publicOverridesMethod("getTypeHandled")
-        .append(Stmt.load(toMap).returnValue())
+        .append(Stmt.load(arrayType).returnValue())
         .finish();
 
     final MetaClass arrayOfArrayType = arrayType.asArrayOf(1);

@@ -46,7 +46,7 @@ public class SenderBean implements Bean {
   private final MessageBus bus;
   private final Set<Type> typesSet;
  
-  public SenderBean(Type type, Set<Annotation> qualifiers, MessageBus bus) {
+  public SenderBean(final Type type, final Set<Annotation> qualifiers, final MessageBus bus) {
     this.bus = bus;
     this.qualifiers = qualifiers;
     typesSet = Arrays2.<Type>asSet(type);
@@ -97,7 +97,7 @@ public class SenderBean implements Bean {
   }
 
   @Override
-  public Object create(CreationalContext creationalContext) {
+  public Object create(final CreationalContext creationalContext) {
     final InjectionPoint injectionPoint = Container.instance().services().get(CurrentInjectionPoint.class).peek();
     final Set<Annotation> qualifiers = injectionPoint.getQualifiers();
     
@@ -114,7 +114,7 @@ public class SenderBean implements Bean {
         
     String toSubject = null, replyTo = null;
 
-    for (Annotation a : qualifiers) {
+    for (final Annotation a : qualifiers) {
       if (a instanceof ToSubject) {
         toSubject = ((ToSubject) a).value();
       }
@@ -135,7 +135,7 @@ public class SenderBean implements Bean {
           = "Injection of " + Sender.class.getName() + " implicit bean failed. ";
 
   @Override
-  public void destroy(Object instance, CreationalContext creationalContext) {
+  public void destroy(final Object instance, final CreationalContext creationalContext) {
   }
 
   @Override
