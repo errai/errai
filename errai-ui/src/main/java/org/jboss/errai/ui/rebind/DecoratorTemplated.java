@@ -437,9 +437,9 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] returns void.");
     }
 
-    logger.info("eventType: " + eventType.getClass() + " -- " + eventType);
-    logger.info("method: " + method.getClass() + " -- " + method);
-    logger.info("returnType: " + returnType.getClass() + " -- " + returnType);
+    logger.fine("eventType: " + eventType.getClass() + " -- " + eventType);
+    logger.fine("method: " + method.getClass() + " -- " + method);
+    logger.fine("returnType: " + returnType.getClass() + " -- " + returnType);
 
     MetaParameterizedType parameterizedType = returnType.getParameterizedType();
     if (parameterizedType == null) {
@@ -447,7 +447,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] does not return Type<? extends EventHandler>..");
     }
 
-    logger.info("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
+    logger.fine("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
 
     MetaType[] argTypes = parameterizedType.getTypeParameters();
     if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass
