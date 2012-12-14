@@ -4,16 +4,14 @@
 	<title>Errai KitchenSink</title>
 	<link rel="stylesheet" type="text/css" href="resources/css/screen.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<script type="text/javascript" src="KitchenSink/KitchenSink.nocache.js"></script>
-
     <script type="text/javascript">
-        // Insert device appropriate Cordova script
-        if (navigator.userAgent == "Kitchensink Cordova Webview iOS") {
-            document.write('<script src="resources/js/cordova-ios-2.0.0.js"><\/script>');
-        } else if (navigator.userAgent.indexOf("Kitchensink Cordova Webview Android") >= 0) {
-            document.write('<script src="resources/js/cordova-android-2.0.0.js"><\/script>');
+        if (navigator.userAgent.indexOf("Apple") >= 0) {
+            document.write('<script src="resources/js/cordova-ios-2.2.0.js"><\/script>');
+        } else {
+            document.write('<script src="resources/js/cordova-android-2.2.0.js"><\/script>');
         }
     </script>
+    <script type="text/javascript" src="KitchenSink/KitchenSink.nocache.js"></script>
 </head>
 <body>
 
@@ -66,6 +64,7 @@
 				</ul>
 			</div>
 			<div id="kitchensink"></div>
+            <div id="picture"></div>
 		</div>
 		<div id="footer">
 			<img src="resources/gfx/logo.png" alt="JBoss AS7 logo" />
