@@ -96,7 +96,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       throw new InvalidMappingException("no definition for: " + toMap.getFullyQualifiedName());
     }
 
-    if (toMap.isAbstract() || toMap.isInterface()) {
+    if ((toMap.isAbstract() || toMap.isInterface()) && !toMap.isEnum()) {
       throw new RuntimeException("cannot map an abstract class or interface: " + toMap.getFullyQualifiedName());
     }
 

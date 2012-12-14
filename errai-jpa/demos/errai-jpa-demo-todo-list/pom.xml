@@ -39,7 +39,7 @@
           <runTarget>index.html</runTarget>
           <extraJvmArgs>-Xmx1g -XX:MaxPermSize=256m</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <logLevel>DEBUG</logLevel>
+          <logLevel>INFO</logLevel>
         </configuration>
         <executions>
           <execution>
@@ -69,7 +69,7 @@
             classpath scanners such as Hibernate and Weld get confused when the webapp 
             is bootstrapping. -->
           <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
-
+          <warSourceExcludes>WEB-INF/web.xml</warSourceExcludes>
         </configuration>
       </plugin>
 

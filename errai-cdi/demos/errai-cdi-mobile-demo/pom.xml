@@ -127,11 +127,13 @@
     <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.weld.servlet</groupId>
-      <artifactId>weld-servlet</artifactId>
+      <artifactId>weld-servlet-core</artifactId>
+      <scope>compile</scope>
     </dependency>
 
     <!-- GWT and GWT Extensions -->
@@ -154,9 +156,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging</artifactId>
-      <version>3.0.0.Beta4</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
     </dependency>
 
     <!-- For the CDI Mobile Demo, we syntax-highlight the Java sources at compile time (they are linked 
@@ -347,7 +349,7 @@
 
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet</artifactId>
+          <artifactId>weld-servlet-core</artifactId>
           <scope>provided</scope>
           <version>${weld.version}</version>
         </dependency>
@@ -462,7 +464,7 @@
 
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet</artifactId>
+          <artifactId>weld-servlet-core</artifactId>
           <scope>provided</scope>
         </dependency>
 

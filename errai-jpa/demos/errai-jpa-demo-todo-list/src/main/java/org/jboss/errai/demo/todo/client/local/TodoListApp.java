@@ -30,15 +30,13 @@ public class TodoListApp extends Composite {
   @Inject IOCBeanManager bm;
 
   @Inject @DataField TextBox newItemBox;
-  @Inject @DataField ListWidget<TodoItem, ItemWidget> itemContainer;
+  @Inject @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
   @Inject @DataField Button archiveButton;
 
   @PostConstruct
   public void init() {
-    System.out.println("TodoListApp init started");
     RootPanel.get().add(this);
     refreshItems();
-    System.out.println("TodoListApp init finished");
   }
 
   private void refreshItems() {

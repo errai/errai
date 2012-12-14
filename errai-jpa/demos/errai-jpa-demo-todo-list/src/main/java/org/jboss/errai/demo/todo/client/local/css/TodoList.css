@@ -42,13 +42,14 @@ div.item {
 div.item input, div.item span.gwt-CheckBox {
 	width: 20px;
 	height: 32px;
-	margin-left: 10px;
+	margin-left: 5px;
 	vertical-align: top;
 }
 
 div.item span {
 	width: 85%;
 	display: inline-block;
+	margin-left: 6px;
 }
 
 div.item .done {
@@ -63,17 +64,14 @@ div.mainContentArea button {
 }
 
 /* Don't forget the phones! */
-@media only screen and (max-width: 600px) , only screen and
-	(max-device-width: 600px) {
+@media only screen and (max-width: 600px) , only screen and (max-device-width: 600px) {
 	body {
 		margin: 0px;
 	}
 	h1 {
 		text-align: left;
-		font-size: 30px;
-		margin-left: 6px;
-		margin-top: 8px;
-		margin-bottom: 8px;
+		font-size: 80px;
+		margin-left: 10px;
 	}
 	div.mainContentArea {
 		width: 100%;
@@ -82,7 +80,10 @@ div.mainContentArea button {
 		border-radius: 0px;
 	}
 	div.mainContentArea>input {
-		font-size: 30px;
+		font-size: 80px;
 		margin-bottom: 15px;
+	}
+	div.item span {
+		font-size: 60px;
 	}
 }
