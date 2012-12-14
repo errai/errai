@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Errai KitchenSink</title>
+	<link rel="stylesheet" type="text/css" href="resources/css/screen.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<script type="text/javascript" src="KitchenSink/KitchenSink.nocache.js"></script>
+
+    <script type="text/javascript">
+        // Insert device appropriate Cordova script
+        if (navigator.userAgent == "Kitchensink Cordova Webview iOS") {
+            document.write('<script src="resources/js/cordova-ios-2.0.0.js"><\/script>');
+        } else if (navigator.userAgent.indexOf("Kitchensink Cordova Webview Android") >= 0) {
+            document.write('<script src="resources/js/cordova-android-2.0.0.js"><\/script>');
+        }
+    </script>
+</head>
+<body>
+
+	<!--
+    This is the web page that loads the Errai/GWT based administration console.
+    The entry point for the app 
+  -->
+
+	<div id="container">
+		<div id="content">
+			<div id="sidebar">
+				<h3>Find out more</h3>
+				<p>Learn about JBoss AS 7.</p>
+				<ul>
+					<li><a
+						href="https://docs.jboss.org/author/display/AS7/Getting+Started+Developing+Applications+Guide">JBoss
+							AS 7 Getting Started Developing Applications Guide</a></li>
+					<li><a href="http://jboss.org/jbossas">JBoss AS 7 project site</a></li>
+				</ul>
+				<p>Learn about the Java EE 6 platform and the component model it
+					provides.</p>
+				<ul>
+					<li><a href="http://download.oracle.com/javaee/6/tutorial/doc">Java
+							EE 6 tutorial</a></li>
+					<li><a href="http://docs.jboss.org/cdi/spec/1.0/html">JSR-299:
+							CDI specification</a></li>
+					<li><a
+						href="https://sites.google.com/site/cdipojo/get-started">CDI
+							Source</a></li>
+				</ul>
+				<p>Dive into Weld, the CDI reference implementation, and
+					discover portable extensions Seam 3 offers.</p>
+				<ul>
+					<li><a
+						href="http://docs.jboss.org/weld/reference/latest/en-US/html">Weld
+							reference guide</a></li>
+					<li><a href="http://seamframework.org/Weld">Weld project</a></li>
+					<li><a href="http://seamframework.org/Seam3">Seam 3
+							project</a></li>
+					<li><a href="http://seamframework.org/Community/Forums">User
+							forums</a></li>
+					<li><a href="http://seamframework.org/Community/MailingLists">Mailing
+							lists</a></li>
+					<li><a href="https://issues.jboss.org/browse/WELDRAD">Archetype
+							issue tracker</a></li>
+				</ul>
+				<p>Explore Errai, the typesafe web framework that brings the Java EE 6 programming model to the browser.</p>
+				<ul>
+					<li><a href="http://jboss.org/errai">Errai community site</a></li>
+				</ul>
+			</div>
+			<div id="kitchensink"></div>
+		</div>
+		<div id="footer">
+			<img src="resources/gfx/logo.png" alt="JBoss AS7 logo" />
+			<p>
+				This project was generated from a Maven archetype from JBoss.<br />
+			</p>
+		</div>
+	</div>
+</body>
+</html>

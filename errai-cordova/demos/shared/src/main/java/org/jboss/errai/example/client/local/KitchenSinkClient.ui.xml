@@ -1,0 +1,65 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:p1="urn:import:com.google.gwt.user.cellview.client">
+  <g:HTMLPanel styleName="bodyContent">
+    <h1>Welcome to JBoss AS 7!</h1>
+
+    <p>You have successfully deployed the Errai Kitchen Sink Java EE 6 web application
+      on JBoss AS 7.</p>
+
+    <h2>Register (Bean Validation example)</h2>
+    <p>Enforces annotation-based constraints defined on the
+      model class.</p>
+
+    <g:Label ui:field="generalErrorLabel"/>
+
+    <g:Grid>
+      <g:row>
+        <g:customCell>
+          <g:Label text="Name:" />
+        </g:customCell>
+        <g:customCell>
+          <g:TextBox ui:field="nameBox" />
+        </g:customCell>
+        <g:customCell>
+          <g:Label wordWrap="false" ui:field="nameValidationErr" styleName="errorMessage" />
+        </g:customCell>
+      </g:row>
+      <g:row>
+        <g:customCell>
+          <g:Label text="Email:" />
+        </g:customCell>
+        <g:customCell>
+          <g:TextBox ui:field="emailBox" />
+        </g:customCell>
+        <g:customCell>
+          <g:Label wordWrap="false" ui:field="emailValidationErr" styleName="errorMessage" />
+        </g:customCell>
+      </g:row>
+      <g:row>
+        <g:customCell>
+          <g:Label text="Phone:" />
+        </g:customCell>
+        <g:customCell>
+          <g:TextBox ui:field="phoneBox" />
+        </g:customCell>
+        <g:customCell>
+          <g:Label wordWrap="false" ui:field="phoneValidationErr" styleName="errorMessage" />
+        </g:customCell>
+      </g:row>
+    </g:Grid>
+    <g:HorizontalPanel>
+      <g:Button ui:field="registerButton">Register</g:Button>
+      <g:Label ui:field="registerConfirmMessage" styleName="errorMessage" />
+    </g:HorizontalPanel>
+    <p1:CellTable ui:field="membersTable" pageSize="10"/>
+    <g:Label text="Table status message" ui:field="tableEmptyMessage" styleName="tableStatus"/>
+
+    <p>REST URL for all members: <a target="_blank" href="rest/members">rest/members</a></p>
+    
+    <p>Note: to see Errai broadcasting push notifications, open this page in another browser (a completely
+       different browser, not just a new window in the same browser). Every member you register will
+       appear in all browsers simultaneously.</p>
+    
+  </g:HTMLPanel>
+</ui:UiBinder> 
