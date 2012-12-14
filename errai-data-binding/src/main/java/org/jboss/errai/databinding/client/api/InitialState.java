@@ -23,7 +23,10 @@ public enum InitialState {
   /**
    * Specifies that the bound value should be initialized to the pre-existing
    * value in the UI widget.
+   * 
+   * @deprecated See https://issues.jboss.org/browse/ERRAI-457 for details.
    */
+  @Deprecated
   FROM_UI {
     @Override
     public <T> T getInitialValue(T modelValue, T widgetValue) {
