@@ -8,6 +8,6 @@ import org.jboss.errai.bus.client.framework.Configuration;
 public class Config implements Configuration {
     @Override
     public String getRemoteLocation() {
-        return "http://localhost:8080/errai-cordova/";
+        return "http://localhost:8080/errai-cordova-kitchensink/";
     }
 }

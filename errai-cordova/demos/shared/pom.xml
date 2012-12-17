@@ -412,7 +412,7 @@
             mode) to not start the default server (embedded jetty), but to download the 
             HTML host page from the configured runTarget. -->
           <noServer>true</noServer>
-          <runTarget>http://localhost:8080/errai-cordova/KitchenSink.html</runTarget>
+          <runTarget>http://localhost:8080/errai-cordova-kitchensink/KitchenSink.html</runTarget>
 
         </configuration>
         <executions>
