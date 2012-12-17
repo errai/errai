@@ -2,12 +2,7 @@ package org.jboss.errai.example.client.shared;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -66,6 +61,9 @@ public class Member implements Serializable, Comparable<Member> {
   @Column(name = "phone_number")
   private String phoneNumber;
 
+  @Lob
+  private String picture;
+
   public Long getId() {
     return id;
   }
@@ -96,6 +94,14 @@ public class Member implements Serializable, Comparable<Member> {
 
   public void setPhoneNumber(String phoneNumber) {
     this.phoneNumber = phoneNumber;
+  }
+
+  public String getPicture() {
+    return picture;
+  }
+
+  public void setPicture(String picture) {
+    this.picture = picture;
   }
 
   /**

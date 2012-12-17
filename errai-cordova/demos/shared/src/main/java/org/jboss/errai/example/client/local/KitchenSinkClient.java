@@ -1,21 +1,5 @@
 package org.jboss.errai.example.client.local;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
-import org.jboss.errai.example.client.shared.Member;
-import org.jboss.errai.example.client.shared.MemberService;
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.ioc.client.api.Caller;
-
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
@@ -29,11 +13,21 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.example.client.shared.Member;
+import org.jboss.errai.example.client.shared.MemberService;
+import org.jboss.errai.ioc.client.api.Caller;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This is a GWT composite that gets added to the page by {@link KitchenSinkApp}
@@ -125,6 +119,14 @@ public class KitchenSinkClient extends Composite {
         return TEMPLATES.link(UriUtils.fromString(url), url);
       }
     }, "REST URL");
+
+    membersTable.addColumn(new Column<Member, String>(new ScaledImageCell()) {
+
+      @Override
+      public String getValue(Member member) {
+        return member.getPicture();
+      }
+    });
 }
 
   /**
@@ -134,6 +136,7 @@ public class KitchenSinkClient extends Composite {
    * @param event The click event (ignored)
    */
   @UiHandler("registerButton")
+  @SuppressWarnings("UnusedParameters")
   void onRegisterButtonClick(ClickEvent event) {
     Member newMember = new Member();
     newMember.setName(nameBox.getText());
