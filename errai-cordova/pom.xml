@@ -44,6 +44,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.googlecode.gwtphonegap</groupId>
+      <artifactId>gwtphonegap</artifactId>
+      <version>1.8.1.0</version>
+    </dependency>
+
     <!-- Test Deps -->
     <dependency>
       <groupId>junit</groupId>

@@ -14,6 +14,9 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.*;
+import com.googlecode.gwtphonegap.client.PhoneGap;
+import com.googlecode.gwtphonegap.client.camera.PictureCallback;
+import com.googlecode.gwtphonegap.client.camera.PictureOptions;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
@@ -51,6 +54,7 @@ public class KitchenSinkClient extends Composite {
   private static final KitchenSinkTemplates TEMPLATES = GWT.create(KitchenSinkTemplates.class);
 
   private static KitchenSinkClientUiBinder uiBinder = GWT.create(KitchenSinkClientUiBinder.class);
+  private PhoneGap phoneGap;
 
   interface KitchenSinkClientUiBinder extends
       UiBinder<Widget, KitchenSinkClient> {
@@ -85,8 +89,12 @@ public class KitchenSinkClient extends Composite {
 
   @UiField(provided=true) CellTable<Member> membersTable = new CellTable<Member>();
 
-  public KitchenSinkClient(Caller<MemberService> memberService) {
+  @UiField Button takePicture;
+  @UiField Image image;
+
+  public KitchenSinkClient(Caller<MemberService> memberService, PhoneGap phoneGap) {
     this.memberService = memberService;
+    this.phoneGap = phoneGap;
     initWidget(uiBinder.createAndBindUi(this));
 
     // This sets up the structure of the Registered Members CellTable
@@ -142,6 +150,7 @@ public class KitchenSinkClient extends Composite {
     newMember.setName(nameBox.getText());
     newMember.setEmail(emailBox.getText());
     newMember.setPhoneNumber(phoneBox.getText());
+    newMember.setPicture(image.getUrl());
 
     nameValidationErr.setText("");
     emailValidationErr.setText("");
@@ -185,6 +194,27 @@ public class KitchenSinkClient extends Composite {
               return false;
             }
           }).register(newMember);
+  }
+
+  @UiHandler("takePicture")
+  @SuppressWarnings("UnusedParameters")
+  void onTakePictureClick(ClickEvent event) {
+    PictureOptions options = new PictureOptions(25);
+    options.setDestinationType(PictureOptions.DESTINATION_TYPE_DATA_URL);
+    options.setSourceType(PictureOptions.PICTURE_SOURCE_TYPE_CAMERA);
+
+    phoneGap.getCamera().getPicture(options, new PictureCallback() {
+
+        @Override
+        public void onSuccess(String data) {
+          image.setUrl(UriUtils.fromSafeConstant("data:image/jpeg;base64," + data));
+        }
+
+        @Override
+        public void onFailure(String error) {
+            registerConfirmMessage.setText("Could not take member picture: " + error);
+        }
+    });
   }
 
   /**

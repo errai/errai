@@ -2,6 +2,7 @@ package org.jboss.errai.example.client.local;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.googlecode.gwtphonegap.client.PhoneGap;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
@@ -54,7 +55,10 @@ public class KitchenSinkApp {
    */
   @AfterInitialization
   public void createUI() {
-    kitchenSinkUi = new KitchenSinkClient(memberService);
+    final PhoneGap phoneGap = GWT.create(PhoneGap.class);
+    phoneGap.initializePhoneGap();
+
+    kitchenSinkUi = new KitchenSinkClient(memberService, phoneGap);
     kitchenSinkUi.setTableStatusMessage("Fetching member list...");
 
     RootPanel.get("kitchensink").add(kitchenSinkUi);
