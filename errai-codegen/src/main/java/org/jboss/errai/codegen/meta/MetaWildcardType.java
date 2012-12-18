@@ -57,9 +57,9 @@ public interface MetaWildcardType extends MetaType {
   /**
    * Returns the upper bounds of this wildcard type. Examples:
    * <ul>
-   * <li>{@code <?>} has no upper bounds
+   * <li>{@code <?>} has an upper bound of {@code java.lang.Object}
    * <li>{@code <? extends List>} has an upper bound of <tt>{List}</tt>
-   * <li>{@code <? super List>} has no upper bounds
+   * <li>{@code <? super List>} has an upper bound of {@code java.lang.Object}
    * <li>{@code <? extends List & Futzable>} upper bounds of <tt>{List, Futzable}</tt>
    * </ul>
    *

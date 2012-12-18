@@ -35,6 +35,7 @@ public class GWTMetaClassTest extends AbstractMetaClassTest {
     f.addTestClass("org.jboss.errai.codegen.test.model.ObjectWithNested");
     f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithGenericCollections");
     f.addTestClass("org.jboss.errai.codegen.test.model.ParameterizedClass");
+    f.addTestClass("org.jboss.errai.codegen.test.model.ClassWithGenericMethods");
     f.addTestClass(PrimitiveFieldContainer.class.getName());
 
     mockacle = f.generateMockacle();
