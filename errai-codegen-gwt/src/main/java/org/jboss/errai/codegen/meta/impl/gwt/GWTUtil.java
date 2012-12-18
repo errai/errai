@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
@@ -146,6 +147,8 @@ public class GWTUtil {
 
     final TypeOracle typeOracle = context.getTypeOracle();
     MetaClassFactory.emptyCache();
+    // Clearing the LiteralFactory cache resolved https://issues.jboss.org/browse/ERRAI-456
+    LiteralFactory.emptyCache();
     if (typeOracle != null) {
       final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));
       translatable.remove("java.lang");

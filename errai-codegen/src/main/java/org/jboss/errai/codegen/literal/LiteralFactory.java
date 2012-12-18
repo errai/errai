@@ -18,18 +18,18 @@ package org.jboss.errai.codegen.literal;
 
 import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
 
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.exception.NotLiteralizableException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The literal factory provides a LiteralValue for the specified object (if possible).
@@ -203,5 +203,9 @@ public class LiteralFactory {
    */
   public static LiteralValue<?> isLiteral(final Object o) {
     return getLiteral(null, o, false);
+  }
+  
+  public static void emptyCache() {
+    LITERAL_CACHE.clear();
   }
 }
