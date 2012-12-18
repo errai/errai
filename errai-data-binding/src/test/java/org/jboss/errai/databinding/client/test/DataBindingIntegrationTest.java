@@ -260,19 +260,6 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindablePropertyChainWithNestedInstanceChange() {
-    TextBox textBox = new TextBox();
-    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.value").getModel();
-
-    model.setChild(new TestModel());
-    textBox.setValue("UI change", true);
-    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
-
-    model.getChild().setValue("model change");
-    assertEquals("Widget not properly updated", "model change", textBox.getText());
-  }
-
-  @Test
   public void testBindablePropertyChainWithRootInstanceChange() {
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value");
@@ -282,6 +269,36 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getValue());
 
+    model.getChild().getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+  
+  @Test
+  public void testBindablePropertyChainWithNestedInstanceChange() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.value").getModel();
+
+    model.setChild(new TestModel());
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getValue());
+
+    model.setChild(new TestModel());
+    model.getChild().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox.getText());
+  }
+  
+  @Test
+  public void testBindablePropertyChainWithNestedInstanceChangeInNonAccessorMethod() {
+    TextBox textBox = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "child.child.value").getModel();
+
+    // changing the nested bindable using a non accessor method
+    model.resetChildren();
+    textBox.setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", model.getChild().getChild().getValue());
+
+    // changing the nested bindable using a non accessor method
+    model.resetChildren();
     model.getChild().getChild().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
   }
@@ -521,11 +538,12 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TestModel model = new TestModel();
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forModel(model).bind(textBox, "value");
+
+    // using direct field access on the target object so the bindable proxy has no chance of seeing the change
+    model.value = "model change";
     assertEquals("TextBox should be empty", "", textBox.getText());
 
-    model.setValue("model change");
-
-    // This call is used by Errai JPA, to update the widgets after an entity was updated
+    // This call is used by Errai JPA, to update the widgets after an entity was changed
     // using direct field access (e.g. the id was set).
     ((BindableProxy<?>) binder.getModel()).updateWidgets();
     assertEquals("TextBox should have been updated", "model change", textBox.getText());
@@ -541,11 +559,14 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forModel(model).bind(textBox, "child.child.value");
+
+    // using direct field access on the target object so the bindable proxy has no chance of seeing the change
+    model.child = new TestModel();
+    model.child.child = new TestModel();
+    model.child.child.value = "model change";
     assertEquals("TextBox should be empty", "", textBox.getText());
-
-    model.getChild().getChild().setValue("model change");
-
-    // This call is used by Errai JPA, to update the widgets after an entity was updated
+    
+    // This call is used by Errai JPA, to update the widgets after an entity was changed
     // using direct field access (e.g. the id was set).
     ((BindableProxy<?>) binder.getModel()).updateWidgets();
     assertEquals("TextBox should have been updated", "model change", textBox.getText());

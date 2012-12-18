@@ -287,28 +287,36 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Updates all bound widgets if necessary (if a bound property's value has changed). This method is invoked in case a
-   * bound property changed outside the property's write method (using a non accessor method).
+   * bound property changed outside the property's write method (when using a non accessor method).
    * 
    * @param <P>
    *          The property type of the changed property.
    */
   void updateWidgetsAndFireEvents() {
     for (String boundProperty : bindings.keySet()) {
-      // we don't need to handle property chains here, since the nested binders/proxies take care of that
-      if (boundProperty.contains("."))
-        continue;
+      int dotPos = boundProperty.indexOf(".");
+      if (dotPos > 0) {
+        boundProperty = boundProperty.substring(0, dotPos);
+      }
 
       Object knownValue = knownValues.get(boundProperty);
       Object actualValue = proxy.get(boundProperty);
       if ((knownValue == null && actualValue != null) ||
           (knownValue != null && !knownValue.equals(actualValue))) {
+
         updateWidgetAndFireEvent(boundProperty, knownValue, actualValue);
+
+        DataBinder nestedBinder = binders.get(boundProperty);
+        if (nestedBinder != null) {
+          nestedBinder.setModel(actualValue, initialState);
+          proxy.set(boundProperty, nestedBinder.getModel());
+        }
       }
     }
   }
 
   /**
-   * Updates bound widgets and fires {@link PropertyChangeEvent}s.
+   * Updates a bound widget and fires the corresponding {@link PropertyChangeEvent}.
    * 
    * @param <P>
    *          The property type of the changed property.

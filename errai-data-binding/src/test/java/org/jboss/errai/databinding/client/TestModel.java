@@ -29,14 +29,15 @@ import org.jboss.errai.databinding.client.api.Bindable;
 public class TestModel {
 
   private int id;
-  private String value;
+  // to test direct field access
+  public String value;
   
   // the _ here is used to test proper JavaBean property discovery
   private String _name;
   private Integer _age;
   
   private boolean active;
-  private TestModel child;
+  public TestModel child;
   
   // this field tests for the case there's a field name collision in the generated proxy
   @SuppressWarnings("unused")
@@ -87,6 +88,19 @@ public class TestModel {
     return child;
   }
 
+  // this method is used to test changes to references of nested bindables using a non accessor method
+  public void resetChildren() {
+    TestModel newChild = new TestModel();
+    
+    TestModel curChild = child;
+    while ((curChild = curChild.child) != null) {
+      newChild.child = new TestModel();
+      newChild = newChild.child;
+    }
+    
+    this.child = newChild;
+  }
+  
   public void setChild(TestModel child) {
     this.child = child;
   }
