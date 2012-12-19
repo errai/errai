@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,6 +71,8 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
@@ -97,8 +98,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
 
-  private static final Logger logger = Logger.getLogger(DecoratorTemplated.class.getName());
-
+  private static final Logger logger = LoggerFactory.getLogger(DecoratorTemplated.class);
 
   public DecoratorTemplated(Class<Templated> decoratesWith) {
     super(decoratesWith);
@@ -432,23 +432,23 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + eventType.getName() + "]");
     }
 
-    MetaClass returnType = method.getReturnType();
+    MetaType returnType = method.getGenericReturnType();
     if (returnType == null) {
       throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
           + "] returns void.");
     }
 
-    logger.fine("eventType: " + eventType.getClass() + " -- " + eventType);
-    logger.fine("method: " + method.getClass() + " -- " + method);
-    logger.fine("returnType: " + returnType.getClass() + " -- " + returnType);
+    logger.debug("eventType: " + eventType.getClass() + " -- " + eventType);
+    logger.debug("method: " + method.getClass() + " -- " + method);
+    logger.debug("genericReturnType: " + returnType.getClass() + " -- " + returnType);
 
-    MetaParameterizedType parameterizedType = returnType.getParameterizedType();
-    if (parameterizedType == null) {
+    if (!(returnType instanceof MetaParameterizedType)) {
       throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
           + "] does not return Type<? extends EventHandler>..");
     }
 
-    logger.fine("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
+    MetaParameterizedType parameterizedType = (MetaParameterizedType) returnType;
+    logger.debug("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
 
     MetaType[] argTypes = parameterizedType.getTypeParameters();
     if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass

@@ -69,7 +69,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
     super(classType);
     this.oracle = oracle;
 
-    if (classType.getQualifiedSourceName().contains(" ")) {
+    if (classType.getQualifiedSourceName().contains(" ")
+            || classType.getQualifiedSourceName().contains("?")) {
       throw new IllegalArgumentException("Cannot represent \"" + classType + "\" as a class. Try a different meta type such as GWTWildcardType or GWTTypeVaraible.");
     }
 

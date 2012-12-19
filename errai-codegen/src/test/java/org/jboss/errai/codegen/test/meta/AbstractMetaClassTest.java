@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.test.meta;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,8 +31,11 @@ import java.util.List;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
+import org.jboss.errai.codegen.test.model.ClassWithGenericMethods;
 import org.jboss.errai.codegen.test.model.ObjectWithNested;
 import org.jboss.errai.codegen.test.model.ParameterizedClass;
 import org.jboss.errai.codegen.test.model.TestInterface;
@@ -524,4 +528,85 @@ public abstract class AbstractMetaClassTest {
 
     assertEquals("org.jboss.errai.codegen.test.model.ParameterizedClass", parameterized.getErased().getFullyQualifiedNameWithTypeParms());
   }
+
+  @Test
+  public void testMethodObjectReturnType() {
+    final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
+    MetaMethod method = c.getMethod("methodReturningObject", new Class[] {});
+    assertEquals("java.lang.Object", method.getReturnType().getFullyQualifiedNameWithTypeParms());
+    assertEquals(getTypeOfMetaClassBeingTested(), method.getReturnType().getClass());
+
+    // the generic return type should be the same: plain old Object
+    assertEquals(getMetaClass(Object.class), method.getGenericReturnType());
+  }
+
+  @Test
+  public void testMethodReturnTypeWithWildcardParameter() {
+    final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
+    MetaMethod method = c.getMethod("methodReturningUnboundedWildcardCollection", new Class[] {});
+
+    // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
+    // then adjust this assertion to strict equality rather than startsWith()
+    assertTrue(method.getReturnType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
+
+    MetaType genericReturnType = method.getGenericReturnType();
+    assertNotNull(genericReturnType);
+    assertTrue("Got unexpected return type type " + genericReturnType.getClass(),
+            genericReturnType instanceof MetaParameterizedType);
+    MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
+    assertEquals(1, mpReturnType.getTypeParameters().length);
+
+    // Sole type parameter should be <?>
+    assertTrue(mpReturnType.getTypeParameters()[0] instanceof MetaWildcardType);
+    MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
+    assertArrayEquals(new MetaType[] {}, typeParam.getLowerBounds());
+    assertArrayEquals(new MetaType[] { getMetaClass(Object.class) }, typeParam.getUpperBounds());
+  }
+
+  @Test
+  public void testMethodReturnTypeWithUpperBoundedWildcardParameter() {
+    final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
+    MetaMethod method = c.getMethod("methodReturningUpperBoundedWildcardCollection", new Class[] {});
+
+    // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
+    // then adjust this assertion to strict equality rather than startsWith()
+    assertTrue(method.getReturnType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
+
+    MetaType genericReturnType = method.getGenericReturnType();
+    assertNotNull(genericReturnType);
+    assertTrue("Got unexpected return type type " + genericReturnType.getClass(),
+            genericReturnType instanceof MetaParameterizedType);
+    MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
+    assertEquals(1, mpReturnType.getTypeParameters().length);
+
+    // Sole type parameter should be <? extends String>
+    assertTrue(mpReturnType.getTypeParameters()[0] instanceof MetaWildcardType);
+    MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
+    assertArrayEquals(new MetaType[] {}, typeParam.getLowerBounds());
+    assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getUpperBounds());
+  }
+
+  @Test
+  public void testMethodReturnTypeWithLowerBoundedWildcardParameter() {
+    final MetaClass c = getMetaClass(ClassWithGenericMethods.class);
+    MetaMethod method = c.getMethod("methodReturningLowerBoundedWildcardCollection", new Class[] {});
+
+    // TODO (ERRAI-459) decide whether it's correct to have the type param present or not
+    // then adjust this assertion to strict equality rather than startsWith()
+    assertTrue(method.getReturnType().getFullyQualifiedNameWithTypeParms().startsWith("java.util.Collection"));
+
+    MetaType genericReturnType = method.getGenericReturnType();
+    assertNotNull(genericReturnType);
+    assertTrue("Got unexpected return type type " + genericReturnType.getClass(),
+            genericReturnType instanceof MetaParameterizedType);
+    MetaParameterizedType mpReturnType = (MetaParameterizedType) genericReturnType;
+    assertEquals(1, mpReturnType.getTypeParameters().length);
+
+    // Sole type parameter should be <? extends String>
+    assertTrue(mpReturnType.getTypeParameters()[0] instanceof MetaWildcardType);
+    MetaWildcardType typeParam = (MetaWildcardType) mpReturnType.getTypeParameters()[0];
+    assertArrayEquals(new MetaType[] { getMetaClass(String.class) }, typeParam.getLowerBounds());
+    assertArrayEquals(new MetaType[] { getMetaClass(Object.class)}, typeParam.getUpperBounds());
+  }
+
 }
