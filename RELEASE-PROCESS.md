@@ -25,18 +25,13 @@ Release Steps
 
         % mvn -Pintegration-test test
    
-1. Export docbook from confluence for /reference
-  * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833085
-     (Single book output, no static files)
-  * Copy and commit the docbook files in /reference. Clean out the old chapters first
-     (otherwise there will be old cruft left over if any chapters were renamed or renumbered):
-
+1. Update reference guide with latest content in confluence
+   (Note that this automatically downloads the latest docs and adds `language` attributes to all the `programlisting` elements.
+   You need to have a file `jboss-credentials.properties` in the `reference` directory with your JBoss Community username and
+   password under the keys `jboss.username` and `jboss.password` respectively.)
       ```
          % cd reference
-         % rm src/main/docbook/en/chapter-*
-         % cp $newdocs/*.xml src/main/docbook/en/
-         % mvn clean xml:transform
-         % cp target/generated-resources/xml/xslt/en/*.xml src/main/docbook/en/
+         % mvn generate-resources
          % git add src
       ```
   * Edit the version numbers in Book_Info.xml to reflect release version
