@@ -215,6 +215,11 @@
                         processor="trax">
                         <factory name="net.sf.saxon.TransformerFactoryImpl"/>
                         <classpath refid="maven.compile.classpath"/>
+                        <xmlcatalog>
+                          <dtd 
+                            publicId="-//OASIS//DTD DocBook XML V4.5//EN"
+                            location="src/main/dtd/docbook/xml/4.5/docbookx.dtd"/>
+                        </xmlcatalog>
                       </xslt>
                     </tasks>
                   </configuration>
