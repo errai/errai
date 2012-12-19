@@ -518,7 +518,7 @@
         <artifactId>gwt-maven-plugin</artifactId>
         <configuration>
           <logLevel>INFO</logLevel>
-          <runTarget>App.html</runTarget>
+          <runTarget>Contacts.html</runTarget>
           <extraJvmArgs>-Xmx512m</extraJvmArgs>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>

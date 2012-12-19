@@ -57,7 +57,7 @@ public final class TemplateUtil {
       throw new IllegalStateException("Template [" + templateFile
               + "] did not contain data-field attribute for field [" + componentType + "." + fieldName + "]");
     }
-    logger.info("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
+    logger.fine("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
 
     if (!element.getTagName().equals(field.getElement().getTagName())) {
@@ -108,7 +108,7 @@ public final class TemplateUtil {
     parserDiv.setInnerHTML(templateContents);
 
     if (rootField != null && !rootField.trim().isEmpty()) {
-      logger.info("Locating root element: " + rootField);
+      logger.fine("Locating root element: " + rootField);
       VisitContext<Element> context = Visit.breadthFirst(parserDiv, new Visitor<Element>() {
         @Override
         public void visit(VisitContextMutable<Element> context, Element element) {
@@ -130,7 +130,7 @@ public final class TemplateUtil {
       }
     }
 
-    logger.info(parserDiv.getInnerHTML().trim());
+    logger.fine(parserDiv.getInnerHTML().trim());
 
     return parserDiv.getFirstChildElement();
   }
@@ -138,7 +138,7 @@ public final class TemplateUtil {
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
     final Map<String, Element> childTemplateElements = new LinkedHashMap<String, Element>();
 
-    logger.info("Searching template for fields.");
+    logger.fine("Searching template for fields.");
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
@@ -146,7 +146,7 @@ public final class TemplateUtil {
       @Override
       public void visit(VisitContextMutable<Object> context, Element element) {
         if (element.hasAttribute("data-field")) {
-          logger.info("Located field: " + element.getAttribute("data-field"));
+          logger.fine("Located field: " + element.getAttribute("data-field"));
           childTemplateElements.put(element.getAttribute("data-field"), element);
         }
       }
