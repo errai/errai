@@ -293,24 +293,19 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          The property type of the changed property.
    */
   void updateWidgetsAndFireEvents() {
-    for (String boundProperty : bindings.keySet()) {
-      int dotPos = boundProperty.indexOf(".");
-      if (dotPos > 0) {
-        boundProperty = boundProperty.substring(0, dotPos);
-      }
-
-      Object knownValue = knownValues.get(boundProperty);
-      Object actualValue = proxy.get(boundProperty);
+    for (String property : propertyTypes.keySet()) {
+      Object knownValue = knownValues.get(property);
+      Object actualValue = proxy.get(property);
+      
       if ((knownValue == null && actualValue != null) ||
           (knownValue != null && !knownValue.equals(actualValue))) {
 
-        updateWidgetAndFireEvent(boundProperty, knownValue, actualValue);
-
-        DataBinder nestedBinder = binders.get(boundProperty);
+        DataBinder nestedBinder = binders.get(property);
         if (nestedBinder != null) {
           nestedBinder.setModel(actualValue, initialState);
-          proxy.set(boundProperty, nestedBinder.getModel());
+          proxy.set(property, nestedBinder.getModel());
         }
+        updateWidgetAndFireEvent(property, knownValue, actualValue);
       }
     }
   }
@@ -358,26 +353,23 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          synchronization should be carried out.
    */
   void syncState(final InitialState initialState) {
-    for (String property : bindings.keySet()) {
-      int dotPos = property.indexOf(".");
-      if (dotPos > 0) {
-        String bindableProperty = property.substring(0, dotPos);
-        binders.get(bindableProperty).setModel(proxy.get(bindableProperty), initialState);
+    for (String property : propertyTypes.keySet()) {
+      DataBinder nestedBinder = binders.get(property);
+      if (nestedBinder != null) {
+        nestedBinder.setModel(proxy.get(property), initialState);
       }
-      else {
-        syncState(bindings.get(property), property, initialState);
-      }
+      syncState(bindings.get(property), property, initialState);
     }
   }
 
   private void syncState(final Widget widget, final String property, final InitialState initialState) {
     if (initialState != null) {
-      Object value = null;
+      Object value = proxy.get(property);
       if (widget instanceof HasValue) {
-        value = initialState.getInitialValue(proxy.get(property), ((HasValue) widget).getValue());
+        value = initialState.getInitialValue(value, ((HasValue) widget).getValue());
       }
       else if (widget instanceof HasText) {
-        value = initialState.getInitialValue(proxy.get(property), ((HasText) widget).getText());
+        value = initialState.getInitialValue(value, ((HasText) widget).getText());
       }
 
       if (initialState == InitialState.FROM_MODEL) {
