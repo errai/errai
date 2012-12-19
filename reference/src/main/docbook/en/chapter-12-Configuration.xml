@@ -105,10 +105,36 @@
          </section>
          <section id="sid-5931354_ErraiApp.properties-ErraiMarshallingConfiguration">
             <title>Errai Marshalling Configuration</title>
+            <itemizedlist>
+               <listitem>
+                  <para>
+                     <emphasis role="strong">errai.marshalling.use_static_marshallers</emphasis>
+                when set to
+                <code>false</code>
+                , Errai will not use the precompiled server-side marshallers even if the generated
+                <code>ServerMarshallingFactoryImpl</code>
+                class is found on the classpath. This is useful when using Dev Mode in conjunction with an external server such as JBoss AS 7 or EAP 6.
+              </para>
+               </listitem>
+               <listitem>
+                  <para>
+                     <emphasis role="strong">errai.marshalling.force_static_marshallers</emphasis>
+                when set to
+                <code>true</code>
+                , Errai will not use dynamic marshallers. If the generated
+                <code>ServerMarshallingFactoryImpl</code>
+                cannot be loaded (possibly after an attempt to generate it on-the-fly), the Errai web app will fail to start.
+              </para>
+               </listitem>
+            </itemizedlist>
             <para>
-            Configuration properties related to marshalling are documented in
+            Errai also supports configuring portable types in
+            <code>ErraiApp.properties</code>
+            as an alternative to the
+            <code>@Portable</code>
+            annotation. See
             <link linkend="sid-5931328_Marshalling-ManualMapping">the Errai Marshalling section on Manual Mapping</link>
-            .
+            for details.
           </para>
          </section>
          <section id="sid-5931354_ErraiApp.properties-ErraiIoCConfiguration">
