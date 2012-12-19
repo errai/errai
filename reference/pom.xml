@@ -39,11 +39,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-          <groupId>net.sf.saxon</groupId>
-          <artifactId>Saxon-HE</artifactId>
-          <version>9.4.0.6</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -172,7 +167,31 @@
                 <groupId>org.jboss.maven.plugins</groupId>
                 <artifactId>maven-jdocbook-plugin</artifactId>
             </plugin>
+        </plugins>
 
+    </build>
+
+    <profiles>
+      <profile>
+        <id>updateDocs</id>
+
+        <!-- the download will fail unless jboss-credentials.properties contains jboss.username and jboss.password entries -->
+        <activation>
+          <file>
+            <exists>jboss-credentials.properties</exists>
+          </file>
+        </activation>
+
+        <dependencies>
+          <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <version>9.4.0.6</version>
+          </dependency>
+        </dependencies>
+
+        <build>
+          <plugins>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-antrun-plugin</artifactId>
@@ -188,7 +207,6 @@
                   <configuration>
                     <tasks>
                       <property file="jboss-credentials.properties" />
-                      <echo message="Note: the download will fail unless jboss-credentials.properties contains jboss.username and jboss.password entries"/>
                       <get
                         src="https://docs.jboss.org/author/rpc/jboss_docbook_tools/export.action?os_authType=basic&amp;spaceKey=ERRAI&amp;pageId=5833085&amp;singleBook=true"
                         dest="target/exported-reference-guide.zip"
@@ -226,9 +244,10 @@
                 </execution>
               </executions>
             </plugin>
-        </plugins>
-
-    </build>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
 
     <repositories>
 
