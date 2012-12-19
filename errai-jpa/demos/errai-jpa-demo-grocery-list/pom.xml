@@ -510,13 +510,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jboss.weld.servlet</groupId>
-            <artifactId>weld-servlet-core</artifactId>
-            <version>${weld.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
             <version>1</version>
