@@ -43,7 +43,7 @@ public class Customer {
       </example>
       <important>
          <para>
-          If you cannot annotate your classes with
+          If you cannot or prefer not to annotate your classes with
           <code>@Bindable</code>
           , you can alternatively specify bindable types in your ErraiApp.properties using a whitespace-separated list of fully qualified class names:
           <code>errai.ui.bindableTypes=org.example.Model1 org.example.Model2</code>

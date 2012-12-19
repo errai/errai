@@ -87,7 +87,7 @@ public class Application {
 
    @Inject
    private Instance&lt;ColorComponent&gt; instance;
- 
+
    @PostConstruct
    public void init() {
       for(String color: colors) {
@@ -211,10 +211,10 @@ public class LoginForm extends Composite {
 
           &lt;label for="username"&gt;Username&lt;/label&gt;
           &lt;input id="username" type="text" placeholder="Username"&gt;
-      
+
           &lt;label for="username"&gt;Password&lt;/label&gt;
           &lt;input id="password" type="password" placeholder="Password"&gt;
-                
+
           &lt;button&gt;Log in&lt;/button&gt;
           &lt;button&gt;Cancel&lt;/button&gt;
         &lt;/form&gt;
@@ -222,7 +222,7 @@ public class LoginForm extends Composite {
 
     &lt;hr&gt;
     &lt;footer data-field="theme-footer"&gt;
-        &lt;p&gt;© Company 2012&lt;/p&gt;
+        &lt;p&gt;(c) Company 2012&lt;/p&gt;
     &lt;/footer&gt;
 &lt;/body&gt;
 &lt;/html&gt;
@@ -493,7 +493,7 @@ public class ElementHandlerComponent extends Composite {
 
    @EventHandler("div-1")
    public void doSomethingC1(ClickEvent e) {
-     // do something 
+     // do something
    }
 }
 </programlisting>
@@ -646,7 +646,7 @@ public class Address {
 }
 
 @Bindable
-public class Customer {
+public class User {
   private String name;
   private Date dob;
   private Address address;
@@ -656,7 +656,7 @@ public class Customer {
 
 @Templated
 public class UserWidget {
-  @Inject @AutoBound DataBinder&lt;Customer&gt; customer;
+  @Inject @AutoBound DataBinder&lt;User&gt; user;
   @Inject @Bound TextBox name;
   @Inject @Bound("dob") DatePicker dateOfBirth;
   @Inject @Bound("address.city") TextBox city;
@@ -669,21 +669,80 @@ public class UserWidget {
           above, the
           <code>name</code>
           text box is bound to
-          <code>customer.name</code>
+          <code>user.name</code>
           using the default name matching; the
           <code>dateOfBirth</code>
           date picker is bound to
-          <code>customer.dob</code>
+          <code>user.dob</code>
           using a simple property name mapping; finally, the
           <code>city</code>
           text box is bound to
-          <code>customer.address.city</code>
+          <code>user.address.city</code>
           using a property chain. Note that the
           <code>Address</code>
           class is required to be
           <code>@Bindable</code>
           in this case.
         </para>
+      </section>
+      <section id="sid-51806600_ErraiUI-BindingofLists">
+         <title>Binding of Lists</title>
+         <para>
+          More often than not you will need to bind a list of model objects so that every object in the list is bound to a corresponding widget. This task can be simplified using Errai UI's
+          <code>ListWidget</code>
+          class. Here's an example of binding a list of users using the
+          <code>UserWidget</code>
+          class from the previous example.
+        </para>
+         <informalexample>
+            <programlisting language="java">
+@Templated
+public class UserList extends Composite {
+
+  @Inject @DataField ListWidget&lt;User, UserWidget&gt; userList;
+
+  @PostConstruct
+  public void init() {
+    List&lt;User&gt; users = .....
+    userList.setItems(users);
+  }
+}
+</programlisting>
+         </informalexample>
+         <para>
+          Calling
+          <code>setItems</code>
+          on the
+          <code>userList</code>
+          causes an instance of
+          <code>UserWidget</code>
+          to be displayed for each user in the list. The
+          <code>UserWidget</code>
+          is then bound to the corresponding user object. By default, the widgets are arranged in a vertical panel. However,
+          <code>ListWidget</code>
+          can be subclassed to provide alternative behaviour. In the following example, we use a horizontal panel to display the widgets.
+        </para>
+         <informalexample>
+            <programlisting language="java">
+public class UserList extends ListWidget&lt;User, UserWidget&gt; {
+
+  public UserList() {
+    super(new HorizontalPanel());
+  }
+
+  @PostConstruct
+  public void init() {
+    List&lt;User&gt; users = .....
+    setItems(users);
+  }
+
+  @Override
+  public Class&lt;UserWidget&gt; getItemWidgetType() {
+    return UserWidget.class;
+  }
+}
+</programlisting>
+         </informalexample>
       </section>
       <section id="sid-51806600_ErraiUI-DataConverters">
          <title>Data Converters</title>

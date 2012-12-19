@@ -756,12 +756,8 @@ public class ErraiJpaTest extends GWTTestCase {
   }
 
   public void testEnsurePropertyChangeEventIsFiredAfterIdGeneration() {
-    // make it
-    Album album = new Album();
-    TextBox box = new TextBox();
-
-    DataBinder<Album> binder = DataBinder.forModel(album);
-    album = binder.bind(box, "id").getModel();
+    DataBinder<Album> binder = DataBinder.forType(Album.class);
+    Album album = binder.getModel();
     assertNull(album.getId());
 
     final Album eventAlbum = new Album();
