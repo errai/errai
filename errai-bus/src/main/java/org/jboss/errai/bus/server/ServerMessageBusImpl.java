@@ -126,6 +126,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    */
   @Inject
   public ServerMessageBusImpl(final ErraiServiceConfigurator config) {
+
     this.webSocketServer = config
         .getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER);
 

@@ -165,8 +165,6 @@
                     <plugin>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <source>1.6</source>
-                            <target>1.6</target>
                             <testExcludes>
                                 <exclude>com/google/gwt/junit/JUnitShell.java</exclude>
                             </testExcludes>
@@ -200,13 +198,6 @@
                     </testResource>
                 </testResources>
                 <plugins>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>1.6</source>
-                            <target>1.6</target>
-                        </configuration>
-                    </plugin>
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>

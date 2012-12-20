@@ -21,10 +21,30 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration {
+  @Override
   public abstract String getName();
 
+  /**
+   * Returns the MetaClass representing this method's return type. The returned
+   * MetaClass may have had its generic information erased.
+   *
+   * @return
+   */
   public abstract MetaClass getReturnType();
 
+  /**
+   * Returns the MetaType representing the return type of the method. In the
+   * case of a plain, non-parameterized return type, this will return a
+   * {@link MetaClass} equivalent to the one returned by
+   * {@link MetaMethod#getReturnType()}. Other possible types could be
+   * {@link MetaWildcardType}, {@link MetaParameterizedType}, and
+   * {@link MetaTypeVariable}.
+   * <p>
+   * As of Errai 2.2, some implementations of this method are incomplete and
+   * will return null if they cannot make sense of the method's return type.
+   *
+   * @return
+   */
   public abstract MetaType getGenericReturnType();
 
   public abstract MetaType[] getGenericParameterTypes();
@@ -36,17 +56,19 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
   public abstract boolean isVarArgs();
 
   private String _hashString;
-  public String hashString() { 
+  public String hashString() {
   if (_hashString != null) return _hashString;
-    return _hashString = MetaMethod.class + ":" 
-            + getDeclaringClass().getFullyQualifiedName() + "." + getName() 
+    return _hashString = MetaMethod.class + ":"
+            + getDeclaringClass().getFullyQualifiedName() + "." + getName()
             + "(" + Arrays.toString(getParameters()) + ")";
   }
-  
+
+  @Override
   public int hashCode() {
     return hashString().hashCode() * 31;
   }
-  
+
+  @Override
   public boolean equals(Object o) {
     return o instanceof MetaMethod && ((MetaMethod)o).hashString().equals(hashString());
   }

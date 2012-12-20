@@ -33,7 +33,8 @@ import org.junit.runners.Suite;
   HibernateQueryTest.class,
   IdGeneratorTest.class,
   ErraiCascadeTest.class,
-  HibernateCascadeTest.class})
+  HibernateCascadeTest.class,
+  JsonUtilTest.class})
 public class AllJpaTests {
 
 }

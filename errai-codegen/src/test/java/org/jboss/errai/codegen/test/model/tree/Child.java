@@ -7,4 +7,7 @@ package org.jboss.errai.codegen.test.model.tree;
  */
 public class Child extends Parent {
 
+  @Override
+  public void interfaceMethodOverriddenMultipleTimes() {}
+
 }

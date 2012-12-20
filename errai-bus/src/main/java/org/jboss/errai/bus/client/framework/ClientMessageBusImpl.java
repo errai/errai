@@ -16,23 +16,22 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
-import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
-
-import java.util.*;
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import junit.framework.AssertionFailedError;
-
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.*;
-import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.util.BusTools;
@@ -43,24 +42,13 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.RequestTimeoutException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import java.util.*;
+
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -79,6 +67,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /* The encoded URL to be used for the bus */
   String OUT_SERVICE_ENTRY_POINT;
   String IN_SERVICE_ENTRY_POINT;
+
+  /* configuration used to set the endpoint */
+  private Configuration configuration = GWT.create(Configuration.class);
 
   /* ArrayList of all subscription listeners */
   private final List<SubscribeListener> onSubscribeHooks
@@ -237,7 +228,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           final RequestCallback callback) throws RequestException {
     final RequestBuilder builder = new RequestBuilder(
         method,
-        URL.encode(getApplicationRoot() + serviceEntryPoint) + "?z=" + getNextRequestNumber()
+        URL.encode(getApplicationLocation(serviceEntryPoint)) + "?z=" + getNextRequestNumber()
     );
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
@@ -1964,6 +1955,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       $wnd.erraiBusApplicationRoot = path;
     }
   }-*/;
+
+  protected String getApplicationLocation(String serviceEntryPoint) {
+    Configuration configuration = getConfiguration();
+    if (configuration instanceof Configuration.NotSpecified) {
+      return getApplicationRoot() + serviceEntryPoint;
+    }
+    return configuration.getRemoteLocation() + serviceEntryPoint;
+  }
+
+  protected Configuration getConfiguration() {
+    return configuration;
+  }
 
   /**
    * Returns the application root for the remote message bus endpoints.

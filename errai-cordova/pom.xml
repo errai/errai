@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ Copyright 2011 JBoss, by Red Hat, Inc ~ ~ Licensed under the Apache 
+   License, Version 2.0 (the "License"); ~ you may not use this file except 
+   in compliance with the License. ~ You may obtain a copy of the License at 
+   ~ ~ http://www.apache.org/licenses/LICENSE-2.0 ~ ~ Unless required by applicable 
+   law or agreed to in writing, software ~ distributed under the License is 
+   distributed on an "AS IS" BASIS, ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+   KIND, either express or implied. ~ See the License for the specific language 
+   governing permissions and ~ limitations under the License. -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>errai-parent</artifactId>
+    <groupId>org.jboss.errai</groupId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>errai-cordova</artifactId>
+  <name>Errai::Cordova</name>
+
+  <properties>
+    <junit.version>4.8.1</junit.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-bus</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- GWT -->
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.googlecode.gwtphonegap</groupId>
+      <artifactId>gwtphonegap</artifactId>
+      <version>1.8.1.0</version>
+    </dependency>
+
+    <!-- Test Deps -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+              <forkMode>always</forkMode>
+              <argLine>-Xmx1500m ${argLine}</argLine>
+
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+              </additionalClasspathElements>
+              <useSystemClassLoader>false</useSystemClassLoader>
+              <useManifestOnlyJar>true</useManifestOnlyJar>
+
+              <systemProperties>
+                <property>
+                  <name>java.io.tmpdir</name>
+                  <value>${project.build.directory}</value>
+                </property>
+                <property>
+                  <name>log4j.output.dir</name>
+                  <value>${project.build.directory}</value>
+                </property>
+
+                <!-- Do not accidently package server test marshallers
+             when building Errai -->
+                <property>
+                  <name>errai.marshalling.server.classOutput.enabled</name>
+                  <value>false</value>
+                </property>
+
+
+                <!-- Must disable long polling for automated tests
+              to succeed -->
+                <property>
+                  <name>org.jboss.errai.bus.do_long_poll</name>
+                  <value>false</value>
+                </property>
+
+                <!-- Disable caching of generated code -->
+                <property>
+                  <name>errai.devel.nocache</name>
+                  <value>true</value>
+                </property>
+              </systemProperties>
+
+              <includes>
+                <include>**/*Test.java</include>
+                <include>**/*Tests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

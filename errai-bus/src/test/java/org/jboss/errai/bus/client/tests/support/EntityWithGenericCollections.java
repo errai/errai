@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 import java.util.List;
+
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * @author Mike Brock
@@ -26,7 +26,9 @@ import java.util.List;
 @Portable
 public class EntityWithGenericCollections {
   private List<Float> listOfFloats;
-  
+
+  private List<? extends String> listWithLowerBoundWildcard;
+
   private Object o;
 
   public EntityWithGenericCollections() {
@@ -39,23 +41,61 @@ public class EntityWithGenericCollections {
   public void setListOfFloats(List<Float> listOfFloats) {
     this.listOfFloats = listOfFloats;
   }
-  
+
   public Object getObject() {
     return o;
   }
-  
+
   public void setObject(Object o ){
     this.o = o;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof EntityWithGenericCollections)) return false;
-
-    EntityWithGenericCollections that = (EntityWithGenericCollections) o;
-
-    return !(listOfFloats != null ? !listOfFloats.equals(that.listOfFloats) : that.listOfFloats != null);
-
+  public List<? extends String> getListWithLowerBoundWildcard() {
+    return listWithLowerBoundWildcard;
   }
+
+  public void setListWithLowerBoundWildcard(List<? extends String> list) {
+    this.listWithLowerBoundWildcard = list;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((listOfFloats == null) ? 0 : listOfFloats.hashCode());
+    result = prime * result + ((listWithLowerBoundWildcard == null) ? 0 : listWithLowerBoundWildcard.hashCode());
+    result = prime * result + ((o == null) ? 0 : o.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    EntityWithGenericCollections other = (EntityWithGenericCollections) obj;
+    if (listOfFloats == null) {
+      if (other.listOfFloats != null)
+        return false;
+    }
+    else if (!listOfFloats.equals(other.listOfFloats))
+      return false;
+    if (listWithLowerBoundWildcard == null) {
+      if (other.listWithLowerBoundWildcard != null)
+        return false;
+    }
+    else if (!listWithLowerBoundWildcard.equals(other.listWithLowerBoundWildcard))
+      return false;
+    if (o == null) {
+      if (other.o != null)
+        return false;
+    }
+    else if (!o.equals(other.o))
+      return false;
+    return true;
+  }
+
 }

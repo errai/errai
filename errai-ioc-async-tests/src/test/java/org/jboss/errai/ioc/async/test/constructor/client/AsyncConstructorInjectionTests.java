@@ -2,6 +2,7 @@ package org.jboss.errai.ioc.async.test.constructor.client;
 
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.async.test.constructor.client.res.ConstrInjBean;
+import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -16,7 +17,6 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
     super.gwtSetUp();
   }
 
-
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.async.test.constructor.AsyncConstrInjectTests";
@@ -24,7 +24,7 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
 
   public void testBeanConstructedViaConstructor() {
     delayTestFinish(10000);
-    new Timer() {
+    Container.runAfterInit(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(ConstrInjBean.class)
@@ -48,6 +48,6 @@ public class AsyncConstructorInjectionTests extends IOCClientTestCase {
               }
             });
       }
-    }.schedule(1);
+    });
   }
 }

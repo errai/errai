@@ -20,24 +20,23 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTMethod extends MetaMethod {
+
   private final JMethod method;
   private final Annotation[] annotations;
   private final TypeOracle oracle;
@@ -82,16 +81,18 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaType getGenericReturnType() {
-    final JTypeParameter type = method.getReturnType().isTypeParameter();
-    if (type != null) {
-      return new GWTTypeVariable(oracle, type);
+    try {
+      JType returnType = method.getReturnType();
+      return GWTUtil.fromType(oracle, returnType);
     }
-    final JParameterizedType parameterized = method.getReturnType().isParameterized();
-    if (parameterized != null) {
-      return new GWTParameterizedType(oracle, parameterized);
+    catch (Exception e) {
+      throw new RuntimeException(
+              "Failed to produce a generic MetaType for return type of method " +
+              method.getReadableDeclaration() + " in class " +
+              method.getEnclosingType().getQualifiedSourceName() +
+              " (underlying GWT return type is " +
+              method.getReturnType().getClass() + ")", e);
     }
-
-    return null;
   }
 
   @Override

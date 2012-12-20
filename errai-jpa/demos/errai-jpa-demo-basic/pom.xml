@@ -15,9 +15,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gwt.version>2.4.0</gwt.version>
     <weld.version>1.1.6.Final</weld.version>
-    <gwt.maven.version>2.4.0</gwt.maven.version>
     <mvel.version>2.1.Beta8</mvel.version>
     <jetty.version>6.1.25</jetty.version>
     <slf4j.version>1.6.1</slf4j.version>
@@ -187,7 +185,7 @@
 
     <dependency>
       <groupId>org.jboss.weld.servlet</groupId>
-      <artifactId>weld-servlet</artifactId>
+      <artifactId>weld-servlet-core</artifactId>
       <version>${weld.version}</version>
     </dependency>
 
@@ -202,6 +200,12 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
 
@@ -393,7 +397,7 @@
 
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet</artifactId>
+          <artifactId>weld-servlet-core</artifactId>
           <scope>provided</scope>
           <version>${weld.version}</version>
         </dependency>
@@ -510,7 +514,7 @@
 
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
-          <artifactId>weld-servlet</artifactId>
+          <artifactId>weld-servlet-core</artifactId>
           <version>${weld.version}</version>
           <scope>provided</scope>
         </dependency>
@@ -580,14 +584,6 @@
           </testResource>
         </testResources>
         <plugins>
-          <plugin>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              
-              <source>1.6</source>
-              <target>1.6</target>
-            </configuration>
-          </plugin>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <version>2.5</version>
@@ -857,14 +853,6 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.jboss.errai</groupId>
         <artifactId>jacoco-gwt-maven-plugin</artifactId>
         <version>0.5.4.201202141554</version>
@@ -907,6 +895,15 @@
               </includes>
             </fileset>
           </filesets>
+        </configuration>
+      </plugin>
+
+      <!-- We do not want to deploy the .war files for demos to Maven Central. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
         </configuration>
       </plugin>
     </plugins>

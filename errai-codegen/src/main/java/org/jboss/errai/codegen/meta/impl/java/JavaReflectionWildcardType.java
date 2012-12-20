@@ -16,15 +16,15 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaWildcardType;
-
 import java.lang.reflect.WildcardType;
+
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaWildcardType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class JavaReflectionWildcardType implements MetaWildcardType {
+public class JavaReflectionWildcardType extends AbstractMetaWildcardType {
   private final WildcardType wildcardType;
 
   public JavaReflectionWildcardType(final WildcardType wildcardType) {
@@ -39,11 +39,6 @@ public class JavaReflectionWildcardType implements MetaWildcardType {
   @Override
   public MetaType[] getUpperBounds() {
     return JavaReflectionUtil.fromTypeArray(wildcardType.getUpperBounds());
-  }
-  
-  @Override
-  public String toString() {
-    return getName();
   }
 
   @Override
