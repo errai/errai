@@ -138,7 +138,6 @@ public class GWTUtil {
    */
   public static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
                                                             final TreeLogger logger) {
-
     // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
     // changing classes. Therefore, do a NOOP after the first successful call.
     if (typeOraclePopulated && (context.equals(populatedFrom.get()) || EnvUtil.isProdMode())) {

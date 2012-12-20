@@ -24,6 +24,7 @@ import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
+import org.jboss.errai.marshalling.tests.res.EntityWithInheritedTypeVariable;
 import org.jboss.errai.marshalling.tests.res.EnumContainer;
 import org.jboss.errai.marshalling.tests.res.EnumContainerContainer;
 import org.jboss.errai.marshalling.tests.res.EnumTestA;
@@ -552,7 +553,7 @@ public class ServerMarshallingTest {
     Assert.assertEquals("Failed to marshall/demarshall enum container container",
             val.toString(), ServerMarshalling.fromJSON(json).toString());
   }
-  
+
   @Test
   // This tests guards against regressions of https://issues.jboss.org/browse/ERRAI-370
   public void testEnumWithAbstractMethod() {
@@ -560,7 +561,7 @@ public class ServerMarshallingTest {
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall enum with abstract method", val, ServerMarshalling.fromJSON(json));
   }
-  
+
   @Test
   public void testImmutableEnumContainer() {
     ImmutableEnumContainer val = new ImmutableEnumContainer(EnumTestA.FIRST);
@@ -568,10 +569,20 @@ public class ServerMarshallingTest {
     Assert.assertEquals("Failed to marshall/demarshall enum container",
             val, ServerMarshalling.fromJSON(json));
   }
-  
+
   @Test
   public void testImmutableEnumContainerWithNullRefs() {
     ImmutableEnumContainer val = new ImmutableEnumContainer(null);
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall immutable enum container with nulls",
+            val, ServerMarshalling.fromJSON(json));
+  }
+
+  @Test
+  public void testListWithInheritedTypeVariable() {
+    EntityWithInheritedTypeVariable<String> val = new EntityWithInheritedTypeVariable<String>();
+    val.setList(Arrays.asList("one", "gwt", null));
+    val.addToFieldAccessedList("this is an entry");
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall immutable enum container with nulls",
             val, ServerMarshalling.fromJSON(json));

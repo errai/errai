@@ -1,5 +1,11 @@
 package org.jboss.errai.codegen.util;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
@@ -15,12 +21,6 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -187,7 +187,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     final String getterName = getReflectionFieldGetterName(field);
 
     final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
-            classBuilder.privateMethod(field.getType(), PrivateAccessUtil.getPrivateFieldInjectorName(field));
+            classBuilder.privateMethod(field.getType().getErased(), PrivateAccessUtil.getPrivateFieldInjectorName(field));
 
     if (!field.isStatic()) {
       methodBuilder.parameters(
@@ -200,7 +200,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     methodBuilder.modifiers(modifiers)
             .body()
             ._(Stmt.try_()
-                    ._(Stmt.nestedCall(Cast.to(field.getType(), Stmt.loadVariable(cachedField)
+                    ._(Stmt.nestedCall(Cast.to(field.getType().getErased(), Stmt.loadVariable(cachedField)
                             .invoke(getterName, field.isStatic() ? null : Refs.get("instance")))).returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")

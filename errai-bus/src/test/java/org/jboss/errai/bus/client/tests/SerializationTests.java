@@ -20,11 +20,67 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.*;
+import org.jboss.errai.bus.client.tests.support.AImpl1;
+import org.jboss.errai.bus.client.tests.support.AImpl2;
+import org.jboss.errai.bus.client.tests.support.AbstractClassA;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.BuilderEntity;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithInheritedTypeVariable;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceArrayField;
+import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
+import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.EnumContainer;
+import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
+import org.jboss.errai.bus.client.tests.support.EnumWithAbstractMethod;
+import org.jboss.errai.bus.client.tests.support.EnumWithState;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntity;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImmutableArrayContainer;
+import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
+import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
+import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
+import org.jboss.errai.bus.client.tests.support.Person;
+import org.jboss.errai.bus.client.tests.support.Student;
+import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.SubInterface;
+import org.jboss.errai.bus.client.tests.support.SubInterfaceImpl;
+import org.jboss.errai.bus.client.tests.support.SubMoron;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TestingTick;
+import org.jboss.errai.bus.client.tests.support.TestingTickCache;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.User;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -2025,7 +2081,7 @@ public class SerializationTests extends AbstractErraiTest {
         ec.setEnumA1(TestEnumA.Jonathan);
         ec.setStatefulEnum1(EnumWithState.THING1);
         ec.setStatefulEnum2(EnumWithState.THING1);
-        
+
 
         // this is the object we'll be transmitting. it contains "ec"
         final EnumContainerContainer ecc = new EnumContainerContainer();
@@ -2210,4 +2266,28 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testCollectionWithInheritedTypeVariable() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithInheritedTypeVariable<String> entity = new EntityWithInheritedTypeVariable<String>();
+        entity.setList(new ArrayList<String>(Arrays.asList("one", "two", null)));
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithInheritedTypeVariable<String>>() {
+          @Override
+          public void callback(EntityWithInheritedTypeVariable<String> response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithInheritedTypeVariable(entity);
+      }
+    });
+  }
 }
