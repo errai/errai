@@ -16,9 +16,24 @@
 
 package org.jboss.errai.codegen.meta;
 
+
 /**
+ * Umbrella interface for {@link MetaClass}, {@link MetaMethod}, and
+ * {@link MetaConstructor}: the three places where a generic type variable can
+ * be declared.
+ *
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-public interface MetaGenericDeclaration extends MetaType {
+public interface MetaGenericDeclaration {
+
+  /**
+   * Returns the array of type variables declared on this generic declaration
+   * site, in the order they were declared in the source code.
+   *
+   * @return the type variables declared at this site. The returned array is
+   *         never null, but it will be empty if no type variable are declared
+   *         at this site.
+   */
   public MetaTypeVariable[] getTypeParameters();
 }

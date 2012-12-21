@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.test.model.ClassWithGenericCollections;
 import org.jboss.errai.codegen.test.model.ClassWithGenericMethods;
@@ -508,6 +509,27 @@ public abstract class AbstractMetaClassTest {
     assertEquals("Upper bound should be java.lang.String",
             Arrays.asList(getMetaClass(String.class)),
             Arrays.asList(typeParam.getUpperBounds()));
+  }
+
+  @Test
+  public void testFieldWithUnboundedTypeVarParam() throws Exception {
+    final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
+    MetaField field = metaClass.getDeclaredField("hasUnboundedTypeVarFromClass");
+    assertNotNull(field);
+
+    assertEquals("Collection", field.getType().getName());
+    assertEquals("java.util.Collection", field.getType().getFullyQualifiedName());
+    assertEquals("java.util.Collection<T>", field.getType().getParameterizedType().getName());
+    assertEquals("java.util.Collection<T>", field.getType().getFullyQualifiedNameWithTypeParms());
+    assertEquals("java.util.Collection", field.getType().getErased().getFullyQualifiedNameWithTypeParms());
+
+    assertEquals(1, field.getType().getParameterizedType().getTypeParameters().length);
+    MetaTypeVariable typeVar = (MetaTypeVariable) field.getType().getParameterizedType().getTypeParameters()[0];
+
+    assertEquals("T", typeVar.getName());
+    assertEquals("Should have no upper bound",
+            Arrays.asList(getMetaClass(Object.class)),
+            Arrays.asList(typeVar.getBounds()));
   }
 
   @Test

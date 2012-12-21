@@ -99,13 +99,8 @@ public class GWTUtil {
     if (t.isTypeParameter() != null) {
       return new GWTTypeVariable(oracle, t.isTypeParameter());
     }
-    else if (t.isGenericType() != null) {
-      if (t.isArray() != null) {
-        return new GWTGenericArrayType(oracle, t.isGenericType());
-      }
-      else {
-        return new GWTGenericDeclaration(oracle, t.isGenericType());
-      }
+    else if (t.isGenericType() != null && t.isArray() != null) {
+      return new GWTGenericArrayType(oracle, t.isGenericType());
     }
     else if (t.isParameterized() != null) {
       return new GWTParameterizedType(oracle, t.isParameterized());
@@ -117,7 +112,8 @@ public class GWTUtil {
       return GWTClass.newInstance(oracle, t.isClassOrInterface());
     }
     else {
-      return null;
+      throw new RuntimeException("Don't know how to make a MetaType from given JType " + t +
+              " (which is a " + (t == null ? null : t.getClass()) + ")");
     }
   }
 

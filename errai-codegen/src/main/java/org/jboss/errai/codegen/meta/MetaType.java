@@ -17,8 +17,19 @@
 package org.jboss.errai.codegen.meta;
 
 /**
+ * Umbrella type for anything that could be used as a type in Java code:
+ * MetaClass, MetaParameterizedType, MetaTypeVariable, MetaWildcardType, and
+ * MetaGenericArrayType all implement this interface.
+ *
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public interface MetaType {
+
+  /**
+   * Returns the name of this type as it was written in the original source code.
+   *
+   * @return The name of this type as it was written in the original source code.
+   */
   public String getName();
 }

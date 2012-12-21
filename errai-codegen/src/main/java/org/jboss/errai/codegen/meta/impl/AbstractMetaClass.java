@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
@@ -83,6 +84,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         }
         else if (typeParameter instanceof MetaWildcardType) {
           buf.append(((MetaWildcardType) typeParameter).toString());
+        }
+        else if (typeParameter instanceof MetaTypeVariable) {
+          buf.append(typeParameter.getName());
         }
         else {
           buf.append(((MetaClass) typeParameter).getFullyQualifiedName());
