@@ -1,18 +1,12 @@
 package org.jboss.errai.example.client.local;
 
-import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.*;
 import com.googlecode.gwtphonegap.client.PhoneGap;
 import com.googlecode.gwtphonegap.client.camera.PictureCallback;
@@ -23,12 +17,14 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.example.client.shared.Member;
 import org.jboss.errai.example.client.shared.MemberService;
 import org.jboss.errai.ioc.client.api.Caller;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -37,7 +33,7 @@ import java.util.Set;
  * at page load time. The layout of this composite widget is declared in the
  * companion file KitchenSinkClient.ui.xml, which you will find in the same
  * source directory.
- * <p>
+ * <p/>
  * Note on software architecture: the embedded event handlers in this class
  * communicate directly with the server. Although this makes a small project
  * such as this one easier to understand at a glance, it is not a great approach
@@ -49,103 +45,95 @@ import java.util.Set;
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@Templated("#main")
 public class KitchenSinkClient extends Composite {
-
-  private static final KitchenSinkTemplates TEMPLATES = GWT.create(KitchenSinkTemplates.class);
-
-  private static KitchenSinkClientUiBinder uiBinder = GWT.create(KitchenSinkClientUiBinder.class);
   private PhoneGap phoneGap;
 
-  interface KitchenSinkClientUiBinder extends
-      UiBinder<Widget, KitchenSinkClient> {
+  @Inject
+  @DataField
+  Label generalErrorLabel;
+
+  @Inject
+  private Caller<MemberService> memberService;
+
+  @Inject
+  @DataField
+  Button registerButton;
+
+  @Inject
+  @DataField
+  Label registerConfirmMessage;
+
+  @Inject
+  @DataField
+  TextBox nameBox;
+
+  @Inject
+  @DataField
+  Label nameValidationErr;
+
+  @Inject
+  @DataField
+  TextBox emailBox;
+
+  @Inject
+  @DataField
+  Label emailValidationErr;
+
+  @Inject
+  @DataField
+  TextBox phoneBox;
+
+  @Inject
+  @DataField
+  Label phoneValidationErr;
+
+  @Inject
+  @DataField
+  Label tableEmptyMessage;
+
+  @Inject
+  @DataField
+  MemberTable membersTable;
+
+  @Inject
+  @DataField
+  Button takePicture;
+
+  @Inject
+  @DataField
+  Image image;
+
+  public KitchenSinkClient() {
+    phoneGap = GWT.create(PhoneGap.class);
+    phoneGap.initializePhoneGap();
   }
 
-  private final Caller<MemberService> memberService;
-
-  /**
-   * The list of members. Add to this list via the
-   * {@link #addDisplayedMember(Member)} method to ensure the update is visible to
-   * the user.
-   */
-  private final List<Member> members = new ArrayList<Member>();
-
-  // The following fields are all injected during instance construction by GWT UiBinder
-
-  @UiField Label generalErrorLabel;
-
-  @UiField Button registerButton;
-  @UiField Label registerConfirmMessage;
-
-  @UiField TextBox nameBox;
-  @UiField Label nameValidationErr;
-
-  @UiField TextBox emailBox;
-  @UiField Label emailValidationErr;
-
-  @UiField TextBox phoneBox;
-  @UiField Label phoneValidationErr;
-
-  @UiField Label tableEmptyMessage;
-
-  @UiField(provided=true) CellTable<Member> membersTable = new CellTable<Member>();
-
-  @UiField Button takePicture;
-  @UiField Image image;
-
-  public KitchenSinkClient(Caller<MemberService> memberService, PhoneGap phoneGap) {
-    this.memberService = memberService;
-    this.phoneGap = phoneGap;
-    initWidget(uiBinder.createAndBindUi(this));
-
-    // This sets up the structure of the Registered Members CellTable
-
-    membersTable.addColumn(new Column<Member, String>(new TextCell()) {
+  @PostConstruct
+  public final void init() {
+    setGeneralErrorMessage("");
+    setTableStatusMessage("Fetching member list...");
+    registerButton.addClickHandler(new ClickHandler() {
       @Override
-      public String getValue(Member m) {
-        return m.getName();
-      }
-    }, "Name");
-
-    membersTable.addColumn(new Column<Member, String>(new TextCell()) {
-      @Override
-      public String getValue(Member m) {
-        return m.getEmail();
-      }
-    }, "Email");
-
-    membersTable.addColumn(new Column<Member, String>(new TextCell()) {
-      @Override
-      public String getValue(Member m) {
-        return m.getPhoneNumber();
-      }
-    }, "Phone Number");
-
-    membersTable.addColumn(new Column<Member, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(Member m) {
-        String url = "rest/members/" + m.getId();
-        return TEMPLATES.link(UriUtils.fromString(url), url);
-      }
-    }, "REST URL");
-
-    membersTable.addColumn(new Column<Member, String>(new ScaledImageCell()) {
-
-      @Override
-      public String getValue(Member member) {
-        return member.getPicture();
+      public void onClick(ClickEvent event) {
+        onRegisterButtonClick();
       }
     });
-}
+
+    takePicture.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        onTakePictureClick();
+      }
+    });
+  }
+
 
   /**
    * Validates the new member data and sends it to the server if validation
    * passes. Displays validation messages if validation fails.
-   *
-   * @param event The click event (ignored)
    */
-  @UiHandler("registerButton")
-  @SuppressWarnings("UnusedParameters")
-  void onRegisterButtonClick(ClickEvent event) {
+  void onRegisterButtonClick() {
     Member newMember = new Member();
     newMember.setName(nameBox.getText());
     newMember.setEmail(emailBox.getText());
@@ -155,8 +143,7 @@ public class KitchenSinkClient extends Composite {
     nameValidationErr.setText("");
     emailValidationErr.setText("");
     phoneValidationErr.setText("");
-    registerConfirmMessage.setText("");
-    registerConfirmMessage.setStyleName("errorMessage");
+    generalErrorLabel.setText("");
 
     Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     Set<ConstraintViolation<Member>> violations = validator.validate(newMember);
@@ -188,32 +175,31 @@ public class KitchenSinkClient extends Composite {
           }
         },
         new ErrorCallback() {
-            @Override
-            public boolean error(Message message, Throwable throwable) {
-              registerConfirmMessage.setText("Member registration failed: " + throwable.getMessage());
-              return false;
-            }
-          }).register(newMember);
+          @Override
+          public boolean error(Message message, Throwable throwable) {
+            setGeneralErrorMessage("Member registration failed: " + throwable.getMessage());
+            return false;
+          }
+        }
+    ).register(newMember);
   }
 
-  @UiHandler("takePicture")
-  @SuppressWarnings("UnusedParameters")
-  void onTakePictureClick(ClickEvent event) {
+  void onTakePictureClick() {
     PictureOptions options = new PictureOptions(25);
     options.setDestinationType(PictureOptions.DESTINATION_TYPE_DATA_URL);
     options.setSourceType(PictureOptions.PICTURE_SOURCE_TYPE_CAMERA);
 
     phoneGap.getCamera().getPicture(options, new PictureCallback() {
 
-        @Override
-        public void onSuccess(String data) {
-          image.setUrl(UriUtils.fromSafeConstant("data:image/jpeg;base64," + data));
-        }
+      @Override
+      public void onSuccess(String data) {
+        image.setUrl(UriUtils.fromSafeConstant("data:image/jpeg;base64," + data));
+      }
 
-        @Override
-        public void onFailure(String error) {
-            registerConfirmMessage.setText("Could not take member picture: " + error);
-        }
+      @Override
+      public void onFailure(String error) {
+        setGeneralErrorMessage("Could not take member picture: " + error);
+      }
     });
   }
 
@@ -221,14 +207,11 @@ public class KitchenSinkClient extends Composite {
    * Adds the given member into the local Registered Members CellTable. Does not
    * communicate with the server.
    *
-   * @param m
-   *          The member to add to the CellTable being displayed in the web
+   * @param m The member to add to the CellTable being displayed in the web
    *          page.
    */
   public void addDisplayedMember(Member m) {
-    members.add(m);
-    Collections.sort(members);
-    membersTable.setRowData(members);
+    membersTable.add(m);
     setTableStatusMessage("");
   }
 
@@ -238,9 +221,7 @@ public class KitchenSinkClient extends Composite {
    * @param members The list of members to display on the web page. Not null.
    */
   public void setDisplayedMembers(List<Member> members) {
-    this.members.clear();
-    this.members.addAll(members);
-    membersTable.setRowData(this.members);
+    membersTable.set(members);
     if (members.isEmpty()) {
       setTableStatusMessage("No members registered yet.");
     } else {
@@ -261,18 +242,4 @@ public class KitchenSinkClient extends Composite {
   public void setTableStatusMessage(String message) {
     tableEmptyMessage.setText(message);
   }
-
-  /**
-   * This is GWT's facility for building HTML snippets that are not vulnerable
-   * to XSS attacks.
-   * <p>
-   * See <a href=
-   * "http://code.google.com/webtoolkit/doc/latest/DevGuideSecuritySafeHtml.html#Creating_SafeHtml_Values"
-   * >the GWT user guide</a> for details.
-   */
-  public interface KitchenSinkTemplates extends SafeHtmlTemplates {
-    @Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
-    SafeHtml link(SafeUri url, String linkText);
-  }
-
 }

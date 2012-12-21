@@ -94,6 +94,18 @@
         <version>${version.org.jboss.errai}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-ui</artifactId>
+        <version>${version.org.jboss.errai}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-data-binding</artifactId>
+        <version>${version.org.jboss.errai}</version>
+      </dependency>
+
       <!-- Errai JAX-RS -->
       <dependency>
         <groupId>org.jboss.errai</groupId>
@@ -322,6 +334,16 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-ui</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-data-binding</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cordova</artifactId>
       <version>${version.org.jboss.errai}</version>
     </dependency>
@@ -412,7 +434,7 @@
             mode) to not start the default server (embedded jetty), but to download the 
             HTML host page from the configured runTarget. -->
           <noServer>true</noServer>
-          <runTarget>http://localhost:8080/errai-cordova-kitchensink/KitchenSink.html</runTarget>
+          <runTarget>http://localhost:8080/errai-cordova-kitchensink/</runTarget>
 
         </configuration>
         <executions>

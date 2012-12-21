@@ -16,7 +16,8 @@
     </replace-with>
 
     <inherits name="org.hibernate.validator.HibernateValidator"/>
-    <replace-with
+  <inherits name="org.jboss.errai.databinding.DataBinding"/>
+  <replace-with
             class="org.jboss.errai.example.client.local.KitchenSinkValidatorFactory">
         <when-type-is class="javax.validation.ValidatorFactory"/>
     </replace-with>

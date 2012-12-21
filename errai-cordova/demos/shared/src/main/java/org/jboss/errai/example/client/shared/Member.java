@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
  * This is the main business entity of the Kitchen Sink demo. It has lots of
@@ -34,6 +35,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  * </dl>
  */
 @Portable
+@Bindable
 @XmlRootElement
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "email"))

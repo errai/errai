@@ -1,8 +1,8 @@
 package org.jboss.errai.example.client.local;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.googlecode.gwtphonegap.client.PhoneGap;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
@@ -12,6 +12,9 @@ import org.jboss.errai.example.client.shared.New;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ioc.client.api.Caller;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ui.cordova.Container;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -26,7 +29,8 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
-public class KitchenSinkApp {
+@Templated("#template")
+public class KitchenSinkApp extends Composite {
 
   /**
    * This is the client-side proxy to the Errai service implemented by
@@ -40,6 +44,8 @@ public class KitchenSinkApp {
   @Inject
   private Caller<MemberService> memberService;
 
+  @Inject
+  @DataField("kitchensink")
   private KitchenSinkClient kitchenSinkUi;
 
   /**
@@ -55,13 +61,7 @@ public class KitchenSinkApp {
    */
   @AfterInitialization
   public void createUI() {
-    final PhoneGap phoneGap = GWT.create(PhoneGap.class);
-    phoneGap.initializePhoneGap();
-
-    kitchenSinkUi = new KitchenSinkClient(memberService, phoneGap);
-    kitchenSinkUi.setTableStatusMessage("Fetching member list...");
-
-    RootPanel.get("kitchensink").add(kitchenSinkUi);
+    RootPanel.get("rootPanel").add(this);
     fetchMemberList();
   }
 

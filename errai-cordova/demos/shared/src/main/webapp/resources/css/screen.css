@@ -1,63 +1,101 @@
-body {
-    margin: 0;
-    padding: 0;
-    background-color: #EAECEE;
-    font-family: Verdana, sans-serif;
-    font-size: 0.9em;
-}
-#container {
-    margin: 0 auto;
-    padding: 0 20px 10px 20px;
-    border: 1px solid #666666;
-    width: 865px; /* subtract 40px from banner width for padding */
-    background: #FFFFFF url(../gfx/banner.png) no-repeat;
-    padding-top: 110px;
-}
-#sidebar {
-    font-size: 0.9em;
-    width: 225px;
-    float: right;
-    border: 1px solid #666666;
-    background: #EAECEE;
-    padding: 0 15px 5px 15px;
-}
-#sidebar ul {
-    padding-left: 30px;
-}
-#footer {
-    clear: both;
-    text-align: center;
-    color: #666666;
-    font-size: 0.85em;
-    padding: 3em 0 0 0;
-}
-code {
-    font-size: 1.1em;
-}
-span.invalid {
-    padding-left: 3px;
-    color: red;
+.table {
+    display: table; /* Defines a Table */
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    border-bottom: 2px solid #dddddd;
+    color: #8d8d8d;
+    margin: 10px 0;
 }
 
-table.members, .bodyContent {
-	width: 600px !important;
+.table-head {
+    display: table-header-group; /* Defines a table header group */
 }
-table.members th {
-    padding-left: 2ex;
-    padding-right: 2ex;
+
+.table-head .column {
+    /* Column inside the table-head */
+    background: #333333;
+    color: #7d7d7d;
+    border-right: 1px solid #5d5d5d;
+    border-bottom: none;
 }
-.emptyTableMessage {
-	font-size: larger;
+
+.table-head .column:hover {
+    /* Column hover inside the table-head */
+    background: #222222;
 }
-.tableStatus {
-	font-style: italic;
-	text-align: center;
+
+.table-row {
+    display: table-row; /* Defines a table row */
 }
-.errorMessage {
-    color: red;
-    font-size: smaller;
+
+.table-row .column:nth-child(1) {
+    /* First column in a row */
+    border-left: 1px solid #eeeeee;
 }
-.successMessage {
-    color: green;
-    font-size: smaller;
+
+.table-row:last-child .column {
+    /* column in a last row */
+    border-bottom: none;
+}
+
+.column {
+    display: table-cell; /* Defines a table cell */
+    padding: 10px 20px;
+    border-bottom: 1px solid #eeeeee;
+    border-right: 1px solid #eeeeee;
+}
+
+.column:hover {
+    background: #f9f9f9;
+}
+
+@media (max-width: 767px) {
+    .table,
+    .table-row,
+    .column,
+    .column:before {
+        display: block; /* Converts a table, table row, table column and table column:before into a block element */
+    }
+
+    .table,
+    .table-row .column:last-child {
+        border-bottom: none;
+    }
+
+    .table-head {
+        position: absolute; /* Hides table head but not using display none */
+        top: -1000em;
+        left: -1000em;
+    }
+
+    .table-row {
+        border: 1px solid #eeeeee;
+        border-top: 2px solid #dddddd;
+        border-bottom: 2px solid #dddddd;
+        margin: 20px 0;
+    }
+
+    .table-row .column:nth-child(1) {
+        /* first column of the row */
+        border-left: none;
+    }
+
+    .table-row .column:last-child {
+        /* last column of the row */
+        border-right: none;
+    }
+
+    .table-row:last-child .column,
+    .column {
+        /* Column in the last row and column */
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    .column:before {
+        /* prints the value of data-label attribute before the column data */
+        font-weight: bold;
+        padding-right: 20px;
+        font-size: 12px;
+        content: " " attr(data-label) " //"; /* call the attribute value of data-label and adds a string // */
+    }
 }
