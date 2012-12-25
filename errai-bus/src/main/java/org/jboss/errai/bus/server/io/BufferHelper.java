@@ -18,50 +18,19 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.io.buffers.Buffer;
-import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
-import org.jboss.errai.marshalling.server.protocol.ErraiProtocolServer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import static org.jboss.errai.marshalling.server.protocol.ErraiProtocolServer.encodePayloadToByteArrayInputStream;
 
 /**
+ *
  * @author Mike Brock
  */
 public final class BufferHelper {
   private BufferHelper() {
-  }
-
-  public static class MultiMessageHandlerCallback implements BufferCallback {
-    int brackCount;
-    int seg;
-
-    @Override
-    public void before(final OutputStream outstream) throws IOException {
-      outstream.write('[');
-    }
-
-    @Override
-    public int each(int i, final OutputStream outstream) throws IOException {
-      if (i == '{' && ++brackCount == 1 && seg != 0) {
-        outstream.write(',');
-      }
-      else if (i == '}' && brackCount != 0 && --brackCount == 0) {
-        seg++;
-      }
-      return i;
-    }
-
-    @Override
-    public void after(final OutputStream outstream) throws IOException {
-      if (brackCount == 1) {
-        outstream.write('}');
-      }
-      outstream.write(']');
-    }
   }
 
   public static void encodeAndWrite(final Buffer buffer, final BufferColor bufferColor, final Message message)

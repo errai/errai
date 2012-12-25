@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 
@@ -70,7 +71,7 @@ public class TransmissionBufferTests extends TestCase {
       buffer.write(s.length(), bInputStream, colorA);
 
       final ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
-      buffer.read(bOutputStream, colorA);
+      buffer.read(new OutputStreamWriteAdapter(bOutputStream), colorA);
 
       assertEquals(s, new String(bOutputStream.toByteArray()));
     }
@@ -92,7 +93,7 @@ public class TransmissionBufferTests extends TestCase {
       final ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
 
       buffer.write(s.length(), bInputStream, color);
-      buffer.read(bOutputStream, color);
+      buffer.read(new OutputStreamWriteAdapter(bOutputStream), color);
 
       assertEquals(s, new String(bOutputStream.toByteArray()));
     }
@@ -126,15 +127,15 @@ public class TransmissionBufferTests extends TestCase {
 
 
       ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
-      buffer.read(bOutputStream, colorA);
+      buffer.read(new OutputStreamWriteAdapter(bOutputStream), colorA);
       assertEquals(stringA, new String(bOutputStream.toByteArray()));
 
       bOutputStream = new ByteArrayOutputStream();
-      buffer.read(bOutputStream, colorB);
+      buffer.read(new OutputStreamWriteAdapter(bOutputStream), colorB);
       assertEquals(stringB, new String(bOutputStream.toByteArray()));
 
       bOutputStream = new ByteArrayOutputStream();
-      buffer.read(bOutputStream, colorC);
+      buffer.read(new OutputStreamWriteAdapter(bOutputStream), colorC);
       assertEquals(stringC, new String(bOutputStream.toByteArray()));
 
     }
@@ -204,7 +205,7 @@ public class TransmissionBufferTests extends TestCase {
       final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       byteArrayOutputStream.reset();
       assertEquals(0, byteArrayOutputStream.size());
-      buffer.read(byteArrayOutputStream, colors.get(i));
+      buffer.read(new OutputStreamWriteAdapter(byteArrayOutputStream), colors.get(i));
       assertTrue("Expected >0 bytes; got " + byteArrayOutputStream.size(), byteArrayOutputStream.size() > 0);
 
       final String val = new String(byteArrayOutputStream.toByteArray());
@@ -318,7 +319,7 @@ public class TransmissionBufferTests extends TestCase {
         buffer.write(s.length(), bInputStream, colorA);
 
         bOutputStream.reset();
-        buffer.read(bOutputStream, colorA);
+        buffer.read(new OutputStreamWriteAdapter(bOutputStream), colorA);
         assertEquals(s, new String(bOutputStream.toByteArray()));
       }
     }
@@ -386,11 +387,12 @@ public class TransmissionBufferTests extends TestCase {
 
         public void read(final BufferColor color, final boolean wait) throws Exception {
           final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+          final OutputStreamWriteAdapter adapter = new OutputStreamWriteAdapter(byteArrayOutputStream);
           if (wait) {
-            buffer.readWait(TimeUnit.SECONDS, 1, byteArrayOutputStream, color);
+            buffer.readWait(TimeUnit.SECONDS, 1, adapter, color);
           }
           else {
-            buffer.read(byteArrayOutputStream, color);
+            buffer.read(adapter, color);
           }
 
           final String val = new String(byteArrayOutputStream.toByteArray()).trim();
@@ -592,11 +594,11 @@ public class TransmissionBufferTests extends TestCase {
       buffer.write(stringC.length(), bInputStream, globalColor);
 
       ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
-      buffer.read(bOutputStream, colorA);
+      buffer.read(new OutputStreamWriteAdapter(bOutputStream), colorA);
       assertEquals(stringA + stringC, new String(bOutputStream.toByteArray()));
 
       bOutputStream = new ByteArrayOutputStream();
-      buffer.read(bOutputStream, colorB);
+      buffer.read(new OutputStreamWriteAdapter(bOutputStream), colorB);
       assertEquals(stringB + stringC, new String(bOutputStream.toByteArray()));
 
     }
@@ -643,7 +645,7 @@ public class TransmissionBufferTests extends TestCase {
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
     // for (int i = 0; i < 5; i++) {
-    buffer.read(byteArrayOutputStream, red);
+    buffer.read(new OutputStreamWriteAdapter(byteArrayOutputStream), red);
     // }
 
     for (final byte b : byteArrayOutputStream.toByteArray()) {
@@ -676,8 +678,9 @@ public class TransmissionBufferTests extends TestCase {
           try {
             while (runstatus.run) {
               final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+              final OutputStreamWriteAdapter adapter = new OutputStreamWriteAdapter(byteArrayOutputStream);
 
-              buffer.readWait(TimeUnit.MILLISECONDS, 100, byteArrayOutputStream, red);
+              buffer.readWait(TimeUnit.MILLISECONDS, 100, adapter, red);
 
               final StringBuilder out = new StringBuilder();
 
@@ -738,7 +741,7 @@ public class TransmissionBufferTests extends TestCase {
 
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     try {
-      buffer.read(byteArrayOutputStream, BufferColor.getAllBuffersColor());
+      buffer.read(new OutputStreamWriteAdapter(byteArrayOutputStream), BufferColor.getAllBuffersColor());
     }
     catch (IOException e) {
       assertTrue(e.getMessage().contains("overflow"));

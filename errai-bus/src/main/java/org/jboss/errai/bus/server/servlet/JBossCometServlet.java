@@ -39,6 +39,7 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.jboss.servlet.http.HttpEvent;
 import org.jboss.servlet.http.HttpEventServlet;
 import org.mvel2.util.StringAppender;
@@ -315,7 +316,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 //          log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.setContentType("application/json");
-    queue.poll(false, httpServletResponse.getOutputStream());
+    queue.poll(false, new OutputStreamWriteAdapter(httpServletResponse.getOutputStream()));
 
     //   queue.heartBeat();
   }

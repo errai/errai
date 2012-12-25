@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 
@@ -87,7 +88,7 @@ public class BusTests extends TestCase {
 
     MessageQueueImpl messageQueue = new MessageQueueImpl(buffer, session);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    messageQueue.poll(false, outputStream);
+    messageQueue.poll(false, new OutputStreamWriteAdapter(outputStream));
 
     assertEquals("[]", new String(outputStream.toByteArray()));
   }

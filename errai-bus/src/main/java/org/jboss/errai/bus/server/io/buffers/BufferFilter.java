@@ -16,14 +16,19 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
+import org.jboss.errai.bus.server.io.ByteWriteAdapter;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
 /**
+ * A buffer filter is used for manipulating the data in the buffer as it is read from the buffer, before it's
+ * written into the transport layer.
+ *
  * @author Mike Brock
  */
-public interface BufferCallback {
-  public void before(OutputStream stream) throws IOException;
-  public int each (int i, OutputStream stream) throws IOException;
-  public void after(OutputStream stream) throws IOException;
+public interface BufferFilter {
+  public void before(ByteWriteAdapter writer) throws IOException;
+  public int each (int i, ByteWriteAdapter writer) throws IOException;
+  public void after(ByteWriteAdapter writer) throws IOException;
 }

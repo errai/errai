@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 /**
@@ -142,7 +143,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
       queue.heartBeat();
 
-      queue.poll(wait, outputStream);
+      queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
 
       outputStream.close();
     }

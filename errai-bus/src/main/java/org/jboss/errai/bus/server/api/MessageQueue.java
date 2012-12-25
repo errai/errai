@@ -16,24 +16,29 @@
 
 package org.jboss.errai.bus.server.api;
 
+import static java.lang.System.nanoTime;
+
 import io.netty.channel.Channel;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.io.ByteWriteAdapter;
+import org.jboss.errai.bus.server.io.MessageDeliveryHandler;
 import org.jboss.errai.bus.server.io.QueueChannel;
+import org.jboss.errai.bus.server.io.buffers.Buffer;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 
 public interface MessageQueue {
-  boolean poll(boolean wait, OutputStream stream) throws IOException;
+  boolean poll(boolean wait, ByteWriteAdapter stream) throws IOException;
 
   boolean offer(Message message) throws IOException;
-  
-  void setDirectSocketChannel(QueueChannel channel);
 
   /**
    * Get the current sequence number for the queue.
+   *
    * @return
    */
   long getCurrentBufferSequenceNumber();
@@ -47,14 +52,16 @@ public interface MessageQueue {
 
   QueueActivationCallback getActivationCallback();
 
-  QueueSession getSession();
+  void fireActivationCallback();
 
+  QueueSession getSession();
 
 
   void finishInit();
 
   /**
    * Returns true if queue is stale and can be discarded.
+   *
    * @return
    */
   boolean isStale();
@@ -62,18 +69,8 @@ public interface MessageQueue {
 
   boolean isPaged();
 
-  /**
-   * Returns true if the queue is a client for being downgraded out of the buffer because it's running
-   * too slow.
-   * @return
-   */
-  boolean isDowngradeCandidate();
+  void setPaged(boolean pageStatus);
 
-  /**
-   * Page any data waiting in this queue to disk. Returns true if queue has already been paged since last call.
-   *
-   */
-  boolean pageWaitingToDisk();
 
   boolean isInitialized();
 
@@ -92,4 +89,22 @@ public interface MessageQueue {
   void stopQueue();
 
   Object getActivationLock();
+
+  Object getPageLock();
+
+  MessageDeliveryHandler getDeliveryHandler();
+
+  void setDeliveryHandler(MessageDeliveryHandler handler);
+
+  void setDeliveryHandlerToDefault();
+
+  BufferColor getBufferColor();
+
+  Buffer getBuffer();
+
+  int incrementMessageCount();
+
+  void resetMessageCount();
+
+  long getLastTransmissionTime();
 }

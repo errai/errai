@@ -38,6 +38,8 @@ import io.netty.util.CharsetUtil;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
 import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.LocalContext;
@@ -169,7 +171,8 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
             activeChannels.put(ctx.getChannel(), session);
 
             // set the session queue into direct channel mode.
-            svc.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(new NettyQueueChannel(ctx.getChannel()));
+            final MessageQueue queueBySession = svc.getBus().getQueueBySession(sessionKey);
+            queueBySession.setDeliveryHandler(DirectDeliveryHandler.createFor(new NettyQueueChannel(ctx.getChannel())));
 
             // remove the web socket token so it cannot be re-used for authentication.
             localContext.removeAttribute(MessageParts.WebSocketToken.name());

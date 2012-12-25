@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
+import org.jboss.errai.bus.server.io.ByteWriteAdapter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -241,7 +243,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws IOException
    */
   @Override
-  public boolean read(final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
+  public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor) throws IOException {
 
     // obtain this color's read lock
     bufferColor.lock.lock();
@@ -273,7 +275,7 @@ public class TransmissionBuffer implements Buffer {
 
   /**
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
-   * with a provided {@link BufferCallback}.
+   * with a provided {@link BufferFilter}.
    *
    * @param outputStream the <tt>OutputStream</tt> to read into.
    * @param bufferColor  the buffer color
@@ -282,13 +284,13 @@ public class TransmissionBuffer implements Buffer {
    * @throws IOException
    */
   @Override
-  public boolean read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException {
+  public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor, final BufferFilter callback) throws IOException {
     return read(outputStream, bufferColor, callback, (int) headSequence % segments);
   }
 
   /**
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
-   * with a provided {@link BufferCallback}.
+   * with a provided {@link BufferFilter}.
    *
    * @param outputStream the <tt>OutputStream</tt> to read into.
    * @param bufferColor  the buffer color.
@@ -298,7 +300,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws IOException
    */
   @Override
-  public boolean read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback, final long sequence) throws IOException {
+  public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor, final BufferFilter callback, final long sequence) throws IOException {
     // attempt obtain this color's read lock
     if (bufferColor.lock.tryLock()) {
 
@@ -347,7 +349,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(final OutputStream outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
+  public boolean readWait(final ByteWriteAdapter outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
     bufferColor.lock.lockInterruptibly();
 
     try {
@@ -397,7 +399,7 @@ public class TransmissionBuffer implements Buffer {
    */
   @Override
   public boolean readWait(final TimeUnit unit, final long time,
-                          final OutputStream outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
+                          final ByteWriteAdapter outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
     final ReentrantLock lock = bufferColor.getLock();
     lock.lockInterruptibly();
 
@@ -448,7 +450,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException, InterruptedException {
+  public boolean readWait(final ByteWriteAdapter outputStream, final BufferColor bufferColor, final BufferFilter callback) throws IOException, InterruptedException {
     return readWait(TimeUnit.NANOSECONDS, -1, outputStream, bufferColor, callback);
   }
 
@@ -465,8 +467,8 @@ public class TransmissionBuffer implements Buffer {
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(final TimeUnit unit, final long time, final OutputStream outputStream, final BufferColor bufferColor,
-                          final BufferCallback callback) throws IOException, InterruptedException {
+  public boolean readWait(final TimeUnit unit, final long time, final ByteWriteAdapter outputStream, final BufferColor bufferColor,
+                          final BufferFilter callback) throws IOException, InterruptedException {
     final ReentrantLock lock = bufferColor.lock;
     lock.lockInterruptibly();
 
@@ -557,18 +559,18 @@ public class TransmissionBuffer implements Buffer {
    * Read in the next data chunk up to the specified {@param head} position, from the specified {@param sequence},
    * for the specifed {@param color} into the provided <tt>OutputStream</tt>.
    * <p/>
-   * This method accepts an optional {@link BufferCallback}. Null can be passed if no callback is needed.
+   * This method accepts an optional {@link BufferFilter}. Null can be passed if no callback is needed.
    *
    * @param head         the head position to seek to.
    * @param sequence     the sequence position to seek from
    * @param color        the data color for the buffer.
    * @param outputStream the <tt>OutputStream</tt> to read into.
-   * @param callback     an optional {@link BufferCallback}.
+   * @param callback     an optional {@link BufferFilter}.
    * @return returns the segment position after reading + 1.
    * @throws IOException thrown if data cannot be read from the buffer or written to the OutputStream.
    */
   private long readNextChunk(final long head, final long sequence, final BufferColor color,
-                             final OutputStream outputStream, final BufferCallback callback) throws IOException {
+                             final ByteWriteAdapter outputStream, final BufferFilter callback) throws IOException {
 
     final long sequenceToRead = getNextSegment(color, head, sequence);
     if (sequenceToRead != -1) {

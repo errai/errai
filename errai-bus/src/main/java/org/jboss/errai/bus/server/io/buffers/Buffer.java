@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
+import org.jboss.errai.bus.server.io.ByteWriteAdapter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,25 +31,25 @@ public interface Buffer {
 
   public void write(int writeSize, InputStream inputStream, BufferColor bufferColor) throws IOException;
 
-  public boolean read(OutputStream outputStream, BufferColor bufferColor) throws IOException;
+  public boolean read(ByteWriteAdapter outputStream, BufferColor bufferColor) throws IOException;
 
-  public boolean read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException;
+  public boolean read(ByteWriteAdapter outputStream, BufferColor bufferColor, BufferFilter callback) throws IOException;
 
-  public boolean read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence)
+  public boolean read(ByteWriteAdapter outputStream, BufferColor bufferColor, BufferFilter callback, long sequence)
           throws IOException;
   
 
-  public boolean readWait(OutputStream outputStream, BufferColor bufferColor)
+  public boolean readWait(ByteWriteAdapter outputStream, BufferColor bufferColor)
           throws IOException, InterruptedException;
 
-  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor)
+  public boolean readWait(TimeUnit unit, long time, ByteWriteAdapter outputStream, BufferColor bufferColor)
           throws IOException, InterruptedException;
 
-  public boolean readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback)
+  public boolean readWait(ByteWriteAdapter outputStream, BufferColor bufferColor, BufferFilter callback)
           throws IOException, InterruptedException;
 
-  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor,
-                          BufferCallback callback) throws IOException, InterruptedException;
+  public boolean readWait(TimeUnit unit, long time, ByteWriteAdapter outputStream, BufferColor bufferColor,
+                          BufferFilter callback) throws IOException, InterruptedException;
 
   public long getHeadSequence();
   

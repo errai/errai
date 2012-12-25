@@ -50,6 +50,7 @@ import org.jboss.errai.bus.server.api.QueueCloseEvent;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.BufferHelper;
+import org.jboss.errai.bus.server.io.PageUtil;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
@@ -426,10 +427,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 endSessions.add(q);
                 killed++;
               }
-              else if (q.isDowngradeCandidate()) {
-                if (!q.pageWaitingToDisk()) {
-                  paged++;
-                }
+
+              if (PageUtil.pageIfStraddling(q)) {
+                paged++;
               }
             }
 

@@ -31,6 +31,7 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 
 /**
  * An implementation of {@link AbstractErraiServlet} leveraging asynchronous support of Servlet 3.0.
@@ -60,7 +61,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
     response.setContentType("application/json");
     if (queue.messagesWaiting()) {
-      queue.poll(false, response.getOutputStream());
+      queue.poll(false, new OutputStreamWriteAdapter(response.getOutputStream()));
       return;
     }
 
@@ -121,6 +122,6 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     if (queue == null) return;
     queue.setActivationCallback(null);
     queue.heartBeat();
-    queue.poll(false, asyncContext.getResponse().getOutputStream());
+    queue.poll(false, new OutputStreamWriteAdapter(asyncContext.getResponse().getOutputStream()));
   }
 }

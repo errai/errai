@@ -25,7 +25,9 @@ import org.jboss.as.websockets.servlet.WebSocketServlet;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
 import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
@@ -72,29 +74,6 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     service.stopService();
   }
 
-  private static class SimpleEventChannelWrapped implements QueueChannel {
-    private final WebSocket socket;
-
-    public SimpleEventChannelWrapped(final WebSocket socket) {
-      this.socket = socket;
-    }
-
-    @Override
-    public boolean isConnected() {
-      return true;
-    }
-
-    @Override
-    public void write(final String data) throws IOException {
-      socket.writeFrame(TextFrame.from(data));
-    }
-
-    @Override
-    public String getId() {
-      return socket.getSocketID();
-    }
-  }
-
   @Override
   protected void onSocketOpened(final WebSocket socket) throws IOException {
   }
@@ -106,7 +85,8 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
     final LocalContext localSessionContext = LocalContext.get(session);
     final QueueSession cometSession = localSessionContext.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS);
-    service.getBus().getQueue(cometSession).setDirectSocketChannel(null);
+
+    service.getBus().getQueue(cometSession).setDeliveryHandlerToDefault();
   }
 
 
@@ -156,7 +136,9 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
                   WebSocketServerHandler.WEBSOCKET_ACTIVE.equals(localCometSession.getAttribute(String.class, WebSocketServerHandler.SESSION_ATTR_WS_STATUS))) {
 
             // set the session queue into direct channel mode.
-            service.getBus().getQueue(cometSession).setDirectSocketChannel(new SimpleEventChannelWrapped(socket));
+
+            final MessageQueue queue = service.getBus().getQueue(cometSession);
+            queue.setDeliveryHandler(DirectDeliveryHandler.createFor(new SimpleEventChannelWrapped(socket)));
 
             localSessionContext.setAttribute(WEBSOCKET_SESSION_ALIAS, cometSession);
             cometSession.removeAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS);
