@@ -19,8 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Mike Brock
  */
 public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, Pageable, Cleanable {
-
-
   private static final BufferDeliveryHandler singleton = new BufferDeliveryHandler();
 
   public static BufferDeliveryHandler getInstance() {
@@ -75,15 +73,8 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
   }
 
   @Override
-  public boolean deliverRaw(final MessageQueue queue, final String rawMessage) throws IOException {
-    queue.getBuffer().write(new ByteArrayInputStream(rawMessage.getBytes("UTF-8")), queue.getBufferColor());
-    return true;
-  }
-
-  @Override
   public void noop(final MessageQueue queue) throws IOException {
     BufferHelper.encodeAndWriteNoop(queue.getBuffer(), queue.getBufferColor());
-
   }
 
   @Override

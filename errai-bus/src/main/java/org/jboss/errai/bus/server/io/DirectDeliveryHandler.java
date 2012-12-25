@@ -41,11 +41,6 @@ public class DirectDeliveryHandler implements MessageDeliveryHandler, Wakeable, 
   }
 
   @Override
-  public boolean deliverRaw(MessageQueue queue, String rawMessage) throws IOException {
-    return false;
-  }
-
-  @Override
   public void onWake(MessageQueue queue) throws IOException {
     UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
     ByteWriteAdapter adapter = new OutputStreamWriteAdapter(outputStream);
