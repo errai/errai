@@ -69,6 +69,13 @@ public enum RoutingFlag {
     public int flag() {
       return 1 << 6;
     }
+  },
+
+  ClusterWait {
+    @Override
+    public int flag() {
+      return 1 << 7;
+    }
   };
   /**
    * Returns the integer representing the flag

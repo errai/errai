@@ -163,32 +163,37 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public synchronized MessageQueue getQueue(QueueSession session) {
-    return null;
+    return proxied.getQueue(session);
   }
 
   @Override
   public void closeQueue(String sessionId) {
+    proxied.closeQueue(sessionId);
   }
 
   @Override
   public void closeQueue(MessageQueue queue) {
+    proxied.closeQueue(queue);
   }
 
   @Override
   public void addRule(String subject, BooleanRoutingRule rule) {
+    proxied.addRule(subject, rule);
   }
 
   @Override
   public ExecutorService getScheduler() {
-    return null;
+    return proxied.getScheduler();
   }
 
   @Override
   public void addQueueClosedListener(QueueClosedListener listener) {
+    proxied.addQueueClosedListener(listener);
   }
 
   @Override
   public void configure(ErraiServiceConfigurator service) {
+    proxied.configure(service);
   }
 
   @Override
@@ -203,35 +208,42 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public synchronized boolean hasRemoteSubscriptions(String subject) {
-    return false;
+    return proxied.hasRemoteSubscriptions(subject);
   }
 
   @Override
   public boolean hasRemoteSubscription(String sessionId, String subject) {
-    return false;
+    return proxied.hasRemoteSubscription(sessionId, subject);
   }
 
   @Override
   public Map<QueueSession, MessageQueue> getMessageQueues() {
-    return null;
+    return proxied.getMessageQueues();
   }
 
   @Override
   public MessageQueue getQueueBySession(String id) {
-    return null;
+    return proxied.getQueueBySession(id);
   }
 
   @Override
   public QueueSession getSessionBySessionId(String id) {
-    return null;
+    return proxied.getSessionBySessionId(id);
   }
 
   @Override
   public void associateNewQueue(QueueSession oldSession, QueueSession newSession) {
+    proxied.associateNewQueue(oldSession, newSession);
   }
 
   @Override
   public void stop() {
+    proxied.stop();
+  }
+
+  @Override
+  public Message getSuspendedMessage(String messageId) {
+    return proxied.getSuspendedMessage(messageId);
   }
 
   @Override

@@ -605,6 +605,17 @@ public class TransmissionBufferTests extends TestCase {
     System.out.println(System.currentTimeMillis() - start);
   }
 
+  public void testBufferColorCyclesAroundCorrectly() throws IOException {
+    final int loopMax = Short.MAX_VALUE * 2 + 10;
+
+    final short allBufferColor = BufferColor.getAllBuffersColor().getColor();
+    for (int i = 0; i < loopMax; i++) {
+      if (BufferColor.getNewColor().getColor() == allBufferColor) {
+        fail("a new color should never be the all-buffers color!");
+      }
+    }
+  }
+
   public static String createGiantString() {
     final int size = TransmissionBuffer.DEFAULT_SEGMENT_SIZE * 3;
     final StringBuilder sb = new StringBuilder(size + 10);

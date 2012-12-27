@@ -43,6 +43,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * extent of the buffer, plus the delta from the beginning of the physical buffer in memory to the closest tail.
  * </p>
  *
+ * @see BufferColor
+ * @see BufferFilter
+ *
  * @author Mike Brock
  * @since Errai v2.0
  */
@@ -301,7 +304,7 @@ public class TransmissionBuffer implements Buffer {
    */
   @Override
   public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor, final BufferFilter callback, final long sequence) throws IOException {
-    // attempt obtain this color's read lock
+    // attempt to obtain this color's read lock
     if (bufferColor.lock.tryLock()) {
 
       try {
@@ -543,9 +546,7 @@ public class TransmissionBuffer implements Buffer {
    * @return returns an long representing the initial sequence to read from
    */
   private long getNextSegment(final BufferColor bufferColor, final long headSeq, long colorSeq) {
-    final int color = bufferColor.getColor();
-
-    for (; colorSeq < headSeq; colorSeq++) {
+    for (final int color = bufferColor.getColor(); colorSeq < headSeq; colorSeq++) {
       final short seg = segmentMap[((int) colorSeq % segments)];
 
       if (seg == color || seg == Short.MIN_VALUE) {
@@ -641,6 +642,9 @@ public class TransmissionBuffer implements Buffer {
     _buffer.put(position + 3, (byte) (size & 0xFF));
   }
 
+  /**
+   * Clear the current buffer.
+   */
   public void clear() {
     _buffer.clear();
   }

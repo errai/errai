@@ -49,6 +49,8 @@ import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueCloseEvent;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.bus.server.cluster.ClusteringProvider;
+import org.jboss.errai.bus.server.cluster.jms.HornetQClusteringProvider;
 import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.PageUtil;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
@@ -59,6 +61,7 @@ import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.LocalContext;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.Resources;
 import org.slf4j.Logger;
@@ -76,6 +79,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -102,6 +106,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
   private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
+  private final Map<String, ClusterWaitEntry> clusterWait = new ConcurrentHashMap<String, ClusterWaitEntry>();
 
   private final List<SubscribeListener> subscribeListeners = new ArrayList<SubscribeListener>();
   private final List<UnsubscribeListener> unsubscribeListeners = new ArrayList<UnsubscribeListener>();
@@ -118,6 +123,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final boolean webSocketServlet;
   private final boolean webSocketServer;
 
+  private final ClusteringProvider clusteringProvider;
+
   /**
    * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
    * functions, scheduler, and monitor
@@ -133,6 +140,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     final int webSocketPort;
     final String webSocketPath;
+
 
     webSocketServlet = ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.getBoolean(config);
 
@@ -184,6 +192,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       directAlloc = false;
     }
 
+
     TransmissionBuffer buffer;
     if (directAlloc) {
       try {
@@ -201,6 +210,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     transmissionbuffer = buffer;
+
 
     /**
      * Define the default ServerBus service used for intrabus communication.
@@ -369,13 +379,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               }
               break;
           }
-
         }
         catch (Throwable t) {
           t.printStackTrace();
         }
       }
     });
+
 
     addSubscribeListener(new SubscribeListener() {
       @Override
@@ -404,6 +414,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
       }
     });
+
 
     scheduler.scheduleAtFixedRate(new Runnable() {
       int runCount = 0;
@@ -455,6 +466,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           ref.discard();
         }
 
+        final Iterator<ClusterWaitEntry> entryIterator = clusterWait.values().iterator();
+
+        while (entryIterator.hasNext()) {
+          final ClusterWaitEntry entry = entryIterator.next();
+          if (entry.isStale()) {
+            entryIterator.remove();
+          }
+        }
+
         final BufferStatus stat = bufferStatus();
         if (stat.getFree() == 1.0f) {
           if (lastWasEmpty) {
@@ -475,7 +495,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         if (stat.getFree() < 0.50f) {
           log.debug("[bus] high load condition detected!");
         }
-
       }
 
       @Override
@@ -483,6 +502,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         return "Bus Housekeeper";
       }
     }, 8, 8, TimeUnit.SECONDS);
+
+    try {
+      clusteringProvider = HornetQClusteringProvider.create(this, ErraiConfigAttribs.CLUSTER_PORT.getInt(config));
+    }
+    catch (Exception e) {
+      throw new RuntimeException("could not initialize clustering provider", e);
+    }
   }
 
   private static class BufferStatus {
@@ -587,6 +613,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final String subject = message.getSubject();
 
     if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
+
       delayOrFail(message, new Runnable() {
         @Override
         public void run() {
@@ -653,10 +680,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     message.setResource(Resources.RetryAttempts.name(),
         message.getResource(Integer.class, Resources.RetryAttempts.name()) + 1);
     getScheduler().schedule(new Runnable() {
-
       @Override
       public void run() {
-
         deliveryTaskRunnable.run();
       }
     }, 250, TimeUnit.MILLISECONDS);
@@ -734,6 +759,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
   }
 
+  private final Random random = new Random(System.nanoTime());
+
   private void enqueueForDelivery(final MessageQueue queue, final Message message) {
     try {
       if (queue != null && isAnyoneListening(queue, message.getSubject())) {
@@ -744,6 +771,30 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           deferDelivery(queue, message);
         }
         else {
+          if (message.hasPart(MessageParts.SessionID)) {
+            final String sessionId = message.get(String.class, MessageParts.SessionID);
+            if (!sessionLookup.containsKey(sessionId)) {
+              final byte[] hashBytes = new byte[16];
+              random.nextBytes(hashBytes);
+
+              final String messageId = sessionId + message.getSubject() + SecureHashUtil.hashToHexString(hashBytes);
+
+              clusteringProvider.clusterTransmit(sessionId, message.getSubject(), messageId);
+              message.setFlag(RoutingFlag.ClusterWait);
+
+              clusterWait.put(messageId, new ClusterWaitEntry(System.currentTimeMillis(), message));
+
+              getScheduler().schedule(new Runnable() {
+                @Override
+                public void run() {
+                  clusterWait.remove(messageId);
+                }
+              }, 10, TimeUnit.SECONDS);
+
+              return;
+            }
+          }
+
           delayOrFail(message, new Runnable() {
             @Override
             public void run() {
@@ -998,6 +1049,28 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     fireSubscribeListeners(
         new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), isNew, subject)
     );
+  }
+
+  public static class ClusterWaitEntry {
+    final long time;
+    final Message message;
+
+    public ClusterWaitEntry(long time, Message message) {
+      this.time = time;
+      this.message = message;
+    }
+
+    public long getTime() {
+      return time;
+    }
+
+    public Message getMessage() {
+      return message;
+    }
+
+    public boolean isStale() {
+      return (System.currentTimeMillis() - time) > (10 * 1000);
+    }
   }
 
   public class RemoteMessageCallback implements MessageCallback {
@@ -1337,6 +1410,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     monitor.attach(this);
+  }
+
+  @Override
+  public Message getSuspendedMessage(final String messageId) {
+    ClusterWaitEntry entry = clusterWait.get(messageId);
+    if (entry != null) {
+      return entry.getMessage();
+    }
+    return null;
   }
 
   @Override

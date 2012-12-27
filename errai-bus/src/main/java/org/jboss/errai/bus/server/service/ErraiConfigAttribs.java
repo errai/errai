@@ -65,7 +65,9 @@ public enum ErraiConfigAttribs {
 //  MAXIMUM_TIME_BACKLOG("errai.bus.queue.maximum_time_backlog_secs", "10"),
 
 
-  AUTO_DISCOVER_SERVICES("errai.bus.auto_discover_services", "false");
+  AUTO_DISCOVER_SERVICES("errai.bus.auto_discover_services", "false"),
+
+  CLUSTER_PORT("errai.clustering.port", "6446");
 
   protected final String attributeName;
   protected final String defaultValue;

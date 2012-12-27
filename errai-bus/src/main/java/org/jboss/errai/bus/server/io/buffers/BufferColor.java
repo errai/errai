@@ -22,6 +22,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * Defines a buffer color, which is a unique identifier for data within a {@link TransmissionBuffer}.
+ *
  * @author Mike Brock
  */
 public class BufferColor {
@@ -57,10 +59,20 @@ public class BufferColor {
     return sequence;
   }
 
+  /**
+   * Wake up all threads which are monitoring this color.
+   */
   public void wake() {
     dataWaiting.signalAll();
   }
 
+  /**
+   * Return an instance to the lock for this color.
+   *
+   * @return an instance of the {@link ReentrantLock} associated with this color.
+   *         This lock is unique to, immutable and is guaranteed  to always be the
+   *         same lock for this color.
+   */
   public ReentrantLock getLock() {
     return lock;
   }
@@ -72,8 +84,9 @@ public class BufferColor {
   /**
    * Return a new unique BufferColor.
    *
-   * @see #getNewColorFromHead(TransmissionBuffer)
    * @return a new unique BufferColor
+   *
+   * @see #getNewColorFromHead(TransmissionBuffer)
    */
   public static BufferColor getNewColor() {
     short val = (short) bufferColorCounter.incrementAndGet();
@@ -90,7 +103,9 @@ public class BufferColor {
   /**
    * Returns a new unique BufferColor set to the head sequence of the specified TransmissionBuffer.
    *
-   * @param buffer the buffer instance to obtain the head sequence from.
+   * @param buffer
+   *     the buffer instance to obtain the head sequence from.
+   *
    * @return a new unique BufferColor instance.
    */
   public static BufferColor getNewColorFromHead(final TransmissionBuffer buffer) {

@@ -66,11 +66,16 @@ public class CommandMessage implements Message {
    *          reflected in this message, and additional parts given to this
    *          message will appear in the provided map.
    */
-  public static CommandMessage createWithParts(Map<String, Object> parts) {
+  public static CommandMessage createWithParts(final Map<String, Object> parts) {
     return new CommandMessage(Assert.notNull(parts));
   }
 
-  public static CommandMessage createWithParts(Map<String, Object> parts, int flags) {
+  @SuppressWarnings("unchecked")
+  public static CommandMessage createWithPartsFromRawMap(final Map parts) {
+    return new CommandMessage(parts);
+  }
+
+  public static CommandMessage createWithParts(final Map<String, Object> parts, final int flags) {
     return new CommandMessage(Assert.notNull(parts), flags);
   }
 
@@ -92,7 +97,7 @@ public class CommandMessage implements Message {
    *          will be reflected in this message, and additional parts given to
    *          this message will appear in the provided map.
    */
-  public static CommandMessage createWithParts(Map<String, Object> parts, Map<String, ResourceProvider<?>> provided) {
+  public static CommandMessage createWithParts(final Map<String, Object> parts, final Map<String, ResourceProvider<?>> provided) {
     return new CommandMessage(parts, provided);
   }
 
@@ -128,104 +133,104 @@ public class CommandMessage implements Message {
   }
 
   @Override
-  public Message toSubject(String subject) {
+  public Message toSubject(final String subject) {
     parts.put(MessageParts.ToSubject.name(), subject);
     return this;
   }
 
   @Override
-  public Message command(Enum<?> type) {
+  public Message command(final Enum<?> type) {
     parts.put(MessageParts.CommandType.name(), type.name());
     return this;
   }
 
   @Override
-  public Message command(String type) {
+  public Message command(final String type) {
     parts.put(MessageParts.CommandType.name(), type);
     return this;
   }
 
   @Override
-  public Message set(Enum<?> part, Object value) {
+  public Message set(final Enum<?> part, final Object value) {
     return set(part.name(), value);
   }
 
   @Override
-  public Message set(String part, Object value) {
+  public Message set(final String part, final Object value) {
     parts.put(part, value);
     return this;
   }
 
   @Override
-  public Message setProvidedPart(String part, ResourceProvider<?> provider) {
+  public Message setProvidedPart(final String part, final ResourceProvider<?> provider) {
     providedParts.put(part, provider);
     return this;
   }
 
   @Override
-  public Message setProvidedPart(Enum<?> part, ResourceProvider<?> provider) {
+  public Message setProvidedPart(final Enum<?> part, final ResourceProvider<?> provider) {
     return setProvidedPart(part.name(), provider);
   }
 
   @Override
-  public void remove(String part) {
+  public void remove(final String part) {
     parts.remove(part);
   }
 
   @Override
-  public void remove(Enum<?> part) {
+  public void remove(final Enum<?> part) {
     parts.remove(part.name());
   }
 
   @Override
-  public Message copy(Enum<?> part, Message message) {
+  public Message copy(final Enum<?> part, final Message message) {
     set(part, message.get(Object.class, part));
     return this;
   }
 
   @Override
-  public Message copy(String part, Message message) {
+  public Message copy(final String part, final Message message) {
     set(part, message.get(Object.class, part));
     return this;
   }
 
   @Override
-  public void setFlag(RoutingFlag flag) {
+  public void setFlag(final RoutingFlag flag) {
     routingFlags |= flag.flag();
   }
 
   @Override
-  public void unsetFlag(RoutingFlag flag) {
+  public void unsetFlag(final RoutingFlag flag) {
     if ((routingFlags & flag.flag()) != 0) {
       routingFlags ^= flag.flag();
     }
   }
 
   @Override
-  public boolean isFlagSet(RoutingFlag flag) {
+  public boolean isFlagSet(final RoutingFlag flag) {
     return (routingFlags & flag.flag()) != 0;
   }
 
   @Override
   @SuppressWarnings({ "UnusedDeclaration" })
-  public <T> T get(Class<T> type, Enum<?> part) {
+  public <T> T get(final Class<T> type, final Enum<?> part) {
     return get(type, part.toString());
   }
 
   @Override
   @SuppressWarnings({ "UnusedDeclaration" })
-  public <T> T get(Class<T> type, String part) {
-    Object value = parts.get(part);
+  public <T> T get(final Class<T> type, final String part) {
+    final Object value = parts.get(part);
     return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
   }
 
   @Override
-  public boolean hasPart(Enum<?> part) {
+  public boolean hasPart(final Enum<?> part) {
     return hasPart(part.name());
   }
 
   @Override
-  public boolean hasPart(String part) {
+  public boolean hasPart(final String part) {
     return parts.containsKey(part);
   }
 
@@ -240,26 +245,26 @@ public class CommandMessage implements Message {
   }
 
   @Override
-  public Message setParts(Map<String, Object> parts) {
+  public Message setParts(final Map<String, Object> parts) {
     parts.clear();
     parts.putAll(parts);
     return this;
   }
 
   @Override
-  public Message addAllParts(Map<String, Object> parts) {
+  public Message addAllParts(final Map<String, Object> parts) {
     this.parts.putAll(parts);
     return this;
   }
 
   @Override
-  public Message addAllProvidedParts(Map<String, ResourceProvider<?>> parts) {
+  public Message addAllProvidedParts(final Map<String, ResourceProvider<?>> parts) {
     this.providedParts.putAll(parts);
     return this;
   }
 
   @Override
-  public Message setResource(String key, Object res) {
+  public Message setResource(final String key, final Object res) {
     if (this.resources == null)
       this.resources = new HashMap<String, Object>();
     this.resources.put(key, res);
@@ -268,12 +273,12 @@ public class CommandMessage implements Message {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> T getResource(Class<T> type, String key) {
+  public <T> T getResource(final Class<T> type, final String key) {
     return (T) (this.resources == null ? null : this.resources.get(key));
   }
 
   @Override
-  public Message copyResource(String key, Message copyFrom) {
+  public Message copyResource(final String key, final Message copyFrom) {
     if (!copyFrom.hasResource(key)) {
       throw new RuntimeException("Cannot copy resource '" + key + "': no such resource.");
     }
@@ -282,7 +287,7 @@ public class CommandMessage implements Message {
   }
 
   @Override
-  public Message errorsCall(ErrorCallback callback) {
+  public Message errorsCall(final ErrorCallback callback) {
     if (this.errorsCall != null) {
       throw new RuntimeException("An ErrorCallback is already registered");
     }
@@ -296,12 +301,12 @@ public class CommandMessage implements Message {
   }
 
   @Override
-  public boolean hasResource(String key) {
+  public boolean hasResource(final String key) {
     return this.resources != null && this.resources.containsKey(key);
   }
 
   @Override
-  public void addResources(Map<String, ?> resources) {
+  public void addResources(final Map<String, ?> resources) {
     if (this.resources == null) {
       this.resources = new HashMap<String, Object>(resources);
     }
@@ -313,7 +318,7 @@ public class CommandMessage implements Message {
   @Override
   public void commit() {
     if (!providedParts.isEmpty()) {
-      for (Map.Entry<String, ResourceProvider<?>> entry : providedParts.entrySet())
+      for (final Map.Entry<String, ResourceProvider<?>> entry : providedParts.entrySet())
         set(entry.getKey(), entry.getValue().get());
     }
   }
@@ -324,12 +329,12 @@ public class CommandMessage implements Message {
   }
 
   @Override
-  public void sendNowWith(MessageBus viaThis) {
+  public void sendNowWith(final MessageBus viaThis) {
     viaThis.send(this);
   }
 
   @Override
-  public void sendNowWith(RequestDispatcher viaThis) {
+  public void sendNowWith(final RequestDispatcher viaThis) {
     try {
       viaThis.dispatch(this);
     }
@@ -344,9 +349,9 @@ public class CommandMessage implements Message {
   }
 
   private String buildDescription() {
-    StringBuilder append = new StringBuilder();
+    final StringBuilder append = new StringBuilder();
     boolean f = false;
-    for (Map.Entry<String, Object> entry : parts.entrySet()) {
+    for (final Map.Entry<String, Object> entry : parts.entrySet()) {
       if (f)
         append.append(", ");
       append.append(entry.getKey()).append("=").append(String.valueOf(entry.getValue()));

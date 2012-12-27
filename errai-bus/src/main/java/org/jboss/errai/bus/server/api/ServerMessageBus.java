@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
@@ -108,6 +109,8 @@ public interface ServerMessageBus extends MessageBus {
   public QueueSession getSessionBySessionId(String id);
 
   public void associateNewQueue(QueueSession oldSession, QueueSession newSession);
+
+  public Message getSuspendedMessage(String messageId);
 
   /**
    * Stop the MessateBus.

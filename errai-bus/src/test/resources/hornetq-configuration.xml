@@ -1,0 +1,28 @@
+<configuration xmlns="urn:hornetq"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="urn:hornetq /schema/hornetq-configuration.xsd">
+
+  <cluster-user>errai</cluster-user>
+  <cluster-password>errai</cluster-password>
+
+  <discovery-groups>
+    <discovery-group name="my-discovery-group">
+      <local-bind-address>127.0.0.1</local-bind-address>
+      <group-address>127.0.0.1</group-address>
+      <group-port>9876</group-port>
+      <refresh-timeout>10000</refresh-timeout>
+    </discovery-group>
+  </discovery-groups>
+
+
+  <broadcast-groups>
+    <broadcast-group name="my-broadcast-group">
+      <local-bind-address>127.0.0.1</local-bind-address>
+      <local-bind-port>5432</local-bind-port>
+      <group-address>127.0.0.1</group-address>
+      <group-port>9876</group-port>
+      <broadcast-period>2000</broadcast-period>
+      <connector-ref connector-name="netty-connector"/>
+    </broadcast-group>
+  </broadcast-groups>
+</configuration>

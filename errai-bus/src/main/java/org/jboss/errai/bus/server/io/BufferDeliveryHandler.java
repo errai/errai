@@ -16,10 +16,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * This implementation of {@link MessageDeliveryHandler} facilitates the buffering of all inbound message
+ * traffic to a singular ring-buffer.
+ *
  * @author Mike Brock
  */
 public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, Pageable, Cleanable {
   private static final BufferDeliveryHandler singleton = new BufferDeliveryHandler();
+
 
   public static BufferDeliveryHandler getInstance() {
     return singleton;
@@ -58,7 +62,7 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
       BufferHelper.encodeAndWrite(buffer, bufferColor, message);
 
       if (queue.incrementMessageCount() > 10
-          && !lastTransmissionWithin(queue, secs(10))) {
+          && !lastTransmissionWithin(queue, TimeUnit.SECONDS.toNanos(10))) {
         // disconnect this client
 
 
@@ -78,28 +82,25 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
   }
 
   @Override
-  public boolean pageOut(MessageQueue queue) {
+  public boolean pageOut(final MessageQueue queue) {
     return PageUtil.pageWaitingToDisk(queue);
   }
 
   @Override
-  public void discardPageData(MessageQueue queue) {
-    if (queue.isPaged()) {
-      File pageFile = new File(PageUtil.getPageFileName(queue));
-      if (pageFile.exists()) {
-        pageFile.delete();
-      }
-    }
+  public void discardPageData(final MessageQueue queue) {
+    PageUtil.discardPageData(queue);
   }
 
   @Override
-  public void clean(MessageQueue queue) {
+  public void clean(final MessageQueue queue) {
     discardPageData(queue);
   }
 
   @Override
-  public boolean copyFromBuffer(final boolean waitForData, final MessageQueue queue, final ByteWriteAdapter toAdapter)
-      throws IOException {
+  public boolean copyFromBuffer(final boolean waitForData,
+                                final MessageQueue queue,
+                                final ByteWriteAdapter toAdapter) throws IOException {
+
     if (queue.isPaged()) {
       synchronized (queue.getPageLock()) {
         if (queue.isPaged()) {
@@ -137,9 +138,5 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
 
   private static boolean lastTransmissionWithin(final MessageQueue queue, final long nanos) {
     return (nanoTime() - queue.getLastTransmissionTime()) < nanos;
-  }
-
-  private static long secs(final long secs) {
-    return secs * 1000000000;
   }
 }

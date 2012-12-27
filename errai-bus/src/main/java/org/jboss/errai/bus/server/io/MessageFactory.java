@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
+import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithPartsFromRawMap;
 
 /**
  * The <tt>MessageFactory</tt> facilitates the building of a command message using a JSON string
@@ -76,8 +77,8 @@ public class MessageFactory {
   public static Message createCommandMessage(QueueSession session, String json) {
     if (json.length() == 0) return null;
 
-    Message msg = createWithParts(MapMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
-            new DecodingSession(MappingContextSingleton.get())))
+    Message msg = createWithPartsFromRawMap(MapMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
+        new DecodingSession(MappingContextSingleton.get())))
             .setResource("Session", session)
             .setResource("SessionID", session.getSessionId());
 

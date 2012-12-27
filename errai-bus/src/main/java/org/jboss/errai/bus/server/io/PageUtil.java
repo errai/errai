@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Mike Brock
@@ -22,12 +23,12 @@ public final class PageUtil {
   }
 
   private static final long DOWNGRADE_THRESHOLD = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-      secs(1600) : secs(10);
+      TimeUnit.SECONDS.toNanos(1600) : TimeUnit.SECONDS.toNanos(10);
 
   private static final String tempDir = System.getProperty("java.io.tmpdir");
 
   public static String getPageFileName(final MessageQueue queue) {
-    return tempDir + "/queueCache/" + queue.getSession().getSessionId().replaceAll("\\-", "_");
+    return tempDir + "/queuecache/" + queue.getSession().getSessionId().replaceAll("\\-", "_");
   }
 
   public static File getOrCreatePageFile(final MessageQueue queue) throws IOException {
@@ -131,11 +132,5 @@ public final class PageUtil {
       }
     }
     return false;
-
-  }
-
-
-  private static long secs(long secs) {
-    return secs * 1000000000;
   }
 }
