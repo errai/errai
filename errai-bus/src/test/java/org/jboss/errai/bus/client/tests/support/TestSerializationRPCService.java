@@ -171,6 +171,8 @@ public interface TestSerializationRPCService {
   public EntityWithMapUsingAbstractKeyType testEntityWithMapUsingAbstractKeyType(EntityWithMapUsingAbstractKeyType e);
 
   public EntityWithMapUsingSubtypeValues testEntityWithMapUsingSubtypeValues(EntityWithMapUsingSubtypeValues e);
+  
+  public EntityWithTypesUsingNestedParameterizedTypes testEntityWithTypesUsingNestedParamTypes(EntityWithTypesUsingNestedParameterizedTypes e);
 
   public LinkedHashMap<String,Integer> testLinkedHashMap(LinkedHashMap<String,Integer> map);
 
