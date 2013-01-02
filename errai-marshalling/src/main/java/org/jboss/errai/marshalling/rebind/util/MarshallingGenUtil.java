@@ -150,7 +150,7 @@ public class MarshallingGenUtil {
   }
 
   /**
-   * Returns the map key value of the given metaclass under the following conditions:
+   * Returns the map value type of the given metaclass under the following conditions:
    * <ul>
    * <li>toType is a {@link Map}
    * <li>toType's value type is not a wildcard

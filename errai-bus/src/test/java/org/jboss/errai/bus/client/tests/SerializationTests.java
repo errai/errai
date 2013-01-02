@@ -20,67 +20,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.AImpl1;
-import org.jboss.errai.bus.client.tests.support.AImpl2;
-import org.jboss.errai.bus.client.tests.support.AbstractClassA;
-import org.jboss.errai.bus.client.tests.support.Boron;
-import org.jboss.errai.bus.client.tests.support.BuilderEntity;
-import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
-import org.jboss.errai.bus.client.tests.support.CustomList;
-import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
-import org.jboss.errai.bus.client.tests.support.EntityWithInheritedTypeVariable;
-import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceArrayField;
-import org.jboss.errai.bus.client.tests.support.EntityWithInterfaceField;
-import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractKeyType;
-import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingAbstractValueType;
-import org.jboss.errai.bus.client.tests.support.EntityWithMapUsingSubtypeValues;
-import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
-import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
-import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
-import org.jboss.errai.bus.client.tests.support.EnumContainer;
-import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
-import org.jboss.errai.bus.client.tests.support.EnumWithAbstractMethod;
-import org.jboss.errai.bus.client.tests.support.EnumWithState;
-import org.jboss.errai.bus.client.tests.support.FactoryEntity;
-import org.jboss.errai.bus.client.tests.support.GenericEntity;
-import org.jboss.errai.bus.client.tests.support.Group;
-import org.jboss.errai.bus.client.tests.support.ImmutableArrayContainer;
-import org.jboss.errai.bus.client.tests.support.ImmutableEnumContainer;
-import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
-import org.jboss.errai.bus.client.tests.support.Koron;
-import org.jboss.errai.bus.client.tests.support.NeverDeclareAnArrayOfThisType;
-import org.jboss.errai.bus.client.tests.support.Person;
-import org.jboss.errai.bus.client.tests.support.Student;
-import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
-import org.jboss.errai.bus.client.tests.support.SubInterface;
-import org.jboss.errai.bus.client.tests.support.SubInterfaceImpl;
-import org.jboss.errai.bus.client.tests.support.SubMoron;
-import org.jboss.errai.bus.client.tests.support.TestEnumA;
-import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
-import org.jboss.errai.bus.client.tests.support.TestingTick;
-import org.jboss.errai.bus.client.tests.support.TestingTickCache;
-import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
-import org.jboss.errai.bus.client.tests.support.User;
+import org.jboss.errai.bus.client.tests.support.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -2190,6 +2134,50 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testEntityWithMapUsingSubtypeValues(e);
+      }
+    });
+  }
+  
+  /**
+   * Serves as a regressions test for ERRAI-463, see also https://community.jboss.org/thread/215933
+   */
+  public void testEntityWithTypesUsingNestedParamTypes() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        
+        final EntityWithTypesUsingNestedParameterizedTypes e = new EntityWithTypesUsingNestedParameterizedTypes();
+        Map<String, String> deTranslations = new HashMap<String, String>();
+        deTranslations.put("hello", "Hallo");
+        deTranslations.put("one", "Eins");
+ 
+        Map<String, String> enTranslations = new HashMap<String, String>();
+        enTranslations.put("hello", "Hello");
+        enTranslations.put("one", "One");
+        
+        Map<String, Map<String, String>> allTranslations = new HashMap<String, Map<String,String>>();
+        allTranslations.put("de", deTranslations);
+        allTranslations.put("en", enTranslations);
+        e.setMap(allTranslations);
+        
+        List<List<Integer>> list = new ArrayList<List<Integer>>();
+        list.add(new ArrayList<Integer>(Arrays.asList(1, 2, null)));
+        list.add(new ArrayList<Integer>(Arrays.asList(3, 4, null)));
+        e.setList(list);
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithTypesUsingNestedParameterizedTypes>() {
+          @Override
+          public void callback(EntityWithTypesUsingNestedParameterizedTypes response) {
+            try {
+              assertEquals(e, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithTypesUsingNestedParamTypes(e);
       }
     });
   }
