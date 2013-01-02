@@ -85,7 +85,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * Makes the settings of this BindableProxyAgent match those of the given agent.
    * <p>
    * IMPORTANT NOTE: this is currently implemented by sharing the PropertyChangeHandler registrations with the given
-   * agent. You should discard all references to the "from" agent after calling this method.
+   * agent. You should discard all references to the "other" agent after calling this method.
    * 
    * @param other
    *          the agent to copy/share settings from. Should not be used after you pass it to this method.
