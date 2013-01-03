@@ -4,10 +4,11 @@
 <module>
 	<inherits name="com.google.gwt.http.HTTP" />
 	<inherits name="com.google.common.collect.Collect"/>
+    <inherits name="org.jboss.errai.ioc.Container"/>
+    <inherits name="org.jboss.errai.marshalling.ErraiMarshalling" />
     
     <generate-with class="org.jboss.errai.enterprise.rebind.JaxrsProxyLoaderGenerator">
-        <when-type-assignable
-                class="org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader"/>
+      <when-type-assignable class="org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader"/>
     </generate-with>
     
     <super-source path="compat"/>
