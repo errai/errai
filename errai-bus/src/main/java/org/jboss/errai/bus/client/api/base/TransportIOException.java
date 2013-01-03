@@ -25,7 +25,6 @@ import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
  * response code of 4xx or 5xx).
  */
 @SuppressWarnings("serial")
-@Portable
 public class TransportIOException extends Exception {
   private final int errorCode;
   private final String errorMessage;

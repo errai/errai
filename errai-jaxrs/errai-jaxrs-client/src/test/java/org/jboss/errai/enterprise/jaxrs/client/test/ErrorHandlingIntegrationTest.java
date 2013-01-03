@@ -16,9 +16,9 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.bus.client.api.RpcErrorCallback;
+import com.google.gwt.http.client.RequestPermissionException;
+import com.google.gwt.http.client.Response;
 import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
@@ -27,9 +27,6 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ErrorHandlingTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
 import org.junit.Test;
-
-import com.google.gwt.http.client.RequestPermissionException;
-import com.google.gwt.http.client.Response;
 
 /**
  * Testing error handling features.
@@ -52,9 +49,9 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new RpcErrorCallback() {
+        new ErrorCallback<Object>() {
           @Override
-          public boolean error(Message message, Throwable throwable) {
+          public boolean error(Object message, Throwable throwable) {
             try {
               throw throwable;
             }
@@ -84,9 +81,9 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new RpcErrorCallback() {
+        new ErrorCallback<Object>() {
           @Override
-          public boolean error(Message message, Throwable throwable) {
+          public boolean error(Object message, Throwable throwable) {
             try {
               throw throwable;
             }
@@ -112,9 +109,9 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new RpcErrorCallback() {
+        new ErrorCallback<Object>() {
           @Override
-          public boolean error(Message message, Throwable throwable) {
+          public boolean error(Object message, Throwable throwable) {
             try {
               throw throwable;
             }
@@ -156,9 +153,9 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new RpcErrorCallback() {
+        new ErrorCallback<Object>() {
           @Override
-          public boolean error(Message message, Throwable throwable) {
+          public boolean error(Object message, Throwable throwable) {
             try {
               throw throwable;
             }

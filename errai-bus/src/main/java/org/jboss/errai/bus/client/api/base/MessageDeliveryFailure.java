@@ -22,7 +22,6 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  * Thrown to indicate that delivery could not be completed for a message which was given to ErraiBus. 
  */
 @SuppressWarnings("serial")
-@Portable
 public class MessageDeliveryFailure extends RuntimeException {
   public MessageDeliveryFailure() {
   }
