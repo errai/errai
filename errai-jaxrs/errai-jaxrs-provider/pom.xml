@@ -5,7 +5,7 @@
   <parent>
     <artifactId>jaxrs-integration-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-<version>3.0-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
   </parent>
   <artifactId>errai-jaxrs-provider</artifactId>
 
@@ -17,7 +17,7 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-bus</artifactId>
+      <artifactId>errai-marshalling</artifactId>
     </dependency>
   </dependencies>
 </project>

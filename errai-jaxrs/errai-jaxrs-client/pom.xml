@@ -4,7 +4,7 @@
   <parent>
     <artifactId>jaxrs-integration-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
-<version>3.0-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -121,62 +121,62 @@
     <profile>
       <id>integration-test</id>
       <build>
-      <plugins>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <skipTests>false</skipTests>
-            <additionalClasspathElements>
-              <additionalClasspathElement>${basedir}/${testOutputDirectory}/</additionalClasspathElement>
-              <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
-              <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-            </additionalClasspathElements>
-            <useManifestOnlyJar>false</useManifestOnlyJar>
-            <forkMode>pertest</forkMode>
-            <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true</argLine>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+              <additionalClasspathElements>
+                <additionalClasspathElement>${basedir}/${testOutputDirectory}/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+              </additionalClasspathElements>
+              <useManifestOnlyJar>false</useManifestOnlyJar>
+              <forkMode>pertest</forkMode>
+              <argLine>${argLine} -Xmx1500m -Derrai.devel.nocache=true</argLine>
 
-            <systemProperties>
-              <!-- Must disable long polling for automated tests to succeed -->
-              <property>
-                <name>errai.hosted_mode_testing</name>
-                <value>true</value>
-              </property>
-              <!-- Do not accidently package server test marshallers when 
-                building Errai -->
-              <property>
-                <name>errai.marshalling.server.classOutput.enabled</name>
-                <value>false</value>
-              </property>
-            </systemProperties>
+              <systemProperties>
+                <!-- Must disable long polling for automated tests to succeed -->
+                <property>
+                  <name>errai.hosted_mode_testing</name>
+                  <value>true</value>
+                </property>
+                <!-- Do not accidently package server test marshallers when 
+                  building Errai -->
+                <property>
+                  <name>errai.marshalling.server.classOutput.enabled</name>
+                  <value>false</value>
+                </property>
+              </systemProperties>
 
-            <includes>
-              <include>**/AllJaxrsTests.java</include>
-            </includes>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>jacoco-gwt-maven-plugin</artifactId>
-          <version>0.5.4.201202141554</version>
-          <executions>
-            <execution>
-              <id>jacoco-initialize</id>
-              <phase>initialize</phase>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>jacoco-site</id>
-              <phase>site</phase>
-              <goals>
-                <goal>report</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </build>
+              <includes>
+                <include>**/AllJaxrsTests.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>jacoco-gwt-maven-plugin</artifactId>
+            <version>0.5.4.201202141554</version>
+            <executions>
+              <execution>
+                <id>jacoco-initialize</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>jacoco-site</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
