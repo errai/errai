@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
 
 import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JGenericType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
@@ -43,10 +42,6 @@ public class GWTField extends MetaField {
   @Override
   public MetaClass getType() {
     return GWTUtil.eraseOrReturn(oracle, field.getType());
-//    if (field.getType().isWildcard() != null) {
-//      return new GWTWildcardType(oracle, field.getType().isWildcard());
-//    }
-//    return GWTClass.newInstance(oracle, field.getType());
   }
 
   @Override
@@ -75,13 +70,8 @@ public class GWTField extends MetaField {
 
   @Override
   public MetaType getGenericType() {
-    final JGenericType genericType = field.getType().isGenericType();
-    if (genericType != null) {
-      return new GWTGenericDeclaration(oracle, genericType);
-    }
-    return null;
+    return GWTUtil.fromType(oracle, field.getType());
   }
-
 
   @Override
   public MetaClass getDeclaringClass() {

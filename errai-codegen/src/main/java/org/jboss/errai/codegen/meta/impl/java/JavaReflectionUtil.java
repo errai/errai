@@ -16,12 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -31,15 +26,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class JavaReflectionUtil {
 
-  public static MetaTypeVariable[] fromTypeVariable(final TypeVariable[] typeVariables) {
+  public static MetaTypeVariable[] fromTypeVariable(final TypeVariable<?>[] typeVariables) {
     final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>(typeVariables.length);
 
-    for (final TypeVariable typeVariable : typeVariables) {
+    for (final TypeVariable<?> typeVariable : typeVariables) {
       typeVariableList.add(new JavaReflectionTypeVariable(typeVariable));
     }
 
@@ -58,14 +58,23 @@ public class JavaReflectionUtil {
 
   private static final Map<Type, MetaType> FROM_TYPE_CLASS = new HashMap<Type, MetaType>();
 
+  /**
+   * Returns an instance of the appropriate MetaType that wraps the given Java
+   * Reflection Type.
+   *
+   * @param t
+   *          the Type to wrap in a MetaType
+   * @return A (possibly cached) MetaType instance that represents the same
+   *         thing as the given Type. Never null.
+   */
   public static MetaType fromType(final Type t) {
     MetaType type = FROM_TYPE_CLASS.get(t);
     if (type == null) {
       if (t instanceof Class) {
-        type = (MetaClassFactory.get((Class) t));
+        type = (MetaClassFactory.get((Class<?>) t));
       }
       else if (t instanceof TypeVariable) {
-        type = new JavaReflectionTypeVariable((TypeVariable) t);
+        type = new JavaReflectionTypeVariable((TypeVariable<?>) t);
       }
       else if (t instanceof ParameterizedType) {
         type = new JavaReflectionParameterizedType((ParameterizedType) t);
@@ -73,13 +82,13 @@ public class JavaReflectionUtil {
       else if (t instanceof GenericArrayType) {
         type = new JavaReflectionGenericArrayType((GenericArrayType) t);
       }
-      else if (t instanceof GenericDeclaration) {
-        type = new JavaReflectionGenericDeclaration((GenericDeclaration) t);
-      }
       else if (t instanceof WildcardType) {
         type = new JavaReflectionWildcardType((WildcardType) t);
       }
-
+      else {
+        throw new RuntimeException("Don't know how to make a MetaType from Type " + t +
+                " (which is a " + (t == null ? null : t.getClass()) + ")");
+      }
       FROM_TYPE_CLASS.put(t, type);
     }
 

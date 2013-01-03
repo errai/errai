@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Table layout</title>
+  <link href="../../../../../../../webapp/resources/css/screen.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="table" data-field="table">
+  <div class="table-head">
+    <div class="column">Name</div>
+    <div class="column">Email</div>
+    <div class="column">Phone number</div>
+    <div class="column">Rest Url</div>
+    <div class="column">Picture</div>
+  </div>
+  <div data-field="data" style="display: table-header-group">
+    <div class="table-row" data-field="row">
+      <div class="column" data-label="Name" data-field="name">John Doe</div>
+      <div class="column" data-label="Email" data-field="email">john.doe@mailinator.com</div>
+      <div class="column" data-label="Phone number" data-field="phoneNumber">+41 07 1234 1234</div>
+      <div class="column" data-label="Rest Url">
+        <a  href="#" data-field="restUrl">/rest/url</a>
+      </div>
+      <div class="column" data-label="Picture">
+        <img data-field="picture" src="#"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

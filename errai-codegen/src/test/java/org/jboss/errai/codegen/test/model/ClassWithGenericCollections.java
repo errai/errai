@@ -7,7 +7,8 @@ import java.util.Collection;
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-public class ClassWithGenericCollections {
+public class ClassWithGenericCollections<T> {
   Collection<String> hasStringParam;
   Collection<? extends String> hasWildcardExtendsStringParam;
+  Collection<T> hasUnboundedTypeVarFromClass;
 }

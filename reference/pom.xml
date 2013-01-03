@@ -142,6 +142,19 @@
                             <ignore></ignore>
                           </action>
                         </pluginExecution>
+                        <pluginExecution>
+                          <pluginExecutionFilter>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-antrun-plugin</artifactId>
+                            <versionRange>[1.3,)</versionRange>
+                            <goals>
+                              <goal>run</goal>
+                            </goals>
+                          </pluginExecutionFilter>
+                          <action>
+                            <ignore></ignore>
+                          </action>
+                        </pluginExecution>
                       </pluginExecutions>
                     </lifecycleMappingMetadata>
                   </configuration>
@@ -155,45 +168,87 @@
                 <groupId>org.jboss.maven.plugins</groupId>
                 <artifactId>maven-jdocbook-plugin</artifactId>
             </plugin>
-
-            <!-- Using the XML plugin to preprocess the documents and add language attribtues to programlistings. -->
-            <!-- This can be removed once ORG-1337 is resolved (language attributes should be included in docbook export in the first place!) -->
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>xml-maven-plugin</artifactId>
-              <version>1.0</version>
-              <executions>
-                <execution>
-                  <id>default-cli</id>
-                  <goals>
-                    <goal>transform</goal>
-                  </goals>
-                </execution>
-              </executions>
-              <configuration>
-                <transformationSets>
-                  <transformationSet>
-                    <dir>src/main/docbook</dir>
-                    <includes>
-                      <include>**/*.xml</include>
-                    </includes>
-                    <stylesheet>set-language-attributes.xsl</stylesheet>
-                  </transformationSet>
-                </transformationSets>
-              </configuration>
-              <dependencies>
-                <!-- The stylesheet uses regex matching, so we need an XSLT 2.0 compliant processor -->
-                <dependency>
-                  <groupId>net.sf.saxon</groupId>
-                  <artifactId>saxon</artifactId>
-                  <version>8.7</version>
-                </dependency>
-              </dependencies>
-            </plugin>
-
         </plugins>
 
     </build>
+
+    <profiles>
+      <profile>
+        <id>updateDocs</id>
+
+        <!-- the download will fail unless jboss-credentials.properties contains jboss.username and jboss.password entries -->
+        <activation>
+          <file>
+            <exists>jboss-credentials.properties</exists>
+          </file>
+        </activation>
+
+        <dependencies>
+          <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <version>9.4.0.6</version>
+          </dependency>
+        </dependencies>
+
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-antrun-plugin</artifactId>
+              <version>1.7</version>
+              <executions>
+                <execution>
+                  <id>fetch-docs</id>
+                  <phase>generate-resources</phase>
+                  <goals>
+                    <goal>run</goal>
+                  </goals>
+                  <inherited>false</inherited>
+                  <configuration>
+                    <tasks>
+                      <property file="jboss-credentials.properties" />
+                      <get
+                        src="https://docs.jboss.org/author/rpc/jboss_docbook_tools/export.action?os_authType=basic&amp;spaceKey=ERRAI&amp;pageId=5833085&amp;singleBook=true"
+                        dest="target/exported-reference-guide.zip"
+                        username="${jboss.username}"
+                        password="${jboss.password}" />
+                      <delete quiet="true">
+                        <fileset dir="target/exported-reference-guide" includes="**"/>
+                      </delete>
+                      <mkdir dir="target/exported-reference-guide"/>
+                      <unzip src="target/exported-reference-guide.zip"
+                        dest="target/exported-reference-guide"
+                        stripAbsolutePathSpec="true" />
+                      <delete>
+                        <fileset dir="src/main/docbook/en/" includes="chapter-*"/>
+                      </delete>
+                      
+                      <!-- Preprocess the documents and add language attribtues to programlistings. -->
+                      <!-- This can be removed once ORG-1337 is resolved (language attributes should be included in docbook export in the first place!) -->
+                      <xslt basedir="target/exported-reference-guide"
+                        includes="*.xml"
+                        destdir="src/main/docbook/en"
+                        extension=".xml"
+                        style="set-language-attributes.xsl"
+                        processor="trax">
+                        <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+                        <classpath refid="maven.compile.classpath"/>
+                        <xmlcatalog>
+                          <dtd 
+                            publicId="-//OASIS//DTD DocBook XML V4.5//EN"
+                            location="src/main/dtd/docbook/xml/4.5/docbookx.dtd"/>
+                        </xmlcatalog>
+                      </xslt>
+                    </tasks>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
 
     <repositories>
 

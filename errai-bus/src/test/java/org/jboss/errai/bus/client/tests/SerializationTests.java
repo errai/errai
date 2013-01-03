@@ -2025,7 +2025,7 @@ public class SerializationTests extends AbstractErraiTest {
         ec.setEnumA1(TestEnumA.Jonathan);
         ec.setStatefulEnum1(EnumWithState.THING1);
         ec.setStatefulEnum2(EnumWithState.THING1);
-        
+
 
         // this is the object we'll be transmitting. it contains "ec"
         final EnumContainerContainer ecc = new EnumContainerContainer();
@@ -2137,6 +2137,50 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  /**
+   * Serves as a regressions test for ERRAI-463, see also https://community.jboss.org/thread/215933
+   */
+  public void testEntityWithTypesUsingNestedParamTypes() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        
+        final EntityWithTypesUsingNestedParameterizedTypes e = new EntityWithTypesUsingNestedParameterizedTypes();
+        Map<String, String> deTranslations = new HashMap<String, String>();
+        deTranslations.put("hello", "Hallo");
+        deTranslations.put("one", "Eins");
+ 
+        Map<String, String> enTranslations = new HashMap<String, String>();
+        enTranslations.put("hello", "Hello");
+        enTranslations.put("one", "One");
+        
+        Map<String, Map<String, String>> allTranslations = new HashMap<String, Map<String,String>>();
+        allTranslations.put("de", deTranslations);
+        allTranslations.put("en", enTranslations);
+        e.setMap(allTranslations);
+        
+        List<List<Integer>> list = new ArrayList<List<Integer>>();
+        list.add(new ArrayList<Integer>(Arrays.asList(1, 2, null)));
+        list.add(new ArrayList<Integer>(Arrays.asList(3, 4, null)));
+        e.setList(list);
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithTypesUsingNestedParameterizedTypes>() {
+          @Override
+          public void callback(EntityWithTypesUsingNestedParameterizedTypes response) {
+            try {
+              assertEquals(e, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithTypesUsingNestedParamTypes(e);
+      }
+    });
+  }
 
   public void testEntityWithInterfaceField() {
     runAfterInit(new Runnable() {
@@ -2210,4 +2254,28 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testCollectionWithInheritedTypeVariable() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithInheritedTypeVariable<String> entity = new EntityWithInheritedTypeVariable<String>();
+        entity.setList(new ArrayList<String>(Arrays.asList("one", "two", null)));
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithInheritedTypeVariable<String>>() {
+          @Override
+          public void callback(EntityWithInheritedTypeVariable<String> response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithInheritedTypeVariable(entity);
+      }
+    });
+  }
 }

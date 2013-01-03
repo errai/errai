@@ -231,13 +231,13 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     List<?> list = (List<?>) result.get("key4");
     assertNotNull("key4 should not be null", list);
-    assertEquals("Wrong list size", list.size(), 3);
+    assertEquals("Wrong list size", 3, list.size());
     assertFalse((Boolean) list.get(0));
     assertNull(list.get(1));
     assertTrue((Boolean) list.get(2));
 
     Map<?, ?> map = (Map<?, ?>) result.get("key5");
-    assertEquals("Wrong map size", map.size(), 1);
+    assertEquals("Wrong map size", 1, map.size());
     assertNotNull("key5 should not be null", map);
     assertEquals("mapValue", map.get("mapKey"));
   }

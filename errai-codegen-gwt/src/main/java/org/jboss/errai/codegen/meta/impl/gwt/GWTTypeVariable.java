@@ -16,13 +16,11 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
-import org.jboss.errai.codegen.meta.MetaGenericDeclaration;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -42,17 +40,8 @@ public class GWTTypeVariable implements MetaTypeVariable {
   }
 
   @Override
-  public MetaGenericDeclaration getGenericDeclaration() {
-    if (typeParameter.isGenericType() != null) {
-      return new GWTGenericDeclaration(oracle, typeParameter.isGenericType());
-    }
-    return null;
-  }
-
-  @Override
   public String getName() {
     return typeParameter.getName();
   }
-
 
 }

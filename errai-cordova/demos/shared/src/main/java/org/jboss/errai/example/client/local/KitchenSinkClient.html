@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Errai KitchenSink</title>
+  <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+  <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
+</head>
+<body>
+<div data-field="main">
+
+  <h1>Welcome to JBoss AS 7!</h1>
+
+  <p>You have successfully deployed the Errai Kitchen Sink Java EE 6 web application
+    on JBoss AS 7.</p>
+
+  <h2>Register (Bean Validation example)</h2>
+
+  <p>Enforces annotation-based constraints defined on the
+    model class.</p>
+
+
+  <div>
+
+    <div class="alert alert-error">
+      <div data-field="generalErrorLabel">error</div>
+    </div>
+
+
+    <form class="form-horizontal">
+      <fieldset>
+        <legend>Member Registration</legend>
+        <div class="control-group">
+          <label class="control-label" for="inputName">Name</label>
+
+          <div class="controls">
+            <input type="text" id="inputName" data-field="nameBox" placeholder="Member name">
+            <span class="help-inline" data-field="nameValidationErr"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="inputEmail">Email</label>
+
+          <div class="controls">
+            <input type="text" id="inputEmail" data-field="emailBox" placeholder="your.name@company.com">
+            <span class="help-inline" data-field="emailValidationErr"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="inputPhone">Phone number</label>
+
+          <div class="controls">
+            <input type="text" id="inputPhone" data-field="phoneBox" placeholder="+41 7 123">
+            <span class="help-inline" data-field="phoneValidationErr"></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Picture</label>
+
+          <div class="controls">
+            <button type="button" class="btn" data-field="takePicture">Take picture</button>
+            <img data-field="image" src="#" class="img-polaroid"/>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="button" class="btn btn-primary" data-field="registerButton">Register</button>
+            <label data-field="registerConfirmMessage"></label>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+    <label data-field="tableEmptyMessage"></label>
+
+    <div data-field="membersTable">
+
+    </div>
+
+    <p>REST URL for all members: <a target="_blank" href="rest/members">rest/members</a></p>
+
+    <p>Note: to see Errai broadcasting push notifications, open this page in another browser (a completely
+      different browser, not just a new window in the same browser). Every member you register will
+      appear in all browsers simultaneously.</p>
+
+  </div>
+</div>
+</body>
+</html>

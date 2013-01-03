@@ -1,7 +1,23 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
 <head>
-    <!-- forward to the GWT  Application -->
-    <meta http-equiv="refresh" content="0;url=KitchenSink.html">
+    <title>Errai KitchenSink</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="resources/css/screen.css">
+
+    <script type="text/javascript">
+        if (navigator.userAgent.indexOf("Apple") >= 0) {
+            document.write('<script src="resources/js/cordova-ios-2.2.0.js"><\/script>');
+        } else {
+            document.write('<script src="resources/js/cordova-android-2.2.0.js"><\/script>');
+        }
+    </script>
+    <script type="text/javascript" src="KitchenSink/KitchenSink.nocache.js"></script>
 </head>
+<body>
+
+<div id="rootPanel"></div>
+</body>
 </html>

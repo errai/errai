@@ -100,7 +100,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
   private static final Logger logger = LoggerFactory.getLogger(DecoratorTemplated.class);
 
-
   public DecoratorTemplated(Class<Templated> decoratesWith) {
     super(decoratesWith);
   }
@@ -327,7 +326,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             throw new GenerationException(
                 "The type " + declaringClass.getFullyQualifiedName() + " looks like a client-side" +
                     " @Templated class, but it is not known to GWT. This probably means that " +
-                    declaringClass.getName() + " or one of its supertypes contains non-translatable code.", e);
+                    declaringClass.getName() + " or one of its supertypes contains non-translatable code." +
+                    " Run the GWT compiler with logLevel=DEBUG to pinpoint the problem.", e);
           }
           throw e;
         }

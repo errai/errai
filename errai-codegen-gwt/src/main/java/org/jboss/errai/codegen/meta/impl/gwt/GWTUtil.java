@@ -99,13 +99,10 @@ public class GWTUtil {
     if (t.isTypeParameter() != null) {
       return new GWTTypeVariable(oracle, t.isTypeParameter());
     }
-    else if (t.isGenericType() != null) {
-      if (t.isArray() != null) {
-        return new GWTGenericArrayType(oracle, t.isGenericType());
-      }
-      else {
-        return new GWTGenericDeclaration(oracle, t.isGenericType());
-      }
+    else if (t.isArray() != null
+            && (t.isArray().getComponentType().isTypeParameter() != null
+               || t.isArray().getComponentType().isWildcard() != null)) {
+      return new GWTGenericArrayType(oracle, t.isArray());
     }
     else if (t.isParameterized() != null) {
       return new GWTParameterizedType(oracle, t.isParameterized());
@@ -113,11 +110,16 @@ public class GWTUtil {
     else if (t.isWildcard() != null) {
       return new GWTWildcardType(oracle, t.isWildcard());
     }
-    else if (t.isClassOrInterface() != null) {
-      return GWTClass.newInstance(oracle, t.isClassOrInterface());
+    else if (t.isClassOrInterface() != null
+            || t.isEnum() != null
+            || t.isPrimitive() != null
+            || t.isRawType() != null
+            || t.isArray() != null) {
+      return GWTClass.newInstance(oracle, t);
     }
     else {
-      return null;
+      throw new RuntimeException("Don't know how to make a MetaType from given JType " + t +
+              " (which is a " + (t == null ? null : t.getClass()) + ")");
     }
   }
 
@@ -138,7 +140,6 @@ public class GWTUtil {
    */
   public static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
                                                             final TreeLogger logger) {
-
     // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
     // changing classes. Therefore, do a NOOP after the first successful call.
     if (typeOraclePopulated && (context.equals(populatedFrom.get()) || EnvUtil.isProdMode())) {

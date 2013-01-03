@@ -18,9 +18,22 @@ package org.jboss.errai.codegen.meta;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public interface MetaTypeVariable extends MetaType {
+
+  /**
+   * Returns an array of the upper bounds on this type variable. For each entry
+   * in the array, if the bound can be resolved to a type, it will be resolved
+   * (the array entry will be a {@link MetaClass} or a
+   * {@link MetaParameterizedType}); otherwise (the type variable is
+   * unresolvable) it will be a type variable or a parameterized type with an
+   * unresolved type variable itself.
+   */
   public MetaType[] getBounds();
-  public MetaGenericDeclaration getGenericDeclaration();
-  
+
+  // note: Java's TypeVariable interface has a getGenericDeclaration() method that returns the
+  // class, method, or constructor where the type variable was declared. Unfortunately, this
+  // information is not available from GWT's type system.
+
 }

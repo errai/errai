@@ -16,14 +16,14 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.Collection;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.EncDecUtil;
-
-import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -76,6 +76,8 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
           type = ctx.determineTypeFor(null, elem);
         }
 
+        // the assumed element type can only be used once since they it is not set for nested collections.
+        ctx.setAssumedElementType(null);
         collection.add(ctx.getMarshallerInstance(type).demarshall(elem, ctx));
       }
       else {

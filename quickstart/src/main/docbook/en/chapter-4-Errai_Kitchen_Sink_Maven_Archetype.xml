@@ -18,7 +18,7 @@
 mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=jboss-errai-kitchensink-archetype \
--DarchetypeVersion=2.2.0.CR1 \
+-DarchetypeVersion=2.2.0.CR2 \
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/
 </programlisting>
     </informalexample>
@@ -64,8 +64,8 @@ mvn gwt:debug (launch hosted with debug settings)
     <note>
       <title>Importing the project into eclipse</title>
       <para>
-        The setup instructions for Eclipse can be found in the Errai
-        <ulink url="http://community.jboss.org/wiki/WorkingwithGWTCDIandErrai">WIKI</ulink>
+        The setup instructions for Eclipse can be found
+        <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=54493497">here</ulink>
         .
       </para>
     </note>

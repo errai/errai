@@ -78,10 +78,11 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
             ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
       }
       else {
+        if (key.equals(SerializationParts.OBJECT_ID)) {
+          continue;
+        }
+        
         if (assumedKeyType != null && assumedValueType != null) {
-          if (key.startsWith(SerializationParts.OBJECT_ID)) {
-            continue;
-          }
           demarshalledKey = convertKey(assumedKeyType, key);
 
           String valueType = null;
@@ -91,6 +92,9 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
           else {
             valueType = assumedValueType;
           }
+          // the assumed map k/v types can only be used once since they are not set for nested maps. 
+          ctx.setAssumedMapKeyType(null);
+          ctx.setAssumedMapValueType(null);
           final Object demarshalledValue = ctx.getMarshallerInstance(valueType).demarshall(ejValue, ctx);
           impl.put(demarshalledKey, demarshalledValue);
         }
@@ -104,10 +108,10 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
     return impl;
   }
 
-  // This only exists to support de-marshalling of maps using Jackson. The Jackson payload doesn't contain our
+  // This only exists to support demarshalling of maps using Jackson. The Jackson payload doesn't contain our
   // EMBEDDED_JSON or any type information, so we have to convert the key (which is always a String) to it's actual
   // type. We only support primitive wrapper types as key types. Other types require a custom
-  // Key(De)serializer in Jackson anyway which would be unknown to Errai.
+  // Key(De)Serializer in Jackson anyway which would be unknown to Errai.
   private Object convertKey(final String toType, final String key) {
     if (toType.equals(Integer.class.getName())) {
       return Integer.parseInt(key);

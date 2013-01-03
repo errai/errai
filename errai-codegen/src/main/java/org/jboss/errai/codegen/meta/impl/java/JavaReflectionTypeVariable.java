@@ -16,32 +16,27 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
-import org.jboss.errai.codegen.meta.MetaGenericDeclaration;
+import java.lang.reflect.TypeVariable;
+
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 
-import java.lang.reflect.TypeVariable;
-
 /**
+ * Java Reflection based implementation of {@link MetaTypeVariable}.
+ *
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class JavaReflectionTypeVariable implements MetaTypeVariable {
-  private final TypeVariable variable;
-  private final MetaGenericDeclaration declaration;
+  private final TypeVariable<?> variable;
 
-  public JavaReflectionTypeVariable(final TypeVariable variable) {
+  public JavaReflectionTypeVariable(final TypeVariable<?> variable) {
     this.variable = variable;
-    this.declaration = new JavaReflectionGenericDeclaration(variable.getGenericDeclaration());
   }
 
   @Override
   public MetaType[] getBounds() {
     return JavaReflectionUtil.fromTypeArray(variable.getBounds());
-  }
-
-  @Override
-  public MetaGenericDeclaration getGenericDeclaration() {
-    return declaration;
   }
 
   @Override

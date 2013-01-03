@@ -9,19 +9,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.PersistenceException;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
+import javax.persistence.*;
 
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
@@ -750,8 +743,7 @@ public class ErraiJpaTest extends GWTTestCase {
     TextBox box = new TextBox();
 
     DataBinder<Album> binder = DataBinder.forModel(album);
-    binder.bind(box, "id");
-    album = binder.getModel();
+    album = binder.bind(box, "id").getModel();
     assertEquals("", box.getText());
 
     // store it
@@ -763,6 +755,30 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(String.valueOf(album.getId()), box.getText());
   }
 
+  public void testEnsurePropertyChangeEventIsFiredAfterIdGeneration() {
+    DataBinder<Album> binder = DataBinder.forType(Album.class);
+    Album album = binder.getModel();
+    assertNull(album.getId());
+
+    final Album eventAlbum = new Album();
+    assertNull(eventAlbum.getId());
+    binder.addPropertyChangeHandler("id", new PropertyChangeHandler<Long>() {
+      @Override
+      public void onPropertyChange(PropertyChangeEvent<Long> event) {
+        eventAlbum.setId(event.getNewValue());
+      }
+    });
+    
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+    em.detach(album);
+    
+    assertNotNull(album.getId());
+    assertEquals(album.getId(), eventAlbum.getId());
+  }
+  
   public void testNullCollectionInEntity() throws Exception {
     Artist artist = new Artist();
     artist.setId(4433443L);
