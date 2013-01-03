@@ -3,6 +3,7 @@
 <module>
   <inherits name="com.google.gwt.user.User" />
   <inherits name="com.google.common.collect.Collect"/>
+  <inherits name="org.jboss.errai.marshalling.ErraiMarshalling" />
   <inherits name="org.jboss.errai.ioc.Container"/>
   <inherits name="org.jboss.errai.databinding.DataBinding"/>
 
