@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.api.interceptors;
+package org.jboss.errai.common.client.api.interceptor;
 
 /**
  * Represents an interceptor for either synchronous or asynchronous (remote) method calls.

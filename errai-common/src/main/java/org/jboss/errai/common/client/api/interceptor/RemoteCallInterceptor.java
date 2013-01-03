@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.api.interceptors;
+package org.jboss.errai.common.client.api.interceptor;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 
 /**
- * Represents a interceptor for asynchronous remote method calls.
+ * Represents an interceptor for asynchronous remote method calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * 

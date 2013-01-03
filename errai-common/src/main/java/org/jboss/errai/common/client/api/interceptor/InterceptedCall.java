@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.api.interceptors;
+package org.jboss.errai.common.client.api.interceptor;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

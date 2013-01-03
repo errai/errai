@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.api.interceptors;
+package org.jboss.errai.common.client.api.interceptor;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -69,5 +69,5 @@ public abstract class RemoteCallContext extends CallContext {
    *          error callback is guaranteed to be invoked before the error callback provided on the actual call site.
    *          Cannot be null.
    */
-  public abstract void proceed(RemoteCallback<?> callback, ErrorCallback errorCallback);
+  public abstract void proceed(RemoteCallback<?> callback, ErrorCallback<?> errorCallback);
 }

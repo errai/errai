@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.api.interceptors;
+package org.jboss.errai.common.client.api.interceptor;
 
 /**
- * Represents a client-side interceptor for remote procedure calls.
+ * Represents an interceptor for local/synchronous method calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * 
+ * @param <T>
+ *          type of {@link CallContext}
  */
-public interface RpcInterceptor extends RemoteCallInterceptor<RemoteCallContext> {
+public interface LocalCallInterceptor extends CallInterceptor<CallContext> {
 
+  /**
+   * Interposes on the execution of methods that should be intercepted.
+   * 
+   * @param context
+   *          the call context of the intercepted method, not null.
+   * 
+   * @return the result of the intercepted method.
+   */
+  public Object aroundInvoke(CallContext context);
 }

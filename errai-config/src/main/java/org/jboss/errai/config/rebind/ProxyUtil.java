@@ -36,8 +36,8 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
-import org.jboss.errai.common.client.api.interceptors.RemoteCallContext;
+import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 
 import com.google.common.reflect.TypeToken;
 
@@ -51,22 +51,22 @@ public abstract class ProxyUtil {
   private ProxyUtil() {}
 
   /**
-   * Generates the {@link org.jboss.errai.common.client.api.interceptors.CallContext} for method interception.
+   * Generates the {@link org.jboss.errai.common.client.api.interceptor.CallContext} for method interception.
    * 
    * @param callContextType
-   *          the type of {@link org.jboss.errai.common.client.api.interceptors.RemoteCallContext} to use.
+   *          the type of {@link org.jboss.errai.common.client.api.interceptor.RemoteCallContext} to use.
    * @param proxyClass
    *          the declaring proxy class
    * @param method
    *          the method that is being proxied.
    * @param proceed
    *          the logic that should be invoked if
-   *          {@link org.jboss.errai.common.client.api.interceptors.CallContext#proceed()} is called.
+   *          {@link org.jboss.errai.common.client.api.interceptor.CallContext#proceed()} is called.
    * @param interceptedCall
-   *          a reference to the {@link org.jboss.errai.common.client.api.interceptors.InterceptedCall} annotation on the
+   *          a reference to the {@link org.jboss.errai.common.client.api.interceptor.InterceptedCall} annotation on the
    *          remote interface or method
    * @return statement representing an anonymous implementation of the provided
-   *         {@link org.jboss.errai.common.client.api.interceptors.CallContext}
+   *         {@link org.jboss.errai.common.client.api.interceptor.CallContext}
    */
   public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
         Class<? extends RemoteCallContext> callContextType,

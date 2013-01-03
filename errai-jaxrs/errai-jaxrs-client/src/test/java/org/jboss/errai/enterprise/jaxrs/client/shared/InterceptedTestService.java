@@ -21,7 +21,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
+import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallBypassingInterceptor;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorOne;
 import org.jboss.errai.enterprise.jaxrs.client.shared.interceptor.RestCallInterceptorTwo;

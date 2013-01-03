@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.api.interceptors;
+package org.jboss.errai.common.client.api.interceptor;
 
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.Assert;
