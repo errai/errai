@@ -58,6 +58,8 @@
                 <include>org.jboss.errai:errai-ui</include>
                 <include>org.jboss.errai:errai-navigation</include>
                 <include>org.jboss.errai:errai-js</include>
+                <include>org.jboss.errai:errai-ioc-bus-support</include>
+                <include>org.jboss.errai:errai-cordova</include>
             </includes>
         </dependencySet>
         <dependencySet>
