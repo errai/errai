@@ -116,6 +116,7 @@ public class App {
     vPanel.add(customersTable);
     vPanel.add(new HTML("<hr>"));
     vPanel.add(newCustomerTable);
+    vPanel.addStyleName("whole-customer-table");
     RootPanel.get().add(vPanel);
 
     populateCustomersTable();
