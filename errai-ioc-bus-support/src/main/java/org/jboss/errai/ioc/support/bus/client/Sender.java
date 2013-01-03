@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api;
+package org.jboss.errai.ioc.support.bus.client;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * An interface that can be used as the injection point for a convenience object that sends single-payload messages to a
  * given subject.
  * <p>
- * Injection of a sender must be qualified with {@link ToSubject} and optionally {@link ReplyTo}.
+ * Injection of a sender must be qualified with {@link org.jboss.errai.ioc.client.api.ToSubject} and optionally {@link org.jboss.errai.ioc.client.api.ReplyTo}.
  * <p>
  * Example:
  * 
@@ -42,7 +42,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 public interface Sender<T> {
 
   /**
-   * Sends the message to the subject specified by {@link ToSubject}.
+   * Sends the message to the subject specified by {@link org.jboss.errai.ioc.client.api.ToSubject}.
    * 
    * @param value
    *          the payload of the message stored in {@link MessageParts#Value}
@@ -50,7 +50,7 @@ public interface Sender<T> {
   public void send(T value);
 
   /**
-   * Sends the message to the subject specified by {@link ToSubject}.
+   * Sends the message to the subject specified by {@link org.jboss.errai.ioc.client.api.ToSubject}.
    * 
    * @param value
    *          the payload of the message stored in {@link MessageParts#Value}
@@ -61,7 +61,7 @@ public interface Sender<T> {
   public void send(T value, ErrorCallback errorCallback);
   
   /**
-   * Sends the message to the subject specified by {@link ToSubject}.
+   * Sends the message to the subject specified by {@link org.jboss.errai.ioc.client.api.ToSubject}.
    *
    * @param value
    *          the payload of the message stored in {@link MessageParts#Value}
@@ -72,7 +72,7 @@ public interface Sender<T> {
   public void send(T value, MessageCallback replyTo);
   
   /**
-   * Sends the message to the subject specified by {@link ToSubject}.
+   * Sends the message to the subject specified by {@link org.jboss.errai.ioc.client.api.ToSubject}.
    *
    * @param value
    *          the payload of the message stored in {@link MessageParts#Value}

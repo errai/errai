@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.MockProductionBean;
@@ -33,40 +33,32 @@ public class TestMockBeanIntegrationTest extends AbstractErraiIOCTest {
   }
 
   public void testMockedBeanInjection() throws Exception {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        ProductionBeanDependentBean bean = IOC.getBeanManager()
-                .lookupBean(ProductionBeanDependentBean.class).getInstance();
 
-        assertNotNull(bean);
-        assertNotNull(bean.getMockableCommonInterface());
-        assertTrue("Expected MockProductionBean; wrong bean injected",
-                bean.getMockableCommonInterface() instanceof MockProductionBean);
+    ProductionBeanDependentBean bean = IOC.getBeanManager()
+        .lookupBean(ProductionBeanDependentBean.class).getInstance();
 
-        finishTest();
-      }
-    });
+    assertNotNull(bean);
+    assertNotNull(bean.getMockableCommonInterface());
+    assertTrue("Expected MockProductionBean; wrong bean injected",
+        bean.getMockableCommonInterface() instanceof MockProductionBean);
+
+    finishTest();
+
   }
 
   public void testMockedCallerInjection() throws Exception {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        ProductionBeanDependentBean bean = IOC.getBeanManager()
-                .lookupBean(ProductionBeanDependentBean.class).getInstance();
+    ProductionBeanDependentBean bean = IOC.getBeanManager()
+        .lookupBean(ProductionBeanDependentBean.class).getInstance();
 
-        assertNotNull(bean);
-        assertNotNull(bean.getMockableCaller());
-        bean.getMockableCaller().call(new RemoteCallback<Boolean> () {
-          @Override
-          public void callback(Boolean response) {
-            // response should come from HappyServiceMockedCallerProvider
-            assertTrue(response);
-            finishTest();
-          }
-        }).isHappy();
+    assertNotNull(bean);
+    assertNotNull(bean.getMockableCaller());
+    bean.getMockableCaller().call(new RemoteCallback<Boolean>() {
+      @Override
+      public void callback(Boolean response) {
+        // response should come from HappyServiceMockedCallerProvider
+        assertTrue(response);
+        finishTest();
       }
-    });
+    }).isHappy();
   }
 }

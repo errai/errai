@@ -20,7 +20,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversat
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -32,7 +32,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class DefaultErrorCallback implements ErrorCallback {
+public class DefaultErrorCallback implements ErrorCallback<Message> {
   public static final DefaultErrorCallback INSTANCE = new DefaultErrorCallback();
   public static final String CLIENT_ERROR_SUBJECT = "ClientBusErrors";
   

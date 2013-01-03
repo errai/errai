@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.ioc.support.bus.client;
 
-/**
- * Provider for generated proxies.
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
- */
-public interface ProxyProvider {
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
-  /**
-   * @return proxy
-   */
-  public Object getProxy();
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+@IOCProvider
+@Singleton
+public class MessageBusProvider implements Provider<MessageBus> {
+  @Override
+  public MessageBus get() {
+    return ErraiBus.get();
+  }
 }

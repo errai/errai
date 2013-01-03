@@ -3,14 +3,14 @@ package org.jboss.errai.example.client.local;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.googlecode.gwtphonegap.client.PhoneGap;
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.example.client.shared.Member;
 import org.jboss.errai.example.client.shared.MemberService;
 import org.jboss.errai.example.client.shared.New;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.ioc.client.api.Caller;
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.enterprise.event.Observes;

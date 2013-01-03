@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api.builtin;
+package org.jboss.errai.ioc.support.bus.client;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.ioc.client.api.Sender;
 
 public final class ErraiMessageSender<T> implements Sender<T> {
   private final MessageBus messageBus;

@@ -31,17 +31,12 @@ public class LifecycleExtensionsTest extends AbstractErraiIOCTest {
   }
 
   public void testLifeCycleBeanWired() {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        LifecycleBean lifecycleBean = IOC.getBeanManager()
-                .lookupBean(LifecycleBean.class).getInstance();
 
-        assertNotNull("LifecycleBean is null", lifecycleBean);
-        assertNotNull("Ballot was not injected into LifecycleBean", lifecycleBean.getBallot());
-        assertTrue("AfterInitialization method was not called", lifecycleBean.isAfterInitCalled());
-        finishTest();
-      }
-    });
+    LifecycleBean lifecycleBean = IOC.getBeanManager()
+        .lookupBean(LifecycleBean.class).getInstance();
+
+    assertNotNull("LifecycleBean is null", lifecycleBean);
+    assertNotNull("Ballot was not injected into LifecycleBean", lifecycleBean.getBallot());
+    assertTrue("AfterInitialization method was not called", lifecycleBean.isAfterInitCalled());
   }
 }

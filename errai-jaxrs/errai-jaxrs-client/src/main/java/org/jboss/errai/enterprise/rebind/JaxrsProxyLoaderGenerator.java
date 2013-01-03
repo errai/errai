@@ -21,8 +21,8 @@ import java.io.PrintWriter;
 
 import javax.ws.rs.Path;
 
-import org.jboss.errai.bus.client.framework.ProxyProvider;
-import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
+import org.jboss.errai.common.client.framework.ProxyProvider;
+import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;

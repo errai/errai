@@ -22,7 +22,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.*;
 

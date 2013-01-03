@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
-import org.jboss.errai.bus.client.api.interceptor.RpcInterceptor;
+import org.jboss.errai.common.client.api.interceptors.RemoteCallContext;
+import org.jboss.errai.common.client.api.interceptors.RpcInterceptor;
 
 /**
  * RPC interceptor for testing purposes. Prevents the actual remote request and sets the result directly.

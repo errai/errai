@@ -25,7 +25,7 @@ import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.client.ui.*;
 
 import org.errai.samples.queryservice.client.shared.QueryServiceRemote;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 public class QueryWidget extends Composite {

@@ -1083,7 +1083,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             stop(false);
             init();
           }
-
           break;
 
         case WebsocketChannelVerify:
@@ -1242,7 +1241,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     private final int statusCode;
     private final RetryInfo retryInfo;
 
-    public BusTransportError(final Request request, final Throwable throwable, final int statusCode, final RetryInfo retryInfo) {
+    public BusTransportError(final Request request,
+                             final Throwable throwable,
+                             final int statusCode,
+                             final RetryInfo retryInfo) {
+
       this.request = request;
       this.throwable = throwable;
       this.statusCode = statusCode;

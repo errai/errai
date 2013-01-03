@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api.builtin;
+package org.jboss.errai.ioc.support.bus.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
-import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
 
 import javax.inject.Singleton;

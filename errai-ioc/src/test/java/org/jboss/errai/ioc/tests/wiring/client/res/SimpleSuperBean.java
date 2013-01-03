@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 import javax.inject.Inject;
 
@@ -25,5 +24,5 @@ import javax.inject.Inject;
  */
 public class SimpleSuperBean {
   @Inject
-  protected RequestDispatcher dispatcher;
+  protected SimpleSingleton superSimpleSingleton;
 }

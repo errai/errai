@@ -16,7 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared.interceptor;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestClientInterceptor;
 

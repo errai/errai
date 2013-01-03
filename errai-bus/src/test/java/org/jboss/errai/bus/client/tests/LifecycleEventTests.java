@@ -6,7 +6,8 @@ import java.util.List;
 import org.jboss.errai.bus.client.api.BusLifecycleAdapter;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.RpcErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -270,15 +271,16 @@ public class LifecycleEventTests extends AbstractErraiTest {
         expectedEventTypes.add(EventType.DISASSOCIATING);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
-        MessageBuilder.createMessage("myLocalTestSubject").withValue("cows often say moo").errorsHandledBy(new ErrorCallback() {
+        MessageBuilder.createMessage("myLocalTestSubject").withValue("cows often say moo")
+            .errorsHandledBy(new RpcErrorCallback() {
 
-          @Override
-          public boolean error(Message message, Throwable throwable) {
-            throwable.printStackTrace();
-            fail("Got an error sending local message");
-            return false;
-          }
-        }).sendNowWith(bus);
+              @Override
+              public boolean error(Message message, Throwable throwable) {
+                throwable.printStackTrace();
+                fail("Got an error sending local message");
+                return false;
+              }
+            }).sendNowWith(bus);
       }
     });
   }
@@ -321,7 +323,8 @@ public class LifecycleEventTests extends AbstractErraiTest {
         expectedEventTypes.add(EventType.DISASSOCIATING);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
-        MessageBuilder.createMessage("myLocalTestSubject").withValue("cows often say moo").errorsHandledBy(new ErrorCallback() {
+        MessageBuilder.createMessage("myLocalTestSubject").withValue("cows often say moo")
+            .errorsHandledBy(new RpcErrorCallback() {
 
           @Override
           public boolean error(Message message, Throwable throwable) {

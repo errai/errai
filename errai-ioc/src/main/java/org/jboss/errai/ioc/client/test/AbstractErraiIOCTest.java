@@ -16,14 +16,14 @@
 
 package org.jboss.errai.ioc.client.test;
 
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
+import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractErraiIOCTest extends AbstractErraiTest {
+public abstract class AbstractErraiIOCTest extends GWTTestCase {
 
   @Override
   protected void gwtSetUp() throws Exception {
@@ -31,5 +31,7 @@ public abstract class AbstractErraiIOCTest extends AbstractErraiTest {
     new IOCBeanManagerLifecycle().resetBeanManager();
     new Container().bootstrapContainer();
   }
+
+
 }
 

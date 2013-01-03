@@ -36,18 +36,13 @@ public class AlternativeBeanIntegrationTest extends AbstractErraiIOCTest {
   public void testAlternativeBeanInjection() throws Exception {
     // AlternativeBeanA should be configured as an alternative in the ErraiApp.properties of this
     // test module.
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        AlternativeDependentBean bean = IOC.getBeanManager().lookupBean(AlternativeDependentBean.class).getInstance();
 
-        assertNotNull(bean);
-        assertNotNull(bean.getCommonInterface());
-        assertTrue("wrong instance of bean injected", bean.getCommonInterface() instanceof AlternativeBeanA);
+    AlternativeDependentBean bean = IOC.getBeanManager().lookupBean(AlternativeDependentBean.class).getInstance();
 
-        finishTest();
-      }
-    });
+    assertNotNull(bean);
+    assertNotNull(bean.getCommonInterface());
+    assertTrue("wrong instance of bean injected", bean.getCommonInterface() instanceof AlternativeBeanA);
+
   }
 
   /**
@@ -57,19 +52,14 @@ public class AlternativeBeanIntegrationTest extends AbstractErraiIOCTest {
    * @throws Exception
    */
   public void testSingleAlternativeTakesPrecedence() throws Exception {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        SingleAlternativeDependentBean bean = IOC.getBeanManager()
-                .lookupBean(SingleAlternativeDependentBean.class).getInstance();
 
-        assertNotNull(bean);
-        assertNotNull(bean.getAlternativeCommonInterfaceB());
-        assertTrue("wrong instance of bean injected",
-                bean.getAlternativeCommonInterfaceB() instanceof OverridingAltCommonInterfaceBImpl);
+    SingleAlternativeDependentBean bean = IOC.getBeanManager()
+        .lookupBean(SingleAlternativeDependentBean.class).getInstance();
 
-        finishTest();
-      }
-    });
+    assertNotNull(bean);
+    assertNotNull(bean.getAlternativeCommonInterfaceB());
+    assertTrue("wrong instance of bean injected",
+        bean.getAlternativeCommonInterfaceB() instanceof OverridingAltCommonInterfaceBImpl);
+
   }
 }

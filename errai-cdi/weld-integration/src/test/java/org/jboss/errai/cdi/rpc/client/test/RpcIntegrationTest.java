@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.rpc.client.test;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.cdi.rpc.client.RpcTestBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;

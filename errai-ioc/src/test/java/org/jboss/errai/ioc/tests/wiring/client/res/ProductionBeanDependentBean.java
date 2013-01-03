@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.Caller;
+import org.jboss.errai.common.client.api.Caller;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

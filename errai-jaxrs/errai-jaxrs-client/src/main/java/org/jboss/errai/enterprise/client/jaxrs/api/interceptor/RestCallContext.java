@@ -16,10 +16,9 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.api.interceptor;
 
-import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
-import org.jboss.errai.common.client.api.Assert;
-
 import com.google.gwt.http.client.RequestBuilder;
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.interceptors.RemoteCallContext;
 
 /**
  * Represents the context of an intercepted JAX-RS (REST) remote call.

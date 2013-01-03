@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.common.client.api.interceptors;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+/**
+ * Represents an interceptor for either synchronous or asynchronous (remote) method calls.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ * 
+ * @param <T>
+ *          type of {@link CallContext}
+ */
+interface CallInterceptor<T extends CallContext> {
 
-import java.lang.annotation.Annotation;
-
-public interface RpcStub {
-  public void setRemoteCallback(RemoteCallback callback);
-
-  public void setErrorCallback(ErrorCallback callback);
-
-  public void setQualifiers(Annotation[] annotations);
 }

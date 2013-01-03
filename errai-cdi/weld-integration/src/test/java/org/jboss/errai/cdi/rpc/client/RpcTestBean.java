@@ -20,14 +20,14 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.remote.MyInterceptedRemote;
 import org.jboss.errai.cdi.client.remote.MyRemote;
 import org.jboss.errai.cdi.client.remote.MySessionAttributeSettingRemote;
 import org.jboss.errai.cdi.client.remote.SubService;
-import org.jboss.errai.ioc.client.api.Caller;
+import org.jboss.errai.common.client.api.Caller;
 
 /**
  * @author Mike Brock

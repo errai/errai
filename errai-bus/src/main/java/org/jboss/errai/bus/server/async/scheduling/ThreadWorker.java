@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.async.scheduling;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.server.async.TimedTask;
 
 public class ThreadWorker implements Runnable {

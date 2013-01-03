@@ -17,95 +17,102 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>cdi-integration-parent</artifactId>
-        <groupId>org.jboss.errai</groupId>
-        <version>3.0-SNAPSHOT</version>
+  <parent>
+    <artifactId>cdi-integration-parent</artifactId>
+    <groupId>org.jboss.errai</groupId>
+    <version>3.0-SNAPSHOT</version>
 
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>errai-cdi-client</artifactId>
-    <name>Errai::CDI::Client</name>
+  <artifactId>errai-cdi-client</artifactId>
+  <name>Errai::CDI::Client</name>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
-    </build>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+  </build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-javax-enterprise</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-bus</artifactId>
-            <scope>provided</scope>
-        </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-bus</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-ioc</artifactId>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>javax.enterprise</artifactId>
-                    <groupId>cdi-api</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-ioc-bus-support</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-ioc</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>javax.enterprise</artifactId>
+          <groupId>cdi-api</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
 
-        <!--<dependency>-->
-        <!--<groupId>javax.enterprise</groupId>-->
-        <!--<artifactId>cdi-api</artifactId>-->
-        <!--<version>1.0-SP4</version>-->
-        <!--<scope>provided</scope>-->
-        <!--</dependency>-->
-        <!--
-           GWT
-        -->
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
-        </dependency>
+    <!--<dependency>-->
+    <!--<groupId>javax.enterprise</groupId>-->
+    <!--<artifactId>cdi-api</artifactId>-->
+    <!--<version>1.0-SP4</version>-->
+    <!--<scope>provided</scope>-->
+    <!--</dependency>-->
+    <!--
+       GWT
+    -->
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-            <scope>provided</scope>
-        </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>provided</scope>
-        </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <classifier>sources</classifier>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <classifier>sources</classifier>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
 
 </project>

@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.interceptor;
+package org.jboss.errai.common.client.api.interceptors;
 
 /**
- * Represents an interceptor for either synchronous or asynchronous (remote) method calls.
+ * Represents an interceptor for local/synchronous method calls.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * 
  * @param <T>
  *          type of {@link CallContext}
  */
-interface CallInterceptor<T extends CallContext> {
+public interface LocalCallInterceptor extends CallInterceptor<CallContext> {
 
+  /**
+   * Interposes on the execution of methods that should be intercepted.
+   * 
+   * @param context
+   *          the call context of the intercepted method, not null.
+   * 
+   * @return the result of the intercepted method.
+   */
+  public Object aroundInvoke(CallContext context);
 }

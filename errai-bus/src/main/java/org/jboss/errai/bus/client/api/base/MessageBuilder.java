@@ -16,10 +16,11 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.RpcErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
@@ -201,7 +202,7 @@ public class MessageBuilder {
    * @return A proxy for the remote service. Methods invoked on this object will communicate with the remote service
    *         over the message bus.
    */
-  public static <R, T> T createCall(RemoteCallback<R> callback, ErrorCallback errorCallback, Class<T> service) {
+  public static <R, T> T createCall(RemoteCallback<R> callback, RpcErrorCallback errorCallback, Class<T> service) {
     return new DefaultRemoteCallBuilder(CommandMessage.create()).call(callback, errorCallback, service);
   }
 

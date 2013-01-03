@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ErrorHandlingTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
-import org.jboss.errai.ioc.client.api.Caller;
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**

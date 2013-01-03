@@ -18,8 +18,8 @@ package org.jboss.errai.enterprise.rebind;
 
 import javax.ws.rs.Path;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;

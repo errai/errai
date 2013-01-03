@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.interceptor;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
+package org.jboss.errai.common.client.framework;
 
 /**
- * Indicates that calls to the annotated method will be intercepted by the specified interceptor(s). When used on
- * a class or interface, all methods of the corresponding type will be intercepted.
+ * Provider for generated proxies.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Documented
-@Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface InterceptedCall {
+public interface ProxyProvider {
 
   /**
-   * The interceptor type(s) to use. Interceptor execution is guaranteed to be in declaration order.
+   * @return proxy
    */
-  Class<? extends CallInterceptor<? extends CallContext>>[] value();
+  public Object getProxy();
 }

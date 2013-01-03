@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
 import org.jboss.errai.bus.server.annotations.Remote;
 
 /**

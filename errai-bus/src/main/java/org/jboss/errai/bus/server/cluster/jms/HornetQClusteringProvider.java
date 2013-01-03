@@ -1,5 +1,13 @@
 package org.jboss.errai.bus.server.cluster.jms;
 
+import static org.jboss.errai.bus.server.cluster.ClusterParts.BusId;
+import static org.jboss.errai.bus.server.cluster.ClusterParts.MessageId;
+import static org.jboss.errai.bus.server.cluster.ClusterParts.Payload;
+import static org.jboss.errai.bus.server.cluster.ClusterParts.Subject;
+import static org.jboss.errai.common.client.protocols.MessageParts.CommandType;
+import static org.jboss.errai.common.client.protocols.MessageParts.SessionID;
+import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
+
 import org.hornetq.api.core.SimpleString;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.api.core.client.ClientConsumer;
@@ -129,25 +137,25 @@ public class HornetQClusteringProvider implements ClusteringProvider {
 
         switch (ClusterCommands.valueOf(message.getCommandType())) {
           case WhoHandles: {
-            if (serverMessageBus.hasRemoteSubscriptions(message.get(String.class, ClusterParts.Subject))) {
+            if (serverMessageBus.hasRemoteSubscriptions(message.get(String.class, Subject))) {
               final ClientMessage clientMessage = clientSession.createMessage(false);
-              final String sessionIdRequested = message.get(String.class, MessageParts.SessionID);
+              final String sessionIdRequested = message.get(String.class, SessionID);
 
               if (serverMessageBus.getQueueBySession(sessionIdRequested) == null) {
                 return;
               }
 
               final Message replyMsg = CommandMessage.createWithParts(new HashMap<String, Object>())
-                  .set(MessageParts.ToSubject, CLUSTER_SERVICE)
-                  .set(MessageParts.CommandType, ClusterCommands.NotifyOwner.name())
-                  .set(ClusterParts.BusId, busId)
-                  .copy(ClusterParts.MessageId, message)
-                  .set(MessageParts.SessionID, sessionIdRequested);
+                  .set(ToSubject, CLUSTER_SERVICE)
+                  .set(CommandType, ClusterCommands.NotifyOwner.name())
+                  .set(BusId, busId)
+                  .copy(MessageId, message)
+                  .set(SessionID, sessionIdRequested);
 
               clientMessage.putStringProperty(ENVELOPE_PROPERTY, ServerMarshalling.toJSON(replyMsg.getParts()));
 
               try {
-                final ClientProducer producer = clientSession.createProducer(message.get(String.class, ClusterParts.BusId));
+                final ClientProducer producer = clientSession.createProducer(message.get(String.class, BusId));
                 producer.send(clientMessage);
                 producer.close();
               }
@@ -159,19 +167,19 @@ public class HornetQClusteringProvider implements ClusteringProvider {
           break;
 
           case NotifyOwner: {
-            final String messageId = message.get(String.class, ClusterParts.MessageId);
+            final String messageId = message.get(String.class, MessageId);
             final Message deferredMessage = serverMessageBus.getSuspendedMessage(messageId);
-            final String remoteBusId = message.get(String.class, ClusterParts.BusId);
+            final String remoteBusId = message.get(String.class, BusId);
 
             if (deferredMessage != null) {
               final Message dMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
-                  .set(MessageParts.ToSubject, CLUSTER_SERVICE)
-                  .set(MessageParts.CommandType, ClusterCommands.MessageForward.name())
-                  .set(ClusterParts.Payload, ServerMarshalling.toJSON(deferredMessage.getParts()));
+                  .set(ToSubject, CLUSTER_SERVICE)
+                  .set(CommandType, ClusterCommands.MessageForward.name())
+                  .set(Payload, ServerMarshalling.toJSON(deferredMessage.getParts()));
 
               try {
                 final ClientMessage clientMessage = clientSession.createMessage(false);
-                final ClientProducer producer = clientSession.createProducer(dMessage.get(String.class, ClusterParts.BusId));
+                final ClientProducer producer = clientSession.createProducer(dMessage.get(String.class, BusId));
                 producer.send(remoteBusId, clientMessage);
                 producer.close();
               }
@@ -183,7 +191,7 @@ public class HornetQClusteringProvider implements ClusteringProvider {
           break;
 
           case MessageForward: {
-            final String payload = message.get(String.class, ClusterParts.Payload);
+            final String payload = message.get(String.class, Payload);
             final Message forwardMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, payload);
             serverMessageBus.send(forwardMessage);
           }
@@ -202,12 +210,12 @@ public class HornetQClusteringProvider implements ClusteringProvider {
   @Override
   public void clusterTransmit(final String sessionId, final String subject, final String messageId) {
     final Message whoHandlesMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
-        .set(MessageParts.ToSubject, CLUSTER_SERVICE)
-        .set(MessageParts.CommandType, ClusterCommands.WhoHandles.name())
-        .set(MessageParts.SessionID, sessionId)
-        .set(ClusterParts.BusId, busId)
-        .set(ClusterParts.Subject, subject)
-        .set(ClusterParts.MessageId, messageId);
+        .set(ToSubject, CLUSTER_SERVICE)
+        .set(CommandType, ClusterCommands.WhoHandles.name())
+        .set(SessionID, sessionId)
+        .set(BusId, busId)
+        .set(Subject, subject)
+        .set(MessageId, messageId);
 
     final ClientMessage clientMessage = clientSession.createMessage(false);
     clientMessage.putStringProperty(ENVELOPE_PROPERTY, ServerMarshalling.toJSON(whoHandlesMessage.getParts()));

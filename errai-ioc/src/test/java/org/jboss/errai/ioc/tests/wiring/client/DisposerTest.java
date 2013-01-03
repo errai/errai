@@ -15,49 +15,39 @@ public class DisposerTest extends AbstractErraiIOCTest {
   }
 
   public void testDisposerFailsToDestroyAppScope() {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        SingletonBeanWithDisposer bean = IOC.getBeanManager().lookupBean(SingletonBeanWithDisposer.class).getInstance();
 
-        assertNotNull(bean);
-        assertNotNull(bean.getDependentBeanDisposer());
+    SingletonBeanWithDisposer bean = IOC.getBeanManager().lookupBean(SingletonBeanWithDisposer.class).getInstance();
 
-        try {
-          bean.dispose();
-        }
-        catch (IllegalStateException e) {
-          finishTest();
-        }
+    assertNotNull(bean);
+    assertNotNull(bean.getDependentBeanDisposer());
 
-        assertFalse("bean should have been disposed", IOC.getBeanManager().isManaged(bean.getBean()));
-        assertFalse("outer bean should have been disposed", IOC.getBeanManager().isManaged(bean));
+    try {
+      bean.dispose();
+    }
+    catch (IllegalStateException e) {
+      finishTest();
+    }
 
-        assertTrue("bean's destructor should have been called", bean.getBean().isPreDestroyCalled());
+    assertFalse("bean should have been disposed", IOC.getBeanManager().isManaged(bean.getBean()));
+    assertFalse("outer bean should have been disposed", IOC.getBeanManager().isManaged(bean));
 
-        finishTest();
-      }
-    });
+    assertTrue("bean's destructor should have been called", bean.getBean().isPreDestroyCalled());
+
   }
 
   public void testDisposerWorksWithDependentScope() {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        DependentBeanWithDisposer bean = IOC.getBeanManager().lookupBean(DependentBeanWithDisposer.class).getInstance();
 
-        assertNotNull(bean);
-        assertNotNull(bean.getDependentBeanDisposer());
+    DependentBeanWithDisposer bean = IOC.getBeanManager().lookupBean(DependentBeanWithDisposer.class).getInstance();
 
-        bean.dispose();
+    assertNotNull(bean);
+    assertNotNull(bean.getDependentBeanDisposer());
 
-        assertFalse("bean should have been disposed", IOC.getBeanManager().isManaged(bean.getBean()));
-        assertFalse("outer bean should have been disposed", IOC.getBeanManager().isManaged(bean));
+    bean.dispose();
 
-        assertTrue("bean's destructor should have been called", bean.getBean().isPreDestroyCalled());
+    assertFalse("bean should have been disposed", IOC.getBeanManager().isManaged(bean.getBean()));
+    assertFalse("outer bean should have been disposed", IOC.getBeanManager().isManaged(bean));
 
-        finishTest();
-      }
-    });
+    assertTrue("bean's destructor should have been called", bean.getBean().isPreDestroyCalled());
+
   }
 }

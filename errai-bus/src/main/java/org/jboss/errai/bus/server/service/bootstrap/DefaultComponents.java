@@ -20,7 +20,7 @@ import com.google.inject.Guice;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
