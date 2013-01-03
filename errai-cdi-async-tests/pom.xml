@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
@@ -23,7 +22,6 @@
     </resources>
   </build>
 
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <weld.version>1.1.6.Final</weld.version>
@@ -31,7 +29,6 @@
     <slf4j.version>1.6.1</slf4j.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
   </properties>
-
 
   <profiles>
     <profile>
@@ -71,7 +68,8 @@
               </additionalClasspathElements>
               <useManifestOnlyJar>false</useManifestOnlyJar>
               <forkMode>pertest</forkMode>
-              <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail.-->
+              <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability 
+                flag or the testsuite WILL fail. -->
               <argLine>-Xmx2048m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
 
               <systemProperties>
@@ -80,9 +78,8 @@
                   <name>errai.hosted_mode_testing</name>
                   <value>true</value>
                 </property>
-                <!--
-                Do not accidently package server test marshallers when building Errai
-                -->
+                <!-- Do not accidently package server test marshallers when 
+                  building Errai -->
                 <property>
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>
@@ -128,6 +125,18 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-bus</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-ioc-bus-support</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc</artifactId>
           <version>${project.version}</version>
           <exclusions>
@@ -167,25 +176,25 @@
         </dependency>
 
         <!-- CDI Development Utils -->
-        <!-- This must be placed above com.google.gwt:gwt-dev to override the
-   Jetty that is present there -->
+        <!-- This must be placed above com.google.gwt:gwt-dev to override 
+          the Jetty that is present there -->
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty</artifactId>
           <version>${jetty.version}</version>
-          <!--<scope>compile</scope>-->
+          <!--<scope>compile</scope> -->
         </dependency>
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-plus</artifactId>
           <version>${jetty.version}</version>
-          <!--<scope>compile</scope>-->
+          <!--<scope>compile</scope> -->
         </dependency>
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-naming</artifactId>
           <version>${jetty.version}</version>
-          <!--<scope>compile</scope>-->
+          <!--<scope>compile</scope> -->
         </dependency>
 
         <!-- Weld Modules -->
@@ -252,13 +261,6 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-javax-enterprise</artifactId>
-          <version>${project.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-data-binding</artifactId>
           <version>${project.version}</version>
           <scope>provided</scope>
         </dependency>
