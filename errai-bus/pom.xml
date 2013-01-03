@@ -136,33 +136,6 @@
       <version>3.2.7.Final</version>
     </dependency>
 
-    <dependency>
-    	<groupId>org.hornetq</groupId>
-    	<artifactId>hornetq-core</artifactId>
-    	<version>2.2.21.Final</version>
-      <!--<scope>provided</scope>-->
-    </dependency>
-
-    <dependency>
-    	<groupId>org.hornetq</groupId>
-    	<artifactId>hornetq-core-client</artifactId>
-    	<version>2.2.21.Final</version>
-      <!--<scope>provided</scope>-->
-    </dependency>
-
-
-    <dependency>
-    	<groupId>javax</groupId>
-    	<artifactId>javaee-api</artifactId>
-    	<version>6.0</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jgroups</groupId>
-      <artifactId>jgroups</artifactId>
-      <version>3.2.0.Final</version>
-    </dependency>
 
     <!-- Appserver implementation dependencies -->
     <dependency>
@@ -268,6 +241,31 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hornetq</groupId>
+      <artifactId>hornetq-core</artifactId>
+      <version>2.2.21.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hornetq</groupId>
+      <artifactId>hornetq-core-client</artifactId>
+      <version>2.2.21.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+      <version>6.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jgroups</groupId>
+      <artifactId>jgroups</artifactId>
+      <version>3.2.0.Final</version>
     </dependency>
 
   </dependencies>
