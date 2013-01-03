@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.common.client.framework;
 
 import java.util.HashMap;
 import java.util.Map;

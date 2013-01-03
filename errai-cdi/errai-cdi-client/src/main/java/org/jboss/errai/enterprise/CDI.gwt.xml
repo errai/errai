@@ -20,5 +20,6 @@
 <module>
     <inherits name="org.jboss.errai.ioc.Container"/>
     <inherits name="javax.enterprise.Support"/>
+    <inherits name="org.jboss.errai.ioc.support.bus.BusSupport" />
     <entry-point class='org.jboss.errai.enterprise.client.cdi.CDIClientBootstrap'/>
 </module>

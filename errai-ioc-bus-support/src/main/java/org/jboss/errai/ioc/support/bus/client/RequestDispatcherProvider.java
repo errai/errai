@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.ioc.support.bus.client;
 
-public interface ProxyFactory {
-  public <T> T getRemoteProxy(Class<T> proxyType);
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.ioc.client.api.IOCProvider;
+
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+@IOCProvider
+@Singleton
+public class RequestDispatcherProvider implements Provider<RequestDispatcher> {
+  @Override
+  public RequestDispatcher get() {
+    return ErraiBus.getDispatcher();
+  }
 }

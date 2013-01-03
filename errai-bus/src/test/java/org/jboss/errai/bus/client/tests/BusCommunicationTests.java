@@ -18,10 +18,11 @@ package org.jboss.errai.bus.client.tests;
 
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.RpcErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
@@ -278,7 +279,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                   public void callback(final Object response) {
                   }
                 },
-                new ErrorCallback() {
+                new RpcErrorCallback() {
                   @Override
                   public boolean error(final Message message, final Throwable caught) {
                     assertNotNull("Message is null.", message);
@@ -458,7 +459,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
         MessageBuilder.createMessage()
                 .toSubject("TestSvc")
                 .command("baz")
-                .errorsHandledBy(new ErrorCallback() {
+                .errorsHandledBy(new RpcErrorCallback() {
                   @Override
                   public boolean error(final Message message, final Throwable throwable) {
                     fail("An exception thrown by a MessageCallback should not be delivered to the caller!");

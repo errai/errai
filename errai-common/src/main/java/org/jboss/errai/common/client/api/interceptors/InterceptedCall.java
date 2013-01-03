@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.interceptor;
+package org.jboss.errai.common.client.api.interceptors;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 
 /**
- * Represents an interceptor for local/synchronous method calls.
+ * Indicates that calls to the annotated method will be intercepted by the specified interceptor(s). When used on
+ * a class or interface, all methods of the corresponding type will be intercepted.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
- * 
- * @param <T>
- *          type of {@link CallContext}
  */
-public interface LocalCallInterceptor extends CallInterceptor<CallContext> {
+@Documented
+@Target({ ElementType.TYPE, ElementType.METHOD })
+public @interface InterceptedCall {
 
   /**
-   * Interposes on the execution of methods that should be intercepted.
-   * 
-   * @param context
-   *          the call context of the intercepted method, not null.
-   * 
-   * @return the result of the intercepted method.
+   * The interceptor type(s) to use. Interceptor execution is guaranteed to be in declaration order.
    */
-  public Object aroundInvoke(CallContext context);
+  Class<? extends CallInterceptor<? extends CallContext>>[] value();
 }

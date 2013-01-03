@@ -44,6 +44,13 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-codegen-tools</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-marshalling</artifactId>
     </dependency>
 

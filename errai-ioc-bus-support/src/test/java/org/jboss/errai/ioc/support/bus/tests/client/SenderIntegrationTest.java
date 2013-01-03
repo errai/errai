@@ -1,23 +1,24 @@
-package org.jboss.errai.ioc.tests.wiring.client;
+package org.jboss.errai.ioc.support.bus.tests.client;
 
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.api.ReplyTo;
-import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
+import org.jboss.errai.ioc.support.bus.client.Sender;
+import org.jboss.errai.ioc.support.bus.tests.AbstractErraiIOCBusTest;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
 
-public class SenderIntegrationTest extends AbstractErraiIOCTest {
+public class SenderIntegrationTest extends AbstractErraiIOCBusTest {
 
   @Override
   public String getModuleName() {
@@ -140,7 +141,7 @@ public class SenderIntegrationTest extends AbstractErraiIOCTest {
         List<String> originalList = Arrays.asList("this", "is", "my", "list");
         ClientListService.latestResponse = null;
         SenderTestInjectionPoint.instance.brokenSender.send(originalList, 
-            new ErrorCallback() {
+            new ErrorCallback<Message>() {
               @Override
               public boolean error(Message message, Throwable throwable) {
                 assertNotNull("Throwable is null.", throwable);

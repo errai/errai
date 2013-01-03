@@ -17,12 +17,12 @@ import com.google.gwt.user.client.ui.*;
 import com.googlecode.gwtphonegap.client.PhoneGap;
 import com.googlecode.gwtphonegap.client.camera.PictureCallback;
 import com.googlecode.gwtphonegap.client.camera.PictureOptions;
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.example.client.shared.Member;
 import org.jboss.errai.example.client.shared.MemberService;
-import org.jboss.errai.ioc.client.api.Caller;
+import org.jboss.errai.common.client.api.Caller;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -187,7 +187,7 @@ public class KitchenSinkClient extends Composite {
             // so we don't have to do that here.
           }
         },
-        new ErrorCallback() {
+        new ErrorCallback<Message>() {
             @Override
             public boolean error(Message message, Throwable throwable) {
               registerConfirmMessage.setText("Member registration failed: " + throwable.getMessage());

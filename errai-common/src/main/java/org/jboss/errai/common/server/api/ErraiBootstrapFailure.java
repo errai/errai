@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api.builtin;
+package org.jboss.errai.common.server.api;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.ioc.client.api.IOCProvider;
+/**
+ * <tt>ErraiBootstrapFailure</tt> extends the <tt>RuntimeException</tt>. It is thrown when configurations and/or
+ * initializations of the server fail
+ */
+public class ErraiBootstrapFailure extends RuntimeException {
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+  public ErraiBootstrapFailure() {
+    super();
+  }
 
-@IOCProvider
-@Singleton
-public class MessageBusProvider implements Provider<MessageBus> {
-  @Override
-  public MessageBus get() {
-    return ErraiBus.get();
+  public ErraiBootstrapFailure(String message) {
+    super(message);
+  }
+
+  public ErraiBootstrapFailure(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public ErraiBootstrapFailure(Throwable cause) {
+    super(cause);
   }
 }

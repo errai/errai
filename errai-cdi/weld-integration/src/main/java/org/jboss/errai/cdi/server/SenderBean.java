@@ -17,7 +17,6 @@
 package org.jboss.errai.cdi.server;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Set;
@@ -30,9 +29,9 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
-import org.jboss.errai.ioc.client.api.Sender;
+import org.jboss.errai.ioc.support.bus.client.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
-import org.jboss.errai.ioc.client.api.builtin.ErraiMessageSender;
+import org.jboss.errai.ioc.support.bus.client.ErraiMessageSender;
 import org.jboss.weld.Container;
 import org.jboss.weld.injection.CurrentInjectionPoint;
 import org.jboss.weld.util.collections.Arrays2;

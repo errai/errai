@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.security.auth.rules;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
@@ -85,7 +85,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
             .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
             .with(SecurityParts.RejectedMessage, ServerBusTools.encodeMessage(message))
             .copyResource("Session", message)
-            .errorsHandledBy(new ErrorCallback() {
+            .errorsHandledBy(new ErrorCallback<Message>() {
               public boolean error(Message message, Throwable throwable) {
                 ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
                 return false;

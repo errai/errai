@@ -16,7 +16,7 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.api;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 
 import com.google.gwt.http.client.Response;
 

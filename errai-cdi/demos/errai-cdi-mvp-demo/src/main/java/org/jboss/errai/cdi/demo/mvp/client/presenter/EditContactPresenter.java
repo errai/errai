@@ -3,12 +3,12 @@ package org.jboss.errai.cdi.demo.mvp.client.presenter;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.cdi.demo.mvp.client.event.ContactUpdatedEvent;
 import org.jboss.errai.cdi.demo.mvp.client.event.EditContactCancelledEvent;
 import org.jboss.errai.cdi.demo.mvp.shared.Contact;
 import org.jboss.errai.cdi.demo.mvp.shared.ContactsService;
-import org.jboss.errai.ioc.client.api.Caller;
+import org.jboss.errai.common.client.api.Caller;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

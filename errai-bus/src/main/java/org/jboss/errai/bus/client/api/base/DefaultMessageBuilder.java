@@ -19,7 +19,7 @@ package org.jboss.errai.bus.client.api.base;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConversationService;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;

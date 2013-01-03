@@ -22,9 +22,9 @@ import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.bus.client.framework.CallContextStatus;
-import org.jboss.errai.bus.rebind.ProxyUtil;
+import org.jboss.errai.codegen.tools.ProxyUtil;
+import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
+import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;

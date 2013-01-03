@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
-import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
@@ -28,6 +27,8 @@ import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton2;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
 import org.junit.runner.RunWith;
@@ -49,18 +50,20 @@ public class  BasicIOCTest extends IOCClientTestCase {
   }
 
   public void testBasicInjectionScenarios() {
+    SimpleSingleton simpleSingleton = IOC.getBeanManager().lookupBean(SimpleSingleton.class).getInstance();
+    SimpleSingleton2 simpleSingleton2 = IOC.getBeanManager().lookupBean(SimpleSingleton2.class).getInstance();
+
+    assertNotNull(simpleSingleton);
+    assertNotNull(simpleSingleton2);
+
     SimpleBean simpleBean = IOC.getBeanManager().lookupBean(SimpleBean.class).getInstance();
     assertNotNull(simpleBean);
 
-    assertEquals(ErraiBus.get(), simpleBean.getBus());
-    assertEquals(ErraiBus.get(), simpleBean.getBus2());
-    assertEquals(ErraiBus.get(), simpleBean.getBus3());
-    assertEquals(ErraiBus.get(), simpleBean.getBus4());
-
-    assertNotNull(simpleBean.getDispatcher());
-    assertNotNull(simpleBean.getDispatcher2());
-    assertNotNull(simpleBean.getDispatcher3());
-    assertNotNull(simpleBean.getDispatcher4());
+    assertEquals(simpleSingleton, simpleBean.getSingletonA());
+    assertEquals(simpleSingleton, simpleBean.getSingletonB());
+    assertEquals(simpleSingleton, simpleBean.getSingletonC());
+    assertEquals(simpleSingleton, simpleBean.getSuperSimpleSingleton());
+    assertEquals(simpleSingleton2, simpleBean.getSingleton2());
 
     TransverseDepService transverseDepService = IOC.getBeanManager().lookupBean(TransverseDepService.class).getInstance();
 
@@ -76,6 +79,13 @@ public class  BasicIOCTest extends IOCClientTestCase {
   }
 
   public void testNewInstanceFromSingleton() {
+    SimpleSingleton simpleSingleton = IOC.getBeanManager().lookupBean(SimpleSingleton.class).getInstance();
+    SimpleSingleton2 simpleSingleton2 = IOC.getBeanManager().lookupBean(SimpleSingleton2.class).getInstance();
+
+
+    assertNotNull(simpleSingleton);
+    assertNotNull(simpleSingleton2);
+
     SimpleBean simpleBean1 = IOC.getBeanManager().lookupBean(SimpleBean.class).getInstance();
     assertNotNull(simpleBean1);
 
@@ -83,15 +93,11 @@ public class  BasicIOCTest extends IOCClientTestCase {
 
     assertNotSame("should have gotten new instance", simpleBean1, simpleBean2);
 
-    assertEquals(ErraiBus.get(), simpleBean2.getBus());
-    assertEquals(ErraiBus.get(), simpleBean2.getBus2());
-    assertEquals(ErraiBus.get(), simpleBean2.getBus3());
-    assertEquals(ErraiBus.get(), simpleBean2.getBus4());
-
-    assertNotNull(simpleBean2.getDispatcher());
-    assertNotNull(simpleBean2.getDispatcher2());
-    assertNotNull(simpleBean2.getDispatcher3());
-    assertNotNull(simpleBean2.getDispatcher4());
+    assertEquals(simpleSingleton, simpleBean2.getSingletonA());
+    assertEquals(simpleSingleton, simpleBean2.getSingletonB());
+    assertEquals(simpleSingleton, simpleBean2.getSingletonC());
+    assertEquals(simpleSingleton, simpleBean2.getSuperSimpleSingleton());
+    assertEquals(simpleSingleton2, simpleBean2.getSingleton2());
 
     TransverseDepService transverseDepService = IOC.getBeanManager().lookupBean(TransverseDepService.class).getInstance();
 

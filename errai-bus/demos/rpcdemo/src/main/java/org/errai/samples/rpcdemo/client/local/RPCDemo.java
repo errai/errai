@@ -23,10 +23,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.errai.samples.rpcdemo.client.shared.TestException;
 import org.errai.samples.rpcdemo.client.shared.TestService;
-import org.jboss.errai.ioc.client.api.Caller;
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
@@ -112,7 +112,7 @@ public class RPCDemo {
                   public void callback(Void response) {
                   }
                 },
-                new ErrorCallback() {
+                new ErrorCallback<Message>() {
                   public boolean error(Message message, Throwable throwable) {
                     try {
                       throw throwable;

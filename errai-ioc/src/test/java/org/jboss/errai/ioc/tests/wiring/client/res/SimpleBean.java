@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.annotation.PostConstruct;
@@ -29,18 +27,12 @@ import javax.inject.Inject;
 public class SimpleBean extends SimpleSuperBean {
 
   @Inject
-  public MessageBus bus;
+  public SimpleSingleton singletonA;
 
-  @Inject
-  private RequestDispatcher dispatcher2;
-  @Inject
-  private MessageBus bus2;
+  private SimpleSingleton singletonB;
+  private SimpleSingleton2 singleton2;
 
-  private RequestDispatcher dispatcher3;
-  private MessageBus bus3;
-
-  private RequestDispatcher dispatcher4;
-  private MessageBus bus4;
+  private SimpleSingleton singletonC;
   
   @Inject ServiceA svcA;
   @Inject ServiceB svcB;
@@ -55,80 +47,49 @@ public class SimpleBean extends SimpleSuperBean {
 
   @PreDestroy
   public void destroy() {
-    preDestroyCalled = true;;
+    preDestroyCalled = true;
   }
 
   @Inject
-  public SimpleBean(RequestDispatcher dispatcher3, MessageBus bus3) {
-    this.dispatcher3 = dispatcher3;
-    this.bus3 = bus3;
-  }
-
-  public RequestDispatcher getDispatcher() {
-    return dispatcher;
-  }
-
-  public void setDispatcher(RequestDispatcher dispatcher) {
-    this.dispatcher = dispatcher;
-  }
-
-  public MessageBus getBus() {
-    return bus;
-  }
-
-  public void setBus(MessageBus bus) {
-    this.bus = bus;
-  }
-
-  public RequestDispatcher getDispatcher2() {
-    return dispatcher2;
-  }
-
-  public void setDispatcher2(RequestDispatcher dispatcher2) {
-    this.dispatcher2 = dispatcher2;
-  }
-
-  public MessageBus getBus2() {
-    return bus2;
-  }
-
-  public void setBus2(MessageBus bus2) {
-    this.bus2 = bus2;
-  }
-
-  public RequestDispatcher getDispatcher3() {
-    return dispatcher3;
-  }
-
-  public void setDispatcher3(RequestDispatcher dispatcher3) {
-    this.dispatcher3 = dispatcher3;
-  }
-
-  public MessageBus getBus3() {
-    return bus3;
-  }
-
-  public void setBus3(MessageBus bus3) {
-    this.bus3 = bus3;
+  public SimpleBean(SimpleSingleton2 singleton2, SimpleSingleton singletonB) {
+    this.singleton2 = singleton2;
+    this.singletonB = singletonB;
   }
 
 
-  public RequestDispatcher getDispatcher4() {
-    return dispatcher4;
+  public SimpleSingleton getSingletonA() {
+    return singletonA;
+  }
+
+  public SimpleSingleton getSingletonB() {
+    return singletonB;
+  }
+
+  public SimpleSingleton2 getSingleton2() {
+    return singleton2;
+  }
+
+  public void setSingletonB(SimpleSingleton singletonB) {
+    this.singletonB = singletonB;
+  }
+
+
+  public SimpleSingleton2 getDispatcher4() {
+    return singleton2;
   }
 
   @Inject
-  public void setDispatcher4(RequestDispatcher dispatcher4) {
-    this.dispatcher4 = dispatcher4;
+  public void setDispatcher4(SimpleSingleton2 singleton2) {
+    this.singleton2 = singleton2;
   }
 
-  public MessageBus getBus4() {
-    return bus4;
+  public SimpleSingleton getSingletonC() {
+    return singletonC;
   }
 
   @Inject
-  public void setBus4(MessageBus bus4) {
-    this.bus4 = bus4;
+  public void setSingletonC(SimpleSingleton singletonC) {
+    this.singletonC = singletonC;
   }
 
   public boolean isPostConstructCalled() {
@@ -141,5 +102,9 @@ public class SimpleBean extends SimpleSuperBean {
 
   public ServiceB getSvcB() {
     return svcB;
+  }
+
+  public SimpleSingleton getSuperSimpleSingleton() {
+    return superSimpleSingleton;
   }
 }

@@ -64,6 +64,7 @@ import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.Resources;
+import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;

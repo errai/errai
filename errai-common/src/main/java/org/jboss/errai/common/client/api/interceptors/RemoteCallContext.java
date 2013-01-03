@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.interceptor;
+package org.jboss.errai.common.client.api.interceptors;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 
 /**
  * Represents the context of an intercepted remote call.

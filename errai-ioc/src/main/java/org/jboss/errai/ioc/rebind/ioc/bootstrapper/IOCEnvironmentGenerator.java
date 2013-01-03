@@ -1,51 +1,17 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.invokeStatic;
-
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
-import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.codegen.util.If;
-import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.ioc.client.AnnotationComparator;
-import org.jboss.errai.ioc.client.QualifierEqualityFactory;
-import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Qualifier;
-import java.io.File;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Mike Brock

@@ -16,15 +16,13 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.test;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.junit.client.GWTTestCase;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.ioc.client.Container;
-
-import com.google.gwt.http.client.Response;
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 /**
@@ -99,9 +97,9 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
     }
   }
   
-  private class TestErrorCallback implements ErrorCallback {
+  private class TestErrorCallback implements ErrorCallback<Object> {
     @Override
-    public boolean error(Message message, Throwable throwable) {
+    public boolean error(Object message, Throwable throwable) {
       fail(throwable.toString());
       return false;
     }

@@ -16,9 +16,10 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.RpcErrorCallback;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
@@ -51,7 +52,7 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback() {
+        new RpcErrorCallback() {
           @Override
           public boolean error(Message message, Throwable throwable) {
             try {
@@ -83,7 +84,7 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback() {
+        new RpcErrorCallback() {
           @Override
           public boolean error(Message message, Throwable throwable) {
             try {
@@ -111,7 +112,7 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback() {
+        new RpcErrorCallback() {
           @Override
           public boolean error(Message message, Throwable throwable) {
             try {
@@ -155,7 +156,7 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback() {
+        new RpcErrorCallback() {
           @Override
           public boolean error(Message message, Throwable throwable) {
             try {

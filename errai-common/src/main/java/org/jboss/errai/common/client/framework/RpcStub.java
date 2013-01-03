@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.enterprise.client.jaxrs.api.interceptor;
+package org.jboss.errai.common.client.framework;
 
-import org.jboss.errai.common.client.api.interceptors.RemoteCallInterceptor;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 
-/**
- * Represents a client-side interceptor for JAX-RS (REST) remote calls.
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
- */
-public interface RestClientInterceptor extends RemoteCallInterceptor<RestCallContext> {
+import java.lang.annotation.Annotation;
 
+public interface RpcStub {
+  public void setRemoteCallback(RemoteCallback callback);
+
+  public void setErrorCallback(ErrorCallback callback);
+
+  public void setQualifiers(Annotation[] annotations);
 }
