@@ -36,6 +36,7 @@ import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.junit.Test;
 
 import com.google.gwt.user.client.ui.Label;
@@ -58,6 +59,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     Convert.deregisterDefaultConverters();
+    MarshallerFramework.initializeDefaultSessionProvider();
   }
 
   @Test
