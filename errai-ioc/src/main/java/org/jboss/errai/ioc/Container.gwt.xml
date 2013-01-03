@@ -18,7 +18,7 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
     <inherits name='com.google.gwt.user.User'/>
-    <inherits name='org.jboss.errai.bus.ErraiBus'/>
+    <inherits name="org.jboss.errai.common.ErraiCommon"/>
     <inherits name="javax.enterprise.Support" />
 
     <entry-point class='org.jboss.errai.ioc.client.Container'/>

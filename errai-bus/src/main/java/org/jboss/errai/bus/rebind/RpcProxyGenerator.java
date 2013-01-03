@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.codegen.tools.ProxyUtil;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -40,7 +41,6 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.rebind.ProxyUtil;
 import org.jboss.errai.config.rebind.RebindUtils;
 
 /**

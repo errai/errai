@@ -16,10 +16,6 @@
 
 package org.jboss.errai.codegen.tools;
 
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
-import org.jboss.errai.common.client.api.interceptors.RemoteCallContext;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -33,6 +29,10 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
+import org.jboss.errai.common.client.api.interceptors.RemoteCallContext;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

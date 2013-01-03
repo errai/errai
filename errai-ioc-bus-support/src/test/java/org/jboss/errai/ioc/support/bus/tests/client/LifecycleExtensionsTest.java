@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client;
+package org.jboss.errai.ioc.support.bus.tests.client;
 
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-import org.jboss.errai.ioc.tests.wiring.client.res.LifecycleBean;
+import org.jboss.errai.ioc.support.bus.tests.client.res.LifecycleBean;
 
 /**
  * @author Mike Brock
  */
-public class LifecycleExtensionsTest extends AbstractErraiIOCTest {
-
-  @Override
-  public String getModuleName() {
-    return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
-  }
-
+public class LifecycleExtensionsTest extends AbstractErraiIOCBusTest {
   public void testLifeCycleBeanWired() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        LifecycleBean lifecycleBean = IOC.getBeanManager()
+            .lookupBean(LifecycleBean.class).getInstance();
 
-    LifecycleBean lifecycleBean = IOC.getBeanManager()
-        .lookupBean(LifecycleBean.class).getInstance();
+        assertNotNull("LifecycleBean is null", lifecycleBean);
+        assertNotNull("Ballot was not injected into LifecycleBean", lifecycleBean.getBallot());
+        assertTrue("AfterInitialization method was not called", lifecycleBean.isAfterInitCalled());
+        finishTest();
+      }
+    });
 
-    assertNotNull("LifecycleBean is null", lifecycleBean);
-    assertNotNull("Ballot was not injected into LifecycleBean", lifecycleBean.getBallot());
-    assertTrue("AfterInitialization method was not called", lifecycleBean.isAfterInitCalled());
   }
 }

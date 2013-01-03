@@ -31,17 +31,17 @@ public class UiBinderWiringTest extends AbstractErraiIOCTest {
   }
 
   public void testUiBinderWiring() {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
+//    runAfterInit(new Runnable() {
+//      @Override
+//      public void run() {
         final HelloWorld helloWorld = IOC.getBeanManager().lookupBean(HelloWorld.class).getInstance();
 
         assertNotNull("binder null!", helloWorld.getBinder());
         assertNotNull("ui element null", helloWorld.getNameSpan());
         assertNotNull("safe templates field is null", helloWorld.getSafeTemplates());
 
-        finishTest();
-      }
-    });
+//        finishTest();
+//      }
+//    });
   }
 }

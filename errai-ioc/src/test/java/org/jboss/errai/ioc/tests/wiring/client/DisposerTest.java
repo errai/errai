@@ -25,7 +25,7 @@ public class DisposerTest extends AbstractErraiIOCTest {
       bean.dispose();
     }
     catch (IllegalStateException e) {
-      finishTest();
+      return;
     }
 
     assertFalse("bean should have been disposed", IOC.getBeanManager().isManaged(bean.getBean()));

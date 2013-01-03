@@ -1,9 +1,11 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
     "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
-
   <inherits name='com.google.gwt.user.User'/>
+  <inherits name="com.google.gwt.junit.JUnit"/>
+  <inherits name="org.jboss.errai.bus.ErraiBus"/>
+  <inherits name="org.jboss.errai.ioc.Container" />
+  <inherits name="org.jboss.errai.common.ErraiCommon"/>
 
-  <entry-point class='org.jboss.errai.ioc.support.bus.tests.client.BusIOCSupportTests'/>
-
+  <inherits name="org.jboss.errai.ioc.support.bus.BusSupport" />
 </module>

@@ -38,9 +38,122 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+      <!--<scope>provided</scope> -->
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-javax-enterprise</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>jsr250-api</artifactId>
+      <version>1.0</version>
+      <!--<scope>provided</scope> -->
+    </dependency>
+    <dependency>
+      <groupId>javax.enterprise</groupId>
+      <artifactId>cdi-api</artifactId>
+      <version>1.0-SP4</version>
+      <!--<scope>provided</scope> -->
+    </dependency>
+
+    <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
+      <!-- This should not be packaged with the Errai Distro. There are no
+runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <!-- This should not be packaged with the Errai Distro. There are no
+runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
+  <profiles>
+     <profile>
+       <id>integration-test</id>
+
+       <dependencies>
+         <dependency>
+           <groupId>javax.validation</groupId>
+           <artifactId>validation-api</artifactId>
+         </dependency>
+
+         <dependency>
+           <groupId>javax.validation</groupId>
+           <artifactId>validation-api</artifactId>
+           <classifier>sources</classifier>
+         </dependency>
+       </dependencies>
+
+       <build>
+         <plugins>
+           <plugin>
+             <artifactId>maven-surefire-plugin</artifactId>
+             <configuration>
+               <skipTests>false</skipTests>
+               <additionalClasspathElements>
+                 <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+               </additionalClasspathElements>
+               <useSystemClassLoader>false</useSystemClassLoader>
+
+               <!-- This is required because the BasicIOCTest is run in "simulated client" mode, which
+          prevents subsequent tests from succeeding -->
+               <forkMode>pertest</forkMode>
+
+               <argLine>-Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+
+               <systemProperties>
+                 <property>
+                   <name>java.io.tmpdir</name>
+                   <value>${project.build.directory}</value>
+                 </property>
+                 <property>
+                   <name>log4j.output.dir</name>
+                   <value>${project.build.directory}</value>
+                 </property>
+
+                 <!-- Must disable long polling for automated tests to succeed -->
+                 <property>
+                   <name>org.jboss.errai.bus.do_long_poll</name>
+                   <value>false</value>
+                 </property>
+
+                 <!-- Do not accidently package server test marshallers when
+               building Errai -->
+                 <property>
+                   <name>errai.marshalling.server.classOutput.enabled</name>
+                   <value>false</value>
+                 </property>
+               </systemProperties>
+
+               <includes>
+                 <include>**/*Test.java</include>
+               </includes>
+               <excludes>
+                 <exclude>**/IOCTests.java</exclude>
+               </excludes>
+             </configuration>
+           </plugin>
+         </plugins>
+       </build>
+     </profile>
+   </profiles>
 </project>

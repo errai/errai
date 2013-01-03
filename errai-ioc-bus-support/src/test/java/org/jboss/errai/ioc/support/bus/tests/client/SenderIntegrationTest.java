@@ -9,9 +9,7 @@ import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.ToSubject;
-import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.support.bus.client.Sender;
-import org.jboss.errai.ioc.support.bus.tests.AbstractErraiIOCBusTest;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,12 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SenderIntegrationTest extends AbstractErraiIOCBusTest {
-
-  @Override
-  public String getModuleName() {
-    return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
-  }
-
   @Singleton
   public static class SenderTestInjectionPoint {
     static SenderTestInjectionPoint instance;

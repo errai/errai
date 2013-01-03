@@ -30,6 +30,7 @@ import org.jboss.errai.common.client.api.ErrorCallback;
 public class LocalTestTesterService implements MessageCallback {
   @Override
   public void callback(Message message) {
+    System.out.println("received: " +message);
     try {
       MessageBuilder.createConversation(message)
               .toSubject("LocalTestCompleteService")

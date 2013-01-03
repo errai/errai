@@ -36,7 +36,7 @@ public class HelloWorld extends VerticalPanel {
         MessageBuilder.createMessage()
                 .toSubject("HelloWorldService")
                 .withValue("Hello, There!")
-                .errorsHandledBy(new ErrorCallback() {
+                .errorsHandledBy(new ErrorCallback<Message>() {
                   @Override
                   public boolean error(Message message, Throwable throwable) {
                     throwable.printStackTrace();

@@ -23,7 +23,6 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.ioc.support.bus.tests.AbstractErraiIOCBusTest;
 
 import javax.inject.Singleton;
 
@@ -31,11 +30,6 @@ import javax.inject.Singleton;
  * @author Mike Brock
  */
 public class LocalServiceIntegrationTest extends AbstractErraiIOCBusTest {
-  @Override
-  public String getModuleName() {
-    return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
-  }
-
   @Singleton
   @Service
   @Local
@@ -55,6 +49,7 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCBusTest {
 
     @Override
     public void callback(final Message message) {
+      System.out.println("callback called:" + message);
       worked = true;
     }
   }
@@ -63,6 +58,8 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCBusTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+
+        System.out.println("RUN TEST");
 
         MessageBuilder.createMessage()
                 .toSubject("LocalTestTesterService")

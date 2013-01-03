@@ -41,9 +41,6 @@ public class TestMockBeanIntegrationTest extends AbstractErraiIOCTest {
     assertNotNull(bean.getMockableCommonInterface());
     assertTrue("Expected MockProductionBean; wrong bean injected",
         bean.getMockableCommonInterface() instanceof MockProductionBean);
-
-    finishTest();
-
   }
 
   public void testMockedCallerInjection() throws Exception {
@@ -57,7 +54,6 @@ public class TestMockBeanIntegrationTest extends AbstractErraiIOCTest {
       public void callback(Boolean response) {
         // response should come from HappyServiceMockedCallerProvider
         assertTrue(response);
-        finishTest();
       }
     }).isHappy();
   }

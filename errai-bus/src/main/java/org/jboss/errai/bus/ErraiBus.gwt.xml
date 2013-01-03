@@ -27,8 +27,6 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.junit.JUnit"/>
 
-    <!--<inherits name="com.google.gwt.junit.JUnit"/>-->
-
     <entry-point class='org.jboss.errai.bus.client.ErraiBus'/>
 
     <replace-with class="org.jboss.errai.bus.client.framework.Configuration.NotSpecified">

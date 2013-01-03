@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client.res;
+package org.jboss.errai.ioc.support.bus.tests.client.res;
 
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ioc.client.api.InitBallot;
@@ -48,5 +48,4 @@ public class LifecycleBean {
   public boolean isAfterInitCalled() {
     return afterInitCalled;
   }
-
 }
