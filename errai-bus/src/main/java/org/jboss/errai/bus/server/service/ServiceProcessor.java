@@ -28,7 +28,7 @@ import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.config.rebind.RebindUtils;
+import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -217,8 +217,8 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
     // beware of classloading issues. better reflect on the actual instance
     for (Class<?> intf : svc.getClass().getInterfaces()) {
       for (final Method method : intf.getMethods()) {
-        if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(intf, method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
+        if (ProxyUtil.isMethodInInterface(remoteIface, method)) {
+          epts.put(ProxyUtil.createCallSignature(intf, method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override
             public Object get(Message message) {
               return svc;

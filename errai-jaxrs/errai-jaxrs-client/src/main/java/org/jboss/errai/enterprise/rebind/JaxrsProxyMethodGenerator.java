@@ -22,7 +22,6 @@ import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.tools.ProxyUtil;
 import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.codegen.BlockStatement;
@@ -39,7 +38,7 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.config.rebind.RebindUtils;
+import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 
@@ -358,7 +357,7 @@ public class JaxrsProxyMethodGenerator {
    * finish the method block.
    */
   private void generateReturnStatement() {
-    Statement returnStatement = RebindUtils.generateProxyMethodReturnStatement(resourceMethod.getMethod());
+    Statement returnStatement = ProxyUtil.generateProxyMethodReturnStatement(resourceMethod.getMethod());
     if (returnStatement != null) {
       methodBlock.append(returnStatement);
     }

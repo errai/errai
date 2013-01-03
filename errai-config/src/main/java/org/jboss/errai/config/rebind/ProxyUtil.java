@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.tools;
+package org.jboss.errai.config.rebind;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Parameter;
@@ -25,7 +28,9 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
@@ -34,8 +39,13 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptors.InterceptedCall;
 import org.jboss.errai.common.client.api.interceptors.RemoteCallContext;
 
+import com.google.common.reflect.TypeToken;
+
 /**
+ * Utilities to avoid redundant code for proxy generation.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public abstract class ProxyUtil {
   private ProxyUtil() {}
@@ -137,5 +147,73 @@ public abstract class ProxyUtil {
     }
     proceedLogic.addStatement(interceptorStack.finish().else_().append(proceed).finish());
     return proceedLogic;
+  }
+
+  public static String createCallSignature(MetaMethod m) {
+    StringBuilder append = new StringBuilder(m.getName()).append(':');
+    for (MetaParameter parm : m.getParameters()) {
+      append.append(parm.getType().getCanonicalName()).append(':');
+    }
+    return append.toString();
+  }
+
+  public static String createCallSignature(Class<?> referenceClass, Method m) {
+    TypeToken<?> resolver = TypeToken.of(referenceClass);
+    StringBuilder append = new StringBuilder(m.getName()).append(':');
+    for (Type c : m.getGenericParameterTypes()) {
+      TypeToken<?> resolvedParamType = resolver.resolveType(c);
+      append.append(resolvedParamType.getRawType().getCanonicalName()).append(':');
+    }
+    return append.toString();
+  }
+
+  public static boolean isMethodInInterface(Class<?> iface, Method member) {
+    try {
+      if (iface.getMethod(member.getName(), member.getParameterTypes()) != null)
+        return true;
+    }
+    catch (NoSuchMethodException e) {
+    }
+    return false;
+  }
+
+  /**
+   * Generates a valid return statement for the provided method.
+   * 
+   * @param method
+   * @return return statement for the provided method
+   */
+  public static Statement generateProxyMethodReturnStatement(MetaMethod method) {
+    Statement returnStatement = null;
+    if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
+  
+      // if it's a Number and not a BigDecimal or BigInteger
+      if (MetaClassFactory.get(Number.class).isAssignableFrom(method.getReturnType().asBoxed())
+              && method.getReturnType().asUnboxed().getFullyQualifiedName().indexOf('.') == -1) {
+  
+        if (MetaClassFactory.get(Double.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+          returnStatement = Stmt.load(0.0).returnValue();
+        }
+        else if (MetaClassFactory.get(Float.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+          returnStatement = Stmt.load(0f).returnValue();
+        }
+        else if (MetaClassFactory.get(Long.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+          returnStatement = Stmt.load(0l).returnValue();
+        }
+        else {
+          returnStatement = Stmt.load(0).returnValue();
+        }
+      }
+      else if (MetaClassFactory.get(char.class).equals(method.getReturnType())) {
+        returnStatement = Stmt.load(0).returnValue();
+      }
+      else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        returnStatement = Stmt.load(false).returnValue();
+      }
+      else {
+        returnStatement = Stmt.load(null).returnValue();
+      }
+    }
+    return returnStatement;
   }
 }

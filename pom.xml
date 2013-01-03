@@ -113,8 +113,7 @@
         <module>errai-cdi-async-tests</module>
         <module>errai-cordova</module>
         <module>errai-cordova/demos/shared</module>
-      <module>errai-ioc-bus-support</module>
-      <module>errai-codegen-tools</module>
+        <module>errai-ioc-bus-support</module>
     </modules>
 
     <dependencyManagement>

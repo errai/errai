@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.tools.ProxyUtil;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -41,7 +40,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.config.rebind.RebindUtils;
+import org.jboss.errai.config.rebind.ProxyUtil;
 
 /**
  * Generates an Errai RPC remote proxy.
@@ -113,7 +112,7 @@ public class RpcProxyGenerator {
       methodBlock.append(generateRequest(method, parameters, false));
     }
 
-    Statement returnStmt = RebindUtils.generateProxyMethodReturnStatement(method);
+    Statement returnStmt = ProxyUtil.generateProxyMethodReturnStatement(method);
     if (returnStmt != null) {
       methodBlock.append(returnStmt);
     }
@@ -156,7 +155,7 @@ public class RpcProxyGenerator {
             Stmt
                 .invokeStatic(MessageBuilder.class, "createCall")
                 .invoke("call", remote.getFullyQualifiedName())
-                .invoke("endpoint", RebindUtils.createCallSignature(method),
+                .invoke("endpoint", ProxyUtil.createCallSignature(method),
                     Stmt.loadClassMember("qualifiers"),
                     methodParams)
                 .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
@@ -168,7 +167,7 @@ public class RpcProxyGenerator {
             Stmt
                 .invokeStatic(MessageBuilder.class, "createCall")
                 .invoke("call", remote.getFullyQualifiedName())
-                .invoke("endpoint", RebindUtils.createCallSignature(method),
+                .invoke("endpoint", ProxyUtil.createCallSignature(method),
                     Stmt.loadClassMember("qualifiers"),
                     methodParams)
                 .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))

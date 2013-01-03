@@ -26,7 +26,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
-import org.jboss.errai.config.rebind.RebindUtils;
+import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.bus.server.AsyncDispatcher;
 import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
@@ -481,9 +481,9 @@ public class CDIExtensionPoints implements Extension {
 
     // beware of classloading issues. better reflect on the actual instance
     for (final Method method : remoteIface.getMethods()) {
-      if (RebindUtils.isMethodInInterface(remoteIface, method)) {
+      if (ProxyUtil.isMethodInInterface(remoteIface, method)) {
 
-        epts.put(RebindUtils.createCallSignature(remoteIface, method), new ConversationalEndpointCallback(
+        epts.put(ProxyUtil.createCallSignature(remoteIface, method), new ConversationalEndpointCallback(
             new ServiceInstanceProvider() {
               @SuppressWarnings("unchecked")
               @Override
