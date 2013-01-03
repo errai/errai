@@ -17,7 +17,7 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-bus</artifactId>
+      <artifactId>errai-marshalling</artifactId>
     </dependency>
   </dependencies>
 </project>
