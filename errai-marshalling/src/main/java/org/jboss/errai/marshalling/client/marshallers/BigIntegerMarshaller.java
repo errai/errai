@@ -42,8 +42,20 @@ public class BigIntegerMarshaller extends AbstractNullableMarshaller<BigInteger>
   
   @Override
   public BigInteger doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
-    return o.isObject() == null ? null :
-            new BigInteger(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue());
+    if (o.isObject() != null) {
+      final EJValue qualifiedValue = o.isObject().get(SerializationParts.QUALIFIED_VALUE);
+      if (!qualifiedValue.isNull() && qualifiedValue.isString() != null) {
+        return new BigInteger(qualifiedValue.isString().stringValue());
+      }
+      final EJValue numericValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      if (!numericValue.isNull() && numericValue.isNumber() != null) {
+        return new BigInteger(numericValue.getRawValue().toString());
+      }
+      if (!numericValue.isNull() && numericValue.isString() != null) {
+        return new BigInteger(numericValue.isString().stringValue());
+      }
+    }
+    return null;
   }
 
   @Override

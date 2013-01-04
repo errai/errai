@@ -16,6 +16,8 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.BigNumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ImmutableEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
@@ -204,6 +207,30 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
         }).postJacksonMap(jackson);
   }
 
+  /**
+   * Guards against regressions of: https://issues.jboss.org/browse/ERRAI-466
+   */
+  @Test
+  public void testJacksonMarshallingOfBigDecimal() {
+    delayTestFinish(5000);
+
+    final BigNumberEntity entity = new BigNumberEntity();
+    entity.setDecimal(BigDecimal.valueOf(22061980.123456d));
+    entity.setInteger(BigInteger.valueOf(22061980l));
+    
+    String jackson = MarshallingWrapper.toJSON(entity);
+    call(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            BigNumberEntity result = MarshallingWrapper.fromJSON(jackson, BigNumberEntity.class);
+            assertEquals(entity, result);
+            finishTest();
+          }
+        }).postJacksonPortableWithBigDecimal(jackson);
+  }
+  
   /**
    * This test ensures the assumed element type is correctly inferred when generating marshallers for types that use @MapsTo
    * on List<T> parameters. See https://issues.jboss.org/browse/ERRAI-436.

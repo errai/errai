@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.BigNumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 
@@ -92,6 +93,19 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       @SuppressWarnings("unchecked")
       Map<String, User> users = mapper.readValue(jackson, Map.class);
       return mapper.writeValueAsString(users);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  @Override
+  public String postJacksonPortableWithBigDecimal(String jackson) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      BigNumberEntity entity = mapper.readValue(jackson, BigNumberEntity.class);
+      return mapper.writeValueAsString(entity);
     }
     catch (Exception e) {
       e.printStackTrace();
