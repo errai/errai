@@ -21,8 +21,6 @@ import java.io.PrintWriter;
 
 import javax.ws.rs.Path;
 
-import org.jboss.errai.common.client.framework.ProxyProvider;
-import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -30,7 +28,10 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.framework.ProxyProvider;
+import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
@@ -58,6 +59,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     String className = null;
     
     try {
+      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
       JClassType classType = context.getTypeOracle().getType(typeName);
 
       if (classType.isInterface() == null) {
