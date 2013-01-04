@@ -8,6 +8,7 @@
 target/
 bin/
 classes/
+data
 deploy/
 .errai/
 .DS_Store
