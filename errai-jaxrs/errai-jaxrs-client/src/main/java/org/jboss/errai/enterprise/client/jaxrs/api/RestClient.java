@@ -37,11 +37,12 @@ public class RestClient {
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
    * @param remoteService
-   *          the JAX-RS resource interface
+   *          the JAX-RS resource interface. Must not be null.
    * @param callback
    *          the asynchronous callback to use. Must not be null.
    * @param successCodes
-   *          optional HTTP status codes used to determine if the request was successful
+   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
+   *          status codes are interpreted as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
@@ -53,13 +54,14 @@ public class RestClient {
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
    * @param remoteService
-   *          the JAX-RS resource interface
+   *          the JAX-RS resource interface. Must not be null.
    * @param baseUrl
    *          the base URL overriding the default application root path
    * @param callback
    *          the asynchronous callback to use. Must not be null.
    * @param successCodes
-   *          optional HTTP status codes used to determine if the request was successful
+   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
+   *          status codes are interpreted as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
@@ -71,13 +73,14 @@ public class RestClient {
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
    * @param remoteService
-   *          the JAX-RS resource interface
+   *          the JAX-RS resource interface. Must not be null.
    * @param callback
    *          the asynchronous callback to use. Must not be null.
    * @param errorCallback
    *          the error callback to use
    * @param successCodes
-   *          optional HTTP status codes used to determine if the request was successful
+   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
+   *          status codes are interpreted as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
@@ -89,7 +92,7 @@ public class RestClient {
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
    * @param remoteService
-   *          the JAX-RS resource interface
+   *          the JAX-RS resource interface. Must not be null.
    * @param baseUrl
    *          the base URL overriding the default application root path
    * @param callback
@@ -97,12 +100,14 @@ public class RestClient {
    * @param errorCallback
    *          the error callback to use
    * @param successCodes
-   *          optional HTTP status codes used to determine if the request was successful
+   *          optional HTTP status codes used to determine whether the request was successful. If omitted, all 2xx
+   *          status codes are interpreted as success for this request.
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
       final ErrorCallback errorCallback, Integer... successCodes) {
 
+    Assert.notNull(remoteService);
     Assert.notNull(callback);
     if (baseUrl != null && !baseUrl.endsWith("/"))
       baseUrl += "/";

@@ -61,7 +61,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
       JClassType classType = context.getTypeOracle().getType(typeName);
 
       if (classType.isInterface() == null) {
-        logger.log(TreeLogger.ERROR, typeName + "is not an interface.");
+        logger.log(TreeLogger.ERROR, typeName + " is not an interface.");
         throw new RuntimeException("invalid type: not an interface");
       }
 
@@ -116,13 +116,6 @@ public class JaxrsProxyLoaderGenerator extends Generator {
       }
     }
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    
-    String out = classBuilder.toJavaString();
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---JAX-RS Proxy-->");
-      System.out.println(out);
-      System.out.println("<--JAX-RS Proxy---");
-    }
-    return out;
+    return classBuilder.toJavaString();
   }
 }

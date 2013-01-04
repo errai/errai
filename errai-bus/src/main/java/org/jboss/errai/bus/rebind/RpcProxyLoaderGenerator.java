@@ -16,11 +16,9 @@
 
 package org.jboss.errai.bus.rebind;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import java.io.File;
+import java.io.PrintWriter;
+
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
@@ -40,8 +38,11 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.PrintWriter;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
@@ -116,12 +117,6 @@ public class RpcProxyLoaderGenerator extends Generator {
     }
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    final String generatedStr = classBuilder.toJavaString();
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("----[start rpc proxy]---");
-      System.out.println(generatedStr);
-      System.out.println("----[end rpc proxy]-----");
-    }
-    return generatedStr;
+    return classBuilder.toJavaString();
   }
 }
