@@ -646,18 +646,11 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       if (matcher.matches()) {
         resource = (matcher.group(1) == null ? resource : matcher.group(1));
         if (resource.matches("\\S+\\.html")) {
-        	if(resource.startsWith("/")) {
-        		resource = resource.substring(1,resource.length());
-        	}
-        	int count = 0;
-        	for(int i =0; i < resource.length(); i++) {
-        	    if(resource.charAt(i) == '/') {
-        	        count++;
-        	    }
-        	}
-        	if(count == 0) {
-        		resource = type.getPackageName().replaceAll("\\.", "/") + "/" + resource;
-        	}
+          if (resource.startsWith("/")) {
+            resource = resource.substring(1);
+          } else {
+            resource = type.getPackageName().replaceAll("\\.", "/") + "/" + resource;
+          }
         }
       }
     }
