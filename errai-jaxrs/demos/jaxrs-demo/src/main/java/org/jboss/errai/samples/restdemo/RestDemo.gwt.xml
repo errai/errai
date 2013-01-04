@@ -3,8 +3,6 @@
 
 <module rename-to="RestDemo">
     <inherits name="com.google.gwt.user.User"/>
-    <inherits name="org.jboss.errai.common.ErraiCommon"/>
-    <inherits name="org.jboss.errai.ioc.Container"/>
-    
-    <inherits name="org.jboss.errai.enterprise.Jaxrs"/> 
+    <inherits name="org.jboss.errai.enterprise.Jaxrs"/>
+    <inherits name="org.jboss.errai.ioc.Container"/> 
 </module>

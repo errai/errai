@@ -16,30 +16,25 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
-import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
+import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 
 /**
- * Bootstrapper for the JAX-RS module.
+ * Bootstrapper of the JAX-RS module.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@IOCBootstrapTask(TaskOrder.Before)
-public class JaxrsModuleBootstrapper implements Runnable {
+public class JaxrsModule implements EntryPoint {
   static {
     // ensure that the marshalling framework has been initialized
     MarshallerFramework.initializeDefaultSessionProvider();
   }
   
   @Override
-  public void run() {
-    InitVotes.waitFor(JaxrsModuleBootstrapper.class);
+  public void onModuleLoad() {
     JaxrsProxyLoader proxyLoader = GWT.create(JaxrsProxyLoader.class);
     proxyLoader.loadProxies();
-    InitVotes.voteFor(JaxrsModuleBootstrapper.class);
   }
 }

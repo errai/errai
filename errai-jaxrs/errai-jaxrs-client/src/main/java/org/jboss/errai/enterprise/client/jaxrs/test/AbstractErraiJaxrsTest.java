@@ -16,14 +16,14 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.test;
 
-import com.google.gwt.http.client.Response;
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
-import org.jboss.errai.ioc.client.Container;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+
+import com.google.gwt.http.client.Response;
+import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Base class for Errai JAX-RS tests.
@@ -36,10 +36,9 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
  
   @Override
   protected void gwtSetUp() throws Exception {
-    new IOCBeanManagerLifecycle().resetBeanManager();
-    new Container().bootstrapContainer();
     RestClient.setApplicationRoot(jaxRsApplicationRoot);
     RestClient.setJacksonMarshallingActive(false);
+    new JaxrsModule().onModuleLoad();
     super.gwtSetUp();
   }
 

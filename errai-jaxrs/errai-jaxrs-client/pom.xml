@@ -22,7 +22,8 @@
       </resource>
     </resources>
     <plugins>
-      <!-- exclude JAX-RS API overrides as they'd pollute the server classpath in GWTTestCases -->
+      <!-- exclude JAX-RS API overrides as they'd pollute the server classpath 
+        in GWTTestCases -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -36,12 +37,6 @@
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-ioc</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-marshalling</artifactId>
@@ -90,6 +85,12 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-ioc</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jaxrs-provider</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
@@ -134,8 +135,7 @@
                   <name>errai.hosted_mode_testing</name>
                   <value>true</value>
                 </property>
-                <!-- Do not accidently package server test marshallers when 
-                  building Errai -->
+                <!-- Do not accidently package server test marshallers when building Errai -->
                 <property>
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>

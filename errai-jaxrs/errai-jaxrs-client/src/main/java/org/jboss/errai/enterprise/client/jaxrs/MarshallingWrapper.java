@@ -28,6 +28,7 @@ import org.jboss.errai.marshalling.client.Marshalling;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingWrapper {
+  
   public static String toJSON(final Object obj) {
     return _toJSON(Marshalling.toJSON(obj));
   }

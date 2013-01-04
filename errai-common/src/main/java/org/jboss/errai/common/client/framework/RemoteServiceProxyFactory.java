@@ -34,12 +34,12 @@ public class RemoteServiceProxyFactory implements ProxyFactory {
     Assert.notNull(proxyType);
     
     if (remoteProxyProviders.isEmpty()) {
-      throw new RuntimeException("There are no proxy providers registered yet.");
+      throw new RuntimeException("There are no proxy providers registered.");
     }
     
     final ProxyProvider proxyProvider = remoteProxyProviders.get(proxyType);
     if (proxyProvider == null) {
-      throw new RuntimeException("No proxy provider found for type:"+proxyType.getName());
+      throw new RuntimeException("No proxy provider found for type: " + proxyType.getName());
     }
     
     final Object proxy = proxyProvider.getProxy();
@@ -49,7 +49,7 @@ public class RemoteServiceProxyFactory implements ProxyFactory {
     
     return (T) proxy;
   }
-
+  
   public static void addRemoteProxy(final Class<?> proxyType, final ProxyProvider proxyProvider) {
     Assert.notNull(proxyType);
     Assert.notNull(proxyProvider);
