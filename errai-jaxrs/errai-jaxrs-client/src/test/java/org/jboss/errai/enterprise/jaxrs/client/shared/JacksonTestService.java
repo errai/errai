@@ -85,6 +85,20 @@ public interface JacksonTestService {
   public String postJacksonPortableWithByteArray(String jackson);
   
   /**
+   * Accepts a jackson compatible JSON string, marshals it into an object using the jackson ObjectMapper (which we can't
+   * use on the client), then demarshals it again and returns the representation.
+   * 
+   * @param jackson
+   *          jackson compatible JSON representation
+   * 
+   * @return the jackson JSON representation the client (unit test) can use to confirm that it can unmarshal it,
+   *         resulting in an object equal to the original.
+   */
+  @POST
+  @Path("/PortableWithBigDecimal")
+  public String postJacksonPortableWithBigDecimal(String jackson);
+  
+  /**
    * Accepts a jackson compatible JSON string, marshals it into an Map using the jackson ObjectMapper (which
    * we can't use on the client), then demarshals it again and returns the representation.
    * 
