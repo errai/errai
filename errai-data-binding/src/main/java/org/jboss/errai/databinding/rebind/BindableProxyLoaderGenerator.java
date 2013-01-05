@@ -41,6 +41,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.EnvUtil;
@@ -78,6 +79,7 @@ public class BindableProxyLoaderGenerator extends Generator {
     String className = null;
 
     try {
+      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
       JClassType classType = context.getTypeOracle().getType(typeName);
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
