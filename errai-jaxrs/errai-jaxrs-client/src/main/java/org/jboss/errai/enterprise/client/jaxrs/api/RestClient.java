@@ -16,11 +16,10 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.api;
 
-import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
 
 import com.google.common.collect.Lists;
@@ -84,7 +83,7 @@ public class RestClient {
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
-      final ErrorCallback errorCallback, Integer... successCodes) {
+      final RestErrorCallback errorCallback, Integer... successCodes) {
     return create(remoteService, null, callback, errorCallback, successCodes);
   }
 
@@ -105,7 +104,7 @@ public class RestClient {
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback,
-      final ErrorCallback errorCallback, Integer... successCodes) {
+      final RestErrorCallback errorCallback, Integer... successCodes) {
 
     Assert.notNull(remoteService);
     Assert.notNull(callback);

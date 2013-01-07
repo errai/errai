@@ -6,7 +6,7 @@ import java.util.List;
 import org.jboss.errai.bus.client.api.BusLifecycleAdapter;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.RpcErrorCallback;
+import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -272,7 +272,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
         MessageBuilder.createMessage("myLocalTestSubject").withValue("cows often say moo")
-            .errorsHandledBy(new RpcErrorCallback() {
+            .errorsHandledBy(new BusErrorCallback() {
 
               @Override
               public boolean error(Message message, Throwable throwable) {
@@ -324,7 +324,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
         MessageBuilder.createMessage("myLocalTestSubject").withValue("cows often say moo")
-            .errorsHandledBy(new RpcErrorCallback() {
+            .errorsHandledBy(new BusErrorCallback() {
 
           @Override
           public boolean error(Message message, Throwable throwable) {

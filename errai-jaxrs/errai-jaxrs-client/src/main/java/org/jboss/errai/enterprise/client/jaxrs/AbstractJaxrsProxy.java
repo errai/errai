@@ -56,7 +56,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
    * 
    * @return the error callback, null if no error callback was provided.
    */
-  public abstract ErrorCallback getErrorCallback();
+  public abstract ErrorCallback<Request> getErrorCallback();
 
   /**
    * If not set explicitly, the base URL is the configured default application root path {@see RestClient}.
@@ -110,7 +110,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
       requestBuilder.sendRequest(body, new RequestCallback() {
         @Override
         public void onError(Request request, Throwable throwable) {
-          handleError(throwable, null);
+          handleError(throwable, request, null);
         }
 
         @Override
@@ -130,19 +130,19 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
           }
           else {
             ResponseException throwable = new ResponseException(response.getStatusText(), response);
-            handleError(throwable, response);
+            handleError(throwable, request, response);
           }
         }
       });
     }
     catch (RequestException throwable) {
-      handleError(throwable, null);
+      handleError(throwable, null, null);
     }
-  }
+  } 
 
-  protected void handleError(Throwable throwable, Response response) {
+  protected void handleError(Throwable throwable, Request request, Response response) {
     if (getErrorCallback() != null) {
-      getErrorCallback().error(null, throwable);
+      getErrorCallback().error(request, throwable);
     }
     else if ((getRemoteCallback() instanceof ResponseCallback) && (response != null)) {
       ((ResponseCallback) getRemoteCallback()).callback(response);

@@ -16,17 +16,19 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import com.google.gwt.http.client.RequestPermissionException;
-import com.google.gwt.http.client.Response;
-import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ErrorHandlingTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
 import org.junit.Test;
+
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestPermissionException;
+import com.google.gwt.http.client.Response;
 
 /**
  * Testing error handling features.
@@ -49,13 +51,14 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback<Object>() {
+        new RestErrorCallback() {
           @Override
-          public boolean error(Object message, Throwable throwable) {
+          public boolean error(Request request, Throwable throwable) {
             try {
               throw throwable;
             }
             catch (ResponseException e) {
+              assertNotNull("Request object should not be null", request);
               assertEquals("Wrong status code received", Response.SC_NOT_FOUND, e.getResponse().getStatusCode());
               finishTest();
             }
@@ -81,9 +84,9 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback<Object>() {
+        new RestErrorCallback() {
           @Override
-          public boolean error(Object message, Throwable throwable) {
+          public boolean error(Request request, Throwable throwable) {
             try {
               throw throwable;
             }
@@ -109,13 +112,14 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback<Object>() {
+        new RestErrorCallback() {
           @Override
-          public boolean error(Object message, Throwable throwable) {
+          public boolean error(Request request, Throwable throwable) {
             try {
               throw throwable;
             }
             catch (ResponseException e) {
+              assertNotNull("Request object should not be null", request);
               assertEquals("Wrong status code received", Response.SC_NOT_FOUND, e.getResponse().getStatusCode());
               finishTest();
             }
@@ -153,13 +157,14 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback<Object>() {
+        new RestErrorCallback() {
           @Override
-          public boolean error(Object message, Throwable throwable) {
+          public boolean error(Request request, Throwable throwable) {
             try {
               throw throwable;
             }
             catch (ResponseException e) {
+              assertNotNull("Request object should not be null", request);
               // expected: Specified CREATED and NO_CONTENT as success codes but OK was returned
               assertEquals("Wrong status code received", Response.SC_OK, e.getResponse().getStatusCode());
               finishTest();
