@@ -25,6 +25,7 @@ import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -48,15 +49,14 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
    * 
    * @return the remote callback, never null.
    */
-  @SuppressWarnings("rawtypes")
-  public abstract RemoteCallback getRemoteCallback();
+  public abstract RemoteCallback<?> getRemoteCallback();
 
   /**
    * Returns the error callback used by this proxy.
    * 
    * @return the error callback, null if no error callback was provided.
    */
-  public abstract ErrorCallback<Request> getErrorCallback();
+  public abstract ErrorCallback<?> getErrorCallback();
 
   /**
    * If not set explicitly, the base URL is the configured default application root path {@see RestClient}.
@@ -141,8 +141,14 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   } 
 
   protected void handleError(Throwable throwable, Request request, Response response) {
-    if (getErrorCallback() != null) {
-      getErrorCallback().error(request, throwable);
+    ErrorCallback<?> errorCallback = getErrorCallback();
+    if (errorCallback != null) {
+      if (errorCallback instanceof RestErrorCallback) {
+        ((RestErrorCallback) errorCallback).error(request, throwable);
+      }
+      else {
+        errorCallback.error(null, throwable);
+      }
     }
     else if ((getRemoteCallback() instanceof ResponseCallback) && (response != null)) {
       ((ResponseCallback) getRemoteCallback()).callback(response);
