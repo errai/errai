@@ -24,7 +24,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, Pageable, Cleanable {
   private static final BufferDeliveryHandler singleton = new BufferDeliveryHandler();
 
-
   public static BufferDeliveryHandler getInstance() {
     return singleton;
   }

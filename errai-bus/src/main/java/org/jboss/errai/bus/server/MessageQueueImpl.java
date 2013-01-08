@@ -96,7 +96,8 @@ public class MessageQueueImpl implements MessageQueue {
       return ((Buffered) deliveryHandler).copyFromBuffer(wait, this, outstream);
     }
     else {
-      log.warn("call to poll() when DeliveryHandler does not implement Buffered.");
+      // this can happen during the hand off to WebSockets.
+      log.debug("call to poll() when DeliveryHandler does not implement Buffered.");
     }
 
     return false;

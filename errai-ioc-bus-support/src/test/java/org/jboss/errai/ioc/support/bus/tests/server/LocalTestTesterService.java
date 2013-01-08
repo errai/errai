@@ -16,12 +16,11 @@
 
 package org.jboss.errai.ioc.support.bus.tests.server;
 
+import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.RpcErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.common.client.api.ErrorCallback;
 
 /**
  * @author Mike Brock
@@ -34,7 +33,7 @@ public class LocalTestTesterService implements MessageCallback {
     try {
       MessageBuilder.createConversation(message)
               .toSubject("LocalTestCompleteService")
-              .errorsHandledBy(new RpcErrorCallback() {
+              .errorsHandledBy(new BusErrorCallback() {
                 @Override
                 public boolean error(Message message, Throwable throwable) {
                   sendConfirmation(message);

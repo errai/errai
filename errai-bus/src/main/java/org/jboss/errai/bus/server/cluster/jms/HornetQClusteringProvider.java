@@ -48,7 +48,8 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class HornetQClusteringProvider implements ClusteringProvider {
-  private static final String CLUSTER_SERVICE = "ErraiClusterService";
+  private static final String CLUSTER_SERVICE = "ErraiClusterService"; // erraibus service
+
   private static final String BACKPLANE_SERVICE = "ErraiBackplane";
   private static final String ENVELOPE_PROPERTY = "JREP.envelope";
 

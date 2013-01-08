@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.RpcErrorCallback;
+import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -60,7 +60,7 @@ public class DefaultRemoteCallBuilder {
     return call(callback, null, remoteService);
   }
 
-  public <T, R> T call(final RemoteCallback<R> callback, final RpcErrorCallback errorCallback, final Class<T> remoteService) {
+  public <T, R> T call(final RemoteCallback<R> callback, final BusErrorCallback errorCallback, final Class<T> remoteService) {
     final T svc = proxyFactory.getRemoteProxy(remoteService);
     ((RpcStub) svc).setRemoteCallback(callback);
     ((RpcStub) svc).setErrorCallback(errorCallback);
@@ -69,7 +69,7 @@ public class DefaultRemoteCallBuilder {
 
   /**
    * Only intended for use by generated code. Use {@link #call(RemoteCallback, Class)} or
-   * {@link #call(RemoteCallback, RpcErrorCallback, Class)} from handwritten code.
+   * {@link #call(RemoteCallback, org.jboss.errai.bus.client.api.BusErrorCallback, Class)} from handwritten code.
    * <p>
    * Creates, implements and returns an instance of <tt>RemoteCallEndpointDef</tt> and all applicable arguments, which
    * should be instantiated after this call to <tt>serviceName</tt>. The endpoint allows a function from a service to be
