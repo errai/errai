@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.api;
 
+import org.apache.james.mime4j.message.MessageBuilder;
+
 /**
  * Callback interface for failed delivery of specific messages for which an error handler has been provided using the
  * {@link MessageBuilder} API.
@@ -31,7 +33,7 @@ public interface ErrorCallback<T> {
    * Called when an error occurs on the bus.
    * 
    * @param message
-   *          The message for which the failure occurred. Never null.
+   *          The message or request for which the failure occurred.
    * @param throwable
    *          The exception thrown or null if not available
    * 

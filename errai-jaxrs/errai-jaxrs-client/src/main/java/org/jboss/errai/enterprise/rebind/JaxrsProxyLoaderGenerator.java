@@ -55,6 +55,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
       throws UnableToCompleteException {
+    
     String packageName = null;
     String className = null;
     

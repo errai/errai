@@ -22,8 +22,6 @@ import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
@@ -38,6 +36,8 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
@@ -258,7 +258,7 @@ public class JaxrsProxyMethodGenerator {
                 Stmt.loadVariable("callContext").invoke("proceed"))
             .finish()
             .catch_(Throwable.class, "throwable")
-            .append(Stmt.loadStatic(declaringClass, "this").invoke("handleError", Variable.get("throwable"), null))
+            .append(Stmt.loadStatic(declaringClass, "this").invoke("handleError", Variable.get("throwable"), null, null))
             .finish();
   }
 

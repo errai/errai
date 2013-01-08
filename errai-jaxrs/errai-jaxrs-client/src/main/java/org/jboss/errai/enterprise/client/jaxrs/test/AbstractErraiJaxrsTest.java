@@ -16,12 +16,13 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.test;
 
-import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsModule;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 
+import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.junit.client.GWTTestCase;
 
@@ -46,7 +47,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
     return RestClient.create(remote, callback, errorCallback, successCodes);
   }
   
-  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, ErrorCallback errorCallback, Integer... successCodes) {
+  protected <T, R> T call(Class<T> remote, RemoteCallback<R> callback, RestErrorCallback errorCallback, Integer... successCodes) {
     return RestClient.create(remote, callback, errorCallback, successCodes);
   }
 
@@ -96,9 +97,9 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
     }
   }
   
-  private class TestErrorCallback implements ErrorCallback<Object> {
+  private class TestErrorCallback implements RestErrorCallback {
     @Override
-    public boolean error(Object message, Throwable throwable) {
+    public boolean error(Request request, Throwable throwable) {
       fail(throwable.toString());
       return false;
     }

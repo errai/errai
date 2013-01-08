@@ -1,15 +1,10 @@
 package org.jboss.errai.example.client.local;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
-import com.googlecode.gwtphonegap.client.PhoneGap;
+import com.google.gwt.user.client.ui.*;
+import com.googlecode.gwtphonegap.client.camera.Camera;
 import com.googlecode.gwtphonegap.client.camera.PictureCallback;
 import com.googlecode.gwtphonegap.client.camera.PictureOptions;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
@@ -48,7 +43,8 @@ import java.util.Set;
  */
 @Templated("#main")
 public class KitchenSinkClient extends Composite {
-  private PhoneGap phoneGap;
+  @Inject
+  Camera camera;
 
   @Inject
   @DataField
@@ -104,11 +100,6 @@ public class KitchenSinkClient extends Composite {
   @Inject
   @DataField
   Image image;
-
-  public KitchenSinkClient() {
-    phoneGap = GWT.create(PhoneGap.class);
-    phoneGap.initializePhoneGap();
-  }
 
   @PostConstruct
   public final void init() {
@@ -190,7 +181,7 @@ public class KitchenSinkClient extends Composite {
     options.setDestinationType(PictureOptions.DESTINATION_TYPE_DATA_URL);
     options.setSourceType(PictureOptions.PICTURE_SOURCE_TYPE_CAMERA);
 
-    phoneGap.getCamera().getPicture(options, new PictureCallback() {
+    camera.getPicture(options, new PictureCallback() {
 
       @Override
       public void onSuccess(String data) {

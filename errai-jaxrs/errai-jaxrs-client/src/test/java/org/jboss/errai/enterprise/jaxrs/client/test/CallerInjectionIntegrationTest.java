@@ -70,9 +70,9 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
                 fail("Callback should not be invoked");
               }
             },
-            new ErrorCallback<Object>() {
+            new ErrorCallback<Void>() {
               @Override
-              public boolean error(Object message, Throwable throwable) {
+              public boolean error(Void message, Throwable throwable) {
                 try {
                   throw throwable;
                 }

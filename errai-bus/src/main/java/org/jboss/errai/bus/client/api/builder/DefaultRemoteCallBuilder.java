@@ -69,7 +69,7 @@ public class DefaultRemoteCallBuilder {
 
   /**
    * Only intended for use by generated code. Use {@link #call(RemoteCallback, Class)} or
-   * {@link #call(RemoteCallback, org.jboss.errai.bus.client.api.BusErrorCallback, Class)} from handwritten code.
+   * {@link #call(RemoteCallback, BusErrorCallback, Class)} from handwritten code.
    * <p>
    * Creates, implements and returns an instance of <tt>RemoteCallEndpointDef</tt> and all applicable arguments, which
    * should be instantiated after this call to <tt>serviceName</tt>. The endpoint allows a function from a service to be

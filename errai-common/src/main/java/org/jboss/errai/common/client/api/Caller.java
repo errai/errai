@@ -17,8 +17,6 @@
 package org.jboss.errai.common.client.api;
 
 
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
 
 /**
  * An interface that can be used as the injection point for a (probably
@@ -62,5 +60,5 @@ public interface Caller<T> {
    * @return an instance of the proxy that can invoke service methods on the
    *         service described by {@code T}.
    */
-  public T call(RemoteCallback<?> callback, ErrorCallback errorCallback);
+  public T call(RemoteCallback<?> callback, ErrorCallback<?> errorCallback);
 }

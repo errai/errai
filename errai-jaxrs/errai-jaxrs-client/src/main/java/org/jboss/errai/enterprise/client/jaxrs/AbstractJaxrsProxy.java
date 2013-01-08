@@ -25,6 +25,7 @@ import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -48,15 +49,14 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
    * 
    * @return the remote callback, never null.
    */
-  @SuppressWarnings("rawtypes")
-  public abstract RemoteCallback getRemoteCallback();
+  public abstract RemoteCallback<?> getRemoteCallback();
 
   /**
    * Returns the error callback used by this proxy.
    * 
    * @return the error callback, null if no error callback was provided.
    */
-  public abstract ErrorCallback getErrorCallback();
+  public abstract ErrorCallback<?> getErrorCallback();
 
   /**
    * If not set explicitly, the base URL is the configured default application root path {@see RestClient}.
@@ -110,7 +110,7 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
       requestBuilder.sendRequest(body, new RequestCallback() {
         @Override
         public void onError(Request request, Throwable throwable) {
-          handleError(throwable, null);
+          handleError(throwable, request, null);
         }
 
         @Override
@@ -130,19 +130,25 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
           }
           else {
             ResponseException throwable = new ResponseException(response.getStatusText(), response);
-            handleError(throwable, response);
+            handleError(throwable, request, response);
           }
         }
       });
     }
     catch (RequestException throwable) {
-      handleError(throwable, null);
+      handleError(throwable, null, null);
     }
-  }
+  } 
 
-  protected void handleError(Throwable throwable, Response response) {
-    if (getErrorCallback() != null) {
-      getErrorCallback().error(null, throwable);
+  protected void handleError(Throwable throwable, Request request, Response response) {
+    ErrorCallback<?> errorCallback = getErrorCallback();
+    if (errorCallback != null) {
+      if (errorCallback instanceof RestErrorCallback) {
+        ((RestErrorCallback) errorCallback).error(request, throwable);
+      }
+      else {
+        errorCallback.error(null, throwable);
+      }
     }
     else if ((getRemoteCallback() instanceof ResponseCallback) && (response != null)) {
       ((ResponseCallback) getRemoteCallback()).callback(response);

@@ -5,5 +5,5 @@ import org.jboss.errai.common.client.api.ErrorCallback;
 /**
  * @author Mike Brock
  */
-public abstract class RpcErrorCallback implements ErrorCallback<Message> {
+public abstract class BusErrorCallback implements ErrorCallback<Message> {
 }

@@ -16,15 +16,17 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import com.google.gwt.http.client.Response;
-import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestErrorCallback;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JaxrsResponseObjectTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.junit.Test;
+
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.Response;
 
 /**
  * Testing the usage of {@link javax.ws.rs.core.Response} on the client.
@@ -62,13 +64,14 @@ public class JaxrsResponseObjectIntegrationTest extends AbstractErraiJaxrsTest {
             fail("Callback should not be invoked");
           }
         },
-        new ErrorCallback<Object>() {
+        new RestErrorCallback() {
           @Override
-          public boolean error(Object message, Throwable throwable) {
+          public boolean error(Request request, Throwable throwable) {
             try {
               throw throwable;
             }
             catch (ResponseException e) {
+              assertNotNull("Request object should not be null", request);
               assertEquals("Wrong status code received", Response.SC_NOT_FOUND, e.getResponse().getStatusCode());
               finishTest();
             }
