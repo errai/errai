@@ -66,6 +66,8 @@ public class PageStateTest extends AbstractErraiCDITest {
   public void testAbsentParameterGivesDefault() throws Exception {
     PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
 
+    // force fields back to defaults before we start
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>of());
     assertAllFieldsHaveDefaultValues(page);
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>builder()
@@ -107,6 +109,8 @@ public class PageStateTest extends AbstractErraiCDITest {
   public void testPassAllStateTokens() throws Exception {
     PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
 
+    // force fields back to defaults before we start
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>of());
     assertAllFieldsHaveDefaultValues(page);
 
     ImmutableMultimap<String, String> stateValues = ImmutableMultimap.<String,String>builder()
@@ -179,6 +183,10 @@ public class PageStateTest extends AbstractErraiCDITest {
    */
   public void testScalarGetsFirstValueInToken() throws Exception {
     PageWithExtraState page = beanManager.lookupBean(PageWithExtraState.class).getInstance();
+
+    // force fields back to defaults before we start
+    navigation.goTo(PageWithExtraState.class, ImmutableMultimap.<String,String>of());
+
     assertNull(page.getStringThing());
 
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of(
