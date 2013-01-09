@@ -23,6 +23,26 @@ import com.google.gwt.user.client.ui.Widget;
  * appearance is based on (and depends on) the Twitter Bootstrap stylesheet
  * collection. It does not require jQuery or the Bootstrap jquery.popup.js
  * plugin (it is a GWT-based replacement for that plugin).
+ * <p>
+ * Usage Example:
+ * <pre>
+ * final StoreForm storeForm = beanManager.lookupBean(StoreForm.class).getInstance();
+ *   final PopoverContainer popover = beanManager.lookupBean(PopoverContainer.class).getInstance();
+ *   popover.setTitleHtml(new SafeHtmlBuilder().appendEscaped("New Store").toSafeHtml());
+ *   popover.setBodyWidget(storeForm);
+ *   popover.show(addStoreButton);
+ *   storeForm.grabKeyboardFocus();
+ *
+ *   // hide store form when new store is saved
+ *   storeForm.setAfterSaveAction(new Runnable() {
+ *     {@code @Override}
+ *     public void run() {
+ *       popover.hide();
+ *       beanManager.destroyBean(popover);
+ *       beanManager.destroyBean(storeForm);
+ *     }
+ *   });
+ * </pre>
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
