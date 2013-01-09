@@ -499,8 +499,54 @@
       <properties>
         <webDescriptor>tomcat</webDescriptor>
       </properties>
-    </profile>
 
+      <dependencies>
+        <dependency>
+          <groupId>javax.enterprise</groupId>
+          <artifactId>cdi-api</artifactId>
+          <scope>compile</scope>
+          <version>1.0-SP4</version>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-cdi-jetty</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+          <version>${jetty.version}</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-plus</artifactId>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-naming</artifactId>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.jboss.weld.se</groupId>
+          <artifactId>weld-se-core</artifactId>
+          <scope>compile</scope>
+          <exclusions>
+            <exclusion>
+              <groupId>javax.el</groupId>
+              <artifactId>el-api</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+
+      </dependencies>
+    </profile>
   </profiles>
 
   <build>

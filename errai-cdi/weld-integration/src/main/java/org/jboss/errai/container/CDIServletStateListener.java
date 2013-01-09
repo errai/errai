@@ -38,6 +38,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A fork of the Listener class from Weld 1.1.0.Beta1. There are two differences from the original:
+ *
+ * <ol>
+ *  <li>Validation of CDI beans is skipped on startup
+ *  <li>JSP support is omitted
+ * </ol>
+ *
  * @author Pete Muir
  */
 public class CDIServletStateListener extends ForwardingServletListener {
@@ -87,6 +94,7 @@ public class CDIServletStateListener extends ForwardingServletListener {
     // Make Javassist always use the TCCL to load classes
     ProxyFactory.classLoaderProvider = new ClassLoaderProvider() {
 
+      @Override
       public ClassLoader get(ProxyFactory pf) {
         return Thread.currentThread().getContextClassLoader();
       }
