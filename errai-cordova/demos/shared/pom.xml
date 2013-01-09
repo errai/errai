@@ -7,7 +7,7 @@
   <artifactId>errai-cordova-kitchensink</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
-  <name>JBoss AS Quickstarts: Errai kitchensink</name>
+  <name>Errai::Cordova::Demos::Kitchensink</name>
   <description>A starter Java EE 6 webapp project for use on JBoss AS 7 / EAP 6, generated from the jboss-javaee6-webapp archetype</description>
 
   <properties>
