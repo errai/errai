@@ -244,18 +244,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.hornetq</groupId>
-      <artifactId>hornetq-core</artifactId>
-      <version>2.2.21.Final</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hornetq</groupId>
-      <artifactId>hornetq-core-client</artifactId>
-      <version>2.2.21.Final</version>
-    </dependency>
-
-    <dependency>
       <groupId>javax</groupId>
       <artifactId>javaee-api</artifactId>
       <version>6.0</version>

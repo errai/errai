@@ -19,7 +19,7 @@ import java.util.Collection;
 /**
  * @author Mike Brock
  */
-public class AsyncBeanManagerTests extends IOCClientTestCase {
+public class      AsyncBeanManagerTests extends IOCClientTestCase {
 
   @Override
   public String getModuleName() {

@@ -31,6 +31,7 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,7 +78,7 @@ public class MessageFactory {
   public static Message createCommandMessage(QueueSession session, String json) {
     if (json.length() == 0) return null;
 
-    Message msg = createWithPartsFromRawMap(MapMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
+    Message msg = createWithPartsFromRawMap(ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
         new DecodingSession(MappingContextSingleton.get())))
             .setResource("Session", session)
             .setResource("SessionID", session.getSessionId());
@@ -105,6 +106,26 @@ public class MessageFactory {
       throw new RuntimeException("bad payload");
     }
   }
+
+
+  public static List<Message> createCommandMessage(QueueSession session, InputStream inputStream) throws IOException {
+    EJValue value = JSONStreamDecoder.decode(inputStream);
+    if (value.isObject() != null) {
+      return Collections.singletonList(from(getParts(value), session, null));
+    }
+    else if (value.isArray() != null) {
+      EJArray arr = value.isArray();
+      List<Message> messages = new ArrayList<Message>(arr.size());
+      for (int i = 0; i < arr.size(); i++) {
+        messages.add(from(getParts(arr.get(i)), session, null));
+      }
+      return messages;
+    }
+    else {
+      throw new RuntimeException("bad payload");
+    }
+  }
+
 
   private static Map getParts(EJValue value) {
     return ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(value,

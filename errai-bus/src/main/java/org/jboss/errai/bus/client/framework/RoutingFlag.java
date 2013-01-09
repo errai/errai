@@ -76,6 +76,13 @@ public enum RoutingFlag {
     public int flag() {
       return 1 << 7;
     }
+  },
+
+  FromPeer {
+    @Override
+    public int flag() {
+      return 1 << 8;
+    }
   };
   /**
    * Returns the integer representing the flag
