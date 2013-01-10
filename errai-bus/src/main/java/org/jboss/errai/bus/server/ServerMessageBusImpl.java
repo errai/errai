@@ -128,6 +128,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final boolean webSocketServlet;
   private final boolean webSocketServer;
 
+  private final boolean clustering;
   private final ClusteringProvider clusteringProvider;
 
   /**
@@ -509,6 +510,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }, 8, 8, TimeUnit.SECONDS);
 
     try {
+      clustering = ErraiConfigAttribs.ENABLE_CLUSTERING.getBoolean(config);
       final String clusteringProviderCls = ErraiConfigAttribs.CLUSTERING_PROVIDER.get(config);
       clusteringProvider = Guice.createInjector(new AbstractModule() {
         @Override
@@ -516,7 +518,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           bind(ServerMessageBus.class).toInstance(ServerMessageBusImpl.this);
           bind(ErraiServiceConfigurator.class).toInstance(config);
         }
-      }).<ClusteringProvider>getInstance((Class<ClusteringProvider>) Class.forName(clusteringProviderCls));
+      }).getInstance((Class<ClusteringProvider>) Class.forName(clusteringProviderCls));
     }
     catch (Exception e) {
       throw new RuntimeException("could not initialize clustering provider", e);
@@ -775,38 +777,28 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void enqueueForDelivery(final MessageQueue queue, final Message message) {
     try {
-      final byte[] hashBytes = new byte[16];
-      random.nextBytes(hashBytes);
-      final String messageId = message.getSubject() + SecureHashUtil.hashToHexString(hashBytes);
-
       if (queue != null && isAnyoneListening(queue, message.getSubject())) {
         queue.offer(message);
-
       }
       else {
         if (queue != null && !queue.isInitialized()) {
           deferDelivery(queue, message);
         }
         else {
-          if (message.hasPart(MessageParts.SessionID)) {
+          if (clustering && message.hasPart(MessageParts.SessionID)) {
             final String sessionId = message.get(String.class, MessageParts.SessionID);
             if (!sessionLookup.containsKey(sessionId) && !BusTools.isReservedName(message.getSubject())) {
+              final byte[] hashBytes = new byte[16];
+              random.nextBytes(hashBytes);
+              final String messageId = message.getSubject() + SecureHashUtil.hashToHexString(hashBytes);
 
               clusteringProvider.clusterTransmit(sessionId, message.getSubject(), messageId);
               message.setFlag(RoutingFlag.ClusterWait);
 
               clusterWait.put(messageId, new ClusterWaitEntry(System.currentTimeMillis(), message));
 
-//              getScheduler().schedule(new Runnable() {
-//                @Override
-//                public void run() {
-//                  clusterWait.remove(messageId);
-//                }
-//              }, 10, TimeUnit.SECONDS);
-
               return;
             }
-
           }
 
           delayOrFail(message, new Runnable() {
@@ -1128,7 +1120,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
       }
 
-      if (!message.isFlagSet(RoutingFlag.FromPeer) && !message.hasPart(MessageParts.SessionID) && !BusTools.isReservedName(message.getSubject())) {
+      if (clustering &&
+          !message.isFlagSet(RoutingFlag.FromPeer)
+          && !message.hasPart(MessageParts.SessionID)
+          && !BusTools.isReservedName(message.getSubject())) {
+
         clusteringProvider.clusterTransmitGlobal(message);
       }
     }

@@ -19,6 +19,8 @@ import org.jboss.errai.bus.server.cluster.ClusterCommands;
 import org.jboss.errai.bus.server.cluster.ClusteringProvider;
 import org.jboss.errai.bus.server.cluster.IntrabusQueueSession;
 import org.jboss.errai.bus.server.io.MessageFactory;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 import org.jgroups.JChannel;
@@ -42,13 +44,15 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
   private static Logger log = LoggerFactory.getLogger(JGroupsClusteringProvider.class);
 
   @Inject
-  private JGroupsClusteringProvider(ServerMessageBus messageBus) {
+  private JGroupsClusteringProvider(final ServerMessageBus messageBus, final ErraiServiceConfigurator config) {
     this.serverMessageBus = messageBus;
 
     try {
       jchannel = new JChannel();
-      jchannel.connect("erraiCluster");
-      jchannel.getState(null, 10000);
+      jchannel.connect(ErraiConfigAttribs.CLUSTER_NAME.get(config));
+
+      // I don't think waiting for the state is necessary.
+      // jchannel.getState(null, 2000);
     }
     catch (Exception e) {
       throw new RuntimeException(e);
@@ -134,25 +138,31 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
 
     jchannel.setReceiver(new ReceiverAdapter() {
       @Override
-      public void receive(org.jgroups.Message msg) {
+      public void receive(final org.jgroups.Message msg) {
+        try {
+          final String json = new String(msg.getRawBuffer(), "UTF-8");
+          final Message commandMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, json);
 
-        final String json = String.valueOf(msg.getObject());
-        final Message commandMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, json);
+          if (busId.equals(commandMessage.get(String.class, BusId))) {
+            return;
+          }
+          commandMessage.setFlag(RoutingFlag.FromPeer);
 
-        if (busId.equals(commandMessage.get(String.class, BusId))) {
-          return;
+          serverMessageBus.sendGlobal(commandMessage);
         }
-        commandMessage.setFlag(RoutingFlag.FromPeer);
-
-        serverMessageBus.sendGlobal(commandMessage);
+        catch (Exception e) {
+          e.printStackTrace();
+        }
       }
+
+
     });
 
     log.info("starting errai clustering service.");
   }
 
   @Override
-  public void clusterTransmit(String sessionId, String subject, String messageId) {
+  public void clusterTransmit(final String sessionId, final String subject, final String messageId) {
     final Message whoHandlesMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
         .set(ToSubject, CLUSTER_SERVICE)
         .set(CommandType, ClusterCommands.WhoHandles.name())
@@ -162,7 +172,7 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
         .set(MessageId, messageId);
 
 
-    org.jgroups.Message jGroupsMsg = new org.jgroups.Message(null, null, ErraiProtocol.encodePayload(whoHandlesMessage.getParts()));
+    final org.jgroups.Message jGroupsMsg = new org.jgroups.Message(null, null, ErraiProtocol.encodePayload(whoHandlesMessage.getParts()));
 
     try {
       jchannel.send(jGroupsMsg);
@@ -174,7 +184,7 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
   }
 
   @Override
-  public void clusterTransmitGlobal(Message message) {
+  public void clusterTransmitGlobal(final Message message) {
 
     final Message dMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
         .set(ToSubject, CLUSTER_SERVICE)
@@ -182,17 +192,14 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
         .set(Payload, ErraiProtocol.encodePayload(message.getParts()))
         .set(BusId, busId);
 
-//    final ClientMessage clientMessage = clientSession.createMessage(false);
-//    clientMessage.putStringProperty(ENVELOPE_PROPERTY, ErraiProtocol.encodePayload(dMessage.getParts()));
-
-    org.jgroups.Message jGroupsMsg = new org.jgroups.Message(null, null, ErraiProtocol.encodePayload(dMessage.getParts()));
 
     try {
+      final org.jgroups.Message jGroupsMsg
+          = new org.jgroups.Message(null, null, ErraiProtocol.encodePayload(dMessage.getParts()).getBytes("UTF-8"));
       jchannel.send(jGroupsMsg);
     }
     catch (Exception e) {
       e.printStackTrace();
     }
-
   }
 }

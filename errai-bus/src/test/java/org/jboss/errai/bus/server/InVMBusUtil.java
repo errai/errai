@@ -17,6 +17,7 @@ public class InVMBusUtil {
     final ErraiServiceConfigurator configurator = new ErraiServiceConfiguratorImpl();
     int port = ErraiConfigAttribs.CLUSTER_PORT.getInt(configurator) + portOffset;
     ErraiConfigAttribs.CLUSTER_PORT.set(configurator, String.valueOf(port));
+    ErraiConfigAttribs.ENABLE_CLUSTERING.set(configurator, "true");
     ErraiConfigAttribs.CLUSTERING_PROVIDER.set(configurator, JGroupsClusteringProvider.class.getName());
     ErraiConfigAttribs.AUTO_DISCOVER_SERVICES.set(configurator, "false");
     return ErraiServiceFactory.create(configurator);

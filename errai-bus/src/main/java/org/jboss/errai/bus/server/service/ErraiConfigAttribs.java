@@ -71,6 +71,8 @@ public enum ErraiConfigAttribs {
 
   CLUSTER_PORT("errai.clustering.port", "6446"),
 
+  CLUSTER_NAME("errai.bus.cluster_name", "errai"),
+  ENABLE_CLUSTERING("errai.bus.enable_clustering", "false"),
   CLUSTERING_PROVIDER("errai.bus.clustering_provider", "org.jboss.errai.bus.server.cluster.noop.NoopClusteringProvider");
 
   protected final String attributeName;
