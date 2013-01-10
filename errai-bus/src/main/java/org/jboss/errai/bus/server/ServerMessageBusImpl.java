@@ -23,7 +23,10 @@ import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.ver
 import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -506,7 +509,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }, 8, 8, TimeUnit.SECONDS);
 
     try {
-      clusteringProvider = JGroupsClusteringProvider.create(this);
+      final String clusteringProviderCls = ErraiConfigAttribs.CLUSTERING_PROVIDER.get(config);
+      clusteringProvider = Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(ServerMessageBus.class).toInstance(ServerMessageBusImpl.this);
+          bind(ErraiServiceConfigurator.class).toInstance(config);
+        }
+      }).<ClusteringProvider>getInstance((Class<ClusteringProvider>) Class.forName(clusteringProviderCls));
     }
     catch (Exception e) {
       throw new RuntimeException("could not initialize clustering provider", e);

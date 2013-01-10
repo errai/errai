@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.service;
 
+import org.jboss.errai.bus.server.cluster.noop.NoopClusteringProvider;
+
 /**
  * @author Mike Brock
  */
@@ -67,7 +69,9 @@ public enum ErraiConfigAttribs {
 
   AUTO_DISCOVER_SERVICES("errai.bus.auto_discover_services", "false"),
 
-  CLUSTER_PORT("errai.clustering.port", "6446");
+  CLUSTER_PORT("errai.clustering.port", "6446"),
+
+  CLUSTERING_PROVIDER("errai.bus.clustering_provider", "org.jboss.errai.bus.server.cluster.noop.NoopClusteringProvider");
 
   protected final String attributeName;
   protected final String defaultValue;

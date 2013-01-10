@@ -8,6 +8,7 @@ import static org.jboss.errai.common.client.protocols.MessageParts.CommandType;
 import static org.jboss.errai.common.client.protocols.MessageParts.SessionID;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 
+import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
@@ -40,10 +41,18 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
 
   private static Logger log = LoggerFactory.getLogger(JGroupsClusteringProvider.class);
 
-
-  private JGroupsClusteringProvider(JChannel jchannel, ServerMessageBus messageBus) {
-    this.jchannel = jchannel;
+  @Inject
+  private JGroupsClusteringProvider(ServerMessageBus messageBus) {
     this.serverMessageBus = messageBus;
+
+    try {
+      jchannel = new JChannel();
+      jchannel.connect("erraiCluster");
+      jchannel.getState(null, 10000);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
     final MessageCallback callback = new MessageCallback() {
       @Override
@@ -123,38 +132,23 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
 
     serverMessageBus.subscribe(CLUSTER_SERVICE, callback);
 
-     jchannel.setReceiver(new ReceiverAdapter() {
-       @Override
-       public void receive(org.jgroups.Message msg) {
+    jchannel.setReceiver(new ReceiverAdapter() {
+      @Override
+      public void receive(org.jgroups.Message msg) {
 
-         final String json = String.valueOf(msg.getObject());
-         final Message commandMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, json);
+        final String json = String.valueOf(msg.getObject());
+        final Message commandMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, json);
 
-         if (busId.equals(commandMessage.get(String.class, BusId))) {
-           return;
-         }
-         commandMessage.setFlag(RoutingFlag.FromPeer);
+        if (busId.equals(commandMessage.get(String.class, BusId))) {
+          return;
+        }
+        commandMessage.setFlag(RoutingFlag.FromPeer);
 
-         serverMessageBus.sendGlobal(commandMessage);
-       }
-     });
+        serverMessageBus.sendGlobal(commandMessage);
+      }
+    });
 
-  }
-
-  public static ClusteringProvider create(ServerMessageBus bus) {
-    final JChannel jChannel;
-    try {
-      jChannel = new JChannel();
-      jChannel.connect("erraiCluster");
-      jChannel.getState(null, 10000);
-
-
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    return new JGroupsClusteringProvider(jChannel, bus);
+    log.info("starting errai clustering service.");
   }
 
   @Override
