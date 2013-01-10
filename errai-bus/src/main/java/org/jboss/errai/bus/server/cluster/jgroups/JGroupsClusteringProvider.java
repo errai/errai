@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jboss.errai.bus.server.cluster.jgroups;
 
 import static org.jboss.errai.bus.server.cluster.ClusterParts.BusId;
@@ -34,9 +50,9 @@ import java.util.HashMap;
 /**
  * @author Mike Brock
  */
-public class JGroupsClusteringProvider implements ClusteringProvider {
+public class JGroupsClusteringProvider extends ReceiverAdapter implements ClusteringProvider, MessageCallback {
 
-  private static final String CLUSTER_SERVICE = "ErraiClusterService"; // erraibus service
+  private static final String CLUSTER_SERVICE = "local:ErraiClusterService"; // erraibus service
   private final String busId = SecureHashUtil.nextSecureHash();
 
   private final JChannel jchannel;
@@ -59,18 +75,40 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
       throw new RuntimeException(e);
     }
 
-    final MessageCallback callback = new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
-        if (queueSession != IntrabusQueueSession.INSTANCE) {
-          log.warn("message to cluster service ('" + CLUSTER_SERVICE + "') originating from illegal session. " +
-              " message was discarded.");
-          return;
-        }
+    serverMessageBus.subscribe(CLUSTER_SERVICE, this);
+    jchannel.setReceiver(this);
 
-        switch (ClusterCommands.valueOf(message.getCommandType())) {
-          case WhoHandles: {
+    log.info("starting errai clustering service.");
+  }
+
+  @Override
+  public void receive(final org.jgroups.Message msg) {
+    try {
+      final Message erraiMessage = getErraiMessage(msg);
+
+      if (busId.equals(erraiMessage.get(String.class, BusId))) {
+        return;
+      }
+      erraiMessage.setFlag(RoutingFlag.FromPeer);
+
+      serverMessageBus.sendGlobal(erraiMessage);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void callback(final Message message) {
+    final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
+    if (queueSession != IntrabusQueueSession.INSTANCE) {
+      log.warn("message to cluster service ('" + CLUSTER_SERVICE + "') originating from illegal session. " +
+          " message was discarded.");
+      return;
+    }
+
+    switch (ClusterCommands.valueOf(message.getCommandType())) {
+      case WhoHandles: {
 //            if (serverMessageBus.hasRemoteSubscriptions(message.get(String.class, Subject))) {
 //              final ClientMessage clientMessage = clientSession.createMessage(false);
 //              final String sessionIdRequested = message.get(String.class, SessionID);
@@ -97,66 +135,41 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
 //                e.printStackTrace();
 //              }
 //            }
-          }
-          break;
+      }
+      break;
 
-          case NotifyOwner: {
-            final String messageId = message.get(String.class, MessageId);
-            final Message deferredMessage = serverMessageBus.getSuspendedMessage(messageId);
-            final String remoteBusId = message.get(String.class, BusId);
+      case NotifyOwner: {
+        final String messageId = message.get(String.class, MessageId);
+        final Message deferredMessage = serverMessageBus.getSuspendedMessage(messageId);
+        final String remoteBusId = message.get(String.class, BusId);
 
-            if (deferredMessage != null) {
-              final Message dMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
-                  .set(ToSubject, CLUSTER_SERVICE)
-                  .set(CommandType, ClusterCommands.MessageForward.name())
-                  .set(Payload, ErraiProtocol.encodePayload(deferredMessage.getParts()));
+        if (deferredMessage != null) {
+          final Message dMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
+              .set(ToSubject, CLUSTER_SERVICE)
+              .set(CommandType, ClusterCommands.MessageForward.name())
+              .set(Payload, ErraiProtocol.encodePayload(deferredMessage.getParts()));
 
-              try {
+          try {
 //                final ClientMessage clientMessage = clientSession.createMessage(false);
 //                final ClientProducer producer = clientSession.createProducer(dMessage.get(String.class, BusId));
 //                producer.send(remoteBusId, clientMessage);
 //                producer.close();
-              }
-              catch (Exception e) {
-                e.printStackTrace();
-              }
-            }
           }
-          break;
-
-          case MessageForward: {
-            final String payload = message.get(String.class, Payload);
-            final Message forwardMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, payload);
-            forwardMessage.setFlag(RoutingFlag.FromPeer);
-            serverMessageBus.sendGlobal(forwardMessage);
+          catch (Exception e) {
+            e.printStackTrace();
           }
-          break;
         }
       }
-    };
+      break;
 
-    serverMessageBus.subscribe(CLUSTER_SERVICE, callback);
-
-    jchannel.setReceiver(new ReceiverAdapter() {
-      @Override
-      public void receive(final org.jgroups.Message msg) {
-        try {
-          final Message erraiMessage = getErraiMessage(msg);
-
-          if (busId.equals(erraiMessage.get(String.class, BusId))) {
-            return;
-          }
-          erraiMessage.setFlag(RoutingFlag.FromPeer);
-
-          serverMessageBus.sendGlobal(erraiMessage);
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-        }
+      case MessageForward: {
+        final String payload = message.get(String.class, Payload);
+        final Message forwardMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, payload);
+        forwardMessage.setFlag(RoutingFlag.FromPeer);
+        serverMessageBus.sendGlobal(forwardMessage);
       }
-    });
-
-    log.info("starting errai clustering service.");
+      break;
+    }
   }
 
   @Override
@@ -181,7 +194,6 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
 
   @Override
   public void clusterTransmitGlobal(final Message message) {
-
     final Message dMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
         .set(ToSubject, CLUSTER_SERVICE)
         .set(CommandType, ClusterCommands.MessageForward.name())
@@ -196,7 +208,7 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
     }
   }
 
-  public static Message getErraiMessage(org.jgroups.Message message) {
+  public static Message getErraiMessage(final org.jgroups.Message message) {
     try {
       return MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, new String(message.getRawBuffer(), "UTF-8"));
     }
