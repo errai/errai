@@ -28,6 +28,7 @@ import org.jgroups.ReceiverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 /**
@@ -140,15 +141,14 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
       @Override
       public void receive(final org.jgroups.Message msg) {
         try {
-          final String json = new String(msg.getRawBuffer(), "UTF-8");
-          final Message commandMessage = MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, json);
+          final Message erraiMessage = getErraiMessage(msg);
 
-          if (busId.equals(commandMessage.get(String.class, BusId))) {
+          if (busId.equals(erraiMessage.get(String.class, BusId))) {
             return;
           }
-          commandMessage.setFlag(RoutingFlag.FromPeer);
+          erraiMessage.setFlag(RoutingFlag.FromPeer);
 
-          serverMessageBus.sendGlobal(commandMessage);
+          serverMessageBus.sendGlobal(erraiMessage);
         }
         catch (Exception e) {
           e.printStackTrace();
@@ -170,10 +170,8 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
         .set(MessageId, messageId);
 
 
-    final org.jgroups.Message jGroupsMsg = new org.jgroups.Message(null, null, ErraiProtocol.encodePayload(whoHandlesMessage.getParts()));
-
     try {
-      jchannel.send(jGroupsMsg);
+      jchannel.send(getJGroupsMessage(whoHandlesMessage));
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -190,14 +188,29 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
         .set(Payload, ErraiProtocol.encodePayload(message.getParts()))
         .set(BusId, busId);
 
-
     try {
-      final org.jgroups.Message jGroupsMsg
-          = new org.jgroups.Message(null, null, ErraiProtocol.encodePayload(dMessage.getParts()).getBytes("UTF-8"));
-      jchannel.send(jGroupsMsg);
+      jchannel.send(getJGroupsMessage(dMessage));
     }
     catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  public static Message getErraiMessage(org.jgroups.Message message) {
+    try {
+      return MessageFactory.createCommandMessage(IntrabusQueueSession.INSTANCE, new String(message.getRawBuffer(), "UTF-8"));
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static org.jgroups.Message getJGroupsMessage(final Message message) {
+    try {
+      return new org.jgroups.Message(null, null, ErraiProtocol.encodePayload(message.getParts()).getBytes("UTF-8"));
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
     }
   }
 }
