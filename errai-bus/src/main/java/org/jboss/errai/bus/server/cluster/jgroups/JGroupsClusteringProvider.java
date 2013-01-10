@@ -154,8 +154,6 @@ public class JGroupsClusteringProvider implements ClusteringProvider {
           e.printStackTrace();
         }
       }
-
-
     });
 
     log.info("starting errai clustering service.");
