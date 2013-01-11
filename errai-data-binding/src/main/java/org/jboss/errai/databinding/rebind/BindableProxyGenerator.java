@@ -195,7 +195,6 @@ public class BindableProxyGenerator {
             Stmt.if_(Bool.expr(agent("binders").invoke("containsKey", property)))
                 .append(Stmt.loadVariable(property).assignValue(Cast.to(paramType,
                     agent("binders").invoke("get", property).invoke("setModel", Variable.get(property)))))
-                .append(Stmt.loadVariable("this").invoke("set", property, Variable.get(property)))
                 .finish();
       }
       else {
