@@ -29,10 +29,10 @@ public class ErraiServiceFactory {
   public static ErraiService create(final ErraiServiceConfigurator configurator) {
     return Guice.createInjector(new AbstractModule() {
       public void configure() {
+        bind(ErraiServiceConfigurator.class).toInstance(configurator);
+        bind(ErraiService.class).to(ErraiServiceImpl.class);
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
         bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ErraiService.class).to(ErraiServiceImpl.class);
-        bind(ErraiServiceConfigurator.class).toInstance(configurator);
       }
     }).getInstance(ErraiService.class);
   }

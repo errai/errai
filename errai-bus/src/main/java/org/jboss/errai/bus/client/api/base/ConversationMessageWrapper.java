@@ -198,6 +198,12 @@ class ConversationMessageWrapper implements Message {
     return newMessage.getErrorCallback();
   }
 
+
+  @Override
+  public <T> T getValue(Class<T> type) {
+    return newMessage.getValue(type);
+  }
+
   @Override
   public <T> T get(Class<T> type, String part) {
     return newMessage.get(type, part);

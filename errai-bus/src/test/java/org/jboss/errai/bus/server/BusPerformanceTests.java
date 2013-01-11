@@ -21,6 +21,7 @@ import org.apache.tools.ant.types.Assertions;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.server.mock.MockErraiService;
 import org.jboss.errai.bus.server.mock.MockErraiServiceConfigurator;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -47,7 +48,7 @@ public class BusPerformanceTests {
 
     TestCallback callback = new TestCallback();
 
-    ServerMessageBusImpl bus = new ServerMessageBusImpl(new MockErraiServiceConfigurator());
+    ServerMessageBusImpl bus = new ServerMessageBusImpl(new MockErraiService(), new MockErraiServiceConfigurator());
     bus.subscribe("Foo", callback);
 
     int iterations = 25000000;

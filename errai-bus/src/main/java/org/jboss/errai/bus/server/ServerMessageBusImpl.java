@@ -16,9 +16,11 @@
 
 package org.jboss.errai.bus.server;
 
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createCall;
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.bus.client.util.ErrorHelper.sendClientError;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
 import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -26,7 +28,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -54,7 +55,6 @@ import org.jboss.errai.bus.server.api.QueueCloseEvent;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.cluster.ClusteringProvider;
-import org.jboss.errai.bus.server.cluster.jgroups.JGroupsClusteringProvider;
 import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.PageUtil;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
@@ -63,6 +63,7 @@ import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
 import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
+import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
@@ -111,7 +112,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
   private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
-  private final Map<String, ClusterWaitEntry> clusterWait = new ConcurrentHashMap<String, ClusterWaitEntry>();
+  private final Map<String, ClusterWaitEntry> deadLetter = new ConcurrentHashMap<String, ClusterWaitEntry>();
 
   private final List<SubscribeListener> subscribeListeners = new ArrayList<SubscribeListener>();
   private final List<UnsubscribeListener> unsubscribeListeners = new ArrayList<UnsubscribeListener>();
@@ -139,7 +140,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
    */
   @Inject
-  public ServerMessageBusImpl(final ErraiServiceConfigurator config) {
+  public ServerMessageBusImpl(final ErraiService service, final ErraiServiceConfigurator config) {
 
     this.webSocketServer = config
         .getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER);
@@ -472,12 +473,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           ref.discard();
         }
 
-        final Iterator<ClusterWaitEntry> entryIterator = clusterWait.values().iterator();
+        final Iterator<ClusterWaitEntry> entryIterator = deadLetter.values().iterator();
 
         while (entryIterator.hasNext()) {
           final ClusterWaitEntry entry = entryIterator.next();
           if (entry.isStale()) {
             entryIterator.remove();
+            try {
+              entry.notifyTimeout();
+            }
+            catch (Exception e) {
+              log.warn("exception occurred expunging from dead letter queue", e);
+            }
           }
         }
 
@@ -517,6 +524,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         protected void configure() {
           bind(ServerMessageBus.class).toInstance(ServerMessageBusImpl.this);
           bind(ErraiServiceConfigurator.class).toInstance(config);
+          bind(ErraiService.class).toInstance(service);
         }
       }).getInstance((Class<ClusteringProvider>) Class.forName(clusteringProviderCls));
     }
@@ -716,7 +724,17 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
     else if (message.hasPart(MessageParts.SessionID)) {
       message.setFlag(RoutingFlag.NonGlobalRouting);
-      send(getQueueBySession(message.get(String.class, MessageParts.SessionID)), message, true);
+      try {
+        send(getQueueBySession(message.get(String.class, MessageParts.SessionID)), message, true);
+      }
+      catch (final QueueUnavailableException e) {
+        forwardToCluster(message, new Runnable() {
+          @Override
+          public void run() {
+            sendClientError(ServerMessageBusImpl.this, message, "failed to deliver message", e);
+          }
+        });
+      }
     }
     else {
       sendGlobal(message);
@@ -775,6 +793,25 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Random random = new Random(System.nanoTime());
 
+  private void forwardToCluster(final Message message, final Runnable timeoutCallback) {
+    if (clustering && message.hasPart(MessageParts.SessionID)) {
+      final String sessionId = message.get(String.class, MessageParts.SessionID);
+      if (!sessionLookup.containsKey(sessionId) && !BusTools.isReservedName(message.getSubject())) {
+        final byte[] hashBytes = new byte[16];
+        random.nextBytes(hashBytes);
+        final String messageId = message.getSubject() + SecureHashUtil.hashToHexString(hashBytes);
+
+        deadLetter.put(messageId, new ClusterWaitEntry(System.currentTimeMillis(), message, timeoutCallback));
+
+        clusteringProvider.clusterTransmit(sessionId, message.getSubject(), messageId);
+        message.setFlag(RoutingFlag.ClusterWait);
+      }
+    }
+    else if (timeoutCallback != null) {
+      timeoutCallback.run();
+    }
+  }
+
   private void enqueueForDelivery(final MessageQueue queue, final Message message) {
     try {
       if (queue != null && isAnyoneListening(queue, message.getSubject())) {
@@ -785,21 +822,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           deferDelivery(queue, message);
         }
         else {
-          if (clustering && message.hasPart(MessageParts.SessionID)) {
-            final String sessionId = message.get(String.class, MessageParts.SessionID);
-            if (!sessionLookup.containsKey(sessionId) && !BusTools.isReservedName(message.getSubject())) {
-              final byte[] hashBytes = new byte[16];
-              random.nextBytes(hashBytes);
-              final String messageId = message.getSubject() + SecureHashUtil.hashToHexString(hashBytes);
-
-              clusteringProvider.clusterTransmit(sessionId, message.getSubject(), messageId);
-              message.setFlag(RoutingFlag.ClusterWait);
-
-              clusterWait.put(messageId, new ClusterWaitEntry(System.currentTimeMillis(), message));
-
-              return;
-            }
-          }
+//          if (clustering) {
+//            forwardToCluster(message, );
+//          }
+//
 
           delayOrFail(message, new Runnable() {
             @Override
@@ -1060,10 +1086,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   public static class ClusterWaitEntry {
     final long time;
     final Message message;
+    final Runnable timeoutCallback;
+
+    public ClusterWaitEntry(long time,  Message message, Runnable timeoutCallback) {
+      this.timeoutCallback = timeoutCallback;
+      this.message = message;
+      this.time = time;
+    }
 
     public ClusterWaitEntry(long time, Message message) {
-      this.time = time;
-      this.message = message;
+      this(time, message, null);
     }
 
     public long getTime() {
@@ -1076,6 +1108,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public boolean isStale() {
       return (System.currentTimeMillis() - time) > (10 * 1000);
+    }
+
+    public void notifyTimeout() {
+     if (timeoutCallback != null) {
+       timeoutCallback.run();
+     }
     }
   }
 
@@ -1427,12 +1465,17 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   @Override
-  public Message getSuspendedMessage(final String messageId) {
-    ClusterWaitEntry entry = clusterWait.get(messageId);
+  public Message getDeadLetterMessage(final String messageId) {
+    final ClusterWaitEntry entry = deadLetter.get(messageId);
     if (entry != null) {
       return entry.getMessage();
     }
     return null;
+  }
+
+  @Override
+  public boolean removeDeadLetterMessage(final String messageId) {
+    return deadLetter.remove(messageId) != null;
   }
 
   @Override

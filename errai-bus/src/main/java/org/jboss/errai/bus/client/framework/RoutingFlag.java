@@ -84,6 +84,7 @@ public enum RoutingFlag {
       return 1 << 8;
     }
   };
+
   /**
    * Returns the integer representing the flag
    *

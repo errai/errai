@@ -258,8 +258,13 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public Message getSuspendedMessage(String messageId) {
-    return proxied.getSuspendedMessage(messageId);
+  public Message getDeadLetterMessage(String messageId) {
+    return proxied.getDeadLetterMessage(messageId);
+  }
+
+  @Override
+  public boolean removeDeadLetterMessage(String messageId) {
+     return proxied.removeDeadLetterMessage(messageId);
   }
 
   @Override

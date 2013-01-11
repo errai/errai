@@ -110,7 +110,9 @@ public interface ServerMessageBus extends MessageBus {
 
   public void associateNewQueue(QueueSession oldSession, QueueSession newSession);
 
-  public Message getSuspendedMessage(String messageId);
+  public Message getDeadLetterMessage(String messageId);
+
+  public boolean removeDeadLetterMessage(String messageId);
 
   /**
    * Stop the MessateBus.

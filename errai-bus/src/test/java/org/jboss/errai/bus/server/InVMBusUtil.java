@@ -20,6 +20,7 @@ public class InVMBusUtil {
     ErraiConfigAttribs.ENABLE_CLUSTERING.set(configurator, "true");
     ErraiConfigAttribs.CLUSTERING_PROVIDER.set(configurator, JGroupsClusteringProvider.class.getName());
     ErraiConfigAttribs.AUTO_DISCOVER_SERVICES.set(configurator, "false");
+    ErraiConfigAttribs.BUS_BUFFER_SIZE.set(configurator, "2"); // 2 MB
     return ErraiServiceFactory.create(configurator);
   }
 }

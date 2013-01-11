@@ -2,6 +2,7 @@ package org.jboss.errai.bus.server;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.apache.catalina.deploy.ResourceParams;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
@@ -19,8 +20,10 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
+import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.Resources;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
 
 import java.io.ByteArrayInputStream;
@@ -41,7 +44,7 @@ import java.util.concurrent.TimeUnit;
  * @author Mike Brock
  */
 public class BusTestClient implements MessageBus {
-  private final ServerMessageBus remoteBus;
+  private ServerMessageBus remoteBus;
   private final QueueSession serverSession = MockQueueSessionFactory.newSession();
   private final QueueSession localSession = MockQueueSessionFactory.newSession();
   private final RequestDispatcher requestDispatcher = new TestRequestDispatcher();
@@ -59,10 +62,16 @@ public class BusTestClient implements MessageBus {
 
   private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
-  public BusTestClient(final ServerMessageBus remoteBus) {
+  private BusTestClient(final ServerMessageBus remoteBus) {
     this.remoteBus = remoteBus;
 
     subscribe("ClientBus", new BusControlProtocolCallback());
+  }
+
+  public static BusTestClient connect(final ErraiService service) {
+    final BusTestClient busTestClient = new BusTestClient(service.getBus());
+    busTestClient.connect();
+    return busTestClient;
   }
 
   private class PollingRunnable implements Runnable {
@@ -111,7 +120,7 @@ public class BusTestClient implements MessageBus {
 
     remoteBus.sendGlobal(m);
 
-    executorService.scheduleAtFixedRate(new PollingRunnable(), 100, 100, TimeUnit.MILLISECONDS);
+    executorService.scheduleAtFixedRate(new PollingRunnable(), 0, 10, TimeUnit.MILLISECONDS);
   }
 
   @Override
@@ -208,6 +217,7 @@ public class BusTestClient implements MessageBus {
   }
 
   private void sendToRemote(Message message) {
+    message.setResource(Resources.Session.name(), serverSession);
     if (!init) {
       deferredDeliveryList.add(message);
     }
@@ -314,4 +324,13 @@ public class BusTestClient implements MessageBus {
     }
   }
 
+  public void changeBus(ErraiService service) {
+    remoteBus.closeQueue(serverSession.getSessionId());
+    remoteBus = service.getBus();
+    connect();
+  }
+
+  public QueueSession getServerSession() {
+    return serverSession;
+  }
 }

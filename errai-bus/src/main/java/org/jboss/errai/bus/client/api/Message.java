@@ -291,6 +291,8 @@ public interface Message {
    */
   public ErrorCallback getErrorCallback();
 
+  public <T> T getValue(Class<T> type);
+
   /**
    * Gets the specified message part in the specified type. A <tt>ClassCastException</tt> is thrown if the value cannot
    * be coerced to the specified type.

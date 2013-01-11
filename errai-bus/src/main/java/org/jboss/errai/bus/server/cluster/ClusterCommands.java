@@ -22,5 +22,6 @@ package org.jboss.errai.bus.server.cluster;
 public enum ClusterCommands {
   WhoHandles,
   NotifyOwner,
-  MessageForward
+  MessageForward,
+  InvalidRoute
 }

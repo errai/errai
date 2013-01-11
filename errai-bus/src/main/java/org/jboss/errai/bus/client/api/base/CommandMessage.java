@@ -212,6 +212,11 @@ public class CommandMessage implements Message {
   }
 
   @Override
+  public <T> T getValue(Class<T> type) {
+    return get(type, MessageParts.Value);
+  }
+
+  @Override
   @SuppressWarnings({ "UnusedDeclaration" })
   public <T> T get(final Class<T> type, final Enum<?> part) {
     return get(type, part.toString());
