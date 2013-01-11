@@ -7,13 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the target method should be called when the {@code @Page}
- * widget it belongs to is about to be removed from the navigation content
+ * Indicates that the target method should be called after the {@code @Page}
+ * widget it belongs has been removed from the navigation content
  * panel.
  * <p>
  * The target method must not take any parameters.
  * <p>
- * The target method's return type will must be {@code void}.
+ * The target method's return type must be {@code void}.
  * <p>
  * The target method can have any access type: public, protected, default, or private.
  * <p>
@@ -21,12 +21,12 @@ import java.lang.annotation.Target;
  *
  * @see Page
  * @see Navigation
- * @see PageHidden
- * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @see PageHiding
+ * @author Daniel Sachse <mail@w0mb.at>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface PageHiding {
+public @interface PageHidden {
 
 }

@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the target method should be called when the {@code @Page}
- * widget it is a member of is about to be displayed in the navigation content
- * panel: after the widget's {@code @PageState} fields have been updated and
+ * widget it is a member of was displayed in the navigation content panel:
+ * after the widget's {@code @PageState} fields have been updated and
  * before it is displayed in the navigation content panel.
  * <p>
  * The target method is permitted an optional parameter of type
@@ -28,12 +28,12 @@ import java.lang.annotation.Target;
  * @see Page
  * @see PageState
  * @see Navigation
- * @see PageShown
- * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @see PageShowing
+ * @author Daniel Sachse <mail@w0mb.at>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface PageShowing {
+public @interface PageShown {
 
 }

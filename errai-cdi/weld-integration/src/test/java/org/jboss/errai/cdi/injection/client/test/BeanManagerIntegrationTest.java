@@ -1,9 +1,9 @@
 package org.jboss.errai.cdi.injection.client.test;
 
+import org.jboss.errai.cdi.injection.client.FoobieScopedBean;
+import org.jboss.errai.cdi.injection.client.FoobieScopedOverriddenBean;
 import org.jboss.errai.cdi.injection.client.AbstractBean;
-import org.jboss.errai.cdi.injection.client.Amex;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
-import org.jboss.errai.cdi.injection.client.Bar;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
 import org.jboss.errai.cdi.injection.client.CommonInterfaceB;
 import org.jboss.errai.cdi.injection.client.Cow;
@@ -339,6 +339,30 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
     assertEquals(true, testValueHolder.destroyed);
   }
+
+  /**
+   * Tests that beans marked as Dependent scoped by an IOCExtension can still be forced into a different scope (in this
+   * case, ApplicationScoped) when they are annotated as such.
+   * <p>
+   * Besides this being a good idea on its own, both Errai UI Templates and Errai Navigation rely on this behaviour.
+   */
+  public void testNormalScopeOverridesDependent() {
+    final FoobieScopedBean foobieScopedBean1 = IOC.getBeanManager().lookupBean(FoobieScopedBean.class).getInstance();
+    final FoobieScopedBean foobieScopedBean2 = IOC.getBeanManager().lookupBean(FoobieScopedBean.class).getInstance();
+
+    assertNotNull(foobieScopedBean1);
+    assertNotSame(foobieScopedBean1, foobieScopedBean2);
+
+    final FoobieScopedOverriddenBean foobieScopedOverriddenBean1
+        = IOC.getBeanManager().lookupBean(FoobieScopedOverriddenBean.class).getInstance();
+
+    final FoobieScopedOverriddenBean foobieScopedOverriddenBean2
+        = IOC.getBeanManager().lookupBean(FoobieScopedOverriddenBean.class).getInstance();
+
+    assertNotNull(foobieScopedOverriddenBean1);
+    assertSame(foobieScopedOverriddenBean1, foobieScopedOverriddenBean2);
+  }
+
 
   private static boolean containsInstanceOf(final Collection<IOCBeanDef> defs, final Class<?> clazz) {
     for (final IOCBeanDef def : defs) {

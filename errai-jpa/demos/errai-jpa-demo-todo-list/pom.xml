@@ -25,11 +25,11 @@
       <version>1.7.2</version>
     </dependency>
   </dependencies>
-
   <build>
   
     <outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
-    
+
+
     <plugins>
 
       <plugin>
@@ -37,7 +37,7 @@
         <artifactId>gwt-maven-plugin</artifactId>
         <configuration>
           <runTarget>index.html</runTarget>
-          <extraJvmArgs>-Xmx1g -XX:MaxPermSize=256m</extraJvmArgs>
+          <extraJvmArgs>-Xmx1g -Xms756m -XX:MaxPermSize=256m -XX:CompileThreshold=1000</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <logLevel>INFO</logLevel>
         </configuration>
