@@ -35,6 +35,19 @@ public class ClusteringTests extends TestCase {
     MappingContextSingleton.get();
   }
 
+  private static class LatchCounter implements Runnable {
+    private CountDownLatch latch;
+
+    private LatchCounter(CountDownLatch latch) {
+      this.latch = latch;
+    }
+
+    @Override
+    public void run() {
+      latch.countDown();
+    }
+  }
+
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
@@ -56,20 +69,8 @@ public class ClusteringTests extends TestCase {
     final BusTestClient clientB = BusTestClient.create(nodeB);
 
     final CountDownLatch initLatch = new CountDownLatch(2);
-    clientA.addInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        initLatch.countDown();
-      }
-    });
-
-    clientB.addInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        initLatch.countDown();
-      }
-    });
-
+    clientA.addInitCallback(new LatchCounter(initLatch));
+    clientB.addInitCallback(new LatchCounter(initLatch));
 
     final CountDownLatch countDownLatch = new CountDownLatch(2);
 
@@ -103,6 +104,7 @@ public class ClusteringTests extends TestCase {
       }
     });
 
+    // connect only after all services are subscribed.
     clientA.connect();
     clientB.connect();
 
@@ -128,20 +130,8 @@ public class ClusteringTests extends TestCase {
     final BusTestClient clientB = BusTestClient.create(serverB);
 
     final CountDownLatch initLatch = new CountDownLatch(2);
-    clientA.addInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        initLatch.countDown();
-      }
-    });
-
-    clientB.addInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        initLatch.countDown();
-      }
-    });
-
+    clientA.addInitCallback(new LatchCounter(initLatch));
+    clientB.addInitCallback(new LatchCounter(initLatch));
 
     final QueueSession clientASession = clientA.getServerSession();
     final QueueSession clientBSession = clientB.getServerSession();
@@ -168,6 +158,7 @@ public class ClusteringTests extends TestCase {
       }
     });
 
+    // connect only after all services are subscribed.
     clientA.connect();
     clientB.connect();
 
@@ -199,23 +190,10 @@ public class ClusteringTests extends TestCase {
     final ErraiService serverB = startInstance();
     final ErraiService serverC = startInstance();
 
-   // final BusTestClient clientA = BusTestClient.create(serverA);
     final BusTestClient clientB = BusTestClient.create(serverB);
 
     final CountDownLatch initLatch = new CountDownLatch(1);
-//    clientA.addInitCallback(new Runnable() {
-//      @Override
-//      public void run() {
-//        initLatch.countDown();
-//      }
-//    });
-
-    clientB.addInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        initLatch.countDown();
-      }
-    });
+    clientB.addInitCallback(new LatchCounter(initLatch));
 
     final QueueSession clientBSession = clientB.getServerSession();
 
@@ -232,8 +210,9 @@ public class ClusteringTests extends TestCase {
 
     final StateHolder holder = new StateHolder();
     holder.name = "ClientB1";
-    holder.latch = firstLatch;
 
+    // set the latch which will be used in the callback.
+    holder.latch = firstLatch;
 
     final MessageCallback receiver = new MessageCallback() {
       @Override
@@ -247,7 +226,7 @@ public class ClusteringTests extends TestCase {
 
     clientB.subscribe(localService, receiver);
 
-   // clientA.connect();
+    // connect only after all services are subscribed.
     clientB.connect();
 
     initLatch.await(5, TimeUnit.SECONDS);
@@ -264,6 +243,7 @@ public class ClusteringTests extends TestCase {
     firstLatch.await(5, TimeUnit.SECONDS);
 
     final CountDownLatch secondLatch = new CountDownLatch(1);
+    // replace the reference in the holder so the callback now uses this latch.
     holder.latch = secondLatch;
 
     clientB.clearInitCallbacks();
@@ -283,7 +263,6 @@ public class ClusteringTests extends TestCase {
     clientB.changeBus(serverC);
 
     changeOverLatch.await(5, TimeUnit.SECONDS);
-
     holder.name = "ClientB2";
 
     MessageBuilder.createMessage()
