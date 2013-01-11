@@ -136,6 +136,38 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
+  public void testBindingOfSinglePropertyToMultipleWidgets() {
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    TestModel model = DataBinder.forType(TestModel.class)
+      .bind(textBox1, "value")
+      .bind(textBox2, "value").getModel();
+
+    textBox1.setValue("UI change 1", true);
+    assertEquals("Model not properly updated", "UI change 1", model.getValue());
+    assertEquals("Widget not properly updated", "UI change 1", textBox2.getValue());
+    
+    textBox2.setValue("UI change 2", true);
+    assertEquals("Model not properly updated", "UI change 2", model.getValue());
+    assertEquals("Widget not properly updated", "UI change 2", textBox1.getValue());
+    
+    model.setValue("model change");
+    assertEquals("Widget not properly updated", "model change", textBox1.getText());
+    assertEquals("Widget not properly updated", "model change", textBox2.getText());
+  }
+  
+  @Test
+  public void testBindingOfSingleWidgetToMultiplePropertiesThrowsException() {
+    TextBox textBox = new TextBox();
+    try {
+      DataBinder.forType(TestModel.class).bind(textBox, "value").bind(textBox, "name");
+      fail("Binding a widget to multiple properties should fail with an exception!");
+    } catch (RuntimeException e) {
+      // expected
+    }
+  }
+  
+  @Test
   public void testUnbindingSpecificProperty() {
     DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
     TextBox textBox = new TextBox();
@@ -442,12 +474,13 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testGetWidget() {
-    TextBox textBox = new TextBox();
-    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class);
+    TextBox textBox1 = new TextBox();
+    TextBox textBox2 = new TextBox();
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox1, "value").bind(textBox2, "value");
 
-    assertNull(binder.getWidget("value"));
-    binder.bind(textBox, "value");
-    assertEquals("Bound widget not found", textBox, binder.getWidget("value"));
+    assertEquals("Bound widget not found", textBox1, binder.getWidgets("value").get(0));
+    assertEquals("Bound widget not found", textBox2, binder.getWidgets("value").get(1));
+    assertEquals("Should have exactly 2 bound widgets", 2, binder.getWidgets("value").size());
   }
   
   @Test

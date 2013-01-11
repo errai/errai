@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client.api;
 
+import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.common.client.api.Assert;
@@ -138,9 +139,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Binds the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
-   * If an existing binding for the specified property exists it will be replaced. If the provided widget already
-   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   *
+   * If the provided widget already participates in another binding managed by this {@link DataBinder}, a
+   * {@link RuntimeException} will be thrown.
+   * 
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -158,9 +159,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
 
   /**
    * Binds the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
-   * If an existing binding for the specified property exists it will be replaced. If the provided widget already
-   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   *
+   * If the provided widget already participates in another binding managed by this {@link DataBinder}, a
+   * {@link RuntimeException} will be thrown.
+   * 
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -183,12 +184,12 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Unbinds the widget from the specified model property, bound by a previous call to
+   * Unbinds all widgets bound to the specified model property by previous calls to
    * {@link #bind(HasValue, Object, String)}. This method has no effect if the specified property was never bound.
-   *
+   * 
    * @param property
-   *          The name of the property (or a property chain) to unbind, must not be null.
-   *
+   *          The name of the property (or a property chain) to unbind, Must not be null.
+   * 
    * @return the same {@link DataBinder} instance to support call chaining.
    */
   public DataBinder<T> unbind(String property) {
@@ -264,14 +265,15 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the widget currently bound to the provided model property (see {@link #bind(Widget, String)}).
-   *
+   * Returns the widgets currently bound to the provided model property (see {@link #bind(Widget, String)}).
+   * 
    * @param property
-   *          The name of the model property, must not be null.
-   * @return The widget currently bound to the provided property or null if no widget was bound.
+   *          The name of the property (or a property chain). Must not be null.
+   * @return the list of widgets currently bound to the provided property or an empty list if no widget was bound to the
+   *         property.
    */
-  public Widget getWidget(String property) {
-    return getAgent().getWidget(Assert.notNull(property));
+  public List<Widget> getWidgets(String property) {
+    return getAgent().getWidgets(Assert.notNull(property));
   }
 
   /**
