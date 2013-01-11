@@ -92,9 +92,10 @@ public class Navigation {
    *          The state information to pass to the page node before showing it.
    */
   private <W extends Widget> void show(PageNode<W> toPage, HistoryToken state) {
+	Widget currentWidget = null;
 
     if (currentPage != null) {
-      Widget currentWidget = contentPanel.getWidget();
+      currentWidget = contentPanel.getWidget();
       if (currentWidget == null) {
         // this could happen if someone was manipulating the DOM behind our backs
         GWT.log("Current widget vanished from navigation content panel. " +
@@ -105,12 +106,18 @@ public class Navigation {
       }
     }
 
+    contentPanel.clear();
+
+    if (currentPage != null && currentWidget != null) {
+    	currentPage.pageHidden(currentWidget);
+    }
+
     W widget = toPage.content();
     toPage.pageShowing(widget, state);
 
-    contentPanel.clear();
     setCurrentPage(toPage);
     contentPanel.add(widget);
+    toPage.pageShown(widget, state);
   }
 
   /**
