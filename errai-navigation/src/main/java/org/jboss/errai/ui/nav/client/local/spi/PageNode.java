@@ -88,7 +88,7 @@ public interface PageNode<W extends Widget> {
   public void pageHiding(W widget);
   
   /**
-   * Called by the framework when this page node was removed from the
+   * Called by the framework after this page has been removed from the
    * navigation content panel.
    * <p>
    * If this method returns null or throws an exception when called, framework

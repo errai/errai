@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * @see Page
  * @see PageState
  * @see Navigation
+ * @see PageShowing
  * @author Daniel Sachse <mail@w0mb.at>
  */
 @Target(ElementType.METHOD)

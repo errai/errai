@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * @see Page
  * @see PageState
  * @see Navigation
+ * @see PageShown
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 @Target(ElementType.METHOD)

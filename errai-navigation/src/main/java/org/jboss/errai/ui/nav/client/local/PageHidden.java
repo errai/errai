@@ -7,8 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the target method should be called when the {@code @Page}
- * widget it belongs to was removed from the navigation content
+ * Indicates that the target method should be called after the {@code @Page}
+ * widget it belongs has been removed from the navigation content
  * panel.
  * <p>
  * The target method must not take any parameters.
@@ -21,6 +21,7 @@ import java.lang.annotation.Target;
  *
  * @see Page
  * @see Navigation
+ * @see PageHiding
  * @author Daniel Sachse <mail@w0mb.at>
  */
 @Target(ElementType.METHOD)

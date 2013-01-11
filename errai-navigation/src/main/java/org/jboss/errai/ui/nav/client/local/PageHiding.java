@@ -21,6 +21,7 @@ import java.lang.annotation.Target;
  *
  * @see Page
  * @see Navigation
+ * @see PageHidden
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 @Target(ElementType.METHOD)
