@@ -2,7 +2,6 @@ package org.jboss.errai.bus.server;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.catalina.deploy.ResourceParams;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
@@ -10,7 +9,6 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -58,6 +56,8 @@ public class BusTestClient implements MessageBus {
 
   private final List<Message> deferredDeliveryList = new ArrayList<Message>();
 
+  private final List<Runnable> initCallbacks = new ArrayList<Runnable>();
+
   private boolean init = false;
 
   private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
@@ -68,9 +68,8 @@ public class BusTestClient implements MessageBus {
     subscribe("ClientBus", new BusControlProtocolCallback());
   }
 
-  public static BusTestClient connect(final ErraiService service) {
+  public static BusTestClient create(final ErraiService service) {
     final BusTestClient busTestClient = new BusTestClient(service.getBus());
-    busTestClient.connect();
     return busTestClient;
   }
 
@@ -307,9 +306,50 @@ public class BusTestClient implements MessageBus {
 
           init = true;
           drainDeliveryList();
+
+
+          scheduleInit();
           break;
       }
     }
+  }
+
+  private void fireInitCallbacks() {
+    for (Runnable init : initCallbacks) {
+      init.run();
+    }
+  }
+
+  private boolean initScheduled = false;
+  private boolean finishedInit = false;
+
+  private void scheduleInit() {
+    if (!initScheduled) {
+      initScheduled = true;
+      executorService.schedule(new Runnable() {
+        @Override
+        public void run() {
+          fireInitCallbacks();
+          finishedInit = true;
+        }
+      }, 250, TimeUnit.MILLISECONDS);
+    }
+  }
+
+  public void addInitCallback(Runnable runnable) {
+    if (finishedInit) {
+      runnable.run();
+    }
+    else if (initScheduled) {
+      throw new RuntimeException("added callback when init is already scheduled!");
+    }
+    else {
+      initCallbacks.add(runnable);
+    }
+  }
+
+  public void clearInitCallbacks() {
+    initCallbacks.clear();
   }
 
   private class TestRequestDispatcher implements RequestDispatcher {
@@ -327,6 +367,11 @@ public class BusTestClient implements MessageBus {
   public void changeBus(ErraiService service) {
     remoteBus.closeQueue(serverSession.getSessionId());
     remoteBus = service.getBus();
+
+    init = false;
+    initScheduled = false;
+    finishedInit = false;
+
     connect();
   }
 

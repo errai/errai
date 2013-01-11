@@ -5,15 +5,12 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,8 +52,24 @@ public class ClusteringTests extends TestCase {
     final ErraiService nodeA = startInstance();
     final ErraiService nodeB = startInstance();
 
-    final MessageBus clientA = BusTestClient.connect(nodeA);
-    final MessageBus clientB = BusTestClient.connect(nodeB);
+    final BusTestClient clientA = BusTestClient.create(nodeA);
+    final BusTestClient clientB = BusTestClient.create(nodeB);
+
+    final CountDownLatch initLatch = new CountDownLatch(2);
+    clientA.addInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        initLatch.countDown();
+      }
+    });
+
+    clientB.addInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        initLatch.countDown();
+      }
+    });
+
 
     final CountDownLatch countDownLatch = new CountDownLatch(2);
 
@@ -90,7 +103,10 @@ public class ClusteringTests extends TestCase {
       }
     });
 
-    Thread.sleep(500);
+    clientA.connect();
+    clientB.connect();
+
+    initLatch.await(5, TimeUnit.SECONDS);
 
     MessageBuilder.createMessage()
         .toSubject(localService)
@@ -104,20 +120,37 @@ public class ClusteringTests extends TestCase {
   }
 
   public void testPointToPointMessageAcrossClusterNodes() throws Exception {
+
     final ErraiService serverA = startInstance();
     final ErraiService serverB = startInstance();
 
-    final BusTestClient clientA = BusTestClient.connect(serverA);
-    final BusTestClient clientB = BusTestClient.connect(serverB);
+    final BusTestClient clientA = BusTestClient.create(serverA);
+    final BusTestClient clientB = BusTestClient.create(serverB);
+
+    final CountDownLatch initLatch = new CountDownLatch(2);
+    clientA.addInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        initLatch.countDown();
+      }
+    });
+
+    clientB.addInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        initLatch.countDown();
+      }
+    });
+
 
     final QueueSession clientASession = clientA.getServerSession();
     final QueueSession clientBSession = clientB.getServerSession();
 
-    final String localService = "localTest";
-
     final Set<String> resultsSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     final CountDownLatch countDownLatch = new CountDownLatch(2);
+
+    final String localService = "localTest";
 
     clientA.subscribe(localService, new MessageCallback() {
       @Override
@@ -135,7 +168,10 @@ public class ClusteringTests extends TestCase {
       }
     });
 
-    Thread.sleep(500);
+    clientA.connect();
+    clientB.connect();
+
+    initLatch.await(5, TimeUnit.SECONDS);
 
     MessageBuilder.createMessage()
         .toSubject(localService)
@@ -163,8 +199,23 @@ public class ClusteringTests extends TestCase {
     final ErraiService serverB = startInstance();
     final ErraiService serverC = startInstance();
 
-    final BusTestClient clientA = BusTestClient.connect(serverA);
-    final BusTestClient clientB = BusTestClient.connect(serverB);
+   // final BusTestClient clientA = BusTestClient.create(serverA);
+    final BusTestClient clientB = BusTestClient.create(serverB);
+
+    final CountDownLatch initLatch = new CountDownLatch(1);
+//    clientA.addInitCallback(new Runnable() {
+//      @Override
+//      public void run() {
+//        initLatch.countDown();
+//      }
+//    });
+
+    clientB.addInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        initLatch.countDown();
+      }
+    });
 
     final QueueSession clientBSession = clientB.getServerSession();
 
@@ -172,26 +223,34 @@ public class ClusteringTests extends TestCase {
 
     final Set<String> resultsSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
-    final CountDownLatch countDownLatch = new CountDownLatch(2);
+    final CountDownLatch firstLatch = new CountDownLatch(1);
 
-    class NameHolder {
+    class StateHolder {
       private String name;
+      private CountDownLatch latch;
     }
 
-    final NameHolder clientName = new NameHolder();
-    clientName.name = "ClientB1";
+    final StateHolder holder = new StateHolder();
+    holder.name = "ClientB1";
+    holder.latch = firstLatch;
 
-    clientB.subscribe(localService, new MessageCallback() {
+
+    final MessageCallback receiver = new MessageCallback() {
       @Override
       public void callback(final Message message) {
-        System.out.println("**received**");
-        resultsSet.add(clientName.name + ":" + message.getValue(String.class));
-        countDownLatch.countDown();
+        final String e = holder.name + ":" + message.getValue(String.class);
+        System.out.println("result:" + e);
+        resultsSet.add(e);
+        holder.latch.countDown();
       }
-    });
+    };
 
+    clientB.subscribe(localService, receiver);
 
-    Thread.sleep(1000);
+   // clientA.connect();
+    clientB.connect();
+
+    initLatch.await(5, TimeUnit.SECONDS);
 
     MessageBuilder.createMessage()
         .toSubject(localService)
@@ -201,16 +260,31 @@ public class ClusteringTests extends TestCase {
         .noErrorHandling()
         .sendNowWith(serverA.getBus());
 
-    Thread.sleep(1000);
+
+    firstLatch.await(5, TimeUnit.SECONDS);
+
+    final CountDownLatch secondLatch = new CountDownLatch(1);
+    holder.latch = secondLatch;
+
+    clientB.clearInitCallbacks();
+
+    final CountDownLatch changeOverLatch = new CountDownLatch(1);
+
+    clientB.addInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        changeOverLatch.countDown();
+      }
+    });
 
     /**
      * Move ClientB to ServerC.
      */
     clientB.changeBus(serverC);
 
-    Thread.sleep(1000);
+    changeOverLatch.await(5, TimeUnit.SECONDS);
 
-    clientName.name = "ClientB2";
+    holder.name = "ClientB2";
 
     MessageBuilder.createMessage()
         .toSubject(localService)
@@ -220,7 +294,7 @@ public class ClusteringTests extends TestCase {
         .noErrorHandling()
         .sendNowWith(serverA.getBus());
 
-    assertTrue("timed out waiting for results", countDownLatch.await(60, TimeUnit.SECONDS));
+    assertTrue("timed out waiting for results", secondLatch.await(5, TimeUnit.SECONDS));
     assertTrue("expected result missing", resultsSet.contains("ClientB1:ServerA"));
     assertTrue("expected result missing", resultsSet.contains("ClientB2:ServerA"));
   }
