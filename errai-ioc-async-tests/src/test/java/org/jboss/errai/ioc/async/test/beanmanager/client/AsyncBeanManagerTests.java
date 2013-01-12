@@ -9,8 +9,7 @@ import org.jboss.errai.ioc.async.test.beanmanager.client.res.TestInterface;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
@@ -19,7 +18,7 @@ import java.util.Collection;
 /**
  * @author Mike Brock
  */
-public class      AsyncBeanManagerTests extends IOCClientTestCase {
+public class AsyncBeanManagerTests extends IOCClientTestCase {
 
   @Override
   public String getModuleName() {
@@ -29,7 +28,7 @@ public class      AsyncBeanManagerTests extends IOCClientTestCase {
   public void testAsyncLookup() {
     delayTestFinish(10000);
 
-    Container.runAfterInit(new Runnable() {
+    Container.$(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(Foo.class).getInstance(new CreationalCallback<Foo>() {
@@ -66,7 +65,7 @@ public class      AsyncBeanManagerTests extends IOCClientTestCase {
   public void testCreateAndDestroyBean() {
     delayTestFinish(10000);
 
-    Container.runAfterInit(new Runnable() {
+    Container.$(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(Bar.class).getInstance(new CreationalCallback<Bar>() {
@@ -88,7 +87,7 @@ public class      AsyncBeanManagerTests extends IOCClientTestCase {
   public void testLookupDependentBean() {
     delayTestFinish(10000);
 
-    Container.runAfterInit(new Runnable() {
+    Container.$(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(ADependent.class)
@@ -109,7 +108,7 @@ public class      AsyncBeanManagerTests extends IOCClientTestCase {
   public void testLookupFromSuperTypes() {
     delayTestFinish(10000);
 
-    Container.runAfterInit(new Runnable() {
+    Container.$(new Runnable() {
       @Override
       public void run() {
         final Collection<AsyncBeanDef<TestInterface>> asyncBeanDefs = IOC.getAsyncBeanManager().lookupBeans(TestInterface.class);
@@ -124,7 +123,7 @@ public class      AsyncBeanManagerTests extends IOCClientTestCase {
   public void testNamedLookupsOfBean() {
     delayTestFinish(10000);
 
-    Container.runAfterInit(new Runnable() {
+    Container.$(new Runnable() {
       @Override
       public void run() {
         final Collection<AsyncBeanDef> beans = IOC.getAsyncBeanManager().lookupBeans("animal");
@@ -137,6 +136,7 @@ public class      AsyncBeanManagerTests extends IOCClientTestCase {
       }
     });
   }
+
 
   private static boolean containsInstanceOf(final Collection<AsyncBeanDef> defs, final Class<?> clazz) {
     for (final AsyncBeanDef def : defs) {

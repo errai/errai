@@ -11,6 +11,27 @@
 
   <artifactId>errai-ioc-async-tests</artifactId>
 
+  <build>
+    <testOutputDirectory>war/WEB-INF/classes</testOutputDirectory>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -103,6 +124,16 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
       </dependencies>
 
       <build>
+
+        <testResources>
+          <testResource>
+            <directory>src/test/java</directory>
+          </testResource>
+          <testResource>
+            <directory>src/test/resources</directory>
+          </testResource>
+        </testResources>
+
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
@@ -118,7 +149,9 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
          prevents subsequent tests from succeeding -->
               <forkMode>pertest</forkMode>
 
-              <argLine>-Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argLine>
+              <argLine>-Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5' -Xdebug
+                -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+              </argLine>
 
               <systemProperties>
                 <property>

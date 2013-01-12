@@ -45,7 +45,6 @@ import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
-import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.protocols.Resources;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 import org.jgroups.Address;
@@ -57,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 
 /**
+ *
  * @author Mike Brock
  */
 public class JGroupsClusteringProvider extends ReceiverAdapter implements ClusteringProvider, MessageCallback {

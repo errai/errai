@@ -12,10 +12,9 @@ import org.jboss.errai.bus.server.service.ErraiServiceFactory;
  */
 public class InVMBusUtil {
 
-  public static ErraiService startService(int portOffset) {
-
+  public static ErraiService startService(final int portOffset) {
     final ErraiServiceConfigurator configurator = new ErraiServiceConfiguratorImpl();
-    int port = ErraiConfigAttribs.CLUSTER_PORT.getInt(configurator) + portOffset;
+    final int port = ErraiConfigAttribs.CLUSTER_PORT.getInt(configurator) + portOffset;
     ErraiConfigAttribs.CLUSTER_PORT.set(configurator, String.valueOf(port));
     ErraiConfigAttribs.ENABLE_CLUSTERING.set(configurator, "true");
     ErraiConfigAttribs.CLUSTERING_PROVIDER.set(configurator, JGroupsClusteringProvider.class.getName());

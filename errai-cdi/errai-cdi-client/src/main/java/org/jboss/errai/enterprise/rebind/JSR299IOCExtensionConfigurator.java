@@ -43,7 +43,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
     injectionContext.mapElementType(WiringElementType.SingletonBean, ApplicationScoped.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
-
   }
 
   public static void addTypeHeirarchyFor(final IOCProcessingContext context, final Set<MetaClass> classes) {

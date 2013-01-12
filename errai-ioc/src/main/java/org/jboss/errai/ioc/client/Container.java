@@ -134,6 +134,14 @@ public class Container implements EntryPoint {
   }
 
   /**
+   * Short-alias method for {@link #runAfterInit(Runnable)}.
+   * @param runnable
+   */
+  public static void $(final Runnable runnable) {
+    runAfterInit(runnable);
+  }
+
+  /**
    * Declares the JavaScript-accessible debugging function to query the status of the bean manager at runtime. The
    * JSNI method internally calls {@link #displayBeanManagerStatus()}.
    */
