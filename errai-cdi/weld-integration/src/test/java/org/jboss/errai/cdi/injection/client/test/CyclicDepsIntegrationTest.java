@@ -163,7 +163,6 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
     assertEquals("hashCode contract broken", equHashCheckCycleB.hashCode(),
         equHashCheckCycleA.getEquHashCheckCycleB().hashCode());
-
   }
 
   public void testNormalCircularConstructors() throws Exception {

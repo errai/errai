@@ -27,9 +27,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
   }
 
   public void testProducer() {
-    delayTestFinish(10000);
-
-    Container.runAfterInit(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(AsyncProducerDependentBean.class)
@@ -51,9 +49,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
   }
 
   public void testSingletonProducer() {
-    delayTestFinish(10000);
-
-    Container.runAfterInit(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(AsyncSingletonProducerDependentBean.class)
@@ -75,9 +71,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
   }
 
   public void testBeanConstrConsumesOwnProduer() {
-    delayTestFinish(10000);
-
-    Container.runAfterInit(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class)
@@ -96,9 +90,7 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
   }
 
   public void testProducerFromDependentBeanIntoDependentBean() {
-    delayTestFinish(10000);
-
-    Container.runAfterInit(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class)

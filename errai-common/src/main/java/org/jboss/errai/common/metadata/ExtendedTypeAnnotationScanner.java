@@ -5,6 +5,7 @@ import org.jboss.errai.reflections.adapters.MetadataAdapter;
 import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
 
 import java.lang.annotation.Inherited;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,7 +32,7 @@ public class ExtendedTypeAnnotationScanner extends TypeAnnotationsScanner {
           Set<SortableClassFileWrapper> classes = MetaDataScanner.annotationsToClassFile.get(annotationType);
           if (classes == null) {
             MetaDataScanner.annotationsToClassFile.put(annotationType, classes =
-                new TreeSet<SortableClassFileWrapper>());
+                Collections.synchronizedSet(new TreeSet<SortableClassFileWrapper>()));
           }
           classes.add(new SortableClassFileWrapper(className, (ClassFile) cls));
         }

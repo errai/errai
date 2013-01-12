@@ -51,7 +51,9 @@ import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanQuery;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -72,9 +74,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
 
 
   public void testBeanManagerLookupInheritedScopeBean() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         final AsyncBeanDef<InheritedApplicationScopedBean> bean =
@@ -108,12 +108,11 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
         });
       }
     });
+
   }
 
   public void testBeanManagerLookupBeanFromAbstractRootType() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         final AsyncBeanDef<AbstractBean> bean = IOC.getAsyncBeanManager().lookupBean(AbstractBean.class);
@@ -137,9 +136,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
    * and transverse interface types.
    */
   public void testBeanManagerLookupForOuterInterfaceRootType() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         final AsyncBeanDef<OuterBeanInterface> bean = IOC.getAsyncBeanManager().lookupBean(OuterBeanInterface.class);
@@ -159,9 +156,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerLookupForOuterInterfacesOfNonAbstractType() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         final AsyncBeanDef<InterfaceC> beanC = IOC.getAsyncBeanManager().lookupBean(InterfaceC.class);
@@ -176,9 +171,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerLookupForExtendedInterfaceType() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         // This should find ApplicationScopedBeanA, ApplicationScopedBeanB and ApplicationScopedBeanC
@@ -200,9 +193,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
 
 
   public void testBeanManagerAPIs() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         final AsyncBeanManager mgr = IOC.getAsyncBeanManager();
@@ -218,9 +209,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   }
 
   public void testQualifiedLookup() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         final QualA qualA = new QualA() {
@@ -266,8 +255,6 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   }
 
   public void testQualifierLookupWithAnnoAttrib() {
-    delayTestFinish(10000);
-
     final QualV qualApples = new QualV() {
       @Override
       public QualEnum value() {
@@ -302,7 +289,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
       }
     };
 
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         final Collection<AsyncBeanDef<CommonInterfaceB>> beans
@@ -402,9 +389,7 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   }
 
   public void testAddingProgrammaticDestructionCallback() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         IOC.getAsyncBeanManager().lookupBean(DependentScopedBean.class)
@@ -441,52 +426,39 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
    * case, ApplicationScoped) when they are annotated as such.
    * <p/>
    * Besides this being a good idea on its own, both Errai UI Templates and Errai Navigation rely on this behaviour.
+   * <p/>
+   * NOTE: This looks really crazy written as an asynchronous test.
    */
   public void testNormalScopeOverridesDependent() {
-    delayTestFinish(10000);
-
-    Container.$(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
-        final AsyncBeanManager bm = IOC.getAsyncBeanManager();
-        bm.lookupBean(FoobieScopedBean.class)
-            .getInstance(new CreationalCallback<FoobieScopedBean>() {
-              @Override
-              public void callback(final FoobieScopedBean foobieScopedBean1) {
-                assertNotNull(foobieScopedBean1);
+        final AsyncBeanQuery beanQuery = new AsyncBeanQuery();
+        final AsyncBeanFuture<FoobieScopedBean> foobieScopedFuture1 = beanQuery.load(FoobieScopedBean.class);
+        final AsyncBeanFuture<FoobieScopedBean> foobieScopedFuture2 = beanQuery.load(FoobieScopedBean.class);
+        final AsyncBeanFuture<FoobieScopedOverriddenBean> foobieScopedOverriddenFuture1
+            = beanQuery.load(FoobieScopedOverriddenBean.class);
+        final AsyncBeanFuture<FoobieScopedOverriddenBean> foobieScopedOverriddenFuture2
+            = beanQuery.load(FoobieScopedOverriddenBean.class);
 
-                bm.lookupBean(FoobieScopedBean.class)
-                    .getInstance(new CreationalCallback<FoobieScopedBean>() {
-                      @Override
-                      public void callback(final FoobieScopedBean foobieScopedBean2) {
-                        assertNotSame(foobieScopedBean1, foobieScopedBean2);
+        beanQuery.query(new Runnable() {
+          @Override
+          public void run() {
+            final FoobieScopedBean foobieScopedBean1 = foobieScopedFuture1.getValue();
+            final FoobieScopedBean foobieScopedBean2 = foobieScopedFuture2.getValue();
+            final FoobieScopedOverriddenBean foobieScopedOverriddenBean1 = foobieScopedOverriddenFuture1.getValue();
+            final FoobieScopedOverriddenBean foobieScopedOverriddenBean2 = foobieScopedOverriddenFuture2.getValue();
 
-                        bm.lookupBean(FoobieScopedOverriddenBean.class)
-                            .getInstance(new CreationalCallback<FoobieScopedOverriddenBean>() {
-                              @Override
-                              public void callback(final FoobieScopedOverriddenBean foobieScopedOverriddenBean1) {
-                                assertNotNull(foobieScopedOverriddenBean1);
-
-                                bm.lookupBean(FoobieScopedOverriddenBean.class)
-                                    .getInstance(new CreationalCallback<FoobieScopedOverriddenBean>() {
-                                      @Override
-                                      public void callback(final FoobieScopedOverriddenBean foobieScopedOverriddenBean2) {
-                                        assertSame(foobieScopedOverriddenBean1, foobieScopedOverriddenBean2);
-                                        finishTest();
-                                      }
-                                    });
-                              }
-                            });
-                      }
-                    });
-              }
-            });
+            assertNotNull(foobieScopedBean1);
+            assertNotSame(foobieScopedBean1, foobieScopedBean2);
+            assertNotNull(foobieScopedOverriddenBean1);
+            assertSame(foobieScopedOverriddenBean1, foobieScopedOverriddenBean2);
+            finishTest();
+          }
+        });
       }
     });
-
-
   }
-
 
   private static boolean containsInstanceOf(final Collection<AsyncBeanDef> defs, final Class<?> clazz) {
     for (final AsyncBeanDef def : defs) {
