@@ -56,6 +56,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
+import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -105,8 +106,22 @@ public class AsyncInjectUtil {
           final BlockBuilder<AnonymousClassStructureBuilder> runBlock = Stmt.newObject(Runnable.class)
               .extend().publicOverridesMethod("run");
 
-          runBlock.append(Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements)));
+          if (injector.isSingleton()) {
+            final MetaClass providerType = MetaClassFactory.parameterizedAs(Provider.class,
+                MetaClassFactory.typeParametersOf(type));
 
+            final Statement newObjectCallback = Stmt.newObject(providerType)
+                .extend()
+                .publicOverridesMethod("get")
+                .append(Stmt.nestedCall(Stmt.newObject(type, parameterStatements)).returnValue())
+                .finish().finish();
+
+            runBlock.append(Stmt.declareFinalVariable(injector.getInstanceVarName(), type,
+                Stmt.loadVariable("context").invoke("getWiredOrNew", Refs.get("beanRef"), newObjectCallback)));
+          }
+          else {
+            runBlock.append(Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements)));
+          }
           final Statement finishedCallback = runBlock
               .append(Stmt.loadVariable("async").invoke("setConstructedObject", Refs.get(injector.getInstanceVarName())))
               .finish()
@@ -146,13 +161,28 @@ public class AsyncInjectUtil {
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          processingContext.append(
-              Stmt.declareVariable(type)
-                  .asFinal()
-                  .named(injector.getInstanceVarName())
-                  .initializeWith(Stmt.newObject(type))
+          if (injector.isSingleton()) {
+            final MetaClass providerType = MetaClassFactory.parameterizedAs(Provider.class,
+                MetaClassFactory.typeParametersOf(type));
 
-          );
+            final Statement newObjectCallback = Stmt.newObject(providerType)
+                .extend()
+                .publicOverridesMethod("get")
+                .append(Stmt.nestedCall(Stmt.newObject(type)).returnValue())
+                .finish().finish();
+
+            processingContext.append(Stmt.declareFinalVariable(injector.getInstanceVarName(), type,
+                Stmt.loadVariable("context").invoke("getWiredOrNew", Refs.get("beanRef"), newObjectCallback)));
+          }
+          else {
+            processingContext.append(
+                Stmt.declareVariable(type)
+                    .asFinal()
+                    .named(injector.getInstanceVarName())
+                    .initializeWith(Stmt.newObject(type))
+
+            );
+          }
 
           callback.beanConstructed(ConstructionType.FIELD);
 

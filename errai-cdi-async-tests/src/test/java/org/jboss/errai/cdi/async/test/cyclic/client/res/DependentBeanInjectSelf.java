@@ -16,13 +16,15 @@
 
 package org.jboss.errai.cdi.async.test.cyclic.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@Dependent
+@Dependent @LoadAsync
 public class DependentBeanInjectSelf {
   private static int counter = 0;
   private int instance = ++counter;

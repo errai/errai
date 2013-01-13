@@ -65,11 +65,14 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.async.test.bm.AsyncCDIBeanManagerTest";
   }
-
 
   public void testBeanManagerLookupInheritedScopeBean() {
     asyncTest(new Runnable() {

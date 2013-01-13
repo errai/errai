@@ -36,6 +36,10 @@ import org.jboss.errai.ioc.client.container.async.CreationalCallback;
  * @author Mike Brock
  */
 public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.async.test.cyclic.AsyncCyclicIntegrationTest";

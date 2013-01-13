@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
+import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanContext;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
@@ -141,6 +142,12 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     ctx.pushBlockBuilder(targetBlock);
 
     targetBlock.append(
+        Stmt.create().declareFinalVariable("beanRef", BeanRef.class,
+            loadVariable("context").invoke("getBeanReference", load(type),
+                            load(qualifyingMetadata.getQualifiers()))
+    ));
+
+    targetBlock.append(
         Stmt.create().declareFinalVariable("async", AsyncBeanContext.class,
             Stmt.create().newObject(AsyncBeanContext.class))
     );
@@ -156,8 +163,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
         /* the bean has been constructed, so get a reference to the BeanRef and set it to the 'beanRef' variable. */
 
         injectContext.getProcessingContext().append(
-            loadVariable("context").invoke("addBean", loadVariable("context").invoke("getBeanReference", load(type),
-                load(qualifyingMetadata.getQualifiers())), Refs.get(instanceVarName))
+            loadVariable("context").invoke("addBean", Refs.get("beanRef"), Refs.get(instanceVarName))
         );
 
         /* add the bean to SimpleCreationalContext */

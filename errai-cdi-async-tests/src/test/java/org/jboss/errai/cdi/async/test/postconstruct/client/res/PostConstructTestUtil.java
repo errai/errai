@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.async.test.cyclic.client.res;
+package org.jboss.errai.cdi.async.test.postconstruct.client.res;
 
-import org.jboss.errai.ioc.client.api.LoadAsync;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Mike Brock
  */
-@LoadAsync
-public class Foo {
-  public String name;
+public class PostConstructTestUtil {
+  private static final List<String> order = new ArrayList<String>();
 
-  public Foo(String name) {
-    this.name = name;
+  public static void reset() {
+    order.clear();
   }
 
-  public String getName() {
-    return name;
+  public static void record(final String fired) {
+    order.add(fired);
+  }
+
+  public static List<String> getOrderOfFiring() {
+    return Collections.unmodifiableList(order);
   }
 }

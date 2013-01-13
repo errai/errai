@@ -3,6 +3,7 @@ package org.jboss.errai.ioc.client.container;
 import org.jboss.errai.common.client.util.LogUtil;
 import sun.rmi.runtime.Log;
 
+import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -175,21 +176,24 @@ public abstract class AbstractCreationalContext implements CreationalContext {
    */
   @SuppressWarnings("unchecked")
   protected void fireAllInitCallbacks() {
-//    LogUtil.log("Init callback firing order: ");
-//    for (final Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
-//      LogUtil.log(" -> " + entry.getKey().getClass().getName());
-//    }
-
     for (final Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
       try {
-     //   LogUtil.log("invoking init-callback for " + entry.getKey().getClass().getName());
-
         entry.getValue().init(entry.getKey());
       }
       catch (Throwable t) {
         LogUtil.log("error initializing bean: " + entry.getKey().getClass().getName() + ": " + t.getMessage());
         throw new RuntimeException("error in bean initialization", t);
       }
+    }
+  }
+
+  public <T> T getWiredOrNew(final BeanRef ref, final Provider<T> provider) {
+    final T t = (T) wired.get(ref);
+    if (t == null) {
+      return provider.get();
+    }
+    else {
+      return t;
     }
   }
 

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.async.test.cyclic.client.res;
+package org.jboss.errai.cdi.async.test.postconstruct.client.res;
 
-import org.jboss.errai.ioc.client.api.LoadAsync;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@LoadAsync
-public class Foo {
-  public String name;
+public class PostConstrBeanB {
+  @Inject
+  PostConstrBeanC postConstrBeanC;
 
-  public Foo(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
+  @PostConstruct
+  private void postConstr() {
+    PostConstructTestUtil.record(PostConstrBeanB.class.getName());
   }
 }
