@@ -28,8 +28,31 @@ import java.util.Set;
 /**
  * An <tt>AsyncBeanQuery</tt> is used for querying more than one bean at a time, and then orchestrating
  * a unit of work to happen only after all of the beans in the query have been successfully loaded.
+ * <p/>
+ * For instance, you may need to load two or more beans dynamically from the bean manager in order to
+ * accomplish some task. Instead of chaining a series of callbacks, which can become difficult to understand
+ * and maintain, you can instead construct a query for the set of beans you need.
+ * <p/>
+ * Example:
+ * <pre><code>
+ * AsyncBeanQuery beanQuery = new AsyncBeanQuery();
+ * final AsyncBeanFuture<BeanA> beanAFuture = beanQuery.load(BeanA.class);
+ * final AsyncBeanFuture<BeanB> beanBFuture = beanQuery.load(BeanB.class);
+ *
+ * beanQuery.query(new Runnable() {
+ *    public void run() {
+ *     BeanA beanA = beanAFuture.get();
+ *     BeanB beanB = beanBFuture.get();
+ *     // do some work.
+ *   }
+ * });
+ * </code></pre>
+ * <p/>
+ * In the above example, the <tt>Runnable</tt> passed to {@link #query(Runnable)} will be executed only after
+ * all the beans requested with the previous {@link #load(AsyncBeanDef)} calls have been satisfied.
  *
  * @author Mike Brock
+ * @since 3.0
  */
 public class AsyncBeanQuery {
   private Runnable finishCallback;
@@ -40,26 +63,90 @@ public class AsyncBeanQuery {
   private final Set<LoadStrategy> loaded
       = new HashSet<LoadStrategy>();
 
+  /**
+   * Requests that the specified bean of the specified {@param type} is loaded.
+   *
+   * @param type
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   * @param <T>
+   *     the type of bean to be loaded.
+   *
+   * @return an {@link AsyncBeanFuture} which will house the instance of the bean once it is loaded.
+   */
   public <T> AsyncBeanFuture<T> load(final Class<T> type) {
     return load(IOC.getAsyncBeanManager().lookupBean(type));
   }
 
+  /**
+   * Requests that the specified bean of the specified {@param type} and {@param qualifiers} is loaded.
+   *
+   * @param type
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   * @param qualifiers
+   *     the qualifiers for the bean to be loaded.
+   * @param <T>
+   *     the type of bean to be loaded.
+   *
+   * @return an {@link AsyncBeanFuture} which will house the instance of the bean once it is loaded.
+   */
   public <T> AsyncBeanFuture<T> load(final Class<T> type, final Annotation... qualifiers) {
     return load(IOC.getAsyncBeanManager().lookupBean(type, qualifiers));
   }
 
+  /**
+   * Requests that the bean described by the specified {@link AsyncBeanDef} is loaded.
+   *
+   * @param beanDef
+   *     the {@link AsyncBeanDef} describing the bean to be loaded.
+   * @param <T>
+   *     the type of bean to be loaded.
+   *
+   * @return an {@link AsyncBeanFuture} which will house the instance of the bean once it is loaded.
+   */
   public <T> AsyncBeanFuture<T> load(final AsyncBeanDef<T> beanDef) {
     return load(beanDef, false);
   }
 
+  /**
+   * Requests that a new instance specified bean of the specified {@param type} is loaded.
+   *
+   * @param type
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   * @param <T>
+   *     the type of bean to be loaded.
+   *
+   * @return an {@link AsyncBeanFuture} which will house the instance of the bean once it is loaded.
+   */
   public <T> AsyncBeanFuture<T> loadNew(final Class<T> type) {
     return loadNew(IOC.getAsyncBeanManager().lookupBean(type));
   }
 
+  /**
+   * Requests that a new instance of  specified bean of the specified {@param type} and {@param qualifiers} is loaded.
+   *
+   * @param type
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   * @param qualifiers
+   *     the qualifiers for the bean to be loaded.
+   * @param <T>
+   *     the type of bean to be loaded.
+   *
+   * @return an {@link AsyncBeanFuture} which will house the instance of the bean once it is loaded.
+   */
   public <T> AsyncBeanFuture<T> loadNew(final Class<T> type, final Annotation... qualifiers) {
     return loadNew(IOC.getAsyncBeanManager().lookupBean(type, qualifiers));
   }
 
+  /**
+   * Requests that a new instance of the bean described by the specified {@link AsyncBeanDef} is loaded.
+   *
+   * @param beanDef
+   *     the {@link AsyncBeanDef} describing the bean to be loaded.
+   * @param <T>
+   *     the type of bean to be loaded.
+   *
+   * @return an {@link AsyncBeanFuture} which will house the instance of the bean once it is loaded.
+   */
   public <T> AsyncBeanFuture<T> loadNew(final AsyncBeanDef<T> beanDef) {
     return load(beanDef, true);
   }
@@ -70,6 +157,14 @@ public class AsyncBeanQuery {
     return loadStrategy.getFuture();
   }
 
+  /**
+   * Initiates the constructed query based on {@link #load(AsyncBeanDef)}  and {@link #loadNew(AsyncBeanDef)} calls
+   * made prior to calling this method. The specified <tt>Runnable</tt> is invoked only after all the requested
+   * beans have been successfully loaded.
+   *
+   * @param finishCallback
+   *    the <tt>Runnable</tt> to be invoked once all of the request beans have been loaded.
+   */
   public void query(final Runnable finishCallback) {
     Assert.notNull(finishCallback);
 

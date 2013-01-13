@@ -35,7 +35,7 @@ public class AsyncBeanFuture<T> {
     };
   }
 
-  public T getValue() {
+  public T get() {
     if (value == null) {
       throw new AsyncBeanNotLoaded();
     }

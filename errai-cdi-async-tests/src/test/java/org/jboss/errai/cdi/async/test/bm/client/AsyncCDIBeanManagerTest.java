@@ -44,11 +44,8 @@ import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanOranges;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualV;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanFuture;
@@ -444,10 +441,10 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
         beanQuery.query(new Runnable() {
           @Override
           public void run() {
-            final FoobieScopedBean foobieScopedBean1 = foobieScopedFuture1.getValue();
-            final FoobieScopedBean foobieScopedBean2 = foobieScopedFuture2.getValue();
-            final FoobieScopedOverriddenBean foobieScopedOverriddenBean1 = foobieScopedOverriddenFuture1.getValue();
-            final FoobieScopedOverriddenBean foobieScopedOverriddenBean2 = foobieScopedOverriddenFuture2.getValue();
+            final FoobieScopedBean foobieScopedBean1 = foobieScopedFuture1.get();
+            final FoobieScopedBean foobieScopedBean2 = foobieScopedFuture2.get();
+            final FoobieScopedOverriddenBean foobieScopedOverriddenBean1 = foobieScopedOverriddenFuture1.get();
+            final FoobieScopedOverriddenBean foobieScopedOverriddenBean2 = foobieScopedOverriddenFuture2.get();
 
             assertNotNull(foobieScopedBean1);
             assertNotSame(foobieScopedBean1, foobieScopedBean2);

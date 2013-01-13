@@ -17,7 +17,6 @@
 package org.jboss.errai.cdi.async.test.cyclic.client;
 
 import static org.jboss.errai.ioc.client.container.IOC.getAsyncBeanManager;
-import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 
 import org.jboss.errai.cdi.async.test.cyclic.client.res.BeanInjectSelf;
 import org.jboss.errai.cdi.async.test.cyclic.client.res.Car;
@@ -79,8 +78,8 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
         asyncBeanQuery.query(new Runnable() {
           @Override
           public void run() {
-            final Petrol petrol = petrolFuture.getValue();
-            final Car car = carFuture.getValue();
+            final Petrol petrol = petrolFuture.get();
+            final Car car = carFuture.get();
 
             assertEquals(petrol.getNameOfCar(), car.getName());
             assertEquals(car.getNameOfPetrol(), petrol.getName());
@@ -233,8 +232,8 @@ public class AsyncCyclicDepsIntegrationTest extends AbstractErraiCDITest {
         asyncBeanQuery.query(new Runnable() {
           @Override
           public void run() {
-            final EquHashCheckCycleA equHashCheckCycleA = equHashCheckCycleAFuture.getValue();
-            final EquHashCheckCycleB equHashCheckCycleB = equHashCheckCycleBFuture.getValue();
+            final EquHashCheckCycleA equHashCheckCycleA = equHashCheckCycleAFuture.get();
+            final EquHashCheckCycleB equHashCheckCycleB = equHashCheckCycleBFuture.get();
 
             assertNotNull(equHashCheckCycleA);
             assertNotNull(equHashCheckCycleB);
