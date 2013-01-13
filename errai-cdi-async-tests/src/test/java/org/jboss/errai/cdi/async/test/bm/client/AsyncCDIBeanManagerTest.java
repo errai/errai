@@ -44,6 +44,7 @@ import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualParmAppScopeBeanOranges;
 import org.jboss.errai.cdi.async.test.bm.client.res.QualV;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
@@ -321,43 +322,65 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   }
 
   public void testQualifiedLookupFailure() {
-    final LincolnBar wrongAnno = new LincolnBar() {
+    asyncTest(new Runnable() {
       @Override
-      public Class<? extends Annotation> annotationType() {
-        return LincolnBar.class;
+      public void run() {
+        final LincolnBar wrongAnno = new LincolnBar() {
+          @Override
+          public Class<? extends Annotation> annotationType() {
+            return LincolnBar.class;
+          }
+        };
+
+        try {
+          final AsyncBeanDef<CommonInterface> bean = IOC.getAsyncBeanManager().lookupBean(CommonInterface.class);
+          fail("should have thrown an exception, but got: " + bean);
+        }
+        catch (IOCResolutionException e) {
+          assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("multiple matching"));
+        }
+
+        try {
+          final AsyncBeanDef<CommonInterface> bean = IOC.getAsyncBeanManager().lookupBean(CommonInterface.class, wrongAnno);
+          fail("should have thrown an exception, but got: " + bean);
+        }
+        catch (IOCResolutionException e) {
+          assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
+        }
+
+        finishTest();
       }
-    };
-
-    try {
-      final AsyncBeanDef<CommonInterface> bean = IOC.getAsyncBeanManager().lookupBean(CommonInterface.class);
-      fail("should have thrown an exception, but got: " + bean);
-    }
-    catch (IOCResolutionException e) {
-      assertTrue("wrong exception thrown: " + e.getMessage(), e.getMessage().contains("multiple matching"));
-    }
-
-    try {
-      final AsyncBeanDef<CommonInterface> bean = IOC.getAsyncBeanManager().lookupBean(CommonInterface.class, wrongAnno);
-      fail("should have thrown an exception, but got: " + bean);
-    }
-    catch (IOCResolutionException e) {
-      assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
-    }
+    });
   }
 
 
   public void testLookupByName() {
-    final Collection<AsyncBeanDef> beans = IOC.getAsyncBeanManager().lookupBeans("animal");
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        final Collection<AsyncBeanDef> beans = IOC.getAsyncBeanManager().lookupBeans("animal");
 
-    assertEquals("wrong number of beans", 2, beans.size());
-    assertTrue("should contain a pig", containsInstanceOf(beans, Pig.class));
-    assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
+        assertEquals("wrong number of beans", 2, beans.size());
+        assertTrue("should contain a pig", containsInstanceOf(beans, Pig.class));
+        assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
+
+        finishTest();
+      }
+    });
+
   }
 
   public void testLookupAllBeans() {
-    final Collection<AsyncBeanDef<Object>> beans = IOC.getAsyncBeanManager().lookupBeans(Object.class);
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        final Collection<AsyncBeanDef<Object>> beans = IOC.getAsyncBeanManager().lookupBeans(Object.class);
 
-    assertTrue(!beans.isEmpty());
+        assertTrue(!beans.isEmpty());
+        finishTest();
+      }
+    });
+
   }
 
   private final QualA QUAL_A = new QualA() {
@@ -368,21 +391,34 @@ public class AsyncCDIBeanManagerTest extends AbstractErraiCDITest {
   };
 
   public void testLookupAllBeansQualified() {
-    final Collection<AsyncBeanDef<Object>> beans
-        = IOC.getAsyncBeanManager().lookupBeans(Object.class, QUAL_A);
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        final Collection<AsyncBeanDef<Object>> beans
+            = IOC.getAsyncBeanManager().lookupBeans(Object.class, QUAL_A);
 
-    assertEquals(1, beans.size());
-    assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
+        assertEquals(1, beans.size());
+        assertEquals(QualAppScopeBeanA.class, beans.iterator().next().getBeanClass());
+        finishTest();
+      }
+    });
+
   }
 
   public void testReportedScopeCorrect() {
-    final AsyncBeanDef<ApplicationScopedBean> appScopeBean
-        = IOC.getAsyncBeanManager().lookupBean(ApplicationScopedBean.class);
-    final AsyncBeanDef<DependentScopedBean> dependentIOCBean
-        = IOC.getAsyncBeanManager().lookupBean(DependentScopedBean.class);
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        final AsyncBeanDef<ApplicationScopedBean> appScopeBean
+            = IOC.getAsyncBeanManager().lookupBean(ApplicationScopedBean.class);
+        final AsyncBeanDef<DependentScopedBean> dependentIOCBean
+            = IOC.getAsyncBeanManager().lookupBean(DependentScopedBean.class);
 
-    assertEquals(ApplicationScoped.class, appScopeBean.getScope());
-    assertEquals(Dependent.class, dependentIOCBean.getScope());
+        assertEquals(ApplicationScoped.class, appScopeBean.getScope());
+        assertEquals(Dependent.class, dependentIOCBean.getScope());
+        finishTest();
+      }
+    });
   }
 
   public void testAddingProgrammaticDestructionCallback() {

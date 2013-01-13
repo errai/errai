@@ -17,12 +17,14 @@
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Named;
 
 /**
  * @author Mike Brock
  */
-@Dependent @Named("animal")
+@Dependent @Named("animal") @LoadAsync
 public class Pig {
 }

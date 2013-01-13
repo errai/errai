@@ -100,7 +100,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
   }
 
   protected void asyncTest() {
-    delayTestFinish(10000);
+    delayTestFinish(90000);
   }
 
   protected void asyncTest(final Runnable runnable) {

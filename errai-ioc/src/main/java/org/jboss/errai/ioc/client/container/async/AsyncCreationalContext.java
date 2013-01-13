@@ -53,6 +53,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
 
     final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
     if (t == null) {
+
       // see if the instance is available in the bean manager
       final Collection<AsyncBeanDef<T>> beanList
           = IOC.getAsyncBeanManager().lookupBeans(beanType, qualifiers);
@@ -60,6 +61,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
       if (!beanList.isEmpty()) {
         final AsyncBeanDef<T> bean = beanList.iterator().next();
         if (bean != null && bean instanceof AsyncSingletonBean) {
+          //   addWait(new BeanRef(beanType, qualifiers), creationalCallback);
           bean.getInstance(creationalCallback);
           return;
         }
@@ -154,15 +156,17 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
     getBeanInstance(new CreationalCallback<T>() {
       @Override
       public void callback(final T inst) {
-        if (inst != null) {
-          /**
-           * If the beanType != type, then this is an aliased reference and we should record it. Otherwise,
-           * it must be a lazily initialized singleton reference, and therefore shouldn't be recorded.
-           */
-          if (!beanType.equals(type)) {
-            injectionContext.addBean(type, beanType, beanProvider, inst, qualifiers);
-          }
 
+        /**
+         * If the beanType != type, then this is an aliased reference and we should record it. Otherwise,
+         * it must be a lazily initialized singleton reference, and therefore shouldn't be recorded.
+         */
+        if (!type.equals(beanType)) {
+          injectionContext.addBean(type, beanType, beanProvider, inst, qualifiers);
+        }
+
+
+        if (inst != null) {
           creationalCallback.callback(inst);
         }
         else {
@@ -183,7 +187,9 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           final CreationalCallback<T> callback = new CreationalCallback<T>() {
             @Override
             public void callback(final T beanInstance) {
+//              if (type.equals(beanType)) {
               injectionContext.addBean(type, beanType, beanProvider, beanInstance, qualifiers);
+//              }
               creationalCallback.callback(beanInstance);
               notifyAllWaiting(beanRef, beanInstance);
 

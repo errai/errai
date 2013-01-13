@@ -16,12 +16,14 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 import javax.enterprise.context.ApplicationScoped;
 
 /**
  * @author Mike Brock
  */        
-@ApplicationScoped
+@ApplicationScoped @LoadAsync
 public class ApplicationScopedBeanA implements InterfaceA {
   private static int instanceCount = 0;
   

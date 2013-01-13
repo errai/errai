@@ -238,7 +238,6 @@ public class ClusteringTests extends TestCase {
         .noErrorHandling()
         .sendNowWith(serverA.getBus());
 
-
     firstLatch.await(5, TimeUnit.SECONDS);
 
     final CountDownLatch secondLatch = new CountDownLatch(1);

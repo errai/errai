@@ -6,6 +6,10 @@ import org.jboss.errai.ioc.client.container.IOC;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -25,6 +29,13 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
                       final AsyncBeanProvider provider,
                       final Object instance,
                       final Annotation[] qualifiers) {
+
+//    final Collection<AsyncBeanDef> collection = manager.lookupBeans(type, qualifiers);
+//    for (AsyncBeanDef asyncBeanDef : collection) {
+//      if (asyncBeanDef.getBeanClass().equals(beanType)) {
+//        return;
+//      }
+//    }
 
     manager.addBean(type, beanType, provider, instance, qualifiers);
   }
@@ -62,7 +73,6 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
       final CreationalCallback creationalCallback = new CreationalCallback() {
         @Override
         public void callback(final Object beanInstance) {
-          //   manager.addBean(type, beanType, provider, beanInstance, qualifiers, name, concrete);
         }
 
         @Override

@@ -16,8 +16,11 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 /**
  * @author Mike Brock
  */
+@LoadAsync
 public class InheritedApplicationScopedBean extends ApplicationScopedBean {
 }

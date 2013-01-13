@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
 import com.google.gwt.user.client.Random;
+import org.jboss.errai.ioc.client.api.LoadAsync;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -26,7 +27,7 @@ import javax.inject.*;
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
+@ApplicationScoped @LoadAsync
 public class ApplicationScopedBean {
   @Inject DependentScopedBean bean1;
   @Inject DependentScopedBean bean2;

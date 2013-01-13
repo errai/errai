@@ -16,6 +16,8 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 import javax.enterprise.context.ApplicationScoped;
 
 
@@ -23,6 +25,6 @@ import javax.enterprise.context.ApplicationScoped;
 /**
  * @author Mike Brock
  */
-@ApplicationScoped @QualB
+@ApplicationScoped @QualB @LoadAsync
 public class QualAppScopeBeanB implements CommonInterface {
 }

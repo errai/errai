@@ -103,6 +103,8 @@ public class AsyncBeanManager {
 
   private void _registerNamedBean(final String name,
                                   final AsyncBeanDef beanDef) {
+    if (name == null) return;
+
     if (!namedBeans.containsKey(name)) {
       namedBeans.put(name, new ArrayList<AsyncBeanDef>());
     }
@@ -131,7 +133,7 @@ public class AsyncBeanManager {
                       final Object instance,
                       final Annotation[] qualifiers) {
 
-    addBean(type, beanType, callback, instance, qualifiers, null, true);
+    addBean(type, beanType, callback, instance, qualifiers, null, beanType.equals(type));
   }
 
 

@@ -16,9 +16,11 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 /**
  * @author Mike Brock
  */
-@FoobieScope
+@FoobieScope @LoadAsync
 public class FoobieScopedBean {
 }

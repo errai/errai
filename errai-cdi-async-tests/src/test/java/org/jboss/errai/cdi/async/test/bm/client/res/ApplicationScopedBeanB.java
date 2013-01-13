@@ -16,13 +16,15 @@
 
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
+import org.jboss.errai.ioc.client.api.LoadAsync;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
+@ApplicationScoped @LoadAsync
 public class ApplicationScopedBeanB implements InterfaceB {
   @Inject DependentBeanCycleA dependentBeanCycleA;
 
