@@ -106,7 +106,7 @@ public class AsyncInjectUtil {
           final BlockBuilder<AnonymousClassStructureBuilder> runBlock = Stmt.newObject(Runnable.class)
               .extend().publicOverridesMethod("run");
 
-          if (injector.isSingleton()) {
+          if (injector.isSingleton() && ctx.typeContainsGraphCycles(type)) {
             final MetaClass providerType = MetaClassFactory.parameterizedAs(Provider.class,
                 MetaClassFactory.typeParametersOf(type));
 
@@ -161,7 +161,7 @@ public class AsyncInjectUtil {
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          if (injector.isSingleton()) {
+          if (injector.isSingleton() && ctx.typeContainsGraphCycles(type)) {
             final MetaClass providerType = MetaClassFactory.parameterizedAs(Provider.class,
                 MetaClassFactory.typeParametersOf(type));
 
