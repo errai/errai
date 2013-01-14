@@ -1,4 +1,4 @@
-package org.jboss.errai.demo.mobile.client.local;
+package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.user.client.Window;
 

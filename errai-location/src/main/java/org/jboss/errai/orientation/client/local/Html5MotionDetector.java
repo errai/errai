@@ -1,4 +1,4 @@
-package org.jboss.errai.demo.mobile.client.local;
+package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -21,7 +21,7 @@ public class Html5MotionDetector extends OrientationDetector {
   }
 
   private native void startEvents() /*-{
-    if (this.@org.jboss.errai.demo.mobile.client.local.Html5MotionDetector::listener) {
+    if (this.@org.jboss.errai.orientation.client.local.Html5MotionDetector::listener) {
       // already registered
       return;
     }
@@ -33,9 +33,9 @@ public class Html5MotionDetector extends OrientationDetector {
       var y = event.accelerationIncludingGravity.y;
       var z = event.accelerationIncludingGravity.z;
    
-      that.@org.jboss.errai.demo.mobile.client.local.Html5MotionDetector::fire(DDD)(x, y, z);
+      that.@org.jboss.errai.orientation.client.local.Html5MotionDetector::fire(DDD)(x, y, z);
     }
-    this.@org.jboss.errai.demo.mobile.client.local.Html5MotionDetector::listener = handleMotionEvent;
+    this.@org.jboss.errai.orientation.client.local.Html5MotionDetector::listener = handleMotionEvent;
     $wnd.addEventListener("devicemotion", handleMotionEvent, true);
   }-*/;
 

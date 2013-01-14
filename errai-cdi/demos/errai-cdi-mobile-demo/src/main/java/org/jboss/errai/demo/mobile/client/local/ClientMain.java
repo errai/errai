@@ -23,8 +23,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
-import org.jboss.errai.demo.mobile.client.shared.Disconnected;
-import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
+import org.jboss.errai.orientation.client.shared.Disconnected;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.animation.client.AnimationScheduler;
@@ -34,6 +33,8 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.RootPanel;
+import org.jboss.errai.orientation.client.local.OrientationDetector;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 /**
  * Main application entry point.
@@ -41,7 +42,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 @EntryPoint
 public class ClientMain {
 
-  @Inject OrientationDetector orientationDetector;
+  @Inject
+  OrientationDetector orientationDetector;
   private WelcomeDialog welcomeDialog;
   private final Map<String, PerspectiveAnimator> animators = new HashMap<String, PerspectiveAnimator>();
 

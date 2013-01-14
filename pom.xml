@@ -114,6 +114,7 @@
         <module>errai-cordova</module>
         <module>errai-cordova/demos/shared</module>
         <module>errai-ioc-bus-support</module>
+      <module>errai-location</module>
     </modules>
 
     <dependencyManagement>

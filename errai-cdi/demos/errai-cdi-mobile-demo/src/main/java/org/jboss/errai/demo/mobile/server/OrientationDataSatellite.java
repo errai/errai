@@ -17,9 +17,11 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
-import org.jboss.errai.demo.mobile.client.shared.Disconnected;
-import org.jboss.errai.demo.mobile.client.shared.Ongoing;
-import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
+import org.jboss.errai.orientation.client.shared.Disconnected;
+import org.jboss.errai.orientation.client.shared.Ongoing;
+import org.jboss.errai.orientation.client.shared.Disconnected;
+import org.jboss.errai.orientation.client.shared.Ongoing;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 /**
  * Acts like a communications satellite in orbit over the attached clients:

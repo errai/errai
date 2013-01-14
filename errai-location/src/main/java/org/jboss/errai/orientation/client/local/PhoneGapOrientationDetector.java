@@ -1,4 +1,4 @@
-package org.jboss.errai.demo.mobile.client.local;
+package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
@@ -21,9 +21,9 @@ public class PhoneGapOrientationDetector extends OrientationDetector {
 
   var options = { frequency: 100 };
 
-  this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::watchID = $wnd.navigator.accelerometer.watchAcceleration(
+  this.@org.jboss.errai.orientation.client.local.PhoneGapOrientationDetector::watchID = $wnd.navigator.accelerometer.watchAcceleration(
     function(acceleration) {
-      this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::fireOrientationEvent(DDD)(
+      this.@org.jboss.errai.orientation.client.local.PhoneGapOrientationDetector::fireOrientationEvent(DDD)(
           acceleration.x, acceleration.y, acceleration.z);
     },
     function() {
@@ -33,9 +33,9 @@ public class PhoneGapOrientationDetector extends OrientationDetector {
 
   @Override
   public native void stopFiringOrientationEvents() /*-{
-    if (this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::watchID) {
-      $wnd.navigator.accelerometer.clearWatch(this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::watchID);
-      this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::watchID = null;
+    if (this.@org.jboss.errai.orientation.client.local.PhoneGapOrientationDetector::watchID) {
+      $wnd.navigator.accelerometer.clearWatch(this.@org.jboss.errai.orientation.client.local.PhoneGapOrientationDetector::watchID);
+      this.@org.jboss.errai.orientation.client.local.PhoneGapOrientationDetector::watchID = null;
     }
   }-*/;
 

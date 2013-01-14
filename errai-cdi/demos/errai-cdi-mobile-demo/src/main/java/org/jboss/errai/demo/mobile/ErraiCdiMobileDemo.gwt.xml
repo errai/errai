@@ -7,6 +7,7 @@
     <inherits name="org.jboss.errai.ioc.Container"/>
     <inherits name="org.jboss.errai.enterprise.CDI"/>
     <inherits name="com.google.gwt.animation.Animation"/>
+    <inherits name="org.jboss.errai.orientation.Location"/>
     
     <public path="resources"></public>
     <stylesheet src="style.css"/>

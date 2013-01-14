@@ -1,8 +1,8 @@
-package org.jboss.errai.demo.mobile.client.local;
+package org.jboss.errai.orientation.client.local;
 
 import javax.enterprise.event.Event;
 
-import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 public abstract class OrientationDetector {
 

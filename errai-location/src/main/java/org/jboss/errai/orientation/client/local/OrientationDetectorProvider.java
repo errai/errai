@@ -1,4 +1,8 @@
-package org.jboss.errai.demo.mobile.client.local;
+package org.jboss.errai.orientation.client.local;
+
+import com.google.gwt.core.client.GWT;
+import org.jboss.errai.orientation.client.shared.Ongoing;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Produces;
@@ -6,15 +10,11 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.jboss.errai.demo.mobile.client.shared.Ongoing;
-import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
-
-import com.google.gwt.core.client.GWT;
-
 @Singleton
 public class OrientationDetectorProvider implements Provider<OrientationDetector> {
 
-  @Inject @Ongoing Event<OrientationEvent> orientationEventSource;
+  @Inject @Ongoing
+  Event<OrientationEvent> orientationEventSource;
 
   @Produces
   public OrientationDetector get() {

@@ -105,6 +105,12 @@
       <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-location</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- CDI Development Utils -->
     <!-- This must be placed above com.google.gwt:gwt-dev to override the Jetty that is present there -->
     <dependency>

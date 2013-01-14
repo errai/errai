@@ -1,8 +1,7 @@
 package org.jboss.errai.demo.mobile.client.local;
 
-import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
-
 import com.google.gwt.dom.client.Element;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 public class PerspectiveAnimator {
 

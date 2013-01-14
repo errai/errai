@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 /**
  * A collection of all the latest client orientations, periodically fired from

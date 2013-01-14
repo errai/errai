@@ -1,4 +1,4 @@
-package org.jboss.errai.demo.mobile.client.local;
+package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -22,7 +22,7 @@ public class Html5OrientationDetector extends OrientationDetector {
   }
 
   private native void startEvents() /*-{
-    if (this.@org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::listener) {
+    if (this.@org.jboss.errai.orientation.client.local.Html5OrientationDetector::listener) {
       // already registered
       return;
     }
@@ -31,9 +31,9 @@ public class Html5OrientationDetector extends OrientationDetector {
 
     var listener = function(e) {
       var alpha = e.alpha ? e.alpha : 0;
-      that.@org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::fire(DDD)(e.beta, e.gamma, alpha);
+      that.@org.jboss.errai.orientation.client.local.Html5OrientationDetector::fire(DDD)(e.beta, e.gamma, alpha);
     };
-    this.@org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::listener = listener;
+    this.@org.jboss.errai.orientation.client.local.Html5OrientationDetector::listener = listener;
     $wnd.addEventListener('deviceorientation', listener, false);
   }-*/;
 
