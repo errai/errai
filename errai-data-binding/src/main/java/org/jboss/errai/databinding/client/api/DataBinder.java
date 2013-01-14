@@ -284,7 +284,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Returns a set of the currently bound property names.
    *
-   * @return bound properties, an empty set if no properties have been bound.
+   * @return all bound properties, or an empty set if no properties have been bound.
    */
   public Set<String> getBoundProperties() {
     return getAgent().getBoundProperties();
