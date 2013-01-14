@@ -128,4 +128,9 @@ public class SimpleCDIService {
 
     currentConfiguration = config;
   }
+  
+  @PreDestroy
+  public void stopTicker() {
+	  tickMaker.shutdown();
+  }  
 }
