@@ -42,7 +42,7 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
  * A CDI-based tag cloud service using random mock data.
  */
 @ApplicationScoped
-public class MockTagCloudService {
+public class TagCloudService {
 
   @SuppressWarnings("serial")
   private static Set<Tag> initialTags = new CopyOnWriteArraySet<Tag>() {
