@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -67,6 +68,8 @@ public class SimpleCDIService {
    * should be treated as immutable.
    */
   private ConfigurationRequest currentConfiguration;
+  
+  private TickerThread tickerThread;
 
   @PostConstruct
   private void setup() {
@@ -112,7 +115,15 @@ public class SimpleCDIService {
       }
     }, 0, config.getMessageInterval(), TimeUnit.MILLISECONDS);
 
-    new Thread() {
+    
+    
+    TickerThread tickerThread = new TickerThread();
+    tickerThread.start();
+
+    currentConfiguration = config;
+  }
+  
+  private class TickerThread extends Thread {
       @Override
       public void run() {
         try {
@@ -124,8 +135,11 @@ public class SimpleCDIService {
           System.out.println("Ticker finished");
         }
       };
-    }.start();
-
-    currentConfiguration = config;
+    }
+  
+  @PreDestroy
+  public void stopTicker() {
+	  tickerThread = null; 
   }
+  
 }
