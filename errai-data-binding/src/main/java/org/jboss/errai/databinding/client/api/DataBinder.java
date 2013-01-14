@@ -24,6 +24,7 @@ import org.jboss.errai.databinding.client.BindableProxyAgent;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.HasPropertyChangeHandlers;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
@@ -104,7 +105,7 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *
    * @param modelType
    *          The bindable type, must not be null.
-   * @param intialState
+   * @param initialState
    *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
    *          synchronization should be carried out.
    */
@@ -139,8 +140,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Binds the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
-   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   *
+   * participates in another binding managed by this {@link DataBinder}, a {@link WidgetAlreadyBoundException} will be
+   * thrown.
+   * 
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -149,7 +151,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          Must not be null.
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
-   *           If the {@code widget} does not have a property with the given name.
+   *           If the {@code model} does not have a property with the given name.
+   * @throws WidgetAlreadyBoundException
+   *           If the provided {@code widget} is already bound to a property of the model.
    */
   public DataBinder<T> bind(final Widget widget, final String property) {
     bind(widget, property, null);
@@ -159,8 +163,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
   /**
    * Binds the provided widget to the specified property of the model instance associated with this {@link DataBinder}.
    * If an existing binding for the specified property exists it will be replaced. If the provided widget already
-   * participates in another binding managed by this {@link DataBinder}, a {@link RuntimeException} will be thrown.
-   *
+   * participates in another binding managed by this {@link DataBinder}, a {@link WidgetAlreadyBoundException} will be
+   * thrown.
+   * 
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
@@ -171,7 +176,9 @@ public class DataBinder<T> implements HasPropertyChangeHandlers {
    *          The converter to use for the binding, null if default conversion should be used (see {@link Convert}).
    * @return the same {@link DataBinder} instance to support call chaining.
    * @throws NonExistingPropertyException
-   *           If the {@code widget} does not have a property with the given name.
+   *           If the {@code model} does not have a property with the given name.
+   * @throws WidgetAlreadyBoundException
+   *           If the provided {@code widget} is already bound to a property of the model.
    */
   public DataBinder<T> bind(final Widget widget, final String property,
       @SuppressWarnings("rawtypes") final Converter converter) {

@@ -167,7 +167,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     unbind(property);
     if (bindings.containsValue(widget)) {
-      throw new RuntimeException("Widget already bound to a different property!");
+      throw new WidgetAlreadyBoundException("Widget already bound to a different property!");
     }
 
     bindings.put(property, widget);
