@@ -162,7 +162,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
     for (Binding binding : bindings.values()) {
       if (binding.getWidget().equals(widget)) {
-        throw new RuntimeException("Widget already bound to a different property!");
+        throw new WidgetAlreadyBoundException("Widget already bound to property: " + binding.getProperty());
       }
     }
 
@@ -177,7 +177,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
                 Convert.toModelValue(propertyTypes.get(property).getType(), widget, event.getValue(), converter);
           proxy.set(property, newValue);
 
-          updateWidgetsAndFireEvents(property, oldValue, newValue, widget);
+          updateWidgetsAndFireEvent(property, oldValue, newValue, widget);
         }
       });
     }
@@ -297,13 +297,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           nestedBinder.setModel(actualValue, initialState);
           proxy.set(property, nestedBinder.getModel());
         }
-        updateWidgetsAndFireEvents(property, knownValue, actualValue);
+        updateWidgetsAndFireEvent(property, knownValue, actualValue);
       }
     }
   }
 
   /**
-   * Updates a bound widget and fires the corresponding {@link PropertyChangeEvent}.
+   * Updates all bound widgets and fires the corresponding {@link PropertyChangeEvent}.
    * 
    * @param <P>
    *          The property type of the changed property.
@@ -316,11 +316,27 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param newValue
    *          The new value of the property.
    */
-  <P> void updateWidgetsAndFireEvents(final String property, final P oldValue, final P newValue) {
-    updateWidgetsAndFireEvents(property, oldValue, newValue, null);
+  <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue) {
+    updateWidgetsAndFireEvent(property, oldValue, newValue, null);
   }
   
-  private <P> void updateWidgetsAndFireEvents(final String property, final P oldValue, final P newValue, final Widget excluding) {
+  /**
+   * Updates all bound widgets and fires the corresponding {@link PropertyChangeEvent}.
+   * 
+   * @param <P>
+   *          The property type of the changed property.
+   * @param source
+   *          The source object.
+   * @param property
+   *          The name of the property that changed.
+   * @param oldValue
+   *          The old value of the property.
+   * @param newValue
+   *          The new value of the property.
+   * @param excluding
+   *          A widget reference that does not need to be updated (the origin of the value change event).
+   */
+  private <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue, final Widget excluding) {
     for (Binding binding : bindings.get(property)) {
       Widget widget = binding.getWidget();
       Converter converter = binding.getConverter();
@@ -377,7 +393,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       }
 
       if (initialState == InitialState.FROM_MODEL) {
-        updateWidgetsAndFireEvents(property, knownValues.get(property), value);
+        updateWidgetsAndFireEvent(property, knownValues.get(property), value);
       }
       else if (initialState == InitialState.FROM_UI) {
         proxy.set(property, value);

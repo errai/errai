@@ -28,6 +28,7 @@ import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.TestModel;
 import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
+import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -124,7 +125,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingOfNonExistingProperty() {
+  public void testBindingOfNonExistingPropertyThrowsException() {
     try {
       DataBinder.forType(TestModel.class).bind(new TextBox(), "non-existing");
       fail("Expected NonExistingPropertyException!");
@@ -134,7 +135,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
       assertEquals("Exception message contains wrong property name", "non-existing", nepe.getMessage());
     }
   }
-
+  
+  @Test
+  public void testBindingOfSingleWidgetToMultiplePropertiesThrowsException() {
+    TextBox textBox = new TextBox();
+    try {
+      DataBinder.forType(TestModel.class).bind(textBox, "value").bind(textBox, "name");
+      fail("Binding a widget to multiple properties should fail with an exception!");
+    } catch (WidgetAlreadyBoundException e) {
+      // expected
+      assertTrue("Exception message does not contain property nane", e.getMessage().contains("value"));
+    }
+  }
+  
   @Test
   public void testBindingOfSinglePropertyToMultipleWidgets() {
     TextBox textBox1 = new TextBox();
@@ -154,17 +167,6 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox1.getText());
     assertEquals("Widget not properly updated", "model change", textBox2.getText());
-  }
-  
-  @Test
-  public void testBindingOfSingleWidgetToMultiplePropertiesThrowsException() {
-    TextBox textBox = new TextBox();
-    try {
-      DataBinder.forType(TestModel.class).bind(textBox, "value").bind(textBox, "name");
-      fail("Binding a widget to multiple properties should fail with an exception!");
-    } catch (RuntimeException e) {
-      // expected
-    }
   }
   
   @Test
