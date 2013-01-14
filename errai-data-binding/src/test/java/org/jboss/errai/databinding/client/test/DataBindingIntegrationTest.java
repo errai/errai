@@ -354,6 +354,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     // unbind specific nested property
     binder.unbind("child.name");
+    assertEquals("Only one bound property should be left", 1, binder.getBoundProperties().size());
     model.getChild().setName("model change");
     assertEquals("Widget should not have been updated because unbind was called for this property", "", nameTextBox
         .getText());
@@ -372,6 +373,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     // unbind all properties
     binder.unbind();
+    assertEquals("No property should be bound", 0, binder.getBoundProperties().size());
+
     model.getChild().setValue("model change");
     assertEquals("Widget should not have been updated because unbind was called", "", valueTextBox.getText());
 
@@ -483,21 +486,21 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
-    assertEquals("Should have received excatly one property change event", 1, handler.getEvents().size());
+    assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(0).getPropertyName());
     assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
     assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
 
     // This should not cause additional events to be fired
-    binder.setModel(binder.getModel(), InitialState.FROM_MODEL);
+    binder.setModel(new TestModel(), InitialState.FROM_MODEL);
     
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
-    assertEquals("Should have received excatly two property change event", 2, handler.getEvents().size());
+    assertEquals("Should have received exactly two property change event", 2, handler.getEvents().size());
     assertEquals("Wrong property name in event", "value", handler.getEvents().get(1).getPropertyName());
     assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
-    assertEquals("Wrong previous value in event", "UI change", handler.getEvents().get(1).getOldValue());
+    assertEquals("Wrong previous value in event", null, handler.getEvents().get(1).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
   }
   
@@ -512,18 +515,35 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     textBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
-    assertEquals("Should have received excatly one property change event", 1, handler.getEvents().size());
+    assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
 
     binder.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", textBox.getText());
-    assertEquals("Should have received excatly two property change event", 2, handler.getEvents().size());
+    assertEquals("Should have received exactly two property change event", 2, handler.getEvents().size());
+  }
+  
+  @Test
+  public void testPropertyChangeEventsAreFiredDuringStateSync() {
+    MockHandler handler = new MockHandler();
+
+    TextBox textBox = new TextBox();
+    textBox.setValue("UI change");
+    
+    DataBinder<TestModel> binder = DataBinder.forType(TestModel.class, InitialState.FROM_UI);
+    binder.addPropertyChangeHandler(handler);
+    binder.bind(textBox, "value");
+
+    assertEquals("Model not properly updated", "UI change", binder.getModel().getValue());
+    assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
+    assertEquals("Wrong property name in event", "value", handler.getEvents().get(0).getPropertyName());
+    assertEquals("Wrong property value in event", "UI change", handler.getEvents().get(0).getNewValue());
   }
 
   /**
    * Ensures that, when a property change event is fired, the new value is already set on the model object.
    */
   @Test
-  public void testNewValueIsSetBeforeEventIsFired() {
+  public void testNewValueIsSetBeforePropertyChangeEventIsFired() {
     TextBox textBox = new TextBox();
     final DataBinder<TestModel> binder = DataBinder.forType(TestModel.class).bind(textBox, "value");
     binder.getModel().setValue("Old Value");
