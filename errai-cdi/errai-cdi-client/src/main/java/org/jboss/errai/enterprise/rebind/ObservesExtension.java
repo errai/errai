@@ -97,7 +97,6 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBack = callBackBlock.finish();
     }
 
-
     callBackBlock = callBack.publicOverridesMethod("fireEvent", Parameter.finalOf(parm, "event"))
         ._(instance.callOrBind(Refs.get("event")))
         .finish()

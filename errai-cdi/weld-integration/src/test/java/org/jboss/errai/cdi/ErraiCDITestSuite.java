@@ -15,6 +15,7 @@ import org.jboss.errai.cdi.injection.client.test.PostConstructOrderTest;
 import org.jboss.errai.cdi.invalid.producer.client.test.InvalidProducerIntegrationTest;
 import org.jboss.errai.cdi.producer.client.test.ProducerIntegrationTest;
 import org.jboss.errai.cdi.rpc.client.test.RpcIntegrationTest;
+import org.jboss.errai.cdi.scheduler.client.test.TimedMethodAPITests;
 import org.jboss.errai.cdi.specialization.client.test.SpecializationIntegrationTest;
 import org.jboss.errai.cdi.stereotypes.client.test.StereotypesIntegrationTest;
 import org.junit.runner.RunWith;
@@ -41,7 +42,8 @@ import org.junit.runners.Suite;
     InstanceInjectionIntegrationTest.class,
     InvalidProducerIntegrationTest.class,
     ProducerIntegrationTest.class,
-    RpcIntegrationTest.class
+    RpcIntegrationTest.class,
+    TimedMethodAPITests.class
 })
 public class ErraiCDITestSuite {
 

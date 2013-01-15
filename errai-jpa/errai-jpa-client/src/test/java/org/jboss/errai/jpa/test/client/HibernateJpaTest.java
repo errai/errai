@@ -94,8 +94,8 @@ public class HibernateJpaTest extends ErraiJpaTest {
    * Hibernate doesn't know how to unwrap Errai's WrappedPortables, so we have
    * to skip this test.
    */
-  @Override
-  public void testEnsurePropertyChangeEventIsFiredAfterIdGeneration() {
-    // skip
-  }
+//  @Override
+//  public void testEnsurePropertyChangeEventIsFiredAfterIdGeneration() {
+//    // skip
+//  }
 }

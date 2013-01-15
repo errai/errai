@@ -9,8 +9,7 @@ import java.util.Set;
  */
 public interface CreationalContext {
   /**
-    * Records a {@link InitializationCallback} to the creational context. All initialization callbacks are executed
-    * when the {@link #finish()} method is called.
+    * Records a {@link InitializationCallback} to the creational context.
     *
     * @param beanInstance
     *     the instance of the bean associated witht he {@link InitializationCallback}
