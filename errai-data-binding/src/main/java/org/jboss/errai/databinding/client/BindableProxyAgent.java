@@ -109,8 +109,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the widget currently bound to the provided property (see
-   * {@link BindableProxy#bind(Widget, String, Converter)}).
+   * Returns the widget currently bound to the provided property (see {@link #bind(Widget, String, Converter)}).
    * 
    * @param property
    *          the name of the model property
@@ -121,8 +120,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the converter used for the binding of the provided property (see
-   * {@link BindableProxy#bind(Widget, String, Converter)}).
+   * Returns the converter used for the binding of the provided property (see {@link #bind(Widget, String, Converter)}).
    * 
    * @param property
    *          the name of the model property
