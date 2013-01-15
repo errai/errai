@@ -758,29 +758,29 @@ public class ErraiJpaTest extends GWTTestCase {
 
 //  TEMPORARY SKIP
 //
-//  public void testEnsurePropertyChangeEventIsFiredAfterIdGeneration() {
-//    DataBinder<Album> binder = DataBinder.forType(Album.class);
-//    Album album = binder.getModel();
-//    assertNull(album.getId());
-//
-//    final Album eventAlbum = new Album();
-//    assertNull(eventAlbum.getId());
-//    binder.addPropertyChangeHandler("id", new PropertyChangeHandler<Long>() {
-//      @Override
-//      public void onPropertyChange(PropertyChangeEvent<Long> event) {
-//        eventAlbum.setId(event.getNewValue());
-//      }
-//    });
-//
-//    // store it
-//    EntityManager em = getEntityManager();
-//    em.persist(album);
-//    em.flush();
-//    em.detach(album);
-//
-//    assertNotNull(album.getId());
-//    assertEquals(album.getId(), eventAlbum.getId());
-//  }
+  public void testEnsurePropertyChangeEventIsFiredAfterIdGeneration() {
+    DataBinder<Album> binder = DataBinder.forType(Album.class);
+    Album album = binder.getModel();
+    assertNull(album.getId());
+
+    final Album eventAlbum = new Album();
+    assertNull(eventAlbum.getId());
+    binder.addPropertyChangeHandler("id", new PropertyChangeHandler<Long>() {
+      @Override
+      public void onPropertyChange(PropertyChangeEvent<Long> event) {
+        eventAlbum.setId(event.getNewValue());
+      }
+    });
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+    em.detach(album);
+
+    assertNotNull(album.getId());
+    assertEquals(album.getId(), eventAlbum.getId());
+  }
   
   public void testNullCollectionInEntity() throws Exception {
     Artist artist = new Artist();
