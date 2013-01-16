@@ -119,7 +119,6 @@ public class MessageQueueImpl implements MessageQueue {
     return deliveryHandler.deliver(this, message);
   }
 
-
   @Override
   public long getCurrentBufferSequenceNumber() {
     return bufferColor.getSequence().get();
@@ -133,9 +132,9 @@ public class MessageQueueImpl implements MessageQueue {
       if (deliveryHandler instanceof Wakeable) {
         ((Wakeable) deliveryHandler).onWake(this);
       }
-      else {
-        deliveryHandler.noop(this);
-      }
+//      else {
+//        deliveryHandler.noop(this);
+//      }
 
       fireActivationCallback();
     }
@@ -144,7 +143,6 @@ public class MessageQueueImpl implements MessageQueue {
       stopQueue();
     }
   }
-
 
   /**
    * Sets the activation callback function which is called when the queue is scheduled for activation

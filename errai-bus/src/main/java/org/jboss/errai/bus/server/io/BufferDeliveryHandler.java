@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Mike Brock
  */
-public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, Pageable, Cleanable {
+public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, Cleanable {
   private static final BufferDeliveryHandler singleton = new BufferDeliveryHandler();
 
   public static BufferDeliveryHandler getInstance() {
@@ -53,36 +53,36 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
       final Buffer buffer = queue.getBuffer();
       final BufferColor bufferColor = queue.getBufferColor();
 
-      if (queue.isPaged()) {
-        try {
-          synchronized (queue.getPageLock()) {
-            if (queue.isPaged()) {
-              PageUtil.writeToPageFile(queue, ServerBusTools.encodeMessageToByteArrayInputStream(message), true);
-              return true;
-            }
-          }
-        }
-        finally {
-          final ReentrantLock lock = bufferColor.getLock();
-          lock.lock();
-          try {
-            bufferColor.wake();
-          }
-          finally {
-            lock.unlock();
-          }
-        }
-      }
+//      if (queue.isPaged()) {
+//        try {
+//          synchronized (queue.getPageLock()) {
+//            if (queue.isPaged()) {
+//              PageUtil.writeToPageFile(queue, ServerBusTools.encodeMessageToByteArrayInputStream(message), true);
+//              return true;
+//            }
+//          }
+//        }
+//        finally {
+//          final ReentrantLock lock = bufferColor.getLock();
+//          lock.lock();
+//          try {
+//            bufferColor.wake();
+//          }
+//          finally {
+//            lock.unlock();
+//          }
+//        }
+//      }
 
       BufferHelper.encodeAndWrite(buffer, bufferColor, message);
 
-      if (queue.incrementMessageCount() > 10
-          && !lastTransmissionWithin(queue, TimeUnit.SECONDS.toNanos(10))) {
-        // disconnect this client
-
-
-        PageUtil.pageWaitingToDisk(queue);
-      }
+//      if (queue.incrementMessageCount() > 10
+//          && !lastTransmissionWithin(queue, TimeUnit.SECONDS.toNanos(10))) {
+//        // disconnect this client
+//
+//
+//        PageUtil.pageWaitingToDisk(queue);
+//      }
     }
     finally {
       queue.fireActivationCallback();
@@ -96,19 +96,19 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
     BufferHelper.encodeAndWriteNoop(queue.getBuffer(), queue.getBufferColor());
   }
 
-  @Override
-  public boolean pageOut(final MessageQueue queue) {
-    return PageUtil.pageWaitingToDisk(queue);
-  }
-
-  @Override
-  public void discardPageData(final MessageQueue queue) {
-    PageUtil.discardPageData(queue);
-  }
+//  @Override
+//  public boolean pageOut(final MessageQueue queue) {
+//    return PageUtil.pageWaitingToDisk(queue);
+//  }
+//
+//  @Override
+//  public void discardPageData(final MessageQueue queue) {
+//    PageUtil.discardPageData(queue);
+//  }
 
   @Override
   public void clean(final MessageQueue queue) {
-    discardPageData(queue);
+ //   discardPageData(queue);
   }
 
   @Override
@@ -116,14 +116,14 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
                                 final MessageQueue queue,
                                 final ByteWriteAdapter toAdapter) throws IOException {
 
-    if (queue.isPaged()) {
-      synchronized (queue.getPageLock()) {
-        if (queue.isPaged()) {
-          PageUtil.readInPageFile(queue, toAdapter, new MultiMessageFilter());
-          return false;
-        }
-      }
-    }
+//    if (queue.isPaged()) {
+//      synchronized (queue.getPageLock()) {
+//        if (queue.isPaged()) {
+//          PageUtil.readInPageFile(queue, toAdapter, new MultiMessageFilter());
+//          return false;
+//        }
+//      }
+//    }
 
     final MarkedByteWriteAdapter markedOutputStream = new MarkedByteWriteAdapter(toAdapter);
 

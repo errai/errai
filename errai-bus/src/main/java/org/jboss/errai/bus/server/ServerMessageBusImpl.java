@@ -822,11 +822,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           deferDelivery(queue, message);
         }
         else {
-//          if (clustering) {
-//            forwardToCluster(message, );
-//          }
-//
-
           delayOrFail(message, new Runnable() {
             @Override
             public void run() {

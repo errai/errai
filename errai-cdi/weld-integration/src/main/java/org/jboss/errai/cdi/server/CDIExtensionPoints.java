@@ -178,7 +178,7 @@ public class CDIExtensionPoints implements Extension {
 
     // services
     if (type.isAnnotationPresent(Service.class)) {
-      log.debug("discovered Errai annotation on type: " + type);
+      log.info("discovered errai service: " + type);
       boolean isRpc = false;
 
       final Class<T> javaClass = type.getJavaClass();
@@ -477,6 +477,7 @@ public class CDIExtensionPoints implements Extension {
 
 
   private void createRPCScaffolding(final Class remoteIface, final MessageBus bus, final BeanManager beanManager) {
+    System.out.println("register RPC service: " + remoteIface.getName());
     final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
     // beware of classloading issues. better reflect on the actual instance
