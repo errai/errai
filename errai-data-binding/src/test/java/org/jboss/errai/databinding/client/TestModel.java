@@ -32,12 +32,15 @@ public class TestModel {
   // to test direct field access
   public String value;
   
-  // the _ here is used to test proper JavaBean property discovery
+  // the _ here is used to test proper JavaBean property discovery (based on getters/setters)
   private String _name;
   private Integer _age;
   
   private boolean active;
   public TestModel child;
+  
+  // test that this variable name does not cause a duplicate local variable in the generated proxy
+  private String oldValue;
   
   // this field tests for the case there's a field name collision in the generated proxy
   @SuppressWarnings("unused")
@@ -104,8 +107,16 @@ public class TestModel {
   public void setChild(TestModel child) {
     this.child = child;
   }
+  
+  public String getOldValue() {
+    return oldValue;
+  }
 
-  // this method is used to test property changes using non accessor methods
+  public void setOldValue(String oldValue) {
+    this.oldValue = oldValue;
+  }
+
+  // these methods are used to test property changes using non accessor methods
   public void activate() {
     this.active = true;
     if (child != null) {
@@ -113,8 +124,8 @@ public class TestModel {
     }
   }
 
-  protected TestModel activate(boolean b) {
-    this.active = b;
+  public TestModel activate(boolean activate) {
+    this.active = activate;
     return this;
   }
 
