@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.If;
@@ -179,10 +180,11 @@ public class BindableProxyGenerator {
       // If the set method we are proxying returns a value, capture that value into a local variable
       Statement callSetterOnTarget = null;
       Statement returnValueOfSetter = null;
+      String returnValName = ensureSafeLocalVariableName("returnValueOfSetter", setterMethod);
       if (!setterMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
         callSetterOnTarget =
-            Stmt.declareFinalVariable("returnValueOfSetter", setterMethod.getReturnType(), callSetterOnTarget);
-        returnValueOfSetter = Stmt.nestedCall(Refs.get("returnValueOfSetter")).returnValue();
+            Stmt.declareFinalVariable(returnValName, setterMethod.getReturnType(), callSetterOnTarget);
+        returnValueOfSetter = Stmt.nestedCall(Refs.get(returnValName)).returnValue();
       }
       else {
         callSetterOnTarget =
@@ -202,14 +204,15 @@ public class BindableProxyGenerator {
         updateNestedProxy = EmptyStatement.INSTANCE;
       }
 
+      String oldValName = ensureSafeLocalVariableName("oldValue", setterMethod);
       classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
           Parameter.of(paramType, property))
           .append(updateNestedProxy)
           .append(
-              Stmt.declareVariable("oldValue", paramType, target().invoke(getterMethod.getName())))
+              Stmt.declareVariable(oldValName, paramType, target().invoke(getterMethod.getName())))
           .append(callSetterOnTarget)
           .append(
-              agent().invoke("updateWidgetsAndFireEvent", property, Variable.get("oldValue"), Variable.get(property)))
+              agent().invoke("updateWidgetsAndFireEvent", property, Variable.get(oldValName), Variable.get(property)))
           .append(returnValueOfSetter)
           .finish();
     }
@@ -236,10 +239,11 @@ public class BindableProxyGenerator {
 
         Statement callOnTarget = null;
         Statement returnValue = null;
+        String returnValName = ensureSafeLocalVariableName("returnValue", method);
         if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
-          callOnTarget = Stmt.declareFinalVariable("returnValue", method.getReturnType(),
-              target().invoke(method, parmVars.toArray()));
-          returnValue = Stmt.nestedCall(Refs.get("returnValue")).returnValue();
+          callOnTarget = Stmt.declareFinalVariable(returnValName, 
+              method.getReturnType(), target().invoke(method, parmVars.toArray()));
+          returnValue = Stmt.nestedCall(Refs.get(returnValName)).returnValue();
         }
         else {
           callOnTarget = target().invoke(method, parmVars.toArray());
@@ -282,6 +286,19 @@ public class BindableProxyGenerator {
       fieldName = "_" + fieldName;
     }
     return fieldName;
+  }
+  
+  private String ensureSafeLocalVariableName(String name, MetaMethod method) {
+    MetaParameter[] params = method.getParameters();
+    if (params != null) {
+      for (MetaParameter param : params) {
+        if (name.equals(param.getName())) {
+          name = "_" + name;
+          break;
+        }
+      }
+    }
+    return name;
   }
 
   private ContextualStatementBuilder agent(String field) {
