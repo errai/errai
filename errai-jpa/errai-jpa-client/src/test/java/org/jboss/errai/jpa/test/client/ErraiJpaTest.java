@@ -759,10 +759,14 @@ public class ErraiJpaTest extends GWTTestCase {
 
     final Album eventAlbum = new Album();
     assertNull(eventAlbum.getId());
-    binder.addPropertyChangeHandler("id", new PropertyChangeHandler<Long>() {
+    binder.addPropertyChangeHandler(new PropertyChangeHandler<Long>() {
       @Override
       public void onPropertyChange(PropertyChangeEvent<Long> event) {
-        eventAlbum.setId(event.getNewValue());
+        if (event.getPropertyName().equals("id")) {
+          eventAlbum.setId(event.getNewValue());
+        } else { 
+          fail("Unexpected property change event received for: " + event.getPropertyName());
+        }
       }
     });
     

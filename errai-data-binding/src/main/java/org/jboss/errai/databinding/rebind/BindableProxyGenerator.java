@@ -81,12 +81,13 @@ public class BindableProxyGenerator {
             Stmt.newObject(parameterizedAs(BindableProxyAgent.class, typeParametersOf(bindable)),
                 Variable.get("this"), Variable.get("target"), Variable.get("initialState"))))
         .append(generatePropertiesMap())
+        .append(agent().invoke("copyValues"))
         .finish()
         .publicMethod(BindableProxyAgent.class, "getProxyAgent")
         .append(agent().returnValue())
         .finish()
         .publicMethod(void.class, "updateWidgets")
-        .append(agent().invoke("syncState", Stmt.loadStatic(InitialState.class, "FROM_MODEL")))
+        .append(agent().invoke("updateWidgetsAndFireEvents"))
         .finish()
         .publicMethod(bindable, "unwrap")
         .append(target().returnValue())
@@ -216,9 +217,9 @@ public class BindableProxyGenerator {
 
   /**
    * Generates proxy methods overriding public non-final methods that are not also property accessor methods. The
-   * purpose of this is to allow the proxies to react on model changes that happen outside the getters and setters of
-   * the bean. These methods will cause a comparison of all bound properties and trigger the appropriate UI updates and
-   * property change events.
+   * purpose of this is to allow the proxies to react on model changes that happen outside setters of the bean. These
+   * methods will cause a comparison of all bound properties and trigger the appropriate UI updates and property change
+   * events.
    */
   private void generateNonAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     for (MetaMethod method : bindable.getMethods()) {
