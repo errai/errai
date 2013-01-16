@@ -101,6 +101,15 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
     
     propertyChangeHandlerSupport = other.propertyChangeHandlerSupport;
   }
+  
+  /**
+   * Copies the values of all properties to be able to compare them in case they change outside a setter method. 
+   */
+  void copyValues() {
+    for (String property : propertyTypes.keySet()) {
+      knownValues.put(property, proxy.get(property));
+    }
+  }
 
   /**
    * Returns a set of the currently bound property names.
@@ -112,8 +121,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the widgets currently bound to the provided property (see
-   * {@link BindableProxy#bind(Widget, String, Converter)}).
+   * Returns the widgets currently bound to the provided property (see {@link #bind(Widget, String, Converter)}).
    * 
    * @param property
    *          the name of the model property
@@ -290,7 +298,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
         DataBinder nestedBinder = binders.get(property);
         if (nestedBinder != null) {
-          nestedBinder.setModel(actualValue, initialState);
+          nestedBinder.setModel(actualValue, InitialState.FROM_MODEL);
           proxy.set(property, nestedBinder.getModel());
         }
         updateWidgetsAndFireEvent(property, knownValue, actualValue);
@@ -368,43 +376,27 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    *          The new value of the property.
    */
   private <P> void firePropertyChangeEvent(final String property, final P oldValue, final P newValue) {
-    knownValues.put(Assert.notNull(property), newValue);
-    
-    PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, property, oldValue, newValue);
+    PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, Assert.notNull(property), oldValue, newValue);
     propertyChangeHandlerSupport.notifyHandlers(event);
-  }
-
-  /**
-   * Synchronizes the state of the model and the bound widgets based on the value of the provided {@link InitialState}.
-   * 
-   * @param initialState
-   *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
-   *          synchronization should be carried out.
-   */
-  void syncState(final InitialState initialState) {
-    for (String property : propertyTypes.keySet()) {
-      DataBinder nestedBinder = binders.get(property);
-      if (nestedBinder != null) {
-        nestedBinder.setModel(proxy.get(property), initialState);
-      }
-      for (Binding binding : bindings.get(property)) {
-        syncState(binding.getWidget(), property, initialState);
-      }
-    }
+    
+    knownValues.put(property, newValue);
   }
 
   /**
    * Synchronizes the state of the provided widgets and model property based on the value of the provided {@link InitialState}.
    * 
    * @param widget
-   *          The widget to synchronize.
+   *          The widget to synchronize. Must not be null.
    * @param property
-   *          The name of the model property that should be synchronized.
+   *          The name of the model property that should be synchronized. Must not be null.
    * @param initialState
-   *          Specifies the origin of the initial state of both model and UI widget. Null if no initial state
+   *          Specifies the origin of the initial state of both model and UI widget. If null, no state
    *          synchronization should be carried out.
    */
   private void syncState(final Widget widget, final String property, final InitialState initialState) {
+    Assert.notNull(widget);
+    Assert.notNull(property);
+    
     if (initialState != null) {
       Object value = proxy.get(property);
       if (widget instanceof HasValue) {

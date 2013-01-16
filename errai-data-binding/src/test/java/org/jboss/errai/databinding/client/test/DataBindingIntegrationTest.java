@@ -17,6 +17,7 @@
 package org.jboss.errai.databinding.client.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -592,10 +593,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
   @Test
   public void testUpdateWidgets() {
+    final List<String> changedProperties = new ArrayList<String>();
+    
     TestModel model = new TestModel();
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forModel(model).bind(textBox, "value");
 
+    binder.addPropertyChangeHandler(new PropertyChangeHandler<Long>() {
+      @Override
+      public void onPropertyChange(PropertyChangeEvent<Long> event) {
+        changedProperties.add(event.getPropertyName());
+      }
+    });
+    
     // using direct field access on the target object so the bindable proxy has no chance of seeing the change
     model.value = "model change";
     assertEquals("TextBox should be empty", "", textBox.getText());
@@ -604,6 +614,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     // using direct field access (e.g. the id was set).
     ((BindableProxy<?>) binder.getModel()).updateWidgets();
     assertEquals("TextBox should have been updated", "model change", textBox.getText());
+    assertEquals("Unexpected property change events received", Arrays.asList("value"), changedProperties);
   }
   
   @Test
