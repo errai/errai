@@ -1,11 +1,13 @@
 package org.jboss.errai.orientation.client.local;
 
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
 
 /**
- * Doesn't make motion events; just pops up an alert for the user when asked to start producing events.
+ * Just uses resize events to tell if the device has changed it's orientation.
  * 
- * @author jfuerth
+ * @author jfuerth, edewit
  */
 public class NoMotionDetector extends OrientationDetector {
 
@@ -15,12 +17,18 @@ public class NoMotionDetector extends OrientationDetector {
 
   @Override
   public void startFiringOrientationEvents() {
-    Window.alert("Sorry, this browser does not support device motion detection");
+    Window.addResizeHandler(new ResizeHandler() {
+      @Override
+      public void onResize(ResizeEvent event) {
+        int orientation = event.getWidth() > event.getHeight() ? 90 : 0;
+        fireOrientationEvent(0, orientation, 0);
+      }
+    });
   }
 
   @Override
   public boolean isReady() {
-    return false;
+    return true;
   }
 
 }
