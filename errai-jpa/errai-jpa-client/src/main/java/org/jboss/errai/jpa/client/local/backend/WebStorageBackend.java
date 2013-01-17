@@ -28,40 +28,10 @@ public class WebStorageBackend implements StorageBackend {
     em = Assert.notNull(erraiEntityManager);
   }
 
-  private native void putImpl(String key, String value) /*-{
-    $wnd.localStorage.setItem(key, value);
-  }-*/;
-
-  private native String getImpl(String key) /*-{
-    return $wnd.localStorage.getItem(key);
-  }-*/;
-
-  private native String removeImpl(String key) /*-{
-    return $wnd.localStorage.removeItem(key);
-  }-*/;
-
   @Override
-  public native void removeAll() /*-{
-    for (var i = $wnd.localStorage.length - 1; i >= 0; i--) {
-      var key = $wnd.localStorage.key(i);
-      $wnd.localStorage.removeItem(key);
-    }
-  }-*/;
-
-  /**
-   * Invokes the given entry visitor on each key/value pair in this entire
-   * storage backend.
-   *
-   * @param entryVisitor
-   *          The visitor that will act on each key/value pair.
-   */
-  private native void forEachKey(EntryVisitor entryVisitor) /*-{
-    for (var i = 0, n = $wnd.localStorage.length; i < n; i++) {
-      var key = $wnd.localStorage.key(i);
-      var value = $wnd.localStorage.getItem(key);
-      entryVisitor.@org.jboss.errai.jpa.client.local.backend.EntryVisitor::visit(Ljava/lang/String;Ljava/lang/String;)(key, value);
-    }
-  }-*/;
+  public void removeAll() {
+    LocalStorage.removeAll();
+  }
 
   @Override
   public <X> void put(Key<X,?> key, X value) {
@@ -69,14 +39,14 @@ public class WebStorageBackend implements StorageBackend {
     String keyJson = key.toJson();
     JSONValue valueJson = entityType.toJson(em, value);
     System.out.println(">>>put '" + keyJson + "'");
-    putImpl(keyJson, valueJson.toString());
+    LocalStorage.put(keyJson, valueJson.toString());
   }
 
   @Override
   public <X> X get(Key<X, ?> key) {
     ErraiEntityType<X> entityType = key.getEntityType();
     String keyJson = key.toJson();
-    String valueJson = getImpl(keyJson);
+    String valueJson = LocalStorage.get(keyJson);
     System.out.println("<<<get '" + keyJson + "' : " + valueJson);
     X entity;
     if (valueJson == null) {
@@ -94,7 +64,7 @@ public class WebStorageBackend implements StorageBackend {
     // TODO index entries by entity type
 
     final List<X> entities = new ArrayList<X>();
-    forEachKey(new EntryVisitor() {
+    LocalStorage.forEachKey(new EntryVisitor() {
       @Override
       public void visit(String key, String value) {
         Key<?, ?> k = Key.fromJson(em, key, false);
@@ -129,7 +99,7 @@ public class WebStorageBackend implements StorageBackend {
   @Override
   public boolean contains(Key<?, ?> key) {
     String keyJson = key.toJson();
-    boolean contains = getImpl(keyJson) != null;
+    boolean contains = LocalStorage.get(keyJson) != null;
     System.out.println("<<<contains '" + keyJson + "' : " + contains);
     return contains;
   }
@@ -137,7 +107,7 @@ public class WebStorageBackend implements StorageBackend {
   @Override
   public <X> void remove(Key<X, ?> key) {
     String keyJson = key.toJson();
-    removeImpl(keyJson);
+    LocalStorage.remove(keyJson);
   }
 
   @Override
@@ -145,7 +115,7 @@ public class WebStorageBackend implements StorageBackend {
     ErraiEntityType<X> entityType = key.getEntityType();
     String keyJson = key.toJson();
     JSONValue newValueJson = entityType.toJson(em, value);
-    JSONValue oldValueJson = JSONParser.parseStrict(getImpl(keyJson));
+    JSONValue oldValueJson = JSONParser.parseStrict(LocalStorage.get(keyJson));
     boolean modified = !JsonUtil.equals(newValueJson, oldValueJson);
     if (modified) {
       System.out.println("Detected modified entity " + key);

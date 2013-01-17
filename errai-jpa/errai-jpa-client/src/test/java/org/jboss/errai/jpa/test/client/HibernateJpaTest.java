@@ -84,6 +84,15 @@ public class HibernateJpaTest extends ErraiJpaTest {
   }
 
   /**
+   * This is a test to see how Errai copes with structural changes to the entity
+   * model. Not applicable to Hibernate.
+   */
+  @Override
+  public void testAddPrimitiveFieldToPreviouslyPersistedEntity() {
+    // skip
+  }
+
+  /**
    * Hibernate doesn't know how to unwrap Errai's WrappedPortables, so we have
    * to skip this test.
    */

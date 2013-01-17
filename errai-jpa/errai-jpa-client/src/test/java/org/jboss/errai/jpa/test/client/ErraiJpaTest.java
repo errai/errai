@@ -25,6 +25,9 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.Key;
+import org.jboss.errai.jpa.client.local.backend.LocalStorage;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
@@ -659,6 +662,37 @@ public class ErraiJpaTest extends GWTTestCase {
     em.clear();
 
     Zentity fetched = em.find(Zentity.class, original.getId());
+    assertNotSame(original, fetched);
+    assertEquals(original.toString(), fetched.toString());
+  }
+
+  /**
+   * This test ensures that application developers can add a primitive field to
+   * a pre-existing entity class that may have persisted instances out in the
+   * wild. Previously, trying to retrieve an old instance of an entity with a
+   * new primitive attribute would cause a NullPointerException when the
+   * generated code tried to assign <tt>null</tt> to the field.
+   */
+  public void testAddPrimitiveFieldToPreviouslyPersistedEntity() {
+    Zentity original = new Zentity();
+    EntityManager em = getEntityManager();
+    em.persist(original);
+    em.flush();
+    assertNotNull(original.getId());
+    em.clear();
+
+    // now we pull the JSON out of local storage and snip out the primitiveInt.
+    // the idea is to simulate having stored a version of Zentity that didn't have the primitiveInt attribute
+    Key<Zentity, Long> key = Key.get((ErraiEntityManager) em, Zentity.class, original.getId());
+    String originalZentityJson = LocalStorage.get(key.toJson());
+    String encodedPrimitiveInt = "\"primitiveInt\":0,";
+    int indexOfPrimitiveInt = originalZentityJson.indexOf(encodedPrimitiveInt);
+    assertTrue("Sanity check failed: didn't find primitiveInt stored in backend entry: " + originalZentityJson,
+            indexOfPrimitiveInt > 0);
+    LocalStorage.put(key.toJson(), originalZentityJson.replace(encodedPrimitiveInt, ""));
+
+    // now try and retrieve this "old version" of Zentity
+    Zentity fetched = em.find(Zentity.class, original.getId());  // <-- this line used to blow up with NPE
     assertNotSame(original, fetched);
     assertEquals(original.toString(), fetched.toString());
   }
