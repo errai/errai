@@ -25,10 +25,6 @@ import org.jboss.errai.ui.test.common.client.TestModel;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindingListWidget extends ListWidget<TestModel, BindingItemWidget> {
-
-  public BindingItemWidget getWidget(int index) {
-    return (BindingItemWidget) getPanel().getWidget(index);
-  }
   
   @Override
   protected Class<BindingItemWidget> getItemWidgetType() {

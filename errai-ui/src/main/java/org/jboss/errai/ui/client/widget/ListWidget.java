@@ -66,7 +66,6 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    */
   protected abstract Class<W> getItemWidgetType();
   
-  
   /**
    * Returns the panel that contains all item widgets.
    * 
@@ -101,5 +100,17 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       widget.setModel(item);
       panel.add((Widget) widget);
     }
+  }
+  
+  /**
+   * Returns the widget at the specified index.
+   * 
+   * @param index the index to be retrieved
+   * @return the widget at the specified index
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  @SuppressWarnings("unchecked")
+  public W getWidget(int index) {
+    return (W) panel.getWidget(index);
   }
 }

@@ -63,7 +63,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   }
   
   @Test
-  public void testListBindingt() {
+  public void testListBinding() {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel());
     modelList.add(new TestModel());
