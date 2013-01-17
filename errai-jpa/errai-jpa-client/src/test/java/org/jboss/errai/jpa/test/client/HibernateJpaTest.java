@@ -68,7 +68,27 @@ public class HibernateJpaTest extends ErraiJpaTest {
    * in Hibernate mode.
    */
   @Override
-  public void testStoreAndFetchOneWithEverything() throws Exception {
+  public void testStoreAndFetchOneWithEverythingUsingFieldAccess() throws Exception {
+    // skip
+  }
+
+  /**
+   * Hibernate (at least on top of HSQLDB) damages BigDecimal (adds extra
+   * precision), java.util.Date (returns a java.sql.Date), and
+   * java.sql.Timestamp (truncates nanosecond precision). So we skip this test
+   * in Hibernate mode.
+   */
+  @Override
+  public void testStoreAndFetchOneWithEverythingUsingMethodAccess() throws Exception {
+    // skip
+  }
+
+  /**
+   * This is a test to see how Errai copes with structural changes to the entity
+   * model. Not applicable to Hibernate.
+   */
+  @Override
+  public void testAddPrimitiveFieldToPreviouslyPersistedEntity() {
     // skip
   }
 
@@ -89,7 +109,7 @@ public class HibernateJpaTest extends ErraiJpaTest {
   public void testUpdateDataBinderProxiedEntity() {
     // skip
   }
-  
+
   /**
    * Hibernate doesn't know how to unwrap Errai's WrappedPortables, so we have
    * to skip this test.

@@ -9,7 +9,16 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.PersistenceException;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -17,6 +26,9 @@ import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.Key;
+import org.jboss.errai.jpa.client.local.backend.LocalStorage;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
@@ -24,6 +36,7 @@ import org.jboss.errai.jpa.test.entity.CallbackLogEntry;
 import org.jboss.errai.jpa.test.entity.CascadeFrom;
 import org.jboss.errai.jpa.test.entity.Format;
 import org.jboss.errai.jpa.test.entity.Genre;
+import org.jboss.errai.jpa.test.entity.MethodAccessedZentity;
 import org.jboss.errai.jpa.test.entity.StandaloneLifecycleListener;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
@@ -572,7 +585,7 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
 
-  public void testStoreAndFetchOneWithEverything() throws Exception {
+  public void testStoreAndFetchOneWithEverythingUsingFieldAccess() throws Exception {
     Timestamp timestamp = new Timestamp(1234L);
     timestamp.setNanos(4321);
 
@@ -604,6 +617,38 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(original.toString(), fetched.toString());
   }
 
+  public void testStoreAndFetchOneWithEverythingUsingMethodAccess() throws Exception {
+    Timestamp timestamp = new Timestamp(1234L);
+    timestamp.setNanos(4321);
+
+    MethodAccessedZentity original = new MethodAccessedZentity(
+            true, Boolean.FALSE,
+            (byte) -10, Byte.valueOf((byte) -10), new byte[] { -128, 0, 127, 126, 125, 124 }, new Byte[] { -128, 0, 127, -3 },
+            'a', 'a', new char[] {'\u1234', '\u0000', 'a' }, new Character[] {'\u1234', '\u0000', 'a' },
+            Short.MIN_VALUE, Short.valueOf(Short.MIN_VALUE),
+            Integer.MIN_VALUE, Integer.valueOf(Integer.MIN_VALUE),
+            Long.MIN_VALUE, Long.valueOf(Long.MIN_VALUE),
+            Float.MIN_VALUE, Float.valueOf(Float.MIN_VALUE),
+            Double.MIN_VALUE, Double.valueOf(Double.MIN_VALUE),
+            "A string with \u4292 non-ascii char",
+            BigInteger.TEN, BigDecimal.TEN,
+            new java.util.Date(1234L), new java.sql.Date(1234L), new Time(1234L), timestamp,
+            PersistenceContextType.TRANSACTION);
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(original);
+    em.flush();
+
+    assertNotNull(original.getId());
+
+    em.clear();
+
+    MethodAccessedZentity fetched = em.find(MethodAccessedZentity.class, original.getId());
+    assertNotSame(original, fetched);
+    assertEquals(original.toString(), fetched.toString());
+  }
+
   /**
    * This is to ensure that the null value of all nullable types can be marshalled and demarshalled without incident.
    */
@@ -620,6 +665,37 @@ public class ErraiJpaTest extends GWTTestCase {
     em.clear();
 
     Zentity fetched = em.find(Zentity.class, original.getId());
+    assertNotSame(original, fetched);
+    assertEquals(original.toString(), fetched.toString());
+  }
+
+  /**
+   * This test ensures that application developers can add a primitive field to
+   * a pre-existing entity class that may have persisted instances out in the
+   * wild. Previously, trying to retrieve an old instance of an entity with a
+   * new primitive attribute would cause a NullPointerException when the
+   * generated code tried to assign <tt>null</tt> to the field.
+   */
+  public void testAddPrimitiveFieldToPreviouslyPersistedEntity() {
+    Zentity original = new Zentity();
+    EntityManager em = getEntityManager();
+    em.persist(original);
+    em.flush();
+    assertNotNull(original.getId());
+    em.clear();
+
+    // now we pull the JSON out of local storage and snip out the primitiveInt.
+    // the idea is to simulate having stored a version of Zentity that didn't have the primitiveInt attribute
+    Key<Zentity, Long> key = Key.get((ErraiEntityManager) em, Zentity.class, original.getId());
+    String originalZentityJson = LocalStorage.get(key.toJson());
+    String encodedPrimitiveInt = "\"primitiveInt\":0,";
+    int indexOfPrimitiveInt = originalZentityJson.indexOf(encodedPrimitiveInt);
+    assertTrue("Sanity check failed: didn't find primitiveInt stored in backend entry: " + originalZentityJson,
+            indexOfPrimitiveInt > 0);
+    LocalStorage.put(key.toJson(), originalZentityJson.replace(encodedPrimitiveInt, ""));
+
+    // now try and retrieve this "old version" of Zentity
+    Zentity fetched = em.find(Zentity.class, original.getId());  // <-- this line used to blow up with NPE
     assertNotSame(original, fetched);
     assertEquals(original.toString(), fetched.toString());
   }
@@ -767,7 +843,7 @@ public class ErraiJpaTest extends GWTTestCase {
       public void onPropertyChange(PropertyChangeEvent<Long> event) {
         if (event.getPropertyName().equals("id")) {
           eventAlbum.setId(event.getNewValue());
-        } else { 
+        } else {
           fail("Unexpected property change event received for: " + event.getPropertyName());
         }
       }
@@ -782,7 +858,7 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNotNull(album.getId());
     assertEquals(album.getId(), eventAlbum.getId());
   }
-  
+
   public void testNullCollectionInEntity() throws Exception {
     Artist artist = new Artist();
     artist.setId(4433443L);

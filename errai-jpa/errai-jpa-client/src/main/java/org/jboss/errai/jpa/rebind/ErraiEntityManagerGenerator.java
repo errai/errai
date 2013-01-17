@@ -640,7 +640,12 @@ public class ErraiEntityManagerGenerator extends Generator {
         return methodBody;
       }
       else if (getJavaMember(attr) instanceof Method) {
-        return Stmt.loadVariable(entityInstanceParam).invoke(getJavaMember(attr).getName()).returnValue();
+
+        // hack "getFoo" to "setFoo" by replacing first letter with s
+        String setterMethodName = "s" + getJavaMember(attr).getName().substring(1);
+
+        return Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam))
+                .invoke(setterMethodName, Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam)));
       }
       else {
         throw new AssertionError(
@@ -680,7 +685,9 @@ public class ErraiEntityManagerGenerator extends Generator {
         return methodBody;
       }
       else if (getJavaMember(attr) instanceof Method) {
-        return Stmt.loadVariable(entityInstanceParam).invoke(getJavaMember(attr).getName()).returnValue();
+        return Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam))
+                .invoke(getJavaMember(attr).getName())
+                .returnValue();
       }
       else {
         throw new AssertionError(
@@ -691,7 +698,7 @@ public class ErraiEntityManagerGenerator extends Generator {
   }
 
   /**
-   * Gets the Java memeber that defines the given Attribute. This needs to be
+   * Gets the Java member that defines the given Attribute. This needs to be
    * done via reflection because Attribute.getJavaMember() is hidden from the
    * Java compiler by our GWT super-source version of JPA2.
    */

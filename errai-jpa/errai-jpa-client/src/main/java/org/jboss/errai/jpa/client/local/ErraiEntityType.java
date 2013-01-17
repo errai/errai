@@ -166,6 +166,9 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
         ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
         JSONValue attrJsonValue = jsonValue.isObject().get(attr.getName());
 
+        // this attribute did not exist when the entity was originally persisted; skip it.
+        if (attrJsonValue == null) continue;
+
         switch (attr.getPersistentAttributeType()) {
         case ELEMENT_COLLECTION:
         case EMBEDDED:
