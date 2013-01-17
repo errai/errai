@@ -113,8 +113,11 @@ public class Navigation {
     }
 
     W widget = toPage.content();
-    toPage.pageShowing(widget, state);
+    if (widget == null) {
+      throw new NullPointerException("Target page " + toPage + " returned a null content widget");
+    }
 
+    toPage.pageShowing(widget, state);
     setCurrentPage(toPage);
     contentPanel.add(widget);
     toPage.pageShown(widget, state);
