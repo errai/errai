@@ -37,6 +37,12 @@
       <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-location</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- GWT -->
     <dependency>
       <groupId>com.google.gwt</groupId>
