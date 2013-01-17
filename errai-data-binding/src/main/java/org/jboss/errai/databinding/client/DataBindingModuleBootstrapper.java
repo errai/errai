@@ -31,9 +31,7 @@ import com.google.gwt.core.client.GWT;
 public class DataBindingModuleBootstrapper implements Runnable {
   @Override
   public void run() {
-    InitVotes.waitFor(DataBindingModuleBootstrapper.class);
     BindableProxyLoader proxyLoader = GWT.create(BindableProxyLoader.class);
     proxyLoader.loadBindableProxies();
-    InitVotes.voteFor(DataBindingModuleBootstrapper.class);
   }
 }

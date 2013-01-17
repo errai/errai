@@ -36,7 +36,6 @@ import com.google.gwt.core.client.EntryPoint;
  */
 public class CDIClientBootstrap implements EntryPoint {
   public void onModuleLoad() {
-    InitVotes.waitFor(CDIClientBootstrap.class);
     final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     final Runnable busReadyEvent = new Runnable() {
@@ -100,6 +99,5 @@ public class CDIClientBootstrap implements EntryPoint {
         });
       }
     });
-    InitVotes.voteFor(CDIClientBootstrap.class);
   }
 }

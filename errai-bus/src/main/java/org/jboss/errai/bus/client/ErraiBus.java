@@ -16,9 +16,8 @@
 
 package org.jboss.errai.bus.client;
 
-import java.util.Collections;
-import java.util.Set;
-
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -35,15 +34,14 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.client.framework.TransportErrorHandler;
 
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
  * client {@link org.jboss.errai.bus.client.framework.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
-public class
-    ErraiBus implements EntryPoint {
+public class ErraiBus implements EntryPoint {
   private static MessageBus bus;
 
   static {

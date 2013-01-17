@@ -15,7 +15,7 @@
   </parent>
 
   <build>
-    <testOutputDirectory>war/WEB-INF/classes</testOutputDirectory>
+    <testOutputDirectory>war/WEB-INF/classes/</testOutputDirectory>
     <resources>
       <resource>
         <directory>src/main/java</directory>
@@ -24,6 +24,14 @@
         <directory>src/main/resources</directory>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
   </build>
 
   <profiles>
@@ -60,7 +68,7 @@
           <artifactId>errai-ioc</artifactId>
           <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-ioc-bus-support</artifactId>
@@ -135,16 +143,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jboss.spec.javax.ejb</groupId>
-            <artifactId>jboss-ejb-api_3.1_spec</artifactId>
-            <version>1.0.2.Final</version>
-            <scope>provided</scope>
+          <groupId>org.jboss.spec.javax.ejb</groupId>
+          <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+          <version>1.0.2.Final</version>
+          <scope>provided</scope>
         </dependency>
 
         <dependency>
-        	<groupId>org.quartz-scheduler</groupId>
-        	<artifactId>quartz</artifactId>
-        	<version>2.1.6</version>
+          <groupId>org.quartz-scheduler</groupId>
+          <artifactId>quartz</artifactId>
+          <version>2.1.6</version>
           <scope>provided</scope>
         </dependency>
 
@@ -225,8 +233,7 @@
             <configuration>
               <skipTests>false</skipTests>
               <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/
-                </additionalClasspathElement>
+                <additionalClasspathElement>${basedir}/${profile.testOutputDirectory}/</additionalClasspathElement>
                 <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
               </additionalClasspathElements>
               <useManifestOnlyJar>false</useManifestOnlyJar>

@@ -22,6 +22,7 @@ import static org.jboss.errai.common.client.util.LogUtil.log;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -48,7 +49,6 @@ public class Container implements EntryPoint {
   public void bootstrapContainer() {
     try {
       init = false;
-      InitVotes.waitFor(Container.class);
 
       QualifierUtil.initFromFactoryProvider(new QualifierEqualityFactoryProvider() {
         @Override
@@ -93,11 +93,11 @@ public class Container implements EntryPoint {
   private void finishInit() {
     init = true;
     log(injectionContext.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
-    InitVotes.voteFor(Container.class);
     declareDebugFunction();
     new CallbacksRunnable().run();
 
     log("bean manager now in service.");
+
   }
 
   private static class CallbacksRunnable implements Runnable {
@@ -135,6 +135,7 @@ public class Container implements EntryPoint {
 
   /**
    * Short-alias method for {@link #runAfterInit(Runnable)}.
+   *
    * @param runnable
    */
   public static void $(final Runnable runnable) {
@@ -170,6 +171,7 @@ public class Container implements EntryPoint {
    * Converts the specified annotation array to a string representation. Used to display the bean manager status.
    *
    * @param annotations
+   *
    * @return
    */
   private static String annotationsToString(final Annotation[] annotations) {
