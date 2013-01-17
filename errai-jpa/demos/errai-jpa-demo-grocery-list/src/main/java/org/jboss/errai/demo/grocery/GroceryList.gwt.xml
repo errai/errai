@@ -11,5 +11,9 @@
   <inherits name="org.jboss.errai.ui.nav.Navigation"/>
   <inherits name="org.jboss.errai.databinding.DataBinding" />
   <inherits name="org.jboss.errai.enterprise.CDI" />
-
+  <inherits name="com.google.gwt.maps.Maps" />
+  
+  <source path="client"/>
+  <source path="shared"/>
+  
 </module>

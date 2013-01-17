@@ -23,6 +23,10 @@ public class Store {
   private long id;
 
   private String name;
+  private String address;
+
+  private double latitude;
+  private double longitude;
 
   @OneToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE})
   private List<Department> departments = new ArrayList<Department>();
@@ -33,6 +37,30 @@ public class Store {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
+  }
+
+  public double getLatitude() {
+    return latitude;
+  }
+
+  public void setLatitude(double latitude) {
+    this.latitude = latitude;
+  }
+
+  public double getLongitude() {
+    return longitude;
+  }
+
+  public void setLongitude(double longitude) {
+    this.longitude = longitude;
   }
 
   public List<Department> getDepartments() {
@@ -47,11 +75,9 @@ public class Store {
     return id;
   }
 
-  // TODO add location
-
   @Override
   public String toString() {
-    return "Store [id=" + id + ", name=" + name + ", departments="
-            + departments + "]";
+    return "Store [id=" + id + ", name=" + name + ", address=" + address + ", latitude=" + latitude + ", longitude="
+            + longitude + ", departments=" + departments + "]";
   }
 }

@@ -192,6 +192,20 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- GWT Maps API V3 -->
+    <dependency>
+      <groupId>com.github.branflake2267</groupId>
+      <artifactId>gwt-maps-api</artifactId>
+      <version>3.9.0-build-16</version>
+    </dependency>
+
+    <!-- Other GWT Maps Dependency from Google -->
+    <dependency>
+      <groupId>com.google.gwt.google-apis</groupId>
+      <artifactId>gwt-ajaxloader</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+
     <!-- Runtime / Container dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>

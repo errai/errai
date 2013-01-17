@@ -12,17 +12,15 @@ import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 
 import org.jboss.errai.demo.grocery.client.shared.Store;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.TableElement;
-import com.google.gwt.dom.client.TableRowElement;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 
@@ -31,20 +29,15 @@ import com.google.gwt.user.client.ui.Composite;
 @Page
 public class StoresPage extends Composite {
 
-  // XXX need a better way of getting at this instance from the StoreListener
+  // TODO eliminate this after making a bridge from JPA lifecycle events to CDI events
   private static StoresPage INSTANCE;
 
-  @Inject
-  private IOCBeanManager beanManager;
+  @Inject private EntityManager em;
 
-  @Inject
-  private EntityManager em;
+  @Inject TransitionTo<StorePage> toStorePage;
+  @Inject @DataField ListWidget<Store, StoreWidget> storeList;
 
-  @DataField
-  private TableElement table = Document.get().createTableElement();
-
-  @Inject @DataField
-  private Button addStoreButton;
+  @Inject @DataField Button addStoreButton;
 
   @PostConstruct
   private void initInstance() {
@@ -68,40 +61,15 @@ public class StoresPage extends Composite {
   }
 
   public void refreshFromDb() {
-    table.setInnerHTML("");
     List<Store> allStores = em.createNamedQuery("allStores", Store.class).getResultList();
-    for (Store s : allStores) {
-      addStore(s);
-    }
+    storeList.setItems(allStores);
   }
 
-  private void addStore(Store store) {
-    TableRowElement row = table.insertRow(-1);
-    row.insertCell(-1).setInnerText(store.getName());
-  }
-
-  /**
-   * Shows the store form in a popup when the "+" button is pressed.
-   *
-   * @param event the click event (ignored)
-   */
   @EventHandler("addStoreButton")
   public void onStoreAddButtonClick(ClickEvent event) {
-    final StoreForm storeForm = beanManager.lookupBean(StoreForm.class).getInstance();
-    final PopoverContainer popover = beanManager.lookupBean(PopoverContainer.class).getInstance();
-    popover.setTitleHtml(new SafeHtmlBuilder().appendEscaped("New Store").toSafeHtml());
-    popover.setBodyWidget(storeForm);
-    popover.show(addStoreButton);
-    storeForm.grabKeyboardFocus();
-
-    // hide store form when new store is saved
-    storeForm.setAfterSaveAction(new Runnable() {
-      @Override
-      public void run() {
-        popover.hide();
-        beanManager.destroyBean(popover);
-        beanManager.destroyBean(storeForm);
-      }
-    });
+    Store newStore = new Store();
+    em.persist(newStore);
+    em.flush();
+    toStorePage.go(ImmutableMultimap.of("id", String.valueOf(newStore.getId())));
   }
 }
