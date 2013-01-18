@@ -37,14 +37,6 @@ public class Html5OrientationDetector extends OrientationDetector {
     $wnd.addEventListener('deviceorientation', listener, false);
   }-*/;
 
-  /**
-   * Returns true always.
-   */
-  @Override
-  public boolean isReady() {
-    return true;
-  }
-
   @Override
   public void stopFiringOrientationEvents() {
     GWT.log("Stopping orientation events!");

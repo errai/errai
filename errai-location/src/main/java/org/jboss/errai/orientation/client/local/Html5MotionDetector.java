@@ -41,18 +41,11 @@ public class Html5MotionDetector extends OrientationDetector {
 
   @Override
   public void stopFiringOrientationEvents() {
-    // TODO Auto-generated method stub
-    
   }
 
   @Override
   public void startFiringOrientationEvents() {
     GWT.log("Starting motion events!!!");
     startEvents();
-  }
-
-  @Override
-  public boolean isReady() {
-    return true;
   }
 }

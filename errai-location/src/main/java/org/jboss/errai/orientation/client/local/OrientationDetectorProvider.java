@@ -1,6 +1,7 @@
 package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.core.client.GWT;
+import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.orientation.client.shared.Ongoing;
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
@@ -14,12 +15,19 @@ import javax.inject.Singleton;
 public class OrientationDetectorProvider implements Provider<OrientationDetector> {
 
   @Inject @Ongoing
+  protected
   Event<OrientationEvent> orientationEventSource;
+
+  OrientationDetector detector;
+
+  @AfterInitialization
+  public void ready() {
+    detector.startFiringOrientationEvents();
+  }
 
   @Produces
   public OrientationDetector get() {
     GWT.log("Creating orientation detector...");
-    OrientationDetector detector;
     if (supportsMotionEvents()) {
       detector = new Html5MotionDetector();
     }

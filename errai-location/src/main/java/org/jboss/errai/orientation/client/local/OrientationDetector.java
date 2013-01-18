@@ -1,21 +1,21 @@
 package org.jboss.errai.orientation.client.local;
 
-import javax.enterprise.event.Event;
-
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
+
+import javax.enterprise.event.Event;
 
 public abstract class OrientationDetector {
 
   /**
-   * Don't try to fire a CDI OrientationEvent event more than once every 250ms.
-   * <p>
+   * Don't try to fire a CDI OrientationEvent event more than once every 175ms.
+   * <p/>
    * TODO we should remove this once the bus supports coalescing events!
    */
-  private long minEventInterval = 175;
+  private static final long MIN_EVENT_INTERVAL = 175;
 
   /**
    * The time we last fired an OrientationEvent.
-   * <p>
+   * <p/>
    * TODO we should remove this once the bus supports coalescing events!
    */
   private long lastEventFireTime;
@@ -46,7 +46,8 @@ public abstract class OrientationDetector {
    */
   protected void fireOrientationEvent(double x, double y, double z) {
     long now = System.currentTimeMillis();
-    if (now - lastEventFireTime < minEventInterval) {
+
+    if (now - lastEventFireTime < MIN_EVENT_INTERVAL) {
       return;
     }
     lastEventFireTime = now;
@@ -57,7 +58,7 @@ public abstract class OrientationDetector {
    * The provider class that creates the detector calls this method to give us a
    * means of firing the event.
    */
-  void setOrientationEventSource(Event<OrientationEvent> orientationEventSource) {
+  public void setOrientationEventSource(Event<OrientationEvent> orientationEventSource) {
     this.orientationEventSource = orientationEventSource;
   }
 
@@ -71,13 +72,4 @@ public abstract class OrientationDetector {
     if (clientId == null) throw new NullPointerException();
     this.clientId = clientId;
   }
-
-  /**
-   * Returns true if this detector can be started. Some detectors (for example,
-   * PhoneGap) need to wait for subsystems to start before they can begin firing
-   * orientation events.
-   * <p>
-   * TODO: we won't need this when client code can participate in Errai VoteForInit.
-   */
-  public abstract boolean isReady();
 }

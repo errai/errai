@@ -15,26 +15,22 @@
  */
 package org.jboss.errai.demo.mobile.client.local;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gwt.animation.client.AnimationScheduler;
+import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.RootPanel;
+import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.orientation.client.local.OrientationDetector;
+import org.jboss.errai.orientation.client.shared.Disconnected;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-
-import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
-import org.jboss.errai.orientation.client.shared.Disconnected;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-
-import com.google.gwt.animation.client.AnimationScheduler;
-import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.RootPanel;
-import org.jboss.errai.orientation.client.local.OrientationDetector;
-import org.jboss.errai.orientation.client.shared.OrientationEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Main application entry point.
@@ -56,22 +52,6 @@ public class ClientMain {
       public void run() {
         orientationDetector.setClientId(welcomeDialog.getNameBoxContents());
         RootPanel.get("rootPanel").remove(welcomeDialog);
-
-        // TODO: could block startup using InitBallot/voteForInit()
-        GWT.log("Starting to poll for readiness! Orientation detector: " + orientationDetector);
-        // poll for readiness; when it's ready, start watching device orientation.
-        Timer t = new Timer() {
-          @Override
-          public void run() {
-            GWT.log("Orientation detector: " + orientationDetector);
-            if (orientationDetector.isReady()) {
-              orientationDetector.startFiringOrientationEvents();
-            } else {
-              schedule(100);
-            }
-          }
-        };
-        t.schedule(100);
       }
     });
     RootPanel.get("rootPanel").add(welcomeDialog);

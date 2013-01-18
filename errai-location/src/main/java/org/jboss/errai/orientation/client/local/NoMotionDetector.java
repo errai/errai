@@ -25,10 +25,4 @@ public class NoMotionDetector extends OrientationDetector {
       }
     });
   }
-
-  @Override
-  public boolean isReady() {
-    return true;
-  }
-
 }

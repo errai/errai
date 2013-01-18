@@ -4,10 +4,11 @@ import com.google.gwt.user.client.Window;
 import com.googlecode.gwtphonegap.client.accelerometer.*;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.orientation.client.local.OrientationDetector;
+import org.jboss.errai.orientation.client.shared.Ongoing;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
-import javax.enterprise.inject.Produces;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
@@ -16,22 +17,27 @@ import javax.inject.Singleton;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
+@Cordova
 @Singleton
 public class PhoneGapOrientationDetector extends OrientationDetector {
 
   @Inject
   Accelerometer accelerometer;
 
+  @Inject @Ongoing
+  Event<OrientationEvent> event;
+
   private AccelerometerWatcher watcher;
 
   @AfterInitialization
-  public void ready() {
+  public void init() {
+    setOrientationEventSource(event);
     startFiringOrientationEvents();
   }
 
   @Override
   public void startFiringOrientationEvents() {
-    watcher = accelerometer.watchAcceleration(new AccelerationOptions(100), new AccelerationCallback() {
+    watcher = accelerometer.watchAcceleration(new AccelerationOptions(), new AccelerationCallback() {
       @Override
       public void onSuccess(Acceleration acceleration) {
         fireOrientationEvent(acceleration.getX(), acceleration.getY(), acceleration.getZ());
@@ -52,18 +58,5 @@ public class PhoneGapOrientationDetector extends OrientationDetector {
     }
   }
 
-  @Override
-  public boolean isReady() {
-    return true;
-  }
-
-  @Singleton
-  public static class PhoneGapOrientationDetectorProvider implements Provider<OrientationDetector> {
-    @Produces
-    @Override
-    public OrientationDetector get() {
-      return new PhoneGapOrientationDetector();
-    }
-  }
 
 }

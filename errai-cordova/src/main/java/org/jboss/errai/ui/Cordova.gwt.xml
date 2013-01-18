@@ -25,10 +25,6 @@
   <replace-with class="org.jboss.errai.ui.cordova.LocationAwareClientMessageBus">
     <when-type-is class="org.jboss.errai.bus.client.framework.MessageBus"/>
   </replace-with>
-  
-  <replace-with class="org.jboss.errai.ui.cordova.PhoneGapOrientationDetector.PhoneGapOrientationDetectorProvider">
-    <when-type-is class="org.jboss.errai.orientation.client.local.OrientationDetectorProvider"/>
-  </replace-with>
 
   <source path="cordova" />
   <source path="shared" />
