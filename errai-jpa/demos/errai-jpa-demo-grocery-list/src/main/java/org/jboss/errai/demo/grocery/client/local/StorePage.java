@@ -38,6 +38,7 @@ import com.google.gwt.maps.client.placeslib.AutocompleteOptions;
 import com.google.gwt.maps.client.placeslib.AutocompleteType;
 import com.google.gwt.maps.client.placeslib.PlaceGeometry;
 import com.google.gwt.maps.client.placeslib.PlaceResult;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -65,15 +66,15 @@ public class StorePage extends Composite {
   @PageShown
   private void setup() {
     System.out.println("Setting up StorePage for store " + requestedStoreId);
-    Store found = null;
     if (requestedStoreId != null) {
-      found = em.find(Store.class, requestedStoreId);
+      Store found = em.find(Store.class, requestedStoreId);
       // TODO store might not be found. Should display error message in this case.
+      if (found == null) {
+        Window.alert("No such store: " + requestedStoreId);
+        backToStoresPage.go();
+      }
+      storeBinder.setModel(found, InitialState.FROM_MODEL);
     }
-    if (found == null) {
-      found = new Store();
-    }
-    storeBinder.setModel(found, InitialState.FROM_MODEL);
 
     GoogleMapBootstrapper.whenReady(new Runnable() {
       @Override
@@ -126,7 +127,9 @@ public class StorePage extends Composite {
 
   @PageHidden
   public void cleanup() {
-    mapContainer.getWidget().removeFromParent();
+    if (mapContainer.getWidget() != null) {
+      mapContainer.getWidget().removeFromParent();
+    }
   }
 
   @EventHandler("saveButton")
