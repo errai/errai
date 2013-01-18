@@ -28,6 +28,10 @@ import org.jboss.errai.databinding.client.api.Bindable;
 @Portable
 public class TestModel {
 
+  // This guard against regressions of https://issues.jboss.org/browse/ERRAI-476
+  @Bindable
+  public static class DuplicateNamedBindableType {}
+
   private int id;
   // to test direct field access
   public String value;

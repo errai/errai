@@ -55,7 +55,8 @@ public class RpcProxyGenerator {
   }
 
   public ClassStructureBuilder<?> generate() {
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getName() + "Impl")
+    String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(safeProxyClassName)
         .packageScope()
         .implementsInterface(remote)
         .implementsInterface(RpcStub.class)

@@ -66,7 +66,8 @@ public class BindableProxyGenerator {
   }
 
   public ClassStructureBuilder<?> generate() {
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(bindable.getName() + "Proxy", bindable)
+    String safeProxyClassName = bindable.getFullyQualifiedName().replace('.', '_') + "Proxy";
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(safeProxyClassName, bindable)
         .packageScope()
         .implementsInterface(BindableProxy.class)
         .body();
