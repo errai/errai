@@ -1,10 +1,7 @@
 package org.jboss.errai.ui.cordova;
 
 import com.googlecode.gwtphonegap.client.PhoneGap;
-import com.googlecode.gwtphonegap.client.accelerometer.AccelerationCallback;
-import com.googlecode.gwtphonegap.client.accelerometer.AccelerationOptions;
 import com.googlecode.gwtphonegap.client.accelerometer.Accelerometer;
-import com.googlecode.gwtphonegap.client.accelerometer.AccelerometerWatcher;
 import com.googlecode.gwtphonegap.client.camera.Camera;
 import com.googlecode.gwtphonegap.client.capture.Capture;
 import com.googlecode.gwtphonegap.client.compass.Compass;
@@ -15,9 +12,7 @@ import com.googlecode.gwtphonegap.client.event.Event;
 import com.googlecode.gwtphonegap.client.file.File;
 import com.googlecode.gwtphonegap.client.media.MediaModule;
 import com.googlecode.gwtphonegap.client.notification.Notification;
-import org.jboss.errai.ioc.client.api.AfterInitialization;
 
-import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,12 +25,6 @@ public class CordovaAccessoriesProducer {
 
   @Inject
   CordovaProducer cordovaProducer;
-
-  @AfterInitialization
-  public void doStuffAfterInit() {
-    // ... do some work ...
-    System.out.println("CordovaAccessoriesProducer.doStuffAfterInit");
-  }
 
   public PhoneGap getPhoneGap() {
     return cordovaProducer.getPhoneGap();
