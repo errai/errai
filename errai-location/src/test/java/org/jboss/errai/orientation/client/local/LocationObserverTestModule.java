@@ -21,11 +21,6 @@ public class LocationObserverTestModule {
   @Inject
   OrientationDetector orientationDetector;
 
-  @PostConstruct
-  public void init() {
-    orientationDetector.startFiringOrientationEvents();
-  }
-
   @SuppressWarnings("UnusedDeclaration")
   public void onEventReceived(@Observes @Any OrientationEvent orientationEvent) {
     receivedEvents.add(orientationEvent.toString());
