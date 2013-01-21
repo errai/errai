@@ -1,14 +1,15 @@
 package org.jboss.errai.orientation.client.local;
 
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.orientation.client.shared.OrientationEvent;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.orientation.client.local.OrientationDetector;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 /**
  * @author edewit@redhat.com
@@ -16,7 +17,7 @@ import java.util.List;
 @EntryPoint
 public class LocationObserverTestModule {
 
-  private List<String> receivedEvents = new ArrayList<String>();
+  private final List<String> receivedEvents = new ArrayList<String>();
 
   @Inject
   OrientationDetector orientationDetector;

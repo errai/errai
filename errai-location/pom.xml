@@ -175,6 +175,12 @@
           <version>${project.version}</version>
           <scope>compile</scope>
         </dependency>
+        
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-weld-integration</artifactId>
+          <version>${project.version}</version>
+        </dependency>
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
