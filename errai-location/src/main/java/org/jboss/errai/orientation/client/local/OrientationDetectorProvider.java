@@ -22,7 +22,9 @@ public class OrientationDetectorProvider implements Provider<OrientationDetector
 
   @AfterInitialization
   public void ready() {
-    detector.startFiringOrientationEvents();
+    if (detector != null) {
+      detector.startFiringOrientationEvents();
+    }
   }
 
   @Produces
