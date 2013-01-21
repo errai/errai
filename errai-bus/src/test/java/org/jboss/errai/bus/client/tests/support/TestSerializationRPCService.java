@@ -38,6 +38,11 @@ import org.jboss.errai.bus.server.annotations.Remote;
  */
 @Remote
 public interface TestSerializationRPCService {
+  
+  // This guard against regressions of https://issues.jboss.org/browse/ERRAI-476
+  @Remote
+  public interface DuplicateRemoteInterface {};
+  
   public String testString(String str);
 
   public int testInteger(int i);

@@ -25,6 +25,10 @@ import org.jboss.errai.bus.server.annotations.Remote;
  */
 @Remote
 public interface TestRPCService {
+  // This guard against regressions of https://issues.jboss.org/browse/ERRAI-476
+  @Remote
+  public interface DuplicateRemoteInterface {};
+  
   public boolean isGreaterThan(int a, int b);
   public void exception() throws TestException;
   public void returnVoid();

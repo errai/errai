@@ -47,8 +47,9 @@ public class JaxrsProxyGenerator {
   }
 
   public ClassStructureBuilder<?> generate() {
+    String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
     ClassStructureBuilder<?> classBuilder =
-        ClassBuilder.define(remote.getName() + "Impl", AbstractJaxrsProxy.class)
+        ClassBuilder.define(safeProxyClassName, AbstractJaxrsProxy.class)
             .packageScope()
             .implementsInterface(remote)
             .body()
