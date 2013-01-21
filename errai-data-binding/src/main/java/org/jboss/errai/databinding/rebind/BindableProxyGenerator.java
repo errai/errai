@@ -230,7 +230,7 @@ public class BindableProxyGenerator {
       String methodName = method.getName();
       if (!methodName.startsWith("get") && !methodName.startsWith("set") && !methodName.startsWith("is")
           && !methodName.equals("hashCode") && !methodName.equals("equals") && !methodName.equals("toString")
-          && method.isPublic() && !method.isFinal()) {
+          && method.isPublic() && !method.isFinal() && !method.isStatic()) {
 
         Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
         List<Statement> parmVars = new ArrayList<Statement>();
@@ -262,7 +262,7 @@ public class BindableProxyGenerator {
   }
 
   /**
-   * Generates the code to collect all existing properties and their type.
+   * Generates the code to collect all existing properties and their types.
    */
   private Statement generatePropertiesMap() {
     BlockStatement block = new BlockStatement();
@@ -278,7 +278,7 @@ public class BindableProxyGenerator {
             );
       }
     }
-    return block;
+    return (block.isEmpty()) ? EmptyStatement.INSTANCE : block;
   }
 
   private String inferSafeAgentFieldName() {
