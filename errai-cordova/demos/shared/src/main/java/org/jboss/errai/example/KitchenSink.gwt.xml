@@ -5,21 +5,21 @@
      module name that doesn't reflect the actual package structure. -->
 
 <module rename-to="KitchenSink">
-    <inherits name="org.jboss.errai.common.ErraiCommon"/>
-    <inherits name="org.jboss.errai.bus.ErraiBus"/>
-    <inherits name="org.jboss.errai.ioc.Container"/>
-    <inherits name="org.jboss.errai.enterprise.CDI"/>
-    <inherits name="org.jboss.errai.ui.Cordova"/>
+  <inherits name="org.jboss.errai.common.ErraiCommon"/>
+  <inherits name="org.jboss.errai.bus.ErraiBus"/>
+  <inherits name="org.jboss.errai.ioc.Container"/>
+  <inherits name="org.jboss.errai.enterprise.CDI"/>
+  <inherits name="org.jboss.errai.ui.UI"/>
+  <inherits name="org.jboss.errai.ui.Cordova"/>
 
-    <replace-with class="org.jboss.errai.example.client.local.Config">
-        <when-type-is class="org.jboss.errai.bus.client.framework.Configuration"/>
-    </replace-with>
-
-    <inherits name="org.hibernate.validator.HibernateValidator"/>
+  <inherits name="org.hibernate.validator.HibernateValidator"/>
   <inherits name="org.jboss.errai.databinding.DataBinding"/>
   <replace-with
-            class="org.jboss.errai.example.client.local.KitchenSinkValidatorFactory">
-        <when-type-is class="javax.validation.ValidatorFactory"/>
-    </replace-with>
+          class="org.jboss.errai.example.client.local.KitchenSinkValidatorFactory">
+    <when-type-is class="javax.validation.ValidatorFactory"/>
+  </replace-with>
 
+  <replace-with class="org.jboss.errai.example.client.local.Config">
+    <when-type-is class="org.jboss.errai.bus.client.framework.Configuration"/>
+  </replace-with>
 </module>

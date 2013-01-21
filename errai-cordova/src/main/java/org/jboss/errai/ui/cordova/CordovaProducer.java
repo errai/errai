@@ -21,6 +21,7 @@ public class CordovaProducer {
 
   public PhoneGap getPhoneGap() {
     if (phoneGap == null) {
+      CordovaResources.configure();
       phoneGap = GWT.create(PhoneGap.class);
       phoneGap.addHandler(new PhoneGapAvailableHandler() {
         @Override
