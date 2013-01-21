@@ -1,39 +1,39 @@
-div.item, div.store {
-    width: 100%;
-    height: auto;
+div.item,div.store {
+	width: 100%;
+	height: auto;
 }
 
 div.item hr {
-    clear: both;
-    margin: 0px;
+	clear: both;
+	margin: 0px;
 }
 
-div.item .name, div.store .name {
+div.item .name,div.store .name {
 	font-weight: bold;
 	font-size: 12pt;
 }
 
 div.item div.comment {
-    font-size: 8pt;
-    text-align: left;
-    float: left;
-    padding-left: 1.5em;
-    color: #999;
+	font-size: 8pt;
+	text-align: left;
+	float: left;
+	padding-left: 1.5em;
+	color: #999;
 }
 
 div.item div.moreInfo {
-    font-size: 8pt;
-    text-align: right;
-    float: right;
-    color: #a5a5a5;
+	font-size: 8pt;
+	text-align: right;
+	float: right;
+	color: #a5a5a5;
 }
 
 div.item div.department {
-    color: #999;
+	color: #999;
 }
 
 div.item.active {
-    background: #fafafa;
+	background: #fafafa;
 }
 
 div.map {
@@ -42,7 +42,8 @@ div.map {
 	border: 1px solid #ddd
 }
 
-/* Suggest box Stuff */
+/* Suggest box stuff
+   -------------------------------------------------- */
 .gwt-SuggestBoxPopup {
 	background: white;
 	border: 1px solid #444;
@@ -51,4 +52,43 @@ div.map {
 
 .gwt-SuggestBoxPopup .item-selected {
 	background: #aaa;
+}
+
+
+/* Sticky footer styles
+   From http://twitter.github.com/bootstrap/examples/sticky-footer.html
+   -------------------------------------------------- */
+html,body {
+	height: 100%;
+	padding: 0px;
+	margin: 0px solid black;
+	/* The html and body elements cannot have any padding or margin. */
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	/* Negative indent footer by its height */
+	margin: 0 auto -60px;
+}
+
+/* Set the fixed height of the footer here */
+#push,#footer {
+	height: 60px;
+}
+
+#footer {
+	background-color: #f5f5f5;
+}
+
+/* Lastly, apply responsive CSS fixes as necessary */
+@media ( max-width : 767px) {
+	#footer {
+		margin-left: -20px;
+		margin-right: -20px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
 }

@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
  * panel with the appropriate body content based on the current history token in
  * the page URL.
  */
-@Templated("#main")
+@Templated("#body")
 @ApplicationScoped
 @EntryPoint
 public class GroceryListClient extends Composite {
@@ -35,9 +35,13 @@ public class GroceryListClient extends Composite {
   @Inject @DataField
   private SimplePanel content;
 
+  @Inject
+  private Footer footer;
+
   @PostConstruct
   public void clientMain() {
     content.add(navigation.getContentPanel());
     RootPanel.get().add(this);
+    RootPanel.get().add(footer);
   }
 }
