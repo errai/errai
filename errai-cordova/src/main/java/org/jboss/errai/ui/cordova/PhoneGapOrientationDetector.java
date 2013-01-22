@@ -1,15 +1,19 @@
 package org.jboss.errai.ui.cordova;
 
-import com.google.gwt.user.client.Window;
-import com.googlecode.gwtphonegap.client.accelerometer.*;
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.orientation.client.local.OrientationDetector;
-import org.jboss.errai.orientation.client.shared.Ongoing;
-import org.jboss.errai.orientation.client.shared.OrientationEvent;
-
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.orientation.client.local.OrientationDetector;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
+
+import com.google.gwt.user.client.Window;
+import com.googlecode.gwtphonegap.client.accelerometer.Acceleration;
+import com.googlecode.gwtphonegap.client.accelerometer.AccelerationCallback;
+import com.googlecode.gwtphonegap.client.accelerometer.AccelerationOptions;
+import com.googlecode.gwtphonegap.client.accelerometer.Accelerometer;
+import com.googlecode.gwtphonegap.client.accelerometer.AccelerometerWatcher;
 
 /**
  * Detects device orientation through the PhoneGap API, periodically firing CDI
@@ -24,7 +28,7 @@ public class PhoneGapOrientationDetector extends OrientationDetector {
   @Inject
   Accelerometer accelerometer;
 
-  @Inject @Ongoing
+  @Inject // @Ongoing
   Event<OrientationEvent> event;
 
   private AccelerometerWatcher watcher;

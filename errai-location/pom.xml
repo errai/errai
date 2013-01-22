@@ -97,18 +97,13 @@
               <forkMode>pertest</forkMode>
 
               <!-- Note: to run the test in a real browser, set -DargLine='-Dgwt.args="-runStyle Manual:1"' -->
-              <argLine>-Xmx512m ${argLine}</argLine>
-
+              <argLine>-Xmx1024m ${argLine}</argLine>
 
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
                   <name>errai.hosted_mode_testing</name>
                   <value>true</value>
-                </property>
-                <property>
-                  <name>gwt.args</name>
-                  <value>-war src/main/webapp</value>
                 </property>
               </systemProperties>
             </configuration>
