@@ -22,7 +22,9 @@ public class TransitionAnchorTest extends AbstractErraiCDITest {
   }
 
   public void testTransitionAnchorInjection() throws Exception {
-    PageWithTransitionAnchor page = beanManager.lookupBean(PageWithTransitionAnchor.class).getInstance();
+    TransitionAnchorTestApp app = beanManager.lookupBean(TransitionAnchorTestApp.class).getInstance();
+    assertNotNull(app);
+    PageWithTransitionAnchor page = app.getPage();
     assertNotNull(page);
     assertNotNull(page.linkToB.getHref());
     assertTrue(page.linkToB.getHref().endsWith("#page_b"));
