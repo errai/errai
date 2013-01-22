@@ -15,4 +15,11 @@ public class PageWithTransitionAnchor extends SimplePanel {
   @Inject
   public TransitionAnchor<PageB> linkToB;
 
+  /**
+   * Constructor.
+   */
+  public PageWithTransitionAnchor() {
+    add(linkToB);
+  }
+
 }

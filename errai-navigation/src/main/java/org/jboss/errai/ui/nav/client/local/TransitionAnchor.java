@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -36,11 +38,17 @@ public final class TransitionAnchor<P extends Widget> extends Anchor implements 
    * @throws NullPointerException
    *           if any of the arguments are null.
    */
-  TransitionAnchor(Navigation navigation, Class<P> toPage) {
+  TransitionAnchor(Navigation navigation, final Class<P> toPage) {
     this.navigation = Assert.notNull(navigation);
     this.toPageWidgetType = Assert.notNull(toPage);
     addClickHandler(this);
-    initHref(toPage);
+    addAttachHandler(new Handler() {
+      @Override
+      public void onAttachOrDetach(AttachEvent event) {
+        if (event.isAttached())
+          initHref(toPage);
+      }
+    });
   }
 
   /**
