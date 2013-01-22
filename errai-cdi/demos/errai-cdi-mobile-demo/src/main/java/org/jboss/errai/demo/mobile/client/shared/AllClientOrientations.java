@@ -20,22 +20,22 @@ public class AllClientOrientations {
     return nextInstanceId++;
   }
 
-  private final List<OrientationEvent> clientOrientations;
+  private final List<ClientOrientationEvent> clientOrientations;
   private final int instanceId;
 
-  public AllClientOrientations(List<OrientationEvent> clientOrientations) {
+  public AllClientOrientations(List<ClientOrientationEvent> clientOrientations) {
     this.clientOrientations = clientOrientations;
     instanceId = nextId();
   }
 
   public AllClientOrientations(
-      @MapsTo("clientOrientations") List<OrientationEvent> clientOrientations,
+      @MapsTo("clientOrientations") List<ClientOrientationEvent> clientOrientations,
       @MapsTo("instanceId") int instanceId) {
     this.clientOrientations = clientOrientations;
     this.instanceId = instanceId;
   }
 
-  public List<OrientationEvent> getClientOrientations() {
+  public List<ClientOrientationEvent> getClientOrientations() {
     return clientOrientations;
   }
 

@@ -21,12 +21,15 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
+import org.jboss.errai.demo.mobile.client.shared.ClientOrientationEvent;
+import org.jboss.errai.demo.mobile.client.shared.Disconnected;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.orientation.client.local.OrientationDetector;
-import org.jboss.errai.orientation.client.shared.Disconnected;
+import org.jboss.errai.demo.mobile.client.shared.Ongoing;
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -37,12 +40,24 @@ import java.util.Map;
  */
 @EntryPoint
 public class ClientMain {
+  /**
+   * Don't try to fire a CDI OrientationEvent event more than once every 175ms.
+   */
+  private static final long MIN_EVENT_INTERVAL = 175;
+
+  /**
+   * The time we last fired an OrientationEvent.
+   */
+  private long lastEventFireTime;
 
   @Inject
   OrientationDetector orientationDetector;
+
+  @Inject @Ongoing
+  private Event<ClientOrientationEvent> clientOrientationEvent;
+
   private WelcomeDialog welcomeDialog;
   private final Map<String, PerspectiveAnimator> animators = new HashMap<String, PerspectiveAnimator>();
-
   private final AnimationScheduler animScheduler = AnimationScheduler.get();
 
   @PostConstruct
@@ -50,7 +65,6 @@ public class ClientMain {
     welcomeDialog = new WelcomeDialog(new Runnable() {
       @Override
       public void run() {
-        orientationDetector.setClientId(welcomeDialog.getNameBoxContents());
         RootPanel.get("rootPanel").remove(welcomeDialog);
       }
     });
@@ -68,7 +82,7 @@ public class ClientMain {
     });
   }
 
-  public void visualizeOrientationEvent(OrientationEvent e) {
+  public void visualizeOrientationEvent(ClientOrientationEvent e) {
     Element rotateMe = Document.get().getElementById("rotateMe-" + e.getClientId());
     if (rotateMe == null) {
       // must be a new client! We will clone the template for this new client.
@@ -89,12 +103,23 @@ public class ClientMain {
   }
 
   public void onAllClientOrientationsUpdate(@Observes AllClientOrientations aco) {
-    for (OrientationEvent e : aco.getClientOrientations()) {
+    for (ClientOrientationEvent e : aco.getClientOrientations()) {
       visualizeOrientationEvent(e);
     }
   }
 
-  public void onClientDisconnect(@Observes @Disconnected OrientationEvent e) {
+  public void onOrientationEvent(@Observes OrientationEvent event) {
+    long now = System.currentTimeMillis();
+
+    if (now - lastEventFireTime < MIN_EVENT_INTERVAL) {
+      return;
+    }
+    lastEventFireTime = now;
+
+    clientOrientationEvent.fire(new ClientOrientationEvent(welcomeDialog.getName(), event));
+  }
+
+  public void onClientDisconnect(@Observes @Disconnected ClientOrientationEvent e) {
     Element rotateMe = Document.get().getElementById("rotateMe-" + e.getClientId());
     if (rotateMe != null) {
       rotateMe.getParentElement().removeChild(rotateMe);

@@ -25,6 +25,7 @@ public class WelcomeDialog extends Composite {
   @UiField TextBox nameBox;
   @UiField Button goButton;
   private final Runnable afterNameGivenAction;
+  private String name = "Anonymous";
 
   public WelcomeDialog(Runnable afterNameGivenAction) {
     this.afterNameGivenAction = Assert.notNull(afterNameGivenAction);
@@ -54,12 +55,13 @@ public class WelcomeDialog extends Composite {
   @UiHandler("goButton")
   void onGoButtonClick(ClickEvent event) {
     afterNameGivenAction.run();
+    name = nameBox.getText();
   }
 
   /**
    * Returns the text that is currently entered in the name textbox.
    */
-  public String getNameBoxContents() {
-    return nameBox.getText();
+  public String getName() {
+    return name;
   }
 }

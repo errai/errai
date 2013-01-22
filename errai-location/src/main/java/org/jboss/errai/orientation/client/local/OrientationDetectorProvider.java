@@ -2,7 +2,6 @@ package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.orientation.client.shared.Ongoing;
 import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 import javax.enterprise.event.Event;
@@ -14,9 +13,8 @@ import javax.inject.Singleton;
 @Singleton
 public class OrientationDetectorProvider implements Provider<OrientationDetector> {
 
-  @Inject @Ongoing
-  protected
-  Event<OrientationEvent> orientationEventSource;
+  @Inject
+  protected Event<OrientationEvent> orientationEventSource;
 
   OrientationDetector detector;
 
@@ -42,8 +40,7 @@ public class OrientationDetectorProvider implements Provider<OrientationDetector
     
     GWT.log("Created " + detector);
     detector.setOrientationEventSource(orientationEventSource);
-    GWT.log("Added event source " + orientationEventSource);
-    
+
     return detector;
   }
 

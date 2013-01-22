@@ -6,26 +6,7 @@ import javax.enterprise.event.Event;
 
 public abstract class OrientationDetector {
 
-  /**
-   * Don't try to fire a CDI OrientationEvent event more than once every 175ms.
-   * <p/>
-   * TODO we should remove this once the bus supports coalescing events!
-   */
-  private static final long MIN_EVENT_INTERVAL = 175;
-
-  /**
-   * The time we last fired an OrientationEvent.
-   * <p/>
-   * TODO we should remove this once the bus supports coalescing events!
-   */
-  private long lastEventFireTime;
-
   protected Event<OrientationEvent> orientationEventSource;
-
-  /**
-   * Should be set by the main application when the username is set or updated.
-   */
-  private String clientId = "Anonymous";
 
   /**
    * Stops the periodic firing of CDI OrientationEvents. If this detector was
@@ -45,13 +26,7 @@ public abstract class OrientationDetector {
    * orientation.
    */
   protected void fireOrientationEvent(double x, double y, double z) {
-    long now = System.currentTimeMillis();
-
-    if (now - lastEventFireTime < MIN_EVENT_INTERVAL) {
-      return;
-    }
-    lastEventFireTime = now;
-    orientationEventSource.fire(new OrientationEvent(clientId, x, y, z));
+    orientationEventSource.fire(new OrientationEvent(x, y, z));
   }
 
   /**
@@ -60,16 +35,5 @@ public abstract class OrientationDetector {
    */
   public void setOrientationEventSource(Event<OrientationEvent> orientationEventSource) {
     this.orientationEventSource = orientationEventSource;
-  }
-
-  /**
-   * Sets the client ID (user name) that should be included with all orientation
-   * events fired.
-   *
-   * @param clientId The client ID to use. Not null.
-   */
-  public void setClientId(String clientId) {
-    if (clientId == null) throw new NullPointerException();
-    this.clientId = clientId;
   }
 }

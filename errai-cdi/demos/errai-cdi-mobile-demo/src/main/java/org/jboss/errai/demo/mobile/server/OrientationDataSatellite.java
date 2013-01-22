@@ -1,5 +1,16 @@
 package org.jboss.errai.demo.mobile.server;
 
+import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
+import org.jboss.errai.demo.mobile.client.shared.ClientOrientationEvent;
+import org.jboss.errai.demo.mobile.client.shared.Disconnected;
+import org.jboss.errai.demo.mobile.client.shared.Ongoing;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,20 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-
-import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
-import org.jboss.errai.orientation.client.shared.Disconnected;
-import org.jboss.errai.orientation.client.shared.Ongoing;
-import org.jboss.errai.orientation.client.shared.Disconnected;
-import org.jboss.errai.orientation.client.shared.Ongoing;
-import org.jboss.errai.orientation.client.shared.OrientationEvent;
 
 /**
  * Acts like a communications satellite in orbit over the attached clients:
@@ -33,17 +30,17 @@ import org.jboss.errai.orientation.client.shared.OrientationEvent;
 @ApplicationScoped
 public class OrientationDataSatellite {
 
-  private final Map<String, OrientationEvent> clientOrientations = new ConcurrentHashMap<String, OrientationEvent>();
+  private final Map<String, ClientOrientationEvent> clientOrientations = new ConcurrentHashMap<String, ClientOrientationEvent>();
 
   @Inject
   private Event<AllClientOrientations> orientationEventSrc;
 
   @Inject @Disconnected
-  private Event<OrientationEvent> disconnectEventSrc;
+  private Event<ClientOrientationEvent> disconnectEventSrc;
 
   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-  public void onClientOrientationChange(@Observes @Ongoing OrientationEvent e) {
+  public void onClientOrientationChange(@Observes @Ongoing ClientOrientationEvent e) {
     clientOrientations.put(e.getClientId(), e);
   }
 
@@ -53,15 +50,15 @@ public class OrientationDataSatellite {
 
       @Override
       public void run() {
-        List<OrientationEvent> clientOrientationList =
-            new ArrayList<OrientationEvent>(clientOrientations.values());
+        List<ClientOrientationEvent> clientOrientationList =
+            new ArrayList<ClientOrientationEvent>(clientOrientations.values());
         orientationEventSrc.fire(new AllClientOrientations(clientOrientationList));
 
         // Notify everyone about clients who have gone away
         long cutoffTime = System.currentTimeMillis() - 2000;
-        Iterator<Map.Entry<String, OrientationEvent>> it = clientOrientations.entrySet().iterator();
+        Iterator<Map.Entry<String, ClientOrientationEvent>> it = clientOrientations.entrySet().iterator();
         while (it.hasNext()) {
-          Map.Entry<String, OrientationEvent> entry = it.next();
+          Map.Entry<String, ClientOrientationEvent> entry = it.next();
           if (entry.getValue().getTimestamp() < cutoffTime) {
             it.remove();
             disconnectEventSrc.fire(entry.getValue());

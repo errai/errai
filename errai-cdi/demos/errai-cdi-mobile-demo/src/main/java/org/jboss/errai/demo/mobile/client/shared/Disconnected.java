@@ -1,4 +1,4 @@
-package org.jboss.errai.orientation.client.shared;
+package org.jboss.errai.demo.mobile.client.shared;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
