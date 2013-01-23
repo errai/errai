@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
+import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageHidden;
@@ -19,8 +20,12 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.ajaxloader.client.AjaxLoader;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.geolocation.client.Geolocation;
 import com.google.gwt.geolocation.client.Position;
 import com.google.gwt.geolocation.client.PositionError;
@@ -41,7 +46,9 @@ import com.google.gwt.maps.client.placeslib.PlaceResult;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Dependent
@@ -54,9 +61,11 @@ public class StorePage extends Composite {
   @Inject private @DataField Button saveButton;
 
   @Inject private @AutoBound DataBinder<Store> storeBinder;
+  @Inject private @DataField TextBox locationSearchBox;
   @Inject private @Bound @DataField TextBox name;
   @Inject private @Bound @DataField TextBox address;
-  @Inject private @DataField TextBox locationSearchBox;
+  @Inject private @DataField SuggestBox addDepartment;
+  @Inject private @DataField DepartmentList departmentList;
 
   private @PageState("id") Long requestedStoreId;
   @Inject private TransitionTo<StoresPage> backToStoresPage;
@@ -65,10 +74,10 @@ public class StorePage extends Composite {
 
   @PageShown
   private void setup() {
-    System.out.println("Setting up StorePage for store " + requestedStoreId);
+
+    // if a store was requested, retrieve it here (otherwise, we're editing a new, blank store instance)
     if (requestedStoreId != null) {
       Store found = em.find(Store.class, requestedStoreId);
-      // TODO store might not be found. Should display error message in this case.
       if (found == null) {
         Window.alert("No such store: " + requestedStoreId);
         backToStoresPage.go();
@@ -76,16 +85,33 @@ public class StorePage extends Composite {
       storeBinder.setModel(found, InitialState.FROM_MODEL);
     }
 
+    departmentList.setItems(storeBinder.getModel().getDepartments());
+    MultiWordSuggestOracle dso = (MultiWordSuggestOracle) addDepartment.getSuggestOracle();
+    for (Department d : em.createNamedQuery("allDepartments", Department.class).getResultList()) {
+      dso.add(d.getName());
+    }
+    addDepartment.getTextBox().addKeyPressHandler(new KeyPressHandler() {
+      @Override
+      public void onKeyPress(KeyPressEvent event) {
+        if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+          if (addDepartment.getText().trim().length() == 0) return;
+          Department department = Department.resolve(em, addDepartment.getText());
+          if (!storeBinder.getModel().getDepartments().contains(department)) {
+            storeBinder.getModel().getDepartments().add(department);
+            departmentList.setItems(storeBinder.getModel().getDepartments());
+          }
+          addDepartment.setText("");
+        }
+      }
+    });
+
     GoogleMapBootstrapper.whenReady(new Runnable() {
       @Override
       public void run() {
-        System.out.println("Adding map widget to container");
 
-        // TODO use geolocation API (fall back to google.loader.ClientLocation) to center the map
-        LatLng center = LatLng.newInstance(49.496675, -102.65625);
+        LatLng center = getIpBasedLocation();
         MapOptions opts = MapOptions.newInstance();
-        opts.setZoom(4);
-        opts.setCenter(center);
+        opts.setZoom(10);
         opts.setMapTypeId(MapTypeId.ROADMAP);
 
         final MapWidget mapWidget = new MapWidget(opts);
@@ -202,19 +228,20 @@ public class StorePage extends Composite {
           public void onFailure(PositionError reason) {
             // fall back to Google's IP Geolocation
             map.setZoom(13);
-            map.panTo(LatLng.newInstance(getGeoIpLatitude(), getGeoIpLongitude()));
+            map.panTo(getIpBasedLocation());
           }
-
-          private native double getGeoIpLatitude() /*-{
-            return google.loader.ClientLocation.latitude;
-          }-*/;
-
-          private native double getGeoIpLongitude() /*-{
-            return google.loader.ClientLocation.longitude;
-          }-*/;
         });
       }
     }
+  }
+
+  /**
+   * Returns Google's guess at the user's physical location based on their IP address.
+   */
+  private static LatLng getIpBasedLocation() {
+    return LatLng.newInstance(
+            AjaxLoader.getClientLocation().getLatitude(),
+            AjaxLoader.getClientLocation().getLongitude());
   }
 
   /**

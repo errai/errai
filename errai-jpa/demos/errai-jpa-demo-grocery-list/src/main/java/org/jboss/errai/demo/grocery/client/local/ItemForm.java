@@ -1,7 +1,6 @@
 package org.jboss.errai.demo.grocery.client.local;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -9,7 +8,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -108,17 +106,7 @@ public class ItemForm extends Composite {
   // TODO (after ERRAI-366): make this method package-private
   @EventHandler("saveButton")
   public void onSaveButtonClicked(ClickEvent event) {
-    TypedQuery<Department> deptQuery = em.createNamedQuery("departmentByName", Department.class);
-    deptQuery.setParameter("name", department.getText());
-    Department resolvedDepartment;
-    List<Department> resultList = deptQuery.getResultList();
-    if (resultList.isEmpty()) {
-      resolvedDepartment = new Department();
-      resolvedDepartment.setName(department.getText());
-    }
-    else {
-      resolvedDepartment = resultList.get(0);
-    }
+    Department resolvedDepartment = Department.resolve(em, department.getText());
     Item item = itemBinder.getModel();
     item.setDepartment(resolvedDepartment);
     item.setAddedBy(user);
