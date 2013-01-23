@@ -213,14 +213,14 @@ public class IOCBeanManager {
     }
 
     // HACK: if the bean was already registered in-line, recycle its reference. this is needed for singleton producers
-    // which get constructed inline and registered with the bean manager eagerly. Effectively his captures the instance
+    // which get constructed inline and registered with the bean manager eagerly. Effectively this captures the instance
     // which was registered inline, and copies the instance reference to a new bean reference containing the specified
     // meta data.
     //
     // TODO: figure a way to clean this up.
     if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
-      final IOCBeanDef def = lookupBean(type, qualifiers);
-      if (def != null) {
+      try {
+        final IOCBeanDef def = lookupBean(type, qualifiers);
         instance = def.getInstance();
         final Iterator<IOCBeanDef> iterator = beanMap.get(type).iterator();
         while (iterator.hasNext()) {
@@ -229,6 +229,9 @@ public class IOCBeanManager {
             break;
           }
         }
+      }
+      catch (IOCResolutionException e) {
+        // fall through if no bean is available for lookup and continue to register this bean normally.
       }
     }
 
@@ -506,12 +509,12 @@ public class IOCBeanManager {
    * and will be called when the bean is destroyed.
    *
    * @param beanInstance
-   *        the bean instance to associate the callback to.
+   *     the bean instance to associate the callback to.
    * @param destructionCallback
-   *        the instance of the {@link DestructionCallback}.
-   * @return
-   *        <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
-   *        {@link CreationalContext} and <tt>false</tt> if not.
+   *     the instance of the {@link DestructionCallback}.
+   *
+   * @return <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
+   *         {@link CreationalContext} and <tt>false</tt> if not.
    */
   public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
     final CreationalContext creationalContext = creationalContextMap.get(beanInstance);
