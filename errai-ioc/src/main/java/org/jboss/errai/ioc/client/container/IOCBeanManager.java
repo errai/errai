@@ -212,29 +212,6 @@ public class IOCBeanManager {
       concreteBeans.add(type.getName());
     }
 
-    // HACK: if the bean was already registered in-line, recycle its reference. this is needed for singleton producers
-    // which get constructed inline and registered with the bean manager eagerly. Effectively this captures the instance
-    // which was registered inline, and copies the instance reference to a new bean reference containing the specified
-    // meta data.
-    //
-    // TODO: figure a way to clean this up.
-    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
-      try {
-        final IOCBeanDef def = lookupBean(type, qualifiers);
-        instance = def.getInstance();
-        final Iterator<IOCBeanDef> iterator = beanMap.get(type).iterator();
-        while (iterator.hasNext()) {
-          if (iterator.next() == def) {
-            iterator.remove();
-            break;
-          }
-        }
-      }
-      catch (IOCResolutionException e) {
-        // fall through if no bean is available for lookup and continue to register this bean normally.
-      }
-    }
-
     if (instance != null) {
       registerSingletonBean(type, beanType, callback, instance, qualifiers, name, concreteType);
     }

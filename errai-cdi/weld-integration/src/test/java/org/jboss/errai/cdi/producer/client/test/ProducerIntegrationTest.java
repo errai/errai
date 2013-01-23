@@ -15,6 +15,7 @@ import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBeanWithCycle;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.cdi.producer.client.SingletonProducedBeanDependentBean;
+import org.jboss.errai.cdi.producer.client.Thung;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
@@ -133,6 +134,14 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(bean.getFactory());
     assertNotNull(bean.getThing());
     assertNotNull(bean.getThung());
+  }
+
+  public void testApplicationScopedProducedBeanCanBeLookedUpProgrammatically() {
+    final IOCBeanDef<Thung> thungIOCBeanDef = IOC.getBeanManager().lookupBean(Thung.class);
+
+    final Thung thung = thungIOCBeanDef.getInstance();
+
+    assertNotNull(thung);
   }
 
   public void testProducersObserveSingletonScope() {

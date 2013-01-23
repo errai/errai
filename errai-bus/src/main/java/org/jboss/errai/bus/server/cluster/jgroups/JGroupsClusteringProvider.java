@@ -71,7 +71,6 @@ public class JGroupsClusteringProvider extends ReceiverAdapter implements Cluste
 
   private final static String JGROUPS_MESSAGE_RESOURCE = "JGroupsMessage";
 
-
   private static Logger log = LoggerFactory.getLogger(JGroupsClusteringProvider.class);
 
   @Inject
@@ -93,7 +92,6 @@ public class JGroupsClusteringProvider extends ReceiverAdapter implements Cluste
 
     serverMessageBus.subscribe(CLUSTER_SERVICE, this);
     jchannel.setReceiver(this);
-
 
     erraiService.addShutdownHook(new Runnable() {
       @Override

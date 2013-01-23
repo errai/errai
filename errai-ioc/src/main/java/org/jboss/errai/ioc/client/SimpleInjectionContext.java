@@ -18,12 +18,15 @@ package org.jboss.errai.ioc.client;
 
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
 
 public class SimpleInjectionContext implements BootstrapInjectionContext {
   public static final Object LAZY_INIT_REF = new Object();
@@ -61,10 +64,19 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
   public void addBean(final Class type,
                       final Class beanType,
                       final BeanProvider callback,
-                      final Object instance,
+                      Object instance,
                       final Annotation[] qualifiers,
                       final String name,
                       final boolean concrete) {
+
+    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
+      try {
+        manager.lookupBean(type, qualifiers);
+      }
+      catch (IOCResolutionException e) {
+        instance = callback.getInstance(rootContext);
+      }
+    }
 
     manager.addBean(type, beanType, callback, instance, qualifiers, name, concrete);
   }
