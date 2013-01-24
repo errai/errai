@@ -231,7 +231,7 @@ public class TransmissionBufferTests extends TestCase {
         final String test = resultList.remove(0);
         if (!nm.equals(test)) {
           System.out.println("[" + resultSequenceNumber + "] expected : " + nm + " -- but found: " + test
-                  + " (color: " + colors.get(i).getColor() + ")");
+              + " (color: " + colors.get(i).getColor() + ")");
 
           System.out.println("  --> log: " + writeLog.get(colors.get(i).getColor()) + " vs result: " + buildResultList);
         }
@@ -240,11 +240,11 @@ public class TransmissionBufferTests extends TestCase {
 
       if (!log.isEmpty())
         System.out.println("[" + resultSequenceNumber + "] results have missing items: " + log
-                + " (color: " + colors.get(i).getColor() + ")");
+            + " (color: " + colors.get(i).getColor() + ")");
 
       if (!resultList.isEmpty())
         System.out.println("[" + resultSequenceNumber + "] results contain items not logged: " + resultList
-                + " (color: " + colors.get(i).getColor() + ")");
+            + " (color: " + colors.get(i).getColor() + ")");
     }
 
     assertEquals(COLOR_COUNT, results.size());
@@ -273,7 +273,7 @@ public class TransmissionBufferTests extends TestCase {
 
     final RandomProvider random = new RandomProvider() {
       private char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-              'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+          'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
       private Random random = new Random(System.nanoTime());
 
@@ -385,10 +385,15 @@ public class TransmissionBufferTests extends TestCase {
       class TestReader {
         volatile boolean running = true;
 
-        public void read(final BufferColor color, final boolean wait) throws Exception {
+        public void read(final BufferColor color, final boolean wait, final boolean straggle) throws Exception {
           final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
           final OutputStreamWriteAdapter adapter = new OutputStreamWriteAdapter(byteArrayOutputStream);
-          if (wait) {
+
+          if (straggle) {
+            buffer.readWait(TimeUnit.SECONDS, 30, adapter, color);
+            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10));
+          }
+          else if (wait) {
             buffer.readWait(TimeUnit.SECONDS, 1, adapter, color);
           }
           else {
@@ -436,7 +441,25 @@ public class TransmissionBufferTests extends TestCase {
       final TestReader testReader = new TestReader();
 
       final Thread[] readers = new Thread[SEGMENT_COUNT];
-      for (int i = 0; i < SEGMENT_COUNT; i++) {
+      readers[0] = new Thread() {
+        final BufferColor color = segs.get(0);
+
+        @Override
+        public void run() {
+          try {
+            while (testReader.running) {
+              testReader.read(color, true, true);
+            }
+          }
+          catch (Throwable t) {
+            t.printStackTrace();
+          }
+        }
+      };
+
+      readers[0].start();
+
+      for (int i = 1; i < SEGMENT_COUNT; i++) {
         final int item = i;
 
         readers[i] = new Thread() {
@@ -446,7 +469,7 @@ public class TransmissionBufferTests extends TestCase {
           public void run() {
             try {
               while (testReader.running) {
-                testReader.read(color, true);
+                testReader.read(color, true, false);
               }
             }
             catch (Throwable t) {
@@ -504,7 +527,7 @@ public class TransmissionBufferTests extends TestCase {
 
         for (int i = 0; i < SEGMENT_COUNT; i++) {
           try {
-            testReader.read(segs.get(i), false);
+            testReader.read(segs.get(i), false, false);
           }
           catch (Exception e) {
             e.printStackTrace();
@@ -543,7 +566,7 @@ public class TransmissionBufferTests extends TestCase {
           //    new ReadWriteOrderAnalysis().analyze();
 
           fail(s + " was written, but never read (leftDiff=" + leftDiff + ";rightDiff=" + rightDiff
-                  + ";duplicatesInReadLog=" + duplicates + ")");
+              + ";duplicatesInReadLog=" + duplicates + ")");
         }
       }
 
