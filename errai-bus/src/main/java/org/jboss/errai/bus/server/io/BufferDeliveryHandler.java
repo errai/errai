@@ -22,8 +22,11 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.buffers.Buffer;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
+import org.jboss.errai.bus.server.io.buffers.BufferOverflowException;
 import org.jboss.errai.bus.server.util.MarkedByteWriteAdapter;
 import org.jboss.errai.bus.server.util.ServerBusTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -38,6 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Mike Brock
  */
 public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, Cleanable {
+  private static Logger log = LoggerFactory.getLogger(BufferDeliveryHandler.class);
   private static final BufferDeliveryHandler singleton = new BufferDeliveryHandler();
 
   public static BufferDeliveryHandler getInstance() {
@@ -67,9 +71,10 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
   public void noop(final MessageQueue queue) throws IOException {
     BufferHelper.encodeAndWriteNoop(queue.getBuffer(), queue.getBufferColor());
   }
+
   @Override
   public void clean(final MessageQueue queue) {
- //   discardPageData(queue);
+    //   discardPageData(queue);
   }
 
   @Override
@@ -96,15 +101,16 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
         return true;
       }
     }
+    catch (BufferOverflowException e) {
+      queue.getBufferColor().getSequence().set(queue.getBuffer().getHeadSequence());
+      log.warn("buffer data was evicted for session " + queue.getSession().getSessionId()
+          + " due to overflow condition. (consider increasing buffer size with errai.bus.buffer_size "
+          + "in ErraiService.properties)");
+    }
     catch (InterruptedException e) {
       e.printStackTrace();
     }
 
     return false;
-  }
-
-
-  private static boolean lastTransmissionWithin(final MessageQueue queue, final long nanos) {
-    return (nanoTime() - queue.getLastTransmissionTime()) < nanos;
   }
 }

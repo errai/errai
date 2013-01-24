@@ -215,8 +215,9 @@ public class TransmissionBuffer implements Buffer {
       /*
       * Allocate the segments to the this color
       */
+      final short color = bufferColor.color;
       for (int i = 0; i < allocSize; i++) {
-        segmentMap[((seq + i) % segments)] = bufferColor.color;
+        segmentMap[((seq + i) % segments)] = color;
       }
 
       for (; writeCursor < initialRead; writeCursor++) {
@@ -657,7 +658,7 @@ public class TransmissionBuffer implements Buffer {
    */
   private void checkOverflow(final long colorSeq) throws IOException {
     if (headSequence - segments > colorSeq) {
-      throw new IOException("buffer overflow");
+      throw new BufferOverflowException("buffer overflow");
     }
   }
 
