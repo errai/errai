@@ -710,42 +710,4 @@ public class TransmissionBufferTests extends TestCase {
       thread.join();
     }
   }
-
-  private static class TestInputStream extends InputStream {
-    int count = 0;
-
-    @Override
-    public int read() throws IOException {
-      if (++count > 201) {
-        throw new AssertionError("buffer should have overflown");
-      }
-
-      return 0x01;
-    }
-
-    @Override
-    public int available() throws IOException {
-      return 200;
-    }
-
-  }
-
-  public void testBufferOverFlowCondition() throws IOException {
-    final TransmissionBuffer buffer = TransmissionBuffer.create(100, 2);
-
-    buffer.write(new TestInputStream(), BufferColor.getAllBuffersColor());
-    buffer.write(new TestInputStream(), BufferColor.getAllBuffersColor());
-
-    final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try {
-      buffer.read(byteArrayOutputStream, BufferColor.getAllBuffersColor());
-    }
-    catch (IOException e) {
-      assertTrue(e.getMessage().contains("overflow"));
-      return;
-    }
-
-    fail("should have overflowed");
-
-  }
 }
