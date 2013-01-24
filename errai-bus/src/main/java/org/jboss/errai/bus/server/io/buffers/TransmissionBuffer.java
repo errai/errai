@@ -259,7 +259,7 @@ public class TransmissionBuffer implements Buffer {
     long read = bufferColor.sequence.get();
     long lastSeq = read;
 
-    checkOverflow(read);
+   // checkOverflow(read);
 
     try {
       while ((read = readNextChunk(writeHead, read, bufferColor, outputStream, null)) != -1)
@@ -315,7 +315,7 @@ public class TransmissionBuffer implements Buffer {
         // get the current tail position for this color.
         long read = bufferColor.sequence.get();
 
-        checkOverflow(read);
+        // checkOverflow(read);
 
         long lastSeq = read;
 
@@ -359,7 +359,7 @@ public class TransmissionBuffer implements Buffer {
     try {
       for (; ; ) {
         long read = bufferColor.sequence.get();
-        checkOverflow(read);
+        //checkOverflow(read);
         long lastRead = -1;
 
         while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, null)) != -1) {
@@ -412,7 +412,7 @@ public class TransmissionBuffer implements Buffer {
     try {
       for (; ; ) {
         long read = bufferColor.sequence.get();
-        checkOverflow(read);
+        //checkOverflow(read);
         long lastRead = -1;
 
         while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, null)) != -1) {
@@ -483,7 +483,7 @@ public class TransmissionBuffer implements Buffer {
 
       for (; ; ) {
         long read = bufferColor.sequence.get();
-        checkOverflow(read);
+        //checkOverflow(read);
         long lastRead = -1;
         while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, callback)) != -1) {
           lastRead = read;
@@ -648,18 +648,6 @@ public class TransmissionBuffer implements Buffer {
    */
   public void clear() {
     _buffer.clear();
-  }
-
-  /**
-   * Check that the buffer has not overflowed.
-   *
-   * @param colorSeq the position to check for overflow
-   * @throws IOException
-   */
-  private void checkOverflow(final long colorSeq) throws IOException {
-    if (headSequence - segments > colorSeq) {
-      throw new BufferOverflowException("buffer overflow");
-    }
   }
 
   public void dumpSegments(final PrintWriter writer) {
