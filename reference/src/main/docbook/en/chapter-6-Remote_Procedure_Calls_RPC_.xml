@@ -84,6 +84,18 @@ private Caller&lt;MyRemoteService&gt; remoteService;
 remoteService.call(callback).isEveryoneHappy();
 </programlisting>
          </informalexample>
+         <para>
+          The Errai IOC GWT module needs to be inherited to make use of caller injection. To do this, the following line needs to be added to the application's
+          <code>*.gwt.xml</code>
+          file. It is important that this line comes
+          <code>after</code>
+          the Errai Bus module:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+  &lt;inherits name="org.jboss.errai.ioc.Container"/&gt;
+</programlisting>
+         </informalexample>
       </section>
    </section>
    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Handlingexceptions">

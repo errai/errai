@@ -5,7 +5,7 @@
    <section id="sid-5931336">
       <title>Appserver Configuration</title>
       <para>
-        Depending on what application server you are deploying on, you must provide an appropriate servlet implementation if you wish to use true, asynchronous I/O. See
+        Depending on what application server you are deploying on, you must provide an appropriate servlet implementation if you wish to use true, asynchronous I/O with Errai's message bus. See
         <xref linkend="sid-5931364"/>
         for information on the available servlet implementations.
       </para>

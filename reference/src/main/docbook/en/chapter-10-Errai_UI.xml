@@ -560,7 +560,7 @@ public class QuickHandlerComponent extends Composite {
       <para>
         A recurring implementation task in rich web development is writing event handler code for updating model objects to reflect input field changes in the user interface. The requirement to update user interface fields in response to changed model values is just as common. These tasks require a significant amount of boilerplate code which can be alleviated by Errai. Errai's
         <link linkend="sid-51282340">data binding module</link>
-        provides the ability to bind model objects to user interface fields, so they will be kept in sync automatically. While the module can be used on its own, it can cut even more boilerplate when integrated with Errai UI.
+        provides the ability to bind model objects to user interface fields, so they will automatically be kept in sync. While the module can be used on its own, it can cut even more boilerplate when used together with Errai UI.
       </para>
       <para>
         In the following example, all
@@ -605,11 +605,15 @@ public class LoginForm extends Composite {
 </programlisting>
       </informalexample>
       <para>
-        Now the user object and the username and password fields are automatically kept in sync. No event handling code needs to be written for updating the user object in response to input field changes and no code needs to be written for updating the user interface fields when the model object changes (when
-        <code>setUsername</code>
-        or
-        <code>setPassword</code>
-        is called).
+        Now the user object and the
+        <code>username</code>
+        and
+        <code>password</code>
+        fields in the UI are automatically kept in sync. No event handling code needs to be written to update the user object in response to input field changes and no code needs to be written to update the UI fields when the model object changes. So, with the above annotations in place, it will always be true that
+        <code>user.getUsername().equals(username.getText())</code>
+        and
+        <code>user.getPassword().equals(password.getText())</code>
+        .
       </para>
       <section id="sid-51806600_ErraiUI-Default%2CSimple%2CandChainedPropertyBindings">
          <title>Default, Simple, and Chained Property Bindings</title>
@@ -697,14 +701,14 @@ public class UserWidget {
          <informalexample>
             <programlisting language="java">
 @Templated
-public class UserList extends Composite {
+public class MyComposite extends Composite {
 
-  @Inject @DataField ListWidget&lt;User, UserWidget&gt; userList;
+  @Inject @DataField ListWidget&lt;User, UserWidget&gt; userListWidget;
 
   @PostConstruct
   public void init() {
     List&lt;User&gt; users = .....
-    userList.setItems(users);
+    userListWidget.setItems(users);
   }
 }
 </programlisting>
@@ -720,11 +724,11 @@ public class UserList extends Composite {
           <code>UserWidget</code>
           is then bound to the corresponding user object. By default, the widgets are arranged in a vertical panel. However,
           <code>ListWidget</code>
-          can be subclassed to provide alternative behaviour. In the following example, we use a horizontal panel to display the widgets.
+          can also be subclassed to provide alternative behaviour. In the following example, we use a horizontal panel to display the widgets.
         </para>
          <informalexample>
             <programlisting language="java">
-public class UserList extends ListWidget&lt;User, UserWidget&gt; {
+public class UserListWidget extends ListWidget&lt;User, UserWidget&gt; {
 
   public UserList() {
     super(new HorizontalPanel());
@@ -809,7 +813,8 @@ public class ComponentOne extends Composite {
             <programlisting language="xml">
 &lt;div class="container"&gt;
    &lt;div data-field="header"&gt; Default header &lt;/div&gt;
-   &lt;div data-field="content"&gt; Default content &lt;/div&gt;   &lt;div data-field="footer"&gt; Default footer &lt;/div&gt;
+   &lt;div data-field="content"&gt; Default content &lt;/div&gt;
+   &lt;div data-field="footer"&gt; Default footer &lt;/div&gt;
 &lt;/div&gt;
 </programlisting>
          </informalexample>
