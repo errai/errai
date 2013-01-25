@@ -995,11 +995,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                       .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
                       .set(MessageParts.SubjectsList, subjects).set(PriorityProcessing, "1"));
-                }
 
-                encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                    .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.FinishStateSync)
-                    .set(PriorityProcessing, "1"));
+                  encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                                  .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.FinishStateSync)
+                                  .set(PriorityProcessing, "1"));
+                }
 
                 /**
                  * ... also send RemoteUnsubscribe signals.

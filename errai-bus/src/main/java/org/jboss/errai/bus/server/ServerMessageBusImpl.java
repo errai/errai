@@ -395,6 +395,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               if (ver3) {
                 msg.set(ConnectionSessionKey, queue.getSession().getSessionId());
                 send(msg, false);
+
+                queue.finishInit();
+                drainDeferredDeliveryQueue(queue);
               }
               else {
                 send(msg, false);
