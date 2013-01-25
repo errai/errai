@@ -22,6 +22,8 @@ import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDe
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
 import static org.jboss.errai.bus.client.util.ErrorHelper.sendClientError;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
+import static org.jboss.errai.common.client.protocols.MessageParts.ConnectionSessionKey;
+import static org.jboss.errai.common.client.protocols.MessageParts.RemoteServices;
 import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -230,6 +232,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           final QueueSession session = getSession(message);
           MessageQueueImpl queue = (MessageQueueImpl) messageQueues.get(session);
 
+          boolean ver3 = false;
+
           switch (BusCommands.valueOf(message.getCommandType())) {
             case Heartbeat:
               if (queue != null) {
@@ -279,6 +283,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case Resend:
               if (queue == null) return;
 
+            case Associate:
+              ver3 = true;
             case ConnectToQueue: {
               List<Message> deferred = null;
               synchronized (messageQueues) {
@@ -304,20 +310,48 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 remoteSubscribe(session, queue, BuiltInServices.ClientBus.name());
               }
 
+              if (ver3) {
+                for (String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+                  remoteSubscribe(session, queue, svc);
+                }
+              }
+              else {
+                createConversation(message)
+                    .toSubject(BuiltInServices.ClientBus.name())
+                    .command(BusCommands.RemoteSubscribe)
+                    .with(MessageParts.SubjectsList, new HashSet(globalSubscriptions))
+                    .with(MessageParts.PriorityProcessing, "1")
+                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+              }
+
+
               if (isMonitor()) {
                 busMonitor.notifyQueueAttached(session.getSessionId(), queue);
               }
 
-              createConversation(message)
-                  .toSubject(BuiltInServices.ClientBus.name())
-                  .command(BusCommands.RemoteSubscribe)
-                  .with(MessageParts.SubjectsList, new HashSet(globalSubscriptions))
-                  .with(MessageParts.PriorityProcessing, "1")
-                  .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+              final Message msg;
 
-              final Message msg = ConversationMessage.create(message)
-                  .toSubject(BuiltInServices.ClientBus.name())
-                  .command(BusCommands.CapabilitiesNotice);
+              if (ver3) {
+                msg = ConversationMessage.create(message)
+                    .toSubject(BuiltInServices.ClientBus.name())
+                    .command(BusCommands.FinishAssociation);
+
+
+                StringBuilder subjects = new StringBuilder();
+                for (final String s : new HashSet<String>(globalSubscriptions)) {
+                  if (subjects.length() != 0) {
+                    subjects.append(',');
+                  }
+                  subjects.append(s);
+                }
+
+                msg.set(RemoteServices, subjects.toString());
+              }
+              else {
+                msg = ConversationMessage.create(message)
+                    .toSubject(BuiltInServices.ClientBus.name())
+                    .command(BusCommands.CapabilitiesNotice);
+              }
 
               final StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
@@ -358,13 +392,19 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
               msg.set(MessageParts.CapabilitiesFlags, capabilitiesBuffer.toString());
 
-              send(msg, false);
+              if (ver3) {
+                msg.set(ConnectionSessionKey, queue.getSession().getSessionId());
+                send(msg, false);
+              }
+              else {
+                send(msg, false);
 
-              createConversation(message)
-                  .toSubject(BuiltInServices.ClientBus.name())
-                  .command(BusCommands.FinishStateSync)
-                  .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
-                  .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+                createConversation(message)
+                    .toSubject(BuiltInServices.ClientBus.name())
+                    .command(BusCommands.FinishStateSync)
+                    .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
+                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+              }
 
               break;
             }
@@ -1083,7 +1123,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final Message message;
     final Runnable timeoutCallback;
 
-    public ClusterWaitEntry(long time,  Message message, Runnable timeoutCallback) {
+    public ClusterWaitEntry(long time, Message message, Runnable timeoutCallback) {
       this.timeoutCallback = timeoutCallback;
       this.message = message;
       this.time = time;
@@ -1106,9 +1146,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     public void notifyTimeout() {
-     if (timeoutCallback != null) {
-       timeoutCallback.run();
-     }
+      if (timeoutCallback != null) {
+        timeoutCallback.run();
+      }
     }
   }
 

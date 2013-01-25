@@ -22,6 +22,15 @@ package org.jboss.errai.bus.client.protocols;
  */
 public enum BusCommands {
   /**
+   * Quick associate
+   *
+   * @since 3.0
+   */
+  Associate,
+
+  FinishAssociation,
+
+  /**
    * The first command sent from a client bus to a remote bus.  This message indicates the bus would like to
    * establish a connection to the queue.  There is no authentication associated with this command.  Any
    * unauthenticated bus can connect to the bus, as establishing a communication channel is necessary

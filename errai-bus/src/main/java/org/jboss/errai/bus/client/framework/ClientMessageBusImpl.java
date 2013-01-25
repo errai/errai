@@ -47,8 +47,12 @@ import java.util.*;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.CommandType;
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.RemoteServices;
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
+import static org.jboss.errai.common.client.protocols.MessageParts.SubjectsList;
+import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -58,7 +62,7 @@ import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
 
-  private enum State { LOCAL_ONLY, CONNECTING, CONNECTED }
+  private enum State {LOCAL_ONLY, CONNECTING, CONNECTED}
 
   private static final RetryInfo NO_RETRY = new RetryInfo(-1, 0);
   private final String clientId;
@@ -79,7 +83,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final List<UnsubscribeListener> onUnsubscribeHooks
       = new ArrayList<UnsubscribeListener>();
 
-  /** Controls strange recursion in init() */
+  /**
+   * Controls strange recursion in init()
+   */
   private boolean sendBuilder;
 
   private volatile boolean cometChannelOpen = true;
@@ -94,7 +100,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Note that this could be any subtype of LongPollRequestCallback, including
    * ShortPollRequestCallback or NoPollRequestCallback.
-   * <p>
+   * <p/>
    * Instance invariant: this field is never set to null.
    */
   private LongPollRequestCallback receiveCommCallback = new NoPollRequestCallback();
@@ -179,7 +185,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public ClientMessageBusImpl() {
     clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999)) + "-"
-            + (System.currentTimeMillis() % (com.google.gwt.user.client.Random.nextInt(99999) + 1));
+        + (System.currentTimeMillis() % (com.google.gwt.user.client.Random.nextInt(99999) + 1));
 
     IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
     OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
@@ -203,29 +209,30 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * request to the server).
    *
    * @param payload
-   *          The message to send. It is sent verbatim.
+   *     The message to send. It is sent verbatim.
    * @param callback
-   *          The callback to receive success or error notification. Note that
-   *          this callback IS NOT CALLED if the request is cancelled.
+   *     The callback to receive success or error notification. Note that
+   *     this callback IS NOT CALLED if the request is cancelled.
    * @param extraHeaders
-   *          Extra headers to include in the response (key is header name;
-   *          value is header value).
+   *     Extra headers to include in the response (key is header name;
+   *     value is header value).
+   *
    * @throws RequestException
-   *           if the request cannot be sent at all.
+   *     if the request cannot be sent at all.
    */
   private void sendOutboundRequest(
-          final String payload,
-          final Map<String, String> extraHeaders,
-          final RequestCallback callback) throws RequestException {
+      final String payload,
+      final Map<String, String> extraHeaders,
+      final RequestCallback callback) throws RequestException {
     sendRequest(RequestBuilder.POST, OUT_SERVICE_ENTRY_POINT, payload, extraHeaders, callback);
   }
 
   private Request sendRequest(
-          final RequestBuilder.Method method,
-          final String serviceEntryPoint,
-          final String payload,
-          final Map<String, String> extraHeaders,
-          final RequestCallback callback) throws RequestException {
+      final RequestBuilder.Method method,
+      final String serviceEntryPoint,
+      final String payload,
+      final Map<String, String> extraHeaders,
+      final RequestCallback callback) throws RequestException {
     final RequestBuilder builder = new RequestBuilder(
         method,
         URL.encode(getApplicationLocation(serviceEntryPoint)) + "?z=" + getNextRequestNumber()
@@ -255,14 +262,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private Request sendInboundRequest(final RequestCallback callback) throws RequestException {
-    return sendRequest(RequestBuilder.GET, IN_SERVICE_ENTRY_POINT, null, Collections.<String, String> emptyMap(), callback);
+    return sendRequest(RequestBuilder.GET, IN_SERVICE_ENTRY_POINT, null, Collections.<String, String>emptyMap(), callback);
   }
 
   /**
    * Removes all subscriptions attached to the specified subject
    *
    * @param subject
-   *          - the subject to have all it's subscriptions removed
+   *     - the subject to have all it's subscriptions removed
    */
   @Override
   public void unsubscribeAll(final String subject) {
@@ -274,9 +281,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Add a subscription for the specified subject
    *
    * @param subject
-   *          - the subject to add a subscription for
+   *     - the subject to add a subscription for
    * @param callback
-   *          - function called when the message is dispatched
+   *     - function called when the message is dispatched
    */
   @Override
   public Subscription subscribe(final String subject, final MessageCallback callback) {
@@ -377,11 +384,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * bus.
    *
    * @param subject
-   *          - new subscription registered
+   *     - new subscription registered
    * @param local
-   *          -
+   *     -
    * @param isNew
-   *          -
+   *     -
    */
   private void fireAllSubscribeListeners(final String subject, final boolean local, final boolean isNew) {
     final Iterator<SubscribeListener> iterator = onSubscribeHooks.iterator();
@@ -402,7 +409,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * bus
    *
    * @param subject
-   *          - subscription unregistered
+   *     - subscription unregistered
    */
   private void fireAllUnSubscribeListeners(final String subject) {
     final Iterator<UnsubscribeListener> iterator = onUnsubscribeHooks.iterator();
@@ -421,7 +428,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Globally send message to all receivers.
    *
    * @param message
-   *          - The message to be sent.
+   *     - The message to be sent.
    */
   @Override
   public void sendGlobal(final Message message) {
@@ -432,9 +439,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Sends the specified message, and notifies the listeners.
    *
    * @param message
-   *          - the message to be sent
+   *     - the message to be sent
    * @param fireListeners
-   *          - true if the appropriate listeners should be fired
+   *     - true if the appropriate listeners should be fired
    */
   @Override
   public void send(final Message message, final boolean fireListeners) {
@@ -454,16 +461,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * <tt>postInitTasks</tt>.
    *
    * @param message
-   *          -
+   *     -
    *
    * @throws RuntimeException
-   *           - if message does not contain a ToSubject field or if the
-   *           message's callback throws an error.
+   *     - if message does not contain a ToSubject field or if the
+   *     message's callback throws an error.
    */
   @Override
   public void send(final Message message) {
     message.setResource(RequestDispatcher.class.getName(), dispatcherProvider)
-            .setResource("Session", JSONUtilCli.getClientSession()).commit();
+        .setResource("Session", JSONUtilCli.getClientSession()).commit();
 
     try {
       if (message.hasPart(MessageParts.ToSubject)) {
@@ -480,7 +487,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
       else {
         throw new RuntimeException("Cannot send message using this method"
-                + " if the message does not contain a ToSubject field.");
+            + " if the message does not contain a ToSubject field.");
       }
     }
     catch (RuntimeException e) {
@@ -506,7 +513,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Delivers the message to either the remote, "subscriptions", or local message callback for the message's subject.
    *
    * @param message
-   *          the message to deliver. Not null.
+   *     the message to deliver. Not null.
    */
   private void directStore(final Message message) {
     final String subject = message.getSubject();
@@ -538,11 +545,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * All messages in the queue are then sent.
    *
    * @param message
-   *          -
+   *     -
    */
   private void encodeAndTransmit(final Message message) {
     if (initialized && !message.hasPart(MessageParts.PriorityProcessing)
-            && (!toSendBuffer.isEmpty() || throttleOutgoing())) {
+        && (!toSendBuffer.isEmpty() || throttleOutgoing())) {
       toSendBuffer.offer(message);
       if (!txActive && toSendBuffer.size() == 1) {
         new Timer() {
@@ -604,7 +611,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Checks if subject is already listed in the subscriptions map
    *
    * @param subject
-   *          - subject to look for
+   *     - subject to look for
    *
    * @return true if the subject is already subscribed
    */
@@ -617,9 +624,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
    *
    * @param message
-   *          - JSON string representation of message
+   *     - JSON string representation of message
    * @param txMessages
-   *          - Messages reference.
+   *     - Messages reference.
    */
   private void transmitRemote(final String message, final List<Message> txMessages) {
     if (state == State.LOCAL_ONLY) {
@@ -647,7 +654,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       try {
-        sendOutboundRequest(message, Collections.<String,String>emptyMap(), new RequestCallback() {
+        sendOutboundRequest(message, Collections.<String, String>emptyMap(), new RequestCallback() {
           int statusCode = 0;
 
           @Override
@@ -656,14 +663,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             if (statusCode >= 400) {
               final TransportIOException tioe
                   = new TransportIOException(response.getText(), response.getStatusCode(),
-                      "Failure communicating with server");
+                  "Failure communicating with server");
 
               if (handleHTTPTransportError(new BusTransportError(request, tioe, statusCode, NO_RETRY))) {
                 return;
               }
 
               LogUtil.log("connection problem. server returned status code: " + response.getStatusCode() + " ("
-                      + response.getStatusText() + ")");
+                  + response.getStatusText() + ")");
 
               for (final Message txM : txMessages) {
                 callErrorHandler(txM, tioe);
@@ -729,7 +736,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return;
       rxActive = true;
       request = sendInboundRequest(receiveCommCallback);
-    } catch (RequestTimeoutException e) {
+    }
+    catch (RequestTimeoutException e) {
       statusCode = 1;
 
       // don't call the error handler here; it will be fired in onError()
@@ -769,8 +777,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     try {
       if (sendDisconnect && isRemoteCommunicationEnabled()) {
         encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.Disconnect)
-                .set(MessageParts.PriorityProcessing, "1"));
+            .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.Disconnect)
+            .set(MessageParts.PriorityProcessing, "1"));
         unsubscribeAll(BuiltInServices.ClientBus.name());
       }
 
@@ -808,9 +816,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Evil backdoor for enabling local communication when the bus is offline.
    * This method will be replaced with a better-behaved API in Errai 3.0.
-   * <p>
+   * <p/>
    * <h2>Instructions for using this method</h2>
-   * <p>
+   * <p/>
    * When the bus has gone into LOCAL_ONLY state (after a disassociating event),
    * by default it defers all message delivery <i>including local messages</i>.
    * By calling <tt>setInitialized(true)</tt> you tell the bus to attempt
@@ -818,7 +826,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * through, but it will cause messages that would normally be enqueued for
    * remote delivery when the bus comes back online to throw a
    * {@link NoSubscribersToDeliverTo} exception when sent.
-   * <p>
+   * <p/>
    * If you want to take the bus back online after calling
    * <tt>setInitialized(true)</tt>, you must do so by calling
    * <code>bus.stop(false)</code> followed by <code>bus.init()</code>.
@@ -849,7 +857,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Takes this message bus from the LOCAL_ONLY state into the CONNECTING state,
    * as long as remote communication is enabled.
-   * <p>
+   * <p/>
    * If this bus is not in the LOCAL_ONLY state when this method is called, this
    * method has no effect.
    *
@@ -915,223 +923,213 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       @Override
       @SuppressWarnings({"unchecked"})
       public void callback(final Message message) {
+        boolean ver3 = false;
         switch (BusCommands.valueOf(message.getCommandType())) {
           case RemoteSubscribe:
             if (message.hasPart(MessageParts.SubjectsList)) {
               LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
 
-            for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
-              remoteSubscribe(subject);
+              for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
+                remoteSubscribe(subject);
+              }
             }
-          }
-          else {
-            remoteSubscribe(message.get(String.class, Subject));
-          }
-          break;
-
-        case RemoteUnsubscribe:
-          unsubscribeAll(message.get(String.class, Subject));
-          break;
-
-        case CapabilitiesNotice:
-          LogUtil.log("received capabilities notice from server. supported capabilities of remote: "
-                  + message.get(String.class, MessageParts.CapabilitiesFlags));
-
-          for (final String capability : message.get(String.class, MessageParts.CapabilitiesFlags).split(",")) {
-            switch (Capabilities.valueOf(capability)) {
-            case WebSockets:
-              webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
-              webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
-              webSocketUpgradeAvailable = true;
-              break;
-            case LongPollAvailable:
-
-              LogUtil.log("initializing long poll subsystem");
-              receiveCommCallback = new LongPollRequestCallback();
-              break;
-            case NoLongPollAvailable:
-              receiveCommCallback = new ShortPollRequestCallback();
-              if (message.hasPart(MessageParts.PollFrequency)) {
-                POLL_FREQUENCY = message.get(Integer.class, MessageParts.PollFrequency);
-              }
-              else {
-                POLL_FREQUENCY = 500;
-              }
-              break;
-            case Proxy:
-              break;
+            else {
+              remoteSubscribe(message.get(String.class, Subject));
             }
-          }
-          break;
+            break;
 
-        case RemoteMonitorAttach:
-          break;
+          case RemoteUnsubscribe:
+            unsubscribeAll(message.get(String.class, Subject));
+            break;
 
-        case FinishStateSync:
-          if (isInitialized()) {
-            return;
-          }
+          case CapabilitiesNotice:
+            LogUtil.log("received capabilities notice from server. supported capabilities of remote: "
+                + message.get(String.class, MessageParts.CapabilitiesFlags));
 
-          new Timer() {
-            @Override
-            public void run() {
-              LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
+            processCapabilities(message);
+            break;
 
-              stateSyncInProgress = true;
+          case RemoteMonitorAttach:
+            break;
 
-              for (final Runnable deferredSubscription : deferredSubscriptions) {
-                deferredSubscription.run();
-              }
 
-              final List<String> subjects = new ArrayList<String>();
-              for (final String s : subscriptions.keySet()) {
-                if (s.startsWith("local:"))
-                  continue;
-                if (!remotes.containsKey(s))
-                  subjects.add(s);
-              }
+          case FinishAssociation:
+            ver3 = true;
+          case FinishStateSync:
+            if (isInitialized()) {
+              return;
+            }
 
-              sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
+            final boolean _ver3 = ver3;
+            new Timer() {
+              @Override
+              public void run() {
+                LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
 
-              remoteSubscribe(BuiltInServices.ServerBus.name());
+                stateSyncInProgress = true;
 
-              encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                for (final Runnable deferredSubscription : deferredSubscriptions) {
+                  deferredSubscription.run();
+                }
+
+
+                sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
+
+                remoteSubscribe(BuiltInServices.ServerBus.name());
+
+                if (_ver3) {
+                  processCapabilities(message);
+
+                  for (String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+                    remoteSubscribe( svc);
+                  }
+                }
+                else {
+                  final List<String> subjects = new ArrayList<String>();
+                  for (final String s : subscriptions.keySet()) {
+                    if (s.startsWith("local:"))
+                      continue;
+                    if (!remotes.containsKey(s))
+                      subjects.add(s);
+                  }
+                  encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                       .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
                       .set(MessageParts.SubjectsList, subjects).set(PriorityProcessing, "1"));
-
-              encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                      .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.FinishStateSync)
-                      .set(PriorityProcessing, "1"));
-
-              /**
-               * ... also send RemoteUnsubscribe signals.
-               */
-              addSubscribeListener(new SubscribeListener() {
-                @Override
-                public void onSubscribe(final SubscriptionEvent event) {
-                  if (event.isLocalOnly() || event.getSubject().startsWith("local:")
-                          || remotes.containsKey(event.getSubject())) {
-                    return;
-                  }
-
-                  if (event.isNew()) {
-                    encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                            .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
-                            .set(Subject, event.getSubject()).set(PriorityProcessing, "1"));
-                  }
                 }
-              });
 
-              addUnsubscribeListener(new UnsubscribeListener() {
-                @Override
-                public void onUnsubscribe(final SubscriptionEvent event) {
-                  encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                          .toSubject(BuiltInServices.ServerBus.name()).command(RemoteUnsubscribe)
+                encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                    .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.FinishStateSync)
+                    .set(PriorityProcessing, "1"));
+
+                /**
+                 * ... also send RemoteUnsubscribe signals.
+                 */
+                addSubscribeListener(new SubscribeListener() {
+                  @Override
+                  public void onSubscribe(final SubscriptionEvent event) {
+                    if (event.isLocalOnly() || event.getSubject().startsWith("local:")
+                        || remotes.containsKey(event.getSubject())) {
+                      return;
+                    }
+
+                    if (event.isNew()) {
+                      encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                          .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
                           .set(Subject, event.getSubject()).set(PriorityProcessing, "1"));
-                }
-              });
-
-              subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-                @Override
-                public void callback(final Message message) {
-                  final String errorTo = message.get(String.class, MessageParts.ErrorTo);
-                  if (errorTo == null) {
-                    logError(message.get(String.class, MessageParts.ErrorMessage),
-                            message.get(String.class, MessageParts.AdditionalDetails), null);
+                    }
                   }
-                  else {
-                    message.toSubject(errorTo);
-                    message.sendNowWith(ClientMessageBusImpl.this);
+                });
+
+                addUnsubscribeListener(new UnsubscribeListener() {
+                  @Override
+                  public void onUnsubscribe(final SubscriptionEvent event) {
+                    encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                        .toSubject(BuiltInServices.ServerBus.name()).command(RemoteUnsubscribe)
+                        .set(Subject, event.getSubject()).set(PriorityProcessing, "1"));
                   }
+                });
+
+                subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+                  @Override
+                  public void callback(final Message message) {
+                    final String errorTo = message.get(String.class, MessageParts.ErrorTo);
+                    if (errorTo == null) {
+                      logError(message.get(String.class, MessageParts.ErrorMessage),
+                          message.get(String.class, MessageParts.AdditionalDetails), null);
+                    }
+                    else {
+                      message.toSubject(errorTo);
+                      message.sendNowWith(ClientMessageBusImpl.this);
+                    }
+                  }
+                });
+
+                stateSyncInProgress = true;
+
+                if (webSocketUpgradeAvailable) {
+                  websocketUpgrade();
                 }
-              });
+                else {
+                  InitVotes.voteFor(ClientMessageBus.class);
+                }
 
-              stateSyncInProgress = true;
+                setState(State.CONNECTED);
 
-              if (webSocketUpgradeAvailable) {
-                websocketUpgrade();
+                // end of FinishStateSync Timer
               }
-              else {
+            }.schedule(5);
+            break;
+
+          case SessionExpired:
+            if (!sessionReEstablish) {
+              sessionReEstablish = true;
+
+              if (isReinit()) {
+                showError("session was terminated and could not be re-established", null);
+                return;
+              }
+
+              if (!isInitialized())
+                return;
+
+              LogUtil.log("http session has expired. resetting bus and attempting reconnection.");
+
+              for (final SessionExpirationListener listener : sessionExpirationListeners) {
+                listener.onSessionExpire();
+              }
+
+              stop(false);
+              init();
+            }
+            break;
+
+          case WebsocketChannelVerify:
+            LogUtil.log("received verification token for websocket connection");
+
+            encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.WebsocketChannelVerify)
+                .copy(MessageParts.WebSocketToken, message));
+            break;
+
+          case WebsocketChannelOpen:
+
+            cometChannelOpen = false;
+            webSocketOpen = true;
+
+            // send final message to open the channel
+            ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
+
+            LogUtil.log("web socket channel successfully negotiated. comet channel deactivated.");
+
+            new Timer() {
+              @Override
+              public void run() {
                 InitVotes.voteFor(ClientMessageBus.class);
               }
+            }.schedule(50);
+            break;
 
-              setState(State.CONNECTED);
+          case WebsocketNegotiationFailed:
+            webSocketChannel = null;
+            logError("failed to connect to websocket: server rejected request",
+                message.get(String.class, MessageParts.ErrorMessage), null);
+            break;
 
-              // end of FinishStateSync Timer
-            }
-          }.schedule(5);
-          break;
-
-        case SessionExpired:
-          if (!sessionReEstablish) {
-            sessionReEstablish = true;
-
-            if (isReinit()) {
-              showError("session was terminated and could not be re-established", null);
-              return;
-            }
-
-            if (!isInitialized())
-              return;
-
-            LogUtil.log("http session has expired. resetting bus and attempting reconnection.");
-
-            for (final SessionExpirationListener listener : sessionExpirationListeners) {
-              listener.onSessionExpire();
-            }
-
+          case Disconnect:
             stop(false);
-            init();
-          }
-          break;
 
-        case WebsocketChannelVerify:
-          LogUtil.log("received verification token for websocket connection");
-
-          encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                  .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.WebsocketChannelVerify)
-                  .copy(MessageParts.WebSocketToken, message));
-          break;
-
-        case WebsocketChannelOpen:
-
-          cometChannelOpen = false;
-          webSocketOpen = true;
-
-          // send final message to open the channel
-          ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
-
-          LogUtil.log("web socket channel successfully negotiated. comet channel deactivated.");
-
-          new Timer() {
-            @Override
-            public void run() {
-              InitVotes.voteFor(ClientMessageBus.class);
+            if (message.hasPart("Reason")) {
+              logError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
             }
-          }.schedule(50);
-          break;
-
-        case WebsocketNegotiationFailed:
-          webSocketChannel = null;
-          logError("failed to connect to websocket: server rejected request",
-                  message.get(String.class, MessageParts.ErrorMessage), null);
-          break;
-
-        case Disconnect:
-          stop(false);
-
-          if (message.hasPart("Reason")) {
-            logError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
-          }
-          break;
-        case ConnectToQueue:
-          break;
-        case Heartbeat:
-          break;
-        case Resend:
-          break;
-        case RemoteMonitorDetach:
-          break;
+            break;
+          case ConnectToQueue:
+            break;
+          case Heartbeat:
+            break;
+          case Resend:
+            break;
+          case RemoteMonitorDetach:
+            break;
         }
       }
     }, false);
@@ -1143,6 +1141,34 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      */
     if (!sendInitialMessage()) {
       logError("Could not connect to remote bus", "", null);
+    }
+  }
+
+  private void processCapabilities(Message message) {
+    for (final String capability : message.get(String.class, MessageParts.CapabilitiesFlags).split(",")) {
+      switch (Capabilities.valueOf(capability)) {
+        case WebSockets:
+          webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
+          webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
+          webSocketUpgradeAvailable = true;
+          break;
+        case LongPollAvailable:
+
+          LogUtil.log("initializing long poll subsystem");
+          receiveCommCallback = new LongPollRequestCallback();
+          break;
+        case NoLongPollAvailable:
+          receiveCommCallback = new ShortPollRequestCallback();
+          if (message.hasPart(MessageParts.PollFrequency)) {
+            POLL_FREQUENCY = message.get(Integer.class, MessageParts.PollFrequency);
+          }
+          else {
+            POLL_FREQUENCY = 500;
+          }
+          break;
+        case Proxy:
+          break;
+      }
     }
   }
 
@@ -1172,12 +1198,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           postInitTasks.remove(runnable);
           try {
             runnable.run();
-          } catch (Throwable t) {
+          }
+          catch (Throwable t) {
             LogUtil.log("[error] running post init task: " + t);
             LogUtil.log("     -> " + t.getMessage());
           }
         }
-      } while (!postInitTasks.isEmpty());
+      }
+      while (!postInitTasks.isEmpty());
 
       sendAllDeferred();
       postInitTasks.clear();
@@ -1220,13 +1248,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         transmitDeferred(message);
         deferredMessages.remove(message);
       }
-    } while (!deferredMessages.isEmpty());
+    }
+    while (!deferredMessages.isEmpty());
   }
 
   private void transmitDeferred(final Message message) {
     try {
       directStore(message);
-    } catch (Throwable t) {
+    }
+    catch (Throwable t) {
       LogUtil.log("[error] failed to transmit deferred message: " + message);
       LogUtil.log("    -> " + t.getMessage());
     }
@@ -1358,28 +1388,49 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       // browsers, etc). It seems that we send this header if-and-only-if CommandType is
       // ConnectToQueue. We should look at making the server message bus not require it.
       final Map<String, String> connectHeader = Collections.singletonMap("phase", "connection");
-      sendOutboundRequest(
-              "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\", \"PriorityProcessing\":\"1\"}",
-              connectHeader, new RequestCallback() {
-                @Override
-                public void onResponseReceived(final Request request, final Response response) {
-                  try {
-                    LogUtil.log("received response from initial handshake.");
-                    processIncomingPayload(response);
-                    initializeMessagingBus();
-                  } catch (Exception e) {
-                    e.printStackTrace();
-                    logError("Error attaching to bus",
-                            e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
-                  }
-                }
 
-                @Override
-                public void onError(final Request request, final Throwable exception) {
-                  logError("Could not connect to remote bus", "", exception);
-                }
-              });
-    } catch (RequestException e) {
+      String subjects = "";
+      for (final String s : subscriptions.keySet()) {
+        if (s.startsWith("local:"))
+          continue;
+        if (!remotes.containsKey(s)) {
+          if (subjects.length() != 0) {
+            subjects += ",";
+          }
+          subjects += s;
+        }
+      }
+
+      final String handShake = BusTools.encodeMessage(CommandMessage.createWithParts(new HashMap<String, Object>())
+          .command(BusCommands.Associate)
+          .set(ToSubject, "ServerBus")
+          .set(PriorityProcessing, "1")
+          .set(MessageParts.RemoteServices, subjects));
+
+      sendOutboundRequest(
+          handShake,
+          connectHeader, new RequestCallback() {
+        @Override
+        public void onResponseReceived(final Request request, final Response response) {
+          try {
+            LogUtil.log("received response from initial handshake.");
+            processIncomingPayload(response);
+            initializeMessagingBus();
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+            logError("Error attaching to bus",
+                e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
+          }
+        }
+
+        @Override
+        public void onError(final Request request, final Throwable exception) {
+          logError("Could not connect to remote bus", "", exception);
+        }
+      });
+    }
+    catch (RequestException e) {
       e.printStackTrace();
       return false;
     }
@@ -1418,40 +1469,40 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       switch (statusCode) {
-      case 0:
-      case 1:
-      case 400: // happens when JBossAS is going down
-      case 404: // happens after errai app is undeployed
-      case 408: // request timeout--probably worth retrying
-      case 500: // we expect this may happen during restart of some non-JBoss servers
-      case 502: // bad gateway--could happen if long poll request was proxied to a down server
-      case 503: // temporary overload (probably on a proxy)
-      case 504: // gateway timeout--same possibilities as 502
-        if (willRetry) {
-          logAdapter.warn("Attempting reconnection -- Retries: " + (maxRetries - retries));
-          retries++;
+        case 0:
+        case 1:
+        case 400: // happens when JBossAS is going down
+        case 404: // happens after errai app is undeployed
+        case 408: // request timeout--probably worth retrying
+        case 500: // we expect this may happen during restart of some non-JBoss servers
+        case 502: // bad gateway--could happen if long poll request was proxied to a down server
+        case 503: // temporary overload (probably on a proxy)
+        case 504: // gateway timeout--same possibilities as 502
+          if (willRetry) {
+            logAdapter.warn("Attempting reconnection -- Retries: " + (maxRetries - retries));
+            retries++;
 
-          new Timer() {
-            @Override
-            public void run() {
-              cometChannelOpen = true;
-              performPoll();
-            }
-          }.schedule(timeout);
+            new Timer() {
+              @Override
+              public void run() {
+                cometChannelOpen = true;
+                performPoll();
+              }
+            }.schedule(timeout);
 
-          statusCode = 0;
-          return;
-        }
-        else {
+            statusCode = 0;
+            return;
+          }
+          else {
+            DefaultErrorCallback.INSTANCE.error(null, throwable);
+            stop(false, transportError);
+          }
+          break;
+
+        default:
+          // polling error is probably unrecoverable; go to local-only mode
           DefaultErrorCallback.INSTANCE.error(null, throwable);
           stop(false, transportError);
-        }
-        break;
-
-      default:
-        // polling error is probably unrecoverable; go to local-only mode
-        DefaultErrorCallback.INSTANCE.error(null, throwable);
-        stop(false, transportError);
       }
     }
 
@@ -1459,32 +1510,33 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void onResponseReceived(final Request request, final Response response) {
       if (response.getStatusCode() != 200) {
         switch (statusCode = response.getStatusCode()) {
-        case 300:
-        case 301:
-        case 302:
-        case 303:
-        case 304:
-        case 305:
-        case 307:
-          break;
-        default:
-          cometChannelOpen = false;
-          onError(request,
-                  new TransportIOException("unexpected response code: " + statusCode, statusCode, response
-                          .getStatusText()));
-          return;
+          case 300:
+          case 301:
+          case 302:
+          case 303:
+          case 304:
+          case 305:
+          case 307:
+            break;
+          default:
+            cometChannelOpen = false;
+            onError(request,
+                new TransportIOException("unexpected response code: " + statusCode, statusCode, response
+                    .getStatusText()));
+            return;
         }
       }
 
       retries = 0;
-      
+
       try {
         if (state != State.CONNECTED) {
           setState(State.CONNECTED);
         }
         processIncomingPayload(response);
         schedule();
-      } catch (Throwable e) {
+      }
+      catch (Throwable e) {
         logError("bus disconnected due to fatal error", response.getText(), e);
       }
     }
@@ -1559,7 +1611,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Add runnable tasks to be run after the message bus is initialized.
    *
    * @param run
-   *          a {@link Runnable} task.
+   *     a {@link Runnable} task.
    */
   @Override
   public void addPostInitTask(final Runnable run) {
@@ -1586,7 +1638,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * listeners attached.
    *
    * @param listener
-   *          - listener to accept all messages dispatched
+   *     - listener to accept all messages dispatched
    */
   @Override
   public void addGlobalListener(final MessageListener listener) {
@@ -1597,7 +1649,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * client.
    *
    * @param listener
-   *          - subscription listener
+   *     - subscription listener
    */
   @Override
   public void addSubscribeListener(final SubscribeListener listener) {
@@ -1609,7 +1661,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * subscriptions from the client
    *
    * @param listener
-   *          - unsubscribe listener
+   *     - unsubscribe listener
    */
   @Override
   public void addUnsubscribeListener(final UnsubscribeListener listener) {
@@ -1618,11 +1670,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private static String decodeCommandMessage(final Message msg) {
     final StringBuilder decode = new StringBuilder(
-            "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
+        "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
 
     for (final Map.Entry<String, Object> entry : msg.getParts().entrySet()) {
       decode.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue())
-              .append("</td></tr>");
+          .append("</td></tr>");
     }
 
     return decode.append("</tbody></table>").toString();
@@ -1652,10 +1704,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * bus.
    *
    * @param response
-   *          -
+   *     -
    *
    * @throws Exception
-   *           -
+   *     -
    */
   private void processIncomingPayload(final Response response) throws Exception {
     procPayload(response.getText());
@@ -1668,7 +1720,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         rxNumber++;
         _store(m.getSubject(), JSONUtilCli.decodeCommandMessage(m.getMessage()));
       }
-    } catch (RuntimeException e) {
+    }
+    catch (RuntimeException e) {
       e.printStackTrace();
       logError("Error delivering message into bus", text, e);
     }
@@ -1716,8 +1769,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private String getWebSocketNegotiationString() {
     return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.ConnectToQueue.name() + "\", \""
-            + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"" + ",\"" + MessageParts.WebSocketToken
-            + "\":\"" + webSocketToken + "\"}";
+        + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"" + ",\"" + MessageParts.WebSocketToken
+        + "\":\"" + webSocketToken + "\"}";
   }
 
   public void attachWebSocketChannel(final Object o) {
@@ -1772,9 +1825,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         @Override
         public void onClick(final ClickEvent event) {
           if (Window
-                  .confirm("Are you sure you want to disconnect and de-federate the local bus from the server bus? "
-                          + "This will permanently kill your session. You will need to refresh to reconnect. OK will proceed. Click "
-                          + "Cancel to abort this operation")) {
+              .confirm("Are you sure you want to disconnect and de-federate the local bus from the server bus? "
+                  + "This will permanently kill your session. You will need to refresh to reconnect. OK will proceed. Click "
+                  + "Cancel to abort this operation")) {
             stop(true);
           }
         }
@@ -1840,7 +1893,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       buildTrace.append("</pre>");
 
       contentPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails
-              + "</tt>"));
+          + "</tt>"));
 
       if (!isShowing()) {
         resize();
@@ -1858,17 +1911,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private static native void declareDebugFunction() /*-{
-    $wnd.errai_status = function () {
-      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayStatusToLog()();
-    };
+      $wnd.errai_status = function () {
+          @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayStatusToLog()();
+      };
 
-    $wnd.errai_list_services = function () {
-      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_listAvailableServicesToLog()();
-    };
+      $wnd.errai_list_services = function () {
+          @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_listAvailableServicesToLog()();
+      };
 
-    $wnd.errai_show_error_console = function () {
-      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
-    }
+      $wnd.errai_show_error_console = function () {
+          @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
+      }
   }-*/;
 
   /**
@@ -1912,7 +1965,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     for (final String localName : ((ClientMessageBusImpl) ErraiBus.get()).subscriptions.keySet()) {
       LogUtil.nativeLog(localName + " (" + ((ClientMessageBusImpl) ErraiBus.get()).subscriptions.get(localName).size()
-              + ")");
+          + ")");
     }
 
     LogUtil.displaySeparator();
@@ -1933,30 +1986,30 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @return true if remote communication enabled, otherwise false.
    */
   public native boolean isRemoteCommunicationEnabled() /*-{
-    //noinspection JSUnresolvedVariable
-    if ($wnd.erraiBusRemoteCommunicationEnabled === undefined || $wnd.erraiBusRemoteCommunicationEnabled.length === 0) {
-      return true;
-    }
-    else {
-    //noinspection JSUnresolvedVariable
-      return $wnd.erraiBusRemoteCommunicationEnabled;
-    }
+      //noinspection JSUnresolvedVariable
+      if ($wnd.erraiBusRemoteCommunicationEnabled === undefined || $wnd.erraiBusRemoteCommunicationEnabled.length === 0) {
+          return true;
+      }
+      else {
+          //noinspection JSUnresolvedVariable
+          return $wnd.erraiBusRemoteCommunicationEnabled;
+      }
   }-*/;
 
   /**
    * Sets the application root for the remote message bus endpoints.
    *
    * @param path
-   *          path to use when sending requests to the JAX-RS endpoint
+   *     path to use when sending requests to the JAX-RS endpoint
    */
   @SuppressWarnings("UnusedDeclaration")
   public static native void setApplicationRoot(final String path) /*-{
-    if (path == null) {
-      $wnd.erraiBusApplicationRoot = undefined;
-    }
-    else {
-      $wnd.erraiBusApplicationRoot = path;
-    }
+      if (path == null) {
+          $wnd.erraiBusApplicationRoot = undefined;
+      }
+      else {
+          $wnd.erraiBusApplicationRoot = path;
+      }
   }-*/;
 
   protected String getApplicationLocation(String serviceEntryPoint) {
@@ -1978,19 +2031,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *         explicitly set to empty
    */
   public static native String getApplicationRoot() /*-{
-    //noinspection JSUnresolvedVariable
-    if ($wnd.erraiBusApplicationRoot === undefined || $wnd.erraiBusApplicationRoot.length === 0) {
-      return "";
-    }
-    else {
       //noinspection JSUnresolvedVariable
-      if ($wnd.erraiBusApplicationRoot.substr(-1) !== "/") {
-        //noinspection JSUnresolvedVariable
-        return $wnd.erraiBusApplicationRoot + "/";
+      if ($wnd.erraiBusApplicationRoot === undefined || $wnd.erraiBusApplicationRoot.length === 0) {
+          return "";
       }
-      //noinspection JSUnresolvedVariable
-      return $wnd.erraiBusApplicationRoot;
-    }
+      else {
+          //noinspection JSUnresolvedVariable
+          if ($wnd.erraiBusApplicationRoot.substr(-1) !== "/") {
+              //noinspection JSUnresolvedVariable
+              return $wnd.erraiBusApplicationRoot + "/";
+          }
+          //noinspection JSUnresolvedVariable
+          return $wnd.erraiBusApplicationRoot;
+      }
   }-*/;
 
   private final List<BusLifecycleListener> lifecycleListeners = new ArrayList<BusLifecycleListener>();
@@ -2044,7 +2097,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Puts the bus in the given state, firing all necessary transition events with the given reason.
    *
-   * @param reason The error that led to this state transition, if any. Null is permitted.
+   * @param reason
+   *     The error that led to this state transition, if any. Null is permitted.
    */
   private void setState(final State newState, final TransportError reason) {
     if (state == newState) {
@@ -2055,37 +2109,37 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final List<EventType> events = new ArrayList<EventType>();
 
     switch (state) {
-    case LOCAL_ONLY:
-      if (newState == State.CONNECTING) {
-        events.add(EventType.ASSOCIATING);
-      }
-      else if (newState == State.CONNECTED) {
-        events.add(EventType.ASSOCIATING);
-        events.add(EventType.ONLINE);
-      }
-      break;
+      case LOCAL_ONLY:
+        if (newState == State.CONNECTING) {
+          events.add(EventType.ASSOCIATING);
+        }
+        else if (newState == State.CONNECTED) {
+          events.add(EventType.ASSOCIATING);
+          events.add(EventType.ONLINE);
+        }
+        break;
 
-    case CONNECTING:
-      if (newState == State.LOCAL_ONLY) {
-        events.add(EventType.DISASSOCIATING);
-      }
-      else if (newState == State.CONNECTED) {
-        events.add(EventType.ONLINE);
-      }
-      break;
+      case CONNECTING:
+        if (newState == State.LOCAL_ONLY) {
+          events.add(EventType.DISASSOCIATING);
+        }
+        else if (newState == State.CONNECTED) {
+          events.add(EventType.ONLINE);
+        }
+        break;
 
-    case CONNECTED:
-      if (newState == State.CONNECTING) {
-        events.add(EventType.OFFLINE);
-      }
-      else if (newState == State.LOCAL_ONLY) {
-        events.add(EventType.OFFLINE);
-        events.add(EventType.DISASSOCIATING);
-      }
-      break;
+      case CONNECTED:
+        if (newState == State.CONNECTING) {
+          events.add(EventType.OFFLINE);
+        }
+        else if (newState == State.LOCAL_ONLY) {
+          events.add(EventType.OFFLINE);
+          events.add(EventType.DISASSOCIATING);
+        }
+        break;
 
-    default:
-      throw new IllegalStateException("Bus is in unknown state: " + state);
+      default:
+        throw new IllegalStateException("Bus is in unknown state: " + state);
     }
 
     state = newState;
@@ -2095,7 +2149,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       for (int i = lifecycleListeners.size() - 1; i >= 0; i--) {
         try {
           et.deliverTo(lifecycleListeners.get(i), e);
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
           logAdapter.warn("Listener threw exception: " + t);
           t.printStackTrace();
         }

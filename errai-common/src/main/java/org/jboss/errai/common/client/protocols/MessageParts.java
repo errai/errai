@@ -41,6 +41,12 @@ public enum MessageParts {
   SubjectsList,
 
   /**
+   *
+   * @since 3.0
+   */
+  RemoteServices,
+
+  /**
    * A list of capabilities (comma-seperate string) of the capabilities of the remote bus.
    */
   CapabilitiesFlags,
