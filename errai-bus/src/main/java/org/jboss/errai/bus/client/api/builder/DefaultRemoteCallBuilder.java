@@ -37,7 +37,7 @@ import java.util.List;
 
 /**
  * Facilitates the building of a remote call. Ensures that the remote call is constructed properly.
- * <p>
+ * <p/>
  * Part of the fluent API centered around {@link MessageBuilder}.
  */
 public class DefaultRemoteCallBuilder {
@@ -70,13 +70,14 @@ public class DefaultRemoteCallBuilder {
   /**
    * Only intended for use by generated code. Use {@link #call(RemoteCallback, Class)} or
    * {@link #call(RemoteCallback, BusErrorCallback, Class)} from handwritten code.
-   * <p>
+   * <p/>
    * Creates, implements and returns an instance of <tt>RemoteCallEndpointDef</tt> and all applicable arguments, which
    * should be instantiated after this call to <tt>serviceName</tt>. The endpoint allows a function from a service to be
    * called directly, rather than waiting for a response to a message.
-   * 
+   *
    * @param serviceName
-   *          the service to call, and create a remote call endpoint for
+   *     the service to call, and create a remote call endpoint for
+   *
    * @return the remote call endpoint.
    */
   public RemoteCallEndpointDef call(final String serviceName) {
@@ -89,10 +90,10 @@ public class DefaultRemoteCallBuilder {
         Integer id;
 
         final String replyTo =
-            message.getSubject() + "." + message.getCommandType() + ":RespondTo:" + (id = uniqueNumber());
+            message.getSubject() + "." + message.getCommandType() + ":" + (id = uniqueNumber()) + ":RespondTo:RPC";
 
         final String errorTo =
-            message.getSubject() + "." + message.getCommandType() + ":Errors:" + ((id == null) ? uniqueNumber() : id);
+            message.getSubject() + "." + message.getCommandType() + ":" + ((id == null) ? uniqueNumber() : id) + ":Errors:RPC";
 
         new MessageCallback() {
           @Override
@@ -112,7 +113,7 @@ public class DefaultRemoteCallBuilder {
                   remoteCallback.callback(message.get(responseType, "MethodReply"));
                 }
               }
-              );
+          );
           message.set(MessageParts.ReplyTo, replyTo);
         }
 
@@ -128,7 +129,7 @@ public class DefaultRemoteCallBuilder {
                   message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
                 }
               }
-              );
+          );
           message.set(MessageParts.ErrorTo, errorTo);
         }
 
@@ -203,9 +204,9 @@ public class DefaultRemoteCallBuilder {
    * Sets the proxy provider factory that is used by MessageBuilder and friends for creating remote proxies. Unless you
    * are creating an Errai extension that provides an alternative remoting mechanism, there is never a need to call this
    * method.
-   * 
+   *
    * @param provider
-   *          The ProxyProvider that provides RPC proxies to message builders. Not null.
+   *     The ProxyProvider that provides RPC proxies to message builders. Not null.
    */
   public static void setProxyFactory(ProxyFactory provider) {
     proxyFactory = Assert.notNull(provider);

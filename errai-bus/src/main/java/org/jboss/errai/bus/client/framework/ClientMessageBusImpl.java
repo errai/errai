@@ -16,6 +16,13 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
+import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,14 +31,43 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.*;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.RequestTimeoutException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import junit.framework.AssertionFailedError;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.*;
-import org.jboss.errai.bus.client.api.base.*;
+import org.jboss.errai.bus.client.api.BusLifecycleEvent;
+import org.jboss.errai.bus.client.api.BusLifecycleListener;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
+import org.jboss.errai.bus.client.api.RetryInfo;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.util.BusTools;
@@ -42,17 +78,16 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
-import java.util.*;
-
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
-import static org.jboss.errai.common.client.protocols.MessageParts.CommandType;
-import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.common.client.protocols.MessageParts.RemoteServices;
-import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
-import static org.jboss.errai.common.client.protocols.MessageParts.SubjectsList;
-import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -248,7 +283,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final Request request = builder.sendRequest(payload, new RequestCallback() {
       @Override
       public void onResponseReceived(final Request request, final Response response) {
-       // LogUtil.log("rx rcvd: " + response.getText());
+        // LogUtil.log("rx rcvd: " + response.getText());
         pendingRequests.remove(request);
         callback.onResponseReceived(request, response);
       }
@@ -261,7 +296,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     });
     pendingRequests.add(request);
 
-  //  LogUtil.log("tx sent: " + payload);
+    //  LogUtil.log("tx sent: " + payload);
     return request;
   }
 
@@ -983,7 +1018,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               return;
             }
 
-
             final boolean _ver3 = ver3;
             new Timer() {
               @Override
@@ -1039,15 +1073,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 addSubscribeListener(new SubscribeListener() {
                   @Override
                   public void onSubscribe(final SubscriptionEvent event) {
-                    if (event.isLocalOnly() || event.getSubject().startsWith("local:")
-                        || remotes.containsKey(event.getSubject())) {
+                    final String subject = event.getSubject();
+                    if (event.isLocalOnly() || subject.startsWith("local:")
+                        || remotes.containsKey(subject)) {
+                      return;
+                    }
+
+                    if (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")) {
                       return;
                     }
 
                     if (event.isNew()) {
                       encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                           .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
-                          .set(Subject, event.getSubject()).set(PriorityProcessing, "1"));
+                          .set(Subject, subject).set(PriorityProcessing, "1"));
                     }
                   }
                 });
@@ -1055,9 +1094,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 addUnsubscribeListener(new UnsubscribeListener() {
                   @Override
                   public void onUnsubscribe(final SubscriptionEvent event) {
+                    final String subject = event.getSubject();
+
+                    if (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")) {
+                      return;
+                    }
+
                     encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                         .toSubject(BuiltInServices.ServerBus.name()).command(RemoteUnsubscribe)
-                        .set(Subject, event.getSubject()).set(PriorityProcessing, "1"));
+                        .set(Subject, subject).set(PriorityProcessing, "1"));
                   }
                 });
 

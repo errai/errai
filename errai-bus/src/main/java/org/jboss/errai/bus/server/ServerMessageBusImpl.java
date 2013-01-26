@@ -1289,8 +1289,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private boolean isAnyoneListening(final MessageQueue queue, final String subject) {
-    return subscriptions.containsKey(subject) ||
-        (remoteSubscriptions.containsKey(subject) && remoteSubscriptions.get(subject).contains(queue));
+    return (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")
+        || subscriptions.containsKey(subject) || (remoteSubscriptions.containsKey(subject)
+            && remoteSubscriptions.get(subject).contains(queue)));
   }
 
   @Override
