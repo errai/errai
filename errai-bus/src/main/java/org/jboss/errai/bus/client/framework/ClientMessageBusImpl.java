@@ -134,6 +134,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private final Set<Request> pendingRequests = new HashSet<Request>();
 
   /* True if the client's message bus has been initialized */
+  private boolean initStarted = false;
   private boolean initialized = false;
   private boolean reinit = false;
   private boolean postInit = false;
@@ -247,6 +248,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final Request request = builder.sendRequest(payload, new RequestCallback() {
       @Override
       public void onResponseReceived(final Request request, final Response response) {
+       // LogUtil.log("rx rcvd: " + response.getText());
         pendingRequests.remove(request);
         callback.onResponseReceived(request, response);
       }
@@ -258,6 +260,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     });
     pendingRequests.add(request);
+
+  //  LogUtil.log("tx sent: " + payload);
     return request;
   }
 
@@ -299,7 +303,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (BuiltInServices.ServerBus.name().equals(subject) && subscriptions.containsKey(BuiltInServices.ServerBus.name()))
       return null;
 
-    if (!postInit && !stateSyncInProgress) {
+    if (initStarted && !postInit && !stateSyncInProgress) {
       final DeferredSubscription deferredSubscription = new DeferredSubscription();
 
       deferredSubscriptions.add(new Runnable() {
@@ -537,7 +541,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private boolean throttleOutgoing() {
-    return (System.currentTimeMillis() - lastTx) < 150;
+    return (System.currentTimeMillis() - lastTx) < 100;
   }
 
   /**
@@ -558,7 +562,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             if (!initialized) return;
             transmitRemote(BusTools.encodeMessages(toSendBuffer), new ArrayList<Message>(toSendBuffer));
           }
-        }.schedule(150);
+        }.schedule(100);
       }
     }
     else {
@@ -629,6 +633,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *     - Messages reference.
    */
   private void transmitRemote(final String message, final List<Message> txMessages) {
+    if ("[]".equals(message)) return;
+
     if (state == State.LOCAL_ONLY) {
       return;
     }
@@ -693,9 +699,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 callErrorHandler(txM, e);
               }
             }
-            finally {
-              lastTx = System.currentTimeMillis();
-            }
           }
 
           @Override
@@ -717,6 +720,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
     finally {
+      lastTx = System.currentTimeMillis();
       txActive = false;
     }
   }
@@ -762,6 +766,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void stop(final boolean sendDisconnect, final TransportError reason) {
+    LogUtil.log("stopping bus ...");
 
     // Ensure the polling callback does not reawaken the bus.
     // It could be sleeping now and about to start another poll request.
@@ -866,6 +871,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void init() {
+    initStarted = true;
+
+    directSubscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+      @Override
+      public void callback(final Message message) {
+        final String errorTo = message.get(String.class, MessageParts.ErrorTo);
+        if (errorTo == null) {
+          logError(message.get(String.class, MessageParts.ErrorMessage),
+              message.get(String.class, MessageParts.AdditionalDetails), null);
+        }
+        else {
+          message.toSubject(errorTo);
+          message.sendNowWith(ClientMessageBusImpl.this);
+        }
+      }
+    }, false);
+
+
     // if the bus is already initialized or is currently initializing
     if (state != State.LOCAL_ONLY) return;
 
@@ -960,6 +983,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               return;
             }
 
+
             final boolean _ver3 = ver3;
             new Timer() {
               @Override
@@ -968,20 +992,28 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 stateSyncInProgress = true;
 
-                for (final Runnable deferredSubscription : deferredSubscriptions) {
-                  deferredSubscription.run();
-                }
-
-
                 sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
 
                 remoteSubscribe(BuiltInServices.ServerBus.name());
+
+                boolean hasDeferred = !deferredSubscriptions.isEmpty();
+                for (final Runnable deferredSubscription : deferredSubscriptions) {
+                  deferredSubscription.run();
+                }
+                deferredSubscriptions.clear();
 
                 if (_ver3) {
                   processCapabilities(message);
 
                   for (String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
-                    remoteSubscribe( svc);
+                    remoteSubscribe(svc);
+                  }
+
+                  if (hasDeferred) {
+                    encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                        .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.RemoteSubscribe)
+                        .set(PriorityProcessing, "1")
+                        .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
                   }
                 }
                 else {
@@ -997,8 +1029,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                       .set(MessageParts.SubjectsList, subjects).set(PriorityProcessing, "1"));
 
                   encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                                  .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.FinishStateSync)
-                                  .set(PriorityProcessing, "1"));
+                      .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.FinishStateSync)
+                      .set(PriorityProcessing, "1"));
                 }
 
                 /**
@@ -1029,20 +1061,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   }
                 });
 
-                subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-                  @Override
-                  public void callback(final Message message) {
-                    final String errorTo = message.get(String.class, MessageParts.ErrorTo);
-                    if (errorTo == null) {
-                      logError(message.get(String.class, MessageParts.ErrorMessage),
-                          message.get(String.class, MessageParts.AdditionalDetails), null);
-                    }
-                    else {
-                      message.toSubject(errorTo);
-                      message.sendNowWith(ClientMessageBusImpl.this);
-                    }
-                  }
-                });
 
                 stateSyncInProgress = true;
 
@@ -1053,8 +1071,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   InitVotes.voteFor(ClientMessageBus.class);
                 }
 
-                setState(State.CONNECTED);
 
+                setState(State.CONNECTED);
                 // end of FinishStateSync Timer
               }
             }.schedule(5);
@@ -1207,10 +1225,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
       while (!postInitTasks.isEmpty());
 
+      setInitialized(true);
+
       sendAllDeferred();
       postInitTasks.clear();
-
-      setInitialized(true);
 
       LogUtil.log("bus federation complete. now operating normally.");
 
@@ -1363,6 +1381,21 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return transportError.stopDefaultErrorHandler;
   }
 
+  private String getAdvertisableSubjects() {
+    String subjects = "";
+    for (final String s : subscriptions.keySet()) {
+      if (s.startsWith("local:"))
+        continue;
+      if (!remotes.containsKey(s)) {
+        if (subjects.length() != 0) {
+          subjects += ",";
+        }
+        subjects += s;
+      }
+    }
+    return subjects;
+  }
+
   /**
    * Sends the initial message to connect to the queue, to establish an HTTP
    * session. Otherwise, concurrent requests will result in multiple sessions
@@ -1389,26 +1422,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       // ConnectToQueue. We should look at making the server message bus not require it.
       final Map<String, String> connectHeader = Collections.singletonMap("phase", "connection");
 
-      String subjects = "";
-      for (final String s : subscriptions.keySet()) {
-        if (s.startsWith("local:"))
-          continue;
-        if (!remotes.containsKey(s)) {
-          if (subjects.length() != 0) {
-            subjects += ",";
-          }
-          subjects += s;
-        }
+      for (final Runnable deferredSubscription : deferredSubscriptions) {
+        deferredSubscription.run();
       }
+      deferredSubscriptions.clear();
 
       final String handShake = BusTools.encodeMessage(CommandMessage.createWithParts(new HashMap<String, Object>())
           .command(BusCommands.Associate)
           .set(ToSubject, "ServerBus")
           .set(PriorityProcessing, "1")
-          .set(MessageParts.RemoteServices, subjects));
+          .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
 
       sendOutboundRequest(
-          handShake,
+          "[" + handShake + "]",
           connectHeader, new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {
@@ -1714,7 +1740,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(final String text) {
-    // LogUtil.log("RX:" + text);
     try {
       for (final MarshalledMessage m : decodePayload(text)) {
         rxNumber++;

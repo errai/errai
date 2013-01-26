@@ -249,6 +249,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   remoteSubscribe(session, queue, subject);
                 }
               }
+              else if (message.hasPart(MessageParts.RemoteServices)) {
+                for (final String subject : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+                  remoteSubscribe(session, queue, subject);
+                }
+              }
               else {
                 remoteSubscribe(session, messageQueues.get(session),
                     message.get(String.class, MessageParts.Subject));

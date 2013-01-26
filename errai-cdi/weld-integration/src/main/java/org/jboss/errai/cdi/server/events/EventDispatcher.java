@@ -171,9 +171,11 @@ public class EventDispatcher implements MessageCallback {
           break;
 
         case AttachRemote:
-          MessageBuilder.createConversation(message).toSubject(CDI.CLIENT_DISPATCHER_SUBJECT)
-              .command(BusCommands.RemoteSubscribe)
-              .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
+          if (observedEvents.size() > 0) {
+            MessageBuilder.createConversation(message).toSubject(CDI.CLIENT_DISPATCHER_SUBJECT)
+                .command(BusCommands.RemoteSubscribe)
+                .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
+          }
 
           localContext.setAttribute(CDI_EVENT_CHANNEL_OPEN, "1");
           break;

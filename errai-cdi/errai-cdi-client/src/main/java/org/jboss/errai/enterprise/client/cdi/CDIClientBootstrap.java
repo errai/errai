@@ -42,9 +42,9 @@ public class CDIClientBootstrap implements EntryPoint {
       public void run() {
         if (bus.isRemoteCommunicationEnabled()) {
           MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
-                  .command(CDICommands.AttachRemote)
-                  .done()
-                  .sendNowWith(bus);
+              .command(CDICommands.AttachRemote)
+              .done()
+              .sendNowWith(bus);
         }
         else {
           InitVotes.waitFor(CDI.class);
@@ -67,16 +67,7 @@ public class CDIClientBootstrap implements EntryPoint {
           switch (CDICommands.valueOf(message.getCommandType())) {
             case RemoteSubscribe:
               CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
-              bus.addPostInitTask(new Runnable() {
-                @Override
-                public void run() {
-                  CDI.activate();
-                }
 
-                public String toString() {
-                  return "CDI service activate";
-                }
-              });
               break;
             case CDIEvent:
               CDI.consumeEventFromMessage(message);
@@ -97,6 +88,17 @@ public class CDIClientBootstrap implements EntryPoint {
             bus.addPostInitTask(busReadyEvent);
           }
         });
+      }
+    });
+
+    bus.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        CDI.activate();
+      }
+
+      public String toString() {
+        return "CDI service activate";
       }
     });
   }
