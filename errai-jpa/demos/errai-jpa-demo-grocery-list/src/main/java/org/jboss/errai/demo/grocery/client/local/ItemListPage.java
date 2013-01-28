@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.demo.grocery.client.shared.Item;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 @Page
 public class ItemListPage extends Composite {
 
-  @Inject private IOCBeanManager bm;
+  @Inject private ClientBeanManager bm;
   @Inject private EntityManager em;
 
   @Inject private @DataField GroceryListWidget listWidget;

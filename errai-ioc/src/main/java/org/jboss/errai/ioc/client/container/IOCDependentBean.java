@@ -27,10 +27,10 @@ import java.util.HashSet;
  * @author Mike Brock
  */
 public class IOCDependentBean<T> extends AbstractIOCBean<T> {
-  protected final IOCBeanManager beanManager;
+  protected final SyncBeanManagerImpl beanManager;
   protected final BeanProvider<T> beanProvider;
 
-  protected IOCDependentBean(final IOCBeanManager beanManager,
+  protected IOCDependentBean(final SyncBeanManagerImpl beanManager,
                              final Class<T> type,
                              final Class<?> beanType,
                              final Annotation[] qualifiers,
@@ -53,7 +53,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     this.beanProvider = beanProvider;
   }
 
-  public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
+  public static <T> IOCBeanDef<T> newBean(final SyncBeanManagerImpl beanManager,
                                           final Class<T> type,
                                           final Class<?> beanType,
                                           final Annotation[] qualifiers,

@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithRenamedStateFields;
@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableMultimap;
 
 public class PageStateTest extends AbstractErraiCDITest {
 
-  private IOCBeanManager beanManager = IOC.getBeanManager();
+  private SyncBeanManager beanManager = IOC.getBeanManager();
   private Navigation navigation;
 
   @Override

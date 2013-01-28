@@ -2,12 +2,12 @@ package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithTransitionAnchor;
 
 public class TransitionAnchorTest extends AbstractErraiCDITest {
 
-  private IOCBeanManager beanManager = null;
+  private SyncBeanManager beanManager = null;
 
   @Override
   public String getModuleName() {

@@ -5,4 +5,5 @@ package org.jboss.errai.ioc.client.container;
  */
 public interface IOCEnvironment {
   public boolean isAsync();
+  ClientBeanManager getNewBeanManager();
 }

@@ -17,21 +17,19 @@
 package org.jboss.errai.ioc.client;
 
 import org.jboss.errai.ioc.client.container.BeanProvider;
-import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
-import java.util.Iterator;
 
 public class SimpleInjectionContext implements BootstrapInjectionContext {
   public static final Object LAZY_INIT_REF = new Object();
 
-  private final IOCBeanManager manager;
+  private final SyncBeanManager manager;
   private final SimpleCreationalContext rootContext;
 
   public SimpleInjectionContext() {

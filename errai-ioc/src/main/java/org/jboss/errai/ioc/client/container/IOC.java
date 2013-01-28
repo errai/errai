@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client.container;
 
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerImpl;
 
 /**
  * A simple utility class which provides a static reference in the client to the bean manager.
@@ -26,9 +27,7 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
  */
 public final class IOC {
   private static final IOC inst = new IOC();
-
-  private final IOCBeanManager beanManager;
-  private final AsyncBeanManager asyncBeanManager;
+  private final ClientBeanManager beanManager;
 
   private IOC() {
     IOCEnvironment iocEnvironment;
@@ -42,17 +41,20 @@ public final class IOC {
         public boolean isAsync() {
           return false;
         }
+
+        @Override
+        public ClientBeanManager getNewBeanManager() {
+          if (!GWT.isClient()) {
+           return new SyncBeanManagerImpl();
+          }
+          else {
+            return null;
+          }
+        }
       };
     }
 
-    if (iocEnvironment.isAsync()) {
-      asyncBeanManager = new AsyncBeanManager();
-      beanManager = null;
-    }
-    else {
-      beanManager = new IOCBeanManager();
-      asyncBeanManager = null;
-    }
+    beanManager = iocEnvironment.getNewBeanManager();
   }
 
   /**
@@ -60,22 +62,22 @@ public final class IOC {
    *
    * @return the singleton instance of the client bean manager.
    *
-   * @see IOCBeanManager
+   * @see SyncBeanManagerImpl
    */
-  public static IOCBeanManager getBeanManager() {
-    if (inst.beanManager == null) {
+  public static SyncBeanManager getBeanManager() {
+    if (inst.beanManager instanceof AsyncBeanManager) {
       throw new RuntimeException("the bean manager has been initialized in async mode. " +
           "You must use getAsyncBeanManager()");
     }
-    return inst.beanManager;
+    return (SyncBeanManagerImpl) inst.beanManager;
   }
 
   public static AsyncBeanManager getAsyncBeanManager() {
-    if (inst.asyncBeanManager == null) {
+    if (inst.beanManager instanceof SyncBeanManager) {
       throw new RuntimeException("the bean manager has been initialized in synchronous mode. " +
           "You must use getBeanManager()");
     }
 
-    return inst.asyncBeanManager;
+    return (AsyncBeanManager) inst.beanManager;
   }
 }

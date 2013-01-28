@@ -67,7 +67,7 @@ public class AsyncBeanQuery {
    * Requests that the specified bean of the specified {@param type} is loaded.
    *
    * @param type
-   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManagerImpl#lookupBean(Class, java.lang.annotation.Annotation...)}
    * @param <T>
    *     the type of bean to be loaded.
    *
@@ -81,7 +81,7 @@ public class AsyncBeanQuery {
    * Requests that the specified bean of the specified {@param type} and {@param qualifiers} is loaded.
    *
    * @param type
-   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManagerImpl#lookupBean(Class, java.lang.annotation.Annotation...)}
    * @param qualifiers
    *     the qualifiers for the bean to be loaded.
    * @param <T>
@@ -111,7 +111,7 @@ public class AsyncBeanQuery {
    * Requests that a new instance specified bean of the specified {@param type} is loaded.
    *
    * @param type
-   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManagerImpl#lookupBean(Class, java.lang.annotation.Annotation...)}
    * @param <T>
    *     the type of bean to be loaded.
    *
@@ -125,7 +125,7 @@ public class AsyncBeanQuery {
    * Requests that a new instance of  specified bean of the specified {@param type} and {@param qualifiers} is loaded.
    *
    * @param type
-   *     the type of the bean to be loaded. See: {@link AsyncBeanManager#lookupBean(Class, java.lang.annotation.Annotation...)}
+   *     the type of the bean to be loaded. See: {@link AsyncBeanManagerImpl#lookupBean(Class, java.lang.annotation.Annotation...)}
    * @param qualifiers
    *     the qualifiers for the bean to be loaded.
    * @param <T>

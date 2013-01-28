@@ -25,6 +25,16 @@ public class IOCBeanManagerLifecycle {
         public boolean isAsync() {
           return false;
         }
+
+        @Override
+        public ClientBeanManager getNewBeanManager() {
+          if (!GWT.isClient()) {
+            return new SyncBeanManagerImpl();
+          }
+          else {
+            return null;
+          }
+        }
       };
     }
 

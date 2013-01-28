@@ -15,7 +15,7 @@ import org.jboss.errai.cdi.demo.mvp.client.presenter.ContactsPresenter;
 import org.jboss.errai.cdi.demo.mvp.client.presenter.EditContactPresenter;
 import org.jboss.errai.cdi.demo.mvp.client.presenter.Presenter;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 @ApplicationScoped
 public class AppController implements Presenter, ValueChangeHandler<String> {
   @Inject
-  private IOCBeanManager manager;
+  private SyncBeanManager manager;
 
   @Inject
   private HandlerManager eventBus;

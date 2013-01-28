@@ -27,7 +27,7 @@ import java.lang.annotation.Annotation;
 public class IOCSingletonBean<T> extends IOCDependentBean<T> {
   private final T instance;
 
-  private IOCSingletonBean(final IOCBeanManager beanManager,
+  private IOCSingletonBean(final SyncBeanManagerImpl beanManager,
                            final Class<T> type,
                            final Class<?> beanType,
                            final Annotation[] qualifiers,
@@ -56,7 +56,7 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
    *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
-  public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
+  public static <T> IOCBeanDef<T> newBean(final SyncBeanManagerImpl beanManager,
                                           final Class<T> type,
                                           final Class<?> beanType,
                                           final Annotation[] qualifiers,

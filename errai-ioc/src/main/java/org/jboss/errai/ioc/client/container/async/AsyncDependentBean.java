@@ -9,10 +9,10 @@ import java.util.HashSet;
  * @author Mike Brock
  */
 public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
-  protected final AsyncBeanManager beanManager;
+  protected final AsyncBeanManagerImpl beanManager;
   protected final AsyncBeanProvider<T> beanProvider;
 
-  protected AsyncDependentBean(final AsyncBeanManager beanManager,
+  protected AsyncDependentBean(final AsyncBeanManagerImpl beanManager,
                                final Class<T> type,
                                final Class<?> beanType,
                                final Annotation[] qualifiers,
@@ -35,7 +35,7 @@ public class AsyncDependentBean<T> extends AbstractAsyncBean<T> {
     this.beanProvider = beanProvider;
   }
 
-  public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManager beanManager,
+  public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManagerImpl beanManager,
                                             final Class<T> type,
                                             final Class<?> beanType,
                                             final Annotation[] qualifiers,

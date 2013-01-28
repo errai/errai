@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.container.async;
-
-import org.jboss.errai.ioc.client.container.ClientBeanManager;
+package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -24,39 +22,39 @@ import java.util.Collection;
 /**
  * @author Mike Brock
  */
-public interface AsyncBeanManager extends ClientBeanManager {
+public interface SyncBeanManager extends ClientBeanManager {
   void addBean(Class<Object> type,
                Class<?> beanType,
-               AsyncBeanProvider<Object> callback,
+               BeanProvider<Object> callback,
                Object instance,
                Annotation[] qualifiers);
 
   void addBean(Class<Object> type,
                Class<?> beanType,
-               AsyncBeanProvider<Object> callback,
+               BeanProvider<Object> callback,
                Object instance,
                Annotation[] qualifiers,
                String name);
 
   void addBean(Class<Object> type,
                Class<?> beanType,
-               AsyncBeanProvider<Object> callback,
+               BeanProvider<Object> callback,
                Object instance,
                Annotation[] qualifiers,
                String name,
                boolean concreteType);
 
-  <T> AsyncBeanDef<T> registerBean(AsyncBeanDef<T> bean);
+  <T> IOCBeanDef<T> registerBean(IOCBeanDef<T> bean);
 
-  Collection<AsyncBeanDef> lookupBeans(String name);
-
-  @SuppressWarnings("unchecked")
-  <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type);
+  Collection<IOCBeanDef> lookupBeans(String name);
 
   @SuppressWarnings("unchecked")
-  <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers);
+  <T> Collection<IOCBeanDef<T>> lookupBeans(Class<T> type);
 
   @SuppressWarnings("unchecked")
-  <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers);
+  <T> Collection<IOCBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers);
+
+  @SuppressWarnings("unchecked")
+  <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers);
 
 }

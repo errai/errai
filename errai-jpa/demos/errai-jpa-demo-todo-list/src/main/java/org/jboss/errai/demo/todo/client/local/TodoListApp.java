@@ -8,7 +8,7 @@ import javax.persistence.TypedQuery;
 
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.TextBox;
 public class TodoListApp extends Composite {
 
   @Inject EntityManager em;
-  @Inject IOCBeanManager bm;
+  @Inject ClientBeanManager bm;
 
   @Inject @DataField TextBox newItemBox;
   @Inject @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;

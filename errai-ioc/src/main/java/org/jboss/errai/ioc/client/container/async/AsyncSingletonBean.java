@@ -9,7 +9,7 @@ import java.lang.annotation.Annotation;
 public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
   private final T instance;
 
-  private AsyncSingletonBean(final AsyncBeanManager beanManager,
+  private AsyncSingletonBean(final AsyncBeanManagerImpl beanManager,
                            final Class<T> type,
                            final Class<?> beanType,
                            final Annotation[] qualifiers,
@@ -38,7 +38,7 @@ public class AsyncSingletonBean<T> extends AsyncDependentBean<T> {
    *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
-  public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManager beanManager,
+  public static <T> AsyncBeanDef<T> newBean(final AsyncBeanManagerImpl beanManager,
                                           final Class<T> type,
                                           final Class<?> beanType,
                                           final Annotation[] qualifiers,

@@ -22,7 +22,7 @@ import java.util.List;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -45,7 +45,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite {
 
-  private final IOCBeanManager bm = IOC.getBeanManager();
+  private final SyncBeanManager bm = IOC.getBeanManager();
 
   private final ComplexPanel panel;
 

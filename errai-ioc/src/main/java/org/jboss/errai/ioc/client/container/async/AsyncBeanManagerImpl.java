@@ -1,22 +1,9 @@
-/*
- * Copyright 2011 JBoss, by Red Hat, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package org.jboss.errai.ioc.client.container.async;
 
-package org.jboss.errai.ioc.client.container;
-
-import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
+import org.jboss.errai.ioc.client.container.IOCResolutionException;
+import org.jboss.errai.ioc.client.container.IOCSingletonBean;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -31,27 +18,23 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A simple bean manager provided by the Errai IOC framework. The manager provides access to all of the wired beans
- * and their instances. Since the actual wiring code is generated, the bean manager is populated by the generated
- * code at bootstrap time.
- *
  * @author Mike Brock
  */
-public class IOCBeanManager {
+public class AsyncBeanManagerImpl implements AsyncBeanManager {
   /**
    * A map of all named beans.
    */
-  private final Map<String, List<IOCBeanDef>> namedBeans
-      = new HashMap<String, List<IOCBeanDef>>();
+  private final Map<String, List<AsyncBeanDef>> namedBeans
+      = new HashMap<String, List<AsyncBeanDef>>();
 
   /**
    * A map of all beans managed by the bean mean manager, keyed by type.
    */
-  private final Map<Class<?>, List<IOCBeanDef>> beanMap
-      = new HashMap<Class<?>, List<IOCBeanDef>>();
+  private final Map<Class<?>, List<AsyncBeanDef>> beanMap
+      = new HashMap<Class<?>, List<AsyncBeanDef>>();
 
   /**
-   * A map which contains bean instances as keys, and their associated {@link CreationalContext}s as values.
+   * A map which contains bean instances as keys, and their associated {@link org.jboss.errai.ioc.client.container.CreationalContext}s as values.
    */
   private final Map<Object, CreationalContext> creationalContextMap
       = new IdentityHashMap<Object, CreationalContext>();
@@ -69,36 +52,36 @@ public class IOCBeanManager {
   private final Set<String> concreteBeans
       = new HashSet<String>();
 
-  public IOCBeanManager() {
+  public AsyncBeanManagerImpl() {
     // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose of
     // lookups. This modifies the lookup behavior to exclude other non-concrete types from qualified matching.
     concreteBeans.add("java.lang.Object");
   }
 
-  private IOCBeanDef<Object> _registerSingletonBean(final Class<Object> type,
-                                                    final Class<?> beanType,
-                                                    final BeanProvider<Object> callback,
-                                                    final Object instance,
-                                                    final Annotation[] qualifiers,
-                                                    final String name,
-                                                    final boolean concrete) {
+  private AsyncBeanDef<Object> _registerSingletonBean(final Class<Object> type,
+                                                      final Class<?> beanType,
+                                                      final AsyncBeanProvider<Object> callback,
+                                                      final Object instance,
+                                                      final Annotation[] qualifiers,
+                                                      final String name,
+                                                      final boolean concrete) {
 
-    return registerBean(IOCSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, instance));
+    return registerBean(AsyncSingletonBean.newBean(this, type, beanType, qualifiers, name, concrete, callback, instance));
   }
 
-  private IOCBeanDef<Object> _registerDependentBean(final Class<Object> type,
-                                                    final Class<?> beanType,
-                                                    final BeanProvider<Object> callback,
-                                                    final Annotation[] qualifiers,
-                                                    final String name,
-                                                    final boolean concrete) {
+  private AsyncBeanDef<Object> _registerDependentBean(final Class<Object> type,
+                                                      final Class<?> beanType,
+                                                      final AsyncBeanProvider<Object> callback,
+                                                      final Annotation[] qualifiers,
+                                                      final String name,
+                                                      final boolean concrete) {
 
-    return registerBean(IOCDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback));
+    return registerBean(AsyncDependentBean.newBean(this, type, beanType, qualifiers, name, concrete, callback));
   }
 
   private void registerSingletonBean(final Class<Object> type,
                                      final Class<?> beanType,
-                                     final BeanProvider<Object> callback,
+                                     final AsyncBeanProvider<Object> callback,
                                      final Object instance,
                                      final Annotation[] qualifiers,
                                      final String beanName,
@@ -110,7 +93,7 @@ public class IOCBeanManager {
 
   private void registerDependentBean(final Class<Object> type,
                                      final Class<?> beanType,
-                                     final BeanProvider<Object> callback,
+                                     final AsyncBeanProvider<Object> callback,
                                      final Annotation[] qualifiers,
                                      final String beanName,
                                      final boolean concrete) {
@@ -119,9 +102,11 @@ public class IOCBeanManager {
   }
 
   private void _registerNamedBean(final String name,
-                                  final IOCBeanDef beanDef) {
+                                  final AsyncBeanDef beanDef) {
+    if (name == null) return;
+
     if (!namedBeans.containsKey(name)) {
-      namedBeans.put(name, new ArrayList<IOCBeanDef>());
+      namedBeans.put(name, new ArrayList<AsyncBeanDef>());
     }
     namedBeans.get(name).add(beanDef);
   }
@@ -142,14 +127,16 @@ public class IOCBeanManager {
    * @param qualifiers
    *     any qualifiers
    */
+  @Override
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final BeanProvider<Object> callback,
+                      final AsyncBeanProvider<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers) {
 
-    addBean(type, beanType, callback, instance, qualifiers, null, true);
+    addBean(type, beanType, callback, instance, qualifiers, null, beanType.equals(type));
   }
+
 
   /**
    * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
@@ -169,15 +156,17 @@ public class IOCBeanManager {
    * @param name
    *     the name of the bean
    */
+  @Override
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final BeanProvider<Object> callback,
+                      final AsyncBeanProvider<Object> callback,
                       final Object instance,
                       final Annotation[] qualifiers,
                       final String name) {
 
     addBean(type, beanType, callback, instance, qualifiers, name, true);
   }
+
 
   /**
    * Register a bean with the manager with a name as well as specifying whether the bean should be treated a concrete
@@ -200,17 +189,14 @@ public class IOCBeanManager {
    * @param concreteType
    *     true if bean should be treated as concrete (ie. not an interface or abstract type).
    */
+  @Override
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
-                      final BeanProvider<Object> callback,
-                      Object instance,
+                      final AsyncBeanProvider<Object> callback,
+                      final Object instance,
                       final Annotation[] qualifiers,
                       final String name,
                       final boolean concreteType) {
-
-    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
-      throw new RuntimeException("you cannot record a lazy initialization reference!");
-    }
 
     if (concreteType) {
       concreteBeans.add(type.getName());
@@ -224,6 +210,7 @@ public class IOCBeanManager {
     }
   }
 
+
   /**
    * Destroy a bean and all other beans associated with its creational context in the bean manager.
    *
@@ -232,8 +219,8 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
-    final SimpleCreationalContext creationalContext =
-        (SimpleCreationalContext) creationalContextMap.get(getActualBeanReference(ref));
+    final AsyncCreationalContext creationalContext =
+        (AsyncCreationalContext) creationalContextMap.get(getActualBeanReference(ref));
 
     if (creationalContext == null) {
       return;
@@ -303,7 +290,7 @@ public class IOCBeanManager {
    * @param realRef
    *     the reference to the bean being proxied.
    */
-  void addProxyReference(final Object proxyRef, final Object realRef) {
+  public void addProxyReference(final Object proxyRef, final Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
@@ -315,7 +302,7 @@ public class IOCBeanManager {
    * @param creationalContext
    *     the {@link CreationalContext} instance to associate the bean instance with.
    */
-  void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
+  public void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
     creationalContextMap.put(ref, creationalContext);
   }
 
@@ -325,10 +312,12 @@ public class IOCBeanManager {
    * @param bean
    *     an {@link IOCSingletonBean} reference
    */
-  public <T> IOCBeanDef<T> registerBean(final IOCBeanDef<T> bean) {
+  @Override
+  public <T> AsyncBeanDef<T> registerBean(final AsyncBeanDef<T> bean) {
     if (!beanMap.containsKey(bean.getType())) {
-      beanMap.put(bean.getType(), new ArrayList<IOCBeanDef>());
+      beanMap.put(bean.getType(), new ArrayList<AsyncBeanDef>());
     }
+
     beanMap.get(bean.getType()).add(bean);
     return bean;
   }
@@ -341,7 +330,8 @@ public class IOCBeanManager {
    *
    * @return and unmodifiable list of all beans with the specified name.
    */
-  public Collection<IOCBeanDef> lookupBeans(final String name) {
+  @Override
+  public Collection<AsyncBeanDef> lookupBeans(final String name) {
     if (!namedBeans.containsKey(name)) {
       return Collections.emptyList();
     }
@@ -359,13 +349,14 @@ public class IOCBeanManager {
    * @return An unmodifiable list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type) {
-    final List<IOCBeanDef> beanList;
+  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type) {
+    final List<AsyncBeanDef> beanList;
 
     if (type.getName().equals("java.lang.Object")) {
-      beanList = new ArrayList<IOCBeanDef>();
-      for (final List<IOCBeanDef> list : beanMap.values()) {
+      beanList = new ArrayList<AsyncBeanDef>();
+      for (final List<AsyncBeanDef> list : beanMap.values()) {
         beanList.addAll(list);
       }
     }
@@ -373,10 +364,10 @@ public class IOCBeanManager {
       beanList = beanMap.get(type);
     }
 
-    final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
+    final List<AsyncBeanDef<T>> matching = new ArrayList<AsyncBeanDef<T>>();
 
     if (beanList != null) {
-      for (final IOCBeanDef<T> beanDef : beanList) {
+      for (final AsyncBeanDef<T> beanDef : beanList) {
         matching.add(beanDef);
       }
     }
@@ -396,13 +387,14 @@ public class IOCBeanManager {
    * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
    *         if no beans match.
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
-    final List<IOCBeanDef> beanList;
+  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
+    final List<AsyncBeanDef> beanList;
 
     if (type.getName().equals("java.lang.Object")) {
-      beanList = new ArrayList<IOCBeanDef>();
-      for (final List<IOCBeanDef> list : beanMap.values()) {
+      beanList = new ArrayList<AsyncBeanDef>();
+      for (final List<AsyncBeanDef> list : beanMap.values()) {
         beanList.addAll(list);
       }
     }
@@ -414,15 +406,15 @@ public class IOCBeanManager {
       return Collections.emptyList();
     }
     else if (beanList.size() == 1) {
-      return Collections.singletonList((IOCBeanDef<T>) beanList.iterator().next());
+      return Collections.singletonList((AsyncBeanDef<T>) beanList.iterator().next());
     }
 
-    final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
+    final List<AsyncBeanDef<T>> matching = new ArrayList<AsyncBeanDef<T>>();
 
     final Set<Annotation> qualifierSet = new HashSet<Annotation>(qualifiers.length * 2);
     Collections.addAll(qualifierSet, qualifiers);
 
-    for (final IOCBeanDef iocBean : beanList) {
+    for (final AsyncBeanDef iocBean : beanList) {
       if (iocBean.matches(qualifierSet)) {
         matching.add(iocBean);
       }
@@ -434,7 +426,7 @@ public class IOCBeanManager {
 
     if (matching.size() > 1) {
       // perform second pass
-      final Iterator<IOCBeanDef<T>> secondIterator = matching.iterator();
+      final Iterator<AsyncBeanDef<T>> secondIterator = matching.iterator();
 
       if (concreteBeans.contains(type.getName())) {
         while (secondIterator.hasNext()) {
@@ -465,12 +457,13 @@ public class IOCBeanManager {
    *     The type of the bean
    *
    * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers.
-   *         Throws an {@link IOCResolutionException} if there is a matching type but none of the
+   *         Throws an {@link org.jboss.errai.ioc.client.container.IOCResolutionException} if there is a matching type but none of the
    *         qualifiers match or if more than one bean  matches.
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
-    final Collection<IOCBeanDef<T>> matching = lookupBeans(type, qualifiers);
+  public <T> AsyncBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
+    final Collection<AsyncBeanDef<T>> matching = lookupBeans(type, qualifiers);
 
     if (matching.size() == 1) {
       return matching.iterator().next();
@@ -483,8 +476,9 @@ public class IOCBeanManager {
     }
   }
 
+
   /**
-   * Associates a {@link DestructionCallback} with a bean instance. If the bean manager cannot find a valid
+   * Associates a {@link org.jboss.errai.ioc.client.container.DestructionCallback} with a bean instance. If the bean manager cannot find a valid
    * {@link CreationalContext} to associate with the bean, or the bean is no longer considered active, the method
    * returns <tt>false</tt>. Otherwise, the method returns <tt>true</tt>, indicating the callback is now registered
    * and will be called when the bean is destroyed.
@@ -492,9 +486,9 @@ public class IOCBeanManager {
    * @param beanInstance
    *     the bean instance to associate the callback to.
    * @param destructionCallback
-   *     the instance of the {@link DestructionCallback}.
+   *     the instance of the {@link org.jboss.errai.ioc.client.container.DestructionCallback}.
    *
-   * @return <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
+   * @return <tt>true</tt> if the {@link org.jboss.errai.ioc.client.container.DestructionCallback} is successfully registered against a valid
    *         {@link CreationalContext} and <tt>false</tt> if not.
    */
   public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
@@ -507,7 +501,7 @@ public class IOCBeanManager {
     return true;
   }
 
-  void destroyAllBeans() {
+  public void destroyAllBeans() {
     namedBeans.clear();
     beanMap.clear();
   }

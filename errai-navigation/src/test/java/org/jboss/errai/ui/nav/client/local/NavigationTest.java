@@ -2,7 +2,7 @@ package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
@@ -14,7 +14,7 @@ import com.google.gwt.user.client.Window;
 
 public class NavigationTest extends AbstractErraiCDITest {
 
-  private IOCBeanManager beanManager;
+  private SyncBeanManager beanManager;
   private Navigation navigation;
   private NavigationGraph navGraph;
 

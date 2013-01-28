@@ -19,7 +19,7 @@ import org.jboss.errai.cdi.producer.client.Thung;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 
 import java.util.List;
 
@@ -145,7 +145,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testProducersObserveSingletonScope() {
-    final IOCBeanManager beanManager = IOC.getBeanManager();
+    final SyncBeanManager beanManager = IOC.getBeanManager();
 
     final IOCBeanDef<Kayak> kayakBean = beanManager.lookupBean(Kayak.class);
     assertNotNull(kayakBean);

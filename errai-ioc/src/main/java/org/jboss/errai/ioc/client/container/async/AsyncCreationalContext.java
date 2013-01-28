@@ -1,6 +1,5 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.codegen.builder.ClassMethodBuilder;
 import org.jboss.errai.ioc.client.container.AbstractCreationalContext;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.IOC;

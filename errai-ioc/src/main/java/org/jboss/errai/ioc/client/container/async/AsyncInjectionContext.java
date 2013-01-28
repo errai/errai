@@ -1,15 +1,10 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.container.IOC;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock

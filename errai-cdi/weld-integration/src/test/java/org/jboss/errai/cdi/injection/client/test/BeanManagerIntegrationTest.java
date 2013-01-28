@@ -31,7 +31,7 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -135,7 +135,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerAPIs() {
-    final IOCBeanManager mgr = IOC.getBeanManager();
+    final SyncBeanManager mgr = IOC.getBeanManager();
     final IOCBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class);
 
     final Set<Annotation> a = bean.getQualifiers();

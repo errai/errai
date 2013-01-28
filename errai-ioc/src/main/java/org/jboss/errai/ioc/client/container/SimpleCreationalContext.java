@@ -31,20 +31,20 @@ import java.util.Map;
  * A SimpleCreationalContext captures {@link InitializationCallback}s and {@link DestructionCallback}s associated with
  * the graph being constructed.
  * <p/>
- * This class is relied upon by the {@link IOCBeanManager} itself and should not generally be used directly.
+ * This class is relied upon by the {@link SyncBeanManagerImpl} itself and should not generally be used directly.
  *
  * @author Mike Brock
  */
 public class SimpleCreationalContext extends AbstractCreationalContext {
 
-  private final IOCBeanManager beanManager;
+  private final SyncBeanManager beanManager;
 
-  public SimpleCreationalContext(final IOCBeanManager beanManager, final Class<? extends Annotation> scopeName) {
+  public SimpleCreationalContext(final SyncBeanManagerImpl beanManager, final Class<? extends Annotation> scopeName) {
     super(scopeName);
     this.beanManager = beanManager;
   }
 
-  public SimpleCreationalContext(final boolean immutableContext, final IOCBeanManager beanManager,
+  public SimpleCreationalContext(final boolean immutableContext, final SyncBeanManager beanManager,
                                  final Class<? extends Annotation> scope) {
     super(immutableContext, scope);
     this.beanManager = beanManager;

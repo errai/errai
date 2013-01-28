@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client.api.builtin;
 
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -30,9 +31,9 @@ import javax.inject.Singleton;
 @IOCProvider
 @Singleton
 @EnabledByProperty(value = "errai.ioc.async_bean_manager")
-public class AsyncBeanManagerProvider implements Provider<AsyncBeanManager> {
+public class AsyncBeanManagerProvider implements Provider<ClientBeanManager> {
   @Override
-  public AsyncBeanManager get() {
+  public ClientBeanManager get() {
     return IOC.getAsyncBeanManager();
   }
 }

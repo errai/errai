@@ -18,7 +18,7 @@ package org.jboss.errai.cdi.injection.client.mvp;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasWidgets;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -29,7 +29,7 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class AppController {
   @Inject
-  private IOCBeanManager manager;
+  private ClientBeanManager manager;
 
   @Inject
   private HandlerManager eventBus;
@@ -45,7 +45,7 @@ public class AppController {
     this.container = container;
   }
 
-  public IOCBeanManager getManager() throws Exception {
+  public ClientBeanManager getManager() throws Exception {
     return manager;
   }
 

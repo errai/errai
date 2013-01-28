@@ -2,7 +2,7 @@ package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ui.nav.client.local.testpages.PageA;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithInheritedLifecycleMethods;
@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableMultimap;
 
 public class PageLifecycleTest extends AbstractErraiCDITest {
 
-  private IOCBeanManager beanManager = IOC.getBeanManager();
+  private SyncBeanManager beanManager = IOC.getBeanManager();
   private Navigation navigation;
 
   @Override
