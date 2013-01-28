@@ -20,21 +20,88 @@ package org.jboss.errai.ioc.client.container;
  * @author Mike Brock
  */
 public interface ClientBeanManager {
-
-  @SuppressWarnings("unchecked")
+  /**
+   * Destroy a bean and all other beans associated with its creational context in the bean manager.
+   *
+   * @param ref
+   *     the instance reference of the bean
+   */
   void destroyBean(Object ref);
 
+  /**
+   * Indicates whether the referenced object is currently a managed bean.
+   *
+   * @param ref
+   *     the reference to the bean
+   *
+   * @return returns true if under management
+   */
   boolean isManaged(Object ref);
 
+  /**
+   * Obtains an instance to the <em>actual</em> bean. If the specified reference is a proxy, this method will
+   * return an un-proxied reference to the object.
+   *
+   * @param ref
+   *     the proxied or unproxied reference
+   *
+   * @return returns the absolute reference to bean if the specified reference is a proxy. If the specified reference
+   *         is not a proxy, the same instance passed to the method is returned.
+   *
+   * @see #isProxyReference(Object)
+   */
   Object getActualBeanReference(Object ref);
 
+  /**
+   * Associates the reference to a proxied bean to the underlying bean instance which it is proxying.
+   *
+   * @param proxyRef
+   *     the reference to the proxy
+   * @param realRef
+   *     the reference to the bean being proxied.
+   */
   void addProxyReference(final Object proxyRef, final Object realRef);
 
+  /**
+   * Determines whether the referenced object is itself a proxy to a managed bean.
+   *
+   * @param ref
+   *     the reference to check
+   *
+   * @return returns true if the specified reference is itself a proxy.
+   *
+   * @see #getActualBeanReference(Object)
+   */
   boolean isProxyReference(Object ref);
 
+  /**
+   * Associates a {@link DestructionCallback} with a bean instance. If the bean manager cannot find a valid
+   * {@link CreationalContext} to associate with the bean, or the bean is no longer considered active, the method
+   * returns <tt>false</tt>. Otherwise, the method returns <tt>true</tt>, indicating the callback is now registered
+   * and will be called when the bean is destroyed.
+   *
+   * @param beanInstance
+   *     the bean instance to associate the callback to.
+   * @param destructionCallback
+   *     the instance of the {@link DestructionCallback}.
+   *
+   * @return <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
+   *         {@link CreationalContext} and <tt>false</tt> if not.
+   */
   boolean addDestructionCallback(Object beanInstance, DestructionCallback<?> destructionCallback);
 
+  /**
+   * Associates a bean instance with a creational context.
+   *
+   * @param ref
+   *     the reference to the bean
+   * @param creationalContext
+   *     the {@link CreationalContext} instance to associate the bean instance with.
+   */
   void addBeanToContext(final Object ref, final CreationalContext creationalContext);
 
+  /**
+   * Destroy all beans currently managed by the bean manager. Don't do this.
+   */
   void destroyAllBeans();
 }

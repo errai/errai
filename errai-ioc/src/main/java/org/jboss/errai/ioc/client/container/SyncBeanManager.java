@@ -23,12 +23,46 @@ import java.util.Collection;
  * @author Mike Brock
  */
 public interface SyncBeanManager extends ClientBeanManager {
+  /**
+   * Register a bean with the manager. This is usually called by the generated code to advertise the bean. Adding
+   * beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
+   * the wiring scenario of auto-discovered beans at runtime.
+   *
+   * @param type
+   *     the bean type
+   * @param beanType
+   *     the actual type of the bean
+   * @param callback
+   *     the creational callback used to construct the bean
+   * @param instance
+   *     the instance reference
+   * @param qualifiers
+   *     any qualifiers
+   */
   void addBean(Class<Object> type,
                Class<?> beanType,
                BeanProvider<Object> callback,
                Object instance,
                Annotation[] qualifiers);
 
+  /**
+   * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
+   * Adding beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
+   * the wiring scenario of auto-discovered beans at runtime.
+   *
+   * @param type
+   *     the bean type
+   * @param beanType
+   *     the actual type of the bean
+   * @param callback
+   *     the creational callback used to construct the bean
+   * @param instance
+   *     the instance reference
+   * @param qualifiers
+   *     any qualifiers
+   * @param name
+   *     the name of the bean
+   */
   void addBean(Class<Object> type,
                Class<?> beanType,
                BeanProvider<Object> callback,
@@ -36,6 +70,27 @@ public interface SyncBeanManager extends ClientBeanManager {
                Annotation[] qualifiers,
                String name);
 
+  /**
+   * Register a bean with the manager with a name as well as specifying whether the bean should be treated a concrete
+   * type. This is usually called by the generated code to advertise the bean. Adding beans at runtime will make beans
+   * available for lookup through the BeanManager, but will not in any way alter the wiring scenario of auto-discovered
+   * beans at runtime.
+   *
+   * @param type
+   *     the bean type
+   * @param beanType
+   *     the actual type of the bean
+   * @param callback
+   *     the creational callback used to construct the bean
+   * @param instance
+   *     the instance reference
+   * @param qualifiers
+   *     any qualifiers
+   * @param name
+   *     the name of the bean
+   * @param concreteType
+   *     true if bean should be treated as concrete (ie. not an interface or abstract type).
+   */
   void addBean(Class<Object> type,
                Class<?> beanType,
                BeanProvider<Object> callback,
@@ -44,17 +99,63 @@ public interface SyncBeanManager extends ClientBeanManager {
                String name,
                boolean concreteType);
 
+  /**
+   * Register a bean with the manager.
+   *
+   * @param bean
+   *     an {@link IOCSingletonBean} reference
+   */
   <T> IOCBeanDef<T> registerBean(IOCBeanDef<T> bean);
 
+  /**
+   * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
+   *
+   * @param name
+   *     the name of bean to lookup
+   *
+   * @return and unmodifiable list of all beans with the specified name.
+   */
   Collection<IOCBeanDef> lookupBeans(String name);
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Looks up all beans of the specified type.
+   *
+   * @param type
+   *     The type of the bean
+   *
+   * @return An unmodifiable list of all the beans that match the specified type. Returns an empty list if there is
+   *         no matching type.
+   */
   <T> Collection<IOCBeanDef<T>> lookupBeans(Class<T> type);
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
+   * with the specified
+   *
+   * @param type
+   *     The type of the bean
+   * @param qualifiers
+   *     qualifiers to match
+   *
+   * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
+   *         if no beans match.
+   */
   <T> Collection<IOCBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers);
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
+   * with the specified
+   *
+   * @param type
+   *     The type of the bean
+   * @param qualifiers
+   *     qualifiers to match
+   * @param <T>
+   *     The type of the bean
+   *
+   * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers.
+   *         Throws an {@link IOCResolutionException} if there is a matching type but none of the
+   *         qualifiers match or if more than one bean  matches.
+   */
   <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers);
-
 }

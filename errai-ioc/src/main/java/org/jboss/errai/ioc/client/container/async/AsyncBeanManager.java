@@ -46,17 +46,63 @@ public interface AsyncBeanManager extends ClientBeanManager {
                String name,
                boolean concreteType);
 
+  /**
+   * Register a bean with the manager.
+   *
+   * @param bean
+   *     an {@link AsyncBeanDef} reference
+   */
   <T> AsyncBeanDef<T> registerBean(AsyncBeanDef<T> bean);
 
+  /**
+   * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
+   *
+   * @param name
+   *     the name of bean to lookup
+   *
+   * @return and unmodifiable list of all beans with the specified name.
+   */
   Collection<AsyncBeanDef> lookupBeans(String name);
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Looks up all beans of the specified type.
+   *
+   * @param type
+   *     The type of the bean
+   *
+   * @return An unmodifiable list of all the beans that match the specified type. Returns an empty list if there is
+   *         no matching type.
+   */
   <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type);
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
+   * with the specified
+   *
+   * @param type
+   *     The type of the bean
+   * @param qualifiers
+   *     qualifiers to match
+   *
+   * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
+   *         if no beans match.
+   */
   <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers);
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
+   * with the specified
+   *
+   * @param type
+   *     The type of the bean
+   * @param qualifiers
+   *     qualifiers to match
+   * @param <T>
+   *     The type of the bean
+   *
+   * @return An instance of the {@link org.jboss.errai.ioc.client.container.IOCSingletonBean} for the matching type and qualifiers.
+   *         Throws an {@link org.jboss.errai.ioc.client.container.IOCResolutionException} if there is a matching type but none of the
+   *         qualifiers match or if more than one bean  matches.
+   */
   <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers);
-
 }

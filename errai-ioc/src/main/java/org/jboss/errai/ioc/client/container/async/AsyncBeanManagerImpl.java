@@ -111,22 +111,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     namedBeans.get(name).add(beanDef);
   }
 
-  /**
-   * Register a bean with the manager. This is usually called by the generated code to advertise the bean. Adding
-   * beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
-   * the wiring scenario of auto-discovered beans at runtime.
-   *
-   * @param type
-   *     the bean type
-   * @param beanType
-   *     the actual type of the bean
-   * @param callback
-   *     the creational callback used to construct the bean
-   * @param instance
-   *     the instance reference
-   * @param qualifiers
-   *     any qualifiers
-   */
   @Override
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
@@ -137,25 +121,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     addBean(type, beanType, callback, instance, qualifiers, null, beanType.equals(type));
   }
 
-
-  /**
-   * Register a bean with the manager with a name. This is usually called by the generated code to advertise the bean.
-   * Adding beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
-   * the wiring scenario of auto-discovered beans at runtime.
-   *
-   * @param type
-   *     the bean type
-   * @param beanType
-   *     the actual type of the bean
-   * @param callback
-   *     the creational callback used to construct the bean
-   * @param instance
-   *     the instance reference
-   * @param qualifiers
-   *     any qualifiers
-   * @param name
-   *     the name of the bean
-   */
   @Override
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
@@ -168,27 +133,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
   }
 
 
-  /**
-   * Register a bean with the manager with a name as well as specifying whether the bean should be treated a concrete
-   * type. This is usually called by the generated code to advertise the bean. Adding beans at runtime will make beans
-   * available for lookup through the BeanManager, but will not in any way alter the wiring scenario of auto-discovered
-   * beans at runtime.
-   *
-   * @param type
-   *     the bean type
-   * @param beanType
-   *     the actual type of the bean
-   * @param callback
-   *     the creational callback used to construct the bean
-   * @param instance
-   *     the instance reference
-   * @param qualifiers
-   *     any qualifiers
-   * @param name
-   *     the name of the bean
-   * @param concreteType
-   *     true if bean should be treated as concrete (ie. not an interface or abstract type).
-   */
   @Override
   public void addBean(final Class<Object> type,
                       final Class<?> beanType,
@@ -211,12 +155,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
   }
 
 
-  /**
-   * Destroy a bean and all other beans associated with its creational context in the bean manager.
-   *
-   * @param ref
-   *     the instance reference of the bean
-   */
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
     final AsyncCreationalContext creationalContext =
@@ -235,30 +173,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     }
   }
 
-  /**
-   * Indicates whether the referenced object is currently a managed bean.
-   *
-   * @param ref
-   *     the reference to the bean
-   *
-   * @return returns true if under management
-   */
+
   public boolean isManaged(final Object ref) {
     return creationalContextMap.containsKey(getActualBeanReference(ref));
   }
 
-  /**
-   * Obtains an instance to the <em>actual</em> bean. If the specified reference is a proxy, this method will
-   * return an un-proxied reference to the object.
-   *
-   * @param ref
-   *     the proxied or unproxied reference
-   *
-   * @return returns the absolute reference to bean if the specified reference is a proxy. If the specified reference
-   *         is not a proxy, the same instance passed to the method is returned.
-   *
-   * @see #isProxyReference(Object)
-   */
   public Object getActualBeanReference(final Object ref) {
     if (isProxyReference(ref)) {
       return proxyLookupForManagedBeans.get(ref);
@@ -268,28 +187,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     }
   }
 
-  /**
-   * Determines whether the referenced object is itself a proxy to a managed bean.
-   *
-   * @param ref
-   *     the reference to check
-   *
-   * @return returns true if the specified reference is itself a proxy.
-   *
-   * @see #getActualBeanReference(Object)
-   */
   public boolean isProxyReference(final Object ref) {
     return proxyLookupForManagedBeans.containsKey(ref);
   }
 
-  /**
-   * Associates the reference to a proxied bean to the underlying bean instance which it is proxying.
-   *
-   * @param proxyRef
-   *     the reference to the proxy
-   * @param realRef
-   *     the reference to the bean being proxied.
-   */
+
   public void addProxyReference(final Object proxyRef, final Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
@@ -306,12 +208,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     creationalContextMap.put(ref, creationalContext);
   }
 
-  /**
-   * Register a bean with the manager.
-   *
-   * @param bean
-   *     an {@link IOCSingletonBean} reference
-   */
+
   @Override
   public <T> AsyncBeanDef<T> registerBean(final AsyncBeanDef<T> bean) {
     if (!beanMap.containsKey(bean.getType())) {
@@ -322,14 +219,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     return bean;
   }
 
-  /**
-   * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
-   *
-   * @param name
-   *     the name of bean to lookup
-   *
-   * @return and unmodifiable list of all beans with the specified name.
-   */
+
   @Override
   public Collection<AsyncBeanDef> lookupBeans(final String name) {
     if (!namedBeans.containsKey(name)) {
@@ -340,15 +230,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     }
   }
 
-  /**
-   * Looks up all beans of the specified type.
-   *
-   * @param type
-   *     The type of the bean
-   *
-   * @return An unmodifiable list of all the beans that match the specified type. Returns an empty list if there is
-   *         no matching type.
-   */
+
   @Override
   @SuppressWarnings("unchecked")
   public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type) {
@@ -375,18 +257,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     return Collections.unmodifiableList(matching);
   }
 
-  /**
-   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
-   * with the specified
-   *
-   * @param type
-   *     The type of the bean
-   * @param qualifiers
-   *     qualifiers to match
-   *
-   * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
-   *         if no beans match.
-   */
+
   @Override
   @SuppressWarnings("unchecked")
   public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
@@ -445,21 +316,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     return Collections.unmodifiableList(matching);
   }
 
-  /**
-   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
-   * with the specified
-   *
-   * @param type
-   *     The type of the bean
-   * @param qualifiers
-   *     qualifiers to match
-   * @param <T>
-   *     The type of the bean
-   *
-   * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers.
-   *         Throws an {@link org.jboss.errai.ioc.client.container.IOCResolutionException} if there is a matching type but none of the
-   *         qualifiers match or if more than one bean  matches.
-   */
+
   @Override
   @SuppressWarnings("unchecked")
   public <T> AsyncBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
@@ -476,21 +333,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     }
   }
 
-
-  /**
-   * Associates a {@link org.jboss.errai.ioc.client.container.DestructionCallback} with a bean instance. If the bean manager cannot find a valid
-   * {@link CreationalContext} to associate with the bean, or the bean is no longer considered active, the method
-   * returns <tt>false</tt>. Otherwise, the method returns <tt>true</tt>, indicating the callback is now registered
-   * and will be called when the bean is destroyed.
-   *
-   * @param beanInstance
-   *     the bean instance to associate the callback to.
-   * @param destructionCallback
-   *     the instance of the {@link org.jboss.errai.ioc.client.container.DestructionCallback}.
-   *
-   * @return <tt>true</tt> if the {@link org.jboss.errai.ioc.client.container.DestructionCallback} is successfully registered against a valid
-   *         {@link CreationalContext} and <tt>false</tt> if not.
-   */
   public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
     final CreationalContext creationalContext = creationalContextMap.get(beanInstance);
     if (creationalContext == null) {
