@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.ioc.client.container.ClientBeanManager;
-
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
 
 /**
  * @author Mike Brock

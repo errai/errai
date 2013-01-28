@@ -16,13 +16,13 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanManagerImpl;
+
+import com.google.gwt.core.client.GWT;
 
 /**
  * A simple utility class which provides a static reference in the client to the bean manager.
- *
+ * 
  * @author Mike Brock
  */
 public final class IOC {
@@ -45,7 +45,7 @@ public final class IOC {
         @Override
         public ClientBeanManager getNewBeanManager() {
           if (!GWT.isClient()) {
-           return new SyncBeanManagerImpl();
+            return new SyncBeanManagerImpl();
           }
           else {
             return null;
@@ -59,9 +59,9 @@ public final class IOC {
 
   /**
    * Returns a reference to the bean manager in the client.
-   *
+   * 
    * @return the singleton instance of the client bean manager.
-   *
+   * 
    * @see SyncBeanManagerImpl
    */
   public static SyncBeanManager getBeanManager() {
@@ -74,8 +74,7 @@ public final class IOC {
 
   public static AsyncBeanManager getAsyncBeanManager() {
     if (inst.beanManager instanceof SyncBeanManager) {
-      throw new RuntimeException("the bean manager has been initialized in synchronous mode. " +
-          "You must use getBeanManager()");
+      return new SyncToAsyncBeanManagerAdpater((SyncBeanManager) inst.beanManager);
     }
 
     return (AsyncBeanManager) inst.beanManager;
