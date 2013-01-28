@@ -37,7 +37,7 @@ import java.util.Set;
  *
  * @author Mike Brock
  */
-public class SyncBeanManagerImpl implements SyncBeanManager {
+public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetup {
   /**
    * A map of all named beans.
    */

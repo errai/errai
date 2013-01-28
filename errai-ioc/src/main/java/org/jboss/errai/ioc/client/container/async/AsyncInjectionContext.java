@@ -32,7 +32,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
 //      }
 //    }
 
-    manager.addBean(type, beanType, provider, instance, qualifiers);
+    ((AsyncBeanManagerSetup)manager).addBean(type, beanType, provider, instance, qualifiers);
   }
 
   public void addBean(final Class type,
@@ -44,7 +44,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
       final CreationalCallback creationalCallback = new CreationalCallback() {
         @Override
         public void callback(final Object beanInstance) {
-          manager.addBean(type, beanType, callback, beanInstance, qualifiers);
+          ((AsyncBeanManagerSetup)manager).addBean(type, beanType, callback, beanInstance, qualifiers);
           context.getBeanContext().finish(this);
         }
       };
@@ -52,7 +52,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
       callback.getInstance(creationalCallback, context);
     }
     else {
-      manager.addBean(type, beanType, callback, null, qualifiers);
+      ((AsyncBeanManagerSetup)manager).addBean(type, beanType, callback, null, qualifiers);
     }
   }
 
@@ -78,7 +78,7 @@ public class AsyncInjectionContext implements BootstrapInjectionContext {
       context.getSingletonInstanceOrNew(this, provider, creationalCallback, type, beanType, qualifiers);
     }
     else {
-      manager.addBean(type, beanType, provider, null, qualifiers, name, concrete);
+      ((AsyncBeanManagerSetup)manager).addBean(type, beanType, provider, null, qualifiers, name, concrete);
     }
 
   }

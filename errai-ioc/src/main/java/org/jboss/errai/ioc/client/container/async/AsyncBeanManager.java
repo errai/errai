@@ -24,36 +24,7 @@ import java.util.Collection;
 /**
  * @author Mike Brock
  */
-public interface AsyncBeanManager extends ClientBeanManager {
-  void addBean(Class<Object> type,
-               Class<?> beanType,
-               AsyncBeanProvider<Object> callback,
-               Object instance,
-               Annotation[] qualifiers);
-
-  void addBean(Class<Object> type,
-               Class<?> beanType,
-               AsyncBeanProvider<Object> callback,
-               Object instance,
-               Annotation[] qualifiers,
-               String name);
-
-  void addBean(Class<Object> type,
-               Class<?> beanType,
-               AsyncBeanProvider<Object> callback,
-               Object instance,
-               Annotation[] qualifiers,
-               String name,
-               boolean concreteType);
-
-  /**
-   * Register a bean with the manager.
-   *
-   * @param bean
-   *     an {@link AsyncBeanDef} reference
-   */
-  <T> AsyncBeanDef<T> registerBean(AsyncBeanDef<T> bean);
-
+public interface AsyncBeanManager extends ClientBeanManager  {
   /**
    * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
    *

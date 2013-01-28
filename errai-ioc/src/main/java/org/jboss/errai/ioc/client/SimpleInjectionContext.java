@@ -22,6 +22,7 @@ import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.SyncBeanManagerImpl;
+import org.jboss.errai.ioc.client.container.SyncBeanManagerSetup;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
@@ -54,7 +55,7 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
       }
     }
 
-    manager.addBean(type, beanType, callback, instance, qualifiers);
+    ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers);
   }
 
   @SuppressWarnings("unchecked")
@@ -75,7 +76,7 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
       }
     }
 
-    manager.addBean(type, beanType, callback, instance, qualifiers, name);
+    ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers, name);
   }
 
   @SuppressWarnings("unchecked")
@@ -97,7 +98,7 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
       }
     }
 
-    manager.addBean(type, beanType, callback, instance, qualifiers, name, concrete);
+    ((SyncBeanManagerSetup)manager).addBean(type, beanType, callback, instance, qualifiers, name, concrete);
   }
 
   public SimpleCreationalContext getRootContext() {

@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * @author Mike Brock
  */
-public class AsyncBeanManagerImpl implements AsyncBeanManager {
+public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerSetup {
   /**
    * A map of all named beans.
    */
@@ -208,9 +208,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager {
     creationalContextMap.put(ref, creationalContext);
   }
 
-
-  @Override
-  public <T> AsyncBeanDef<T> registerBean(final AsyncBeanDef<T> bean) {
+  private <T> AsyncBeanDef<T> registerBean(final AsyncBeanDef<T> bean) {
     if (!beanMap.containsKey(bean.getType())) {
       beanMap.put(bean.getType(), new ArrayList<AsyncBeanDef>());
     }
