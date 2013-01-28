@@ -21,8 +21,9 @@ import java.util.List;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.IOCBeanDef;
-import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -45,7 +46,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite {
 
-  private final SyncBeanManager bm = IOC.getBeanManager();
+  private final AsyncBeanManager bm = IOC.getAsyncBeanManager();
 
   private final ComplexPanel panel;
 
@@ -94,12 +95,17 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     if (items == null)
       return;
 
-    IOCBeanDef<W> itemBeanDef = bm.lookupBean(getItemWidgetType());
-    for (M item : items) {
-      W widget = itemBeanDef.newInstance();
-      widget.setModel(item);
-      panel.add((Widget) widget);
+    AsyncBeanDef<W> itemBeanDef = bm.lookupBean(getItemWidgetType());
+    for (final M item : items) {
+      itemBeanDef.newInstance(new CreationalCallback<W>() {
+        @Override
+        public void callback(W widget) {
+          widget.setModel(item);
+          panel.add((Widget) widget);
+        }
+      });
     }
+    
   }
   
   /**

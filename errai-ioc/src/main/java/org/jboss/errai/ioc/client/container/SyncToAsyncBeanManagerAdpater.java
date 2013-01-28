@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanProvider;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
@@ -82,42 +81,13 @@ public class SyncToAsyncBeanManagerAdpater implements AsyncBeanManager {
   }
 
   @Override
-  public void addBean(Class<Object> type, Class<?> beanType, AsyncBeanProvider<Object> callback, Object instance,
-      Annotation[] qualifiers) {
-    throw new UnsupportedOperationException(
-        "Not supported in SyncOrAsyncBeanManager. Only to be called from generated bootstrapper for specific bean managers!");
-  }
-
-  @Override
-  public void addBean(Class<Object> type, Class<?> beanType, AsyncBeanProvider<Object> callback, Object instance,
-      Annotation[] qualifiers, String name) {
-
-    throw new UnsupportedOperationException(
-        "Not supported in SyncOrAsyncBeanManager. Only to be called from generated bootstrapper for specific bean managers!");
-  }
-
-  @Override
-  public void addBean(Class<Object> type, Class<?> beanType, AsyncBeanProvider<Object> callback, Object instance,
-      Annotation[] qualifiers, String name, boolean concreteType) {
-
-    throw new UnsupportedOperationException(
-        "Not supported in SyncOrAsyncBeanManager. Only to be called from generated bootstrapper for specific bean managers!");
-  }
-
-  @Override
-  public <T> AsyncBeanDef<T> registerBean(AsyncBeanDef<T> bean) {
-
-    throw new UnsupportedOperationException(
-        "Not supported in SyncOrAsyncBeanManager. Only to be called from generated bootstrapper for specific bean managers!");
-  }
-
-  @Override
   @SuppressWarnings("rawtypes")
   public Collection<AsyncBeanDef> lookupBeans(String name) {
+    final Collection<IOCBeanDef> beanDefs = bm.lookupBeans(name);
+    
     final List<AsyncBeanDef> asyncBeanDefs = new ArrayList<AsyncBeanDef>();
-    final Collection<IOCBeanDef> beanDefs = (bm).lookupBeans(name);
     for (final IOCBeanDef beanDef : beanDefs) {
-      asyncBeanDefs.add(fromBeanDef(beanDef));
+      asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
 
     return asyncBeanDefs;
@@ -125,34 +95,31 @@ public class SyncToAsyncBeanManagerAdpater implements AsyncBeanManager {
 
   @Override
   public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type) {
-    final List<AsyncBeanDef<T>> asyncBeanDefs = new ArrayList<AsyncBeanDef<T>>();
-    final Collection<IOCBeanDef<T>> beanDefs = (bm).lookupBeans(type);
-    for (final IOCBeanDef<T> beanDef : beanDefs) {
-      asyncBeanDefs.add(fromBeanDef(beanDef));
-    }
-
-    return asyncBeanDefs;
+    return lookupBeans(type, new Annotation[0]);
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> Collection<AsyncBeanDef<T>> lookupBeans(Class<T> type, Annotation... qualifiers) {
+    final Collection<IOCBeanDef<T>> beanDefs = bm.lookupBeans(type, qualifiers);
+    
     final List<AsyncBeanDef<T>> asyncBeanDefs = new ArrayList<AsyncBeanDef<T>>();
-    final Collection<IOCBeanDef<T>> beanDefs = (bm).lookupBeans(type, qualifiers);
     for (final IOCBeanDef<T> beanDef : beanDefs) {
-      asyncBeanDefs.add(fromBeanDef(beanDef));
+      asyncBeanDefs.add(createAsyncBeanDef(beanDef));
     }
 
     return asyncBeanDefs;
   }
 
   @Override
+  @SuppressWarnings({ "unchecked" })
   public <T> AsyncBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
-    final IOCBeanDef<T> beanDef = (bm).lookupBean(type, qualifiers);
-    return fromBeanDef(beanDef);
+    final IOCBeanDef<T> beanDef = bm.lookupBean(type, qualifiers);
+    return createAsyncBeanDef(beanDef);
   }
-  
-  @SuppressWarnings("rawtypes")
-  private AsyncBeanDef fromBeanDef(final IOCBeanDef beanDef) {
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  private AsyncBeanDef createAsyncBeanDef(final IOCBeanDef beanDef) {
     AsyncBeanDef abd = new AsyncBeanDef() {
 
       @Override
@@ -161,12 +128,12 @@ public class SyncToAsyncBeanManagerAdpater implements AsyncBeanManager {
       }
 
       @Override
-      public Class getBeanClass() {
+      public Class<?> getBeanClass() {
         return beanDef.getBeanClass();
       }
 
       @Override
-      public Class getScope() {
+      public Class<? extends Annotation> getScope() {
         return beanDef.getScope();
       }
 
@@ -205,10 +172,8 @@ public class SyncToAsyncBeanManagerAdpater implements AsyncBeanManager {
       public boolean isConcrete() {
         return beanDef.isConcrete();
       }
-
     };
-    
+
     return abd;
   }
-
 }
