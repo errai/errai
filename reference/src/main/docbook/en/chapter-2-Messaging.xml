@@ -252,6 +252,81 @@ public class HelloWorldService implements MessageCallback {
         .
       </para>
    </section>
+   <section id="sid-59146643">
+      <title>Bus Lifecycle</title>
+      <section id="sid-59146643_BusLifecycle-TurningServerCommunicationOnandOff">
+         <title>Turning Server Communication On and Off</title>
+         <para>By default, Errai's client-side message bus attempts to connect to the server as soon as the ErraiBus module has been loaded. The bus will stay connected until a lengthy (about 45 seconds) communication failure occurs, or the web page is unloaded.</para>
+         <para>The application can affect bus communication through two mechanisms:</para>
+         <orderedlist inheritnum="ignore" continuation="restarts">
+            <listitem>
+               <para>
+              By setting a global JavaScript variable
+              <code>erraiBusRemoteCommunicationEnabled = false</code>
+              before the GWT scripts load, bus communication with the server is permanently disabled
+            </para>
+            </listitem>
+            <listitem>
+               <para>
+              By calling
+              <code>((ClientMessageBus) ErraiBus.get()).stop()</code>
+              , the bus disconnects from the server
+            </para>
+            </listitem>
+         </orderedlist>
+         <para>
+          To resume server communication after a call to
+          <code>ClientMessageBus.stop()</code>
+          or after communication with the server has exceeded the bus' retry timeout, call
+          <code>((ClientMessageBus) ErraiBus.get()).init()</code>
+          . You can use a
+          <code>BusLifecycleListener</code>
+          to monitor the success or failure of this attempt. See the next section for details.
+        </para>
+      </section>
+      <section id="sid-59146643_BusLifecycle-ObservingBusLifecycleStateandCommunicationStatus">
+         <title>Observing Bus Lifecycle State and Communication Status</title>
+         <para>In a perfect world, the client message bus would always be able to communicate with the server message bus. But in the real world, there's a whole array of reasons why the communication link between the server and the client might be interrupted.</para>
+         <para>
+          On its own, the client message bus will attempt to reconnect with the server whenever communication has been disrupted. Errai applications can monitor the status of the bus' communication link (whether it is disconnected, attempting to connect, or fully connected) through the
+          <code>BusLifecycleListener</code>
+          interface:
+        </para>
+         <informalexample>
+            <programlisting language="java">
+class BusStatusLogger implements BusLifecycleListener {
+
+  @Override
+  public void busAssociating(BusLifecycleEvent e) {
+    GWT.log("Errai Bus trying to connect...");
+  }
+
+  @Override
+  public void busOnline(BusLifecycleEvent e) {
+    GWT.log("Errai Bus connected!");
+  }
+
+  @Override
+  public void busOffline(BusLifecycleEvent e) {
+    GWT.log("Errai Bus trying to connect...");
+  }
+
+  @Override
+  public void busDisassociating(BusLifecycleEvent e) {
+    GWT.log("Errai Bus going into local-only mode.");
+  }
+}
+</programlisting>
+         </informalexample>
+         <para>To attach such a listener to the bus, make the following call in client-side code:</para>
+         <informalexample>
+            <programlisting language="java">
+ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
+bus.addLifecycleListener(new BusStatusLogger());
+</programlisting>
+         </informalexample>
+      </section>
+   </section>
    <section id="sid-5931306">
       <title>Handling Errors</title>
       <para>

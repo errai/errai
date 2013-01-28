@@ -5,24 +5,16 @@
    <para>Errai's JAX-RS support consists of the following:</para>
    <itemizedlist>
       <listitem>
-         <para>
-          The
-          <code>Caller&lt;T&gt;</code>
-          interface (the same interface used in Errai RPC)
-        </para>
-      </listitem>
-      <listitem>
          <para>A client-side API to communicate with JAX-RS endpoints</para>
       </listitem>
       <listitem>
-         <para>A code generator that runs at your project's build time, providing proxy implementations for each JAX-RS resource class visible within the GWT module</para>
+         <para>A code generator that runs at your project's build time, providing proxy implementations for each JAX-RS resource interfaces visible within the GWT module</para>
       </listitem>
       <listitem>
          <para>
           Errai IoC and CDI providers that allow you to
           <code>@Inject</code>
-          instances of
-          <code>Caller&lt;T&gt;</code>
+          instances of {{Caller&lt;T&gt;} (the same API used in Errai RPC)}
         </para>
       </listitem>
       <listitem>
@@ -30,12 +22,61 @@
       </listitem>
    </itemizedlist>
    <para>
-      If you want to get started right away with a working Errai JAX-RS CRUD application, use our Maven archetype to get started. See the
+      If you want to get started right away with a working Errai JAX-RS CRUD application, you can use our jaxrs-quickstart Maven archetype. See the
       <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5833096">Quickstart Guide</ulink>
-      for details.
+      for details. If you want to set up a project from scratch see the next chapter.
     </para>
-   <section id="sid-19398997_ErraiJAX-RS-ServerSidePrerequisites">
-      <title>Server-Side Prerequisites</title>
+   <section id="sid-19398997_ErraiJAX-RS-GettingStarted">
+      <title>Getting Started</title>
+      <section id="sid-19398997_ErraiJAX-RS-Dependencies">
+         <title>Dependencies</title>
+         <para>To use Errai JAX-RS, you must include it on the compile-time classpath. If you are using Maven for your build, add this dependency:</para>
+         <informalexample>
+            <programlisting language="xml">
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-jaxrs-client&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          or if you are not using Maven for dependency management, add
+          <code>errai-jaxrs-client-version.jar</code>
+          to your classpath.
+        </para>
+         <para>If you intend to use Errai's JSON format on the wire you will need to add Errai's JAX-RS JSON provider to your classpath and make sure it gets deployed to the server.</para>
+         <informalexample>
+            <programlisting language="xml">
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jboss.errai&lt;/groupId&gt;
+      &lt;artifactId&gt;errai-jaxrs-provider&lt;/artifactId&gt;
+      &lt;version&gt;${errai.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          or manually add
+          <code>errai-jaxrs-provider-version.jar</code>
+          in case you're not using Maven. If your REST service returns Jackson generated JSON you do not need the errai-jaxrs-provider (see
+          <link linkend="sid-19398997_ErraiJAX-RS-Configuration">Configuration</link>
+          ) .
+        </para>
+      </section>
+      <section id="sid-19398997_ErraiJAX-RS-GWTModule">
+         <title>GWT Module</title>
+         <para>
+          Once you have Errai JAX-RS on your classpath, ensure your application inherits the GWT module as well. Add this line to your application's
+          <code>*.gwt.xml</code>
+          file:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+  &lt;inherits name="org.jboss.errai.enterprise.Jaxrs"/&gt;
+</programlisting>
+         </informalexample>
+      </section>
       <section id="sid-19398997_ErraiJAX-RS-ServerSideJAXRSImplementation">
          <title>Server-Side JAX-RS Implementation</title>
          <para>Errai's JAX-RS support consists mostly of features that make the client side easier and more reliable to maintain. You will need to use an existing third-party JAX-RS implementation on the server side. All Java EE 6 application servers include such a module out-of-the-box. If you are developing an application that you intend to deploy on a plain servlet container, you will have to choose a JAX-RS implementation (for example, RestEasy) and configure it properly in your web.xml.</para>
@@ -44,7 +85,7 @@
       </section>
       <section id="sid-19398997_ErraiJAX-RS-SharedJAXRSInterface">
          <title>Shared JAX-RS Interface</title>
-         <para>For Errai's JAX-RS support to work, an interface that bears the JAX-RS annotations must be contained within a GWT module in your project. You will also want these interfaces visible to server-side code so that your JAX-RS resource classes can implement them. This keeps the whole setup typesafe, and reduces duplication to the bare minimum. The natural solution, then is to put the JAX-RS interfaces under the client.shared package within your GWT module:</para>
+         <para>Errai JAX-RS works by leveraging standard Java interfaces that bear JAX-RS annotations. You will also want these interfaces visible to server-side code so that your JAX-RS resource classes can implement them (and inherit the annotations). This keeps the whole setup typesafe, and reduces duplication to the bare minimum. The natural solution, then is to put the JAX-RS interfaces under the client.shared package within your GWT module:</para>
          <itemizedlist>
             <listitem>
                <para>project</para>
@@ -188,9 +229,6 @@ Button create = new Button("Create", new ClickHandler() {
         <link linkend="sid-19398997_ErraiJAX-RS-HandlingResponses">Handling Responses</link>
         .
       </para>
-      <note>
-         <para>The JAX-RS interfaces need to be visible to the GWT compiler and must therefore reside within the client packages (e.g. client.shared).</para>
-      </note>
       <section id="sid-19398997_ErraiJAX-RS-ProxyInjection">
          <title>Proxy Injection</title>
          <para>
@@ -214,6 +252,23 @@ private Caller&lt;CustomerService&gt; customerService;
 customerService.call(callback).listAllCustomers();
 </programlisting>
          </informalexample>
+         <para>
+          To use caller injection, your application needs to inherit the Errai IOC GWT module. To do this, just add this line to your application's
+          <code>*.gwt.xml</code>
+          file and make sure it comes
+          <code>after</code>
+          the Errai JAX-RS module (see
+          <link linkend="sid-19398997_ErraiJAX-RS-GettingStarted">Getting Started</link>
+          ):
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+  &lt;inherits name="org.jboss.errai.ioc.Container"/&gt;
+</programlisting>
+         </informalexample>
+         <note>
+            <para>The JAX-RS interfaces need to be visible to the GWT compiler and must therefore reside within the client packages (e.g. client.shared).</para>
+         </note>
       </section>
    </section>
    <section id="sid-19398997_ErraiJAX-RS-HandlingResponses">
@@ -247,13 +302,13 @@ RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
         <code>ResponseCallback</code>
         which can be used as an alternative. It provides access to the
         <code>Response</code>
-        object representing the underlying HTTP response. This is useful when more details of the HTTP response are needed, such as headers, the status code, etc. The
+        object representing the underlying HTTP response. This is useful when more details of the HTTP response are needed, such as headers and the status code. The
         <code>ResponseCallback</code>
         can also be used for JAX-RS interface methods that return a
         <code>javax.ws.rs.core.Response</code>
-        type. The
+        type. In this case, the
         <code>MarshallingWrapper</code>
-        class can be used to demarshall the response body to an entity of the desired type.
+        class can be used to manually demarshall the response body to an entity of the desired type.
       </para>
       <informalexample>
          <programlisting language="java">

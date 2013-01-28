@@ -10,7 +10,6 @@
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
         <version>3.0-SNAPSHOT</version>
-
         <relativePath>../pom.xml</relativePath>
     </parent>
 
