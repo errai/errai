@@ -30,5 +30,4 @@ import org.jboss.errai.ioc.client.api.AfterInitialization;
  *
  * @author Mike Brock .
  */
-@Portable
 public class BusReadyEvent {}

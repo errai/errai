@@ -208,6 +208,10 @@ public class IOCBeanManager {
                       final String name,
                       final boolean concreteType) {
 
+    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
+      throw new RuntimeException("you cannot record a lazy initialization reference!");
+    }
+
     if (concreteType) {
       concreteBeans.add(type.getName());
     }

@@ -43,8 +43,18 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
   public void addBean(final Class type,
                       final Class beanType,
                       final BeanProvider callback,
-                      final Object instance,
+                      Object instance,
                       final Annotation[] qualifiers) {
+
+    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
+      try {
+        manager.lookupBean(type, qualifiers);
+        return;
+      }
+      catch (IOCResolutionException e) {
+        instance = callback.getInstance(rootContext);
+      }
+    }
 
     manager.addBean(type, beanType, callback, instance, qualifiers);
   }
@@ -53,9 +63,19 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
   public void addBean(final Class type,
                       final Class beanType,
                       final BeanProvider callback,
-                      final Object instance,
+                      Object instance,
                       final Annotation[] qualifiers,
                       final String name) {
+
+    if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
+      try {
+        manager.lookupBean(type, qualifiers);
+        return;
+      }
+      catch (IOCResolutionException e) {
+        instance = callback.getInstance(rootContext);
+      }
+    }
 
     manager.addBean(type, beanType, callback, instance, qualifiers, name);
   }
@@ -72,6 +92,7 @@ public class SimpleInjectionContext implements BootstrapInjectionContext {
     if (instance == SimpleInjectionContext.LAZY_INIT_REF) {
       try {
         manager.lookupBean(type, qualifiers);
+        return;
       }
       catch (IOCResolutionException e) {
         instance = callback.getInstance(rootContext);

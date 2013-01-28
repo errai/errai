@@ -22,10 +22,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -33,6 +35,7 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -42,6 +45,8 @@ import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * CDI client interface.
@@ -58,11 +63,12 @@ public class CDI {
 
   private static final Set<String> remoteEvents = new HashSet<String>();
   private static boolean active = false;
-  private static final List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
+  // private static final List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
   private static final List<Runnable> postInitTasks = new ArrayList<Runnable>();
 
   private static Map<String, List<MessageCallback>> eventObservers = new HashMap<String, List<MessageCallback>>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
+  private static Map<String, List<MessageFireDeferral>> fireOnSubscribe = new LinkedHashMap<String, List<MessageFireDeferral>>();
 
   public static final MessageCallback ROUTING_CALLBACK = new MessageCallback() {
     @Override
@@ -87,7 +93,8 @@ public class CDI {
 
     remoteEvents.clear();
     active = false;
-    deferredEvents.clear();
+    //  deferredEvents.clear();
+    fireOnSubscribe.clear();
     postInitTasks.clear();
     eventObservers.clear();
     lookupTable = Collections.emptyMap();
@@ -137,11 +144,11 @@ public class CDI {
     else {
       beanRef = payload;
     }
-    
-    if (!local && !active) {
-      deferredEvents.add(new DeferredEvent(beanRef, qualifiers));
-      return;
-    }
+
+//    if (!local && !active) {
+//      deferredEvents.add(new DeferredEvent(beanRef, qualifiers));
+//      return;
+//    }
 
     final Map<String, Object> messageMap = new HashMap<String, Object>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
@@ -155,9 +162,11 @@ public class CDI {
 
     consumeEventFromMessage(CommandMessage.createWithParts(messageMap));
 
-    if (isRemoteCommunicationEnabled() && remoteEvents.contains(beanRef.getClass().getName())) {
+    if (isRemoteCommunicationEnabled()) {
+      final CommandMessage withParts = CommandMessage.createWithParts(messageMap);
       messageMap.put(MessageParts.ToSubject.name(), SERVER_DISPATCHER_SUBJECT);
-      ErraiBus.get().send(CommandMessage.createWithParts(messageMap));
+
+      fireOnSubscribe(beanRef.getClass().getName(), withParts);
     }
   }
 
@@ -243,6 +252,25 @@ public class CDI {
 
   public static void addRemoteEventType(final String remoteEvent) {
     remoteEvents.add(remoteEvent);
+
+    if (active) {
+      fireIfWaiting(remoteEvent);
+    }
+  }
+
+  private static void fireIfWaiting(final String remoteEvent) {
+    if (fireOnSubscribe.containsKey(remoteEvent)) {
+      for (final MessageFireDeferral runnable : fireOnSubscribe.get(remoteEvent)) {
+        runnable.send();
+      }
+      fireOnSubscribe.remove(remoteEvent);
+    }
+  }
+
+  private static void fireAllIfWaiting() {
+    for (final String svc : new HashSet<String>(fireOnSubscribe.keySet())) {
+      fireIfWaiting(svc);
+    }
   }
 
   public static void addRemoteEventTypes(final String[] remoteEvent) {
@@ -260,36 +288,64 @@ public class CDI {
     }
   }
 
+  private static void fireOnSubscribe(final String type, final Message message) {
+
+    if (MarshallerFramework.canMarshall(type)) {
+      final MessageFireDeferral deferral = new MessageFireDeferral(System.currentTimeMillis(), message);
+
+      if (remoteEvents.contains(type)) {
+        ErraiBus.get().send(message);
+        return;
+      }
+
+      List<MessageFireDeferral> runnables = fireOnSubscribe.get(type);
+      if (runnables == null) {
+        fireOnSubscribe.put(type, runnables = new ArrayList<MessageFireDeferral>());
+      }
+      runnables.add(deferral);
+    }
+  }
+
+
   public static void removePostInitTasks() {
     postInitTasks.clear();
   }
 
-  public static void activate() {
+  public static void activate(String... remoteTypes) {
     if (!active) {
+      addRemoteEventTypes(remoteTypes);
       active = true;
-      for (final DeferredEvent o : deferredEvents) {
-        fireEvent(o.eventInstance, o.annotations);
-      }
+
+      fireAllIfWaiting();
 
       for (final Runnable r : postInitTasks) {
         r.run();
       }
-
-      deferredEvents.clear();
 
       LogUtil.log("activated CDI eventing subsystem.");
     }
     InitVotes.voteFor(CDI.class);
   }
 
+  static class MessageFireDeferral {
+    final Message message;
+    final long time;
 
-  static class DeferredEvent {
-    final Object eventInstance;
-    final Annotation[] annotations;
+    MessageFireDeferral(final long time, final Message message) {
+      this.time = time;
+      this.message = message;
+    }
 
-    DeferredEvent(final Object eventInstance, final Annotation[] annotations) {
-      this.eventInstance = eventInstance;
-      this.annotations = annotations;
+    public Message getMessage() {
+      return message;
+    }
+
+    public long getTime() {
+      return time;
+    }
+
+    public void send() {
+      ErraiBus.get().send(message);
     }
   }
 

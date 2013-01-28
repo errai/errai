@@ -65,6 +65,10 @@ public class CDIClientBootstrap implements EntryPoint {
       bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
         public void callback(Message message) {
           switch (CDICommands.valueOf(message.getCommandType())) {
+            case AttachRemote:
+              CDI.activate(message.get(String.class, MessageParts.RemoteServices).split(","));
+              break;
+
             case RemoteSubscribe:
               CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
 
@@ -91,15 +95,15 @@ public class CDIClientBootstrap implements EntryPoint {
       }
     });
 
-    bus.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        CDI.activate();
-      }
-
-      public String toString() {
-        return "CDI service activate";
-      }
-    });
+//    bus.addPostInitTask(new Runnable() {
+//      @Override
+//      public void run() {
+//        CDI.activate();
+//      }
+//
+//      public String toString() {
+//        return "CDI service activate";
+//      }
+//    });
   }
 }

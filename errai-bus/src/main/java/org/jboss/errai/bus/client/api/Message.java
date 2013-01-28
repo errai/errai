@@ -289,7 +289,7 @@ public interface Message {
    *
    * @return the error callback
    */
-  public ErrorCallback getErrorCallback();
+  public ErrorCallback<Message> getErrorCallback();
 
   public <T> T getValue(Class<T> type);
 

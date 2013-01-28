@@ -22,27 +22,18 @@ package org.jboss.errai.bus.client.protocols;
  */
 public enum BusCommands {
   /**
-   * Quick associate
-   *
-   * @since 3.0
-   */
-  Associate,
-
-  FinishAssociation,
-
-  /**
    * The first command sent from a client bus to a remote bus.  This message indicates the bus would like to
    * establish a connection to the queue.  There is no authentication associated with this command.  Any
    * unauthenticated bus can connect to the bus, as establishing a communication channel is necessary
    * for all communication, including authentication.
    */
-  ConnectToQueue,
+  Associate,
 
   /**
    * The command sent from the remote bus back to the client bus to tell it that it should transition to a
    * normal communications mode, as all remote subscription data will have been sent at this point.
    */
-  FinishStateSync,
+  FinishAssociation,
 
   /**
    * Notifies the remote bus that a local subscription has been registered.  This is an advertisement to the
@@ -104,8 +95,6 @@ public enum BusCommands {
   RemoteMonitorAttach,
 
   RemoteMonitorDetach,
-
-  CapabilitiesNotice,
 
   WebsocketChannelVerify,
 

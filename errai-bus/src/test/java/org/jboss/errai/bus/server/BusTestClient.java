@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jboss.errai.bus.server;
 
 import com.google.common.collect.HashMultimap;
@@ -28,6 +44,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +128,8 @@ public class BusTestClient implements MessageBus {
   public void connect() {
     final Message m = CommandMessage.createWithParts(new HashMap<String, Object>())
         .toSubject("ServerBus")
-        .command(BusCommands.ConnectToQueue)
+        .command(BusCommands.Associate)
+        .set(MessageParts.RemoteServices, getAdvertisableSubjects())
         .set(MessageParts.PriorityProcessing, "1")
         .setResource("Session", serverSession);
 
@@ -226,7 +244,6 @@ public class BusTestClient implements MessageBus {
   }
 
   private void drainDeliveryList() {
-
     if (init) {
       // only send priority processing messages first.
       List<Message> deferred = new ArrayList<Message>();
@@ -277,36 +294,11 @@ public class BusTestClient implements MessageBus {
           unsubscribeAll(message.get(String.class, MessageParts.Subject));
           break;
 
-        case CapabilitiesNotice:
-          for (final String capability : message.get(String.class, MessageParts.CapabilitiesFlags).split(",")) {
-          }
-          break;
-
-        case FinishStateSync:
-          final Message remoteSubscribeMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
-              .toSubject("ServerBus")
-              .command(BusCommands.RemoteSubscribe)
-              .set(MessageParts.SubjectsList, new ArrayList<String>(services.keySet()))
-              .set(MessageParts.PriorityProcessing, "1")
-              .setResource("Session", serverSession);
-
-          remoteSubscribeMessage.setFlag(RoutingFlag.FromRemote);
-
-          remoteBus.sendGlobal(remoteSubscribeMessage);
-
-          final Message stateSyncMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
-              .toSubject("ServerBus")
-              .command(BusCommands.FinishStateSync)
-              .set(MessageParts.PriorityProcessing, "1")
-              .setResource("Session", serverSession);
-
-          stateSyncMessage.setFlag(RoutingFlag.FromRemote);
-
-          remoteBus.sendGlobal(stateSyncMessage);
+        case FinishAssociation:
+          Collections.addAll(remotes, message.get(String.class, MessageParts.RemoteServices).split(","));
 
           init = true;
           drainDeliveryList();
-
 
           scheduleInit();
           break;
@@ -350,6 +342,21 @@ public class BusTestClient implements MessageBus {
 
   public void clearInitCallbacks() {
     initCallbacks.clear();
+  }
+
+  private String getAdvertisableSubjects() {
+    final StringBuilder stringBuilder = new StringBuilder();
+    for (final String s : services.keySet()) {
+      if (s.startsWith("local:"))
+        continue;
+      if (!remotes.contains(s)) {
+        if (stringBuilder.length() != 0) {
+          stringBuilder.append(",");
+        }
+        stringBuilder.append(s);
+      }
+    }
+    return stringBuilder.toString();
   }
 
   private class TestRequestDispatcher implements RequestDispatcher {

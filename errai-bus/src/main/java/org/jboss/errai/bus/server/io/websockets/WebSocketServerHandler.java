@@ -157,7 +157,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
       final String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
-      if (BusCommands.ConnectToQueue.name().equals(commandType)) {
+      if (BusCommands.Associate.name().equals(commandType)) {
         final String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
         // has this client already attempted a connection, and is in a wait verify state

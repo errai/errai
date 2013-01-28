@@ -47,6 +47,7 @@ public class CdiTestEventProducerService {
   private Event<FinishEvent> finishEvent;
 
   public void start(@Observes StartEvent event) {
+    System.out.println("Server Observed StartEvent");
     fireAll();
   }
 

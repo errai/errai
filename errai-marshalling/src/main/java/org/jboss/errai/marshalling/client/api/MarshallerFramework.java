@@ -131,6 +131,10 @@ public class MarshallerFramework implements EntryPoint {
     }
   }
 
+  public static boolean canMarshall(final String type) {
+    return marshallerFactory.getMarshaller("json", type) != null;
+  }
+
   public static MarshallerFactory getMarshallerFactory() {
     return marshallerFactory;
   }

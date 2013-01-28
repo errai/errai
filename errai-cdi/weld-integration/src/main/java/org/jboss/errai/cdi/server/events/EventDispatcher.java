@@ -173,8 +173,8 @@ public class EventDispatcher implements MessageCallback {
         case AttachRemote:
           if (observedEvents.size() > 0) {
             MessageBuilder.createConversation(message).toSubject(CDI.CLIENT_DISPATCHER_SUBJECT)
-                .command(BusCommands.RemoteSubscribe)
-                .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
+                .command(CDICommands.AttachRemote)
+                .with(MessageParts.RemoteServices, getEventTypes()).done().reply();
           }
 
           localContext.setAttribute(CDI_EVENT_CHANNEL_OPEN, "1");
@@ -188,6 +188,19 @@ public class EventDispatcher implements MessageCallback {
       throw new RuntimeException("Failed to dispatch CDI Event", e);
     }
   }
+
+  private String getEventTypes() {
+    final StringBuilder stringBuilder = new StringBuilder();
+    for (final String s : observedEvents) {
+
+      if (stringBuilder.length() != 0) {
+        stringBuilder.append(",");
+      }
+      stringBuilder.append(s);
+    }
+    return stringBuilder.toString();
+  }
+
 
   public boolean isRoutable(final LocalContext localContext, final Message message) {
     return "1".equals(localContext.getAttribute(String.class, CDI_EVENT_CHANNEL_OPEN))

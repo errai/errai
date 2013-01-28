@@ -556,21 +556,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void directStore(final Message message) {
     final String subject = message.getSubject();
+    boolean routedToRemote = false;
 
-    // XXX nobody thinks it is correct that remote delivery causes local
-    // delivery to be canceled.
-    // we have to revisit this... we are changing things one-at-a-time.
-
-    if (remotes.containsKey(subject)) {
+    if (!message.isFlagSet(RoutingFlag.NonGlobalRouting) && remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
+      routedToRemote = true;
     }
-    else if (subscriptions.containsKey(subject)) {
+
+    if (subscriptions.containsKey(subject)) {
       deliverToSubscriptions(subscriptions, subject, message);
     }
     else if (localSubscriptions.containsKey(subject)) {
       deliverToSubscriptions(localSubscriptions, subject, message);
     }
-    else {
+    else if (!routedToRemote) {
       throw new NoSubscribersToDeliverTo(subject);
     }
   }
@@ -924,6 +923,46 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }, false);
 
 
+    addUnsubscribeListener(new UnsubscribeListener() {
+      @Override
+      public void onUnsubscribe(final SubscriptionEvent event) {
+        final String subject = event.getSubject();
+
+        if (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")) {
+          return;
+        }
+
+        encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+            .toSubject(BuiltInServices.ServerBus.name()).command(RemoteUnsubscribe)
+            .set(Subject, subject).set(PriorityProcessing, "1"));
+      }
+    });
+
+    /**
+     * ... also send RemoteUnsubscribe signals.
+     */
+    addSubscribeListener(new SubscribeListener() {
+      @Override
+      public void onSubscribe(final SubscriptionEvent event) {
+        final String subject = event.getSubject();
+        if (event.isLocalOnly() || subject.startsWith("local:")
+            || remotes.containsKey(subject)) {
+          return;
+        }
+
+        if (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")) {
+          return;
+        }
+
+        if (event.isNew()) {
+          encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+              .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
+              .set(Subject, subject).set(PriorityProcessing, "1"));
+        }
+      }
+    });
+
+
     // if the bus is already initialized or is currently initializing
     if (state != State.LOCAL_ONLY) return;
 
@@ -934,7 +973,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     cometChannelOpen = true;
 
-    if (sendBuilder == false) {
+    if (!sendBuilder) {
 
       initialized = false;
       disconnected = false;
@@ -958,7 +997,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
 
-    if (sendBuilder == false) {
+    if (!sendBuilder) {
       return;
     }
 
@@ -981,7 +1020,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       @Override
       @SuppressWarnings({"unchecked"})
       public void callback(final Message message) {
-        boolean ver3 = false;
         switch (BusCommands.valueOf(message.getCommandType())) {
           case RemoteSubscribe:
             if (message.hasPart(MessageParts.SubjectsList)) {
@@ -1000,25 +1038,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             unsubscribeAll(message.get(String.class, Subject));
             break;
 
-          case CapabilitiesNotice:
-            LogUtil.log("received capabilities notice from server. supported capabilities of remote: "
-                + message.get(String.class, MessageParts.CapabilitiesFlags));
-
-            processCapabilities(message);
-            break;
-
           case RemoteMonitorAttach:
             break;
 
-
           case FinishAssociation:
-            ver3 = true;
-          case FinishStateSync:
             if (isInitialized()) {
               return;
             }
 
-            final boolean _ver3 = ver3;
             new Timer() {
               @Override
               public void run() {
@@ -1030,84 +1057,30 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 remoteSubscribe(BuiltInServices.ServerBus.name());
 
-                boolean hasDeferred = !deferredSubscriptions.isEmpty();
+                final boolean hasDeferred = !deferredSubscriptions.isEmpty();
                 for (final Runnable deferredSubscription : deferredSubscriptions) {
                   deferredSubscription.run();
                 }
                 deferredSubscriptions.clear();
 
-                if (_ver3) {
-                  processCapabilities(message);
+                processCapabilities(message);
 
-                  for (String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
-                    remoteSubscribe(svc);
-                  }
-
-                  if (hasDeferred) {
-                    encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                        .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.RemoteSubscribe)
-                        .set(PriorityProcessing, "1")
-                        .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
-                  }
-                }
-                else {
-                  final List<String> subjects = new ArrayList<String>();
-                  for (final String s : subscriptions.keySet()) {
-                    if (s.startsWith("local:"))
-                      continue;
-                    if (!remotes.containsKey(s))
-                      subjects.add(s);
-                  }
-                  encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                      .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
-                      .set(MessageParts.SubjectsList, subjects).set(PriorityProcessing, "1"));
-
-                  encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                      .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.FinishStateSync)
-                      .set(PriorityProcessing, "1"));
+                for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+                  remoteSubscribe(svc);
                 }
 
-                /**
-                 * ... also send RemoteUnsubscribe signals.
-                 */
-                addSubscribeListener(new SubscribeListener() {
-                  @Override
-                  public void onSubscribe(final SubscriptionEvent event) {
-                    final String subject = event.getSubject();
-                    if (event.isLocalOnly() || subject.startsWith("local:")
-                        || remotes.containsKey(subject)) {
-                      return;
-                    }
-
-                    if (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")) {
-                      return;
-                    }
-
-                    if (event.isNew()) {
-                      encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                          .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
-                          .set(Subject, subject).set(PriorityProcessing, "1"));
-                    }
-                  }
-                });
-
-                addUnsubscribeListener(new UnsubscribeListener() {
-                  @Override
-                  public void onUnsubscribe(final SubscriptionEvent event) {
-                    final String subject = event.getSubject();
-
-                    if (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")) {
-                      return;
-                    }
-
-                    encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                        .toSubject(BuiltInServices.ServerBus.name()).command(RemoteUnsubscribe)
-                        .set(Subject, subject).set(PriorityProcessing, "1"));
-                  }
-                });
+                if (hasDeferred) {
+                  encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                      .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.RemoteSubscribe)
+                      .set(PriorityProcessing, "1")
+                      .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
+                }
 
 
                 stateSyncInProgress = true;
+
+                setState(State.CONNECTED);
+                // end of FinishStateSync Timer
 
                 if (webSocketUpgradeAvailable) {
                   websocketUpgrade();
@@ -1117,8 +1090,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
 
-                setState(State.CONNECTED);
-                // end of FinishStateSync Timer
               }
             }.schedule(5);
             break;
@@ -1185,8 +1156,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               logError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
             }
             break;
-          case ConnectToQueue:
-            break;
           case Heartbeat:
             break;
           case Resend:
@@ -1207,7 +1176,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private void processCapabilities(Message message) {
+  private void processCapabilities(final Message message) {
     for (final String capability : message.get(String.class, MessageParts.CapabilitiesFlags).split(",")) {
       switch (Capabilities.valueOf(capability)) {
         case WebSockets:
@@ -1287,9 +1256,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   Set<String> getRemoteSubscriptions() {
-    if (remotes == null)
-      return null;
-
     return remotes.keySet();
   }
 
@@ -1838,7 +1804,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private String getWebSocketNegotiationString() {
-    return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.ConnectToQueue.name() + "\", \""
+    return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.Associate.name() + "\", \""
         + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"" + ",\"" + MessageParts.WebSocketToken
         + "\":\"" + webSocketToken + "\"}";
   }

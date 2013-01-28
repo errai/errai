@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.createCall;
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
@@ -232,8 +231,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           final QueueSession session = getSession(message);
           MessageQueueImpl queue = (MessageQueueImpl) messageQueues.get(session);
 
-          boolean ver3 = false;
-
           switch (BusCommands.valueOf(message.getCommandType())) {
             case Heartbeat:
               if (queue != null) {
@@ -268,13 +265,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   message.get(String.class, MessageParts.Subject));
               break;
 
-            case FinishStateSync:
-              if (queue == null) return;
-              queue.finishInit();
-
-              drainDeferredDeliveryQueue(queue);
-              break;
-
             case Disconnect:
               if (queue == null) return;
 
@@ -288,9 +278,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case Resend:
               if (queue == null) return;
 
-            case Associate:
-              ver3 = true;
-            case ConnectToQueue: {
+            case Associate: {
               List<Message> deferred = null;
               synchronized (messageQueues) {
                 if (messageQueues.containsKey(session)) {
@@ -315,48 +303,27 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 remoteSubscribe(session, queue, BuiltInServices.ClientBus.name());
               }
 
-              if (ver3) {
-                for (String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
-                  remoteSubscribe(session, queue, svc);
-                }
+              for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+                remoteSubscribe(session, queue, svc);
               }
-              else {
-                createConversation(message)
-                    .toSubject(BuiltInServices.ClientBus.name())
-                    .command(BusCommands.RemoteSubscribe)
-                    .with(MessageParts.SubjectsList, new HashSet(globalSubscriptions))
-                    .with(MessageParts.PriorityProcessing, "1")
-                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
-              }
-
 
               if (isMonitor()) {
                 busMonitor.notifyQueueAttached(session.getSessionId(), queue);
               }
 
-              final Message msg;
+              final Message msg = ConversationMessage.create(message)
+                  .toSubject(BuiltInServices.ClientBus.name())
+                  .command(BusCommands.FinishAssociation);
 
-              if (ver3) {
-                msg = ConversationMessage.create(message)
-                    .toSubject(BuiltInServices.ClientBus.name())
-                    .command(BusCommands.FinishAssociation);
-
-
-                StringBuilder subjects = new StringBuilder();
-                for (final String s : new HashSet<String>(globalSubscriptions)) {
-                  if (subjects.length() != 0) {
-                    subjects.append(',');
-                  }
-                  subjects.append(s);
+              final StringBuilder subjects = new StringBuilder();
+              for (final String s : new HashSet<String>(globalSubscriptions)) {
+                if (subjects.length() != 0) {
+                  subjects.append(',');
                 }
+                subjects.append(s);
+              }
 
-                msg.set(RemoteServices, subjects.toString());
-              }
-              else {
-                msg = ConversationMessage.create(message)
-                    .toSubject(BuiltInServices.ClientBus.name())
-                    .command(BusCommands.CapabilitiesNotice);
-              }
+              msg.set(RemoteServices, subjects.toString());
 
               final StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
@@ -397,23 +364,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
               msg.set(MessageParts.CapabilitiesFlags, capabilitiesBuffer.toString());
 
-              if (ver3) {
-                msg.set(ConnectionSessionKey, queue.getSession().getSessionId());
-                send(msg, false);
+              msg.set(ConnectionSessionKey, queue.getSession().getSessionId());
+              send(msg, false);
 
-                queue.finishInit();
-                drainDeferredDeliveryQueue(queue);
-              }
-              else {
-                send(msg, false);
-
-                createConversation(message)
-                    .toSubject(BuiltInServices.ClientBus.name())
-                    .command(BusCommands.FinishStateSync)
-                    .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
-                    .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
-              }
-
+              queue.finishInit();
+              drainDeferredDeliveryQueue(queue);
               break;
             }
 
@@ -469,7 +424,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
       }
     });
-
 
     scheduler.scheduleAtFixedRate(new Runnable() {
       int runCount = 0;
@@ -567,6 +521,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     try {
       clustering = ErraiConfigAttribs.ENABLE_CLUSTERING.getBoolean(config);
       final String clusteringProviderCls = ErraiConfigAttribs.CLUSTERING_PROVIDER.get(config);
+      //noinspection unchecked
       clusteringProvider = Guice.createInjector(new AbstractModule() {
         @Override
         protected void configure() {
@@ -1131,14 +1086,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final Message message;
     final Runnable timeoutCallback;
 
-    public ClusterWaitEntry(long time, Message message, Runnable timeoutCallback) {
+    public ClusterWaitEntry(final long time, final Message message, final Runnable timeoutCallback) {
       this.timeoutCallback = timeoutCallback;
       this.message = message;
       this.time = time;
-    }
-
-    public ClusterWaitEntry(long time, Message message) {
-      this(time, message, null);
     }
 
     public long getTime() {
@@ -1291,7 +1242,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private boolean isAnyoneListening(final MessageQueue queue, final String subject) {
     return (subject.endsWith(":RespondTo:RPC") || subject.endsWith(":Errors:RPC")
         || subscriptions.containsKey(subject) || (remoteSubscriptions.containsKey(subject)
-            && remoteSubscriptions.get(subject).contains(queue)));
+        && remoteSubscriptions.get(subject).contains(queue)));
   }
 
   @Override

@@ -67,51 +67,64 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
    * start the event producers on the server
    */
   public void start() {
+    System.out.println("Firing StartEvent");
     startEvent.fire(new StartEvent());
   }
 
   private void onEvent(@Observes String event) {
+    System.out.println("Observed unqualified");
     addQualifiedReceivedEvent("", event);
 
   }
   @SuppressWarnings("unused")
   private void onEventAny(@Observes @Any String event) {
+    System.out.println("Observed @Any");
     addQualifiedReceivedEvent("Any", event);
   }
 
   public void onEventA(@Observes @A String event) {
+    System.out.println("Observed @A");
     addQualifiedReceivedEvent("A", event);
   }
 
   public void onEventB(@Observes @B String event) {
+    System.out.println("Observed @B");
     addQualifiedReceivedEvent("B", event);
   }
 
   public void onEventC(@Observes @C String event) {
+    System.out.println("Observed @C");
     addQualifiedReceivedEvent("C", event);
   }
 
   public void onEventAB(@Observes @A @B String event) {
+    System.out.println("Observed @A @B");
     addQualifiedReceivedEvent("AB", event);
   }
 
   public void onEventBA(@Observes @B @A String event) {
+    System.out.println("Observed @B @A");
     addQualifiedReceivedEvent("BA", event);
   }
 
   public void onEventAC(@Observes @A @C String event) {
+    System.out.println("Observed @A @C");
     addQualifiedReceivedEvent("AC", event);
   }
 
   public void onEventBC(@Observes @B @C String event) {
+    System.out.println("Observed @B @C");
     addQualifiedReceivedEvent("BC", event);
   }
 
   public void onEventABC(@Observes @A @B @C String event) {
+    System.out.println("Observed @A @B @C");
     addQualifiedReceivedEvent("ABC", event);
   }
 
   public void onFinish(@Observes FinishEvent event) {
+    System.out.println("Observed FinishEvent");
+
     if (verifier != null) {
       verifier.run();
     }
