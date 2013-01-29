@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdpater;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
@@ -47,10 +48,10 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite {
 
+  private final ComplexPanel panel;
+  
   private final AsyncBeanManager bm = IOC.getAsyncBeanManager();
   private final List<WidgetCreationalCallback> creationalCallbackList = new LinkedList<WidgetCreationalCallback>();
-
-  private final ComplexPanel panel;
 
   protected ListWidget() {
     this(new VerticalPanel());
@@ -86,11 +87,10 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    *     The list of model objects. If null or empty all existing child widgets will be removed.
    */
   public void setItems(List<M> items) {
-    // in the case that this method is executed before the first call has successfully processed all of its
-    // CreationalCallbacks, we must cancel those uncompleted callbacks in flight to prevent duplicate data
-    // in the ListWidget.
+    // In the case that this method is executed before the first call has successfully processed all of its
+    // callbacks, we must cancel those uncompleted callbacks in flight to prevent duplicate data in the ListWidget.
     for (WidgetCreationalCallback callback : creationalCallbackList) {
-      callback.setDiscard(true);
+      callback.discard();
     }
     creationalCallbackList.clear();
 
@@ -104,7 +104,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
     if (items == null)
       return;
-
+    
     AsyncBeanDef<W> itemBeanDef = bm.lookupBean(getItemWidgetType());
     for (final M item : items) {
       final WidgetCreationalCallback callback = new WidgetCreationalCallback(item);
@@ -129,9 +129,14 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     return (W) panel.getWidget(index);
   }
 
+  /**
+   * A callback invoked by the {@link AsyncBeanManager} or {@link SyncToAsyncBeanManagerAdpater} when the widget
+   * instance was created. It will associate the corresponding model instance with the widget and add the widget to the
+   * panel.
+   */
   private class WidgetCreationalCallback implements CreationalCallback<W> {
     private boolean discard;
-    private M item;
+    private final M item;
 
     private WidgetCreationalCallback(M item) {
       this.item = item;
@@ -145,8 +150,8 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       }
     }
 
-    public void setDiscard(boolean discard) {
-      this.discard = discard;
+    public void discard() {
+      this.discard = true;
     }
   }
 }
