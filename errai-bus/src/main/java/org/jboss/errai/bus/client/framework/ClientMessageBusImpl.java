@@ -558,7 +558,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final String subject = message.getSubject();
     boolean routedToRemote = false;
 
-    if (!message.isFlagSet(RoutingFlag.NonGlobalRouting) && remotes.containsKey(subject)) {
+    if (!message.isFlagSet(RoutingFlag.DeliverLocalOnly) && remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
       routedToRemote = true;
     }

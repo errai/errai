@@ -83,7 +83,15 @@ public enum RoutingFlag {
     public int flag() {
       return 1 << 8;
     }
-  };
+  },
+
+  DeliverLocalOnly {
+    @Override
+    public int flag() {
+      return 1 << 9;
+    }
+  }
+  ;
 
   /**
    * Returns the integer representing the flag
