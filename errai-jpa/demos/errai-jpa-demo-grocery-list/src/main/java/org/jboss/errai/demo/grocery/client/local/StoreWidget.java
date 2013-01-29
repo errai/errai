@@ -2,6 +2,7 @@ package org.jboss.errai.demo.grocery.client.local;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -16,6 +17,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
@@ -29,8 +31,11 @@ public class StoreWidget extends Composite implements HasModel<Store> {
   @Inject private @Bound @DataField InlineLabel address;
 
   @Inject private @DataField Label departments;
+  @Inject private @DataField Button deleteButton;
 
   @Inject private TransitionTo<StorePage> toStorePage;
+
+  @Inject EntityManager em;
 
   @Override
   public Store getModel() {
@@ -49,5 +54,11 @@ public class StoreWidget extends Composite implements HasModel<Store> {
   @EventHandler
   private void onClick(ClickEvent e) {
     toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
+  }
+
+  @EventHandler("deleteButton")
+  private void deleteThisStore(ClickEvent e) {
+    em.remove(getModel());
+    em.flush();
   }
 }
