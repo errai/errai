@@ -17,6 +17,7 @@
 package org.jboss.errai.ui.client.widget;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jboss.errai.common.client.api.Assert;
@@ -36,17 +37,18 @@ import com.google.gwt.user.client.ui.Widget;
  * instances are managed by Errai's IOC container and are arranged in a {@link ComplexPanel}. By default a
  * {@link VerticalPanel} is used, but an alternative can be specified using {@link #ListWidget(ComplexPanel)}.
  *
- * @author Christian Sadilek <csadilek@redhat.com>
- *
  * @param <M>
- *          the model type
+ *     the model type
  * @param <W>
- *          the item widget type, needs to implement {@link HasModel} for associating the widget instance with the
- *          corresponding model instance.
+ *     the item widget type, needs to implement {@link HasModel} for associating the widget instance with the
+ *     corresponding model instance.
+ *
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite {
 
   private final AsyncBeanManager bm = IOC.getAsyncBeanManager();
+  private final List<WidgetCreationalCallback> creationalCallbackList = new LinkedList<WidgetCreationalCallback>();
 
   private final ComplexPanel panel;
 
@@ -66,24 +68,32 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    * @return the item widget type.
    */
   protected abstract Class<W> getItemWidgetType();
-  
+
   /**
    * Returns the panel that contains all item widgets.
-   * 
+   *
    * @return the item widget panel, never null.
    */
   protected ComplexPanel getPanel() {
     return panel;
   }
-  
+
   /**
    * Sets the list of model objects. A widget instance of type <W> will be added to the panel for each object in the
    * list.
    *
    * @param items
-   *          The list of model objects. If null or empty all existing child widgets will be removed.
+   *     The list of model objects. If null or empty all existing child widgets will be removed.
    */
   public void setItems(List<M> items) {
+    // in the case that this method is executed before the first call has successfully processed all of its
+    // CreationalCallbacks, we must cancel those uncompleted callbacks in flight to prevent duplicate data
+    // in the ListWidget.
+    for (WidgetCreationalCallback callback : creationalCallbackList) {
+      callback.setDiscard(true);
+    }
+    creationalCallbackList.clear();
+
     // clean up the old widgets before we add new ones (this will eventually become a feature of the framework:
     // ERRAI-375)
     Iterator<Widget> it = panel.iterator();
@@ -97,26 +107,46 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
     AsyncBeanDef<W> itemBeanDef = bm.lookupBean(getItemWidgetType());
     for (final M item : items) {
-      itemBeanDef.newInstance(new CreationalCallback<W>() {
-        @Override
-        public void callback(W widget) {
-          widget.setModel(item);
-          panel.add((Widget) widget);
-        }
-      });
+      final WidgetCreationalCallback callback = new WidgetCreationalCallback(item);
+      creationalCallbackList.add(callback);
+      itemBeanDef.newInstance(callback);
     }
-    
   }
-  
+
   /**
    * Returns the widget at the specified index.
-   * 
-   * @param index the index to be retrieved
+   *
+   * @param index
+   *     the index to be retrieved
+   *
    * @return the widget at the specified index
-   * @throws IndexOutOfBoundsException if the index is out of range
+   *
+   * @throws IndexOutOfBoundsException
+   *     if the index is out of range
    */
   @SuppressWarnings("unchecked")
   public W getWidget(int index) {
     return (W) panel.getWidget(index);
+  }
+
+  private class WidgetCreationalCallback implements CreationalCallback<W> {
+    private boolean discard;
+    private M item;
+
+    private WidgetCreationalCallback(M item) {
+      this.item = item;
+    }
+
+    @Override
+    public void callback(W widget) {
+      if (!discard) {
+        widget.setModel(item);
+        panel.add((Widget) widget);
+      }
+    }
+
+    public void setDiscard(boolean discard) {
+      this.discard = discard;
+    }
   }
 }

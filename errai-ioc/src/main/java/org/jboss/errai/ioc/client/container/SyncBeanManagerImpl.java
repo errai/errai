@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.client.container;
 
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.Set;
  *
  * @author Mike Brock
  */
+@EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
 public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetup {
   /**
    * A map of all named beans.

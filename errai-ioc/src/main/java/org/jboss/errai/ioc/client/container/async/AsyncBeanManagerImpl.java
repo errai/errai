@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
@@ -20,6 +21,7 @@ import java.util.Set;
 /**
  * @author Mike Brock
  */
+@EnabledByProperty(value = "errai.ioc.async_bean_manager")
 public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerSetup {
   /**
    * A map of all named beans.
@@ -53,6 +55,9 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
       = new HashSet<String>();
 
   public AsyncBeanManagerImpl() {
+
+
+
     // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose of
     // lookups. This modifies the lookup behavior to exclude other non-concrete types from qualified matching.
     concreteBeans.add("java.lang.Object");

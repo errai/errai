@@ -36,22 +36,22 @@ public final class IOC {
       iocEnvironment = GWT.create(IOCEnvironment.class);
     }
     catch (UnsupportedOperationException e) {
-      iocEnvironment = new IOCEnvironment() {
-        @Override
-        public boolean isAsync() {
-          return false;
-        }
+        iocEnvironment = new IOCEnvironment() {
+          @Override
+          public boolean isAsync() {
+            return false;
+          }
 
-        @Override
-        public ClientBeanManager getNewBeanManager() {
-          if (!GWT.isClient()) {
-            return new SyncBeanManagerImpl();
+          @Override
+          public ClientBeanManager getNewBeanManager() {
+            if (!GWT.isClient()) {
+              return new SyncBeanManagerImpl();
+            }
+            else {
+              return null;
+            }
           }
-          else {
-            return null;
-          }
-        }
-      };
+        };
     }
 
     beanManager = iocEnvironment.getNewBeanManager();

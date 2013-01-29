@@ -38,5 +38,4 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
     Class<?> itemWidgetType = typeargs[1];
     return new GenericListWidget(itemWidgetType);
   }
-
 }

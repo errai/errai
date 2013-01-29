@@ -165,10 +165,10 @@ public class AsyncBeanContext {
       return;
     }
 
-    if (allDependencies.isEmpty()) {
-      new Timer() {
-        @Override
-        public void run() {
+//    if (allDependencies.isEmpty()) {
+//      new Timer() {
+//        @Override
+//        public void run() {
           if (allDependencies.isEmpty()) {
             timeOut.cancel();
             finishFireState = FireState.ARMED;
@@ -188,9 +188,9 @@ public class AsyncBeanContext {
               }
             }
           }
-        }
-      }.schedule(1); // yield.
-    }
+//        }
+//      }.schedule(1); // yield.
+//    }
   }
 
   public void setComment(String comment) {
