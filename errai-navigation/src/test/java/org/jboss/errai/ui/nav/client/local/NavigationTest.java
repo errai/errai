@@ -3,6 +3,7 @@ package org.jboss.errai.ui.nav.client.local;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
@@ -54,8 +55,20 @@ public class NavigationTest extends AbstractErraiCDITest {
   }
 
   public void testCircularReferences() throws Exception {
-    PageNode<?> cr1Node = navGraph.getPage(CircularRef1.class);
-    CircularRef1 cr1 = (CircularRef1) cr1Node.content();
+    PageNode<CircularRef1> cr1Node = navGraph.getPage(CircularRef1.class);
+
+    // now fetch the bean instance
+    final CircularRef1[] workaround = new CircularRef1[1];
+    cr1Node.produceContent(new CreationalCallback<CircularRef1>() {
+      @Override
+      public void callback(CircularRef1 beanInstance) {
+        workaround[0] = beanInstance;
+      }
+    });
+
+    assertNotNull("CreationalCallback should have been invoked before produceContent returned!", workaround[0]);
+
+    CircularRef1 cr1 = workaround[0];
     TransitionTo<CircularRef2> transitionToCR2 = cr1.getLink();
     Class<CircularRef2> cr2Type = transitionToCR2.toPageType();
     assertEquals(CircularRef2.class, cr2Type);

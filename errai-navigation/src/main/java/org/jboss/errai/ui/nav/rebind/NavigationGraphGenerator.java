@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.Page;
@@ -184,9 +185,11 @@ public class NavigationGraphGenerator extends Generator {
             .append(Stmt.loadLiteral(pageName).returnValue()).finish()
         .publicMethod(Class.class, "contentType")
             .append(Stmt.loadLiteral(pageClass).returnValue()).finish()
-        .publicMethod(pageClass, "content")
+        .publicMethod(void.class, "produceContent", Parameter.of(CreationalCallback.class, "callback"))
             .append(Stmt.nestedCall(Refs.get("bm"))
-                    .invoke("lookupBean", Stmt.loadLiteral(pageClass)).invoke("getInstance").returnValue()).finish();
+                    .invoke("lookupBean", Stmt.loadLiteral(pageClass))
+                    .invoke("getInstance", Stmt.loadVariable("callback")))
+                    .finish();
 
     appendPageHidingMethod(pageImplBuilder, pageClass);
     appendPageHiddenMethod(pageImplBuilder, pageClass);
@@ -224,7 +227,7 @@ public class NavigationGraphGenerator extends Generator {
   private void appendPageHiddenMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
 	  createAndProcessHideMethod(pageImplBuilder, pageClass, PageHidden.class);
   }
-  
+
   private void createAndProcessHideMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, Class<? extends Annotation> annotation) {
 	  BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
 	            Parameter.of(pageClass, "widget"))
@@ -266,14 +269,14 @@ public class NavigationGraphGenerator extends Generator {
 		                  " has an illegal parameter of type " + paramSpec.getType().getFullyQualifiedName());
 		        }
 		      }
-		      
+
 	      } else {
 	    	  if (metaMethod.getParameters().length != 0) {
 	  	        throw new UnsupportedOperationException(
 	  	        		createAnnotionName(annotation) + " methods cannot take parameters, but " +
 	  	                metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
 	  	                " does.");
-	  	      }  
+	  	      }
 	      }
 
 	      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(metaMethod), paramValues));
@@ -281,15 +284,15 @@ public class NavigationGraphGenerator extends Generator {
 
 	    method.finish();
   }
-  
+
   private String createAnnotionName(Class<? extends Annotation> annotation) {
 	  return "@" + annotation.getSimpleName();
   }
-  
+
   private String createMethodNameFromAnnotation(Class<? extends Annotation> annotation) {
 	  return StringUtils.uncapitalize(annotation.getSimpleName());
   }
-  
+
   private void appendPageShowingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
 	  appendPageShowMethod(pageImplBuilder, pageClass, PageShowing.class, true);
   }
@@ -303,7 +306,7 @@ public class NavigationGraphGenerator extends Generator {
 	            Parameter.of(pageClass, "widget"),
 	            Parameter.of(HistoryToken.class, "state"))
 	            .body();
-	    
+
 	    int idx = 0;
 	    for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
 	      PageState psAnno = field.getAnnotation(PageState.class);
@@ -312,7 +315,7 @@ public class NavigationGraphGenerator extends Generator {
 	      if (queryParamName == null || queryParamName.trim().isEmpty()) {
 	        queryParamName = fieldName;
 	      }
-	      
+
 	      if(addPrivateAccessors) {
 	    	  PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field, new Modifier[] {});
 	      }

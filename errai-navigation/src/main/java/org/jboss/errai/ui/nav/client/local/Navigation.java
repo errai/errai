@@ -3,6 +3,7 @@ package org.jboss.errai.ui.nav.client.local;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
@@ -91,7 +92,7 @@ public class Navigation {
    * @param state
    *          The state information to pass to the page node before showing it.
    */
-  private <W extends Widget> void show(PageNode<W> toPage, HistoryToken state) {
+  private <W extends Widget> void show(final PageNode<W> toPage, final HistoryToken state) {
 	Widget currentWidget = null;
 
     if (currentPage != null) {
@@ -112,15 +113,19 @@ public class Navigation {
     	currentPage.pageHidden(currentWidget);
     }
 
-    W widget = toPage.content();
-    if (widget == null) {
-      throw new NullPointerException("Target page " + toPage + " returned a null content widget");
-    }
+    toPage.produceContent(new CreationalCallback<W>() {
+      @Override
+      public void callback(W widget) {
+        if (widget == null) {
+          throw new NullPointerException("Target page " + toPage + " returned a null content widget");
+        }
 
-    toPage.pageShowing(widget, state);
-    setCurrentPage(toPage);
-    contentPanel.add(widget);
-    toPage.pageShown(widget, state);
+        toPage.pageShowing(widget, state);
+        setCurrentPage(toPage);
+        contentPanel.add(widget);
+        toPage.pageShown(widget, state);
+      }
+    });
   }
 
   /**

@@ -1,5 +1,6 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.HistoryToken;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
@@ -28,11 +29,12 @@ public interface PageNode<W extends Widget> {
    * Retrieves the widget that provides this page's content from the client-side
    * bean manager.
    *
-   * @return The widget to display for this page. The Widget returned will have
-   *         the exact runtime type as returned by {@link #contentType()}. Never
-   *         null.
+   * @param callback
+   *          The callback that will receive the widget to display for this
+   *          page. The Widget will have the same runtime type as returned by
+   *          {@link #contentType()}, and will never be null.
    */
-  public W content();
+  public void produceContent(CreationalCallback<W> callback);
 
   /**
    * Returns the type of widget that this page node's {@link #content()} method will produce.
@@ -86,7 +88,7 @@ public interface PageNode<W extends Widget> {
    *          {@link #pageShowing(Widget, Multimap)}. Never null.
    */
   public void pageHiding(W widget);
-  
+
   /**
    * Called by the framework after this page has been removed from the
    * navigation content panel.
@@ -100,5 +102,5 @@ public interface PageNode<W extends Widget> {
    *          {@link #pageShowing(Widget, Multimap)}. Never null.
    */
   public void pageHidden(W widget);
-  
+
 }

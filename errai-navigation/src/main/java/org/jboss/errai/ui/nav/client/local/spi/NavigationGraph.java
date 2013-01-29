@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -25,7 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class NavigationGraph {
 
-  protected final ClientBeanManager bm = IOC.getBeanManager();
+  protected final AsyncBeanManager bm = IOC.getAsyncBeanManager();
 
   /**
    * Maps page names to the classes that implement them. The subclass's
@@ -77,5 +78,14 @@ public abstract class NavigationGraph {
    */
   public boolean isEmpty() {
     return pagesByName.isEmpty();
+  }
+
+  protected static final class PageNodeCreationalCallback<W extends Widget> implements CreationalCallback<PageNode<W>> {
+
+    @Override
+    public void callback(PageNode<W> beanInstance) {
+
+    }
+
   }
 }
