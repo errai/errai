@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.BlockBuilderImpl;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -86,6 +87,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -151,7 +153,9 @@ public class IOCBootstrapGenerator {
 
       gen = generateBootstrappingClassSource(injectionContext);
       log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms "
-          + "(" + MetaClassFactory.getAllCachedClasses().size() + " beans processed)");
+          + "(" + injectionContext.getAllKnownInjectionTypes().size() + " beans processed)");
+
+      System.out.println("*** time spent in class scanner: " + ClassScanner.getTotalClassScanTime() + "ms");
 
       ThreadUtil.execute(new Runnable() {
         @Override
@@ -277,8 +281,9 @@ public class IOCBootstrapGenerator {
 
   private String generateBootstrappingClassSource(final InjectionContext injectionContext) {
 
+    long sUTime = System.currentTimeMillis();
     final IOCConfigProcessor processorFactory = new IOCConfigProcessor(injectionContext);
-      processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
+    processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
 
     final IOCProcessingContext processingContext = injectionContext.getProcessingContext();
     final ClassStructureBuilder<?> classBuilder = processingContext.getBootstrapBuilder();
@@ -301,7 +306,14 @@ public class IOCBootstrapGenerator {
 
     _doRunnableTasks(beforeTasks, builder);
 
+    System.out.println("*** time spent setting up IOC: " + (System.currentTimeMillis() - sUTime) + "ms");
+
+    long pfTime = System.currentTimeMillis();
     processorFactory.process(processingContext);
+    System.out.println("*** time spent in processor factory: " + (System.currentTimeMillis() - pfTime) + "ms");
+
+
+    long ptTime = System.currentTimeMillis();
 
     int i = 0;
     int beanDeclareMethodCount = 0;
@@ -345,6 +357,8 @@ public class IOCBootstrapGenerator {
 
     blockBuilder.finish();
 
+    System.out.println("*** time spent in post tasks: " + (System.currentTimeMillis() - ptTime) + "ms");
+
     return classBuilder.toJavaString();
   }
 
@@ -367,12 +381,14 @@ public class IOCBootstrapGenerator {
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
+    long extensionsTime = System.currentTimeMillis();
     /*
     * IOCDecoratorExtension.class
     */
     final Set<Class<?>> iocExtensions = scanner
         .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
     final List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
+
 
     for (final Class<?> clazz : iocExtensions) {
       try {
@@ -388,6 +404,7 @@ public class IOCBootstrapGenerator {
         throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
       }
     }
+    System.out.println("*** time spent in IOC extensions: " + (System.currentTimeMillis() - extensionsTime) + "ms");
 
     computeDependentScope(context, injectionContext);
 
@@ -405,6 +422,7 @@ public class IOCBootstrapGenerator {
     /**
      * CodeDecorator.class
      */
+    long codeDecTime = System.currentTimeMillis();
     final Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
     for (final Class<?> clazz : decorators) {
       try {
@@ -436,9 +454,15 @@ public class IOCBootstrapGenerator {
       }
     }
 
+    System.out.println("*** time spent in IOC code decorators: " + (System.currentTimeMillis() - codeDecTime) + "ms");
+
+    long extConfTime = System.currentTimeMillis();
     for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
       extensionConfigurator.afterInitialization(injectionContext.getProcessingContext(), injectionContext, processorFactory);
     }
+
+    System.out.println("*** time spent in IOC ext cfg: " + (System.currentTimeMillis() - extConfTime) + "ms");
+
   }
 
   /**
@@ -487,13 +511,27 @@ public class IOCBootstrapGenerator {
 
   private static void computeDependentScope(final GeneratorContext context, final InjectionContext injectionContext) {
 
+    final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
+
+    final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class));
+    knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class));
+
+    long scopeCalcTime = System.currentTimeMillis();
     if (context != null) {
-      for (final JPackage pkg : context.getTypeOracle().getPackages()) {
-        TypeScan:
-        for (final JClassType type : pkg.getTypes()) {
-          if (!type.isDefaultInstantiable()) {
+      TypeScan:
+      for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
+        if (translatablePackages.contains(clazz.getPackageName())) {
+
+          for (final Annotation a : clazz.getAnnotations()) {
+            final Class<? extends Annotation> clazz1 = a.annotationType();
+            if (clazz1.isAnnotationPresent(Scope.class) || clazz1.isAnnotationPresent(NormalScope.class)) {
+              continue TypeScan;
+            }
+          }
+
+          if (!clazz.isDefaultInstantiable()) {
             boolean hasInjectableConstructor = false;
-            for (final JConstructor c : type.getConstructors()) {
+            for (MetaConstructor c : clazz.getConstructors()) {
               if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
                 hasInjectableConstructor = true;
                 break;
@@ -505,17 +543,11 @@ public class IOCBootstrapGenerator {
             }
           }
 
-          for (final Annotation a : type.getAnnotations()) {
-            final Class<? extends Annotation> annoClass = a.annotationType();
-            if (annoClass.isAnnotationPresent(Scope.class)
-                || annoClass.isAnnotationPresent(NormalScope.class)) {
-              continue TypeScan;
-            }
-          }
-
-          injectionContext.addPseudoScopeForType(GWTClass.newInstance(type.getOracle(), type));
+          injectionContext.addPseudoScopeForType(clazz);
         }
       }
     }
+
+    System.out.println("*** time spent computing dependent scope: " + (System.currentTimeMillis() - scopeCalcTime) + "ms");
   }
 }

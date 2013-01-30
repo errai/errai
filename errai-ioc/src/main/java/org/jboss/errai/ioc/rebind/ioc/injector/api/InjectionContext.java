@@ -561,11 +561,12 @@ public class InjectionContext {
     registerInjector(getInjectorFactory().getTypeInjector(type, this));
   }
 
-  public void addPseudoScopeForType(final MetaClass type) {
+  public Injector addPseudoScopeForType(final MetaClass type) {
     // final TypeInjector inj = new TypeInjector(type, this);
     final AbstractInjector inj = (AbstractInjector) getInjectorFactory().getTypeInjector(type, this);
     inj.setReplaceable(true);
     registerInjector(inj);
+    return inj;
   }
 
   public IOCProcessingContext getProcessingContext() {

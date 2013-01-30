@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
 import com.google.gwt.user.client.Random;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
 import javax.annotation.PreDestroy;
@@ -31,6 +32,8 @@ import javax.inject.*;
 public class ApplicationScopedBean {
   @Inject DependentScopedBean bean1;
   @Inject DependentScopedBean bean2;
+
+  @Inject ClientMessageBus clientMessageBus;
 
   // the dependent qualification is optional -- this just confirms it doesn't break when used.
   @Inject @Dependent DependentScopedBean bean3;

@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.api.TestMock;
@@ -399,6 +400,7 @@ public class IOCConfigProcessor {
             }
           });
           break;
+
         case SingletonBean:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
@@ -543,16 +545,24 @@ public class IOCConfigProcessor {
     }
     while (!processingTasksStack.isEmpty());
 
+    long graphSortTm = System.currentTimeMillis();
     final List<SortUnit> toSort = injectionContext.getGraphBuilder().build();
     final List<SortUnit> list = GraphSort.sortGraph(toSort);
+    System.out.println("*** time spent sorting graph: " + (System.currentTimeMillis() - graphSortTm) + "ms");
 
-    final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/beangraph.gv");
 
-    RebindUtils.writeStringToFile(dotFile,
-        "//\n" +
-            "// Generated IOC bean dependency graph in GraphViz DOT format.\n" +
-            "//\n\n" +
-            GraphBuilder.toDOTRepresentation(list));
+    ThreadUtil.execute(new Runnable() {
+      @Override
+      public void run() {
+        final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/beangraph.gv");
+        RebindUtils.writeStringToFile(dotFile,
+            "//\n" +
+                "// Generated IOC bean dependency graph in GraphViz DOT format.\n" +
+                "//\n\n" +
+                GraphBuilder.toDOTRepresentation(list));
+      }
+    });
+
 
     for (final SortUnit unit : list) {
       if (unit.isCyclicGraph()) {
@@ -624,7 +634,6 @@ public class IOCConfigProcessor {
         }
         else {
           injector = injectionContext.getInjectorFactory().getTypeInjector(type, injectionContext);
-          //  injector = new TypeInjector(type, injectionContext);
         }
 
         return entry.handler

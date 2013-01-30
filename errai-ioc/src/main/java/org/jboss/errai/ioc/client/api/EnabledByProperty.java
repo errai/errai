@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.client.api;
 
-import com.google.gwt.resources.css.ast.CssProperty;
-
 import javax.inject.Scope;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

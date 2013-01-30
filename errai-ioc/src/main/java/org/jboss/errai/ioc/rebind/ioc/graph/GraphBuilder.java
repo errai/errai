@@ -18,7 +18,7 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class GraphBuilder {
-  private final Map<String, MetaClass> classLookup = new HashMap<String, MetaClass>();
+  private final Map<String, MetaClass> classLookup = new HashMap<String, MetaClass>(100);
   private final Multimap<String, Dependency> dependencyMap = HashMultimap.create();
   private final Multimap<String, Object> itemMap = HashMultimap.create();
 

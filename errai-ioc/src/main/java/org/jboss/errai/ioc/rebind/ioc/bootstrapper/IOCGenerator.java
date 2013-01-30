@@ -26,6 +26,7 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.EnvUtil;
 
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * The main generator class for the Errai IOC framework.
@@ -84,14 +85,19 @@ public class IOCGenerator extends Generator {
    */
   private void generateIOCBootstrapClass(final TreeLogger logger, final GeneratorContext context) {
     // get print writer that receives the source code
+
+
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
 
     // if null, source code has ALREADY been generated,
     if (printWriter == null)
       return;
 
+
+    final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
+
     final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(context, logger,
-            RebindUtils.findTranslatablePackages(context), false);
+        translatablePackages, false);
 
     final String out = iocBootstrapGenerator.generate(packageName, className);
 

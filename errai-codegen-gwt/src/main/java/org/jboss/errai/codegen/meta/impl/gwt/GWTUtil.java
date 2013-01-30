@@ -38,6 +38,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.config.util.ClassScanner;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -145,6 +146,8 @@ public class GWTUtil {
     if (typeOraclePopulated && (context.equals(populatedFrom.get()) || EnvUtil.isProdMode())) {
       return;
     }
+
+    ClassScanner.resetCache();
 
     final TypeOracle typeOracle = context.getTypeOracle();
     MetaClassFactory.emptyCache();
