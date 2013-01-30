@@ -192,14 +192,6 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
 
         statements.append(Stmt.declareFinalVariable(varName, depCreationCallbackMC, callback));
         statements.append(Stmt.loadVariable("async").invoke("wait", Refs.get(varName)));
-
-        final QualifyingMetadata qualifyingMetadata
-            = injectionContext.getProcessingContext().getQualifyingMetadataFactory()
-            .createFrom(metaParameter.getAnnotations());
-
-        final InjectableInstance parmInjectableInstance = InjectableInstance.getParameterInjectedInstance(metaParameter, this, injectionContext);
-
-     //   statements.append(AsyncInjectUtil.getInjectorOrProxy(injectionContext, parmInjectableInstance, metaParameter.getType(), qualifyingMetadata));
       }
     }
 

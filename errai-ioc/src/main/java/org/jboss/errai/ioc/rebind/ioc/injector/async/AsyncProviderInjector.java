@@ -62,7 +62,7 @@ public class AsyncProviderInjector extends AsyncTypeInjector {
         Stmt.declareFinalVariable(varName, providerCreationalCallback,
             Stmt.newObject(providerCreationalCallback).extend()
                 .publicOverridesMethod("callback", Parameter.of(providerInjector.getInjectedType(), "beanInstance"))
-                    .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(type, injectableInstance))
+                    .append(Stmt.loadVariable(InjectUtil.getVarNameFromType(injectableInstance.getElementTypeOrMethodReturnType(), injectableInstance))
                          .invoke("callback", Stmt.loadVariable("beanInstance").invoke("get")))
                     .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this")))
                 .finish()
