@@ -1,8 +1,8 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
@@ -31,7 +31,7 @@ public class Navigation {
 
   protected PageNode<Widget> currentPage;
 
-  @PostConstruct
+  @AfterInitialization
   private void init() {
     if (navGraph.isEmpty()) return;
 
