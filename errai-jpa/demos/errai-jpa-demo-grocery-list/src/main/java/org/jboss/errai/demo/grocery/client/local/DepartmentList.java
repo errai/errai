@@ -8,16 +8,7 @@ import org.jboss.errai.ui.client.widget.ListWidget;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.DragEnterEvent;
-import com.google.gwt.event.dom.client.DragEnterHandler;
-import com.google.gwt.event.dom.client.DragLeaveEvent;
-import com.google.gwt.event.dom.client.DragLeaveHandler;
-import com.google.gwt.event.dom.client.DragOverEvent;
-import com.google.gwt.event.dom.client.DragOverHandler;
-import com.google.gwt.event.dom.client.DragStartEvent;
-import com.google.gwt.event.dom.client.DragStartHandler;
-import com.google.gwt.event.dom.client.DropEvent;
-import com.google.gwt.event.dom.client.DropHandler;
+import com.google.gwt.event.dom.client.*;
 
 /**
  * A list of Department objects (each represented by a DepartmentWidget) whose
@@ -30,16 +21,21 @@ import com.google.gwt.event.dom.client.DropHandler;
  */
 public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
 
-  @Override
-  protected Class<DepartmentWidget> getItemWidgetType() {
-    return DepartmentWidget.class;
-  }
-
   /**
    * When an entry in this list is currently being dragged by the user, this field
    * refers to it. When nothing is being dragged, this field is null.
    */
   private DepartmentWidget draggingDepartmentWidget;
+
+  /**
+   * Storing the list of items to support drag and drop based reordering.
+   */
+  private List<Department> items;
+  
+  @Override
+  protected Class<DepartmentWidget> getItemWidgetType() {
+    return DepartmentWidget.class;
+  }
 
   /**
    * Sets the list of model objects that should be represented in the list. This
@@ -61,7 +57,14 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
   @Override
   public void setItems(final List<Department> items) {
     super.setItems(items);
-
+    this.items = items;
+  }
+  
+  /**
+   * Adding drag and drop support to all rendered item widgets.
+   */
+  @Override
+  protected void onItemsRendered() {
     // make all the widgets draggable
     for (int i = 0; i < getPanel().getWidgetCount(); i++) {
       final int widgetIndex = i;
@@ -183,4 +186,5 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
       }
     }
   }
+
 }

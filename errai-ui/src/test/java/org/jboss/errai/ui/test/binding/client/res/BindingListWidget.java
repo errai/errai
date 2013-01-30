@@ -26,9 +26,20 @@ import org.jboss.errai.ui.test.common.client.TestModel;
  */
 public class BindingListWidget extends ListWidget<TestModel, BindingItemWidget> {
   
+  private int itemsRenderedCalled = 0;
+  
   @Override
   protected Class<BindingItemWidget> getItemWidgetType() {
     return BindingItemWidget.class;
   }
 
+  @Override
+  protected void onItemsRendered() {
+    itemsRenderedCalled++;
+  }
+
+  public int getItemsRenderedCalled() {
+    return itemsRenderedCalled;
+  }
+  
 }

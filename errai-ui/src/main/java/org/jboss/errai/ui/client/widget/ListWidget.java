@@ -35,23 +35,22 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A type of widget that displays and manages a child widget for each item in a list of model objects. The widget
- * instances are managed by Errai's IOC container and are arranged in a {@link ComplexPanel}. By default a
+ * instances are managed by Errai's IOC container and are arranged in a {@link ComplexPanel}. By default, a
  * {@link VerticalPanel} is used, but an alternative can be specified using {@link #ListWidget(ComplexPanel)}.
- *
+ * 
  * @param <M>
- *     the model type
+ *          the model type
  * @param <W>
- *     the item widget type, needs to implement {@link HasModel} for associating the widget instance with the
- *     corresponding model instance.
- *
+ *          the item widget type, needs to implement {@link HasModel} for associating the widget instance with the
+ *          corresponding model instance.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite {
 
   private final ComplexPanel panel;
-  
-  private final AsyncBeanManager bm = IOC.getAsyncBeanManager();
-  private final List<WidgetCreationalCallback> creationalCallbackList = new LinkedList<WidgetCreationalCallback>();
+  private final List<WidgetCreationalCallback> callbacks = new LinkedList<WidgetCreationalCallback>();
+  private int pendingCallbacks;
 
   protected ListWidget() {
     this(new VerticalPanel());
@@ -65,14 +64,23 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   /**
    * Returns the class object for the item widget type <W> to look up new instances of the widget using the client-side
    * bean manager.
-   *
+   * 
    * @return the item widget type.
    */
   protected abstract Class<W> getItemWidgetType();
 
   /**
+   * Called after all item widgets have been rendered. By default, this is a NOOP, but subclasses can add behaviour if needed.
+   * <p>
+   * Using the standard synchronous bean manager this method is invoked before {@link #setItems(List)} returns. However,
+   * when using the asynchronous bean manager and declaring @LoadAsync on the item widget, this method might be called after
+   * {@link #setItems(List)} returns and after the corresponding JavaScript code has been downloaded.
+   */
+  protected void onItemsRendered() {};
+
+  /**
    * Returns the panel that contains all item widgets.
-   *
+   * 
    * @return the item widget panel, never null.
    */
   protected ComplexPanel getPanel() {
@@ -82,18 +90,26 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   /**
    * Sets the list of model objects. A widget instance of type <W> will be added to the panel for each object in the
    * list.
-   *
+   * <p>
+   * If the standard synchronous bean manager is used it is guaranteed that all widgets have been added to the panel
+   * when this method returns. In case the asynchronous bean manager is used this method might return before the widgets
+   * have been added to the panel. See {@link #onItemsRendered()}.
+   * 
    * @param items
-   *     The list of model objects. If null or empty all existing child widgets will be removed.
+   *          The list of model objects. If null or empty all existing child widgets will be removed.
    */
   public void setItems(List<M> items) {
+    // The AsyncBeanManager API works in both synchronous and asynchronous IOC mode
+    AsyncBeanManager bm = IOC.getAsyncBeanManager();
+    
     // In the case that this method is executed before the first call has successfully processed all of its
     // callbacks, we must cancel those uncompleted callbacks in flight to prevent duplicate data in the ListWidget.
-    for (WidgetCreationalCallback callback : creationalCallbackList) {
+    for (WidgetCreationalCallback callback : callbacks) {
       callback.discard();
     }
-    creationalCallbackList.clear();
-
+    callbacks.clear();
+    pendingCallbacks = 0;
+    
     // clean up the old widgets before we add new ones (this will eventually become a feature of the framework:
     // ERRAI-375)
     Iterator<Widget> it = panel.iterator();
@@ -104,25 +120,26 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
     if (items == null)
       return;
-    
+
+    pendingCallbacks = items.size();
     AsyncBeanDef<W> itemBeanDef = bm.lookupBean(getItemWidgetType());
     for (final M item : items) {
       final WidgetCreationalCallback callback = new WidgetCreationalCallback(item);
-      creationalCallbackList.add(callback);
+      callbacks.add(callback);
       itemBeanDef.newInstance(callback);
     }
   }
 
   /**
    * Returns the widget at the specified index.
-   *
+   * 
    * @param index
-   *     the index to be retrieved
-   *
+   *          the index to be retrieved
+   * 
    * @return the widget at the specified index
-   *
+   * 
    * @throws IndexOutOfBoundsException
-   *     if the index is out of range
+   *           if the index is out of range
    */
   @SuppressWarnings("unchecked")
   public W getWidget(int index) {
@@ -146,7 +163,11 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     public void callback(W widget) {
       if (!discard) {
         widget.setModel(item);
-        panel.add((Widget) widget);
+        panel.add(widget);
+        
+        if (--pendingCallbacks == 0) {
+          onItemsRendered();
+        }
       }
     }
 

@@ -75,6 +75,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     
     assertEquals("", listWidget.getWidget(0).getTextBox().getText());
     assertEquals("", listWidget.getWidget(1).getTextBox().getText());
+    assertEquals("onItemsRendered should be called exactly one time", 1, listWidget.getItemsRenderedCalled());
     
     BindingItemWidget itemWidget0 = listWidget.getWidget(0);
     BindingItemWidget itemWidget1 = listWidget.getWidget(1);
