@@ -282,8 +282,12 @@ public class IOCBootstrapGenerator {
   private String generateBootstrappingClassSource(final InjectionContext injectionContext) {
 
     long sUTime = System.currentTimeMillis();
+
     final IOCConfigProcessor processorFactory = new IOCConfigProcessor(injectionContext);
+
+    long preInitExt = System.currentTimeMillis();
     processExtensions(context, injectionContext, processorFactory, beforeTasks, afterTasks);
+    System.out.println("*** time spent setting up extensions: " + (System.currentTimeMillis() - preInitExt) + "ms");
 
     final IOCProcessingContext processingContext = injectionContext.getProcessingContext();
     final ClassStructureBuilder<?> classBuilder = processingContext.getBootstrapBuilder();
@@ -397,7 +401,6 @@ public class IOCBootstrapGenerator {
 
         final IOCExtensionConfigurator configurator = configuratorClass.newInstance();
         configurator.configure(injectionContext.getProcessingContext(), injectionContext, processorFactory);
-
         extensionConfigurators.add(configurator);
       }
       catch (Exception e) {
@@ -458,6 +461,7 @@ public class IOCBootstrapGenerator {
 
     long extConfTime = System.currentTimeMillis();
     for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
+      System.out.println("*** afterInit: " + extensionConfigurator.getClass().getName());
       extensionConfigurator.afterInitialization(injectionContext.getProcessingContext(), injectionContext, processorFactory);
     }
 

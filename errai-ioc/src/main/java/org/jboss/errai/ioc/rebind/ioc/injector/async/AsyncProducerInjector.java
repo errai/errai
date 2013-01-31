@@ -170,7 +170,10 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
 
     final BlockBuilder<AnonymousClassStructureBuilder> statements = ObjectBuilder.newInstanceOf(beanProviderMC)
         .extend()
-        .publicOverridesMethod("getInstance", Parameter.finalOf(creationCallbackMC, "callback"), Parameter.finalOf(AsyncCreationalContext.class, "pContext"));
+        .publicOverridesMethod("getInstance",
+            Parameter.finalOf(creationCallbackMC, "callback"),
+            Parameter.finalOf(AsyncCreationalContext.class, "pContext")
+        );
 
     injectionContext.getProcessingContext().pushBlockBuilder(statements);
 
@@ -194,7 +197,6 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
         statements.append(Stmt.loadVariable("async").invoke("wait", Refs.get(varName)));
       }
     }
-
 
     final String producerBeanCBVar = InjectUtil.getVarNameFromType(producerMember.getDeclaringClass(), injectableInstance);
     final MetaClass callbackMC = parameterizedAs(CreationalCallback.class, typeParametersOf(producerMember.getDeclaringClass()));

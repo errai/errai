@@ -40,7 +40,7 @@ public class BlockStatement extends AbstractStatement {
     }
   };
 
-  private final List<Statement> statements = new ArrayList<Statement>();
+  private final List<Statement> statements = new ArrayList<Statement>(20);
   
   public BlockStatement(final Statement... statements) {
     if (statements != null) {

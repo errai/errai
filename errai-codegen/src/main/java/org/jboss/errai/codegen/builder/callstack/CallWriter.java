@@ -32,6 +32,11 @@ public class CallWriter {
     reset();
   }
 
+  public CallWriter prepend(final String str) {
+    buffer.insert(0, str);
+    return this;
+  }
+
   public CallWriter append(final String str) {
     buffer.append(str);
     return this;

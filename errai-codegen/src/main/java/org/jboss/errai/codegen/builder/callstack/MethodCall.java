@@ -39,38 +39,38 @@ import static org.jboss.errai.codegen.CallParameters.fromStatements;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MethodCall extends AbstractCallElement {
-  private String methodName;
-  private Object[] parameters;
-  private boolean staticMethod;
+  private final String methodName;
+  private final Object[] parameters;
+  private final boolean staticMethod;
 
-  public MethodCall(String methodName, Object[] parameters) {
+  public MethodCall(final String methodName, final Object[] parameters) {
     this.methodName = methodName;
     this.parameters = parameters;
+    this.staticMethod = false;
   }
 
-  public MethodCall(String methodName, Object[] parameters, boolean staticMethod) {
+  public MethodCall(final String methodName, final Object[] parameters, final boolean staticMethod) {
     this.methodName = methodName;
     this.parameters = parameters;
     this.staticMethod = staticMethod;
   }
 
   @Override
-  public void handleCall(CallWriter writer, Context context, Statement statement) {
+  public void handleCall(final CallWriter writer, final Context context, Statement statement) {
     try {
       CallParameters callParams = fromStatements(GenUtil.generateCallParameters(context, parameters));
 
       statement.generate(context);
 
-      MetaClass callType = statement.getType();
+      final MetaClass callType = statement.getType();
 
-      MetaClass[] parameterTypes = callParams.getParameterTypes();
+      final MetaClass[] parameterTypes = callParams.getParameterTypes();
       final MetaMethod method = (staticMethod) ? callType.getBestMatchingStaticMethod(methodName, parameterTypes)
               : callType.getBestMatchingMethod(methodName, parameterTypes);
 
       if (method == null) {
-
         if (context.isPermissiveMode()) {
-          UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+          final UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
           GenUtil.rewriteBlameStackTrace(blame);
           udme.initCause(blame);
           udme.printStackTrace();
@@ -79,7 +79,7 @@ public class MethodCall extends AbstractCallElement {
           return;
         }
         else {
-          UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+          final UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
           GenUtil.rewriteBlameStackTrace(blame);
           udme.initCause(blame);
           throw udme;
@@ -87,11 +87,11 @@ public class MethodCall extends AbstractCallElement {
       }
 
       if (method.getGenericParameterTypes() != null) {
-        MetaType[] genTypes = method.getGenericParameterTypes();
+        final MetaType[] genTypes = method.getGenericParameterTypes();
         for (int i = 0; i < genTypes.length; i++) {
           if (genTypes[i] instanceof MetaParameterizedType) {
             if (parameters[i] instanceof MetaClass) {
-              MetaType type = ((MetaParameterizedType) genTypes[i]).getTypeParameters()[0];
+              final MetaType type = ((MetaParameterizedType) genTypes[i]).getTypeParameters()[0];
               if (type instanceof MetaTypeVariable) {
                 writer.recordTypeParm(((MetaTypeVariable) type).getName(), (MetaClass) parameters[i]);
               }
@@ -128,11 +128,11 @@ public class MethodCall extends AbstractCallElement {
     return "[[MethodCall<" + methodName + "(" + Arrays.toString(parameters) + ")>]" + next + "]";
   }
 
-  private void dummyReturn(CallWriter writer, Context context) {
+  private void dummyReturn(final CallWriter writer, final Context context) {
     nextOrReturn(writer, context, new Statement() {
       @Override
-      public String generate(Context context) {
-        StringBuilder parms = new StringBuilder();
+      public String generate(final Context context) {
+        final StringBuilder parms = new StringBuilder();
         for (int i = 0; i < parameters.length; i++) {
           parms.append(GenUtil.generate(context, parameters[i]));
           if (i + 1 < parameters.length) parms.append(", ");

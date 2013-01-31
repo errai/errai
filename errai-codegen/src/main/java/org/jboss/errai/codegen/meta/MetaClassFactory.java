@@ -550,6 +550,6 @@ public final class MetaClassFactory {
   }
 
   public static Collection<MetaClass> getAllCachedClasses() {
-    return Collections.unmodifiableCollection(PRIMARY_CLASS_CACHE.values());
+    return PRIMARY_CLASS_CACHE.values();
   }
 }
