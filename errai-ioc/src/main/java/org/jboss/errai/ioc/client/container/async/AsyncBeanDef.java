@@ -1,7 +1,5 @@
 package org.jboss.errai.ioc.client.container.async;
 
-import org.jboss.errai.ioc.client.container.CreationalContext;
-
 import java.lang.annotation.Annotation;
 import java.util.Set;
 

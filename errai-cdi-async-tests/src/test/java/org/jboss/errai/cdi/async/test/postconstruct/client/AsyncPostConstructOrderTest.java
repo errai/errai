@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.async.test.postconstruct.client;
 
+import org.jboss.errai.cdi.async.test.postconstruct.client.res.PostConstrAppBean;
 import org.jboss.errai.cdi.async.test.postconstruct.client.res.PostConstrBeanA;
 import org.jboss.errai.cdi.async.test.postconstruct.client.res.PostConstrBeanB;
 import org.jboss.errai.cdi.async.test.postconstruct.client.res.PostConstrBeanC;
@@ -39,7 +40,6 @@ public class AsyncPostConstructOrderTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.async.test.postconstruct.PostConstructOrderTests";
   }
 
-
   public void testPostConstructFiresInCorrectOrderR() {
     asyncTest(new Runnable() {
       @Override
@@ -56,6 +56,25 @@ public class AsyncPostConstructOrderTest extends AbstractErraiCDITest {
                 assertEquals(PostConstrBeanC.class.getName(), postConstructOrder.get(0));
                 assertEquals(PostConstrBeanB.class.getName(), postConstructOrder.get(1));
                 assertEquals(PostConstrBeanA.class.getName(), postConstructOrder.get(2));
+
+                finishTest();
+              }
+            });
+      }
+    });
+  }
+
+  public void testPostConstructCalledAsDynamicLookup() {
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        PostConstructTestUtil.reset();
+
+        IOC.getAsyncBeanManager().lookupBean(PostConstrAppBean.class)
+            .getInstance(new CreationalCallback<PostConstrAppBean>() {
+              @Override
+              public void callback(PostConstrAppBean beanInstance) {
+                assertTrue(beanInstance.isFinished());
 
                 finishTest();
               }
