@@ -20,17 +20,22 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.rebind.AsyncCodeGenerator;
+import org.jboss.errai.config.rebind.AsyncGenerators;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.config.util.ThreadUtil;
+import org.jboss.errai.ioc.client.Bootstrapper;
 
 import java.io.PrintWriter;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * The main generator class for the Errai IOC framework.
- *
+ * <p/>
  * <pre>
  *
  * </pre>
@@ -38,32 +43,35 @@ import java.util.Set;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IOCGenerator extends Generator {
-  private String className = null;
-  private String packageName = null;
+@GenerateAsync(Bootstrapper.class)
+public class IOCGenerator extends Generator implements AsyncCodeGenerator {
+  private final String className = Bootstrapper.class.getName() + "Impl";
+  private final String packageName = Bootstrapper.class.getPackage().getName();
 
   public static final boolean isTestMode = EnvUtil.isJUnitTest();
 
   public IOCGenerator() {
   }
 
+
   @Override
   public String generate(final TreeLogger logger,
                          final GeneratorContext context,
                          final String typeName)
-          throws UnableToCompleteException {
+      throws UnableToCompleteException {
 
     try {
-      // get classType and save instance variables
-
-      final JClassType classType = context.getTypeOracle().getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
-
       logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
       // Generate class source code
-      generateIOCBootstrapClass(logger, context);
+      final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+
+      // if null, source code has ALREADY been generated,
+      if (printWriter == null)
+        return null;
+
+      printWriter.append(AsyncGenerators.getFutureFor(logger, context, Bootstrapper.class).get());
+      context.commit(logger, printWriter);
     }
     catch (Throwable e) {
       // record sendNowWith logger that Map generation threw an exception
@@ -75,39 +83,30 @@ public class IOCGenerator extends Generator {
     return packageName + "." + className;
   }
 
-  /**
-   * Generate source code for new class. Class extends <code>HashMap</code>.
-   *
-   * @param logger
-   *         Logger object
-   * @param context
-   *         Generator context
-   */
-  private void generateIOCBootstrapClass(final TreeLogger logger, final GeneratorContext context) {
+  @Override
+  public Future<String> generateAsync(final TreeLogger logger, final GeneratorContext context) {
     // get print writer that receives the source code
 
+    return ThreadUtil.submit(new Callable<String>() {
+      @Override
+      public String call() throws Exception {
 
-    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+        final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
 
-    // if null, source code has ALREADY been generated,
-    if (printWriter == null)
-      return;
+        final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(context, logger,
+            translatablePackages, false);
 
+        final String out = iocBootstrapGenerator.generate(packageName, className);
 
-    final Set<String> translatablePackages = RebindUtils.findTranslatablePackages(context);
+        if (Boolean.getBoolean("errai.codegen.printOut")) {
+          System.out.println("---IOC Bootstrapper--->");
+          System.out.println(out);
+          System.out.println("<--IOC bootstrapper---");
+        }
 
-    final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(context, logger,
-        translatablePackages, false);
-
-    final String out = iocBootstrapGenerator.generate(packageName, className);
-
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---IOC Bootstrapper--->");
-      System.out.println(out);
-      System.out.println("<--IOC bootstrapper---");
-    }
-
-    printWriter.append(out);
-    context.commit(logger, printWriter);
+        return out;
+      }
+    });
   }
+
 }

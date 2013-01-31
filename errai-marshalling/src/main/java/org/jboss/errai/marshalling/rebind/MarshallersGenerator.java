@@ -24,13 +24,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
+import org.jboss.errai.config.rebind.AsyncCodeGenerator;
+import org.jboss.errai.config.rebind.AsyncGenerators;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.config.util.ThreadUtil;
+import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
@@ -48,7 +55,8 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class MarshallersGenerator extends Generator {
+@GenerateAsync(MarshallerFactory.class)
+public class MarshallersGenerator extends Generator implements AsyncCodeGenerator {
 
   private static final Logger logger = LoggerFactory.getLogger(Generator.class);
 
@@ -202,12 +210,12 @@ public class MarshallersGenerator extends Generator {
   /**
    * Simple name of class to be generated
    */
-  private String className = null;
+  private final String className = MarshallerFactory.class.getName() + "Impl";
 
   /**
    * Package name of class to be generated
    */
-  private String packageName = null;
+  private final String packageName = MarshallerFactory.class.getPackage().getName();
 
 
   @Override
@@ -219,12 +227,6 @@ public class MarshallersGenerator extends Generator {
     }
 
     try {
-      final TypeOracle typeOracle = context.getTypeOracle();
-
-      final JClassType classType = typeOracle.getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
-
       logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
 
       EnvUtil.clearCaches();
@@ -244,11 +246,21 @@ public class MarshallersGenerator extends Generator {
     return packageName + "." + className;
   }
 
-  public void generateMarshallerBootstrapper(final TreeLogger logger, final GeneratorContext context) {
+  public void generateMarshallerBootstrapper(final TreeLogger logger, final GeneratorContext context) throws Exception{
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter == null) return;
-    printWriter.write(_generate(context));
+    printWriter.write(AsyncGenerators.getFutureFor(logger, context, MarshallerFactory.class).get());
     context.commit(logger, printWriter);
+  }
+
+  @Override
+  public Future<String> generateAsync(final TreeLogger logger, final GeneratorContext context) {
+    return ThreadUtil.submit(new Callable<String>() {
+      @Override
+      public String call() throws Exception {
+         return _generate(context);
+      }
+    });
   }
 
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
