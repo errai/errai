@@ -31,7 +31,8 @@ public final class ClassScanner {
   private ClassScanner() {
   }
 
-  private final static Map<MetaClass, Collection<MetaClass>> subtypesCache = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
+  private final static Map<MetaClass, Collection<MetaClass>> subtypesCache
+      = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
 
   public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
                                                                      final Set<String> packages) {
@@ -281,5 +282,9 @@ public final class ClassScanner {
     else {
       iterator.remove();
     }
+  }
+
+  public static void clearCache() {
+    subtypesCache.clear();
   }
 }
