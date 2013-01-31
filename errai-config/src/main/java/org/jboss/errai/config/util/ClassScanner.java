@@ -285,6 +285,13 @@ public final class ClassScanner {
   }
 
   public static void clearCache() {
-    subtypesCache.clear();
+    final Iterator<Map.Entry<MetaClass, Collection<MetaClass>>> iterator = subtypesCache.entrySet().iterator();
+    while (iterator.hasNext()) {
+      final String packageName = iterator.next().getKey().getPackageName();
+      if (packageName.startsWith("com.google.gwt")) {
+        continue;
+      }
+      iterator.remove();
+    }
   }
 }
