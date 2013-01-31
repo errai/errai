@@ -63,7 +63,6 @@
                 <dependency>
                     <groupId>javax.enterprise</groupId>
                     <artifactId>cdi-api</artifactId>
-                    <version>1.0-SP4</version>
                     <scope>provided</scope>
                 </dependency>
 
@@ -141,7 +140,6 @@
                          to scope this as compile rather than provided. -->
                     <groupId>org.jboss</groupId>
                     <artifactId>jboss-common-core</artifactId>
-                    <version>2.2.14.GA</version>
                     <scope>provided</scope>
                 </dependency>
 
