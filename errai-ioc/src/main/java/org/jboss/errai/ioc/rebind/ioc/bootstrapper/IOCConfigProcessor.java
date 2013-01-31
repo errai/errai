@@ -545,11 +545,8 @@ public class IOCConfigProcessor {
     }
     while (!processingTasksStack.isEmpty());
 
-    long graphSortTm = System.currentTimeMillis();
     final List<SortUnit> toSort = injectionContext.getGraphBuilder().build();
     final List<SortUnit> list = GraphSort.sortGraph(toSort);
-    System.out.println("*** time spent sorting graph: " + (System.currentTimeMillis() - graphSortTm) + "ms");
-
 
     ThreadUtil.execute(new Runnable() {
       @Override

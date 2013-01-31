@@ -45,7 +45,7 @@ import java.util.concurrent.Future;
  */
 @GenerateAsync(Bootstrapper.class)
 public class IOCGenerator extends Generator implements AsyncCodeGenerator {
-  private final String className = Bootstrapper.class.getName() + "Impl";
+  private final String className = Bootstrapper.class.getSimpleName() + "Impl";
   private final String packageName = Bootstrapper.class.getPackage().getName();
 
   public static final boolean isTestMode = EnvUtil.isJUnitTest();

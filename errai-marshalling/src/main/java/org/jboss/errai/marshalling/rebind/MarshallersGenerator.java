@@ -210,7 +210,7 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
   /**
    * Simple name of class to be generated
    */
-  private final String className = MarshallerFactory.class.getName() + "Impl";
+  private final String className = MarshallerFactory.class.getSimpleName() + "Impl";
 
   /**
    * Package name of class to be generated
