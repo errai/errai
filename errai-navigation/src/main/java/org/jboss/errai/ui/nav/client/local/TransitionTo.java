@@ -1,6 +1,7 @@
 package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.ImmutableMultimap;
@@ -21,7 +22,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public final class TransitionTo<P extends Widget> {
 
-  private final Navigation navigation;
   private final Class<P> toPageWidgetType;
 
   /**
@@ -34,8 +34,7 @@ public final class TransitionTo<P extends Widget> {
    * @throws NullPointerException
    *           if any of the arguments are null.
    */
-  TransitionTo(Navigation navigation, Class<P> toPage) {
-    this.navigation = Assert.notNull(navigation);
+  TransitionTo(Class<P> toPage) {
     this.toPageWidgetType = Assert.notNull(toPage);
   }
 
@@ -52,6 +51,7 @@ public final class TransitionTo<P extends Widget> {
    * information.
    */
   public void go() {
+    Navigation navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
     navigation.goTo(toPageWidgetType, ImmutableMultimap.<String,String>of());
   }
 
@@ -65,6 +65,7 @@ public final class TransitionTo<P extends Widget> {
    *          it is displayed. Must not be null.
    */
   public void go(Multimap<String,String> state) {
+    Navigation navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
     navigation.goTo(toPageWidgetType, state);
   }
 

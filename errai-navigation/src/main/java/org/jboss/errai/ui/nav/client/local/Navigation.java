@@ -1,8 +1,8 @@
 package org.jboss.errai.ui.nav.client.local;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
-import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
@@ -25,13 +25,13 @@ import com.google.gwt.user.client.ui.Widget;
 @ApplicationScoped
 public class Navigation {
 
-  private SimplePanel contentPanel = new SimplePanel();
+  private final SimplePanel contentPanel = new SimplePanel();
 
-  private NavigationGraph navGraph = GWT.create(NavigationGraph.class);
+  private final NavigationGraph navGraph = GWT.create(NavigationGraph.class);
 
   protected PageNode<Widget> currentPage;
 
-  @AfterInitialization
+  @PostConstruct
   private void init() {
     if (navGraph.isEmpty()) return;
 
