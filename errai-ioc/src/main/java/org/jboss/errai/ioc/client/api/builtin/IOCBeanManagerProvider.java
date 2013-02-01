@@ -32,9 +32,9 @@ import javax.inject.Singleton;
 @IOCProvider
 @Singleton
 @EnabledByProperty(value = "errai.ioc.async_bean_manager", negated = true)
-public class IOCBeanManagerProvider implements Provider<SyncBeanManagerImpl> {
+public class IOCBeanManagerProvider implements Provider<SyncBeanManager> {
   @Override
-  public SyncBeanManagerImpl get() {
-    return (SyncBeanManagerImpl) IOC.getBeanManager();
+  public SyncBeanManager get() {
+    return IOC.getBeanManager();
   }
 }

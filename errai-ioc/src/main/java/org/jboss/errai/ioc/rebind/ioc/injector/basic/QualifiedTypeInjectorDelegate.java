@@ -172,7 +172,7 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
 
   @Override
   public boolean isEnabled() {
-    return super.isEnabled();
+    return super.isEnabled() && delegate.isEnabled();
   }
 
   @Override
@@ -183,5 +183,9 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   @Override
   public String toString() {
     return delegate.toString();
+  }
+
+  public Injector getDelegate() {
+    return delegate;
   }
 }

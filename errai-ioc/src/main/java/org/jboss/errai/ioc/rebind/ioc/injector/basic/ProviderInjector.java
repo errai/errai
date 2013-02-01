@@ -16,18 +16,25 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.basic;
 
-import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectorRegistrationListener;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class ProviderInjector extends TypeInjector {
@@ -52,7 +59,27 @@ public class ProviderInjector extends TypeInjector {
     this.testMock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
+
+    final Collection<MetaClass> toDisable = new ArrayList<MetaClass>(ClassScanner.getSubTypesOf(type));
+    toDisable.add(type);
+
     setRendered(true);
+
+    for (final MetaClass mc : toDisable) {
+      context.addInjectorRegistrationListener(mc,
+          new InjectorRegistrationListener() {
+            @Override
+            public void onRegister(final MetaClass type, Injector injector) {
+              while (injector instanceof QualifiedTypeInjectorDelegate) {
+                injector = ((QualifiedTypeInjectorDelegate) injector).getDelegate();
+              }
+
+              if (!(injector instanceof ProviderInjector)) {
+                injector.setEnabled(false);
+              }
+            }
+          });
+    }
   }
 
   @Override

@@ -220,6 +220,14 @@ public interface Injector {
   void setEnabled(boolean enabled);
 
 
+//  /**
+//   * Set the enabled state of the bean permanently to hard disabled. This means that the bean cannot be re-enabled.
+//   *
+//   * @param enabled
+//   */
+//  void setHardDisabled(boolean enabled);
+
+
   /**
    * Returns true if the injector type is a regular type injector. (ie. not a proxy injector, producer injector, etc).
    *

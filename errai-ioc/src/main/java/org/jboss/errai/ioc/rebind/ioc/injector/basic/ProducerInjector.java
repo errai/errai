@@ -44,8 +44,10 @@ import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -121,10 +123,14 @@ public class ProducerInjector extends AbstractInjector {
           }
         });
 
-   injectionContext.addInjectorRegistrationListener(injectedType,
+    injectionContext.addInjectorRegistrationListener(injectedType,
         new InjectorRegistrationListener() {
           @Override
-          public void onRegister(final MetaClass type, final Injector injector) {
+          public void onRegister(final MetaClass type, Injector injector) {
+            while (injector instanceof QualifiedTypeInjectorDelegate) {
+              injector = ((QualifiedTypeInjectorDelegate) injector).getDelegate();
+            }
+
             if (!(injector instanceof ProducerInjector)) {
               injector.setEnabled(false);
             }

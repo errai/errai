@@ -198,13 +198,23 @@ public class InjectionContext {
       }
     }
 
-    if (matching.size() > 1 && type.isConcrete()) {
-      // perform second pass
-      final Iterator<Injector> secondIterator = matching.iterator();
-      while (secondIterator.hasNext()) {
-        if (!secondIterator.next().getInjectedType().equals(erased))
-          secondIterator.remove();
+    if (matching.size() > 1) {
+      if (type.isConcrete()) {
+        // perform second pass
+        final Iterator<Injector> secondIterator = matching.iterator();
+        while (secondIterator.hasNext()) {
+          if (!secondIterator.next().getInjectedType().equals(erased))
+            secondIterator.remove();
+        }
       }
+//      else {
+//        final Iterator<Injector> secondIterator = matching.iterator();
+//        while (secondIterator.hasNext()) {
+//          if (!secondIterator.next().getInjectedType().isConcrete()) {
+//            secondIterator.remove();
+//          }
+//        }
+//      }
     }
 
     if (matching.isEmpty()) {
@@ -263,9 +273,15 @@ public class InjectionContext {
   }
 
   public boolean isTypeInjectable(final MetaClass type) {
+    if (type == null) return false;
+
     final List<Injector> injectorList = injectors.get(type);
     if (injectorList != null) {
       for (final Injector injector : injectorList) {
+        if (!injector.isEnabled()) {
+          continue;
+        }
+
         if (!injector.isRendered()) {
           return false;
         }
@@ -318,7 +334,7 @@ public class InjectionContext {
 
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : proxiedInjectors.get(injectorType.getErased())) {
-        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+        if (inj.isEnabled() && inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
           return true;
         }
       }
@@ -331,7 +347,7 @@ public class InjectionContext {
 
     if (injectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : injectors.get(injectorType.getErased())) {
-        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+        if (inj.isEnabled() && inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
           return true;
         }
       }
@@ -344,7 +360,7 @@ public class InjectionContext {
 
     if (injectors.containsKey(injectorType.getErased())) {
       for (final Injector inj : injectors.get(injectorType.getErased())) {
-        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+        if (inj.isEnabled() && inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
           return inj.isRendered();
         }
       }
@@ -429,6 +445,7 @@ public class InjectionContext {
         final Injector inj = iterator.next();
 
         if (inj.isPseudo()) {
+          inj.setEnabled(false);
           iterator.remove();
         }
       }
@@ -447,8 +464,6 @@ public class InjectionContext {
     do {
       if (cls != type && cls.isPublic()) {
         if (processedTypes.add(cls)) {
-
-
           final Injector injectorDelegate =
               getInjectorFactory().getQualifyingTypeInjector(cls, injector, cls.getParameterizedType());
 
@@ -603,7 +618,7 @@ public class InjectionContext {
       log.error(hasAnnotations + " was annotated with " + matchingAnnotation.annotationType().getName()
           + " which is not supported in client-side Errai code!");
     }
-    
+
     return matchingAnnotation != null;
   }
 
@@ -765,13 +780,7 @@ public class InjectionContext {
   }
 
   public Statement getBeanReference(final MetaClass ref) {
-    Statement stmt = beanReferenceMap.get(ref);
-
-    if (stmt == null) {
-      System.out.println();
-    }
-
-    return stmt;
+    return beanReferenceMap.get(ref);
   }
 
   public void addInlineBeanReference(final MetaParameter ref, final Statement statement) {

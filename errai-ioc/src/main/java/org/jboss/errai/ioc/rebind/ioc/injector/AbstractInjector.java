@@ -294,6 +294,11 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public void setEnabled(final boolean enabled) {
     if (!(this.enabled = enabled)) {
+
+      if (getInjectedType().getFullyQualifiedName().endsWith("Necklace")) {
+        System.out.println();
+      }
+
       _runDisablingCallbacks();
     }
   }

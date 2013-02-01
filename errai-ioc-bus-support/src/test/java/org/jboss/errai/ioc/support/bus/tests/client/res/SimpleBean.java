@@ -1,5 +1,7 @@
 package org.jboss.errai.ioc.support.bus.tests.client.res;
 
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -25,6 +27,10 @@ public class SimpleBean extends SimpleSuperBean {
 
   private RequestDispatcher dispatcher4;
   private MessageBus bus4;
+
+  @Inject
+  private ClientMessageBus clientMessageBus;
+
 
 
   @Inject
@@ -98,5 +104,9 @@ public class SimpleBean extends SimpleSuperBean {
   @Inject
   public void setBus4(MessageBus bus4) {
     this.bus4 = bus4;
+  }
+
+  public ClientMessageBus getClientMessageBus() {
+    return clientMessageBus;
   }
 }
