@@ -304,11 +304,11 @@ public class ProducerInjector extends AbstractInjector {
 
     registerWithBeanManager(injectionContext, null);
 
-    final Injector injector = injectionContext.getInjector(producerMember.getDeclaringClass());
-    injectionContext.getProcessingContext()
-        .appendToEnd(
-            Stmt.loadVariable(injector.getCreationalCallbackVarName()).invoke("getInstance", Refs.get("context"))
-        );
+//    final Injector injector = injectionContext.getInjector(producerMember.getDeclaringClass());
+//    injectionContext.getProcessingContext()
+//        .appendToEnd(
+//            Stmt.loadVariable(injector.getCreationalCallbackVarName()).invoke("getInstance", Refs.get("context"))
+//        );
 
     injectionContext.getProcessingContext().popBlockBuilder();
   }
