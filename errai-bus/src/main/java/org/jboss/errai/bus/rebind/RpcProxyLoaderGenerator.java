@@ -100,7 +100,6 @@ public class RpcProxyLoaderGenerator extends Generator implements AsyncCodeGener
     return ThreadUtil.submit(new Callable<String>() {
       @Override
       public String call() throws Exception {
-        log.info("generating rpc proxy loader class.");
         return generate(context);
       }
     });
@@ -133,6 +132,8 @@ public class RpcProxyLoaderGenerator extends Generator implements AsyncCodeGener
     }
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
+
+    log.info("rpc proxies generated.");
     return classBuilder.toJavaString();
   }
 }

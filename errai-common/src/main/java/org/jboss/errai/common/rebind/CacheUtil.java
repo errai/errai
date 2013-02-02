@@ -16,6 +16,9 @@
 
 package org.jboss.errai.common.rebind;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +26,8 @@ import java.util.Map;
  * @author Mike Brock
  */
 public abstract class CacheUtil {
+  private static final Logger log = LoggerFactory.getLogger(CacheUtil.class);
+
   private CacheUtil() {
   }
 
@@ -47,7 +52,7 @@ public abstract class CacheUtil {
   }
 
   public static synchronized void clearAll() {
-    System.out.println("*** CLEAR ALL CALLED ***");
+    log.info("clearing all generation caches...");
 
     for (Map.Entry<Class<? extends CacheStore>, CacheStore> entry : CACHE_STORE_MAP.entrySet()) {
       synchronized (entry.getKey()) {

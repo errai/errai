@@ -20,6 +20,8 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.typeinfo.TypeOracleException;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.CacheUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +31,8 @@ import java.util.concurrent.Future;
  * @author Mike Brock
  */
 public final class AsyncGenerators {
+  private static final Logger log = LoggerFactory.getLogger(AsyncGenerators.class);
+
   private AsyncGenerators() {
   }
 
@@ -79,7 +83,8 @@ public final class AsyncGenerators {
           try {
             job.getGeneratorContext().getTypeOracle().getType(generateAsync.value().getName());
             codeGenerators.put(generateAsync.value(), asyncCodeGenerator);
-            System.out.println(" ****** REGISTERED ASYNC CODE GENERATOR: " + generateAsync.value());
+
+            log.info("discovered async generator " + cls.getName() + "; for type: " + generateAsync.value().getName());
           }
           catch (TypeOracleException e) {
             e.printStackTrace();
@@ -95,7 +100,8 @@ public final class AsyncGenerators {
       for (final Map.Entry<Class, AsyncCodeGenerator> entry : codeGenerators.entrySet()) {
         activeFutures.put(entry.getKey(),
             entry.getValue().generateAsync(job.getTreeLogger(), job.getGeneratorContext()));
-        System.out.println("  ASYNC GENERATION BEGAN >> " + entry.getKey().getName());
+
+        log.info("started async generation for >> " + entry.getKey().getName());
       }
     }
     else {

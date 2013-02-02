@@ -480,7 +480,6 @@ public class CDIExtensionPoints implements Extension {
 
 
   private void createRPCScaffolding(final Class remoteIface, final MessageBus bus, final BeanManager beanManager) {
-    System.out.println("register RPC service: " + remoteIface.getName());
     final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
     // beware of classloading issues. better reflect on the actual instance
@@ -516,6 +515,8 @@ public class CDIExtensionPoints implements Extension {
         delegate.callback(message);
       }
     });
+
+    log.debug("registered RPC service for: " + remoteIface.getName());
 
     // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
     DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyFactory() {
