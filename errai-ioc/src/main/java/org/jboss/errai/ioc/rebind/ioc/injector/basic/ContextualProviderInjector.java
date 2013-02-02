@@ -50,7 +50,7 @@ public class ContextualProviderInjector extends TypeInjector {
   @Override
   public Statement getBeanInstance(final InjectableInstance injectableInstance) {
     final MetaClass type;
-    MetaParameterizedType pType = null;
+    MetaParameterizedType pType;
 
     switch (injectableInstance.getTaskType()) {
       case Type:

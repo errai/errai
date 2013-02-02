@@ -32,18 +32,20 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  */
 public class GWTParameter extends MetaParameter {
   private final JParameter parameter;
-  private volatile Annotation[] annotationsCache;
+  private final Annotation[] annotations;
   private final MetaClassMember declaredBy;
   private final TypeOracle oracle;
 
   GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaMethod declaredBy) {
     this.parameter = parameter;
+    this.annotations = parameter.getAnnotations();
     this.declaredBy = declaredBy;
     this.oracle = oracle;
   }
 
   GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaConstructor declaredBy) {
     this.parameter = parameter;
+    this.annotations = parameter.getAnnotations();
     this.declaredBy = declaredBy;
     this.oracle = oracle;
   }
@@ -59,11 +61,8 @@ public class GWTParameter extends MetaParameter {
   }
 
   @Override
-  public synchronized Annotation[] getAnnotations() {
-    if (annotationsCache == null) {
-      annotationsCache = parameter.getAnnotations();
-    }
-    return annotationsCache;
+  public Annotation[] getAnnotations() {
+    return annotations;
   }
 
   @SuppressWarnings("unchecked")

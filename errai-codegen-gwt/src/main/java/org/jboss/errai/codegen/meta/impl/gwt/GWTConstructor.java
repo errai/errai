@@ -36,11 +36,13 @@ import java.util.List;
 public class GWTConstructor extends MetaConstructor {
   private final JConstructor constructor;
   private final MetaClass declaringClass;
-  private volatile Annotation[] annotationsCache;
+  private final Annotation[] annotations;
   private final TypeOracle oracle;
 
   public GWTConstructor(final TypeOracle oracle, final JConstructor c) {
     this.constructor = c;
+    this.annotations = c.getAnnotations();
+
     this.declaringClass = GWTClass.newInstance(oracle, c.getEnclosingType());
     this.oracle = oracle;
   }
@@ -77,11 +79,8 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
-  public synchronized Annotation[] getAnnotations() {
-    if (annotationsCache == null) {
-      annotationsCache = constructor.getAnnotations();
-    }
-    return annotationsCache;
+  public Annotation[] getAnnotations() {
+    return annotations;
   }
 
   @Override

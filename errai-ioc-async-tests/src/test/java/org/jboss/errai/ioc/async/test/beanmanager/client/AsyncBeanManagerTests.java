@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.async.test.beanmanager.client;
 
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.ADependent;
+import org.jboss.errai.ioc.async.test.beanmanager.client.res.AirDependentBean;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Bar;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Cow;
 import org.jboss.errai.ioc.async.test.beanmanager.client.res.Foo;
@@ -133,6 +134,25 @@ public class AsyncBeanManagerTests extends IOCClientTestCase {
         assertTrue("should contain a cow", containsInstanceOf(beans, Cow.class));
 
         finishTest();
+      }
+    });
+  }
+
+  public void testBeanInjectedByInterface() {
+    delayTestFinish(100000);
+
+    Container.$(new Runnable() {
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(AirDependentBean.class)
+            .getInstance(new CreationalCallback<AirDependentBean>() {
+              @Override
+              public void callback(AirDependentBean beanInstance) {
+                assertNotNull(beanInstance);
+                assertNotNull(beanInstance.getAir());
+                finishTest();
+              }
+            });
       }
     });
   }

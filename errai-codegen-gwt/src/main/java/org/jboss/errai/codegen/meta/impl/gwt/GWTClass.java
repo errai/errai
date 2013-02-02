@@ -57,7 +57,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GWTClass extends AbstractMetaClass<JType> {
-  protected volatile Annotation[] annotationsCache;
+  protected final Annotation[] annotations;
   protected TypeOracle oracle;
 
   static {
@@ -68,6 +68,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
   protected GWTClass(final TypeOracle oracle, final JType classType, final boolean erased) {
     super(classType);
     this.oracle = oracle;
+
+    final JClassType classOrInterface = classType.isClassOrInterface();
+    if (classOrInterface != null) {
+      annotations = classOrInterface.getAnnotations();
+    }
+    else {
+      annotations = new Annotation[0];
+    }
 
     if (classType.getQualifiedSourceName().contains(" ")
             || classType.getQualifiedSourceName().contains("?")) {
@@ -428,20 +436,8 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   @Override
-  public synchronized Annotation[] getAnnotations() {
-    if (annotationsCache == null) {
-      final JClassType classOrInterface = getEnclosedMetaObject().isClassOrInterface();
-
-      if (classOrInterface != null) {
-        annotationsCache = classOrInterface.getAnnotations();
-      }
-
-      if (annotationsCache == null) {
-        annotationsCache = new Annotation[0];
-      }
-    }
-
-    return annotationsCache;
+  public Annotation[] getAnnotations() {
+    return annotations;
   }
 
   @Override

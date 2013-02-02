@@ -38,11 +38,12 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 public class GWTMethod extends MetaMethod {
 
   private final JMethod method;
-  private volatile Annotation[] annotationsCache;
+  private volatile Annotation[] annotations;
   private final TypeOracle oracle;
 
   GWTMethod(final TypeOracle oracle, final JMethod method) {
     this.method = method;
+    this.annotations = method.getAnnotations();
     this.oracle = oracle;
   }
 
@@ -69,10 +70,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public synchronized Annotation[] getAnnotations() {
-    if (annotationsCache == null) {
-      annotationsCache = method.getAnnotations();
-    }
-    return annotationsCache;
+    return annotations;
   }
 
   @Override
