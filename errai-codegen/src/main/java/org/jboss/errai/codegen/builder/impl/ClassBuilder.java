@@ -55,7 +55,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         ClassDefinitionStaticOption<T>,
         ClassStructureBuilder<T> {
 
-  protected BuildMetaClass classDefinition;
+  protected final BuildMetaClass classDefinition;
 
   ClassBuilder(final String className, final MetaClass parent, final Context context) {
     this.classDefinition = new BuildMetaClass(context, className);

@@ -64,11 +64,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private boolean isStatic;
   private boolean isInner;
 
-  private BlockStatement staticInitializer = new BlockStatement();
-  private BlockStatement instanceInitializer = new BlockStatement();
+  private final BlockStatement staticInitializer = new BlockStatement();
+  private final BlockStatement instanceInitializer = new BlockStatement();
 
   private List<Annotation> annotations = new ArrayList<Annotation>();
   private List<InnerClass> innerClasses = new ArrayList<InnerClass>();
+
   private List<BuildMetaMethod> methods = new ArrayList<BuildMetaMethod>();
   private List<BuildMetaField> fields = new ArrayList<BuildMetaField>();
   private List<BuildMetaConstructor> constructors = new ArrayList<BuildMetaConstructor>();
@@ -88,6 +89,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private BuildMetaClass shallowCopy() {
     final BuildMetaClass copy = new BuildMetaClass(context, className);
 
+    copy.scope = scope;
     copy.superClass = superClass;
     copy.interfaces = interfaces;
 
@@ -99,6 +101,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     copy.isStatic = isStatic;
     copy.isInner = isInner;
 
+    copy.innerClasses = innerClasses;
+    copy.annotations = annotations;
     copy.methods = methods;
     copy.fields = fields;
     copy.constructors = constructors;
