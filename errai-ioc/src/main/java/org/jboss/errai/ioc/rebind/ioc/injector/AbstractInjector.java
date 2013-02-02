@@ -295,9 +295,9 @@ public abstract class AbstractInjector implements Injector {
   public void setEnabled(final boolean enabled) {
     if (!(this.enabled = enabled)) {
 
-      if (getInjectedType().getFullyQualifiedName().endsWith("Necklace")) {
-        System.out.println();
-      }
+//      if (getInjectedType().getFullyQualifiedName().endsWith("Necklace")) {
+//        System.out.println();
+//      }
 
       _runDisablingCallbacks();
     }
@@ -329,6 +329,11 @@ public abstract class AbstractInjector implements Injector {
       }
     }
     return false;
+  }
+
+  @Override
+  public MetaClass getConcreteInjectedType() {
+    return getInjectedType();
   }
 }
 

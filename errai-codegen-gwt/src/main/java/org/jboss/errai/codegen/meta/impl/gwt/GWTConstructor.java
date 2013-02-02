@@ -77,7 +77,7 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = constructor.getAnnotations();
     }

@@ -14,6 +14,7 @@ import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
 import org.jboss.errai.ioc.rebind.ioc.test.harness.MockIOCGenerator;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -39,7 +40,7 @@ public class InvalidProducerIntegrationTest {
    * @throws IllegalAccessException -
    * @throws InstantiationException -
    */
-  @Test
+  @Test @Ignore
   public void testInvalidProducerWithMissingQualifier() throws InstantiationException, IllegalAccessException {
     try {
       final Set<String> packages = new HashSet<String>();

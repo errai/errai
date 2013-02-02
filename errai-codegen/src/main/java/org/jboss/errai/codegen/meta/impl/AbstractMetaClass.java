@@ -288,51 +288,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return staticMethodCache = methods.toArray(new MetaMethod[methods.size()]);
   }
 
-  private static final Map<MetaMethod[], Method[]> METAMETHOD_TO_METHOD_CACHE = new HashMap<MetaMethod[], Method[]>();
-
-  private static Method[] fromMetaMethod(final MetaMethod[] methods) {
-    Method[] result = METAMETHOD_TO_METHOD_CACHE.get(methods);
-    if (result == null) {
-
-      if (methods == null || methods.length == 0) {
-        return new Method[0];
-      }
-
-      final List<Method> staticMethods = new ArrayList<Method>();
-
-      for (final MetaMethod m : methods) {
-        final Method javaMethod = getJavaMethodFromMetaMethod(m);
-        if (javaMethod != null)
-          staticMethods.add(javaMethod);
-      }
-
-      result = staticMethods.toArray(new Method[staticMethods.size()]);
-      METAMETHOD_TO_METHOD_CACHE.put(methods, result);
-    }
-    return result;
-  }
-
-  private static Method getJavaMethodFromMetaMethod(final MetaMethod method) {
-    final Class<?> declaring = method.getDeclaringClass().asClass();
-    final Class<?>[] parms = getParmTypes(method.getParameters());
-
-    try {
-      return declaring.getMethod(method.getName(), parms);
-    }
-    catch (NoSuchMethodException e) {
-      return null;
-    }
-  }
-
-  private static Class<?>[] getParmTypes(final MetaParameter[] parameters) {
-    final List<Class<?>> parmTypes = new ArrayList<Class<?>>();
-
-    for (final MetaParameter parameter : parameters) {
-      parmTypes.add(parameter.getType().asClass());
-    }
-
-    return parmTypes.toArray(new Class<?>[parmTypes.size()]);
-  }
 
   @Override
   public MetaConstructor getBestMatchingConstructor(final Class... parameters) {

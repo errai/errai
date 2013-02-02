@@ -47,6 +47,7 @@ import org.jboss.errai.cdi.server.events.EventRoutingTable;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
@@ -315,6 +316,8 @@ public class CDIExtensionPoints implements Extension {
     if (t instanceof Class) {
       type = (Class) t;
     }
+
+    ClassScanner.setReflectionsScanning(true);
 
     if (type != null && EnvUtil.isPortableType(type)) {
       final Set<Annotation> annotations = processObserverMethod.getObserverMethod().getObservedQualifiers();

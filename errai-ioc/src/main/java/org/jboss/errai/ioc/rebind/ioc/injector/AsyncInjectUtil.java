@@ -380,7 +380,7 @@ public class AsyncInjectUtil {
       if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof AsyncTypeInjector) {
         return Stmt.loadVariable("context").invoke("getInstanceOrNew",
             Refs.get(inj.getCreationalCallbackVarName()),
-            Refs.get(InjectUtil.getVarNameFromType(inj.getInjectedType(), injectableInstance)),
+            Refs.get(InjectUtil.getVarNameFromType(inj.getConcreteInjectedType(), injectableInstance)),
             inj.getInjectedType(),
             inj.getQualifyingMetadata().getQualifiers());
       }
@@ -635,8 +635,10 @@ public class AsyncInjectUtil {
   private static Statement recordInlineReference(final InjectionContext ctx,
                                                  final MetaParameter parm) {
 
+    final Injector injector = ctx.getQualifiedInjector(parm.getType(), parm.getAnnotations());
+
     final Statement stmt = Cast.to(parm.getType(), Stmt.loadVariable("async").invoke("getBeanValue",
-        Refs.get(InjectUtil.getVarNameFromType(parm.getType(), parm))));
+        Refs.get(InjectUtil.getVarNameFromType(injector.getConcreteInjectedType(), parm))));
 
     ctx.addInlineBeanReference(parm, stmt);
     return stmt;

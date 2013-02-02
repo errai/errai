@@ -183,13 +183,16 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     if (producerMember instanceof MetaMethod) {
       final MetaMethod producerMethod = (MetaMethod) producerMember;
       for (final MetaParameter metaParameter : producerMethod.getParameters()) {
-        final String varName = InjectUtil.getVarNameFromType(metaParameter.getType(), metaParameter);
+        final Injector inj = injectionContext.getQualifiedInjector(metaParameter.getType(), metaParameter.getAnnotations());
+
+        final MetaClass concreteInjectedType = inj.getConcreteInjectedType();
+        final String varName = InjectUtil.getVarNameFromType(concreteInjectedType, metaParameter);
 
         final MetaClass depCreationCallbackMC = parameterizedAs(CreationalCallback.class,
-            typeParametersOf(metaParameter.getType()));
+            typeParametersOf(concreteInjectedType));
 
         final ObjectBuilder callback = Stmt.newObject(depCreationCallbackMC)
-            .extend().publicOverridesMethod("callback", Parameter.finalOf(metaParameter.getType(), "beanValue"))
+            .extend().publicOverridesMethod("callback", Parameter.finalOf(concreteInjectedType, "beanValue"))
             .append(Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("beanValue")))
             .finish().finish();
 
@@ -237,11 +240,9 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     final BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
 
     if (isDependent()) {
-
       callbackBuilder.append(
           Stmt.loadVariable(creationalCallbackVarName)
               .invoke("getInstance", Refs.get(InjectUtil.getVarNameFromType(injectedType, injectableInstance)), Refs.get("context"))
-
       );
     }
     else {

@@ -27,7 +27,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.Multimaps;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -66,14 +68,17 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   /**
    * Map of aliases to the mapped marshalling type.
    */
-  private final Map<String, String> mappingAliases = new HashMap<String, String>();
+  private final Map<String, String> mappingAliases
+      = new HashMap<String, String>();
 
-  private final Map<String, MappingDefinition> MAPPING_DEFINITIONS = new HashMap<String, MappingDefinition>();
+  private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
+      = new HashMap<String, MappingDefinition>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
   // key = all types, value = list of all types which inherit from.
-  private final Multimap<String, String> inheritanceMap = HashMultimap.create();
+  private final Multimap<String, String> inheritanceMap
+      = HashMultimap.create();
 
   DefinitionsFactoryImpl() {
     loadCustomMappings();

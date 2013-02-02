@@ -50,6 +50,7 @@ public class MappingContextSingleton {
 
   static {
     ClassScanner.setReflectionsScanning(true);
+
     ParserFactory.registerParser(
         new Parser() {
           @Override

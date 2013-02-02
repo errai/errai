@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config.rebind;
+package org.jboss.errai.cdi.async.test.producers.client.res;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GenerateAsync {
-  Class value();
+@ApplicationScoped
+public class AustenProducerDependnetBean {
+  @Inject Austen austen;
+
+  public Austen getAusten() {
+    return austen;
+  }
 }

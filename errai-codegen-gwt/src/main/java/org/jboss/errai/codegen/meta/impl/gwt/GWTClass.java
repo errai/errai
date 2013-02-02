@@ -57,7 +57,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GWTClass extends AbstractMetaClass<JType> {
-  protected Annotation[] annotationsCache;
+  protected volatile Annotation[] annotationsCache;
   protected TypeOracle oracle;
 
   static {
@@ -428,7 +428,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       final JClassType classOrInterface = getEnclosedMetaObject().isClassOrInterface();
 

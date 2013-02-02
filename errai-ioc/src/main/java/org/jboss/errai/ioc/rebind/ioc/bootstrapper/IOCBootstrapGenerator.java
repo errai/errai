@@ -370,7 +370,6 @@ public class IOCBootstrapGenerator {
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
-    long extensionsTime = System.currentTimeMillis();
     /*
     * IOCDecoratorExtension.class
     */
@@ -408,7 +407,6 @@ public class IOCBootstrapGenerator {
     /**
      * CodeDecorator.class
      */
-    long codeDecTime = System.currentTimeMillis();
     final Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
     for (final Class<?> clazz : decorators) {
       try {
@@ -497,7 +495,6 @@ public class IOCBootstrapGenerator {
     final Set<MetaClass> knownScopes = new HashSet<MetaClass>(ClassScanner.getTypesAnnotatedWith(Scope.class));
     knownScopes.addAll(ClassScanner.getTypesAnnotatedWith(NormalScope.class));
 
-    long scopeCalcTime = System.currentTimeMillis();
     if (context != null) {
       TypeScan:
       for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {

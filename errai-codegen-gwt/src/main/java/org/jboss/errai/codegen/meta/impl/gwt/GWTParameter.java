@@ -59,7 +59,7 @@ public class GWTParameter extends MetaParameter {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = parameter.getAnnotations();
     }

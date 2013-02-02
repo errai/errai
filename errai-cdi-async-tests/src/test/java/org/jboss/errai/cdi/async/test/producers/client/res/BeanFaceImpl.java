@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.config.rebind;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+package org.jboss.errai.cdi.async.test.producers.client.res;
 
 /**
  * @author Mike Brock
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface GenerateAsync {
-  Class value();
+public class BeanFaceImpl implements BeanFace {
 }

@@ -95,7 +95,7 @@ public class AsyncContextualProviderInjector extends TypeInjector {
         = MetaClassFactory.parameterizedAs(CreationalCallback.class,
         MetaClassFactory.typeParametersOf(providerInjector.getInjectedType()));
 
-    final String varName = InjectUtil.getVarNameFromType(providerInjector.getInjectedType(), injectableInstance);
+    final String varName = InjectUtil.getVarNameFromType(providerInjector.getConcreteInjectedType(), injectableInstance);
 
     final Statement valueRef;
 

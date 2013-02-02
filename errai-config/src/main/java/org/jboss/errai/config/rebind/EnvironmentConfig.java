@@ -1,6 +1,7 @@
 package org.jboss.errai.config.rebind;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.common.rebind.CacheStore;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
  */
 public class ThreadUtil {
   private static final ExecutorService executorService
-      = Executors.newCachedThreadPool();
+      = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
   public static void execute(final Runnable runnable) {
     executorService.execute(runnable);
@@ -37,7 +37,7 @@ public class ThreadUtil {
   }
 
   public static Future<?> submit(final Runnable runnable) {
-    return executorService.submit(runnable);
+   return executorService.submit(runnable);
   }
 
   public static void stopExecutor() {

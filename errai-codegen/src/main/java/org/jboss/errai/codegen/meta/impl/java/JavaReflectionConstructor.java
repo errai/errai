@@ -38,7 +38,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   private final Constructor constructor;
   private MetaParameter[] parameters;
   private MetaClass declaringClass;
-  private Annotation[] annotationsCache;
+  private volatile Annotation[] annotationsCache;
 
   JavaReflectionConstructor(final Constructor c) {
     constructor = c;
@@ -104,7 +104,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = constructor.getAnnotations();
     }

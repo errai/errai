@@ -45,6 +45,8 @@ import com.google.common.collect.Multimap;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.reflections.Configuration;
 import org.jboss.errai.reflections.Reflections;
 import org.jboss.errai.reflections.ReflectionsException;
@@ -66,8 +68,17 @@ import org.jboss.errai.reflections.vfs.Vfs;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MetaDataScanner extends Reflections {
-  public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
+  public static class CacheHolder implements CacheStore {
+    final Map<String, Set<SortableClassFileWrapper>> ANNOTATIONS_TO_CLASS =
+          new ConcurrentHashMap<String, Set<SortableClassFileWrapper>>();
 
+    @Override
+    public void clear() {
+      ANNOTATIONS_TO_CLASS.clear();
+    }
+  }
+
+  public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
   private static final ErraiPropertyScanner propScanner = new ErraiPropertyScanner(
       new Predicate<String>() {
@@ -87,9 +98,6 @@ public class MetaDataScanner extends Reflections {
       scan();
     }
   }
-
-  static final Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =
-      new ConcurrentHashMap<String, Set<SortableClassFileWrapper>>();
 
   private static Configuration getConfiguration(final List<URL> urls) {
     return new ConfigurationBuilder()
@@ -207,7 +215,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   public String getHashForTypesAnnotatedWith(final String seed, final Class<? extends Annotation> annotation) {
-    if (!annotationsToClassFile.containsKey(annotation.getName())) {
+    if (!CacheUtil.getCache(CacheHolder.class).ANNOTATIONS_TO_CLASS.containsKey(annotation.getName())) {
       return "0";
     }
     else {
@@ -219,7 +227,7 @@ public class MetaDataScanner extends Reflections {
         }
 
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        for (final SortableClassFileWrapper classFileWrapper : annotationsToClassFile.get(annotation.getName())) {
+        for (final SortableClassFileWrapper classFileWrapper : CacheUtil.getCache(CacheHolder.class).ANNOTATIONS_TO_CLASS.get(annotation.getName())) {
           byteArrayOutputStream.reset();
           final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
           classFileWrapper.getClassFile().write(dataOutputStream);

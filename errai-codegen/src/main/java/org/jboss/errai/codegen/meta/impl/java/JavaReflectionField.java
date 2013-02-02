@@ -42,10 +42,10 @@ public class JavaReflectionField extends MetaField {
     return MetaClassFactory.get(field.getType(), field.getGenericType());
   }
 
-  private Annotation[] _annotationsCache;
+  private volatile Annotation[] _annotationsCache;
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache != null) {
       return _annotationsCache;
     }

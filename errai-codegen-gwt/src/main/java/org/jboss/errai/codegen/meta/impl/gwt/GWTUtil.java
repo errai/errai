@@ -16,21 +16,6 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.lang.ref.SoftReference;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jboss.errai.codegen.literal.LiteralFactory;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.EnvUtil;
-
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JArrayType;
@@ -38,7 +23,21 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassCache;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.rebind.EnvUtil;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -101,8 +100,8 @@ public class GWTUtil {
       return new GWTTypeVariable(oracle, t.isTypeParameter());
     }
     else if (t.isArray() != null
-            && (t.isArray().getComponentType().isTypeParameter() != null
-               || t.isArray().getComponentType().isWildcard() != null)) {
+        && (t.isArray().getComponentType().isTypeParameter() != null
+        || t.isArray().getComponentType().isWildcard() != null)) {
       return new GWTGenericArrayType(oracle, t.isArray());
     }
     else if (t.isParameterized() != null) {
@@ -112,21 +111,18 @@ public class GWTUtil {
       return new GWTWildcardType(oracle, t.isWildcard());
     }
     else if (t.isClassOrInterface() != null
-            || t.isEnum() != null
-            || t.isPrimitive() != null
-            || t.isRawType() != null
-            || t.isArray() != null) {
+        || t.isEnum() != null
+        || t.isPrimitive() != null
+        || t.isRawType() != null
+        || t.isArray() != null) {
       return GWTClass.newInstance(oracle, t);
     }
     else {
       throw new RuntimeException("Don't know how to make a MetaType from given JType " + t +
-              " (which is a " + (t == null ? null : t.getClass()) + ")");
+          " (which is a " + (t == null ? null : t.getClass()) + ")");
     }
   }
-
-  private static volatile boolean typeOraclePopulated = false;
-  private static volatile SoftReference<GeneratorContext> populatedFrom
-          = new SoftReference<GeneratorContext>(null);
+  private static volatile GeneratorContext populatedFrom;
 
   /**
    * Erases the {@link MetaClassFactory} cache, then populates it with types
@@ -136,24 +132,26 @@ public class GWTUtil {
    * (super-source classes) are used in preference to the Java reflection based
    * class definitions.
    *
-   * @param context The GeneratorContext supplied by the GWT compiler. Not null.
-   * @param logger  The TreeLogger supplied by the GWT compiler. Not null.
+   * @param context
+   *     The GeneratorContext supplied by the GWT compiler. Not null.
+   * @param logger
+   *     The TreeLogger supplied by the GWT compiler. Not null.
    */
-  public static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
+  public synchronized static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
                                                             final TreeLogger logger) {
+
     // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
     // changing classes. Therefore, do a NOOP after the first successful call.
-    if (typeOraclePopulated && (context.equals(populatedFrom.get()) || EnvUtil.isProdMode())) {
+    if (context.equals(populatedFrom) || EnvUtil.isProdMode()) {
       return;
     }
 
-    ClassScanner.resetCache();
-
     final TypeOracle typeOracle = context.getTypeOracle();
-    MetaClassFactory.emptyCache();
+    final MetaClassCache cache = MetaClassFactory.getMetaClassCache();
+
     // Clearing the LiteralFactory cache resolved https://issues.jboss.org/browse/ERRAI-456
-    LiteralFactory.emptyCache();
     if (typeOracle != null) {
+      final Map<String, MetaClass> classesToPush = new HashMap<String, MetaClass>(typeOracle.getTypes().length);
       final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));
       translatable.remove("java.lang");
       translatable.remove("java.lang.annotation");
@@ -167,21 +165,26 @@ public class GWTUtil {
         if (type.isAnnotation() != null || type.getQualifiedSourceName().equals("java.lang.annotation.Annotation")) {
           logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
 
-          if (!MetaClassFactory.canLoadClass(type.getQualifiedBinaryName()))  {
-             throw new RuntimeException("a new annotation has been introduced (" + type.getQualifiedSourceName() + "); "
-             + "you cannot currently introduce new annotations in devmode. Please restart.");
+          if (!MetaClassFactory.canLoadClass(type.getQualifiedBinaryName())) {
+            throw new RuntimeException("a new annotation has been introduced (" + type.getQualifiedSourceName() + "); "
+                + "you cannot currently introduce new annotations in devmode. Please restart.");
           }
 
-          MetaClassFactory.pushCache(JavaReflectionClass
-                  .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
+
+          final MetaClass clazz = JavaReflectionClass
+              .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName()));
+
+          classesToPush.put(clazz.getFullyQualifiedName(), clazz);
         }
         else {
           logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
-          MetaClassFactory.pushCache(GWTClass.newInstance(typeOracle, type));
+          final MetaClass clazz = GWTClass.newInstance(typeOracle, type);
+          classesToPush.put(clazz.getFullyQualifiedName(), clazz);
         }
       }
+
+      cache.pushCacheAll(classesToPush);
     }
-    typeOraclePopulated = true;
-    populatedFrom = new SoftReference<GeneratorContext>(context);
+    populatedFrom = context;
   }
 }

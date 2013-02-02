@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.async.test.producers.client;
 
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncProducerDependentBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.AsyncSingletonProducerDependentBean;
+import org.jboss.errai.cdi.async.test.producers.client.res.AustenProducerDependnetBean;
 import org.jboss.errai.cdi.async.test.producers.client.res.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.Container;
@@ -104,6 +105,24 @@ public class AsyncProducerTest extends AbstractErraiCDITest {
                 finishTest();
               }
             });
+      }
+    });
+  }
+
+  public void testProducerAcceptingInterfaceType() {
+    asyncTest(new Runnable() {
+      @Override
+      public void run() {
+        IOC.getAsyncBeanManager().lookupBean(AustenProducerDependnetBean.class)
+               .getInstance(new CreationalCallback<AustenProducerDependnetBean>() {
+                 @Override
+                 public void callback(final AustenProducerDependnetBean bean) {
+                   assertNotNull(bean);
+                   assertNotNull(bean.getAusten());
+
+                   finishTest();
+                 }
+               });
       }
     });
   }

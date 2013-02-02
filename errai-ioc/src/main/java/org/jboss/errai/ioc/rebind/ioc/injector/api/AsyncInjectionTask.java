@@ -159,7 +159,7 @@ public class AsyncInjectionTask {
               new AsyncInjectorResolveCallback() {
                 @Override
                 public void onResolved(final Injector resolvedInjector) {
-                  generateCallback(InjectUtil.getVarNameFromType(field.getType(), field),
+                  generateCallback(InjectUtil.getVarNameFromType(resolvedInjector.getConcreteInjectedType(), field),
                       resolvedInjector.getInjectedType(), ctx, fieldAccessStmt,
                       Stmt.loadVariable("async").invoke("finish", Refs.get("this")));
                 }
@@ -203,7 +203,8 @@ public class AsyncInjectionTask {
               @Override
               public void onResolved(final Injector resolvedInjector) {
                 generateCallback(
-                    InjectUtil.getVarNameFromType(resolvedInjector.getInjectedType(), method.getParameters()[atomicInteger.getAndIncrement()]),
+                    InjectUtil.getVarNameFromType(resolvedInjector.getConcreteInjectedType(),
+                        method.getParameters()[atomicInteger.getAndIncrement()]),
                     resolvedInjector.getInjectedType(),
                     ctx,
                     Stmt.loadVariable("async").invoke("finish", Refs.get("this"), Refs.get("bean")));

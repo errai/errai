@@ -35,4 +35,14 @@ public class AsyncQualifiedTypeInjectorDelegate extends QualifiedTypeInjectorDel
       }
     }
   }
+
+  @Override
+  public MetaClass getConcreteInjectedType() {
+    Injector inj = delegate;
+    while (inj instanceof AsyncQualifiedTypeInjectorDelegate) {
+      inj = ((QualifiedTypeInjectorDelegate) inj).getDelegate();
+    }
+    return inj.getInjectedType();
+  }
+
 }

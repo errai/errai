@@ -37,6 +37,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AsyncCodeGenerator;
+import org.jboss.errai.config.rebind.AsyncGenerationJob;
 import org.jboss.errai.config.rebind.AsyncGenerators;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
@@ -48,7 +49,6 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
@@ -72,7 +72,15 @@ public class RpcProxyLoaderGenerator extends Generator implements AsyncCodeGener
         final File fileCacheDir = org.jboss.errai.common.metadata.RebindUtils.getErraiCacheDir();
         final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
-        final String gen = AsyncGenerators.getFutureFor(logger, context, RpcProxyLoader.class).get();
+        final Future<String> future = AsyncGenerationJob.createBuilder()
+            .treeLogger(logger)
+            .generatorContext(context)
+            .interfaceType(RpcProxyLoader.class)
+            .build()
+            .submit();
+
+        //   final String gen = AsyncGenerators.getFutureFor(logger, context, RpcProxyLoader.class).get();
+        final String gen = future.get();
         printWriter.append(gen);
         RebindUtils.writeStringToFile(cacheFile, gen);
 

@@ -170,6 +170,10 @@ public class InjectionContext {
     }
   }
 
+  public Injector getQualifiedInjector(final MetaClass type, final Annotation[] annotations) {
+    return getQualifiedInjector(type, getProcessingContext().getQualifyingMetadataFactory().createFrom(annotations));
+  }
+
   public Injector getQualifiedInjector(final MetaClass type, final QualifyingMetadata metadata) {
     final MetaClass erased = type.getErased();
     final List<Injector> injectors = this.injectors.get(erased);

@@ -47,6 +47,14 @@ import java.util.TreeSet;
  * @author Mike Brock
  */
 public class Context {
+
+  private final Thread BLESSED_THREAD = Thread.currentThread();
+
+  private void checkThread() {
+    if (Thread.currentThread() != BLESSED_THREAD) {
+      throw new RuntimeException("WRONG THREAD!! Expected " + BLESSED_THREAD + "; got " + Thread.currentThread());
+    }
+  }
   private Context parent = null;
 
   private Map<String, Variable> variables;
@@ -117,6 +125,7 @@ public class Context {
    * @return the current context with the variable added.
    */
   public Context addVariable(final String name, final Class<?> type) {
+    checkThread();
     return addVariable(Variable.create(Assert.notNull(name), Assert.notNull(type)));
   }
 
@@ -133,6 +142,7 @@ public class Context {
    * @return the current context with the variable added.
    */
   public Context addVariable(final String name, final Class<?> type, final Object initialization) {
+    checkThread();
     final Variable v = Variable.create(Assert.notNull(name), Assert.notNull(type), initialization);
     return addVariable(v);
   }
@@ -146,6 +156,7 @@ public class Context {
    * @return the current context with the variable added.
    */
   public Context addVariable(final Variable variable) {
+    checkThread();
     if (variables == null)
       variables = new HashMap<String, Variable>();
 
@@ -162,6 +173,7 @@ public class Context {
    * @return the current context with the label added.
    */
   public Context addLabel(final Label label) {
+    checkThread();
     if (labels == null)
       labels = new HashMap<String, Label>();
 
@@ -171,6 +183,7 @@ public class Context {
 
   // Ensures that imports are visible/shared between all parent/child contexts.
   private void initImports() {
+    checkThread();
     if (imports == null) {
       Context c = this;
       Map<String, String> importsMap = null;
@@ -205,6 +218,7 @@ public class Context {
    * @return the current context with the import added.
    */
   public Context addImport(MetaClass clazz) {
+    checkThread();
     initImports();
 
     while (clazz.isArray()) {
@@ -230,6 +244,7 @@ public class Context {
    * @return true if import exists, otherwise false.
    */
   public boolean hasImport(MetaClass clazz) {
+    checkThread();
     if (clazz.isArray()) {
       clazz = clazz.getComponentType();
     }
@@ -239,6 +254,7 @@ public class Context {
   }
 
   private String getImportForClass(final MetaClass clazz) {
+    checkThread();
     String imp = null;
 
     final String fqcn = clazz.getCanonicalName();
@@ -256,6 +272,7 @@ public class Context {
    * @return required imports
    */
   public Set<String> getRequiredImports() {
+    checkThread();
     if (imports == null)
       return Collections.emptySet();
 
@@ -275,6 +292,7 @@ public class Context {
    * @return the current context whit auto import enabled.
    */
   public Context autoImport() {
+    checkThread();
     this.autoImportActive = true;
     return this;
   }
@@ -291,6 +309,7 @@ public class Context {
    *     if variable with the given name can not be found.
    */
   public VariableReference getVariable(final String name) {
+    checkThread();
     return getVariable(name, false);
   }
 
@@ -306,10 +325,12 @@ public class Context {
    *     if member variable with the given name can not be found.
    */
   public VariableReference getClassMember(final String name) {
+    checkThread();
     return getVariable(name, true);
   }
 
   private VariableReference getVariable(final String name, final boolean mustBeClassMember) {
+    checkThread();
     Variable found = null;
     Context ctx = this;
     do {
@@ -345,6 +366,7 @@ public class Context {
    *     if label with the given name can not be found.
    */
   public LabelReference getLabel(final String name) {
+    checkThread();
     Label found = null;
     Context ctx = this;
     do {
@@ -370,6 +392,7 @@ public class Context {
    * @return true if in scope, otherwise false.
    */
   public boolean isScoped(final Variable variable) {
+    checkThread();
     Context ctx = this;
     do {
       if (ctx.variables != null && ctx.variables.containsValue(variable))
@@ -388,6 +411,7 @@ public class Context {
    * @return true if in scope, otherwise false.
    */
   public boolean isInScope(final MetaMethod method) {
+    checkThread();
     Context c = this;
     do {
       for (final MetaClass clazz : c.classContexts) {
@@ -411,6 +435,7 @@ public class Context {
    * @return true if in scope, otherwise false.
    */
   public boolean isInScope(final MetaField field) {
+    checkThread();
     Context c = this;
     do {
       for (final MetaClass clazz : c.classContexts) {
@@ -434,6 +459,7 @@ public class Context {
    * @return true if ambiguous, otherwise false.
    */
   public boolean isAmbiguous(final String varName) {
+    checkThread();
     Context ctx = this;
     int matches = 0;
     do {
@@ -450,18 +476,21 @@ public class Context {
    * @return collection of {@link Variable}, empty if no variables are in scope.
    */
   public Collection<Variable> getDeclaredVariables() {
+    checkThread();
     if (variables == null)
       return Collections.<Variable>emptyList();
     return variables.values();
   }
 
   public void addLiteralizableClasses(final Collection<Class<?>> clazzes) {
+    checkThread();
     for (final Class<?> cls : clazzes) {
       addLiteralizableClass(cls);
     }
   }
 
   public void addLiteralizableMetaClasses(final Collection<MetaClass> clazzes) {
+    checkThread();
     for (final MetaClass cls : clazzes) {
       addLiteralizableClass(cls);
     }
@@ -475,6 +504,7 @@ public class Context {
    *     the class, interface or superclass to be considered literalizable.
    */
   public void addLiteralizableClass(final Class clazz) {
+    checkThread();
     addLiteralizableClass(MetaClassFactory.get(clazz));
   }
 
@@ -486,6 +516,7 @@ public class Context {
    *     the class, interface or superclass to be considered literalizable.
    */
   public void addLiteralizableClass(final MetaClass clazz) {
+    checkThread();
     literalizableClasses.add(clazz.getErased());
   }
 
@@ -500,6 +531,7 @@ public class Context {
    * @see #addLiteralizableClass(Class)
    */
   public boolean isLiteralizableClass(final Class clazz) {
+    checkThread();
     return isLiteralizableClass(MetaClassFactory.get(clazz));
   }
 
@@ -514,6 +546,7 @@ public class Context {
    * @see #addLiteralizableClass(MetaClass)
    */
   public boolean isLiteralizableClass(final MetaClass clazz) {
+    checkThread();
     return getLiteralizableTargetType(clazz) != null;
   }
 
@@ -530,6 +563,7 @@ public class Context {
    * @return the literalizable target type that matches
    */
   public Class getLiteralizableTargetType(final Class clazz) {
+    checkThread();
     return getLiteralizableTargetType(MetaClassFactory.get(clazz));
   }
 
@@ -546,6 +580,7 @@ public class Context {
    * @return the literalizable target type that matches
    */
   public Class getLiteralizableTargetType(final MetaClass clazz) {
+    checkThread();
     Context ctx = this;
     do {
       MetaClass cls = clazz;
@@ -571,6 +606,7 @@ public class Context {
    * @return map of variable name to {@link Variable}, empty if no variables are in scope.
    */
   public Map<String, Variable> getVariables() {
+    checkThread();
     if (variables == null)
       return Collections.<String, Variable>emptyMap();
 
@@ -584,6 +620,7 @@ public class Context {
    *     class to attach.
    */
   public void attachClass(final MetaClass clazz) {
+    checkThread();
     this.classContexts.add(clazz);
   }
 
@@ -593,6 +630,7 @@ public class Context {
    * @return true if auto import active, otherwise false.
    */
   public boolean isAutoImportActive() {
+    checkThread();
     return autoImportActive;
   }
 
@@ -602,6 +640,7 @@ public class Context {
    * @return
    */
   public boolean isPermissiveMode() {
+    checkThread();
     return permissiveMode;
   }
 
@@ -611,11 +650,13 @@ public class Context {
    * @param permissiveMode
    */
   public void setPermissiveMode(final boolean permissiveMode) {
+    checkThread();
     this.permissiveMode = permissiveMode;
   }
 
   // TODO factor this out. should not be part of Context.
   public <K, V> Map<K, V> getRenderingCache(final RenderCacheStore<K, V> store) {
+    checkThread();
     Map<K, V> cacheStore = (Map<K, V>) renderingCache.get(store.getName());
     if (cacheStore == null) {
       renderingCache.put(store.getName(), (Map<Object, Object>) (cacheStore = new HashMap<K, V>()));
@@ -631,10 +672,12 @@ public class Context {
    * @param interningCallback
    */
   public void addInterningCallback(final InterningCallback interningCallback) {
+    checkThread();
     interningCallbackList.add(interningCallback);
   }
 
   public Statement intern(final LiteralValue<?> literalValue) {
+    checkThread();
     if (interningCallbackList.isEmpty()) return null;
 
     Statement internedReference;
@@ -654,6 +697,7 @@ public class Context {
 
   @Override
   public String toString() {
+    checkThread();
     String indent = "";
     final StringBuilder context = new StringBuilder();
 
@@ -696,6 +740,7 @@ public class Context {
   }
 
   public Set<String> getMissingSymbols() {
+    checkThread();
     return Collections.unmodifiableSet(missingSymbols);
   }
 }

@@ -156,6 +156,15 @@ public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   }
 
   @Override
+  public MetaClass getConcreteInjectedType() {
+    Injector inj = delegate;
+    while (inj instanceof QualifiedTypeInjectorDelegate) {
+      inj = ((QualifiedTypeInjectorDelegate) inj).delegate;
+    }
+    return inj.getInjectedType();
+  }
+
+  @Override
   public boolean isAlternative() {
     return delegate.isAlternative();
   }

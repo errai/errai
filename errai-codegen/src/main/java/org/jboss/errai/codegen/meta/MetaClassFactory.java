@@ -16,23 +16,6 @@
 
 package org.jboss.errai.codegen.meta;
 
-import java.io.File;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
@@ -52,16 +35,29 @@ import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.CacheUtil;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
+
+import javax.enterprise.util.TypeLiteral;
+import java.io.File;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public final class MetaClassFactory {
-  private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
-  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new ConcurrentHashMap<String, MetaClass>(1000);
-
   static {
     DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
       @Override
@@ -112,8 +108,8 @@ public final class MetaClassFactory {
     });
   }
 
-  public static void pushCache(final MetaClass clazz) {
-    PRIMARY_CLASS_CACHE.put(clazz.getFullyQualifiedName(), clazz);
+  public static MetaClassCache getMetaClassCache() {
+    return CacheUtil.getCache(MetaClassCache.class);
   }
 
   public static MetaClass get(final String fullyQualifiedClassName, final boolean erased) {
@@ -181,29 +177,29 @@ public final class MetaClassFactory {
   }
 
   public static boolean isCached(final String name) {
-    return ERASED_CLASS_CACHE.containsKey(name);
+    return getMetaClassCache().ERASED_CLASS_CACHE.containsKey(name);
   }
 
   private static MetaClass createOrGet(final String fullyQualifiedClassName) {
-    if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
+    if (!getMetaClassCache().ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
       return createOrGet(fullyQualifiedClassName, false);
     }
 
-    return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
+    return getMetaClassCache().ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
   }
 
   private static MetaClass createOrGet(final TypeLiteral type) {
     if (type == null)
       return null;
 
-    if (!ERASED_CLASS_CACHE.containsKey(type.toString())) {
+    if (!getMetaClassCache().ERASED_CLASS_CACHE.containsKey(type.toString())) {
       final MetaClass gwtClass = JavaReflectionClass.newUncachedInstance(type);
 
       addLookups(type, gwtClass);
       return gwtClass;
     }
 
-    return ERASED_CLASS_CACHE.get(type.toString());
+    return getMetaClassCache().ERASED_CLASS_CACHE.get(type.toString());
   }
 
   private static MetaClass createOrGet(final String clsName, final boolean erased) {
@@ -212,15 +208,15 @@ public final class MetaClassFactory {
 
     MetaClass mCls;
     if (erased) {
-      mCls = ERASED_CLASS_CACHE.get(clsName);
+      mCls = getMetaClassCache().ERASED_CLASS_CACHE.get(clsName);
       if (mCls == null) {
-        ERASED_CLASS_CACHE.put(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
+        getMetaClassCache().ERASED_CLASS_CACHE.put(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
       }
     }
     else {
-      mCls = PRIMARY_CLASS_CACHE.get(clsName);
+      mCls = getMetaClassCache().get(clsName);
       if (mCls == null) {
-        PRIMARY_CLASS_CACHE.put(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
+        getMetaClassCache().pushCache(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
       }
     }
     return mCls;
@@ -235,19 +231,19 @@ public final class MetaClassFactory {
         return JavaReflectionClass.newUncachedInstance(cls, type);
       }
 
-      if (!ERASED_CLASS_CACHE.containsKey(cls.getName())) {
+      if (!getMetaClassCache().ERASED_CLASS_CACHE.containsKey(cls.getName())) {
         final MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
         addLookups(cls, javaReflectionClass);
         return javaReflectionClass;
       }
 
-      return ERASED_CLASS_CACHE.get(cls.getName());
+      return getMetaClassCache().ERASED_CLASS_CACHE.get(cls.getName());
     }
     else {
       MetaClass mCls;
-      mCls = PRIMARY_CLASS_CACHE.get(cls.getName());
+      mCls = getMetaClassCache().get(cls.getName());
       if (mCls == null) {
-        PRIMARY_CLASS_CACHE.put(cls.getName(), mCls = JavaReflectionClass.newUncachedInstance(cls));
+        getMetaClassCache().pushCache(cls.getName(), mCls = JavaReflectionClass.newUncachedInstance(cls));
       }
       return mCls;
     }
@@ -437,14 +433,14 @@ public final class MetaClassFactory {
   }
 
   private static void addLookups(final TypeLiteral literal, final MetaClass metaClass) {
-    ERASED_CLASS_CACHE.put(literal.toString(), metaClass);
+    getMetaClassCache().ERASED_CLASS_CACHE.put(literal.toString(), metaClass);
   }
 
   private static void addLookups(final Class cls, final MetaClass metaClass) {
-    ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
+    getMetaClassCache().ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
   }
 
-  public static Map<String, Class<?>> PRIMITIVE_LOOKUP = Collections.unmodifiableMap(new HashMap<String, Class<?>>() {
+  public static final Map<String, Class<?>> PRIMITIVE_LOOKUP = Collections.unmodifiableMap(new HashMap<String, Class<?>>() {
     {
       put("void", void.class);
       put("boolean", boolean.class);
@@ -544,12 +540,8 @@ public final class MetaClassFactory {
     return newClasses;
   }
 
-  public static void emptyCache() {
-    PRIMARY_CLASS_CACHE.clear();
-    ERASED_CLASS_CACHE.clear();
-  }
 
   public static Collection<MetaClass> getAllCachedClasses() {
-    return PRIMARY_CLASS_CACHE.values();
+    return getMetaClassCache().getAllCached();
   }
 }

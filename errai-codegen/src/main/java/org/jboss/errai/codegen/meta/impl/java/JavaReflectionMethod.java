@@ -94,10 +94,10 @@ public class JavaReflectionMethod extends MetaMethod {
     return JavaReflectionUtil.fromTypeVariable(method.getTypeParameters());
   }
 
-  private Annotation[] _annotationsCache;
+  private volatile Annotation[] _annotationsCache;
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache != null)
       return _annotationsCache;
     return _annotationsCache = method.getAnnotations();

@@ -42,7 +42,7 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
-  private Annotation[] _annotationsCache;
+  private volatile Annotation[] _annotationsCache;
 
   protected JavaReflectionClass(final Class clazz, final boolean erased) {
     this(clazz, null, erased);
@@ -72,7 +72,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
     if (!MetaClassFactory.isCached(type.getName())) {
       final MetaClass clazz = newUncachedInstance(type);
-      MetaClassFactory.pushCache(clazz);
+      MetaClassFactory.getMetaClassCache().pushCache(clazz);
 
       return clazz;
     }
@@ -336,7 +336,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache == null) {
       _annotationsCache = getEnclosedMetaObject().getAnnotations();
     }

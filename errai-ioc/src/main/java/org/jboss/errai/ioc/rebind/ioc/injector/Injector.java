@@ -112,9 +112,16 @@ public interface Injector {
   /**
    * The injected type of the injector. This is the absolute type which the injector produces. For producers, this
    * is the bean type which the producer method returns.
-   * @return the absolute return type from the injector.
+   * @return the return type from the injector.
    */
   MetaClass getInjectedType();
+
+  /**
+   * Returns the concrete type that will be returned by this injector.
+   *
+   * @return
+   */
+  MetaClass getConcreteInjectedType();
 
 
   /**

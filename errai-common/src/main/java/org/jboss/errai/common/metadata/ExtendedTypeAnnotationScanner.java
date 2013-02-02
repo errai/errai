@@ -1,6 +1,7 @@
 package org.jboss.errai.common.metadata;
 
 import javassist.bytecode.ClassFile;
+import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.reflections.adapters.MetadataAdapter;
 import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
 
@@ -29,9 +30,9 @@ public class ExtendedTypeAnnotationScanner extends TypeAnnotationsScanner {
         getStore().put(annotationType, className);
 
         if (cls instanceof ClassFile) {
-          Set<SortableClassFileWrapper> classes = MetaDataScanner.annotationsToClassFile.get(annotationType);
+          Set<SortableClassFileWrapper> classes = CacheUtil.getCache(MetaDataScanner.CacheHolder.class).ANNOTATIONS_TO_CLASS.get(annotationType);
           if (classes == null) {
-            MetaDataScanner.annotationsToClassFile.put(annotationType, classes =
+            CacheUtil.getCache(MetaDataScanner.CacheHolder.class).ANNOTATIONS_TO_CLASS.put(annotationType, classes =
                 Collections.synchronizedSet(new TreeSet<SortableClassFileWrapper>()));
           }
           classes.add(new SortableClassFileWrapper(className, (ClassFile) cls));

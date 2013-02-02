@@ -43,6 +43,8 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,23 @@ import com.google.gwt.core.ext.GeneratorContext;
  * @author Mike Brock
  */
 public abstract class EnvUtil {
+  public static class EnvironmentConfigCache implements CacheStore {
+    private volatile EnvironmentConfig environmentConfig;
+
+    public EnvironmentConfigCache() {
+      clear();
+    }
+
+    @Override
+    public synchronized void clear() {
+      environmentConfig = newEnvironmentConfig();
+    }
+
+    public synchronized EnvironmentConfig get() {
+      return environmentConfig;
+    }
+  }
+
   public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
   public static final String CONFIG_ERRAI_NONSERIALIZABLE_TYPE = "errai.marshalling.nonserializableTypes";
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
@@ -104,7 +123,7 @@ public abstract class EnvUtil {
 
   private static Logger log = LoggerFactory.getLogger(EnvUtil.class);
 
-  private static EnvironmentConfig loadConfiguredPortableTypes() {
+  private static EnvironmentConfig newEnvironmentConfig() {
     final Map<String, String> frameworkProps = new HashMap<String, String>();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
@@ -230,7 +249,7 @@ public abstract class EnvUtil {
       throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
     }
   }
-  
+
   private static void fillInInterfacesAndSuperTypes(final Set<MetaClass> set, final MetaClass type) {
     for (final MetaClass iface : type.getInterfaces()) {
       set.add(iface);
@@ -241,11 +260,12 @@ public abstract class EnvUtil {
     }
   }
 
-  private static EnvironmentConfig _environmentConfigCache;
-
+  /**
+   * @return an instance of {@link EnvironmentConfig}. Do NOT retain a reference to this value. Call every time
+   *         you need additional configuration information.
+   */
   public static EnvironmentConfig getEnvironmentConfig() {
-    if (_environmentConfigCache == null) _environmentConfigCache = loadConfiguredPortableTypes();
-    return _environmentConfigCache;
+    return CacheUtil.getCache(EnvironmentConfigCache.class).get();
   }
 
   public static boolean isPortableType(final Class<?> cls) {
@@ -290,10 +310,6 @@ public abstract class EnvUtil {
     }
 
     return portableSubtypes;
-  }
-
-  public static void clearCaches() {
-    _environmentConfigCache = null;
   }
 
   static class ReachabilityCache {

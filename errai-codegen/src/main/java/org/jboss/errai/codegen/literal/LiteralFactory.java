@@ -23,13 +23,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.RenderCacheStore;
 import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.exception.NotLiteralizableException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
 
 /**
  * The literal factory provides a LiteralValue for the specified object (if possible).
@@ -38,16 +43,18 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
  */
 public class LiteralFactory {
 
-  private static final Map<Object, LiteralValue<?>> LITERAL_CACHE = new HashMap<Object, LiteralValue<?>>();
 
   /**
    * Returns a literal value (specialization of Statement) representing the
    * given object in the given context.
    *
    * @param o
-   *          The object to create a literal value for.
+   *     The object to create a literal value for.
+   *
    * @return a LiteralValue for the given object. Never null.
-   * @throws NotLiteralizableException if {@code o} cannot be literalized
+   *
+   * @throws NotLiteralizableException
+   *     if {@code o} cannot be literalized
    */
   public static LiteralValue<?> getLiteral(final Object o) {
     return getLiteral(null, o);
@@ -58,37 +65,55 @@ public class LiteralFactory {
    * given object in the given context.
    *
    * @param context
-   *          The context the literal value will be code-generated in. Contexts
-   *          can specify additional literalizable types. See {@link Context#addLiteralizableClass(Class)}.
+   *     The context the literal value will be code-generated in. Contexts
+   *     can specify additional literalizable types. See {@link Context#addLiteralizableClass(Class)}.
    * @param o
-   *          The object to create a literal value for.
+   *     The object to create a literal value for.
+   *
    * @return a LiteralValue for the given object. Never null.
-   * @throws NotLiteralizableException if {@code o} cannot be literalized
+   *
+   * @throws NotLiteralizableException
+   *     if {@code o} cannot be literalized
    */
   public static LiteralValue<?> getLiteral(final Context context, final Object o) {
     return getLiteral(context, o, true);
   }
 
+  private static final RenderCacheStore<Object, LiteralValue<?>> CLASS_LITERAL_RENDER_CACHE
+      = new RenderCacheStore<Object, LiteralValue<?>>() {
+    @Override
+    public String getName() {
+      return "LITERAL_CACHE_STORE";
+    }
+  };
+
   /**
    * Implementation for the public getLiteral() methods.
    *
    * @param context
-   *          The context the literal value will be code-generated in. Contexts
-   *          can specify additional literalizable types.
+   *     The context the literal value will be code-generated in. Contexts
+   *     can specify additional literalizable types.
    * @param o
-   *          The object to create a literal value for.
+   *     The object to create a literal value for.
+   *
    * @return a LiteralValue for the given object. Never null.
-   * @throws NotLiteralizableException if {@code o} cannot be literalized
+   *
+   * @throws NotLiteralizableException
+   *     if {@code o} cannot be literalized
    */
   private static LiteralValue<?> getLiteral(final Context context,
                                             final Object o,
                                             final boolean throwIfNotLiteralizable) {
+    Map<Object, LiteralValue<?>> LITERAL_CACHE = null;
+    if (context != null) {
+      LITERAL_CACHE = context.getRenderingCache(CLASS_LITERAL_RENDER_CACHE);
+    }
 
-    LiteralValue<?> result = LITERAL_CACHE.get(o);
+    LiteralValue<?> result = LITERAL_CACHE != null ? LITERAL_CACHE.get(o) : null;
     if (result == null) {
 
       if (o instanceof MetaClass) {
-        result = new MetaClassLiteral((MetaClass)o);
+        result = new MetaClassLiteral((MetaClass) o);
       }
       else if (o instanceof Annotation) {
         result = new LiteralValue<Annotation>((Annotation) o) {
@@ -110,8 +135,8 @@ public class LiteralFactory {
         result = _getLiteral(context, o, throwIfNotLiteralizable);
       }
 
-      if (result != null) {
-        // avoid caching the null; we don't want that returned from the cache!
+      // avoid caching the null; we don't want that returned from the cache!
+      if (result != null && LITERAL_CACHE != null) {
         LITERAL_CACHE.put(o, result);
       }
     }
@@ -197,15 +222,12 @@ public class LiteralFactory {
    * literalizable.
    *
    * @param o
-   *          The object to create a literal value for.
+   *     The object to create a literal value for.
+   *
    * @return a LiteralValue for the given object, or null if the value cannot be
    *         expressed as a literal.
    */
   public static LiteralValue<?> isLiteral(final Object o) {
     return getLiteral(null, o, false);
-  }
-  
-  public static void emptyCache() {
-    LITERAL_CACHE.clear();
   }
 }

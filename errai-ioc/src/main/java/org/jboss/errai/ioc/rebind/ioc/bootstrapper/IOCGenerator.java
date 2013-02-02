@@ -20,8 +20,10 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AsyncCodeGenerator;
+import org.jboss.errai.config.rebind.AsyncGenerationJob;
 import org.jboss.errai.config.rebind.AsyncGenerators;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
@@ -63,6 +65,7 @@ public class IOCGenerator extends Generator implements AsyncCodeGenerator {
     try {
       logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
+
       // Generate class source code
       final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
 
@@ -70,7 +73,18 @@ public class IOCGenerator extends Generator implements AsyncCodeGenerator {
       if (printWriter == null)
         return null;
 
-      printWriter.append(AsyncGenerators.getFutureFor(logger, context, Bootstrapper.class).get());
+      final Future<String> future = AsyncGenerationJob.createBuilder()
+          .treeLogger(logger)
+          .generatorContext(context)
+          .interfaceType(Bootstrapper.class)
+          .runIfStarting(new Runnable() {
+            @Override
+            public void run() {
+              GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+            }
+          }).build().submit();
+
+      printWriter.append(future.get());
       context.commit(logger, printWriter);
     }
     catch (Throwable e) {

@@ -68,7 +68,7 @@ public class GWTMethod extends MetaMethod {
   }
 
   @Override
-  public Annotation[] getAnnotations() {
+  public synchronized Annotation[] getAnnotations() {
     if (annotationsCache == null) {
       annotationsCache = method.getAnnotations();
     }

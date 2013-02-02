@@ -30,8 +30,6 @@ import java.util.regex.Pattern;
  */
 public final class ClassScanner {
   private static boolean reflectionsScanning = false;
-  private static Map<Class<? extends Annotation>, List<MetaClass>> SCAN_CACHE
-      = new HashMap<Class<? extends Annotation>, List<MetaClass>>(1000);
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
   private ClassScanner() {
@@ -63,61 +61,40 @@ public final class ClassScanner {
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
                                                             final Set<String> packages,
                                                             final String excludeRegEx) {
-    long tm = System.currentTimeMillis();
-    final Collection<MetaClass> result;
+    final Collection<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    if (false && SCAN_CACHE.containsKey(annotation)) {
-      result = new ArrayList<MetaClass>(SCAN_CACHE.get(annotation));
-    }
-    else {
-      result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
-
-//      final Map<Class<? extends  Annotation>, List<MetaClass>> cacheBuild
-//          = new HashMap<Class<? extends Annotation>, List<MetaClass>>();
-
-      final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
-        @Override
-        public void run() {
-          for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-            if (metaClass.isAnnotationPresent(annotation)) {
-//              recordCache(cacheBuild, annotation, metaClass);
-              result.add(metaClass);
-            }
-//            else {
-//              for (final Annotation a : metaClass.getAnnotations()) {
-//                recordCache(cacheBuild, a.annotationType(), metaClass);
-//              }
-//            }
+    final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
+      @Override
+      public void run() {
+        for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+          if (metaClass.isAnnotationPresent(annotation)) {
+            result.add(metaClass);
           }
         }
-      });
+      }
+    });
 
-      try {
-        factoryFuture.get();
+    try {
+      factoryFuture.get();
 
-        if (reflectionsScanning) {
-          final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
-            @Override
-            public void run() {
-              for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-                final MetaClass e = MetaClassFactory.get(cls);
-//                recordCache(cacheBuild, annotation, e);
-                result.add(e);
-              }
+      if (reflectionsScanning) {
+        final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
+          @Override
+          public void run() {
+            for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
+              final MetaClass e = MetaClassFactory.get(cls);
+              result.add(e);
             }
-          });
-          reflectionsFuture.get();
-        }
-      }
-      catch (Exception ignored) {
-      }
+          }
+        });
 
-//      SCAN_CACHE.putAll(cacheBuild);
+        reflectionsFuture.get();
+      }
+    }
+    catch (Exception ignored) {
     }
 
     filterResultsClass(result, packages, excludeRegEx);
-
-    totalClassScanTime.addAndGet(System.currentTimeMillis() - tm);
 
     return Collections.unmodifiableCollection(result);
   }
@@ -302,19 +279,6 @@ public final class ClassScanner {
     else {
       iterator.remove();
     }
-  }
-
-  private static void recordCache(final Map<Class<? extends  Annotation>, List<MetaClass>> map,
-                                  final Class<? extends Annotation> a, final MetaClass mc) {
-    List<MetaClass> cls = map.get(a);
-    if (cls == null) {
-      map.put(a, cls = new ArrayList<MetaClass>(10));
-    }
-    cls.add(mc);
-  }
-
-  public static void resetCache() {
-    SCAN_CACHE.clear();
   }
 
   public static void setReflectionsScanning(final boolean bool) {

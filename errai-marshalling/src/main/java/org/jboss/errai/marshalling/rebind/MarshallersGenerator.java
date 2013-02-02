@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
 import org.jboss.errai.config.rebind.AsyncCodeGenerator;
+import org.jboss.errai.config.rebind.AsyncGenerationJob;
 import org.jboss.errai.config.rebind.AsyncGenerators;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
@@ -50,7 +51,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -229,10 +229,6 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
     try {
       logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
 
-      EnvUtil.clearCaches();
-      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-      DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
-
       // Generate class source code
       generateMarshallerBootstrapper(logger, context);
     }
@@ -249,7 +245,36 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
   public void generateMarshallerBootstrapper(final TreeLogger logger, final GeneratorContext context) throws Exception{
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter == null) return;
-    printWriter.write(AsyncGenerators.getFutureFor(logger, context, MarshallerFactory.class).get());
+
+    final Future<String> future = AsyncGenerationJob.createBuilder()
+        .treeLogger(logger)
+        .generatorContext(context)
+        .interfaceType(MarshallerFactory.class)
+        .runIfStarting(new Runnable() {
+          @Override
+          public void run() {
+            GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+          }
+        })
+        .runIfStarted(new Runnable() {
+          @Override
+          public void run() {
+            DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
+          }
+        }).build().submit();
+
+
+    printWriter.write(future.get());
+
+
+//    printWriter.write(AsyncGenerators.getFutureFor(logger, context, MarshallerFactory.class,
+//        new Runnable() {
+//          @Override
+//          public void run() {
+//            GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+//          }
+//        }).get());
+
     context.commit(logger, printWriter);
   }
 

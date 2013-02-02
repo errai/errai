@@ -25,16 +25,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class JavaReflectionUtil {
+  public static class CacheHolder implements CacheStore {
+    final Map<Type, MetaType> FROM_TYPE_CLASS = new ConcurrentHashMap<Type, MetaType>();
+
+    @Override
+    public void clear() {
+      FROM_TYPE_CLASS.clear();
+    }
+  }
+
 
   public static MetaTypeVariable[] fromTypeVariable(final TypeVariable<?>[] typeVariables) {
     final List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>(typeVariables.length);
@@ -56,7 +68,10 @@ public class JavaReflectionUtil {
     return typeList.toArray(new MetaType[types.length]);
   }
 
-  private static final Map<Type, MetaType> FROM_TYPE_CLASS = new HashMap<Type, MetaType>();
+
+
+
+
 
   /**
    * Returns an instance of the appropriate MetaType that wraps the given Java
@@ -68,7 +83,7 @@ public class JavaReflectionUtil {
    *         thing as the given Type. Never null.
    */
   public static MetaType fromType(final Type t) {
-    MetaType type = FROM_TYPE_CLASS.get(t);
+    MetaType type = CacheUtil.getCache(CacheHolder.class).FROM_TYPE_CLASS.get(t);
     if (type == null) {
       if (t instanceof Class) {
         type = (MetaClassFactory.get((Class<?>) t));
@@ -89,7 +104,7 @@ public class JavaReflectionUtil {
         throw new RuntimeException("Don't know how to make a MetaType from Type " + t +
                 " (which is a " + (t == null ? null : t.getClass()) + ")");
       }
-      FROM_TYPE_CLASS.put(t, type);
+      CacheUtil.getCache(CacheHolder.class).FROM_TYPE_CLASS.put(t, type);
     }
 
     return type;
