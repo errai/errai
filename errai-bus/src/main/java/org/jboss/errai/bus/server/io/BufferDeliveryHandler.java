@@ -58,9 +58,9 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
       final BufferColor bufferColor = queue.getBufferColor();
 
       BufferHelper.encodeAndWrite(buffer, bufferColor, message);
-
     }
     finally {
+      queue.incrementMessageCount();
       queue.fireActivationCallback();
     }
 

@@ -72,6 +72,7 @@ public final class AsyncGenerators {
       currentContext = job.getGeneratorContext();
 
       job.notifyStarting();
+      job.notifyStarted();
 
       for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GenerateAsync.class)) {
         try {
@@ -95,7 +96,6 @@ public final class AsyncGenerators {
         }
       }
 
-      job.notifyStarted();
 
       for (final Map.Entry<Class, AsyncCodeGenerator> entry : codeGenerators.entrySet()) {
         activeFutures.put(entry.getKey(),

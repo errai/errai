@@ -264,7 +264,8 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
         }).build().submit();
 
 
-    printWriter.write(future.get());
+    final String s = future.get();
+    printWriter.write(s);
 
 
 //    printWriter.write(AsyncGenerators.getFutureFor(logger, context, MarshallerFactory.class,

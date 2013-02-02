@@ -1082,12 +1082,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 setState(State.CONNECTED);
                 // end of FinishStateSync Timer
 
+                InitVotes.voteFor(ClientMessageBus.class);
+
                 if (webSocketUpgradeAvailable) {
                   websocketUpgrade();
                 }
-                else {
-                  InitVotes.voteFor(ClientMessageBus.class);
-                }
+
 
 
               }
@@ -1632,9 +1632,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-    ((RpcProxyLoader) GWT.create(RpcProxyLoader.class)).loadProxies(ClientMessageBusImpl.this);
+    try {
+      ((RpcProxyLoader) GWT.create(RpcProxyLoader.class)).loadProxies(ClientMessageBusImpl.this);
 
-    InitVotes.voteFor(RpcProxyLoader.class);
+      InitVotes.voteFor(RpcProxyLoader.class);
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+    }
 
     new Timer() {
       @Override

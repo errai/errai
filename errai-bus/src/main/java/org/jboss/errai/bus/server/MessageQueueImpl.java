@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server;
 
 import static java.lang.System.nanoTime;
+import static java.lang.System.setOut;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import org.jboss.errai.bus.client.api.Message;
@@ -59,6 +60,7 @@ public class MessageQueueImpl implements MessageQueue {
 
   private volatile MessageDeliveryHandler deliveryHandler = BufferDeliveryHandler.getInstance();
   private volatile QueueActivationCallback activationCallback;
+  private volatile boolean deferredActivation;
 
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
@@ -132,9 +134,9 @@ public class MessageQueueImpl implements MessageQueue {
       if (deliveryHandler instanceof Wakeable) {
         ((Wakeable) deliveryHandler).onWake(this);
       }
-//      else {
-//        deliveryHandler.noop(this);
-//      }
+      else {
+        deliveryHandler.noop(this);
+      }
 
       fireActivationCallback();
     }
@@ -151,7 +153,9 @@ public class MessageQueueImpl implements MessageQueue {
    *     - new activation callback function
    */
   public void setActivationCallback(QueueActivationCallback activationCallback) {
-    this.activationCallback = activationCallback;
+    synchronized (activationLock) {
+      this.activationCallback = activationCallback;
+    }
   }
 
   public void fireActivationCallback() {
