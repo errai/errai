@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -44,8 +46,12 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.rebind.AsyncCodeGenerator;
+import org.jboss.errai.config.rebind.AsyncGenerationJob;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
@@ -68,18 +74,19 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class BindableProxyLoaderGenerator extends Generator {
+@GenerateAsync(BindableProxyLoader.class)
+public class BindableProxyLoaderGenerator extends Generator implements AsyncCodeGenerator {
   private final Logger log = LoggerFactory.getLogger(BindableProxyLoaderGenerator.class);
 
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName)
+  public String generate(final TreeLogger logger, final GeneratorContext context, String typeName)
       throws UnableToCompleteException {
 
     String packageName = null;
     String className = null;
 
     try {
-      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+
       JClassType classType = context.getTypeOracle().getType(typeName);
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
@@ -87,7 +94,19 @@ public class BindableProxyLoaderGenerator extends Generator {
       PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       // If code has not already been generated.
       if (printWriter != null) {
-        printWriter.append(generate(context, className));
+        final Future<String> future = AsyncGenerationJob.createBuilder()
+            .generatorContext(context)
+            .treeLogger(logger)
+            .interfaceType(BindableProxyLoader.class)
+            .runIfStarting(new Runnable() {
+              @Override
+              public void run() {
+                GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+              }
+            })
+            .build().submit();
+
+        printWriter.append(future.get());
         context.commit(logger, printWriter);
       }
     }
@@ -107,6 +126,17 @@ public class BindableProxyLoaderGenerator extends Generator {
     RebindUtils.writeStringToFile(cacheFile, gen);
 
     return gen;
+  }
+
+
+  @Override
+  public Future<String> generateAsync(TreeLogger logger, final GeneratorContext context) {
+    return ThreadUtil.submit(new Callable<String>() {
+      @Override
+      public String call() throws Exception {
+        return generate(context);
+      }
+    });
   }
 
   private String generate(final GeneratorContext context) {

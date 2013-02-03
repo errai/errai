@@ -18,18 +18,8 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -53,8 +43,16 @@ import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshalle
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
@@ -63,7 +61,8 @@ import com.google.common.collect.Multimap;
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
-  private final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
+  private final Set<MetaClass> exposedClasses
+      = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
   /**
    * Map of aliases to the mapped marshalling type.

@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.rebind.EnvUtil;
 
 import java.util.ArrayList;
@@ -122,6 +123,7 @@ public class GWTUtil {
           " (which is a " + (t == null ? null : t.getClass()) + ")");
     }
   }
+
   private static volatile GeneratorContext populatedFrom;
 
   /**
@@ -138,13 +140,14 @@ public class GWTUtil {
    *     The TreeLogger supplied by the GWT compiler. Not null.
    */
   public synchronized static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
-                                                            final TreeLogger logger) {
+                                                                         final TreeLogger logger) {
 
     // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
     // changing classes. Therefore, do a NOOP after the first successful call.
-    if (context.equals(populatedFrom) || EnvUtil.isProdMode()) {
+    if (context.equals(populatedFrom)) {
       return;
     }
+
 
     final TypeOracle typeOracle = context.getTypeOracle();
     final MetaClassCache cache = MetaClassFactory.getMetaClassCache();
@@ -186,5 +189,8 @@ public class GWTUtil {
       cache.pushCacheAll(classesToPush);
     }
     populatedFrom = context;
+
+    CacheUtil.getCache(EnvUtil.EnvironmentConfigCache.class).clear();
+
   }
 }

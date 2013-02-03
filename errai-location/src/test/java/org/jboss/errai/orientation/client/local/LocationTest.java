@@ -8,6 +8,9 @@ import org.jboss.errai.ioc.client.container.IOC;
  * @author edewit@redhat.com
  */
 public class LocationTest extends AbstractErraiCDITest {
+  {
+    disableBus = true;
+  }
 
   @Override
   public String getModuleName() {

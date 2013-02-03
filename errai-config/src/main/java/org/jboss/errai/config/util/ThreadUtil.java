@@ -17,9 +17,12 @@
 package org.jboss.errai.config.util;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Mike Brock
@@ -32,15 +35,107 @@ public class ThreadUtil {
     executorService.execute(runnable);
   }
 
-  public static <T> Future<T> submit(final Callable<T> runnable) {
-    return executorService.submit(runnable);
+  public static <T> Future<T> submit(final Callable<T> callable) {
+    return executorService.submit(callable);
   }
 
   public static Future<?> submit(final Runnable runnable) {
-   return executorService.submit(runnable);
+    return executorService.submit(runnable);
   }
 
   public static void stopExecutor() {
     executorService.shutdown();
+  }
+
+  public static class SynchronousCallableFuture<V> implements Future<V> {
+    private final Callable<V> runnable;
+
+    public SynchronousCallableFuture(Callable<V> runnable) {
+      this.runnable = runnable;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+      return false;
+    }
+
+    @Override
+    public boolean isCancelled() {
+      return false;
+    }
+
+    @Override
+    public boolean isDone() {
+      return false;
+    }
+
+    @Override
+    public V get() throws InterruptedException, ExecutionException {
+      try {
+        System.out.println("**RUN SYNC**");
+        return runnable.call();
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t);
+      }
+    }
+
+    @Override
+    public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+      try {
+        return runnable.call();
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t);
+      }
+    }
+
+
+  }
+
+  public static class SynchronousRunnableeFuture<V> implements Future<V> {
+    private final Runnable runnable;
+
+    public SynchronousRunnableeFuture(Runnable runnable) {
+      this.runnable = runnable;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+      return false;
+    }
+
+    @Override
+    public boolean isCancelled() {
+      return false;
+    }
+
+    @Override
+    public boolean isDone() {
+      return false;
+    }
+
+    @Override
+    public V get() throws InterruptedException, ExecutionException {
+      try {
+        System.out.println("**RUN SYNC**");
+        runnable.run();
+        return null;
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t);
+      }
+    }
+
+    @Override
+    public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+      try {
+        runnable.run();
+        return null;
+      }
+      catch (Throwable t) {
+        throw new RuntimeException(t);
+      }
+    }
   }
 }

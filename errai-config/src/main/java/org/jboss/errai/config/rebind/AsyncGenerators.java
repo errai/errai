@@ -60,6 +60,22 @@ public final class AsyncGenerators {
     }
   }
 
+  public static Future<String> getFutureFor(final Class clazz) {
+    synchronized (lock) {
+
+      if (!codeGenerators.containsKey(clazz)) {
+        throw new RuntimeException("no generator found for interface: " + clazz.getName());
+      }
+
+      if (activeFutures.containsKey(clazz)) {
+        return activeFutures.get(clazz);
+      }
+      else {
+        throw new RuntimeException("could not find future for interface: " + clazz.getName());
+      }
+    }
+  }
+
   private static void startAll(final AsyncGenerationJob job) {
     if (started && job.getGeneratorContext() != currentContext) {
       started = false;
@@ -88,7 +104,8 @@ public final class AsyncGenerators {
             log.info("discovered async generator " + cls.getName() + "; for type: " + generateAsync.value().getName());
           }
           catch (TypeOracleException e) {
-            e.printStackTrace();
+            codeGenerators.remove(generateAsync.value());
+            //  e.printStackTrace();
             // ignore because not inherited in an active module.
           }
         }

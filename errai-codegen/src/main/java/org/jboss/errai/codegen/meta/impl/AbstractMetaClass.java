@@ -52,11 +52,20 @@ import org.slf4j.LoggerFactory;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractMetaClass<T> extends MetaClass {
-  private static final Logger logger = LoggerFactory.getLogger(AbstractMetaClass.class);
+  private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
+
+  private volatile transient Class<?> _asClassCache;
+  private volatile transient MetaClass _boxedCache;
+  private volatile transient MetaClass _unboxedCache;
+  private volatile transient Boolean _isPrimitiveWrapper;
+  private volatile transient String _internalNameCache;
+  private volatile transient MetaClass _outerComponentCache;
 
   private final T enclosedMetaObject;
   protected MetaParameterizedType parameterizedType;
   protected MetaParameterizedType genericSuperClass;
+  private final Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
+  private MetaMethod[] staticMethodCache;
 
   protected AbstractMetaClass(final T enclosedMetaObject) {
     this.enclosedMetaObject = enclosedMetaObject;
@@ -262,7 +271,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private MetaMethod getBestMatchingMethod(final GetMethodsCallback methodsCallback, final String name,
-      final MetaClass... parameters) {
+                                           final MetaClass... parameters) {
     MetaMethod meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
     if (meth == null) {
       meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
@@ -270,7 +279,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return meth;
   }
 
-  private MetaMethod[] staticMethodCache;
 
   private MetaMethod[] getStaticMethods() {
     if (staticMethodCache != null) {
@@ -392,9 +400,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _hashString;
   }
 
-  private final Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
-
-  private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 
   @Override
   public boolean isAssignableFrom(final MetaClass clazz) {
@@ -459,6 +464,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isDefaultInstantiable() {
+    if (!isConcrete()) {
+      return false;
+    }
     final MetaConstructor c = getConstructor(new MetaClass[0]);
     return c != null && c.isPublic();
   }
@@ -483,10 +491,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return hashString().hashCode();
   }
 
-  private volatile transient Class<?> _asClassCache;
 
   @Override
-  public Class<?> asClass() {
+  public synchronized Class<?> asClass() {
     if (_asClassCache != null) {
       return _asClassCache;
     }
@@ -521,37 +528,32 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _asClassCache = cls;
   }
 
-  private MetaClass _boxedCache;
 
   @Override
-  public MetaClass asBoxed() {
+  public synchronized MetaClass asBoxed() {
     if (_boxedCache != null)
       return _boxedCache;
     return _boxedCache = GenUtil.getPrimitiveWrapper(this);
   }
 
-  private MetaClass _unboxedCache;
 
   @Override
-  public MetaClass asUnboxed() {
+  public synchronized MetaClass asUnboxed() {
     if (_unboxedCache != null)
       return _unboxedCache;
     return _unboxedCache = GenUtil.getUnboxedFromWrapper(this);
   }
 
-  private MetaClass _erasedCache;
 
-  private Boolean _isPrimitiveWrapper;
 
   @Override
-  public boolean isPrimitiveWrapper() {
+  public synchronized boolean isPrimitiveWrapper() {
     return _isPrimitiveWrapper != null ? _isPrimitiveWrapper : (_isPrimitiveWrapper = GenUtil.isPrimitiveWrapper(this));
   }
 
-  private String _internalNameCache;
 
   @Override
-  public String getInternalName() {
+  public synchronized String getInternalName() {
     if (_internalNameCache != null)
       return _internalNameCache;
 
@@ -646,7 +648,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return null;
   }
 
-  private MetaClass _outerComponentCache;
 
   @Override
   public BeanDescriptor getBeanDescriptor() {
@@ -712,7 +713,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   @Override
-  public MetaClass getOuterComponentType() {
+  public synchronized MetaClass getOuterComponentType() {
     if (_outerComponentCache != null)
       return _outerComponentCache;
 

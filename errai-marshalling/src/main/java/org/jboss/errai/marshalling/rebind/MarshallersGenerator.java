@@ -267,15 +267,6 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
     final String s = future.get();
     printWriter.write(s);
 
-
-//    printWriter.write(AsyncGenerators.getFutureFor(logger, context, MarshallerFactory.class,
-//        new Runnable() {
-//          @Override
-//          public void run() {
-//            GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-//          }
-//        }).get());
-
     context.commit(logger, printWriter);
   }
 
