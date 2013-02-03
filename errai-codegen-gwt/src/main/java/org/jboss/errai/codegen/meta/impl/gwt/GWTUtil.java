@@ -148,7 +148,6 @@ public class GWTUtil {
       return;
     }
 
-
     final TypeOracle typeOracle = context.getTypeOracle();
     final MetaClassCache cache = MetaClassFactory.getMetaClassCache();
 

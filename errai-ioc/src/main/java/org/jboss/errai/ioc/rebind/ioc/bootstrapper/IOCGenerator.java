@@ -54,9 +54,9 @@ public class IOCGenerator extends Generator implements AsyncCodeGenerator {
 
   public static final boolean isTestMode = EnvUtil.isJUnitTest();
 
+
   public IOCGenerator() {
   }
-
 
   @Override
   public String generate(final TreeLogger logger,
@@ -66,11 +66,11 @@ public class IOCGenerator extends Generator implements AsyncCodeGenerator {
 
     try {
       synchronized (generatorLock) {
+
         // Generate class source code
         final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
         // if null, source code has ALREADY been generated,
         if (printWriter != null) {
-
           final Future<String> future = AsyncGenerationJob.createBuilder()
               .treeLogger(logger)
               .generatorContext(context)
@@ -107,7 +107,6 @@ public class IOCGenerator extends Generator implements AsyncCodeGenerator {
   @Override
   public Future<String> generateAsync(final TreeLogger logger, final GeneratorContext context) {
     // get print writer that receives the source code
-
     return ThreadUtil.submit(new Callable<String>() {
       @Override
       public String call() throws Exception {
