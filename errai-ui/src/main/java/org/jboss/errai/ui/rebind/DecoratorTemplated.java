@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.enterprise.util.TypeLiteral;
 
+import com.google.gwt.user.client.ui.RootPanel;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -58,6 +59,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.rebind.DataBindingValidator;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
@@ -109,6 +111,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
     MetaClass declaringClass = ctx.getEnclosingType();
 
+
     if (!declaringClass.isAssignableTo(Composite.class)) {
       throw new GenerationException("@Templated class [" + declaringClass.getFullyQualifiedName()
           + "] must extend base class [" + Composite.class.getName() + "].");
@@ -130,6 +133,10 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Do the work
      */
     generateTemplatedInitialization(ctx, builder);
+
+    if (declaringClass.isAnnotationPresent(EntryPoint.class)) {
+      builder.append(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("obj")));
+    }
 
     return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
         Refs.get(ctx.getInjector().getInstanceVarName()), builder.finish().finish()));
@@ -240,7 +247,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
             + declaringClass.getFullyQualifiedName()
             + "] must have exactly one parameter of a type extending either ["
-            + DomEvent.class.getName() + "] or [" + NativeEvent.class.getName() + "]." );
+            + DomEvent.class.getName() + "] or [" + NativeEvent.class.getName() + "].");
       }
 
       if (eventType.isAssignableTo(Event.class)) {
@@ -648,7 +655,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         if (resource.matches("\\S+\\.html")) {
           if (resource.startsWith("/")) {
             resource = resource.substring(1);
-          } else {
+          }
+          else {
             resource = type.getPackageName().replaceAll("\\.", "/") + "/" + resource;
           }
         }
