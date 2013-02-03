@@ -19,24 +19,12 @@ package org.jboss.errai.codegen.meta.impl;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
-import java.beans.Introspector;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.codegen.meta.BeanDescriptor;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
@@ -44,8 +32,16 @@ import org.jboss.errai.codegen.meta.MetaWildcardType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
 import org.mvel2.util.ReflectionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.beans.Introspector;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -464,7 +460,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isDefaultInstantiable() {
-    if (!isConcrete()) {
+    if (isInterface() || isAbstract()) {
       return false;
     }
     final MetaConstructor c = getConstructor(new MetaClass[0]);
