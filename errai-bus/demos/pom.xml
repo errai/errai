@@ -97,7 +97,8 @@
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>App.html</runTarget>
-          <extraJvmArgs>-Xmx512m</extraJvmArgs>
+          <extraJvmArgs>${argLine} -Xmx1g</extraJvmArgs>
+          <jvm></jvm>
           <soyc>false</soyc>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <treeLogger>true</treeLogger>
@@ -211,6 +212,8 @@
   </build>
 
   <profiles>
+
+
     <profile>
       <id>jetty</id>
       <activation>
@@ -333,5 +336,17 @@
         <webDescriptor>tomcat</webDescriptor>
       </properties>
     </profile>
+
+    <!--<profile>-->
+      <!--<id>macJvmSettings</id>-->
+      <!--<activation>-->
+        <!--<os>-->
+          <!--<family>mac</family>-->
+        <!--</os>-->
+      <!--</activation>-->
+      <!--<properties>-->
+        <!--<argLine>-d32 -XX:CompileThreshold=1000</argLine>-->
+      <!--</properties>-->
+    <!--</profile>-->
   </profiles>
 </project>

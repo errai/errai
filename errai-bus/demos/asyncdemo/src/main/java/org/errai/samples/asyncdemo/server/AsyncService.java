@@ -57,21 +57,13 @@ public class AsyncService implements MessageCallback {
             .noErrorHandling()
             .replyRepeating(TimeUnit.MILLISECONDS, 50);
 
-        System.out.println("New task started: " + taskName);
         ctx.setAttribute(taskName, task);
-      }
-      else {
-        System.out.println("Task already started: " + taskName);
       }
     }
     else if (StopMatcher.matcher(commandType).matches()) {
       AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
 
-      if (task == null) {
-        System.out.println("Nothing to stop: " + taskName);
-      }
-      else {
-        System.out.println("Stopping: " + taskName);
+      if (task != null) {
         task.cancel(true);
         ctx.removeAttribute(taskName);
       }

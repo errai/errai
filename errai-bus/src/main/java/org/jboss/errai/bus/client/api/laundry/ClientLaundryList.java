@@ -33,7 +33,7 @@ class ClientLaundryList implements LaundryList {
       }
       catch (Exception e) {
         // TODO GWT.log("Laundry item failed in cleaning", e);
-        System.out.println("Laundry item failed in cleaning");
+        //System.out.println("Laundry item failed in cleaning");
         e.printStackTrace(System.out);
       }
       iter.remove();

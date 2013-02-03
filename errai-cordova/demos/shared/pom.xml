@@ -30,6 +30,7 @@
     <version.org.jboss.errai>3.0-SNAPSHOT</version.org.jboss.errai>
     <version.com.google.gwt>2.4.0</version.com.google.gwt>
     <version.org.codehaus.mojo.gwt.maven.plugin>${version.com.google.gwt}</version.org.codehaus.mojo.gwt.maven.plugin>
+    <argLine></argLine>
   </properties>
 
   <dependencyManagement>
@@ -428,7 +429,7 @@
         <configuration>
           <inplace>true</inplace>
           <logLevel>INFO</logLevel>
-          <extraJvmArgs>-Xmx512m</extraJvmArgs>
+          <extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
 
           <!-- Configure GWT's development mode (formerly known as hosted 
             mode) to not start the default server (embedded jetty), but to download the 

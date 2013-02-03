@@ -193,9 +193,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       synchronized (queue.getActivationLock()) {
         queue.setActivationCallback(null);
         cont.resume();
-        System.out.println("run jetty activation");
       }
-
     }
   }
 }

@@ -56,7 +56,7 @@
 					<logLevel>INFO</logLevel>
 					<runTarget>ClientService.html</runTarget>
 					<warSourceDirectory>war</warSourceDirectory>
-					<extraJvmArgs>-Xmx512m</extraJvmArgs>
+					<extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
 					<skip>true</skip>
 					<!--<soyc>false</soyc> -->
 				</configuration>

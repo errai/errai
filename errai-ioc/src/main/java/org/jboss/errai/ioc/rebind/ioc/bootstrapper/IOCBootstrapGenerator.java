@@ -22,9 +22,6 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Statement;
@@ -37,7 +34,6 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
@@ -53,7 +49,6 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.ioc.client.BootstrapInjectionContext;
 import org.jboss.errai.ioc.client.Bootstrapper;
-import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -62,7 +57,6 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncInjectionContext;
@@ -497,7 +491,7 @@ public class IOCBootstrapGenerator {
 
     if (context != null) {
       TypeScan:
-      for (MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
+      for (final MetaClass clazz : MetaClassFactory.getAllCachedClasses()) {
         if (translatablePackages.contains(clazz.getPackageName())) {
 
           for (final Annotation a : clazz.getAnnotations()) {
@@ -509,7 +503,7 @@ public class IOCBootstrapGenerator {
 
           if (!clazz.isDefaultInstantiable()) {
             boolean hasInjectableConstructor = false;
-            for (MetaConstructor c : clazz.getConstructors()) {
+            for (final MetaConstructor c : clazz.getConstructors()) {
               if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
                 hasInjectableConstructor = true;
                 break;

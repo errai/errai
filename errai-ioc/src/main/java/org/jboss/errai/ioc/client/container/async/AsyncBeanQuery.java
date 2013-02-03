@@ -38,7 +38,7 @@ import java.util.Set;
  * AsyncBeanQuery beanQuery = new AsyncBeanQuery();
  * final AsyncBeanFuture<BeanA> beanAFuture = beanQuery.load(BeanA.class);
  * final AsyncBeanFuture<BeanB> beanBFuture = beanQuery.load(BeanB.class);
- *
+ * <p/>
  * beanQuery.query(new Runnable() {
  *    public void run() {
  *     BeanA beanA = beanAFuture.get();
@@ -55,6 +55,7 @@ import java.util.Set;
  * @since 3.0
  */
 public class AsyncBeanQuery {
+  private boolean cancelled = false;
   private Runnable finishCallback;
 
   private final List<LoadStrategy> loadStrategies
@@ -163,7 +164,7 @@ public class AsyncBeanQuery {
    * beans have been successfully loaded.
    *
    * @param finishCallback
-   *    the <tt>Runnable</tt> to be invoked once all of the request beans have been loaded.
+   *     the <tt>Runnable</tt> to be invoked once all of the request beans have been loaded.
    */
   public void query(final Runnable finishCallback) {
     Assert.notNull(finishCallback);
@@ -175,8 +176,29 @@ public class AsyncBeanQuery {
     }
   }
 
+  /**
+   * Cancels the query if it has not yet returned. Already loaded beans are destroyed.
+   */
+  public void cancelQuery() {
+    cancelled = true;
+
+    for (final LoadStrategy strategy : loaded) {
+      final AsyncBeanFuture future = strategy.getFuture();
+      IOC.getAsyncBeanManager().destroyBean(future.get());
+    }
+
+    loaded.clear();
+    loadStrategies.clear();
+  }
+
   private void vote(LoadStrategy<?> strategy) {
+    if (cancelled) {
+      IOC.getAsyncBeanManager().destroyBean(strategy.getFuture().get());
+      return;
+    }
+
     loaded.add(strategy);
+
     if (loaded.containsAll(loadStrategies)) {
       finishCallback.run();
     }
@@ -200,19 +222,20 @@ public class AsyncBeanQuery {
     }
 
 
-    public AsyncBeanDef<T> getBeanDef() {
+    AsyncBeanDef<T> getBeanDef() {
       return beanDef;
     }
 
-    public AsyncBeanFuture<T> getFuture() {
+    AsyncBeanFuture<T> getFuture() {
       return future;
     }
 
-    public boolean isLoadNew() {
+    boolean isLoadNew() {
       return loadNew;
     }
 
-    public void load() {
+    void load() {
+
       if (loadNew) {
         beanDef.newInstance(future.getCreationalCallback());
       }

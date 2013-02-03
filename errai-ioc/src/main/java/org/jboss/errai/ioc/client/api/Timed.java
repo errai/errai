@@ -24,7 +24,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a timed method invocation of a method on a managed bean.
+ * Specifies a timed method invocation of a method on a managed bean. Timed methods are tied to the lifecycle of
+ * the bean which they are declared on. Therefore, repeating timers cannot be stopped unless the host bean is
+ * destroyed.
  *
  * @author Mike Brock
  */

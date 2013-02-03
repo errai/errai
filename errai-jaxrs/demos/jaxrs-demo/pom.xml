@@ -240,7 +240,7 @@
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>RestDemo.html</runTarget>
-          <extraJvmArgs>-Xmx512m</extraJvmArgs>
+          <extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <webappDirectory>src/main/webapp/</webappDirectory>
         </configuration>

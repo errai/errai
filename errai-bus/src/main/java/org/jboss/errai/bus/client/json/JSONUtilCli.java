@@ -60,7 +60,6 @@ public class JSONUtilCli {
     }
     catch (ClassCastException e) {
       if (!GWT.isProdMode()) {
-        System.out.println("*** working around devmode bug ***");
         val = JSONParser.parseStrict(value);
       }
       else {
