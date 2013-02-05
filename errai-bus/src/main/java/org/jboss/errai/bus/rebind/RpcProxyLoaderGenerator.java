@@ -22,8 +22,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.common.client.framework.ProxyProvider;
-import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.InnerClass;
@@ -35,15 +33,14 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.framework.ProxyProvider;
+import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AsyncCodeGenerator;
 import org.jboss.errai.config.rebind.AsyncGenerationJob;
-import org.jboss.errai.config.rebind.AsyncGenerators;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.config.util.ThreadUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -57,7 +54,6 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  */
 @GenerateAsync(RpcProxyLoader.class)
 public class RpcProxyLoaderGenerator extends Generator implements AsyncCodeGenerator {
-  private final Logger log = LoggerFactory.getLogger(RpcProxyLoaderGenerator.class);
   private final String packageName = RpcProxyLoader.class.getPackage().getName();
   private final String className = RpcProxyLoader.class.getSimpleName() + "Impl";
 
@@ -132,8 +128,6 @@ public class RpcProxyLoaderGenerator extends Generator implements AsyncCodeGener
     }
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-
-    log.info("rpc proxies generated.");
     return classBuilder.toJavaString();
   }
 }

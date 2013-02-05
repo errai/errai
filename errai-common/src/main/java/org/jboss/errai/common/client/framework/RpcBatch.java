@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,25 @@
 package org.jboss.errai.common.client.framework;
 
 /**
- * Provides instances of generated proxies.
+ * Represents a batch for remote procedure calls. It's used to accumulate remote calls that will get executed in a
+ * single server round trip when {@link #flush()} is called.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * 
+ * @param <T>
  */
-public interface ProxyProvider {
+public interface RpcBatch<T> {
 
   /**
-   * Returns a new proxy instance.
+   * Adds a request of type <T> to the queue.
    * 
-   * @return proxy, never null.
+   * @param request
+   *          the request to send when {@link #flush()} is called.
    */
-  public Object getProxy();
+  public void addRequest(T request);
+
+  /**
+   * Sends all accumulated requests in a single server round trip.
+   */
+  public void flush();
 }

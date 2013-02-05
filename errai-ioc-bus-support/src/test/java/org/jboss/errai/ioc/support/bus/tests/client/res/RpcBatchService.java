@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.framework;
+package org.jboss.errai.ioc.support.bus.tests.client.res;
 
-/**
- * Provides instances of generated proxies.
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
- */
-public interface ProxyProvider {
+import org.jboss.errai.bus.server.annotations.Remote;
 
-  /**
-   * Returns a new proxy instance.
-   * 
-   * @return proxy, never null.
-   */
-  public Object getProxy();
+@Remote
+public interface RpcBatchService {
+
+  public String batchedMethod1();
+  public String batchedMethod2();
+  public void batchedMethodThrowsException();
 }

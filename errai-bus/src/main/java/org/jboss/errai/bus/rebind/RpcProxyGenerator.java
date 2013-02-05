@@ -16,17 +16,13 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
-import org.jboss.errai.common.client.framework.CallContextStatus;
-import org.jboss.errai.common.client.framework.RpcStub;
+import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
+import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
+import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -40,6 +36,9 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.config.rebind.ProxyUtil;
 
 /**
@@ -56,26 +55,11 @@ public class RpcProxyGenerator {
 
   public ClassStructureBuilder<?> generate() {
     String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.define(safeProxyClassName)
+    ClassStructureBuilder<?> classBuilder = 
+      ClassBuilder.define(safeProxyClassName, AbstractRpcProxy.class)
         .packageScope()
         .implementsInterface(remote)
-        .implementsInterface(RpcStub.class)
-        .body()
-        .privateField("remoteCallback", RemoteCallback.class)
-        .finish()
-        .privateField("errorCallback", ErrorCallback.class)
-        .finish()
-        .privateField("qualifiers", Annotation[].class)
-        .finish()
-        .publicMethod(void.class, "setErrorCallback", Parameter.of(ErrorCallback.class, "callback"))
-        .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
-        .finish()
-        .publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
-        .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
-        .finish()
-        .publicMethod(void.class, "setQualifiers", Parameter.of(Annotation[].class, "quals"))
-        .append(Stmt.loadClassMember("qualifiers").assignValue(Variable.get("quals")))
-        .finish();
+        .body();
 
     for (MetaMethod method : remote.getMethods()) {
       if (!method.isFinal()) {
@@ -151,8 +135,12 @@ public class RpcProxyGenerator {
   }
 
   private Statement generateRequest(MetaMethod method, Statement methodParams, boolean intercepted) {
-    return If.isNull(Variable.get("errorCallback"))
-        .append(
+    BlockStatement requestBlock = new BlockStatement();
+    
+    requestBlock.addStatement(Stmt.declareVariable("sendable", RemoteCallSendable.class, null));
+    requestBlock.addStatement(
+        If.isNull(Variable.get("errorCallback"))
+        .append(Stmt.loadVariable("sendable").assignValue(
             Stmt
                 .invokeStatic(MessageBuilder.class, "createCall")
                 .invoke("call", remote.getFullyQualifiedName())
@@ -160,11 +148,10 @@ public class RpcProxyGenerator {
                     Stmt.loadClassMember("qualifiers"),
                     methodParams)
                 .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-                .invoke("defaultErrorHandling")
-                .invoke("sendNowWith", Stmt.loadVariable("bus")))
+                .invoke("defaultErrorHandling")))
         .finish()
         .else_()
-        .append(
+        .append(Stmt.loadVariable("sendable").assignValue(
             Stmt
                 .invokeStatic(MessageBuilder.class, "createCall")
                 .invoke("call", remote.getFullyQualifiedName())
@@ -172,8 +159,12 @@ public class RpcProxyGenerator {
                     Stmt.loadClassMember("qualifiers"),
                     methodParams)
                 .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-                .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))
-                .invoke("sendNowWith", Stmt.loadVariable("bus")))
-        .finish();
+                .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))))
+        .finish());
+    
+    requestBlock.addStatement(
+        Stmt.loadVariable("this").invoke("sendRequest", Variable.get("bus"), Variable.get("sendable")));
+    
+    return requestBlock;
   }
 }

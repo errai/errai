@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.common.client.framework.RpcBatch;
 import org.jboss.errai.common.client.framework.RpcStub;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
@@ -161,5 +162,10 @@ public abstract class AbstractJaxrsProxy implements RpcStub {
   @Override
   public void setQualifiers(Annotation[] annos) {
     // do nothing (no use for qualifiers on injected JAX-RS proxies yet)
+  }
+  
+  @Override
+  public void setBatch(@SuppressWarnings("rawtypes") RpcBatch batch) {
+    throw new UnsupportedOperationException("Batching of remote calls is not supported in errai jax-rs!");
   }
 }

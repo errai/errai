@@ -16,10 +16,10 @@
 
 package org.jboss.errai.common.client.framework;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-
-import java.lang.annotation.Annotation;
 
 public interface RpcStub {
   public void setRemoteCallback(RemoteCallback callback);
@@ -27,4 +27,6 @@ public interface RpcStub {
   public void setErrorCallback(ErrorCallback callback);
 
   public void setQualifiers(Annotation[] annotations);
+  
+  public void setBatch(RpcBatch batch);
 }

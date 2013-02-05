@@ -52,12 +52,12 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 public class JaxrsProxyLoaderGenerator extends Generator {
   private final Logger log = LoggerFactory.getLogger(JaxrsProxyLoaderGenerator.class);
   
+  private final String packageName = JaxrsProxyLoader.class.getPackage().getName();
+  private final String className = JaxrsProxyLoader.class.getSimpleName() + "Impl";
+
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
       throws UnableToCompleteException {
-    
-    String packageName = null;
-    String className = null;
     
     try {
       GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
@@ -67,9 +67,6 @@ public class JaxrsProxyLoaderGenerator extends Generator {
         logger.log(TreeLogger.ERROR, typeName + " is not an interface.");
         throw new RuntimeException("invalid type: not an interface");
       }
-
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
 
       PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       // If code has not already been generated.
