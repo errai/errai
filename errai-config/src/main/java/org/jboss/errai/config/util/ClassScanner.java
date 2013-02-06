@@ -6,6 +6,8 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.mvel2.util.NullType;
 
@@ -29,11 +31,20 @@ import java.util.regex.Pattern;
  * @author Mike Brock
  */
 public final class ClassScanner {
+  public static class CacheHolder implements CacheStore {
+    final Map<MetaClass, Collection<MetaClass>> subtypesCache
+        = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
+
+    @Override
+    public void clear() {
+      subtypesCache.clear();
+    }
+  }
+
   private static boolean reflectionsScanning = false;
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
-  private final static Map<MetaClass, Collection<MetaClass>> subtypesCache
-      = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
+
 
   private ClassScanner() {
   }
@@ -152,8 +163,10 @@ public final class ClassScanner {
   public static Collection<MetaClass> getSubTypesOf(final MetaClass metaClass) {
     final MetaClass root = metaClass.getErased();
 
-    if (subtypesCache.containsKey(root)) {
-      return subtypesCache.get(root);
+    final CacheHolder cache = CacheUtil.getCache(CacheHolder.class);
+
+    if (cache.subtypesCache.containsKey(root)) {
+      return cache.subtypesCache.get(root);
     }
 
     final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
@@ -198,7 +211,7 @@ public final class ClassScanner {
     catch (Exception ignored) {
     }
 
-    subtypesCache.put(root, result);
+    cache.subtypesCache.put(root, result);
     return result;
   }
 
