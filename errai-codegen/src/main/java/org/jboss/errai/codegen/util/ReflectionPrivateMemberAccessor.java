@@ -158,7 +158,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
       methodBuilder
               .parameters(
                       DefParameters.fromParameters(
-                              Parameter.of(field.getDeclaringClass(), "instance"),
+                              Parameter.of(field.getDeclaringClass().getErased(), "instance"),
                               Parameter.of(field.getType(), "value")
                       )
               );
@@ -192,7 +192,7 @@ public class ReflectionPrivateMemberAccessor implements PrivateMemberAccessor {
     if (!field.isStatic()) {
       methodBuilder.parameters(
               DefParameters.fromParameters(
-                      Parameter.of(field.getDeclaringClass(), "instance")
+                      Parameter.of(field.getDeclaringClass().getErased(), "instance")
               )
       );
     }

@@ -47,7 +47,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
 
     if (!field.isStatic()) {
       methodBuilder
-              .parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass(), "instance"),
+              .parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass().getErased(), "instance"),
                       Parameter.of(type, "value")));
     }
 
@@ -67,7 +67,7 @@ public class GWTPrivateMemberAccessor implements PrivateMemberAccessor {
             classBuilder.privateMethod(type, PrivateAccessUtil.getPrivateFieldInjectorName(field));
 
     if (!field.isStatic()) {
-      instance.parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass(), "instance")));
+      instance.parameters(DefParameters.fromParameters(Parameter.of(field.getDeclaringClass().getErased(), "instance")));
     }
 
     if (type.getCanonicalName().equals("long")) {

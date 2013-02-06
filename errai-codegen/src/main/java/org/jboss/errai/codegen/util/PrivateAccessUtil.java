@@ -189,7 +189,7 @@ public class PrivateAccessUtil {
   }
 
   public static String getPrivateMethodName(final MetaMethod method) {
-    return condensify(method.getDeclaringClass()
-        .getFullyQualifiedName()) + "_" + method.getName();
+    final MetaClass declaringClass = method.getDeclaringClass();
+    return condensify(declaringClass.getFullyQualifiedName()) + "_" + method.getName();
   }
 }

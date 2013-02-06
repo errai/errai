@@ -123,9 +123,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private boolean sendBuilder;
 
-  private volatile boolean cometChannelOpen = true;
+  private boolean pollingActive = true;
+
+  private volatile boolean sseAvailable = false;
   private volatile boolean webSocketUpgradeAvailable = false;
-  private volatile boolean webSocketOpen = false;
   private String webSocketUrl;
   private String webSocketToken;
   private Object webSocketChannel;
@@ -139,6 +140,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Instance invariant: this field is never set to null.
    */
   private LongPollRequestCallback receiveCommCallback = new NoPollRequestCallback();
+  private RemoteTransmissionHandler remoteTransmissionHandler = new HTTPPostHandler();
 
   private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
   private final Map<String, List<MessageCallback>> localSubscriptions = new HashMap<String, List<MessageCallback>>();
@@ -295,7 +297,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     });
     pendingRequests.add(request);
-
     //  LogUtil.log("tx sent: " + payload);
     return request;
   }
@@ -674,89 +675,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     if (message == null) return;
 
-    try {
-      txActive = true;
-
-      if (webSocketOpen) {
-        if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
-          return;
-        }
-        else {
-          LogUtil.log("websocket channel is closed. falling back to comet");
-
-          // disconnected.
-          webSocketOpen = false;
-          webSocketChannel = null;
-          cometChannelOpen = true;
-
-          receiveCommCallback.schedule();
-        }
-      }
-
-      try {
-        sendOutboundRequest(message, Collections.<String, String>emptyMap(), new RequestCallback() {
-          int statusCode = 0;
-
-          @Override
-          public void onResponseReceived(final Request request, final Response response) {
-            statusCode = response.getStatusCode();
-            if (statusCode >= 400) {
-              final TransportIOException tioe
-                  = new TransportIOException(response.getText(), response.getStatusCode(),
-                  "Failure communicating with server");
-
-              if (handleHTTPTransportError(new BusTransportError(request, tioe, statusCode, NO_RETRY))) {
-                return;
-              }
-
-              LogUtil.log("connection problem. server returned status code: " + response.getStatusCode() + " ("
-                  + response.getStatusText() + ")");
-
-              for (final Message txM : txMessages) {
-                callErrorHandler(txM, tioe);
-              }
-              return;
-            }
-
-            /**
-             * If the server bus returned us some client-destined messages in
-             * response to our send, handle them now.
-             */
-            try {
-              processIncomingPayload(response);
-            }
-            catch (AssertionFailedError e) {
-              throw e;
-            }
-            catch (Throwable e) {
-              for (final Message txM : txMessages) {
-                callErrorHandler(txM, e);
-              }
-            }
-          }
-
-          @Override
-          public void onError(final Request request, final Throwable exception) {
-            handleHTTPTransportError(new BusTransportError(request, exception, statusCode, NO_RETRY));
-
-            for (final Message txM : txMessages) {
-              if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
-                logError("Failed to communicate with remote bus", "", exception);
-              }
-            }
-          }
-        });
-      }
-      catch (Exception e) {
-        for (final Message txM : txMessages) {
-          callErrorHandler(txM, e);
-        }
-      }
-    }
-    finally {
-      lastTx = System.currentTimeMillis();
-      txActive = false;
-    }
+    remoteTransmissionHandler.transmit(message, txMessages);
   }
 
   /**
@@ -770,7 +689,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     Request request = null;
     try {
-      if (rxActive || !cometChannelOpen)
+      if (rxActive || !(remoteTransmissionHandler instanceof HTTPPostHandler))
         return;
       rxActive = true;
       request = sendInboundRequest(receiveCommCallback);
@@ -922,7 +841,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }, false);
 
-
     addUnsubscribeListener(new UnsubscribeListener() {
       @Override
       public void onUnsubscribe(final SubscriptionEvent event) {
@@ -971,7 +889,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       registerInitVoteCallbacks();
     }
 
-    cometChannelOpen = true;
+    //cometChannelOpen = true;
 
     if (!sendBuilder) {
 
@@ -1087,8 +1005,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 if (webSocketUpgradeAvailable) {
                   websocketUpgrade();
                 }
-
-
+                else if (sseAvailable) {
+                  activateSSE();
+                }
 
               }
             }.schedule(5);
@@ -1127,8 +1046,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           case WebsocketChannelOpen:
 
-            cometChannelOpen = false;
-            webSocketOpen = true;
+            remoteTransmissionHandler = new WebsocketHandler();
 
             // send final message to open the channel
             ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
@@ -1184,8 +1102,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
           webSocketUpgradeAvailable = true;
           break;
-        case LongPollAvailable:
 
+        case SSE:
+          sseAvailable = true;
+          break;
+        case LongPollAvailable:
           LogUtil.log("initializing long poll subsystem");
           receiveCommCallback = new LongPollRequestCallback();
           break;
@@ -1204,6 +1125,27 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  private void activateSSE() {
+    try {
+    LogUtil.log("attempting to use SSE");
+
+    final Object o = ClientSSEChannel.attemptSSEChannel(ClientMessageBusImpl.this,
+        URL.encode(getApplicationLocation(IN_SERVICE_ENTRY_POINT))
+            + "?z=" + getNextRequestNumber() + "&sse=1&clientId=" + clientId);
+
+    if (o instanceof String) {
+      LogUtil.log("sse could not be negotiated. reason: " + o);
+    }
+    else {
+      LogUtil.log("sse channel active.");
+      pollingActive = false;
+    }
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+    }
+  }
+
   private void websocketUpgrade() {
     LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
 
@@ -1213,6 +1155,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       LogUtil.log("could not use web sockets. reason: " + o);
       InitVotes.voteFor(ClientMessageBus.class);
     }
+
   }
 
   @SuppressWarnings("ConstantConditions")
@@ -1522,7 +1465,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             new Timer() {
               @Override
               public void run() {
-                cometChannelOpen = true;
+                //cometChannelOpen = true;
                 performPoll();
               }
             }.schedule(timeout);
@@ -1556,7 +1499,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           case 307:
             break;
           default:
-            cometChannelOpen = false;
+            //   cometChannelOpen = false;
             onError(request,
                 new TransportIOException("unexpected response code: " + statusCode, statusCode, response
                     .getStatusText()));
@@ -1579,7 +1522,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void schedule() {
-      if (canceled || !cometChannelOpen)
+      if (canceled || !pollingActive)
         return;
       new Timer() {
         @Override
@@ -1975,14 +1918,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
     LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
     LogUtil.nativeLog("");
-    LogUtil.nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
-    LogUtil.nativeLog("  Endpoint (RX)        : " + getApplicationRoot() + bus.IN_SERVICE_ENTRY_POINT);
-    LogUtil.nativeLog("  Endpoint (TX)        : " + getApplicationRoot() + bus.OUT_SERVICE_ENTRY_POINT);
-    LogUtil.nativeLog("  Pending Requests     : " + bus.pendingRequests.size());
-    LogUtil.nativeLog("");
-    LogUtil.nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
-    LogUtil.nativeLog("  Endpoint (RX/TX)     : " + bus.webSocketUrl);
-    LogUtil.nativeLog("");
+//    LogUtil.nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
+//    LogUtil.nativeLog("  Endpoint (RX)        : " + getApplicationRoot() + bus.IN_SERVICE_ENTRY_POINT);
+//    LogUtil.nativeLog("  Endpoint (TX)        : " + getApplicationRoot() + bus.OUT_SERVICE_ENTRY_POINT);
+//    LogUtil.nativeLog("  Pending Requests     : " + bus.pendingRequests.size());
+//    LogUtil.nativeLog("");
+//    LogUtil.nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
+//    LogUtil.nativeLog("  Endpoint (RX/TX)     : " + bus.webSocketUrl);
+//    LogUtil.nativeLog("");
     LogUtil.nativeLog("Total TXs              : " + bus.txNumber);
     LogUtil.nativeLog("Total RXs              : " + bus.rxNumber);
     LogUtil.nativeLog("");
@@ -2053,8 +1996,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
   }-*/;
 
-  protected String getApplicationLocation(String serviceEntryPoint) {
-    Configuration configuration = getConfiguration();
+  protected String getApplicationLocation(final String serviceEntryPoint) {
+    final Configuration configuration = getConfiguration();
     if (configuration instanceof Configuration.NotSpecified) {
       return getApplicationRoot() + serviceEntryPoint;
     }
@@ -2195,6 +2138,99 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           logAdapter.warn("Listener threw exception: " + t);
           t.printStackTrace();
         }
+      }
+    }
+  }
+
+  interface RemoteTransmissionHandler {
+    public void transmit(String encodedJSON, List<Message> txMessages);
+  }
+
+  class HTTPPostHandler implements RemoteTransmissionHandler {
+    @Override
+    public void transmit(final String message, final List<Message> txMessages) {
+      try {
+        txActive = true;
+
+        try {
+          sendOutboundRequest(message, Collections.<String, String>emptyMap(), new RequestCallback() {
+            int statusCode = 0;
+
+            @Override
+            public void onResponseReceived(final Request request, final Response response) {
+              statusCode = response.getStatusCode();
+              if (statusCode >= 400) {
+                final TransportIOException tioe
+                    = new TransportIOException(response.getText(), response.getStatusCode(),
+                    "Failure communicating with server");
+
+                if (handleHTTPTransportError(new BusTransportError(request, tioe, statusCode, NO_RETRY))) {
+                  return;
+                }
+
+                LogUtil.log("connection problem. server returned status code: " + response.getStatusCode() + " ("
+                    + response.getStatusText() + ")");
+
+                for (final Message txM : txMessages) {
+                  callErrorHandler(txM, tioe);
+                }
+                return;
+              }
+
+              /**
+               * If the server bus returned us some client-destined messages in
+               * response to our send, handle them now.
+               */
+              try {
+                processIncomingPayload(response);
+              }
+              catch (AssertionFailedError e) {
+                throw e;
+              }
+              catch (Throwable e) {
+                for (final Message txM : txMessages) {
+                  callErrorHandler(txM, e);
+                }
+              }
+            }
+
+            @Override
+            public void onError(final Request request, final Throwable exception) {
+              handleHTTPTransportError(new BusTransportError(request, exception, statusCode, NO_RETRY));
+
+              for (final Message txM : txMessages) {
+                if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
+                  logError("Failed to communicate with remote bus", "", exception);
+                }
+              }
+            }
+          });
+        }
+        catch (Exception e) {
+          for (final Message txM : txMessages) {
+            callErrorHandler(txM, e);
+          }
+        }
+      }
+      finally {
+        lastTx = System.currentTimeMillis();
+        txActive = false;
+      }
+    }
+  }
+
+  class WebsocketHandler implements RemoteTransmissionHandler {
+    @Override
+    public void transmit(final String encodedJSON, final List<Message> txMessages) {
+      if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, encodedJSON)) {
+        return;
+      }
+      else {
+        LogUtil.log("websocket channel is closed. falling back to comet");
+
+        remoteTransmissionHandler = new HTTPPostHandler();
+        pollingActive = true;
+        receiveCommCallback.schedule();
       }
     }
   }

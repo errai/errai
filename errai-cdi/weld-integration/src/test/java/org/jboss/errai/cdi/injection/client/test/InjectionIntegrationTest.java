@@ -9,6 +9,8 @@ import org.jboss.errai.cdi.injection.client.InjectionTestModule;
 import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanApples;
 import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanOranges;
 import org.jboss.errai.cdi.injection.client.Visa;
+import org.jboss.errai.cdi.injection.client.ZFooAmex;
+import org.jboss.errai.cdi.injection.client.ZFooVisa;
 import org.jboss.errai.cdi.injection.client.mvp.Contacts;
 import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanOranges;
@@ -86,5 +88,18 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
 
     assertTrue("bean should be an Amex", creditCardLover.getAmexCard() instanceof Amex);
     assertTrue("bean should be a Visa", creditCardLover.getVisaCard() instanceof Visa);
+  }
+
+  public void testResolutionOfParameterizedBeansExtFromAbstractClass() {
+    final ZFooVisa zFooVisa
+        = getBeanManager().lookupBean(ZFooVisa.class).getInstance();
+    final ZFooAmex zFooAmex
+        = getBeanManager().lookupBean(ZFooAmex.class).getInstance();
+
+    assertNotNull(zFooVisa);
+    assertNotNull(zFooAmex);
+
+    assertNotNull(zFooVisa.getServiceXXX());
+    assertSame(zFooVisa.getServiceXXX(), zFooAmex.getServiceXXX());
   }
 }

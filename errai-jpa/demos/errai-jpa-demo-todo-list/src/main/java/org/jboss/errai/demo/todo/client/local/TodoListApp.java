@@ -35,7 +35,6 @@ public class TodoListApp extends Composite {
 
   @PostConstruct
   public void init() {
-    RootPanel.get().add(this);
     refreshItems();
   }
 

@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
  */
 @Templated("#body")
 @ApplicationScoped
-@EntryPoint
 public class GroceryListClient extends Composite {
 
   @Inject

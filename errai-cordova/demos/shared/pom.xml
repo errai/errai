@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jboss.errai.example</groupId>
   <artifactId>errai-cordova-kitchensink</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>Errai::Cordova::Demos::Kitchensink</name>
-  <description>A starter Java EE 6 webapp project for use on JBoss AS 7 / EAP 6, generated from the jboss-javaee6-webapp archetype</description>
+  <description>A starter Java EE 6 webapp project for use on JBoss AS 7 / EAP 6, generated from the jboss-javaee6-webapp
+    archetype
+  </description>
+
+  <parent>
+    <artifactId>errai-parent</artifactId>
+    <groupId>org.jboss.errai</groupId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
 
   <properties>
     <!-- Explicitly declaring the source encoding eliminates the following 
@@ -30,7 +37,6 @@
     <version.org.jboss.errai>3.0-SNAPSHOT</version.org.jboss.errai>
     <version.com.google.gwt>2.4.0</version.com.google.gwt>
     <version.org.codehaus.mojo.gwt.maven.plugin>${version.com.google.gwt}</version.org.codehaus.mojo.gwt.maven.plugin>
-    <argLine></argLine>
   </properties>
 
   <dependencyManagement>
@@ -51,12 +57,12 @@
       </dependency>
 
       <dependency>
-         <groupId>org.jboss.bom</groupId>
-         <artifactId>jboss-javaee-6.0-with-errai</artifactId>
-         <version>${version.org.jboss.bom.errai}</version>
-         <type>pom</type>
-         <scope>import</scope>
-     </dependency>
+        <groupId>org.jboss.bom</groupId>
+        <artifactId>jboss-javaee-6.0-with-errai</artifactId>
+        <version>${version.org.jboss.bom.errai}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
 
       <!-- Errai Core and ErraiBus -->
       <dependency>
@@ -429,7 +435,7 @@
         <configuration>
           <inplace>true</inplace>
           <logLevel>INFO</logLevel>
-          <extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
+          <extraJvmArgs>-Xmx512m</extraJvmArgs>
 
           <!-- Configure GWT's development mode (formerly known as hosted 
             mode) to not start the default server (embedded jetty), but to download the 
@@ -473,19 +479,28 @@
         <configuration>
           <filesets>
             <fileset>
-                <directory>${basedir}</directory>
-                <includes>
-                    <include>www-test/**</include>
-                    <include>.gwt/**</include>
-                    <include>.errai/**</include>
-                    <include>src/main/webapp/KitchenSink/**</include>
-                    <include>src/main/webapp/WEB-INF/deploy/**</include>
-                    <include>src/main/webapp/WEB-INF/lib/**</include>
-                    <include>**/gwt-unitCache/**</include>
-                    <include>**/*.JUnit/**</include>
-                </includes>
+              <directory>${basedir}</directory>
+              <includes>
+                <include>www-test/**</include>
+                <include>.gwt/**</include>
+                <include>.errai/**</include>
+                <include>src/main/webapp/KitchenSink/**</include>
+                <include>src/main/webapp/WEB-INF/deploy/**</include>
+                <include>src/main/webapp/WEB-INF/lib/**</include>
+                <include>**/gwt-unitCache/**</include>
+                <include>**/*.JUnit/**</include>
+              </includes>
             </fileset>
           </filesets>
+        </configuration>
+      </plugin>
+
+      <!-- We do not want to deploy the .war files for demos to Maven Central. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
         </configuration>
       </plugin>
     </plugins>
@@ -511,7 +526,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <execute />
+                    <execute/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -520,7 +535,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
   </build>
 
   <profiles>

@@ -40,6 +40,11 @@ public enum Capabilities {
   WebSockets,
 
   /**
+   * This message bus can communicate using Server-Sent Events
+   */
+  SSE,
+
+  /**
    * This message bus is just a proxy for another bus. All messages are
    * forwarded on to another bus for processing.
    */

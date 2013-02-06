@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.cdi.injection.client;
+
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * @author Mike Brock
  */
-public class ClientSSEChannel {
-  public static native Object attemptSSEChannel(final ClientMessageBusImpl bus, final String sseAddress) /*-{
-      var sseSource;
-      if (!!window.EventSource) {
-          sseSource = new EventSource(sseAddress);
-          sseSource.addEventListener('message', function (e) {
-              bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::procPayload(Ljava/lang/String;)(e.data);
-          }, false);
+@ApplicationScoped
+public class ZFooVisa extends ZFoo<Visa> {
 
-          return sseSource;
-      } else {
-          return "NotSupportedByBrowser";
-      }
-  }-*/;
+
 }
