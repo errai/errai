@@ -23,6 +23,7 @@ import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
@@ -82,6 +83,24 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
  */
 
 public class DefaultBlockingServlet extends AbstractErraiServlet implements Filter {
+  private int sseTimeout;
+
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    setSseTimeout();
+  }
+
+  @Override
+  public void initAsFilter(FilterConfig config) throws ServletException {
+    super.initAsFilter(config);
+    setSseTimeout();
+  }
+
+  private void setSseTimeout() {
+    sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(service.getConfiguration());
+  }
+
   /**
    * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
    * a response
@@ -166,7 +185,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
       queue.heartBeat();
 
       if (sse) {
-        final long timeout = System.currentTimeMillis() + ErraiConfigAttribs.SSE_TIMEOUT.getInt(service.getConfiguration());;
+        final long timeout = System.currentTimeMillis() + sseTimeout;
         while (System.currentTimeMillis() < timeout) {
           outputStream.write("event: bus-traffic\n\ndata: ".getBytes());
           queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
