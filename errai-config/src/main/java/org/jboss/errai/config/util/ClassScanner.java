@@ -32,6 +32,9 @@ public final class ClassScanner {
   private static boolean reflectionsScanning = false;
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
+  private final static Map<MetaClass, Collection<MetaClass>> subtypesCache
+      = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
+
   private ClassScanner() {
   }
 
@@ -148,6 +151,11 @@ public final class ClassScanner {
 
   public static Collection<MetaClass> getSubTypesOf(final MetaClass metaClass) {
     final MetaClass root = metaClass.getErased();
+
+    if (subtypesCache.containsKey(root)) {
+      return subtypesCache.get(root);
+    }
+
     final Set<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
     final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
@@ -163,7 +171,7 @@ public final class ClassScanner {
       }
     });
 
-    if (reflectionsScanning && EnvUtil.isProdMode()) {
+    if (EnvUtil.isProdMode()) {
       final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
         @Override
         public void run() {
@@ -190,8 +198,10 @@ public final class ClassScanner {
     catch (Exception ignored) {
     }
 
+    subtypesCache.put(root, result);
     return result;
   }
+
 
   private static void filterResultsClass(final Collection<MetaClass> result,
                                          final Set<String> packages,
