@@ -91,10 +91,10 @@ public class RpcProxyGenerator {
 
     if (intercepted) {
       methodBlock.append(generateInterceptorLogic(classBuilder, method,
-          generateRequest(method, parameters, true), parmVars));
+          generateRequest(classBuilder, method, parameters, true), parmVars));
     }
     else {
-      methodBlock.append(generateRequest(method, parameters, false));
+      methodBlock.append(generateRequest(classBuilder, method, parameters, false));
     }
 
     Statement returnStmt = ProxyUtil.generateProxyMethodReturnStatement(method);
@@ -134,7 +134,8 @@ public class RpcProxyGenerator {
             .finish();
   }
 
-  private Statement generateRequest(MetaMethod method, Statement methodParams, boolean intercepted) {
+  private Statement generateRequest(ClassStructureBuilder<?> classBuilder, 
+      MetaMethod method, Statement methodParams, boolean intercepted) {
     BlockStatement requestBlock = new BlockStatement();
     
     requestBlock.addStatement(Stmt.declareVariable("sendable", RemoteCallSendable.class, null));
@@ -162,8 +163,8 @@ public class RpcProxyGenerator {
                 .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))))
         .finish());
     
-    requestBlock.addStatement(
-        Stmt.loadVariable("this").invoke("sendRequest", Variable.get("bus"), Variable.get("sendable")));
+    requestBlock.addStatement(Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
+        .invoke("sendRequest", Variable.get("bus"), Variable.get("sendable")));
     
     return requestBlock;
   }
