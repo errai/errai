@@ -62,7 +62,7 @@ public class RpcProxyGenerator {
         .body();
 
     for (MetaMethod method : remote.getMethods()) {
-      if (!method.isFinal()) {
+      if (ProxyUtil.shouldProxyMethod(method)) {
         generateMethod(classBuilder, method);
       }
     }

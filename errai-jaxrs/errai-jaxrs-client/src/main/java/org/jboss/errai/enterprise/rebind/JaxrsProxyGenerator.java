@@ -18,8 +18,6 @@ package org.jboss.errai.enterprise.rebind;
 
 import javax.ws.rs.Path;
 
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -27,6 +25,9 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.enterprise.client.jaxrs.AbstractJaxrsProxy;
 
 /**
@@ -71,10 +72,7 @@ public class JaxrsProxyGenerator {
             .finish();
 
     for (MetaMethod method : remote.getMethods()) {
-      String methodName = method.getName();
-      if (!method.isFinal() && !methodName.equals("hashCode") && !methodName.equals("equals")
-          && !methodName.equals("toString")) {
-        
+      if (ProxyUtil.shouldProxyMethod(method)) {
         JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
         new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
       }

@@ -149,6 +149,13 @@ public abstract class ProxyUtil {
     return proceedLogic;
   }
 
+  public static boolean shouldProxyMethod(MetaMethod method) {
+    String methodName = method.getName();
+    
+    return !method.isFinal() && !method.isStatic() && !method.isPrivate() && 
+      !methodName.equals("hashCode") && !methodName.equals("equals")  && !methodName.equals("toString");
+  }
+  
   public static String createCallSignature(MetaMethod m) {
     StringBuilder append = new StringBuilder(m.getName()).append(':');
     for (MetaParameter parm : m.getParameters()) {
