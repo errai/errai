@@ -26,9 +26,9 @@ import com.google.gwt.user.client.ui.Widget;
 @ApplicationScoped
 public class Navigation {
 
-  private SimplePanel contentPanel = new SimplePanel();
+  private final SimplePanel contentPanel = new SimplePanel();
 
-  private NavigationGraph navGraph = GWT.create(NavigationGraph.class);
+  private final NavigationGraph navGraph = GWT.create(NavigationGraph.class);
 
   protected PageNode<Widget> currentPage;
 

@@ -16,13 +16,13 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JArrayType;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassCache;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -33,12 +33,13 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.rebind.EnvUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

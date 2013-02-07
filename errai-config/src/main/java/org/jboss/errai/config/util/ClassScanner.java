@@ -1,5 +1,17 @@
 package org.jboss.errai.config.util;
 
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -10,21 +22,6 @@ import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.mvel2.util.NullType;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Pattern;
 
 
 /**
@@ -48,6 +45,9 @@ public final class ClassScanner {
 
   private ClassScanner() {
   }
+
+  private final static Map<MetaClass, Collection<MetaClass>> subtypesCache
+      = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
 
   public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
                                                                      final Set<String> packages) {
