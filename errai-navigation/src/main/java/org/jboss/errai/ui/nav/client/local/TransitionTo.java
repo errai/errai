@@ -2,6 +2,7 @@ package org.jboss.errai.ui.nav.client.local;
 
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.ImmutableMultimap;
@@ -49,24 +50,36 @@ public final class TransitionTo<P extends Widget> {
    * Transitions the application's view from the current page (whatever it is)
    * to the {@code toPage} of this transition, passing no extra state
    * information.
+   * <p>
+   * Note: if the Navigation framework is being used together with ErraiIOC in
+   * asynchronous mode, the page transition may not have happened by the
+   * time this method returns.
    */
   public void go() {
-    Navigation navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
-    navigation.goTo(toPageWidgetType, ImmutableMultimap.<String,String>of());
+    go(ImmutableMultimap.<String, String>of());
   }
 
   /**
    * Transitions the application's view from the current page (whatever it is)
    * to the {@code toPage} of this transition, passing the given extra state
    * information.
+   * <p>
+   * Note: if the Navigation framework is being used together with ErraiIOC in
+   * asynchronous mode, the page transition may not have happened by the
+   * time this method returns.
    *
    * @param state
    *          Extra state information that should be passed to the page before
    *          it is displayed. Must not be null.
    */
-  public void go(Multimap<String,String> state) {
-    Navigation navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
-    navigation.goTo(toPageWidgetType, state);
+  public void go(final Multimap<String,String> state) {
+    IOC.getAsyncBeanManager().lookupBean(Navigation.class).getInstance(
+            new CreationalCallback<Navigation>() {
+      @Override
+      public void callback(Navigation navigation) {
+        navigation.goTo(toPageWidgetType, state);
+      }
+    });
   }
 
 }
