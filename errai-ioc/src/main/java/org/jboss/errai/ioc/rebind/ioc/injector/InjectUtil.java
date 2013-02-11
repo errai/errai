@@ -64,6 +64,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -178,8 +179,8 @@ public class InjectUtil {
    *     -
    */
   static boolean doPostConstruct(final InjectionContext ctx,
-                              final Injector injector,
-                              final List<MetaMethod> postConstructTasks) {
+                                 final Injector injector,
+                                 final List<MetaMethod> postConstructTasks) {
 
     if (postConstructTasks.isEmpty()) return false;
 
@@ -220,8 +221,8 @@ public class InjectUtil {
    *     -
    */
   static boolean doPreDestroy(final InjectionContext ctx,
-                           final Injector injector,
-                           final List<MetaMethod> preDestroyTasks) {
+                              final Injector injector,
+                              final List<MetaMethod> preDestroyTasks) {
 
     if (preDestroyTasks.isEmpty()) return false;
 
@@ -340,7 +341,7 @@ public class InjectUtil {
 
         for (final Class<? extends Annotation> a : decorators) {
           final ElementType[] elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-              : new ElementType[]{ElementType.FIELD};
+              : new ElementType[]{ElementType.METHOD, ElementType.PARAMETER};
 
           for (final ElementType elType : elTypes) {
             switch (elType) {
@@ -542,7 +543,7 @@ public class InjectUtil {
               throw new InjectionFailure("un-resolveable cycle on dependent scoped bean: "
                   + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");
             }
-              return inj.getBeanInstance(injectableInstance);
+            return inj.getBeanInstance(injectableInstance);
           }
         }
       }
@@ -754,13 +755,42 @@ public class InjectUtil {
   public static interface BeanMetric {
     public MetaConstructor getInjectorConstructor();
 
+    public Collection<MetaParameter> getInjectorConstructorParameters();
+
     public Collection<MetaField> getFieldInjectors();
 
     public Collection<MetaMethod> getMethodInjectors();
+
+    public Collection<MetaParameter> getMethodInjectorParameters();
+
+    public Collection<MetaParameter> getConsolidatedMetaParameters();
+
+    public Collection<Object> getAllInjectors();
+  }
+
+  public static abstract class AbstractBeanMetric implements BeanMetric {
+    @Override
+    public Collection<MetaParameter> getConsolidatedMetaParameters() {
+      final List<MetaParameter> metaParameterList = new ArrayList<MetaParameter>(getMethodInjectorParameters());
+      metaParameterList.addAll(getInjectorConstructorParameters());
+      return metaParameterList;
+    }
+
+    @Override
+    public Collection<Object> getAllInjectors() {
+      final List<Object> allInjectors = new ArrayList<Object>(getFieldInjectors());
+      allInjectors.addAll(getMethodInjectors());
+      final MetaConstructor injectorConstructor = getInjectorConstructor();
+      if (injectorConstructor != null) {
+        allInjectors.add(injectorConstructor);
+      }
+
+      return allInjectors;
+    }
   }
 
   public static BeanMetric analyzeBean(final InjectionContext context, final MetaClass clazz) {
-    return new BeanMetric() {
+    return new AbstractBeanMetric() {
       @Override
       public MetaConstructor getInjectorConstructor() {
         for (final MetaConstructor constructor : clazz.getDeclaredConstructors()) {
@@ -769,6 +799,28 @@ public class InjectUtil {
           }
         }
         return null;
+      }
+
+      @Override
+      public Collection<MetaParameter> getInjectorConstructorParameters() {
+        final MetaConstructor constructor = getInjectorConstructor();
+        if (constructor != null) {
+          return Arrays.asList(constructor.getParameters());
+        }
+        else {
+          return Collections.emptyList();
+        }
+      }
+
+      @Override
+      public Collection<MetaParameter> getMethodInjectorParameters() {
+        final Collection<MetaMethod> methods = getMethodInjectors();
+        final List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
+        for (final MetaMethod method : methods) {
+          parameterList.addAll(Arrays.asList(method.getParameters()));
+        }
+
+        return parameterList;
       }
 
       @Override
@@ -802,6 +854,71 @@ public class InjectUtil {
         }
         while ((toScan = toScan.getSuperClass()) != null);
         return methods;
+      }
+
+    };
+  }
+
+  public static BeanMetric getFilteredBeanMetric(final InjectionContext context,
+                                                 final MetaClass clazz,
+                                                 final Class<? extends Annotation> annotatedWith) {
+
+    final BeanMetric beanMetric = analyzeBean(context, clazz);
+
+    return new AbstractBeanMetric() {
+      @Override
+      public MetaConstructor getInjectorConstructor() {
+        final MetaConstructor injectionConstructor = beanMetric.getInjectorConstructor();
+        if (injectionConstructor != null) {
+          if (!injectionConstructor.getParametersAnnotatedWith(annotatedWith).isEmpty()) {
+            return injectionConstructor;
+          }
+        }
+        return null;
+      }
+
+      @Override
+      public Collection<MetaField> getFieldInjectors() {
+        final List<MetaField> fieldList = new ArrayList<MetaField>();
+        for (final MetaField metaField : beanMetric.getFieldInjectors()) {
+          if (metaField.isAnnotationPresent(annotatedWith)) {
+            fieldList.add(metaField);
+          }
+        }
+
+        return fieldList;
+      }
+
+      @Override
+      public Collection<MetaMethod> getMethodInjectors() {
+        final List<MetaMethod> metaMethodList = new ArrayList<MetaMethod>();
+        for (final MetaMethod metaMethod : beanMetric.getMethodInjectors()) {
+          if (!metaMethod.getParametersAnnotatedWith(annotatedWith).isEmpty()) {
+            metaMethodList.add(metaMethod);
+          }
+        }
+
+        return metaMethodList;
+      }
+
+      @Override
+      public Collection<MetaParameter> getInjectorConstructorParameters() {
+        final MetaConstructor metaConstructor = getInjectorConstructor();
+        if (metaConstructor != null) {
+          return metaConstructor.getParametersAnnotatedWith(annotatedWith);
+        }
+
+        return Collections.emptyList();
+      }
+
+      @Override
+      public Collection<MetaParameter> getMethodInjectorParameters() {
+        final List<MetaParameter> metaMethodList = new ArrayList<MetaParameter>();
+        for (final MetaMethod metaMethod : beanMetric.getMethodInjectors()) {
+          metaMethodList.addAll(metaMethod.getParametersAnnotatedWith(annotatedWith));
+        }
+
+        return metaMethodList;
       }
     };
   }

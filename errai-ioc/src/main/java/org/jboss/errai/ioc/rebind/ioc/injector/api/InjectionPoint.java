@@ -64,6 +64,10 @@ public class InjectionPoint<T> {
     return annotation;
   }
 
+  public Annotation getRawAnnotation() {
+    return (Annotation) annotation;
+  }
+
   public MetaConstructor getConstructor() {
     return constructor;
   }

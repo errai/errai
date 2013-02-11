@@ -1,0 +1,66 @@
+/*
+ * Copyright 2012 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jboss.errai.ui.test.stylebinding.client;
+
+import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCBeanDef;
+import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
+import org.jboss.errai.ui.test.stylebinding.client.res.StyleBoundTemplate;
+import org.jboss.errai.ui.test.stylebinding.client.res.StyleControl;
+
+/**
+ * @author Mike Brock
+ */
+public class StyleBindingTest extends AbstractErraiCDITest {
+  @Override
+  public String getModuleName() {
+    return "org.jboss.errai.ui.test.stylebinding.Test";
+  }
+
+  public void testStyleBinding() {
+    final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    assertNotNull(bean);
+
+    final StyleBoundTemplate instance = bean.getInstance();
+    assertNotNull(instance);
+
+    assertEquals("hidden", instance.getTestA().getElement().getStyle().getVisibility());
+
+    final IOCBeanDef<StyleControl> styleControl = IOC.getBeanManager().lookupBean(StyleControl.class);
+    styleControl.getInstance().setAdmin(true);
+
+    StyleBindingsRegistry.get().updateStyles();
+
+    assertEquals("visible", instance.getTestA().getElement().getStyle().getVisibility());
+  }
+
+  public void testDataBindingChangesUpdatesStyle() {
+    final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    assertNotNull(bean);
+
+    final StyleBoundTemplate instance = bean.getInstance();
+    assertNotNull(instance);
+
+    assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
+
+    instance.getTestModel().setTestB("0");
+
+    assertEquals("0", instance.getTestB().getText());
+    assertEquals("hidden", instance.getTestB().getElement().getStyle().getVisibility());
+  }
+}

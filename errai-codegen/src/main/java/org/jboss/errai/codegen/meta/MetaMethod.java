@@ -18,7 +18,10 @@ package org.jboss.errai.codegen.meta;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration {
   @Override
@@ -86,6 +89,17 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
   }
+
+  public List<MetaParameter> getParametersAnnotatedWith(Class<? extends Annotation> annotation) {
+    final List<MetaParameter> metaParameters = new ArrayList<MetaParameter>();
+    for (final MetaParameter parameter : getParameters()) {
+      if (parameter.isAnnotationPresent(annotation)) {
+        metaParameters.add(parameter);
+      }
+    }
+    return Collections.unmodifiableList(metaParameters);
+  }
+
 
   public Method asMethod() {
     try {

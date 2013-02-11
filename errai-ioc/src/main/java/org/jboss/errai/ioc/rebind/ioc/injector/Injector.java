@@ -241,4 +241,11 @@ public interface Injector {
    * @return true if the injector is a regular type injector.
    */
   boolean isRegularTypeInjector();
+
+
+  public void setAttribute(String name, Object value);
+
+  public Object getAttribute(String name);
+
+  public boolean hasAttribute(String name);
 }

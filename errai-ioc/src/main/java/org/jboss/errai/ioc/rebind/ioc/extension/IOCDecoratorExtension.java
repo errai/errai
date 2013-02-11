@@ -37,6 +37,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
  * Errai's own built in support for facilities such as <tt>@Service</tt> and <tt>@Observes</tt> implement
  * their functionality as decorators.
  * @param <T>
+ *
+ * @author Mike Brock
  */
 public abstract class IOCDecoratorExtension<T extends Annotation> {
   private final Class<T> decoratesWith;

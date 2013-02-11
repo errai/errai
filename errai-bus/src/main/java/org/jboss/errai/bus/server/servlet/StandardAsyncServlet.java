@@ -24,6 +24,7 @@ import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,8 +43,18 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   private static final long serialVersionUID = 1L;
 
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+  protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException,
       IOException {
+
+    final boolean sse;
+    if (request.getParameter("sse") != null) {
+      response.setContentType("text/event-stream");
+      sse = true;
+    }
+    else {
+      response.setContentType("application/json");
+      sse = false;
+    }
 
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(),
         request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
@@ -51,9 +62,9 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     final MessageQueue queue = service.getBus().getQueue(session);
     if (queue == null) {
       switch (getConnectionPhase(request)) {
-      case CONNECTING:
-      case DISCONNECTING:
-        return;
+        case CONNECTING:
+        case DISCONNECTING:
+          return;
       }
       sendDisconnectDueToSessionExpiry(response.getOutputStream());
       return;
@@ -68,46 +79,77 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     final AsyncContext asyncContext = request.startAsync();
     asyncContext.addListener(new AsyncListener() {
       @Override
-      public void onTimeout(AsyncEvent event) throws IOException {
+      public void onTimeout(final AsyncEvent event) throws IOException {
         poll(queue, asyncContext);
         asyncContext.complete();
       }
 
       @Override
-      public void onComplete(AsyncEvent event) throws IOException {}
+      public void onComplete(final AsyncEvent event) throws IOException {
+      }
 
       @Override
-      public void onError(AsyncEvent event) throws IOException {}
+      public void onError(final AsyncEvent event) throws IOException {
+      }
 
       @Override
-      public void onStartAsync(AsyncEvent event) throws IOException {}
-    });
-
-    queue.setActivationCallback(new QueueActivationCallback() {
-      @Override
-      public void activate(MessageQueue queue) {
-        try {
-          poll(queue, asyncContext);
-        }
-        catch (final Throwable t) {
-          try {
-            writeExceptionToOutputStream((HttpServletResponse)asyncContext.getResponse(), t);
-          }
-          catch (IOException e) {
-            throw new RuntimeException("Failed to write exception to output stream", e);
-          }
-        }
-        finally {
-          asyncContext.complete();
-        }
+      public void onStartAsync(final AsyncEvent event) throws IOException {
       }
     });
+
+    if (sse) {
+
+      queue.setActivationCallback(new QueueActivationCallback() {
+        @Override
+        public void activate(final MessageQueue queue) {
+          try {
+            final ServletOutputStream outputStream = asyncContext.getResponse().getOutputStream();
+            outputStream.write("event: bus-traffic\n\ndata: ".getBytes());
+            poll(queue, asyncContext);
+            outputStream.write("\n\n".getBytes());
+            outputStream.flush();
+          }
+          catch (final Throwable t) {
+            try {
+              writeExceptionToOutputStream((HttpServletResponse) asyncContext.getResponse(), t);
+            }
+            catch (IOException e) {
+              throw new RuntimeException("Failed to write exception to output stream", e);
+            }
+          }
+          finally {
+            asyncContext.complete();
+          }
+        }
+      });
+    }
+    else {
+      queue.setActivationCallback(new QueueActivationCallback() {
+        @Override
+        public void activate(final MessageQueue queue) {
+          try {
+            poll(queue, asyncContext);
+          }
+          catch (final Throwable t) {
+            try {
+              writeExceptionToOutputStream((HttpServletResponse) asyncContext.getResponse(), t);
+            }
+            catch (IOException e) {
+              throw new RuntimeException("Failed to write exception to output stream", e);
+            }
+          }
+          finally {
+            asyncContext.complete();
+          }
+        }
+      });
+    }
   }
 
   @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(),
-            request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+        request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
     try {
       service.store(createCommandMessage(session, request));
     }
@@ -118,7 +160,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     }
   }
 
-  private void poll(MessageQueue queue, AsyncContext asyncContext) throws IOException {
+  private void poll(final MessageQueue queue, final AsyncContext asyncContext) throws IOException {
     if (queue == null) return;
     queue.setActivationCallback(null);
     queue.heartBeat();

@@ -364,6 +364,39 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return Collections.unmodifiableList(methods); // in case we want to cache this in the future
   }
 
+  @Override
+  public List<MetaMethod> getMethodsWithMetaAnnotations(final Class<? extends Annotation> annotation) {
+    final List<MetaMethod> methods = new ArrayList<MetaMethod>();
+    MetaClass scanTarget = this;
+    while (scanTarget != null) {
+      for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
+        for (final Annotation a : m.getAnnotations()) {
+          if (_findMetaAnnotation(a.annotationType(), annotation)) {
+            methods.add(m);
+          }
+        }
+      }
+      scanTarget = scanTarget.getSuperClass();
+    }
+
+    return methods;
+  }
+
+  private static boolean _findMetaAnnotation(final Class<? extends Annotation> root,
+                                             final Class<? extends Annotation> annotation) {
+    if (root.isAnnotationPresent(annotation)) {
+      return true;
+    }
+    else {
+      for (final Annotation a : root.getAnnotations()) {
+         if (_findMetaAnnotation(a.annotationType(), annotation)) {
+           return true;
+         }
+      }
+    }
+    return false;
+  }
+
   // docs inherited from superclass
   @Override
   public final List<MetaField> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
@@ -378,6 +411,24 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       scanTarget = scanTarget.getSuperClass();
     }
     return Collections.unmodifiableList(fields); // in case we want to cache this in the future
+  }
+
+  @Override
+  public List<MetaField> getFieldsWithMetaAnnotations(Class<? extends Annotation> annotation) {
+    final List<MetaField> methods = new ArrayList<MetaField>();
+    MetaClass scanTarget = this;
+    while (scanTarget != null) {
+      for (final MetaField m : scanTarget.getDeclaredFields()) {
+        for (final Annotation a : m.getAnnotations()) {
+          if (_findMetaAnnotation(a.annotationType(), annotation)) {
+            methods.add(m);
+          }
+        }
+      }
+      scanTarget = scanTarget.getSuperClass();
+    }
+
+    return methods;
   }
 
   public T getEnclosedMetaObject() {
@@ -697,8 +748,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       }
 
       @Override
-      public MetaClass getPropertyType(String propertyName) {
-        MetaMethod readMethod = getReadMethodForProperty(propertyName);
+      public MetaClass getPropertyType(final String propertyName) {
+        final MetaMethod readMethod = getReadMethodForProperty(propertyName);
         if (readMethod != null) {
           return readMethod.getReturnType();
         }

@@ -53,6 +53,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
    */
   public abstract List<MetaMethod> getMethodsAnnotatedWith(Class<? extends Annotation> annotation);
 
+  public abstract List<MetaMethod> getMethodsWithMetaAnnotations(Class<? extends Annotation> annotation);
+
   public abstract MetaMethod[] getDeclaredMethods();
 
   public abstract MetaMethod getMethod(String name, Class... parameters);
@@ -85,6 +87,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
    *           if {@code annotation} is null.
    */
   public abstract List<MetaField> getFieldsAnnotatedWith(Class<? extends Annotation> annotation);
+
+  public abstract List<MetaField> getFieldsWithMetaAnnotations(Class<? extends Annotation> annotations);
 
   public abstract MetaField[] getDeclaredFields();
 

@@ -35,7 +35,9 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import javax.enterprise.inject.New;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractInjector implements Injector {
   protected QualifyingMetadata qualifyingMetadata;
@@ -62,6 +64,8 @@ public abstract class AbstractInjector implements Injector {
   protected final List<RegistrationHook> registrationHooks = new ArrayList<RegistrationHook>();
   protected final List<RenderingHook> renderingHooks = new ArrayList<RenderingHook>();
   protected final List<Runnable> disablingCallback = new ArrayList<Runnable>();
+
+  protected Map<String, Object> attributes;
 
   @Override
   public boolean isTestMock() {
@@ -329,6 +333,29 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public MetaClass getConcreteInjectedType() {
     return getInjectedType();
+  }
+
+  @Override
+  public void setAttribute(String name, Object value) {
+    if (attributes == null) {
+      attributes = new HashMap<String, Object>();
+    }
+    attributes.put(name, value);
+  }
+
+  @Override
+  public Object getAttribute(String name) {
+    if (attributes == null) {
+      return null;
+    }
+    else {
+      return attributes.get(name);
+    }
+  }
+
+  @Override
+  public boolean hasAttribute(String name) {
+    return attributes != null && attributes.containsKey(name);
   }
 }
 

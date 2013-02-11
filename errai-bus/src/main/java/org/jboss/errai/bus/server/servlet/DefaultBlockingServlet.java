@@ -158,7 +158,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
     try {
       // note about caching: clients now include a uniquifier in a request parameter called "z"
       // so no-cache headers are now unnecessary.
-      boolean sse;
+      final boolean sse;
       if (httpServletRequest.getParameter("sse") != null) {
         httpServletResponse.setContentType("text/event-stream");
         sse = true;

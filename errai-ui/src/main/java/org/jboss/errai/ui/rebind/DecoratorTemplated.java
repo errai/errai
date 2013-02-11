@@ -43,17 +43,14 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessType;
-import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -63,11 +60,9 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.BeanMetric;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.TemplateUtil;
-import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -102,31 +97,32 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
   private static final Logger logger = LoggerFactory.getLogger(DecoratorTemplated.class);
 
-  public DecoratorTemplated(Class<Templated> decoratesWith) {
+  public DecoratorTemplated(final Class<Templated> decoratesWith) {
     super(decoratesWith);
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(InjectableInstance<Templated> ctx) {
+  public List<? extends Statement> generateDecorator(final InjectableInstance<Templated> ctx) {
 
-    MetaClass declaringClass = ctx.getEnclosingType();
-
+    final MetaClass declaringClass = ctx.getEnclosingType();
 
     if (!declaringClass.isAssignableTo(Composite.class)) {
       throw new GenerationException("@Templated class [" + declaringClass.getFullyQualifiedName()
           + "] must extend base class [" + Composite.class.getName() + "].");
     }
 
-    for (MetaField field : declaringClass.getFields()) {
+    final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
+
+    for (final MetaField field : declaringClass.getFields()) {
       if (field.isAnnotationPresent(DataField.class)
-          || field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))) {
+          || field.getType().getErased().equals(databinderMetaClass)) {
         ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
       }
     }
 
-    MetaClass callbackMetaClass = MetaClassFactory.parameterizedAs(InitializationCallback.class,
+    final MetaClass callbackMetaClass = MetaClassFactory.parameterizedAs(InitializationCallback.class,
         MetaClassFactory.typeParametersOf(declaringClass));
-    BlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(callbackMetaClass).extend()
+    final BlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(callbackMetaClass).extend()
         .publicOverridesMethod("init", Parameter.of(declaringClass, "obj"));
 
     /*
@@ -146,12 +142,12 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
    * Generate the actual construction logic for our {@link Templated} component
    */
   @SuppressWarnings("serial")
-  private void generateTemplatedInitialization(InjectableInstance<Templated> ctx,
-                                               BlockBuilder<AnonymousClassStructureBuilder> builder) {
+  private void generateTemplatedInitialization(final InjectableInstance<Templated> ctx,
+                                               final BlockBuilder<AnonymousClassStructureBuilder> builder) {
 
-    Map<MetaClass, BuildMetaClass> constructed = getConstructedTemplateTypes(ctx);
+    final Map<MetaClass, BuildMetaClass> constructed = getConstructedTemplateTypes(ctx);
 
-    MetaClass declaringClass = ctx.getEnclosingType();
+    final MetaClass declaringClass = ctx.getEnclosingType();
     if (!constructed.containsKey(declaringClass)) {
 
       /*
@@ -162,7 +158,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       /*
        * Instantiate the ClientBundle Template resource
        */
-      String templateVarName = InjectUtil.getUniqueVarName();
+      final String templateVarName = InjectUtil.getUniqueVarName();
       builder
           .append(Stmt
               .declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass))
@@ -173,7 +169,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       /*
        * Get root Template Element
        */
-      String rootTemplateElementVarName = InjectUtil.getUniqueVarName();
+      final String rootTemplateElementVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt
           .declareVariable(Element.class)
           .named(rootTemplateElementVarName)
@@ -182,17 +178,17 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                   .loadVariable(templateVarName).invoke("getContents").invoke("getText"),
                   getTemplateFragmentName(declaringClass))));
 
-      Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
+      final Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
 
       /*
        * Get a reference to the actual Composite component being created
        */
-      Statement component = Refs.get(ctx.getInjector().getInstanceVarName());
+      final Statement component = Refs.get(ctx.getInjector().getInstanceVarName());
 
       /*
        * Get all of the data-field Elements from the Template
        */
-      String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
+      final String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
       },
           Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
@@ -201,7 +197,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Attach Widget field children Elements to the Template DOM
        */
 
-      String fieldsMapVarName = InjectUtil.getUniqueVarName();
+      final String fieldsMapVarName = InjectUtil.getUniqueVarName();
 
       /*
        * The Map<String, Widget> to store actual component field references.
@@ -210,7 +206,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       },
           Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
           })));
-      Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
+      final Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
 
       generateComponentCompositions(ctx, builder, component, rootTemplateElement,
           Stmt.loadVariable(dataFieldElementsVarName), fieldsMap);
@@ -219,22 +215,22 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
   }
 
-  private void generateEventHandlerMethodClasses(InjectableInstance<Templated> ctx,
-                                                 BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component,
-                                                 String dataFieldElementsVarName, Statement fieldsMap) {
+  private void generateEventHandlerMethodClasses(final InjectableInstance<Templated> ctx,
+                                                 final BlockBuilder<AnonymousClassStructureBuilder> builder, final Statement component,
+                                                 final String dataFieldElementsVarName, final Statement fieldsMap) {
 
-    Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
+    final Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
     dataFieldTypes.put("this", ctx.getType());
 
-    MetaClass declaringClass = ctx.getEnclosingType();
+    final MetaClass declaringClass = ctx.getEnclosingType();
 
     /* Ensure that no @DataFields are handled more than once when used in combination with @SyncNative */
-    Set<String> processedNativeHandlers = new HashSet<String>();
-    Set<String> processedEventHandlers = new HashSet<String>();
+    final Set<String> processedNativeHandlers = new HashSet<String>();
+    final Set<String> processedEventHandlers = new HashSet<String>();
 
-    for (MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
+    for (final MetaMethod method : declaringClass.getMethodsAnnotatedWith(EventHandler.class)) {
 
-      String[] targetDataFieldNames = method.getAnnotation(EventHandler.class).value();
+      final String[] targetDataFieldNames = method.getAnnotation(EventHandler.class).value();
 
       if (targetDataFieldNames.length == 0) {
         throw new GenerationException("@EventHandler annotation on method ["
@@ -242,7 +238,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             + "." + method.getName() + "] must specify at least one data-field target.");
       }
 
-      MetaClass eventType = (method.getParameters().length == 1) ? method.getParameters()[0].getType() : null;
+      final MetaClass eventType = (method.getParameters().length == 1) ? method.getParameters()[0].getType() : null;
       if (eventType == null || (!eventType.isAssignableTo(Event.class)) && !eventType.isAssignableTo(DomEvent.class)) {
         throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
             + declaringClass.getFullyQualifiedName()
@@ -254,14 +250,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         /*
          * Generate native DOM event handlers.
          */
-        MetaClass handlerType = MetaClassFactory.get(EventListener.class);
-        BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType)
+        final MetaClass handlerType = MetaClassFactory.get(EventListener.class);
+        final BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType)
             .extend()
             .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
         listenerBuiler.append(InjectUtil.invokePublicOrPrivateMethod(ctx.getInjectionContext(), component,
             method, Stmt.loadVariable("event")));
 
-        ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
+        final ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
 
         int eventsToSink = Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS
             | Event.TOUCHEVENTS;
@@ -269,7 +265,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           eventsToSink = method.getAnnotation(SinkNative.class).value();
         }
 
-        for (String name : targetDataFieldNames) {
+        for (final String name : targetDataFieldNames) {
 
           if (processedNativeHandlers.contains(name) || processedEventHandlers.contains(name)) {
             throw new GenerationException(
@@ -283,7 +279,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           }
 
           if (dataFieldTypes.containsKey(name)) {
-            MetaClass dataFieldType = dataFieldTypes.get(name);
+            final MetaClass dataFieldType = dataFieldTypes.get(name);
             if (!dataFieldType.isAssignableTo(Element.class)) {
               /*
                * We have a GWT or other Widget type.
@@ -320,7 +316,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         /*
          * We have a GWT Widget type
          */
-        MetaClass handlerType;
+        final MetaClass handlerType;
         try {
           handlerType = getHandlerForEvent(eventType);
         }
@@ -339,7 +335,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           throw e;
         }
 
-        BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType)
+        final BlockBuilder<AnonymousClassStructureBuilder> listenerBuiler = ObjectBuilder.newInstanceOf(handlerType)
             .extend()
             .publicOverridesMethod(handlerType.getMethods()[0].getName(), Parameter.of(eventType, "event"));
 
@@ -347,14 +343,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         listenerBuiler.append(InjectUtil.invokePublicOrPrivateMethod(ctx.getInjectionContext(),
             component, method, Stmt.loadVariable("event")));
 
-        ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
+        final ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
 
-        MetaClass hasHandlerType = MetaClassFactory.get("com.google.gwt.event.dom.client.Has"
+        final MetaClass hasHandlerType = MetaClassFactory.get("com.google.gwt.event.dom.client.Has"
             + handlerType.getName()
             + "s");
 
-        for (String name : targetDataFieldNames) {
-          MetaClass dataFieldType = dataFieldTypes.get(name);
+        for (final String name : targetDataFieldNames) {
+          final MetaClass dataFieldType = dataFieldTypes.get(name);
 
           if (dataFieldType == null) {
             throw new GenerationException("@EventHandler method [" + method.getName() + "] in class ["
@@ -372,7 +368,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           processedEventHandlers.add(name);
 
           // Where will the event come from? It could be a @DataField member, or it could be the templated widget itself!
-          Statement eventSource;
+          final Statement eventSource;
           if ("this".equals(name)) {
             eventSource = Stmt.loadVariable("obj");
           }
@@ -386,12 +382,12 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                 Stmt.invokeStatic(eventType, "getType")));
           }
           else if (dataFieldType.isAssignableTo(hasHandlerType)) {
-            Statement widget = Cast.to(hasHandlerType, eventSource);
+            final Statement widget = Cast.to(hasHandlerType, eventSource);
             builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
                 Cast.to(handlerType, listenerInstance)));
           }
           else if (dataFieldType.isAssignableTo(Widget.class)) {
-            Statement widget = Cast.to(Widget.class, eventSource);
+            final Statement widget = Cast.to(Widget.class, eventSource);
             builder.append(Stmt.nestedCall(widget).invoke("addDomHandler",
                 listenerInstance, Stmt.invokeStatic(eventType, "getType")));
           }
@@ -407,7 +403,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
   }
 
-  private MetaClass getHandlerForEvent(MetaClass eventType) {
+  private MetaClass getHandlerForEvent(final MetaClass eventType) {
 
     /*
      * All handlers event must have an overrided method getAssociatedType(). We
@@ -426,7 +422,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     MetaMethod method = eventType.getBestMatchingMethod("getAssociatedType", Type.class);
 
     if (method == null) {
-      for (MetaMethod m : eventType.getMethods()) {
+      for (final MetaMethod m : eventType.getMethods()) {
         if ("getAssociatedType".equals(m.getName())) {
           method = m;
           break;
@@ -439,7 +435,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + eventType.getName() + "]");
     }
 
-    MetaType returnType = method.getGenericReturnType();
+    final MetaType returnType = method.getGenericReturnType();
     if (returnType == null) {
       throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
           + "] returns void.");
@@ -454,10 +450,10 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] does not return Type<? extends EventHandler>..");
     }
 
-    MetaParameterizedType parameterizedType = (MetaParameterizedType) returnType;
+    final MetaParameterizedType parameterizedType = (MetaParameterizedType) returnType;
     logger.debug("parameterizedType: " + parameterizedType.getClass() + " -- " + parameterizedType);
 
-    MetaType[] argTypes = parameterizedType.getTypeParameters();
+    final MetaType[] argTypes = parameterizedType.getTypeParameters();
     if ((argTypes.length != 1) && argTypes[0] instanceof MetaClass
         && !((MetaClass) argTypes[0]).isAssignableTo(EventHandler.class)) {
       throw new GenerationException("The method 'getAssociatedType()' in the event [" + eventType.getName()
@@ -467,68 +463,29 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     return (MetaClass) argTypes[0];
   }
 
-  private void generateComponentCompositions(InjectableInstance<Templated> ctx,
-                                             BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component, Statement rootTemplateElement,
-                                             Statement dataFieldElements, Statement fieldsMap) {
+  private void generateComponentCompositions(final InjectableInstance<Templated> ctx,
+                                             final BlockBuilder<AnonymousClassStructureBuilder> builder,
+                                             final Statement component,
+                                             final Statement rootTemplateElement,
+                                             final Statement dataFieldElements,
+                                             final Statement fieldsMap) {
 
-    /*
-     * In case of constructor injection, search for the data binder parameter annotated with @AutoBound
-     */
-    Statement dataBinderRef = null;
-    MetaClass dataModelType = null;
-    BeanMetric beanMetric = InjectUtil.analyzeBean(ctx.getInjectionContext(), ctx.getEnclosingType());
-    MetaConstructor mc = beanMetric.getInjectorConstructor();
-    if (mc != null) {
-      for (MetaParameter mp : mc.getParameters()) {
-        if (mp.getType().getErased().isAssignableTo(MetaClassFactory.get(DataBinder.class))
-            && mp.isAnnotationPresent(AutoBound.class)) {
-          dataModelType = (MetaClass) mp.getType().getParameterizedType().getTypeParameters()[0];
-          if (dataBinderRef != null) {
-            throw new GenerationException("Multiple @AutoBound data binders found in constructor of " +
-                mc.getDeclaringClass());
-          }
-          dataBinderRef = ctx.getInjectionContext().getInlineBeanReference(mp);
-        }
-      }
-    }
 
-    /*
-     * Search for data binder fields annotated with @AutoBound
-     */
-    MetaField dataBinderField = null;
-    for (MetaField field : ctx.getInjector().getInjectedType().getFields()) {
-      if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))
-          && field.isAnnotationPresent(AutoBound.class)) {
-        if (dataBinderField != null) {
-          throw new GenerationException("Multiple @AutoBound data binder fields found in class "
-              + ctx.getInjector().getInjectedType());
-        }
-        if (dataBinderRef != null) {
-          throw new GenerationException(
-              "Multiple @AutoBound data binders found (check constructors and fields) in class "
-                  + ctx.getInjector().getInjectedType());
-        }
-        dataModelType = (MetaClass) field.getType().getParameterizedType().getTypeParameters()[0];
-        dataBinderField = field;
-        dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
-            PrivateAccessUtil.getPrivateFieldInjectorName(dataBinderField),
-            Variable.get(ctx.getInjector().getInstanceVarName()));
-      }
-    }
+    final DataBindingUtil.DataBinderLookup binderLookup = DataBindingUtil.getDataBinder(ctx);
 
     /*
      * Create a reference to the composite's data binder
      */
-    if (dataBinderRef != null) {
-      builder.append(Stmt.declareVariable("binder", DataBinder.class, dataBinderRef));
+    if (binderLookup != null) {
+      builder.append(Stmt.declareVariable("binder", DataBinder.class, binderLookup.getValueAccessor()));
     }
 
     /*
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
      */
-    Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
-    for (Entry<String, Statement> field : dataFields.entrySet()) {
+    final Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+    for (final Entry<String, Statement> field : dataFields.entrySet()) {
       builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
           .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
           dataFieldElements, field.getKey()));
@@ -538,27 +495,27 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Add each field to the Collection of children of the new Composite
      * Template
      */
-    for (Entry<String, Statement> field : dataFields.entrySet()) {
+    for (final Entry<String, Statement> field : dataFields.entrySet()) {
       builder.append(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
     }
 
     /*
      * Bind each widget if data binder is found and has been initialized.
      */
-    BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
-    for (Entry<String, Statement> dataField : dataFields.entrySet()) {
-      Bound bound = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType()).get(dataField.getKey());
+    final BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
+    for (final Entry<String, Statement> dataField : dataFields.entrySet()) {
+      final Bound bound = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType()).get(dataField.getKey());
       if (bound != null) {
-        if (dataBinderRef != null) {
-          String property = bound.property().equals("") ? dataField.getKey() : bound.property();
+        if (binderLookup != null) {
+          final String property = bound.property().equals("") ? dataField.getKey() : bound.property();
           // Check if bound property exists in data model type
-          if (!DataBindingValidator.isValidPropertyChain(dataModelType, property)) {
+          if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
             throw new GenerationException("Invalid binding of DataField " + dataField.getKey() + " in class "
                 + ctx.getInjector().getInjectedType() + "! Property " + property + " not resolvable from class "
-                + dataModelType + ". Hint: All types in a property chain must be @Bindable!");
+                + binderLookup.getDataModelType() + ". Hint: All types in a property chain must be @Bindable!");
           }
 
-          Statement converter =
+          final Statement converter =
               bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
           binderBlock.append(Stmt.loadVariable("binder").invoke("bind", dataField.getValue(), property, converter));
         }
@@ -569,7 +526,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       }
     }
 
-    if (dataBinderRef != null) {
+    if (binderLookup != null) {
       builder.append(binderBlock
           .finish()
           .else_()
@@ -587,11 +544,20 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
   }
 
+  private static void checkTypeIsDataBinder(MetaClass type) {
+    final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
+
+    if (!databinderMetaClass.isAssignableFrom(type)) {
+      throw new GenerationException("type of @AutoBound element must be " + DataBinder.class.getName() +
+          "; was: " + type.getFullyQualifiedName());
+    }
+  }
+
   /**
    * Create an inner interface for the given {@link Template} class and its HTML corresponding resource
    */
-  private void generateTemplateResourceInterface(InjectableInstance<Templated> ctx, final MetaClass type) {
-    ClassStructureBuilder<?> componentTemplateResource = ClassBuilder.define(getTemplateTypeName(type)).publicScope()
+  private void generateTemplateResourceInterface(final InjectableInstance<Templated> ctx, final MetaClass type) {
+    final ClassStructureBuilder<?> componentTemplateResource = ClassBuilder.define(getTemplateTypeName(type)).publicScope()
         .interfaceDefinition().implementsInterface(Template.class).implementsInterface(ClientBundle.class)
         .body()
         .publicMethod(TextResource.class, "getContents").annotatedWith(new Source() {
@@ -618,7 +584,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
    * Get a map of all previously constructed {@link Template} object types
    */
   @SuppressWarnings("unchecked")
-  private Map<MetaClass, BuildMetaClass> getConstructedTemplateTypes(InjectableInstance<Templated> ctx) {
+  private Map<MetaClass, BuildMetaClass> getConstructedTemplateTypes(final InjectableInstance<Templated> ctx) {
     Map<MetaClass, BuildMetaClass> result = (Map<MetaClass, BuildMetaClass>) ctx.getInjectionContext().getAttribute(
         CONSTRUCTED_TEMPLATE_SET_KEY);
 
@@ -637,19 +603,19 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   /**
    * Get the name of the {@link Template} class of the given {@link MetaClass} type
    */
-  private String getTemplateTypeName(MetaClass type) {
+  private String getTemplateTypeName(final MetaClass type) {
     return type.getFullyQualifiedName().replaceAll("\\.", "_") + "TemplateResource";
   }
 
   /**
    * Get the name of the {@link Template} HTML file of the given {@link MetaClass} component type
    */
-  private String getTemplateFileName(MetaClass type) {
+  private String getTemplateFileName(final MetaClass type) {
     String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
 
     if (type.isAnnotationPresent(Templated.class)) {
-      String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
-      Matcher matcher = Pattern.compile("^([^#]+)#?.*$").matcher(source);
+      final String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
+      final Matcher matcher = Pattern.compile("^([^#]+)#?.*$").matcher(source);
       if (matcher.matches()) {
         resource = (matcher.group(1) == null ? resource : matcher.group(1));
         if (resource.matches("\\S+\\.html")) {
@@ -670,12 +636,12 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
    * Get the name of the {@link Template} HTML fragment (Element subtree) to be used as the template root of the given
    * {@link MetaClass} component type
    */
-  private String getTemplateFragmentName(MetaClass type) {
+  private String getTemplateFragmentName(final MetaClass type) {
     String fragment = "";
 
     if (type.isAnnotationPresent(Templated.class)) {
-      String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
-      Matcher matcher = Pattern.compile("^.*#([^#]+)$").matcher(source);
+      final String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
+      final Matcher matcher = Pattern.compile("^.*#([^#]+)$").matcher(source);
       if (matcher.matches()) {
         fragment = (matcher.group(1) == null ? fragment : matcher.group(1));
       }
@@ -687,8 +653,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   /**
    * Throw an exception if the template source syntax is invalid
    */
-  private String canonicalizeTemplateSourceSyntax(MetaClass component, String source) {
-    String result = Strings.nullToEmpty(source).trim();
+  private String canonicalizeTemplateSourceSyntax(final MetaClass component, final String source) {
+    final String result = Strings.nullToEmpty(source).trim();
 
     if (result.matches(".*#.*#.*")) {
       throw new IllegalArgumentException("Invalid syntax: @" + Templated.class.getSimpleName() + "(" + source

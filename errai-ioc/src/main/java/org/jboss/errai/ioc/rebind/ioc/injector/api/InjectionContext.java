@@ -18,20 +18,12 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import static java.util.Collections.unmodifiableCollection;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.*;
-
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Qualifier;
-import javax.inject.Scope;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -39,6 +31,7 @@ import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.config.rebind.ReachableTypes;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
@@ -47,16 +40,29 @@ import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProxyInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.QualifiedTypeInjectorDelegate;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Qualifier;
+import javax.inject.Scope;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class InjectionContext {
   private static final Logger log = LoggerFactory.getLogger(InjectionContext.class);
@@ -82,6 +88,8 @@ public class InjectionContext {
 
   private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators = HashMultimap.create();
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType = HashMultimap.create();
+  private final Multimap<Class<? extends Annotation>, Class<? extends Annotation>> metaAnnotationAliases
+      = HashMultimap.create();
 
   private final Set<Object> overriddenTypesAndMembers = new HashSet<Object>();
 
@@ -492,7 +500,32 @@ public class InjectionContext {
   }
 
   public void registerDecorator(final IOCDecoratorExtension<?> iocExtension) {
-    decorators.get(iocExtension.decoratesWith()).add(iocExtension);
+    final Class<? extends Annotation> annotation = iocExtension.decoratesWith();
+
+    final Target target = annotation.getAnnotation(Target.class);
+    if (target != null) {
+      boolean oneTarget = target.value().length == 1;
+
+      for (ElementType type : target.value()) {
+        if (type == ElementType.ANNOTATION_TYPE) {
+          // type is a meta-annotation. so we need to map all annotations with this
+          // meta-annotation to the decorator extension.
+
+          for (final MetaClass annotationClazz : ClassScanner.getTypesAnnotatedWith(annotation)) {
+            final Class<? extends Annotation> javaAnnoCls = annotationClazz.asClass().asSubclass(Annotation.class);
+            decorators.get(javaAnnoCls).add(iocExtension);
+
+            if (oneTarget) {
+              metaAnnotationAliases.put(javaAnnoCls, annotation);
+            }
+          }
+          if (oneTarget) {
+            return;
+          }
+        }
+      }
+    }
+    decorators.get(annotation).add(iocExtension);
   }
 
   public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
@@ -518,10 +551,19 @@ public class InjectionContext {
     }
   }
 
+  public boolean isMetaAnnotationFor(Class<? extends Annotation> alias, Class<? extends Annotation> forAnno) {
+    return metaAnnotationAliases.containsEntry(alias, forAnno);
+  }
+
   private void sortDecorators() {
     for (final Class<? extends Annotation> a : getDecoratorAnnotations()) {
       if (a.isAnnotationPresent(Target.class)) {
         for (final ElementType type : a.getAnnotation(Target.class).value()) {
+          decoratorsByElementType.get(type).add(a);
+        }
+      }
+      else {
+        for (final ElementType type : ElementType.values()) {
           decoratorsByElementType.get(type).add(a);
         }
       }

@@ -27,33 +27,34 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
 
 public class DecoratorTask extends InjectionTask {
-  private final IOCDecoratorExtension[] IOCExtensions;
+  private final IOCDecoratorExtension[] iocExtensions;
 
   public DecoratorTask(final Injector injector, final MetaClass type, final IOCDecoratorExtension[] decs) {
     super(injector, type);
-    this.IOCExtensions = decs;
+    this.iocExtensions = decs;
   }
 
   public DecoratorTask(final Injector injector, final MetaField field, final IOCDecoratorExtension[] decs) {
     super(injector, field);
-    this.IOCExtensions = decs;
+    this.iocExtensions = decs;
   }
 
   public DecoratorTask(final Injector injector, final MetaConstructor constr, final IOCDecoratorExtension[] decs) {
     super(injector, constr);
-    this.IOCExtensions = decs;
+    this.iocExtensions = decs;
   }
 
   public DecoratorTask(final Injector injector, final MetaMethod method, final IOCDecoratorExtension[] decs) {
     super(injector, method);
-    this.IOCExtensions = decs;
+    this.iocExtensions = decs;
   }
 
   public DecoratorTask(final Injector injector, final MetaParameter parm, final IOCDecoratorExtension[] decs) {
     super(injector, parm);
-    this.IOCExtensions = decs;
+    this.iocExtensions = decs;
   }
 
   @SuppressWarnings({"unchecked"})
@@ -61,14 +62,37 @@ public class DecoratorTask extends InjectionTask {
   public boolean doTask(final InjectionContext ctx) {
     Annotation annotation = null;
 
-    for (final IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
+    for (final IOCDecoratorExtension<? extends Annotation> dec : iocExtensions) {
+      TaskSwitch:
       switch (taskType) {
         case PrivateField:
         case Field:
+          if (!ctx.getDecoratorAnnotationsBy(ElementType.FIELD).contains(dec.decoratesWith())) {
+            for (Annotation a : field.getAnnotations()) {
+              if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
+                annotation = field.getAnnotation(a.annotationType());
+                break TaskSwitch;
+              }
+            }
+
+            continue;
+          }
+
           annotation = field.getAnnotation(dec.decoratesWith());
           break;
         case PrivateMethod:
         case Method:
+          if (!ctx.getDecoratorAnnotationsBy(ElementType.METHOD).contains(dec.decoratesWith())) {
+            for (Annotation a : method.getAnnotations()) {
+              if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
+                annotation = method.getAnnotation(a.annotationType());
+                break TaskSwitch;
+              }
+            }
+
+            continue;
+          }
+
           annotation = method.getAnnotation(dec.decoratesWith());
           if (annotation == null && field != null) {
             annotation = field.getAnnotation(dec.decoratesWith());
@@ -78,15 +102,35 @@ public class DecoratorTask extends InjectionTask {
           }
           break;
         case Type:
+          if (!ctx.getDecoratorAnnotationsBy(ElementType.TYPE).contains(dec.decoratesWith())) {
+            for (Annotation a : type.getAnnotations()) {
+              if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
+                annotation = type.getAnnotation(a.annotationType());
+                break TaskSwitch;
+              }
+            }
+            continue;
+          }
+
           annotation = type.getAnnotation(dec.decoratesWith());
           break;
         case Parameter:
+          if (!ctx.getDecoratorAnnotationsBy(ElementType.PARAMETER).contains(dec.decoratesWith())) {
+            for (Annotation a : parm.getAnnotations()) {
+              if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
+                annotation = parm.getAnnotation(a.annotationType());
+                break TaskSwitch;
+              }
+            }
+            continue;
+          }
+
           annotation = parm.getAnnotation(dec.decoratesWith());
           break;
       }
 
       for (final Statement stmt : dec.generateDecorator(new InjectableInstance(annotation, taskType, constructor, method, field, type,
-              parm, injector, ctx))) {
+          parm, injector, ctx))) {
         ctx.getProcessingContext().append(stmt);
       }
     }
