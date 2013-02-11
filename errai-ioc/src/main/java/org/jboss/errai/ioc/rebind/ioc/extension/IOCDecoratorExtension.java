@@ -54,7 +54,8 @@ public abstract class IOCDecoratorExtension<T extends Annotation> {
   /**
    * The <tt>generateDecorator()</tt> method is called at the point the container has finished constructing a
    * reference to an element annotated with the configured annotation.
-   * @param ctx the {@link org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance} reference, representing the value of the element which is annotated.
+   * @param ctx the {@link org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance} reference, representing
+   *            the value of the element which is annotated.
    * @return
    */
   public abstract List<? extends Statement> generateDecorator(InjectableInstance<T> ctx);

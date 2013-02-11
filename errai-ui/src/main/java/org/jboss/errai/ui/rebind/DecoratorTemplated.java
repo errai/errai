@@ -101,7 +101,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
   @Override
   public List<? extends Statement> generateDecorator(final InjectableInstance<Templated> ctx) {
-
     final MetaClass declaringClass = ctx.getEnclosingType();
 
     if (!declaringClass.isAssignableTo(Composite.class)) {
@@ -538,15 +537,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement,
         Stmt.nestedCall(fieldsMap).invoke("values")));
 
-  }
-
-  private static void checkTypeIsDataBinder(MetaClass type) {
-    final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
-
-    if (!databinderMetaClass.isAssignableFrom(type)) {
-      throw new GenerationException("type of @AutoBound element must be " + DataBinder.class.getName() +
-          "; was: " + type.getFullyQualifiedName());
-    }
   }
 
   /**

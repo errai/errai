@@ -15,13 +15,8 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Strings;
+import com.google.gwt.dom.client.Element;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -34,8 +29,11 @@ import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 
-import com.google.common.base.Strings;
-import com.google.gwt.dom.client.Element;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Store all injected {@link DataField} {@link Statement} instances into the
