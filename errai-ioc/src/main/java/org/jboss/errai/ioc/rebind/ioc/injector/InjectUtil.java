@@ -29,6 +29,7 @@ import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -187,22 +188,20 @@ public class InjectUtil {
     final MetaClass initializationCallbackType =
         parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
 
-    final BlockBuilder<AnonymousClassStructureBuilder> initMeth
-        = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
-        .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj", true));
-
     final String varName = "init_".concat(injector.getInstanceVarName());
     injector.setPostInitCallbackVar(varName);
 
-    renderLifeCycleEvents(PostConstruct.class, injector, ctx, initMeth, postConstructTasks);
+    final List<Statement> initStatements = new ArrayList<Statement>();
 
-    final AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+    renderLifeCycleEvents(PostConstruct.class, injector, ctx, initStatements, postConstructTasks);
+
+    final Statement initCallback = createInitializationCallback(injector.getInjectedType(), "obj", initStatements);
 
     final IOCProcessingContext pc = ctx.getProcessingContext();
 
     pc.getBootstrapBuilder()
         .privateField(varName, initializationCallbackType)
-        .initializesWith(classStructureBuilder.finish()).finish();
+        .initializesWith(initCallback).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
@@ -229,19 +228,23 @@ public class InjectUtil {
     final MetaClass destructionCallbackType =
         parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
 
-    final BlockBuilder<AnonymousClassStructureBuilder> initMeth
-        = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
-        .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
+//    final BlockBuilder<AnonymousClassStructureBuilder> initMeth
+//        = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
+//        .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
 
     final String varName = "destroy_".concat(injector.getInstanceVarName());
     injector.setPreDestroyCallbackVar(varName);
 
+    final List<Statement> initMeth = new ArrayList<Statement>();
+
     renderLifeCycleEvents(PreDestroy.class, injector, ctx, initMeth, preDestroyTasks);
+
+    Statement destructionCallback = createDestructionCallback(injector.getInjectedType(), "obj", initMeth);
 
     final IOCProcessingContext pc = ctx.getProcessingContext();
 
     pc.getBootstrapBuilder().privateField(varName, destructionCallbackType)
-        .initializesWith(initMeth.finish().finish()).finish();
+        .initializesWith(destructionCallback).finish();
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
         Refs.get(injector.getInstanceVarName()), Refs.get(varName)));
@@ -252,17 +255,17 @@ public class InjectUtil {
   private static void renderLifeCycleEvents(final Class<? extends Annotation> type,
                                             final Injector injector,
                                             final InjectionContext ctx,
-                                            final BlockBuilder<?> body,
+                                            final List<Statement> initStatements,
                                             final List<MetaMethod> methods) {
     for (final MetaMethod meth : methods) {
-      renderLifeCycleMethodCall(type, injector, ctx, body, meth);
+      renderLifeCycleMethodCall(type, injector, ctx, initStatements, meth);
     }
   }
 
   private static void renderLifeCycleMethodCall(final Class<? extends Annotation> type,
                                                 final Injector injector,
                                                 final InjectionContext ctx,
-                                                final BlockBuilder<?> body,
+                                                final List<Statement> initStatements,
                                                 final MetaMethod meth) {
     if (meth.getParameters().length != 0) {
       throw new InjectionFailure(type.getCanonicalName() + " method must contain no parameters: "
@@ -274,11 +277,11 @@ public class InjectUtil {
     }
 
     if (!meth.isPublic()) {
-      body.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+      initStatements.add(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
           PrivateAccessUtil.getPrivateMethodName(meth), Refs.get("obj")));
     }
     else {
-      body.append(Stmt.loadVariable("obj").invoke(meth.getName()));
+      initStatements.add(Stmt.loadVariable("obj").invoke(meth.getName()));
     }
   }
 
@@ -921,6 +924,26 @@ public class InjectUtil {
         return metaMethodList;
       }
     };
+  }
+
+
+  public static Statement createInitializationCallback(final MetaClass type, final String initVar, final List<Statement> statementList) {
+    return Stmt.newObject(parameterizedAs(InitializationCallback.class, typeParametersOf(type)))
+        .extend()
+        .publicOverridesMethod("init", Parameter.of(type, initVar, true))
+        .appendAll(statementList)
+        .finish()
+        .finish();
+  }
+
+
+  public static Statement createDestructionCallback(final MetaClass type, final String initVar, final List<Statement> statementList) {
+    return Stmt.newObject(parameterizedAs(DestructionCallback.class, typeParametersOf(type)))
+        .extend()
+        .publicOverridesMethod("destroy", Parameter.of(type, initVar, true))
+        .appendAll(statementList)
+        .finish()
+        .finish();
   }
 
   private static final String BEAN_INJECTOR_STORE = "InjectorBeanManagerStore";

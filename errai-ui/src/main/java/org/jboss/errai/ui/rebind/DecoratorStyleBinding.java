@@ -18,30 +18,24 @@ package org.jboss.errai.ui.rebind;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Element;
-import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 import org.jboss.errai.ui.shared.api.style.StyleBindingChangeHandler;
 import org.jboss.errai.ui.shared.api.style.StyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,6 +45,7 @@ import java.util.List;
 @CodeDecorator
 public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
   private static final String DATA_BINDING_CONFIG_ATTR = "StyleBinding:DataBinderConfigured";
+  private static final String STYLE_BINDING_HOUSEKEEPING_ATTR = "StyleBinding:HousekeepingReg";
 
   public DecoratorStyleBinding(Class<StyleBinding> decoratesWith) {
     super(decoratesWith);
@@ -94,35 +89,35 @@ public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
     final DataBindingUtil.DataBinderLookup dataBinder = DataBindingUtil.getDataBinder(ctx);
 
     if (dataBinder != null) {
-      if (!ctx.getInjector().hasAttribute(DATA_BINDING_CONFIG_ATTR))  {
+      if (!ctx.getInjector().hasAttribute(DATA_BINDING_CONFIG_ATTR)) {
         ctx.getInjector().setAttribute(DATA_BINDING_CONFIG_ATTR, Boolean.TRUE);
 
         stmts.add(Stmt.nestedCall(
             dataBinder.getValueAccessor()).invoke("addPropertyChangeHandler",
-                Stmt.newObject(StyleBindingChangeHandler.class))
+            Stmt.newObject(StyleBindingChangeHandler.class))
         );
       }
     }
 
     stmts.add(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
-        .invoke("addElementBinding", ctx.getRawAnnotation().annotationType(),
+        .invoke("addElementBinding", Refs.get(ctx.getInjector().getInstanceVarName()),
+            ctx.getRawAnnotation().annotationType(),
             Stmt.nestedCall(valueAccessor).invoke("getElement")));
 
     if (!ctx.getInjector().hasAttribute(DecoratorStyleBinding.class.getName())) {
-
-      final MetaClass initCallbackType = MetaClassFactory.parameterizedAs(InitializationCallback.class,
-          MetaClassFactory.typeParametersOf(ctx.getEnclosingType()));
-
-      final ObjectBuilder initCallback = Stmt.newObject(initCallbackType).extend()
-          .publicOverridesMethod("init", Parameter.of(ctx.getEnclosingType(), "obj"))
-          .append(Stmt.invokeStatic(StyleBindingsRegistry.class, "get").invoke("updateStyles"))
-          .finish().finish();
+      final Statement initCallback = InjectUtil.createInitializationCallback(ctx.getEnclosingType(), "obj",
+          Collections.<Statement>singletonList(
+              Stmt.invokeStatic(StyleBindingsRegistry.class, "get").invoke("updateStyles"))
+      );
 
       stmts.add(Stmt.loadVariable("context")
           .invoke("addInitializationCallback", Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
 
+
       ctx.getInjector().setAttribute(DecoratorStyleBinding.class.getName(), Boolean.TRUE);
     }
+
+    addCleanup(ctx, stmts);
 
     return stmts;
   }
@@ -151,7 +146,27 @@ public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
         .finish()
         .finish();
 
-    return Collections.singletonList(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
-            .invoke("addStyleBinding", ctx.getRawAnnotation().annotationType(), bindExec));
+    final List<Statement> stmts = new ArrayList<Statement>();
+    stmts.add(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
+            .invoke("addStyleBinding", Refs.get(ctx.getInjector().getInstanceVarName()),
+                ctx.getRawAnnotation().annotationType(), bindExec));
+    addCleanup(ctx, stmts);
+
+
+    return stmts;
+  }
+
+  private static void addCleanup(final InjectableInstance ctx, final List<Statement> stmts) {
+    if (!ctx.getInjector().hasAttribute(STYLE_BINDING_HOUSEKEEPING_ATTR)) {
+      Statement destructionCallback = InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj",
+          Arrays.<Statement>asList(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
+              .invoke("cleanAllForBean", Refs.get(ctx.getInjector().getInstanceVarName()))));
+
+      stmts.add(Stmt.loadVariable("context").invoke("addDestructionCallback",
+          Refs.get(ctx.getInjector().getInstanceVarName()),
+          destructionCallback));
+
+      ctx.getInjector().setAttribute(STYLE_BINDING_HOUSEKEEPING_ATTR, Boolean.TRUE);
+    }
   }
 }

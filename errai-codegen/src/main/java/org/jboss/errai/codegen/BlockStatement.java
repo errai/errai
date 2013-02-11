@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.codegen.builder.ClosedBlock;
@@ -54,6 +55,14 @@ public class BlockStatement extends AbstractStatement {
   public BlockStatement addStatement(final Statement statement) {
     if (statement != null)
       statements.add(statement);
+
+    return this;
+  }
+
+  public BlockStatement addAllStatements(final Collection<Statement> stmts) {
+    if (statements != null)
+      statements.addAll(stmts);
+
     return this;
   }
 

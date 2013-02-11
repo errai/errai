@@ -34,10 +34,7 @@ public class StyleBindingTest extends AbstractErraiCDITest {
 
   public void testStyleBinding() {
     final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
-    assertNotNull(bean);
-
     final StyleBoundTemplate instance = bean.getInstance();
-    assertNotNull(instance);
 
     assertEquals("hidden", instance.getTestA().getElement().getStyle().getVisibility());
 
@@ -51,10 +48,7 @@ public class StyleBindingTest extends AbstractErraiCDITest {
 
   public void testDataBindingChangesUpdatesStyle() {
     final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
-    assertNotNull(bean);
-
     final StyleBoundTemplate instance = bean.getInstance();
-    assertNotNull(instance);
 
     assertEquals("", instance.getTestB().getElement().getStyle().getVisibility());
 
@@ -62,5 +56,21 @@ public class StyleBindingTest extends AbstractErraiCDITest {
 
     assertEquals("0", instance.getTestB().getText());
     assertEquals("hidden", instance.getTestB().getElement().getStyle().getVisibility());
+  }
+
+  public void testDestroyingBeanCleansUpStyleBindings() {
+    final IOCBeanDef<StyleBoundTemplate> bean = IOC.getBeanManager().lookupBean(StyleBoundTemplate.class);
+    final StyleBoundTemplate instance = bean.getInstance();
+
+    assertEquals("hidden", instance.getTestA().getElement().getStyle().getVisibility());
+
+    IOC.getBeanManager().destroyBean(instance);
+
+    final IOCBeanDef<StyleControl> styleControl = IOC.getBeanManager().lookupBean(StyleControl.class);
+    styleControl.getInstance().setAdmin(true);
+
+    StyleBindingsRegistry.get().updateStyles();
+
+    assertEquals("hidden", instance.getTestA().getElement().getStyle().getVisibility());
   }
 }

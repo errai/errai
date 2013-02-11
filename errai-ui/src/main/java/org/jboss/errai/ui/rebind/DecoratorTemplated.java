@@ -15,20 +15,20 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.enterprise.util.TypeLiteral;
-
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -57,7 +57,6 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.rebind.DataBindingValidator;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -71,19 +70,18 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.DomEvent.Type;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
-import com.google.gwt.resources.client.TextResource;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
+import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Generates the code required for {@link Templated} classes.
@@ -120,22 +118,21 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       }
     }
 
-    final MetaClass callbackMetaClass = MetaClassFactory.parameterizedAs(InitializationCallback.class,
-        MetaClassFactory.typeParametersOf(declaringClass));
-    final BlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(callbackMetaClass).extend()
-        .publicOverridesMethod("init", Parameter.of(declaringClass, "obj"));
+    final List<Statement> initStmts = new ArrayList<Statement>();
 
     /*
      * Do the work
      */
-    generateTemplatedInitialization(ctx, builder);
+    generateTemplatedInitialization(ctx, initStmts);
 
     if (declaringClass.isAnnotationPresent(EntryPoint.class)) {
-      builder.append(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("obj")));
+      initStmts.add(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("obj")));
     }
 
+    final Statement initCallback = InjectUtil.createInitializationCallback(declaringClass, "obj", initStmts);
+
     return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
-        Refs.get(ctx.getInjector().getInstanceVarName()), builder.finish().finish()));
+        Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
   }
 
   /**
@@ -143,7 +140,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
    */
   @SuppressWarnings("serial")
   private void generateTemplatedInitialization(final InjectableInstance<Templated> ctx,
-                                               final BlockBuilder<AnonymousClassStructureBuilder> builder) {
+                                               final List<Statement> initStmts) {
 
     final Map<MetaClass, BuildMetaClass> constructed = getConstructedTemplateTypes(ctx);
 
@@ -159,18 +156,17 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Instantiate the ClientBundle Template resource
        */
       final String templateVarName = InjectUtil.getUniqueVarName();
-      builder
-          .append(Stmt
-              .declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass))
-              .named(templateVarName)
-              .initializeWith(
-                  Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
+      initStmts.add(Stmt
+          .declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass))
+          .named(templateVarName)
+          .initializeWith(
+              Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
 
       /*
        * Get root Template Element
        */
       final String rootTemplateElementVarName = InjectUtil.getUniqueVarName();
-      builder.append(Stmt
+      initStmts.add(Stmt
           .declareVariable(Element.class)
           .named(rootTemplateElementVarName)
           .initializeWith(
@@ -189,7 +185,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Get all of the data-field Elements from the Template
        */
       final String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
-      builder.append(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
+      initStmts.add(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
       },
           Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
 
@@ -202,21 +198,21 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       /*
        * The Map<String, Widget> to store actual component field references.
        */
-      builder.append(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {
+      initStmts.add(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {
       },
           Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
           })));
       final Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
 
-      generateComponentCompositions(ctx, builder, component, rootTemplateElement,
+      generateComponentCompositions(ctx, initStmts, component, rootTemplateElement,
           Stmt.loadVariable(dataFieldElementsVarName), fieldsMap);
 
-      generateEventHandlerMethodClasses(ctx, builder, component, dataFieldElementsVarName, fieldsMap);
+      generateEventHandlerMethodClasses(ctx, initStmts, component, dataFieldElementsVarName, fieldsMap);
     }
   }
 
   private void generateEventHandlerMethodClasses(final InjectableInstance<Templated> ctx,
-                                                 final BlockBuilder<AnonymousClassStructureBuilder> builder, final Statement component,
+                                                 final List<Statement> initStmts, final Statement component,
                                                  final String dataFieldElementsVarName, final Statement fieldsMap) {
 
     final Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
@@ -306,7 +302,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
              * We are completely native and have no reference to this data-field
              * Element in Java
              */
-            builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupNativeEventListener", component,
+            initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupNativeEventListener", component,
                 Stmt.loadVariable(dataFieldElementsVarName).invoke("get", name), listenerInstance,
                 eventsToSink));
           }
@@ -377,18 +373,18 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           }
 
           if (dataFieldType.isAssignableTo(Element.class)) {
-            builder.append(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component,
+            initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "setupWrappedElementEventHandler", component,
                 eventSource, listenerInstance,
                 Stmt.invokeStatic(eventType, "getType")));
           }
           else if (dataFieldType.isAssignableTo(hasHandlerType)) {
             final Statement widget = Cast.to(hasHandlerType, eventSource);
-            builder.append(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
+            initStmts.add(Stmt.nestedCall(widget).invoke("add" + handlerType.getName(),
                 Cast.to(handlerType, listenerInstance)));
           }
           else if (dataFieldType.isAssignableTo(Widget.class)) {
             final Statement widget = Cast.to(Widget.class, eventSource);
-            builder.append(Stmt.nestedCall(widget).invoke("addDomHandler",
+            initStmts.add(Stmt.nestedCall(widget).invoke("addDomHandler",
                 listenerInstance, Stmt.invokeStatic(eventType, "getType")));
           }
           else {
@@ -464,7 +460,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   }
 
   private void generateComponentCompositions(final InjectableInstance<Templated> ctx,
-                                             final BlockBuilder<AnonymousClassStructureBuilder> builder,
+                                             final List<Statement> initStmts,
                                              final Statement component,
                                              final Statement rootTemplateElement,
                                              final Statement dataFieldElements,
@@ -477,7 +473,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Create a reference to the composite's data binder
      */
     if (binderLookup != null) {
-      builder.append(Stmt.declareVariable("binder", DataBinder.class, binderLookup.getValueAccessor()));
+      initStmts.add(Stmt.declareVariable("binder", DataBinder.class, binderLookup.getValueAccessor()));
     }
 
     /*
@@ -486,7 +482,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      */
     final Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
-      builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
+      initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
           .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
           dataFieldElements, field.getKey()));
     }
@@ -496,7 +492,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Template
      */
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
-      builder.append(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
+      initStmts.add(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
     }
 
     /*
@@ -527,7 +523,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
 
     if (binderLookup != null) {
-      builder.append(binderBlock
+      initStmts.add(binderBlock
           .finish()
           .else_()
           .append(Stmt.invokeStatic(GWT.class, "log", "DataBinder in class "
@@ -539,7 +535,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Attach the Template to the Component, and set up the GWT Widget hierarchy
      * to preserve Handlers and DOM events.
      */
-    builder.append(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement,
+    initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement,
         Stmt.nestedCall(fieldsMap).invoke("values")));
 
   }

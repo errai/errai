@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.util.Stmt;
 
 import javax.management.monitor.StringMonitorMBean;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -77,6 +78,12 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
   @Override
   public BlockBuilder<T> append(final Statement statement) {
     blockStatement.addStatement(statement);
+    return this;
+  }
+
+  @Override
+  public BlockBuilder<T> appendAll(Collection<Statement> stmt) {
+    blockStatement.addAllStatements(stmt);
     return this;
   }
 

@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.builder;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Statement;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,7 +31,10 @@ public interface BlockBuilder<T> extends Finishable<T>, Iterable<Statement> {
   public void insertBefore(InnerClass innerClass);
 
   public BlockBuilder<T> append(Statement stmt);
+  public BlockBuilder<T> appendAll(Collection<Statement> stmt);
+
   public BlockBuilder<T> append(InnerClass innerClass);
+
 
   /**
    * Alias for {@link #append(org.jboss.errai.codegen.Statement)}

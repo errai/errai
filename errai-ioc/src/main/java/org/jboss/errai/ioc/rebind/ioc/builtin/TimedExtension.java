@@ -35,6 +35,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -89,24 +90,15 @@ public class TimedExtension extends IOCDecoratorExtension<Timed> {
           break;
       }
 
-      final MetaClass destructionCallbackCls = MetaClassFactory.parameterizedAs(DestructionCallback.class,
-             MetaClassFactory.typeParametersOf(beanClass));
-         final ObjectBuilder destructionCallbackStmt = ObjectBuilder.newInstanceOf(destructionCallbackCls)
-             .extend()
-             .publicOverridesMethod("destroy", Parameter.finalOf(beanClass, "beanInstance"))
-             .append(Stmt.loadVariable(timerVarName).invoke("cancel"))
-             .finish().finish();
+      final Statement destructionCallbackStmt
+          = InjectUtil.createDestructionCallback(beanClass, "beanInstance",
+              Collections.<Statement>singletonList(Stmt.loadVariable(timerVarName).invoke("cancel")));
 
-      final MetaClass initCallbackCls = MetaClassFactory.parameterizedAs(InitializationCallback.class,
-          MetaClassFactory.typeParametersOf(beanClass));
-      final ObjectBuilder initCallbackStmt = ObjectBuilder.newInstanceOf(initCallbackCls)
-          .extend()
-          .publicOverridesMethod("init", Parameter.finalOf(beanClass, "beanInstance"))
-          .append(timerVar)
-          .append(Stmt.loadVariable("context").invoke("addDestructionCallback",
-                    Refs.get(ctx.getInjector().getInstanceVarName()), destructionCallbackStmt))
-          .append(timerExec)
-          .finish().finish();
+      final Statement initCallbackStmt = InjectUtil.createInitializationCallback(beanClass, "beanInstance",
+          Arrays.asList(timerVar,
+              Stmt.loadVariable("context").invoke("addDestructionCallback",
+                  Refs.get(ctx.getInjector().getInstanceVarName()), destructionCallbackStmt),
+              timerExec));
 
       statements.add(Stmt.loadVariable("context").invoke("addInitializationCallback",
           Refs.get(ctx.getInjector().getInstanceVarName()), initCallbackStmt));
