@@ -72,7 +72,6 @@ public class ThreadUtil {
     @Override
     public V get() throws InterruptedException, ExecutionException {
       try {
-        System.out.println("**RUN SYNC**");
         return runnable.call();
       }
       catch (Throwable t) {

@@ -41,13 +41,8 @@ public final class ClassScanner {
   private static boolean reflectionsScanning = false;
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
-
-
   private ClassScanner() {
   }
-
-  private final static Map<MetaClass, Collection<MetaClass>> subtypesCache
-      = new ConcurrentHashMap<MetaClass, Collection<MetaClass>>();
 
   public static Collection<MetaParameter> getParametersAnnotatedWith(final Class<? extends Annotation> annotation,
                                                                      final Set<String> packages) {
@@ -77,32 +72,18 @@ public final class ClassScanner {
                                                             final String excludeRegEx) {
     final Collection<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
-    final Future<?> factoryFuture = ThreadUtil.submit(new Runnable() {
-      @Override
-      public void run() {
-        for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
-          if (metaClass.isAnnotationPresent(annotation)) {
-            result.add(metaClass);
-          }
-        }
+    for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
+      if (metaClass.isAnnotationPresent(annotation)) {
+        result.add(metaClass);
       }
-    });
+    }
 
     try {
-      factoryFuture.get();
-
       if (reflectionsScanning) {
-        final Future<?> reflectionsFuture = ThreadUtil.submit(new Runnable() {
-          @Override
-          public void run() {
-            for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
-              final MetaClass e = MetaClassFactory.get(cls);
-              result.add(e);
-            }
-          }
-        });
-
-        reflectionsFuture.get();
+        for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
+          final MetaClass e = MetaClassFactory.get(cls);
+          result.add(e);
+        }
       }
     }
     catch (Exception ignored) {
