@@ -47,6 +47,10 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       IOException {
 
     final boolean sse;
+    String clientId = request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER);
+    if (clientId == null) {
+      clientId = request.getParameter("clientId");
+    }
     if (request.getParameter("sse") != null) {
       response.setContentType("text/event-stream");
       sse = true;
@@ -56,8 +60,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       sse = false;
     }
 
-    final QueueSession session = sessionProvider.createOrGetSession(request.getSession(),
-        request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+    final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), clientId);
 
     final MessageQueue queue = service.getBus().getQueue(session);
     if (queue == null) {
@@ -98,7 +101,6 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     });
 
     if (sse) {
-
       queue.setActivationCallback(new QueueActivationCallback() {
         @Override
         public void activate(final MessageQueue queue) {
