@@ -158,7 +158,7 @@ public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
 
   private static void addCleanup(final InjectableInstance ctx, final List<Statement> stmts) {
     if (!ctx.getInjector().hasAttribute(STYLE_BINDING_HOUSEKEEPING_ATTR)) {
-      Statement destructionCallback = InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj",
+      final Statement destructionCallback = InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj",
           Arrays.<Statement>asList(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
               .invoke("cleanAllForBean", Refs.get(ctx.getInjector().getInstanceVarName()))));
 

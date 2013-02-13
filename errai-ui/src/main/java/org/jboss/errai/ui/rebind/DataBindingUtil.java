@@ -62,7 +62,6 @@ public class DataBindingUtil {
 
     final InjectUtil.BeanMetric beanMetric
         = InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), ctx.getEnclosingType(), AutoBound.class);
-    //final MetaConstructor mc = beanMetric.getInjectorConstructor();
 
     final Collection<Object> allInjectors = beanMetric.getAllInjectors();
     if (allInjectors.size() > 1) {

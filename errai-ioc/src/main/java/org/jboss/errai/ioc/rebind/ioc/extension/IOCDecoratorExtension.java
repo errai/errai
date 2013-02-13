@@ -16,11 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
 
 /**
  * A code decorator extension for the Errai IOC framework. Decorators allow the generation of code in and around
@@ -43,7 +43,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 public abstract class IOCDecoratorExtension<T extends Annotation> {
   private final Class<T> decoratesWith;
 
-  protected IOCDecoratorExtension(Class<T> decoratesWith) {
+  protected IOCDecoratorExtension(final Class<T> decoratesWith) {
     this.decoratesWith = decoratesWith;
   }
 
@@ -56,7 +56,7 @@ public abstract class IOCDecoratorExtension<T extends Annotation> {
    * reference to an element annotated with the configured annotation.
    * @param ctx the {@link org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance} reference, representing
    *            the value of the element which is annotated.
-   * @return
+   * @return a list of statements to be rendered into the injector code.
    */
   public abstract List<? extends Statement> generateDecorator(InjectableInstance<T> ctx);
 }

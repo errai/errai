@@ -83,13 +83,13 @@ public final class AsyncGenerators {
     private final Class interfaceType;
     private final Future<String> delegate;
 
-    private FutureWrapper(Class interfaceType, Future<String> delegate) {
+    private FutureWrapper(final Class interfaceType, final Future<String> delegate) {
       this.interfaceType = interfaceType;
       this.delegate = delegate;
     }
 
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public boolean cancel(final boolean mayInterruptIfRunning) {
       return delegate.cancel(mayInterruptIfRunning);
     }
 
@@ -111,7 +111,8 @@ public final class AsyncGenerators {
     }
 
     @Override
-    public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public String get(final long timeout, final TimeUnit unit)
+        throws InterruptedException, ExecutionException, TimeoutException {
       final String val = delegate.get(timeout, unit);
       activeFutures.remove(interfaceType);
       return val;

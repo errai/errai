@@ -432,7 +432,6 @@ public class IOCBootstrapGenerator {
       }
     }
 
-
     for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
       extensionConfigurator.afterInitialization(injectionContext.getProcessingContext(), injectionContext, processorFactory);
     }

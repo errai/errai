@@ -222,5 +222,4 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   private static final String dataFieldTypeMapName(MetaClass composite) {
     return DecoratorDataField.class.getName() + "_DATA_FIELD_TYPE_MAP_" + composite.getName();
   }
-
 }

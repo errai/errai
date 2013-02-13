@@ -16,6 +16,29 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.ClassListReader;
+import org.jboss.errai.config.rebind.AsyncCodeGenerator;
+import org.jboss.errai.config.rebind.AsyncGenerationJob;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.config.util.ThreadUtil;
+import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.marshalling.server.ServerMappingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,37 +50,11 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.util.ClassChangeUtil;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.rebind.ClassListReader;
-import org.jboss.errai.config.rebind.AsyncCodeGenerator;
-import org.jboss.errai.config.rebind.AsyncGenerationJob;
-import org.jboss.errai.config.rebind.AsyncGenerators;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.config.util.ThreadUtil;
-import org.jboss.errai.marshalling.client.api.MarshallerFactory;
-import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
-import org.jboss.errai.marshalling.server.ServerMappingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @GenerateAsync(MarshallerFactory.class)
 public class MarshallersGenerator extends Generator implements AsyncCodeGenerator {
-
   private static final Logger logger = LoggerFactory.getLogger(Generator.class);
 
   public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai.marshalling.server.impl";
@@ -74,8 +71,14 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
       Boolean.valueOf(System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP, "true"));
 
   private static final String[] candidateOutputDirectories =
-      {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/",
-          "WEB-INF/classes/", "src/main/webapp/WEB-INF/classes/"};
+      {
+          "target/classes/",
+          "war/WEB-INF/classes/",
+          "web/WEB-INF/classes/",
+          "target/war/WEB-INF/classes/",
+          "WEB-INF/classes/",
+          "src/main/webapp/WEB-INF/classes/"
+      };
 
   private static final DiscoveryStrategy[] rootDiscoveryStrategies;
 
@@ -217,7 +220,6 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
    */
   private final String packageName = MarshallerFactory.class.getPackage().getName();
 
-
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
@@ -242,7 +244,7 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
     return packageName + "." + className;
   }
 
-  public void generateMarshallerBootstrapper(final TreeLogger logger, final GeneratorContext context) throws Exception{
+  public void generateMarshallerBootstrapper(final TreeLogger logger, final GeneratorContext context) throws Exception {
     final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter == null) return;
 
@@ -275,7 +277,7 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
     return ThreadUtil.submit(new Callable<String>() {
       @Override
       public String call() throws Exception {
-         return _generate(context);
+        return _generate(context);
       }
     });
   }

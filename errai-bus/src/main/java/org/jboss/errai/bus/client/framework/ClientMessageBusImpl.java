@@ -1127,19 +1127,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void activateSSE() {
     try {
-    LogUtil.log("attempting to use SSE");
+      LogUtil.log("attempting to use SSE");
 
-    final Object o = ClientSSEChannel.attemptSSEChannel(ClientMessageBusImpl.this,
-        URL.encode(getApplicationLocation(IN_SERVICE_ENTRY_POINT))
-            + "?z=" + getNextRequestNumber() + "&sse=1&clientId=" + clientId);
+      final Object o = ClientSSEChannel.attemptSSEChannel(ClientMessageBusImpl.this,
+          URL.encode(getApplicationLocation(IN_SERVICE_ENTRY_POINT))
+              + "?z=" + getNextRequestNumber() + "&sse=1&clientId=" + clientId);
 
-    if (o instanceof String) {
-      LogUtil.log("sse could not be negotiated. reason: " + o);
-    }
-    else {
-      LogUtil.log("sse channel active.");
-      pollingActive = false;
-    }
+      if (o instanceof String) {
+        LogUtil.log("sse could not be negotiated. reason: " + o);
+      }
+      else {
+        LogUtil.log("sse channel active.");
+        pollingActive = false;
+      }
     }
     catch (Throwable t) {
       t.printStackTrace();
@@ -2222,10 +2222,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   class WebsocketHandler implements RemoteTransmissionHandler {
     @Override
     public void transmit(final String encodedJSON, final List<Message> txMessages) {
-      if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, encodedJSON)) {
-        return;
-      }
-      else {
+      if (!ClientWebSocketChannel.transmitToSocket(webSocketChannel, encodedJSON)) {
         LogUtil.log("websocket channel is closed. falling back to comet");
 
         remoteTransmissionHandler = new HTTPPostHandler();

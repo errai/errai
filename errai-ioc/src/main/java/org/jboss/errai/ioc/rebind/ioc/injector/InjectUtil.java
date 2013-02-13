@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -227,10 +228,6 @@ public class InjectUtil {
 
     final MetaClass destructionCallbackType =
         parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
-
-//    final BlockBuilder<AnonymousClassStructureBuilder> initMeth
-//        = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
-//        .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
 
     final String varName = "destroy_".concat(injector.getInstanceVarName());
     injector.setPreDestroyCallbackVar(varName);
@@ -660,8 +657,11 @@ public class InjectUtil {
             + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the " +
             "class is non-final.";
 
-        throw UnsatisfiedDependenciesException.createWithSingleParameterFailure(parms[i], constructor.getDeclaringClass(),
-            parms[i].getType(), err);
+        throw UnsatisfiedDependenciesException.createWithSingleParameterFailure(
+            parms[i],
+            constructor.getDeclaringClass(),
+            parms[i].getType(),
+            err);
       }
       catch (InjectionFailure e) {
         e.setTarget(constructor.getDeclaringClass() + "." + DefParameters.from(constructor)
@@ -678,6 +678,7 @@ public class InjectUtil {
   private static Statement recordInlineReference(final Statement beanCreationStmt,
                                                  final InjectionContext ctx,
                                                  final MetaParameter parm) {
+
     final String varName = InjectUtil.getUniqueVarName();
 
     ctx.getProcessingContext()
@@ -699,8 +700,7 @@ public class InjectUtil {
   }
 
   private static String getVarNameFromType(final MetaClass clazz) {
-    final String varName = clazz.getFullyQualifiedName().replaceAll("\\.", "_");
-    return varName;
+    return clazz.getFullyQualifiedName().replaceAll("\\.", "_");
   }
 
   public static String getVarNameFromType(final MetaClass clazz, final MetaParameter parameter) {
@@ -927,7 +927,10 @@ public class InjectUtil {
   }
 
 
-  public static Statement createInitializationCallback(final MetaClass type, final String initVar, final List<Statement> statementList) {
+  public static Statement createInitializationCallback(final MetaClass type,
+                                                       final String initVar,
+                                                       final List<Statement> statementList) {
+
     return Stmt.newObject(parameterizedAs(InitializationCallback.class, typeParametersOf(type)))
         .extend()
         .publicOverridesMethod("init", Parameter.of(type, initVar, true))
@@ -937,7 +940,10 @@ public class InjectUtil {
   }
 
 
-  public static Statement createDestructionCallback(final MetaClass type, final String initVar, final List<Statement> statementList) {
+  public static Statement createDestructionCallback(final MetaClass type,
+                                                    final String initVar,
+                                                    final List<Statement> statementList) {
+
     return Stmt.newObject(parameterizedAs(DestructionCallback.class, typeParametersOf(type)))
         .extend()
         .publicOverridesMethod("destroy", Parameter.of(type, initVar, true))
