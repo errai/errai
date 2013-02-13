@@ -27,46 +27,64 @@ import java.io.OutputStream;
  * single-message payloads. This filter prepends '<tt>[</tt>' to the data coming from the buffer,
  * and inserts a '<tt>,</tt>' between each message in the stream. It then appends a '<tt>]</tt>' to the
  * message to complete the payload.
- * <p>
+ * <p/>
  * For instance, consider the following buffer data:
- * <p>
+ * <p/>
  * <code>
  * {"foo":"bar"}{"bar":"foo"}
  * </code>
- * <p>
+ * <p/>
  * This filter will transform this to:
- * <p>
+ * <p/>
  * <code>
  * [{"foo":"bar"},{"bar":"foo"}]
  * </code>
-
+ *
  * @author Mike Brock
  */
 public class MultiMessageFilter implements BufferFilter {
-  private int bracketCount;
-  private int seg;
+  int brackCount;
+  int seg;
+  boolean inString;
+  boolean escape;
 
   @Override
-  public void before(final ByteWriteAdapter writer) throws IOException {
-    writer.write('[');
+  public void before(final ByteWriteAdapter outstream) throws IOException {
+    outstream.write('[');
   }
 
   @Override
-  public int each(final int i, final ByteWriteAdapter writer) throws IOException {
-    if (i == '{' && ++bracketCount == 1 && seg != 0) {
-      writer.write(',');
+  public int each(int i, final ByteWriteAdapter outstream) throws IOException {
+    if (inString) {
+      if (escape) {
+        escape = false;
+      }
+      else if (i == '\\') {
+        escape = true;
+      }
+      else if (i == '"') {
+        inString = false;
+      }
     }
-    else if (i == '}' && bracketCount != 0 && --bracketCount == 0) {
-      seg++;
+    else {
+      if (i == '"') {
+        inString = true;
+      }
+      else if (i == '{' && ++brackCount == 1 && seg != 0) {
+        outstream.write(',');
+      }
+      else if (i == '}' && brackCount != 0 && --brackCount == 0) {
+        seg++;
+      }
     }
     return i;
   }
 
   @Override
-  public void after(final ByteWriteAdapter writer) throws IOException {
-    if (bracketCount == 1) {
-      writer.write('}');
+  public void after(final ByteWriteAdapter outstream) throws IOException {
+    if (brackCount == 1) {
+      outstream.write('}');
     }
-    writer.write(']');
+    outstream.write(']');
   }
 }
