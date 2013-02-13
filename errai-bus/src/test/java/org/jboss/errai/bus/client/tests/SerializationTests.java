@@ -72,6 +72,39 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testStringWithUnclosedCurlyBracket() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final String expected = "{";
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testString(expected);
+      }
+    });
+  }
+
+  public void testStringWithUnclosedCurlyBracketAndEscapedQuotes() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final String expected = "\"{\"";
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testString(expected);
+      }
+    });
+  }
+
+
   public void testInteger() {
     runAfterInit(new Runnable() {
       @Override
@@ -2015,6 +2048,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
   public void testEntityWithEnumContainerContainer() {
     runAfterInit(new Runnable() {
       @Override
@@ -2137,7 +2171,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   /**
    * Serves as a regressions test for ERRAI-463, see also https://community.jboss.org/thread/215933
    */
@@ -2145,21 +2179,21 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        
+
         final EntityWithTypesUsingNestedParameterizedTypes e = new EntityWithTypesUsingNestedParameterizedTypes();
         Map<String, String> deTranslations = new HashMap<String, String>();
         deTranslations.put("hello", "Hallo");
         deTranslations.put("one", "Eins");
- 
+
         Map<String, String> enTranslations = new HashMap<String, String>();
         enTranslations.put("hello", "Hello");
         enTranslations.put("one", "One");
-        
-        Map<String, Map<String, String>> allTranslations = new HashMap<String, Map<String,String>>();
+
+        Map<String, Map<String, String>> allTranslations = new HashMap<String, Map<String, String>>();
         allTranslations.put("de", deTranslations);
         allTranslations.put("en", enTranslations);
         e.setMap(allTranslations);
-        
+
         List<List<Integer>> list = new ArrayList<List<Integer>>();
         list.add(new ArrayList<Integer>(Arrays.asList(1, 2, null)));
         list.add(new ArrayList<Integer>(Arrays.asList(3, 4, null)));
@@ -2211,7 +2245,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
         final EntityWithInterfaceArrayField ent = new EntityWithInterfaceArrayField();
-        ent.setArrayField(new SubInterface[] {new SubInterfaceImpl("value0"), null, new SubInterfaceImpl("value2")});
+        ent.setArrayField(new SubInterface[]{new SubInterfaceImpl("value0"), null, new SubInterfaceImpl("value2")});
 
         MessageBuilder.createCall(new RemoteCallback<EntityWithInterfaceArrayField>() {
           @Override
@@ -2235,7 +2269,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final ImmutableArrayContainer entity = new ImmutableArrayContainer(new String[] {"1" , "2"});
+        final ImmutableArrayContainer entity = new ImmutableArrayContainer(new String[]{"1", "2"});
 
         MessageBuilder.createCall(new RemoteCallback<ImmutableArrayContainer>() {
           @Override

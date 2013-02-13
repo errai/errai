@@ -38,6 +38,8 @@ public final class BufferHelper {
   public static class MultiMessageHandlerCallback implements BufferCallback {
     int brackCount;
     int seg;
+    boolean inString;
+    boolean escape;
 
     @Override
     public void before(final OutputStream outstream) throws IOException {
@@ -46,11 +48,27 @@ public final class BufferHelper {
 
     @Override
     public int each(int i, final OutputStream outstream) throws IOException {
-      if (i == '{' && ++brackCount == 1 && seg != 0) {
-        outstream.write(',');
+      if (inString) {
+        if (escape) {
+          escape = false;
+        }
+        else if (i == '\\') {
+          escape = true;
+        }
+        else if (i == '"') {
+          inString = false;
+        }
       }
-      else if (i == '}' && brackCount != 0 && --brackCount == 0) {
-        seg++;
+      else {
+        if (i == '"') {
+          inString = true;
+        }
+        else if (i == '{' && ++brackCount == 1 && seg != 0) {
+          outstream.write(',');
+        }
+        else if (i == '}' && brackCount != 0 && --brackCount == 0) {
+          seg++;
+        }
       }
       return i;
     }
@@ -65,7 +83,7 @@ public final class BufferHelper {
   }
 
   public static void encodeAndWrite(final Buffer buffer, final BufferColor bufferColor, final Message message)
-          throws IOException {
+      throws IOException {
 
     buffer.write(encodePayloadToByteArrayInputStream(message.getParts()), bufferColor);
   }
@@ -73,7 +91,7 @@ public final class BufferHelper {
   private static final byte[] NOOP_ARRAY = new byte[0];
 
   public static void encodeAndWriteNoop(final Buffer buffer, final BufferColor bufferColor)
-          throws IOException {
+      throws IOException {
 
     buffer.write(NOOP_ARRAY.length, new ByteArrayInputStream(NOOP_ARRAY), bufferColor);
   }
