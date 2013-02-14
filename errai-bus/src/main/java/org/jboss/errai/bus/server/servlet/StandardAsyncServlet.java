@@ -39,6 +39,7 @@ import org.jboss.errai.common.client.util.TimeUnit;
  * An implementation of {@link AbstractErraiServlet} leveraging asynchronous support of Servlet 3.0.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class StandardAsyncServlet extends AbstractErraiServlet {
   private static final long serialVersionUID = 1L;
