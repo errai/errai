@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import static java.lang.System.nanoTime;
-import static java.lang.System.setOut;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import org.jboss.errai.bus.client.api.Message;
@@ -30,11 +28,11 @@ import org.jboss.errai.bus.server.io.ByteWriteAdapter;
 import org.jboss.errai.bus.server.io.Cleanable;
 import org.jboss.errai.bus.server.io.DirectChannel;
 import org.jboss.errai.bus.server.io.MessageDeliveryHandler;
-import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.Wakeable;
 import org.jboss.errai.bus.server.io.buffers.Buffer;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
@@ -48,19 +46,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * messages.
  */
 public class MessageQueueImpl implements MessageQueue {
-  private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-      secs(1600) : secs(60);
+  private static final long DEFAULT_TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
+      TimeUnit.SECONDS.toMillis(600) : TimeUnit.SECONDS.toMillis(60);
 
   private final QueueSession session;
 
   private boolean initLock = true;
   private boolean queueRunning = true;
-  private volatile long lastTransmission = nanoTime();
+  private volatile long lastTransmission = System.currentTimeMillis();
   private volatile boolean pagedOut = false;
 
   private volatile MessageDeliveryHandler deliveryHandler = BufferDeliveryHandler.getInstance();
   private volatile QueueActivationCallback activationCallback;
-  private volatile boolean deferredActivation;
+  private volatile long timeout = DEFAULT_TIMEOUT;
 
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
@@ -68,6 +66,8 @@ public class MessageQueueImpl implements MessageQueue {
   private final Object activationLock = new Object();
   private final Object pageLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
+
+
 
   private static final Logger log = getLogger(MessageQueueImpl.class);
 
@@ -189,7 +189,7 @@ public class MessageQueueImpl implements MessageQueue {
     if (!queueRunning) {
       return true;
     }
-    else return !isDirectChannelOpen() && (((nanoTime() - lastTransmission) > TIMEOUT));
+    else return !isDirectChannelOpen() && (((System.currentTimeMillis() - lastTransmission) > timeout));
   }
 
   private boolean isDirectChannelOpen() {
@@ -209,7 +209,7 @@ public class MessageQueueImpl implements MessageQueue {
    * Fakes a transmission, shows life with a heartbeat
    */
   public void heartBeat() {
-    lastTransmission = nanoTime();
+    lastTransmission = System.currentTimeMillis();
   }
 
   public void finishInit() {
@@ -251,9 +251,6 @@ public class MessageQueueImpl implements MessageQueue {
     }
   }
 
-  private static long secs(long secs) {
-    return secs * 1000000000;
-  }
 
   @Override
   public Object getActivationLock() {
@@ -303,6 +300,11 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public long getLastTransmissionTime() {
     return lastTransmission;
+  }
+
+  @Override
+  public void setTimeout(long timeout) {
+    this.timeout = timeout;
   }
 
   @Override

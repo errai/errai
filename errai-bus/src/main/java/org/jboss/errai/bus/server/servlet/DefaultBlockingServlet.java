@@ -83,22 +83,16 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
  */
 
 public class DefaultBlockingServlet extends AbstractErraiServlet implements Filter {
-  private int sseTimeout;
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    setSseTimeout();
+
   }
 
   @Override
   public void initAsFilter(FilterConfig config) throws ServletException {
     super.initAsFilter(config);
-    setSseTimeout();
-  }
-
-  private void setSseTimeout() {
-    sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(service.getConfiguration());
   }
 
   /**
@@ -118,13 +112,9 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   @Override
   protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
-    String clientId = httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER);
-    if (clientId == null) {
-      clientId = httpServletRequest.getParameter("clientId");
-    }
 
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
-        clientId),
+        getClientId(httpServletRequest)),
         httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
   }
 
@@ -146,7 +136,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   protected void doPost(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
-        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+        getClientId(httpServletRequest));
 
     service.store(createCommandMessage(session, httpServletRequest));
 
@@ -185,9 +175,11 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
       queue.heartBeat();
 
       if (sse) {
-        final long timeout = System.currentTimeMillis() + sseTimeout;
+        final long timeout = System.currentTimeMillis() + getSSETimeout();
+        queue.setTimeout(getSSETimeout() + 1000);
+
         while (System.currentTimeMillis() < timeout) {
-          outputStream.write("event: bus-traffic\n\ndata: ".getBytes());
+          outputStream.write("retry: 150\nevent: bus-traffic\n\ndata: ".getBytes());
           queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
           outputStream.write("\n\n".getBytes());
           outputStream.flush();

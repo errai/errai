@@ -28,6 +28,12 @@ public class ClientSSEChannel {
               bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::procPayload(Ljava/lang/String;)(e.data);
           }, false);
 
+          sseSource.addEventListener('error', function(e) {
+            if (e.readyState == EventSource.CLOSED) {
+                bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::reconnectSSE()();
+            }
+          }, false);
+
           return sseSource;
       } else {
           return "NotSupportedByBrowser";

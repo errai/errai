@@ -1127,7 +1127,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void activateSSE() {
     try {
-      LogUtil.log("attempting to use SSE");
+      LogUtil.log("opening SSE channel ...");
 
       final Object o = ClientSSEChannel.attemptSSEChannel(ClientMessageBusImpl.this,
           URL.encode(getApplicationLocation(IN_SERVICE_ENTRY_POINT))
@@ -1145,6 +1145,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       t.printStackTrace();
     }
   }
+
+  protected void reconnectSSE() {
+    try {
+      new Timer() {
+        @Override
+        public void run() {
+          activateSSE();
+        }
+      }.schedule(1);
+
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+    }
+  }
+
 
   private void websocketUpgrade() {
     LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
@@ -1705,9 +1721,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         _store(m.getSubject(), JSONUtilCli.decodeCommandMessage(m.getMessage()));
       }
     }
-    catch (RuntimeException e) {
-      e.printStackTrace();
-      logError("Error delivering message into bus", text, e);
+    catch (Throwable t) {
+      t.printStackTrace();
+      logError("Error delivering message into bus", text, t);
+      System.out.println("Rejected message <<" + text + ">>");
     }
   }
 

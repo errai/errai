@@ -23,15 +23,18 @@ import java.nio.charset.Charset;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 
 /**
@@ -50,6 +53,12 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
   }
+
+  private int sseTimeout;
+
+  private void setSseTimeout() {
+     sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(service.getConfiguration());
+   }
 
   public static ConnectionPhase getConnectionPhase(final HttpServletRequest request) {
     if (request.getHeader("phase") == null) return ConnectionPhase.NORMAL;
@@ -70,12 +79,14 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   public void init(final ServletConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
+    setSseTimeout();
   }
 
 
   public void initAsFilter(final FilterConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
+    setSseTimeout();
   }
 
   @Override
@@ -171,5 +182,17 @@ public abstract class AbstractErraiServlet extends HttpServlet {
         return "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.SessionExpired + "\"}";
       }
     });
+  }
+
+  protected static String getClientId(HttpServletRequest request) {
+    String clientId = request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER);
+    if (clientId == null) {
+      clientId = request.getParameter("clientId");
+    }
+    return clientId;
+  }
+
+  protected final long getSSETimeout() {
+    return sseTimeout;
   }
 }

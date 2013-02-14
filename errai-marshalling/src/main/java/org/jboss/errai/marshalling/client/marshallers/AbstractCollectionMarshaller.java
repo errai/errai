@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.client.marshallers;
 import java.util.Collection;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
@@ -78,7 +79,11 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
 
         // the assumed element type can only be used once since they it is not set for nested collections.
         ctx.setAssumedElementType(null);
-        collection.add(ctx.getMarshallerInstance(type).demarshall(elem, ctx));
+        final Marshaller<Object> marshallerInstance = ctx.getMarshallerInstance(type);
+        if (marshallerInstance == null) {
+          throw new RuntimeException("no marshaller for type: " + type);
+        }
+        collection.add(marshallerInstance.demarshall(elem, ctx));
       }
       else {
         collection.add(null);

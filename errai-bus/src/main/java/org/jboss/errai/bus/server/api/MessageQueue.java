@@ -16,19 +16,14 @@
 
 package org.jboss.errai.bus.server.api;
 
-import static java.lang.System.nanoTime;
-
-import io.netty.channel.Channel;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.io.ByteWriteAdapter;
 import org.jboss.errai.bus.server.io.MessageDeliveryHandler;
-import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.buffers.Buffer;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 
 public interface MessageQueue {
@@ -107,4 +102,6 @@ public interface MessageQueue {
   void resetMessageCount();
 
   long getLastTransmissionTime();
+
+  void setTimeout(long timeout);
 }
