@@ -26,14 +26,14 @@
 	</properties>
 
    <build>
-      <resources>
-         <resource>
+      <testResources>
+         <testResource>
             <directory>src/main/java</directory>
-         </resource>
-         <resource>
+         </testResource>
+         <testResource>
             <directory>src/main/resources</directory>
-         </resource>
-      </resources>
+         </testResource>
+      </testResources>
    </build>
 
    <dependencies>

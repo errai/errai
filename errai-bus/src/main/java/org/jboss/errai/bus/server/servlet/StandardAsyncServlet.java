@@ -121,7 +121,6 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
               writer.write("\n\n".getBytes());
 
               queue.heartBeat();
-              ;
               writer.flush();
             }
             catch (final Throwable t) {
@@ -142,7 +141,6 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       synchronized (queue.getActivationLock()) {
         if (queue.messagesWaiting()) {
           queue.poll(false, writer);
-
           return;
         }
 
