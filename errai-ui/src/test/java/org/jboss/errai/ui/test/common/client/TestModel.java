@@ -33,6 +33,7 @@ public class TestModel {
   private Integer id;
   private String name;
   private Date lastChanged;
+  private String phoneNumber;
   
   private TestModel child;
 
@@ -75,5 +76,12 @@ public class TestModel {
   public TestModel getChild() {
     return child;
   }
+  
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
 
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
 }

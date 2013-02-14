@@ -63,15 +63,16 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
       }
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
-    saveDataField(ctx, ctx.getType(), name, ctx.getAnnotation(Bound.class), instance);
+    saveDataField(ctx, ctx.getType(), name, ctx.getMemberName(), ctx.getAnnotation(Bound.class), instance);
 
     return new ArrayList<Statement>();
 
   }
 
-  private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, Bound bound, Statement instance) {
+  private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, String fieldName,
+      Bound bound, Statement instance) {
     dataFieldMap(ctx, ctx.getEnclosingType()).put(name, instance);
-    dataFieldBoundMap(ctx, ctx.getEnclosingType()).put(name, bound);
+    dataFieldBoundMap(ctx, ctx.getEnclosingType()).put(fieldName, bound);
     dataFieldTypeMap(ctx, ctx.getEnclosingType()).put(name, type);
   }
 

@@ -57,18 +57,21 @@ public class Convert {
    * @param toType
    *          The type to convert to, must not be null.
    * @param o
-   *          The object to convert. Must not be null except in the special case where toType is String (which causes
-   *          null to be represented as an empty String).
+   *          The object to convert. Null allowed. If toType is String.class, null values will be represented as empty
+   *          Strings.
    * @return the converted object
    */
   public static Object to(Class<?> toType, Object o) {
     Assert.notNull(toType);
 
-    if (toType == String.class && o == null) {
-      o = "";
+    if (o == null) {
+      if (toType == String.class) {
+        o = "";
+      }
+      else {
+        return null;
+      }
     }
-
-    Assert.notNull(o);
 
     if (toType.equals(o.getClass())) {
       return o;
