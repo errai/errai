@@ -33,6 +33,10 @@ public class BindingTemplate extends Composite {
   @DataField
   private TextBox date;
 
+  // This guards against regressions of ERRAI-489
+  @Inject @Bound @DataField("phone") 
+  private Label phoneNumber;
+  
   private final TestModel model;
   
   @Inject
