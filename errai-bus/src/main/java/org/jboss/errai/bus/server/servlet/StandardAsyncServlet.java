@@ -119,7 +119,8 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
               writer.write("\n\n".getBytes());
 
-              queue.heartBeat();;
+              queue.heartBeat();
+              ;
               writer.flush();
             }
             catch (final Throwable t) {
@@ -177,7 +178,10 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
     try {
       service.store(createCommandMessage(session, request));
-      service.getBus().getQueue(session).poll(false, new OutputStreamWriteAdapter(response.getOutputStream()));
+      final MessageQueue queue = service.getBus().getQueue(session);
+      if (queue != null) {
+        queue.poll(false, new OutputStreamWriteAdapter(response.getOutputStream()));
+      }
     }
     catch (Exception e) {
       final String message = e.getMessage();
