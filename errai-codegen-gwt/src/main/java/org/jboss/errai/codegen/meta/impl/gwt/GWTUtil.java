@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.rebind.EnvUtil;
 
@@ -125,7 +126,15 @@ public class GWTUtil {
     }
   }
 
-  private static volatile GeneratorContext populatedFrom;
+  public static class GWTTypeOracleCacheStore implements CacheStore {
+    volatile GeneratorContext populatedFrom;
+
+    @Override
+    public void clear() {
+      populatedFrom = null;
+    }
+  }
+
 
   /**
    * Erases the {@link MetaClassFactory} cache, then populates it with types
@@ -143,9 +152,12 @@ public class GWTUtil {
   public synchronized static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
                                                                          final TreeLogger logger) {
 
+
+    final GWTTypeOracleCacheStore tOCache = CacheUtil.getCache(GWTTypeOracleCacheStore.class);
+
     // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
     // changing classes. Therefore, do a NOOP after the first successful call.
-    if (context.equals(populatedFrom)) {
+    if (context.equals(tOCache.populatedFrom)) {
       return;
     }
 
@@ -188,7 +200,7 @@ public class GWTUtil {
 
       cache.pushCacheAll(classesToPush);
     }
-    populatedFrom = context;
+    tOCache.populatedFrom = context;
 
     CacheUtil.getCache(EnvUtil.EnvironmentConfigCache.class).clear();
 

@@ -120,54 +120,57 @@ public final class AsyncGenerators {
   }
 
   private static void startAll(final AsyncGenerationJob job) {
-    if (started && job.getGeneratorContext() != currentContext) {
-      codeGenerators.clear();
-      activeFutures.clear();
-      started = false;
-    }
+    synchronized (lock) {
+      if (started && job.getGeneratorContext() != currentContext) {
+        codeGenerators.clear();
+        activeFutures.clear();
+        started = false;
+      }
 
-    if (!started) {
-      EnvUtil.recordEnvironmentState();
-      CacheUtil.clearAll();
+      if (!started) {
+        started = true;
 
-      started = true;
-      currentContext = job.getGeneratorContext();
+        EnvUtil.recordEnvironmentState();
+        CacheUtil.clearAll();
 
-      job.notifyStarting();
-      job.notifyStarted();
+        currentContext = job.getGeneratorContext();
 
-      for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GenerateAsync.class)) {
-        try {
-          final AsyncCodeGenerator asyncCodeGenerator
-              = cls.asSubclass(AsyncCodeGenerator.class).newInstance();
+        job.notifyStarting();
+        job.notifyStarted();
 
-          final GenerateAsync generateAsync = cls.getAnnotation(GenerateAsync.class);
-
+        for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GenerateAsync.class)) {
           try {
-            job.getGeneratorContext().getTypeOracle().getType(generateAsync.value().getName());
-            codeGenerators.put(generateAsync.value(), asyncCodeGenerator);
+            final AsyncCodeGenerator asyncCodeGenerator
+                = cls.asSubclass(AsyncCodeGenerator.class).newInstance();
 
-            log.info("discovered async generator " + cls.getName() + "; for type: " + generateAsync.value().getName());
+            final GenerateAsync generateAsync = cls.getAnnotation(GenerateAsync.class);
+
+            try {
+              job.getGeneratorContext().getTypeOracle().getType(generateAsync.value().getName());
+              codeGenerators.put(generateAsync.value(), asyncCodeGenerator);
+
+              log.info("discovered async generator " + cls.getName() + "; for type: " + generateAsync.value().getName());
+            }
+            catch (TypeOracleException e) {
+              codeGenerators.remove(generateAsync.value());
+              //  e.printStackTrace();
+              // ignore because not inherited in an active module.
+            }
           }
-          catch (TypeOracleException e) {
-            codeGenerators.remove(generateAsync.value());
-            //  e.printStackTrace();
-            // ignore because not inherited in an active module.
+          catch (Throwable e) {
           }
         }
-        catch (Throwable e) {
+
+        for (final Map.Entry<Class, AsyncCodeGenerator> entry : codeGenerators.entrySet()) {
+          final Future<String> value = entry.getValue().generateAsync(job.getTreeLogger(), job.getGeneratorContext());
+          activeFutures.put(entry.getKey(), new FutureWrapper(entry.getKey(), value));
+
+          log.info("started async generation for >> " + entry.getKey().getName());
         }
       }
-
-      for (final Map.Entry<Class, AsyncCodeGenerator> entry : codeGenerators.entrySet()) {
-        final Future<String> value = entry.getValue().generateAsync(job.getTreeLogger(), job.getGeneratorContext());
-        activeFutures.put(entry.getKey(), new FutureWrapper(entry.getKey(), value));
-
-        log.info("started async generation for >> " + entry.getKey().getName());
+      else {
+        job.notifyStarted();
       }
-    }
-    else {
-      job.notifyStarted();
     }
   }
 }
