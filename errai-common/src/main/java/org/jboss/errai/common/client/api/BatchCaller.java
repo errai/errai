@@ -18,7 +18,7 @@ package org.jboss.errai.common.client.api;
 
 /**
  * An interface that can be used as an injection point for batched invocations of remote methods using generated
- * proxies. In contrast to {@link Caller}, no remote request will be sent until {@link #endBatch()} is called.
+ * proxies. In contrast to {@link Caller}, no remote request will be sent until {@link #sendBatch()} is called.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -64,7 +64,7 @@ public interface BatchCaller {
   /**
    * Invokes the accumulated remote requests using a single server round trip.
    */
-  public void endBatch();
+  public void sendBatch();
 
   /**
    * Invokes the accumulated remote requests using a single server round trip.
@@ -72,7 +72,7 @@ public interface BatchCaller {
    * @param callback
    *          the callback to be invoked when all remote calls have completed in success. Must not be null.
    */
-  public void endBatch(RemoteCallback<Void> callback);
+  public void sendBatch(RemoteCallback<Void> callback);
 
   /**
    * Invokes the accumulated remote requests using a single server round trip.
@@ -81,7 +81,7 @@ public interface BatchCaller {
    *          the callback to be invoked for all remote calls that have completed in failure. No callback is invoked
    *          in the case of success.
    */
-  public void endBatch(ErrorCallback<?> errorCallback);
+  public void sendBatch(ErrorCallback<?> errorCallback);
 
   /**
    * Invokes the accumulated remote requests using a single server round trip.
@@ -91,6 +91,6 @@ public interface BatchCaller {
    * @param errorCallback
    *          the callback to be invoked for all remote calls that have completed in failure.
    */
-  public void endBatch(RemoteCallback<Void> callback, ErrorCallback<?> errorCallback);
+  public void sendBatch(RemoteCallback<Void> callback, ErrorCallback<?> errorCallback);
 
 }
