@@ -15,6 +15,15 @@
 
   <dependencies>
 
+    <!-- This dependency comes first to ensure this project doesn't see the GWT translatable
+         version in errai-jpa-client on its classpath. -->
+    <dependency>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.0-api</artifactId>
+      <version>1.0.1.Final</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jpa-client</artifactId>

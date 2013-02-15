@@ -13,9 +13,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.jpa.sync.client.shared.ConflictResponse;
 import org.jboss.errai.jpa.sync.client.shared.IdChangeResponse;
 import org.jboss.errai.jpa.sync.client.shared.NewRemoteEntityResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
+import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation.Type;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
 import org.jboss.errai.jpa.sync.test.entity.SimpleEntity;
@@ -101,6 +103,39 @@ public class SyncableDataSetUnitTest {
     assertEquals(1, syncResponse.size());
     NewRemoteEntityResponse<SimpleEntity> newRemoteEntityResponse = (NewRemoteEntityResponse<SimpleEntity>) syncResponse.get(0);
     assertEquals(remoteSimpleEntity.toString(), newRemoteEntityResponse.getEntity().toString());
+  }
+
+  @Test
+  public void testPushConflictingUpdate() {
+    SimpleEntity remoteSimpleEntity = new SimpleEntity();
+    remoteSimpleEntity.setDate(new Date(8917200000L));
+    remoteSimpleEntity.setInteger(123456);
+    remoteSimpleEntity.setString("Houston, we've had a problem.");
+    em.persist(remoteSimpleEntity);
+    em.flush();
+    em.detach(remoteSimpleEntity);
+
+    SimpleEntity localEntityExpectedState = remoteSimpleEntity.clone();
+    localEntityExpectedState.setString("Go ahead, Apollo");
+
+    SimpleEntity localEntityNewState = remoteSimpleEntity.clone();
+    localEntityNewState.setString("Crosstalk");
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(new SyncRequestOperation<SimpleEntity>(Type.EXISTING, localEntityNewState, localEntityExpectedState));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is as expected
+    assertEquals(1, syncResponse.size());
+    ConflictResponse<SimpleEntity> conflictResponse = (ConflictResponse<SimpleEntity>) syncResponse.get(0);
+    assertEquals(remoteSimpleEntity.toString(), conflictResponse.getActualNew().toString());
+    assertEquals(localEntityExpectedState.toString(), conflictResponse.getExpected().toString());
+    assertEquals(localEntityNewState.toString(), conflictResponse.getRequestedNew().toString());
   }
 
 }
