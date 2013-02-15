@@ -2,8 +2,8 @@ package org.jboss.errai.jpa.sync.test.client;
 
 import static org.junit.Assert.assertEquals;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +58,7 @@ public class SyncableDataSetUnitTest {
 
     SimpleEntity localSimpleEntity = new SimpleEntity();
     SimpleEntity.setId(localSimpleEntity, 1234L); // simulating an ID we generated in the browser; Hibernate doesn't know about it
-    localSimpleEntity.setDate(new Date());
+    localSimpleEntity.setDate(new Timestamp(System.currentTimeMillis()));
     localSimpleEntity.setInteger(42);
     localSimpleEntity.setString("This was recorded on sticky tape and rust.");
 
@@ -84,7 +84,7 @@ public class SyncableDataSetUnitTest {
   @Test
   public void testReceiveNewRemoteSimpleEntity() {
     SimpleEntity remoteSimpleEntity = new SimpleEntity();
-    remoteSimpleEntity.setDate(new Date(-2960391600000L));
+    remoteSimpleEntity.setDate(new Timestamp(-2960391600000L));
     remoteSimpleEntity.setInteger(42);
     remoteSimpleEntity.setString("Mr. Watson--come here--I want to see you.");
     em.persist(remoteSimpleEntity);
@@ -108,7 +108,7 @@ public class SyncableDataSetUnitTest {
   @Test
   public void testPushConflictingUpdate() {
     SimpleEntity remoteSimpleEntity = new SimpleEntity();
-    remoteSimpleEntity.setDate(new Date(8917200000L));
+    remoteSimpleEntity.setDate(new Timestamp(8917200000L));
     remoteSimpleEntity.setInteger(123456);
     remoteSimpleEntity.setString("Houston, we've had a problem.");
     em.persist(remoteSimpleEntity);
@@ -136,6 +136,34 @@ public class SyncableDataSetUnitTest {
     assertEquals(remoteSimpleEntity.toString(), conflictResponse.getActualNew().toString());
     assertEquals(localEntityExpectedState.toString(), conflictResponse.getExpected().toString());
     assertEquals(localEntityNewState.toString(), conflictResponse.getRequestedNew().toString());
+  }
+
+  @Test
+  public void testPushNonConflictingUpdate() {
+    SimpleEntity remoteSimpleEntity = new SimpleEntity();
+    remoteSimpleEntity.setDate(new Timestamp(8917200000L));
+    remoteSimpleEntity.setInteger(123456);
+    remoteSimpleEntity.setString("Houston, we've had a problem.");
+    em.persist(remoteSimpleEntity);
+    em.flush();
+    em.detach(remoteSimpleEntity);
+
+    SimpleEntity localEntityExpectedState = remoteSimpleEntity.clone();
+
+    SimpleEntity localEntityNewState = remoteSimpleEntity.clone();
+    localEntityNewState.setString("No crosstalk");
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(new SyncRequestOperation<SimpleEntity>(Type.EXISTING, localEntityNewState, localEntityExpectedState));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is as expected
+    assertEquals("Non-empty response: " + syncResponse, 0, syncResponse.size());
   }
 
 }

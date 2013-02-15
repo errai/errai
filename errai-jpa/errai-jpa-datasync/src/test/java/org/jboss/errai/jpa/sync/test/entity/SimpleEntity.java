@@ -1,8 +1,8 @@
 package org.jboss.errai.jpa.sync.test.entity;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,7 +16,8 @@ public class SimpleEntity implements Cloneable {
 
   private String string;
   private Integer integer;
-  private Date date;
+
+  private Timestamp date;
 
   public Long getId() {
     return id;
@@ -33,10 +34,10 @@ public class SimpleEntity implements Cloneable {
   public void setInteger(Integer integer) {
     this.integer = integer;
   }
-  public Date getDate() {
+  public Timestamp getDate() {
     return date;
   }
-  public void setDate(Date date) {
+  public void setDate(Timestamp date) {
     this.date = date;
   }
 
