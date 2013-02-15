@@ -15,6 +15,7 @@
   
   <modules>
     <module>errai-jpa-client</module>
+    <module>errai-jpa-datasync</module>
     <module>demos/errai-jpa-demo-basic</module>
     <module>demos/errai-jpa-demo-grocery-list</module>
     <module>demos/errai-jpa-demo-todo-list</module>
