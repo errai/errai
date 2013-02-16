@@ -49,7 +49,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.ArgProcessorBase;
 import com.google.gwt.dev.Compiler;
 import com.google.gwt.dev.DevMode;
-import com.google.gwt.dev.GWTShell;
 import com.google.gwt.dev.cfg.BindingProperty;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.Properties;
@@ -869,7 +868,7 @@ public class JUnitShell extends DevMode {
   private int tries;
 
   /**
-   * Enforce the singleton pattern. The call to {@link GWTShell}'s ctor forces
+   * Enforce the singleton pattern. The call to GWTShell forces
    * server mode and disables processing extra arguments as URLs to be shown.
    */
   private JUnitShell() {
