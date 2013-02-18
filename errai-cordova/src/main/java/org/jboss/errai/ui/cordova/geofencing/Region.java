@@ -13,6 +13,19 @@ public class Region {
     this.id = id;
   }
 
+  public Region(int id, double latitude, double longitude) {
+    this.id = id;
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
+
+  public Region(int id, double latitude, double longitude, int radius) {
+    this.id = id;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.radius = radius;
+  }
+
   public int getId() {
     return id;
   }
