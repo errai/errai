@@ -55,26 +55,26 @@ public class BatchCallerIntegrationTest extends AbstractErraiIOCBusTest {
     }
 
     @Override
-    public void endBatch() {
-      caller.endBatch();
+    public void sendBatch() {
+      caller.sendBatch();
       flushed = true;
     }
 
     @Override
-    public void endBatch(RemoteCallback<Void> callback) {
-      caller.endBatch(callback);
+    public void sendBatch(RemoteCallback<Void> callback) {
+      caller.sendBatch(callback);
       flushed = true;
     }
 
     @Override
-    public void endBatch(ErrorCallback<?> errorCallback) {
-      caller.endBatch(errorCallback);
+    public void sendBatch(ErrorCallback<?> errorCallback) {
+      caller.sendBatch(errorCallback);
       flushed = true;
     }
 
     @Override
-    public void endBatch(RemoteCallback<Void> callback, ErrorCallback<?> errorCallback) {
-      caller.endBatch(callback, errorCallback);
+    public void sendBatch(RemoteCallback<Void> callback, ErrorCallback<?> errorCallback) {
+      caller.sendBatch(callback, errorCallback);
       flushed = true;
     }
   }
@@ -104,7 +104,7 @@ public class BatchCallerIntegrationTest extends AbstractErraiIOCBusTest {
           }
         }, RpcBatchService.class).batchedMethod2();
 
-        batchCaller.endBatch();
+        batchCaller.sendBatch();
       }
     });
   }
@@ -133,7 +133,7 @@ public class BatchCallerIntegrationTest extends AbstractErraiIOCBusTest {
           }
         }, RpcBatchService.class).batchedMethod2();
 
-        batchCaller.endBatch(new RemoteCallback<Void>() {
+        batchCaller.sendBatch(new RemoteCallback<Void>() {
           @Override
           public void callback(Void response) {
             assertTrue(batchCaller.flushed);
@@ -159,7 +159,7 @@ public class BatchCallerIntegrationTest extends AbstractErraiIOCBusTest {
           }
         }, RpcBatchService.class).batchedMethodThrowsException();
 
-        batchCaller.endBatch(new BusErrorCallback() {
+        batchCaller.sendBatch(new BusErrorCallback() {
           @Override
           public boolean error(Message message, Throwable throwable) {
             assertTrue(batchCaller.flushed);

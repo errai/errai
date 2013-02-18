@@ -16,7 +16,6 @@
 
 package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 

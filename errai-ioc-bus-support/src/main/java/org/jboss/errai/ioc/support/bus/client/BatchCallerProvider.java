@@ -66,28 +66,28 @@ public class BatchCallerProvider implements Provider<BatchCaller> {
       }
 
       @Override
-      public void endBatch() {
+      public void sendBatch() {
         batch.flush();
         batch = new RpcBatchImpl();
       }
 
       @Override
-      public void endBatch(RemoteCallback<Void> callback) {
+      public void sendBatch(RemoteCallback<Void> callback) {
         batch.successCallback = callback;
-        endBatch();
+        sendBatch();
       }
 
       @Override
-      public void endBatch(ErrorCallback<?> errorCallback) {
+      public void sendBatch(ErrorCallback<?> errorCallback) {
         batch.errorCallback = errorCallback;
-        endBatch();
+        sendBatch();
       }
 
       @Override
-      public void endBatch(RemoteCallback<Void> callback, ErrorCallback<?> errorCallback) {
+      public void sendBatch(RemoteCallback<Void> callback, ErrorCallback<?> errorCallback) {
         batch.successCallback = callback;
         batch.errorCallback = errorCallback;
-        endBatch();
+        sendBatch();
       }
     };
   }
