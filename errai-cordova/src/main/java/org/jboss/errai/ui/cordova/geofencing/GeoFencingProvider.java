@@ -1,7 +1,9 @@
 package org.jboss.errai.ui.cordova.geofencing;
 
-import javax.annotation.PostConstruct;
+import org.jboss.errai.ioc.client.api.AfterInitialization;
+
 import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
@@ -13,18 +15,20 @@ import javax.inject.Singleton;
 @Singleton
 public class GeoFencingProvider {
 
+  @Inject
   protected Event<GeoFencingEvent> geoFencingEventEvent;
 
-  @PostConstruct
+  @AfterInitialization
   public void init() {
     addRegionListener();
   }
 
   private native void addRegionListener() /*-{
-    $wnd.document.addEventListener("region-update", function(event) {
+    var instance = this;
+    $doc.addEventListener("region-update", function (event) {
       var fid = event.regionupdate.fid;
-      var status = event.regionupdate.status;
-      this.@org.jboss.errai.ui.cordova.geofencing.GeoFencingProvider::fireCdiEvent(I)(fid);
+      console.log("got region update event ['" + fid + "']");
+      $entry(instance.@org.jboss.errai.ui.cordova.geofencing.GeoFencingProvider::fireCdiEvent(I)(fid));
     });
   }-*/;
 
@@ -33,9 +37,8 @@ public class GeoFencingProvider {
   }
 
   private native void addRegion(int id, double latitude, double longitude, int radius) /*-{
-    var params = {"fid":id, "radius":radius, "latitude":latitude, "longitude":longitude};
-    DGGeofencing.addRegion(
-            params,
+    $wnd.DGGeofencing.addRegion(
+            {"fid":id, "radius":radius, "latitude":latitude, "longitude":longitude},
             function (result) {
               console.log("region add success");
             }
@@ -47,16 +50,15 @@ public class GeoFencingProvider {
   }
 
   private native void removeRegion(int id, double latitude, double longitude) /*-{
-    var params = {"fid":id, "latitude":latitude, "longitude":longitude};
-    DGGeofencing.removeRegion(
-            params,
+    $wnd.DGGeofencing.removeRegion(
+            {"fid":id, "latitude":latitude, "longitude":longitude},
             function () {
               console.log("region removed")
             }
     )
   }-*/;
 
-  private void fireCdiEvent(int regionId) {
+  protected void fireCdiEvent(int regionId) {
     geoFencingEventEvent.fire(new GeoFencingEvent(regionId));
   }
 }
