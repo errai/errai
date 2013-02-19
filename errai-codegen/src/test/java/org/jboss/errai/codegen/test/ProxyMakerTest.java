@@ -42,22 +42,26 @@ public class ProxyMakerTest extends AbstractCodegenTest {
    * ignoring the order of the fields and methods.
    */
   private static final List<String> expectedChunks = Arrays.asList(
-          "public class ToProxy_Proxy extends org.jboss.errai.codegen.test.model.ToProxyBean {\n" +
+      "public class ToProxy_Proxy extends org.jboss.errai.codegen.test.model.ToProxyBean {\n" +
           "  private org.jboss.errai.codegen.test.model.ToProxyBean $$_proxy_$$;\n",
 
-          "  @Override public String getName() {\n" +
+      "  @Override public String getName() {\n" +
           "    return $$_proxy_$$.getName();\n" +
           "  }\n",
 
-          "  @Override public org.jboss.errai.codegen.test.model.Integer getBlah() {\n" +
+      "  @Override public org.jboss.errai.codegen.test.model.Integer getBlah() {\n" +
           "    return $$_proxy_$$.getBlah();\n" +
           "  }\n",
 
-          "  @Override public String toString() {\n" +
+      "  @Override public void methodWithTypeArgs(Class a0, com.google.common.collect.Multimap a1) {\n" +
+          "    $$_proxy_$$.methodWithTypeArgs(a0, a1);\n" +
+          "  }\n",
+
+      "  @Override public String toString() {\n" +
           "    return $$_proxy_$$.toString();\n" +
           "  }\n",
 
-          "  @Override public int hashCode() {\n" +
+      "  @Override public int hashCode() {\n" +
           "    if ($$_proxy_$$ == null) {\n" +
           "      throw new IllegalStateException(\"call to hashCode() on an unclosed proxy.\");\n" +
           "    } else {\n" +
@@ -65,7 +69,7 @@ public class ProxyMakerTest extends AbstractCodegenTest {
           "    }\n" +
           "  }\n",
 
-          "  @Override public boolean equals(Object o) {\n" +
+      "  @Override public boolean equals(Object o) {\n" +
           "    if ($$_proxy_$$ == null) {\n" +
           "      throw new IllegalStateException(\"call to equals() on an unclosed proxy.\");\n" +
           "    } else {\n" +
@@ -73,10 +77,10 @@ public class ProxyMakerTest extends AbstractCodegenTest {
           "    }\n" +
           "  }\n",
 
-          "  public void __$setProxiedInstance$(org.jboss.errai.codegen.test.model.ToProxyBean proxy) {\n" +
+      "  public void __$setProxiedInstance$(org.jboss.errai.codegen.test.model.ToProxyBean proxy) {\n" +
           "    $$_proxy_$$ = proxy;\n" +
           "  }\n",
-          "}\n");
+      "}\n");
 
   @Test
   public void testProxyGeneration() {
@@ -85,14 +89,14 @@ public class ProxyMakerTest extends AbstractCodegenTest {
     int totalChars = 0;
     for (String expectedChunk : expectedChunks) {
       assertTrue("Generated code was missing a chunk:\n" + expectedChunk + "\n----- Actual generated proxy was:\n" + proxy,
-              proxy.contains(expectedChunk));
+          proxy.contains(expectedChunk));
       totalChars += countNonWhitespace(expectedChunk);
     }
 
     // finally, a length check will ensure there were no extra chunks we weren't expecting
     Assert.assertEquals(
-            "Found wrong number of non-whitespace chars in generated proxy:\n" + proxy,
-            totalChars, countNonWhitespace(proxy));
+        "Found wrong number of non-whitespace chars in generated proxy:\n" + proxy,
+        totalChars, countNonWhitespace(proxy));
   }
 
   private static int countNonWhitespace(String s) {

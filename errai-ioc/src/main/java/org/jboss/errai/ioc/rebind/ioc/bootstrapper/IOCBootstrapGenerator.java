@@ -372,19 +372,21 @@ public class IOCBootstrapGenerator {
     final List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
 
 
-    for (final Class<?> clazz : iocExtensions) {
-      try {
+    try {
+      for (final Class<?> clazz : iocExtensions) {
         final Class<? extends IOCExtensionConfigurator> configuratorClass
             = clazz.asSubclass(IOCExtensionConfigurator.class);
 
         final IOCExtensionConfigurator configurator = configuratorClass.newInstance();
         configurator.configure(injectionContext.getProcessingContext(), injectionContext, processorFactory);
         extensionConfigurators.add(configurator);
-      }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+
       }
     }
+    catch (Exception e) {
+      throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+    }
+
     computeDependentScope(context, injectionContext);
 
     final Collection<MetaClass> bootstrapClassCollection = ClassScanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
@@ -402,8 +404,8 @@ public class IOCBootstrapGenerator {
      * CodeDecorator.class
      */
     final Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
-    for (final Class<?> clazz : decorators) {
-      try {
+    try {
+      for (final Class<?> clazz : decorators) {
         final Class<? extends IOCDecoratorExtension> decoratorClass = clazz.asSubclass(IOCDecoratorExtension.class);
 
         Class<? extends Annotation> annoType = null;
@@ -426,10 +428,11 @@ public class IOCBootstrapGenerator {
         injectionContext.registerDecorator(
             decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType)
         );
+
       }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
-      }
+    }
+    catch (Exception e) {
+      throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
     }
 
     for (final IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {

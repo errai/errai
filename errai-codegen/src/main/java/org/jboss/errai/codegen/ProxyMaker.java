@@ -131,24 +131,9 @@ public class ProxyMaker {
 
       final List<Parameter> methodParms = new ArrayList<Parameter>();
       final MetaParameter[] parameters = method.getParameters();
-      final MetaType[] genericParmTypes = method.getGenericParameterTypes();
 
-      if (genericParmTypes != null && genericParmTypes.length == parameters.length) {
-        for (int i = 0, genericParmTypesLength = genericParmTypes.length; i < genericParmTypesLength; i++) {
-          MetaType type = genericParmTypes[i];
-          MetaClass parmType = parameters[i].getType();
-          if (type instanceof MetaTypeVariable) {
-            final MetaTypeVariable typeVariable = (MetaTypeVariable) type;
-            if (typeVariableMap.containsKey(typeVariable.getName())) {
-              final MetaType typeVar = typeVariableMap.get(typeVariable.getName());
-              if (typeVar instanceof MetaClass) {
-                parmType = (MetaClass) typeVar;
-              }
-            }
-          }
-
-          methodParms.add(Parameter.of(parmType, "a" + i));
-        }
+      for (int i = 0; i < parameters.length; i++) {
+        methodParms.add(Parameter.of(parameters[i].getType().getErased(), "a" + i));
       }
 
       final DefParameters defParameters = DefParameters.fromParameters(methodParms);
@@ -163,7 +148,6 @@ public class ProxyMaker {
       for (int i = 0; i < parms.size(); i++) {
         statementVars[i] = loadVariable(parms.get(i).getName());
       }
-
 
       if (!method.isPublic()) {
         PrivateAccessUtil.addPrivateAccessStubs(privateAccessorType, builder, method, new Modifier[0]);
