@@ -19,6 +19,7 @@ package org.jboss.errai.codegen;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.throw_;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +72,13 @@ public class ProxyMaker {
                                          final MetaClass toProxy,
                                          final String privateAccessorType) {
     final ClassStructureBuilder builder;
+
+    final Override override = new Override() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Override.class;
+      }
+    };
 
     final boolean renderEqualsAndHash;
     if (!toProxy.isInterface()) {
@@ -145,6 +153,7 @@ public class ProxyMaker {
 
       final DefParameters defParameters = DefParameters.fromParameters(methodParms);
       final BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
+          .annotatedWith(override)
           .parameters(defParameters)
           .throws_(method.getCheckedExceptions());
 
@@ -186,7 +195,9 @@ public class ProxyMaker {
 
     if (renderEqualsAndHash) {
       // implement hashCode()
-      builder.publicMethod(int.class, "hashCode").body()
+      builder.publicMethod(int.class, "hashCode")
+          .annotatedWith(override)
+          .body()
           ._(
               If.isNull(loadVariable(proxyVar))
                   ._(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
@@ -198,7 +209,9 @@ public class ProxyMaker {
           .finish();
 
       // implements equals()
-      builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o")).body()
+      builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o"))
+          .annotatedWith(override)
+          .body()
           ._(
               If.isNull(loadVariable(proxyVar))
                   ._(throw_(IllegalStateException.class, "call to equals() on an unclosed proxy."))

@@ -45,19 +45,19 @@ public class ProxyMakerTest extends AbstractCodegenTest {
           "public class ToProxy_Proxy extends org.jboss.errai.codegen.test.model.ToProxyBean {\n" +
           "  private org.jboss.errai.codegen.test.model.ToProxyBean $$_proxy_$$;\n",
 
-          "  public String getName() {\n" +
+          "  @Override public String getName() {\n" +
           "    return $$_proxy_$$.getName();\n" +
           "  }\n",
 
-          "  public org.jboss.errai.codegen.test.model.Integer getBlah() {\n" +
+          "  @Override public org.jboss.errai.codegen.test.model.Integer getBlah() {\n" +
           "    return $$_proxy_$$.getBlah();\n" +
           "  }\n",
 
-          "  public String toString() {\n" +
+          "  @Override public String toString() {\n" +
           "    return $$_proxy_$$.toString();\n" +
           "  }\n",
 
-          "  public int hashCode() {\n" +
+          "  @Override public int hashCode() {\n" +
           "    if ($$_proxy_$$ == null) {\n" +
           "      throw new IllegalStateException(\"call to hashCode() on an unclosed proxy.\");\n" +
           "    } else {\n" +
@@ -65,7 +65,7 @@ public class ProxyMakerTest extends AbstractCodegenTest {
           "    }\n" +
           "  }\n",
 
-          "  public boolean equals(Object o) {\n" +
+          "  @Override public boolean equals(Object o) {\n" +
           "    if ($$_proxy_$$ == null) {\n" +
           "      throw new IllegalStateException(\"call to equals() on an unclosed proxy.\");\n" +
           "    } else {\n" +

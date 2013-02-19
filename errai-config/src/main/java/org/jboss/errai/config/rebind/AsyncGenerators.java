@@ -16,19 +16,20 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.typeinfo.TypeOracleException;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.typeinfo.TypeOracleException;
 
 /**
  * @author Mike Brock
@@ -158,6 +159,7 @@ public final class AsyncGenerators {
             }
           }
           catch (Throwable e) {
+            log.error("Generator failed to launch", e);
           }
         }
 
