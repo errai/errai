@@ -8,6 +8,7 @@ import org.jboss.errai.location.client.shared.GeoLocationEvent;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static com.google.gwt.geolocation.client.Position.Coordinates;
@@ -18,6 +19,7 @@ import static com.google.gwt.geolocation.client.Position.Coordinates;
 @Singleton
 public class GeoLocationProvider {
 
+  @Inject
   protected Event<GeoLocationEvent> geoLocationEventSource;
 
   @PostConstruct
