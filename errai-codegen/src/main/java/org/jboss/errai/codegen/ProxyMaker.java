@@ -19,6 +19,7 @@ package org.jboss.errai.codegen;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.throw_;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +73,13 @@ public class ProxyMaker {
                                          final String privateAccessorType) {
     final ClassStructureBuilder builder;
 
+    final Override override = new Override() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Override.class;
+      }
+    };
+
     final boolean renderEqualsAndHash;
     if (!toProxy.isInterface()) {
       renderEqualsAndHash = true;
@@ -123,28 +131,14 @@ public class ProxyMaker {
 
       final List<Parameter> methodParms = new ArrayList<Parameter>();
       final MetaParameter[] parameters = method.getParameters();
-      final MetaType[] genericParmTypes = method.getGenericParameterTypes();
 
-      if (genericParmTypes != null && genericParmTypes.length == parameters.length) {
-        for (int i = 0, genericParmTypesLength = genericParmTypes.length; i < genericParmTypesLength; i++) {
-          MetaType type = genericParmTypes[i];
-          MetaClass parmType = parameters[i].getType();
-          if (type instanceof MetaTypeVariable) {
-            final MetaTypeVariable typeVariable = (MetaTypeVariable) type;
-            if (typeVariableMap.containsKey(typeVariable.getName())) {
-              final MetaType typeVar = typeVariableMap.get(typeVariable.getName());
-              if (typeVar instanceof MetaClass) {
-                parmType = (MetaClass) typeVar;
-              }
-            }
-          }
-
-          methodParms.add(Parameter.of(parmType, "a" + i));
-        }
+      for (int i = 0; i < parameters.length; i++) {
+        methodParms.add(Parameter.of(parameters[i].getType().getErased(), "a" + i));
       }
 
       final DefParameters defParameters = DefParameters.fromParameters(methodParms);
       final BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
+          .annotatedWith(override)
           .parameters(defParameters)
           .throws_(method.getCheckedExceptions());
 
@@ -154,7 +148,6 @@ public class ProxyMaker {
       for (int i = 0; i < parms.size(); i++) {
         statementVars[i] = loadVariable(parms.get(i).getName());
       }
-
 
       if (!method.isPublic()) {
         PrivateAccessUtil.addPrivateAccessStubs(privateAccessorType, builder, method, new Modifier[0]);
@@ -186,7 +179,9 @@ public class ProxyMaker {
 
     if (renderEqualsAndHash) {
       // implement hashCode()
-      builder.publicMethod(int.class, "hashCode").body()
+      builder.publicMethod(int.class, "hashCode")
+          .annotatedWith(override)
+          .body()
           ._(
               If.isNull(loadVariable(proxyVar))
                   ._(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
@@ -198,7 +193,9 @@ public class ProxyMaker {
           .finish();
 
       // implements equals()
-      builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o")).body()
+      builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o"))
+          .annotatedWith(override)
+          .body()
           ._(
               If.isNull(loadVariable(proxyVar))
                   ._(throw_(IllegalStateException.class, "call to equals() on an unclosed proxy."))

@@ -219,14 +219,6 @@ public class InjectionContext {
             secondIterator.remove();
         }
       }
-//      else {
-//        final Iterator<Injector> secondIterator = matching.iterator();
-//        while (secondIterator.hasNext()) {
-//          if (!secondIterator.next().getInjectedType().isConcrete()) {
-//            secondIterator.remove();
-//          }
-//        }
-//      }
     }
 
     if (matching.isEmpty()) {
@@ -504,9 +496,9 @@ public class InjectionContext {
 
     final Target target = annotation.getAnnotation(Target.class);
     if (target != null) {
-      boolean oneTarget = target.value().length == 1;
+      final boolean oneTarget = target.value().length == 1;
 
-      for (ElementType type : target.value()) {
+      for (final ElementType type : target.value()) {
         if (type == ElementType.ANNOTATION_TYPE) {
           // type is a meta-annotation. so we need to map all annotations with this
           // meta-annotation to the decorator extension.
@@ -551,7 +543,7 @@ public class InjectionContext {
     }
   }
 
-  public boolean isMetaAnnotationFor(Class<? extends Annotation> alias, Class<? extends Annotation> forAnno) {
+  public boolean isMetaAnnotationFor(final Class<? extends Annotation> alias, final Class<? extends Annotation> forAnno) {
     return metaAnnotationAliases.containsEntry(alias, forAnno);
   }
 
@@ -599,10 +591,6 @@ public class InjectionContext {
     overriddenTypesAndMembers.add(method);
   }
 
-  public boolean isOverridden(final MetaClass type) {
-    return overriddenTypesAndMembers.contains(type);
-  }
-
   public boolean isOverridden(final MetaMethod method) {
     return overriddenTypesAndMembers.contains(method);
   }
@@ -634,10 +622,6 @@ public class InjectionContext {
     return processingContext;
   }
 
-  public void addEnabledAlternative(final String name) {
-    enabledAlternatives.add(name);
-  }
-
   public void mapElementType(final WiringElementType type, final Class<? extends Annotation> annotationType) {
     elementBindings.put(type, annotationType);
   }
@@ -659,7 +643,7 @@ public class InjectionContext {
   }
 
   public boolean isElementType(final WiringElementType type, final HasAnnotations hasAnnotations) {
-    Annotation matchingAnnotation = getMatchingAnnotationForElementType(type, hasAnnotations);
+    final Annotation matchingAnnotation = getMatchingAnnotationForElementType(type, hasAnnotations);
     if (matchingAnnotation != null && type == WiringElementType.NotSupported) {
       log.error(hasAnnotations + " was annotated with " + matchingAnnotation.annotationType().getName()
           + " which is not supported in client-side Errai code!");
