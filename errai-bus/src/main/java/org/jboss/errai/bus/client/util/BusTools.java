@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Queue;
@@ -56,11 +57,10 @@ public class BusTools {
     }
   }
   
-  public static String encodeMessages(final Queue<Message> messages) {
+  public static String encodeMessages(final Collection<Message> messages) {
     final StringBuilder sbuf = new StringBuilder("[");
     boolean first = true;
-    Message m;
-    while ((m = messages.poll()) != null) {
+    for (Message m : messages) {
       if (!first) {
         sbuf.append(',');
       }

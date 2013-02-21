@@ -25,14 +25,18 @@ public class ClientSSEChannel {
       if (!!window.EventSource) {
           sseSource = new EventSource(sseAddress);
           sseSource.addEventListener('message', function (e) {
-              bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::procPayload(Ljava/lang/String;)(e.data);
+              bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::handleJsonMessage(Ljava/lang/String;Z)(e.data, true);
           }, false);
 
-          sseSource.addEventListener('error', function(e) {
-            if (e.readyState == EventSource.CLOSED) {
-                bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::reconnectSSE()();
-            }
-          }, false);
+          var errorHandler = function (e) {
+              console.log(e);
+              if (e === undefined || e.readyState === EventSource.CLOSED) {
+                  bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::reconnectSSE()();
+              }
+          };
+
+          sseSource.onerror = errorHandler;
+          sseSource.addEventListener('error', errorHandler, false);
 
           return sseSource;
       } else {

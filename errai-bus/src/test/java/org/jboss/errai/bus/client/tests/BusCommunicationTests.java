@@ -475,7 +475,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 })
                 .sendGlobalWith(ErraiBus.get());
       }
-    }, 20000);
+    });
 
     new Timer() {
       @Override

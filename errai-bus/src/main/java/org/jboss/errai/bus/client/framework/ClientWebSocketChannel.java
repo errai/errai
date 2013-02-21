@@ -26,7 +26,7 @@ public class ClientWebSocketChannel {
       socket = new WebSocket(websocketAddr);
 
       socket.onmessage = function (event) {
-        bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::procPayload(Ljava/lang/String;)(event.data);
+        bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::handleJsonMessage(Ljava/lang/String;Z)(event.data, false);
       };
 
       socket.onopen = function (event) {

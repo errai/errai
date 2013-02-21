@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2012 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.support.bus.client;
+package org.jboss.errai.bus.client.framework.transports;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.bus.client.api.Message;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import java.util.List;
 
-@IOCProvider
-@Singleton
-public class MessageBusProvider implements Provider<ClientMessageBus> {
-  @Override
-  public ClientMessageBus get() {
-    return (ClientMessageBus) ErraiBus.get();
-  }
+/**
+* @author Mike Brock
+*/
+public interface TransportHandler {
+  public void configure(Message capabilitiesMessage);
+
+  public void start();
+
+  public void stop();
+
+  public void transmit(List<Message> txMessages);
+
+  public void handleProtocolExtension(Message message);
+
+  public boolean isUsable();
 }

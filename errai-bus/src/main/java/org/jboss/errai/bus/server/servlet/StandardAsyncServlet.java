@@ -48,19 +48,9 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException,
       IOException {
 
-    final boolean sse;
-    if (request.getParameter("sse") != null) {
-      response.setContentType("text/event-stream");
-      sse = true;
-    }
-    else {
-      response.setContentType("application/json");
-      sse = false;
-    }
-
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
-
     final MessageQueue queue = service.getBus().getQueue(session);
+
     if (queue == null) {
       switch (getConnectionPhase(request)) {
         case CONNECTING:
@@ -70,6 +60,17 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       sendDisconnectDueToSessionExpiry(response.getOutputStream());
       return;
     }
+
+    final boolean sse;
+     if (request.getParameter("sse") != null) {
+       response.setContentType("text/event-stream");
+       sse = true;
+     }
+     else {
+       response.setContentType("application/json");
+       sse = false;
+     }
+
 
     queue.heartBeat();
 

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -35,7 +34,6 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -46,7 +44,6 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * CDI client interface.

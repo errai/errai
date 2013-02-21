@@ -16,11 +16,10 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import java.util.Set;
-
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
 import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
+
+import java.util.Set;
 
 /**
  * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
@@ -37,18 +36,6 @@ public interface ClientMessageBus extends MessageBus {
    * @param run a {@link Runnable} task.
    */
   public void addPostInitTask(Runnable run);
-
-  /**
-   * Adds a {@link SessionExpirationListener} to this bus instance.
-   *
-   * @param listener
-   *          listener to add, must not be null
-   * @deprecated session expiration is part of the bus lifecycle, and should be
-   *             observed via a bus lifecycle listener. See
-   *             {@link #addLifecycleListener(BusLifecycleListener)}.
-   */
-  @Deprecated
-  public void addSessionExpirationListener(SessionExpirationListener listener);
 
   /**
    * Adds the given listener instance to this bus. The listener will be notified
@@ -112,24 +99,8 @@ public interface ClientMessageBus extends MessageBus {
    */
   public boolean isInitialized();
 
-  /**
-   * Sets the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
-   *
-   * @param logAdapter The log adapter this bus should log to. Must not be null.
-   * @deprecated Use java.util logging instead. It is supported by GWT.
-   */
-  @Deprecated
-  public void setLogAdapter(LogAdapter logAdapter);
 
   public Set<String> getAllRegisteredSubjects();
-
-  /**
-   * Returns the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
-   *
-   * @deprecated Use java.util logging instead. It is supported by GWT.
-   */
-  @Deprecated
-  public LogAdapter getLogAdapter();
 
   /**
    * Adds a global transport error handler to deal with any errors which arise
@@ -140,4 +111,18 @@ public interface ClientMessageBus extends MessageBus {
    */
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
 
+  /**
+   * Parses the given JSON message and reacts to its contents.
+   *
+   * @param text
+   *         the JSON message payload.
+   */
+  void handleJsonMessage(String text);
+
+
+  /**
+   * When called, the MessageBus assumes that the currently active transport is no longer capable of operating. The
+   * MessageBus then find the best remaining handler and activates it.
+   */
+  void reconsiderTransport();
 }

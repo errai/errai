@@ -1,13 +1,10 @@
 package org.jboss.errai.ioc.support.bus.tests.client.res;
 
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 @EntryPoint

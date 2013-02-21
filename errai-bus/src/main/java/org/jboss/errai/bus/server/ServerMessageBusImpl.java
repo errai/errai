@@ -329,11 +329,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
               final boolean first;
               if (ErraiServiceConfigurator.LONG_POLLING) {
-                capabilitiesBuffer.append(Capabilities.LongPollAvailable.name());
+                capabilitiesBuffer.append(Capabilities.LongPolling.name());
                 first = false;
               }
               else {
-                capabilitiesBuffer.append(Capabilities.NoLongPollAvailable.name());
+                capabilitiesBuffer.append(Capabilities.ShortPolling.name());
                 first = false;
                 msg.set(MessageParts.PollFrequency, ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
               }

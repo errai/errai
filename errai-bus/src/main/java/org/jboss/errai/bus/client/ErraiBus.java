@@ -23,12 +23,10 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
 import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.LogAdapter;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.Subscription;
@@ -106,10 +104,6 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void addSessionExpirationListener(SessionExpirationListener listener) {
-        }
-
-        @Override
         public void addPreInitializationListener(PreInitializationListener listener) {
         }
 
@@ -127,17 +121,16 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void setLogAdapter(LogAdapter logAdapter) {
+        public void handleJsonMessage(String text) {
+        }
+
+        @Override
+        public void reconsiderTransport() {
         }
 
         @Override
         public Set<String> getAllRegisteredSubjects() {
           return Collections.emptySet();
-        }
-
-        @Override
-        public LogAdapter getLogAdapter() {
-          return null;
         }
 
         @Override

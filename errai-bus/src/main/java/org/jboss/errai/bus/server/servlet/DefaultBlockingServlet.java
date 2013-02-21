@@ -145,17 +145,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   private void pollForMessages(final QueueSession session, final HttpServletRequest httpServletRequest,
                                final HttpServletResponse httpServletResponse, final boolean wait) throws IOException {
     try {
-      // note about caching: clients now include a uniquifier in a request parameter called "z"
-      // so no-cache headers are now unnecessary.
-      final boolean sse;
-      if (httpServletRequest.getParameter("sse") != null) {
-        httpServletResponse.setContentType("text/event-stream");
-        sse = true;
-      }
-      else {
-        httpServletResponse.setContentType("application/json");
-        sse = false;
-      }
 
       final MessageQueue queue = service.getBus().getQueue(session);
 
@@ -169,6 +158,18 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
         sendDisconnectDueToSessionExpiry(outputStream);
         return;
+      }
+
+      // note about caching: clients now include a uniquifier in a request parameter called "z"
+      // so no-cache headers are now unnecessary.
+      final boolean sse;
+      if (httpServletRequest.getParameter("sse") != null) {
+        httpServletResponse.setContentType("text/event-stream");
+        sse = true;
+      }
+      else {
+        httpServletResponse.setContentType("application/json");
+        sse = false;
       }
 
       queue.heartBeat();
