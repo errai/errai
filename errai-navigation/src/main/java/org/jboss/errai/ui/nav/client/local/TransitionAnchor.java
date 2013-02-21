@@ -27,6 +27,7 @@ public final class TransitionAnchor<P extends Widget> extends Anchor implements 
 
   private final Navigation navigation;
   private final Class<P> toPageWidgetType;
+  private final Multimap<String, String> state;
 
   /**
    * Creates a new TransitionAnchor with the given attributes.
@@ -39,14 +40,31 @@ public final class TransitionAnchor<P extends Widget> extends Anchor implements 
    *           if any of the arguments are null.
    */
   TransitionAnchor(Navigation navigation, final Class<P> toPage) {
+    this(navigation, toPage, ImmutableMultimap.<String,String>of());
+  }
+
+  /**
+   * Creates a new TransitionAnchor with the given attributes.
+   *
+   * @param navigation
+   *          The navigation system this page transition participates in.
+   * @param toPage
+   *          The page type this transition goes to. Not null.
+   * @param state
+   *          The page state.  Cannot be null (but can be an empty multimap)
+   * @throws NullPointerException
+   *           if any of the arguments are null.
+   */
+  TransitionAnchor(Navigation navigation, final Class<P> toPage, final Multimap<String, String> state) {
     this.navigation = Assert.notNull(navigation);
     this.toPageWidgetType = Assert.notNull(toPage);
+    this.state = Assert.notNull(state);
     addClickHandler(this);
     addAttachHandler(new Handler() {
       @Override
       public void onAttachOrDetach(AttachEvent event) {
         if (event.isAttached())
-          initHref(toPage);
+          initHref(toPage, state);
       }
     });
   }
@@ -56,10 +74,12 @@ public final class TransitionAnchor<P extends Widget> extends Anchor implements 
    *
    * @param toPage
    *          The page type this transition goes to. Not null.
+   * @param state
+   *          The page state.  Cannot be null (but can be an empty multimap)
    */
-  private void initHref(Class<P> toPage) {
+  private void initHref(Class<P> toPage, Multimap<String, String> state) {
     PageNode<P> toPageInstance = navigation.getNavGraph().getPage(toPage);
-    HistoryToken token = HistoryToken.of(toPageInstance.name(), ImmutableMultimap.<String,String>of());
+    HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
     String href = "#" + token.toString();
     setHref(href);
   }
@@ -76,7 +96,7 @@ public final class TransitionAnchor<P extends Widget> extends Anchor implements 
    */
   @Override
   public void onClick(ClickEvent event) {
-    navigation.goTo(toPageWidgetType, ImmutableMultimap.<String,String>of());
+    navigation.goTo(toPageWidgetType, this.state);
     event.stopPropagation();
     event.preventDefault();
   }
@@ -85,11 +105,11 @@ public final class TransitionAnchor<P extends Widget> extends Anchor implements 
    * Programmatically click on the anchor.
    */
   public void click() {
-    navigation.goTo(toPageWidgetType, ImmutableMultimap.<String,String>of());
+    navigation.goTo(toPageWidgetType, this.state);
   }
 
   /**
-   * Programmatically click on the anchor (with some parameters).
+   * Programmatically click on the anchor (with alternate page state).
    * @param state
    */
   public void click(Multimap<String,String> state) {
