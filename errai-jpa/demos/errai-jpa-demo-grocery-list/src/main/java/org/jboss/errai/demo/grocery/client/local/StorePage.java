@@ -1,25 +1,5 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
-import org.jboss.errai.demo.grocery.client.shared.Department;
-import org.jboss.errai.demo.grocery.client.shared.Store;
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageHidden;
-import org.jboss.errai.ui.nav.client.local.PageShown;
-import org.jboss.errai.ui.nav.client.local.PageState;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
-import org.jboss.errai.ui.shared.api.annotations.AutoBound;
-import org.jboss.errai.ui.shared.api.annotations.Bound;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
-
 import com.google.gwt.ajaxloader.client.AjaxLoader;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,31 +9,35 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.geolocation.client.Geolocation;
 import com.google.gwt.geolocation.client.Position;
 import com.google.gwt.geolocation.client.PositionError;
-import com.google.gwt.maps.client.MapOptions;
-import com.google.gwt.maps.client.MapTypeId;
-import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.events.place.PlaceChangeMapEvent;
 import com.google.gwt.maps.client.events.place.PlaceChangeMapHandler;
-import com.google.gwt.maps.client.overlays.Animation;
-import com.google.gwt.maps.client.overlays.Marker;
-import com.google.gwt.maps.client.overlays.MarkerOptions;
-import com.google.gwt.maps.client.placeslib.Autocomplete;
-import com.google.gwt.maps.client.placeslib.AutocompleteOptions;
-import com.google.gwt.maps.client.placeslib.AutocompleteType;
-import com.google.gwt.maps.client.placeslib.PlaceGeometry;
-import com.google.gwt.maps.client.placeslib.PlaceResult;
+import com.google.gwt.maps.client.placeslib.*;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.*;
+import org.gwtopenmaps.openlayers.client.*;
+import org.gwtopenmaps.openlayers.client.control.OverviewMap;
+import org.gwtopenmaps.openlayers.client.control.ScaleLine;
+import org.gwtopenmaps.openlayers.client.layer.Markers;
+import org.gwtopenmaps.openlayers.client.layer.OSM;
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
+import org.jboss.errai.demo.grocery.client.shared.Department;
+import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ui.nav.client.local.*;
+import org.jboss.errai.ui.shared.api.annotations.*;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 @Dependent
 @Templated("#main") @Page
 public class StorePage extends Composite {
+
+  private static final Projection DEFAULT_PROJECTION = new Projection("EPSG:4326");
 
   @Inject private EntityManager em;
 
@@ -71,6 +55,7 @@ public class StorePage extends Composite {
   @Inject private TransitionTo<StoresPage> backToStoresPage;
 
   private Marker marker;
+  private Markers markers;
 
   @PageShown
   private void setup() {
@@ -108,16 +93,20 @@ public class StorePage extends Composite {
     GoogleMapBootstrapper.whenReady(new Runnable() {
       @Override
       public void run() {
-
-        LatLng center = getIpBasedLocation();
-        MapOptions opts = MapOptions.newInstance();
-        opts.setZoom(10);
-        opts.setMapTypeId(MapTypeId.ROADMAP);
-
-        final MapWidget mapWidget = new MapWidget(opts);
-        mapWidget.setSize("100%", "100%");
+        MapOptions defaultMapOptions = new MapOptions();
+        defaultMapOptions.setNumZoomLevels(16);
+        final MapWidget mapWidget = new MapWidget("100%", "100%", defaultMapOptions);
         mapContainer.add(mapWidget);
-        triggerResizeEvent(mapWidget, center);
+        Map map = mapWidget.getMap();
+
+        OSM osm = OSM.Mapnik("Mapnik");
+        osm.setIsBaseLayer(true);
+        map.addLayer(osm);
+        markers = new Markers("Markers");
+        map.addLayer(markers);
+        map.addControl(new OverviewMap());
+        map.addControl(new ScaleLine());
+
         placeMarkerAtStoreLocation(mapWidget);
 
         // set up autocomplete search box for this place
@@ -125,9 +114,14 @@ public class StorePage extends Composite {
         types[0] = AutocompleteType.ESTABLISHMENT;
         types[1] = AutocompleteType.GEOCODE;
 
+        Bounds extent = map.getExtent();
+        extent.transform(DEFAULT_PROJECTION, new Projection("EPSG:900913"));
+
         AutocompleteOptions options = AutocompleteOptions.newInstance();
         options.setTypes(types);
-        options.setBounds(mapWidget.getBounds());
+        LatLng sw = LatLng.newInstance(extent.getLowerLeftX(), extent.getLowerLeftY());
+        LatLng ne = LatLng.newInstance(extent.getUpperRightX(), extent.getUpperRightY());
+        options.setBounds(LatLngBounds.newInstance(sw, ne));
 
         final Autocomplete autoComplete = Autocomplete.newInstance(locationSearchBox.getElement(), options);
 
@@ -166,25 +160,6 @@ public class StorePage extends Composite {
   }
 
   /**
-   * This workaround as described at <a href=
-   * "http://stackoverflow.com/questions/4528490/google-map-v3-off-center-in-hidden-div"
-   * >StackOverflow</a> makes the map tiles center properly within the map div.
-   * <p>
-   * The center argument is required because the map has to be re-centered after
-   * it has adjusted to the proper bounds (without recentering, the map's
-   * pre-existing center point would lie northwest of the viewport).
-   *
-   * @param map the MapWidget that has just been added to the DOM. Must not be null.
-   * @param center The Lat/Long coordinate that should be in the center of the map's viewport.
-   */
-  private native void triggerResizeEvent(MapWidget map, LatLng center) /*-{
-    var mapImpl = map.@com.google.gwt.maps.client.MapWidget::getJso()();
-    console.log("Sending resize to ", mapImpl);
-    $wnd.google.maps.event.trigger(mapImpl, 'resize');
-    map.@com.google.gwt.maps.client.MapWidget::setCenter(Lcom/google/gwt/maps/client/base/LatLng;)(center);
-  }-*/;
-
-  /**
    * If the store's location is set to something reasonable (that is, not 0
    * degrees north, 0 degrees east), this method centers the map on that
    * location and places a marker on it. Otherwise, this method tries to center
@@ -195,22 +170,18 @@ public class StorePage extends Composite {
   private void placeMarkerAtStoreLocation(final MapWidget map) {
     // first remove old marker, if any
     if (marker != null) {
-      marker.close();
+      markers.removeMarker(marker);
       marker = null;
     }
 
     LatLng center = getStoreLocation();
     if (center != null) {
-      MarkerOptions options = MarkerOptions.newInstance();
-      options.setAnimation(Animation.DROP);
-      options.setPosition(center);
-      marker = Marker.newInstance(options);
+      Size size = new Size(25, 22);
+      Icon icon = new Icon("img/marker.png", size);
+      marker = new Marker(convertPoint(map.getMap().getProjection(), center), icon);
+      markers.addMarker(marker);
 
-      map.setZoom(15);
-      map.panTo(center);
-      System.out.println("Panned map to " + center);
-
-      marker.setMap(map);
+      centerMap(map.getMap(), center, 15);
     }
     else {
       Geolocation geolocation = Geolocation.getIfSupported();
@@ -219,20 +190,29 @@ public class StorePage extends Composite {
 
           @Override
           public void onSuccess(Position result) {
-            map.setZoom(14);
             LatLng here = LatLng.newInstance(result.getCoordinates().getLatitude(), result.getCoordinates().getLongitude());
-            map.panTo(here);
+            centerMap(map.getMap(), here, 14);
           }
 
           @Override
           public void onFailure(PositionError reason) {
             // fall back to Google's IP Geolocation
-            map.setZoom(13);
-            map.panTo(getIpBasedLocation());
+            centerMap(map.getMap(), getIpBasedLocation(), 13);
           }
         });
       }
     }
+  }
+
+  private void centerMap(Map map, LatLng center, int zoomLevel) {
+    LonLat lonlat = convertPoint(map.getProjection(), center);
+    map.setCenter(lonlat, zoomLevel);
+  }
+
+  private LonLat convertPoint(String mapProjection, LatLng center) {
+    LonLat lonlat = new LonLat(center.getLongitude(), center.getLatitude());
+    lonlat.transform(DEFAULT_PROJECTION.getProjectionCode(), mapProjection);
+    return lonlat;
   }
 
   /**

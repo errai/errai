@@ -12,6 +12,7 @@
   <inherits name="org.jboss.errai.databinding.DataBinding" />
   <inherits name="org.jboss.errai.enterprise.CDI" />
   <inherits name="com.google.gwt.maps.Maps" />
+  <inherits name="org.gwtopenmaps.openlayers.OpenLayers"/>
   
   <source path="client"/>
   <source path="shared"/>
