@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Store all injected {@link DataField} {@link Statement} instances into the
  * aggregate {@link Map} for this composite {@link Template}.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -63,16 +63,16 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
       }
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
-    saveDataField(ctx, ctx.getType(), name, ctx.getMemberName(), ctx.getAnnotation(Bound.class), instance);
+    saveDataField(ctx, ctx.getType(), name, ctx.getAnnotation(Bound.class), instance);
 
     return new ArrayList<Statement>();
 
   }
 
-  private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, String fieldName,
+  private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name,
       Bound bound, Statement instance) {
     dataFieldMap(ctx, ctx.getEnclosingType()).put(name, instance);
-    dataFieldBoundMap(ctx, ctx.getEnclosingType()).put(fieldName, bound);
+    dataFieldBoundMap(ctx, ctx.getEnclosingType()).put(name, bound);
     dataFieldTypeMap(ctx, ctx.getEnclosingType()).put(name, type);
   }
 
@@ -114,7 +114,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
 
     return bindings;
   }
-  
+
   /**
    * Get the map of {@link DataField} names and {@link MetaClass} types.
    */
@@ -154,7 +154,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
 
     return result;
   }
-  
+
   /**
    * Get the aggregate map of {@link DataField} names to {@link Bound} instances.
    */
@@ -192,7 +192,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
 
     Map<String, MetaClass> dataFields = (Map<String, MetaClass>) ctx.getInjectionContext().getAttribute(
             dataFieldTypeMapName(componentType));
-    
+
     if (dataFields != null) {
       result.putAll(dataFields);
     }
@@ -207,7 +207,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   private static final String dataFieldMapName(MetaClass composite) {
     return DecoratorDataField.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
   }
-  
+
   /**
    * Using the given composite {@link Template} type, return the name of the map
    * of {@link DataField} names and {@link Bound} instances.
