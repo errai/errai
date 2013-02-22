@@ -1,6 +1,8 @@
 package org.jboss.errai.jpa.sync.test.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -14,12 +16,14 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
 import org.jboss.errai.jpa.sync.client.shared.ConflictResponse;
+import org.jboss.errai.jpa.sync.client.shared.DeleteResponse;
 import org.jboss.errai.jpa.sync.client.shared.IdChangeResponse;
 import org.jboss.errai.jpa.sync.client.shared.NewRemoteEntityResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
 import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation.Type;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
+import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 import org.jboss.errai.jpa.sync.test.entity.SimpleEntity;
 import org.junit.After;
 import org.junit.Before;
@@ -106,7 +110,32 @@ public class SyncableDataSetUnitTest {
   }
 
   @Test
-  public void testPushConflictingUpdate() {
+  public void testUpdateBothSidesUnchanged() {
+    SimpleEntity remoteSimpleEntity = new SimpleEntity();
+    remoteSimpleEntity.setDate(new Timestamp(-2960391600000L));
+    remoteSimpleEntity.setInteger(42);
+    remoteSimpleEntity.setString("Mr. Watson--come here--I want to see you.");
+    em.persist(remoteSimpleEntity);
+    em.flush();
+    em.detach(remoteSimpleEntity);
+
+    SimpleEntity localSimpleEntity = remoteSimpleEntity.clone();
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(SyncRequestOperation.unchanged(localSimpleEntity));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is as expected (nothing to do)
+    assertEquals("Got unexpected response: " + syncResponse, 0, syncResponse.size());
+  }
+
+  @Test
+  public void testUpdateBothSidesChanged() {
     SimpleEntity remoteSimpleEntity = new SimpleEntity();
     remoteSimpleEntity.setDate(new Timestamp(8917200000L));
     remoteSimpleEntity.setInteger(123456);
@@ -125,7 +154,7 @@ public class SyncableDataSetUnitTest {
     SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
 
     List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
-    syncRequest.add(new SyncRequestOperation<SimpleEntity>(Type.EXISTING, localEntityNewState, localEntityExpectedState));
+    syncRequest.add(new SyncRequestOperation<SimpleEntity>(Type.UPDATED, localEntityNewState, localEntityExpectedState));
 
     // now do the actual sync
     List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
@@ -139,7 +168,37 @@ public class SyncableDataSetUnitTest {
   }
 
   @Test
-  public void testPushNonConflictingUpdate() {
+  public void testUpdateRemoteSideChanged() {
+    SimpleEntity remoteSimpleEntity = new SimpleEntity();
+    remoteSimpleEntity.setDate(new Timestamp(-2960391600000L));
+    remoteSimpleEntity.setInteger(42);
+    remoteSimpleEntity.setString("Mr. Watson--come here--I want to see you.");
+    em.persist(remoteSimpleEntity);
+    em.flush();
+
+    SimpleEntity localSimpleEntity = remoteSimpleEntity.clone();
+
+    remoteSimpleEntity.setString("This is different");
+    em.flush();
+    em.detach(remoteSimpleEntity);
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(SyncRequestOperation.unchanged(localSimpleEntity));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is as expected (nothing to do)
+    assertEquals("Got unexpected response: " + syncResponse, 1, syncResponse.size());
+    UpdateResponse<SimpleEntity> updateResponse = (UpdateResponse<SimpleEntity>) syncResponse.get(0);
+    assertEquals(remoteSimpleEntity.toString(), updateResponse.getEntity().toString());
+  }
+
+  @Test
+  public void testUpdateRequestingSideChanged() {
     SimpleEntity remoteSimpleEntity = new SimpleEntity();
     remoteSimpleEntity.setDate(new Timestamp(8917200000L));
     remoteSimpleEntity.setInteger(123456);
@@ -157,13 +216,84 @@ public class SyncableDataSetUnitTest {
     SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
 
     List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
-    syncRequest.add(new SyncRequestOperation<SimpleEntity>(Type.EXISTING, localEntityNewState, localEntityExpectedState));
+    syncRequest.add(new SyncRequestOperation<SimpleEntity>(Type.UPDATED, localEntityNewState, localEntityExpectedState));
 
     // now do the actual sync
     List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
 
     // ensure the response is as expected
     assertEquals("Non-empty response: " + syncResponse, 0, syncResponse.size());
+  }
+
+  @Test
+  public void testReceiveRemoteDelete() throws Exception {
+    SimpleEntity localSimpleEntity = new SimpleEntity();
+    localSimpleEntity.setDate(new Timestamp(-2960391600000L));
+    localSimpleEntity.setInteger(42);
+    localSimpleEntity.setString("Mr. Watson--come here--I want to see you.");
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    // this sync request claims we were told in the past that the server has localSimpleEntity
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(SyncRequestOperation.unchanged(localSimpleEntity));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is as expected (the server doesn't have the entity anymore)
+    assertEquals("Got unexpected response: " + syncResponse, 1, syncResponse.size());
+    DeleteResponse<SimpleEntity> deleteResponse = (DeleteResponse<SimpleEntity>) syncResponse.get(0);
+    assertEquals(localSimpleEntity.toString(), deleteResponse.getEntity().toString());
+  }
+
+  @Test
+  public void testSendLocalDelete() throws Exception {
+    // TODO
+    fail("not implemented");
+  }
+
+  /**
+   * This tests for the case where the client has generated its own ID locally,
+   * and that ID is already in use on the server.
+   */
+  @Test
+  public void testSendNewSimpleEntityThatHappensToHaveSameIdAsExistingRemoteEntity() {
+    SimpleEntity unrelatedRemoteEntity = new SimpleEntity();
+    unrelatedRemoteEntity.setString("Innocent bystander");
+    unrelatedRemoteEntity.setDate(new Timestamp(System.currentTimeMillis()));
+    unrelatedRemoteEntity.setInteger(2);
+    em.persist(unrelatedRemoteEntity);
+    em.flush();
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    SimpleEntity localSimpleEntity = new SimpleEntity();
+    SimpleEntity.setId(localSimpleEntity, unrelatedRemoteEntity.getId());
+    localSimpleEntity.setDate(new Timestamp(System.currentTimeMillis()));
+    localSimpleEntity.setInteger(1);
+    localSimpleEntity.setString("Unwitting impostor");
+
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(new SyncRequestOperation<SimpleEntity>(SyncRequestOperation.Type.NEW, localSimpleEntity.clone(), null));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is as expected
+    assertEquals(2, syncResponse.size());
+    IdChangeResponse<SimpleEntity> idChangeResponse = (IdChangeResponse<SimpleEntity>) syncResponse.get(0);
+    assertEquals(unrelatedRemoteEntity.getId(), idChangeResponse.getOldId());
+    Long newId = idChangeResponse.getEntity().getId(); // we will verify this in the next stanza
+
+    // ensure the new entity actually got persisted on the server, and the innocent bystander is unharmed
+    List<SimpleEntity> queryResult = em.createQuery("SELECT se FROM SimpleEntity se ORDER BY se.integer", SimpleEntity.class).getResultList();
+    assertEquals(2, queryResult.size());
+    SimpleEntity.setId(localSimpleEntity, newId); // set local instance's ID to the new remote one from the response
+    assertEquals(localSimpleEntity.toString(), queryResult.get(0).toString());
+    assertSame(unrelatedRemoteEntity, queryResult.get(1));
   }
 
 }

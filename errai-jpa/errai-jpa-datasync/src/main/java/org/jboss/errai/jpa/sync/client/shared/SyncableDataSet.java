@@ -48,29 +48,80 @@ public class SyncableDataSet<E> {
     List<SyncResponse<E>> syncResponse = new ArrayList<SyncResponse<E>>();
 
     for (SyncRequestOperation<E> syncReq : remoteResults) {
-      final E remoteCopy = syncReq.getEntity();
-      Object remoteId = id(remoteCopy);
-      final E localCopy = localResults.get(remoteId);
+
+      // the new state (updated since last sync) after mutation by the client
+      final E remoteNewState;
+      if (syncReq.getEntity() != null) {
+        remoteNewState = syncReq.getEntity();
+      }
+      else {
+        remoteNewState = null;
+      }
+
+      // the expected state (last thing this client saw from us)
+      final E remoteExpectedState;
+      if (syncReq.getExpectedState() != null) {
+        remoteExpectedState = syncReq.getExpectedState();
+      }
+      else {
+        remoteExpectedState = null;
+      }
+
+      // the JPA ID of the remote entity, whether new to us or known before
+      final Object remoteId;
+      if (remoteNewState != null) {
+        remoteId = id(remoteNewState);
+      }
+      else if (remoteExpectedState != null) {
+        remoteId = id(remoteExpectedState);
+      }
+      else {
+        remoteId = null;
+      }
+
+      final E localState;
+      if (remoteId != null) {
+        localState = localResults.get(remoteId);
+      }
+      else {
+        localState = null;
+      }
 
       // TODO handle related entities reachable from the given ones
 
       switch (syncReq.getType()) {
-      case EXISTING:
+      case UPDATED:
         localResults.remove(remoteId);
         E expectedLocalState = syncReq.getExpectedState();
-        if (isDifferent(localCopy, expectedLocalState)) {
-          syncResponse.add(new ConflictResponse<E>(expectedLocalState, localCopy, remoteCopy));
+        if (isDifferent(localState, expectedLocalState)) {
+          syncResponse.add(new ConflictResponse<E>(expectedLocalState, localState, remoteNewState));
         }
         else {
-          em.merge(remoteCopy);
+          em.merge(remoteNewState);
           // don't need to generate a response here; we've accepted the merge
         }
         break;
 
       case NEW:
-        clearId(remoteCopy);
-        em.persist(remoteCopy);
-        newLocalEntities.put(remoteId, remoteCopy);
+        clearId(remoteNewState);
+        em.persist(remoteNewState);
+        newLocalEntities.put(remoteId, remoteNewState);
+        break;
+
+      case UNCHANGED:
+        if (localState == null) {
+          syncResponse.add(new DeleteResponse<E>(remoteExpectedState));
+        }
+        else {
+          localResults.remove(remoteId);
+          if (isDifferent(localState, remoteExpectedState)) {
+            syncResponse.add(new UpdateResponse<E>(localState));
+          }
+        }
+        break;
+
+      default:
+        throw new UnsupportedOperationException("Unknown sync request type: " + syncReq.getType());
       }
     }
 

@@ -22,7 +22,12 @@ public class SyncRequestOperation<X> {
      * system the change list is being sent to. This newState's non-identity state
      * may have changed.
      */
-    EXISTING
+    UPDATED,
+
+    /**
+     * Indicates an entity instance that has not changed since the last sync request.
+     */
+    UNCHANGED
   }
 
   public SyncRequestOperation(
@@ -32,6 +37,11 @@ public class SyncRequestOperation<X> {
     this.type = type;
     this.newState = newState;
     this.expectedState = expectedState;
+  }
+
+  public static <X> SyncRequestOperation<X> unchanged(X knownState) {
+    // XXX would be better to use a type hierarchy of SyncRequestOperations than to say newState is null
+    return new SyncRequestOperation<X>(Type.UNCHANGED, null, knownState);
   }
 
   public Type getType() {
