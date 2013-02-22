@@ -23,30 +23,14 @@ import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
@@ -63,8 +47,10 @@ import org.jboss.errai.bus.client.framework.transports.HttpPollingHandler;
 import org.jboss.errai.bus.client.framework.transports.SSEHandler;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.bus.client.framework.transports.WebsocketHandler;
+import org.jboss.errai.bus.client.util.BusErrorDialog;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.util.ManagementCli;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -75,6 +61,7 @@ import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -147,6 +134,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public ClientMessageBusImpl() {
     setBusToInitializableState();
+
+    new ManagementCli(this);
 
     clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999)) + "-"
         + (System.currentTimeMillis() % (com.google.gwt.user.client.Random.nextInt(99999) + 1));
@@ -228,9 +217,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
     }, false);
-
-
-    declareDebugFunction();
 
     registerInitVoteCallbacks();
 
@@ -769,13 +755,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private boolean hasListeners(final String subject) {
-    return subscriptions.containsKey(subject)
-        || remotes.containsKey(subject)
-        || localSubscriptions.containsKey(subject);
-  }
-
-
   public void callErrorHandler(final Message message, final Throwable t) {
     if (message.getErrorCallback() != null) {
       message.getErrorCallback().error(message, t);
@@ -1035,7 +1014,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void ensureInitErrorDialog() {
     if (errorDialog == null) {
-      errorDialog = new BusErrorDialog();
+      errorDialog = new BusErrorDialog(this);
     }
   }
 
@@ -1104,201 +1083,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  /**
-   * The built-in, default error dialog.
-   */
-  class BusErrorDialog extends DialogBox {
-    boolean showErrors = !GWT.isProdMode();
-    Panel contentPanel = new AbsolutePanel();
-
-    public BusErrorDialog() {
-      setModal(false);
-
-      final VerticalPanel panel = new VerticalPanel();
-
-      final HorizontalPanel titleBar = new HorizontalPanel();
-      titleBar.getElement().getStyle().setProperty("backgroundColor", "#A9A9A9");
-      titleBar.getElement().getStyle().setWidth(100, Style.Unit.PCT);
-      titleBar.getElement().getStyle().setProperty("borderBottom", "1px solid black");
-      titleBar.getElement().getStyle().setProperty("marginBottom", "5px");
-
-      final Label titleBarLabel = new Label("An Error Occurred in the Bus");
-      titleBarLabel.getElement().getStyle().setFontSize(10, Style.Unit.PT);
-      titleBarLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLDER);
-      titleBarLabel.getElement().getStyle().setColor("white");
-
-      titleBar.add(titleBarLabel);
-      titleBar.setCellVerticalAlignment(titleBarLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-
-      final HorizontalPanel buttonPanel = new HorizontalPanel();
-
-      final CheckBox showFurtherErrors = new CheckBox();
-      showFurtherErrors.setValue(showErrors);
-      showFurtherErrors.setText("Show further errors");
-      showFurtherErrors.getElement().getStyle().setFontSize(10, Style.Unit.PT);
-      showFurtherErrors.getElement().getStyle().setColor("white");
-
-      showFurtherErrors.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-        @Override
-        public void onValueChange(final ValueChangeEvent<Boolean> booleanValueChangeEvent) {
-          showErrors = booleanValueChangeEvent.getValue();
-        }
-      });
-
-      final Button disconnectFromServer = new Button("Disconnect Bus");
-      disconnectFromServer.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(final ClickEvent event) {
-          if (Window
-              .confirm("Are you sure you want to disconnect and de-federate the local bus from the server bus? "
-                  + "This will permanently kill your session. You will need to refresh to reconnect. OK will proceed. Click "
-                  + "Cancel to abort this operation")) {
-            stop(true);
-          }
-        }
-      });
-
-      final Button clearErrors = new Button("Clear Log");
-      clearErrors.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(final ClickEvent event) {
-          contentPanel.clear();
-        }
-      });
-
-      final Button closeButton = new Button("Dismiss Error");
-      closeButton.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(final ClickEvent event) {
-          errorDialog.hide();
-        }
-      });
-
-      buttonPanel.add(showFurtherErrors);
-      buttonPanel.add(disconnectFromServer);
-      buttonPanel.add(clearErrors);
-      buttonPanel.add(closeButton);
-
-      buttonPanel.setCellVerticalAlignment(showFurtherErrors, HasVerticalAlignment.ALIGN_MIDDLE);
-
-      titleBar.add(buttonPanel);
-      titleBar.setCellHorizontalAlignment(buttonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-
-      panel.add(titleBar);
-
-      final Style s = panel.getElement().getStyle();
-
-      s.setProperty("border", "1px");
-      s.setProperty("borderStyle", "solid");
-      s.setProperty("borderColor", "black");
-      s.setProperty("backgroundColor", "#ede0c3");
-
-      resize();
-
-      panel.add(contentPanel);
-      add(panel);
-
-      getElement().getStyle().setZIndex(16777271);
-    }
-
-    public void addError(final String message, final String additionalDetails, final Throwable e) {
-      if (!showErrors)
-        return;
-
-      contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
-
-      final StringBuilder buildTrace = new StringBuilder("<tt style=\"font-size:11px;\"><pre>");
-      if (e != null) {
-        e.printStackTrace();
-        buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
-        for (final StackTraceElement ste : e.getStackTrace()) {
-          buildTrace.append("  ").append(ste.toString()).append("<br/>");
-        }
-      }
-      buildTrace.append("</pre>");
-
-      contentPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails
-          + "</tt>"));
-
-      if (!isShowing()) {
-        resize();
-        show();
-        center();
-        setModal(true);
-      }
-    }
-
-    private void resize() {
-      contentPanel.setWidth(Window.getClientWidth() * 0.90 + "px");
-      contentPanel.setHeight(Window.getClientHeight() * 0.90 + "px");
-      contentPanel.getElement().getStyle().setProperty("overflow", "auto");
-    }
+  public void showErrorConsole() {
+    ensureInitErrorDialog();
+    errorDialog.show();
   }
 
-  private static native void declareDebugFunction() /*-{
-      $wnd.errai_status = function () {
-          @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayStatusToLog()();
-      };
-
-      $wnd.errai_list_services = function () {
-          @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_listAvailableServicesToLog()();
-      };
-
-      $wnd.errai_show_error_console = function () {
-          @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
-      }
-  }-*/;
-
-  /**
-   * Debugging functions.
-   */
-  private static void _displayStatusToLog() {
-
-    LogUtil.displayDebuggerUtilityTitle("ErraiBus Status");
-
-    final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
-//    LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
-    LogUtil.nativeLog("");
-//    LogUtil.nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
-//    LogUtil.nativeLog("  Endpoint (RX)        : " + getApplicationRoot() + bus.IN_SERVICE_ENTRY_POINT);
-//    LogUtil.nativeLog("  Endpoint (TX)        : " + getApplicationRoot() + bus.OUT_SERVICE_ENTRY_POINT);
-//    LogUtil.nativeLog("  Pending Requests     : " + bus.pendingRequests.size());
-//    LogUtil.nativeLog("");
-//    LogUtil.nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
-//    LogUtil.nativeLog("  Endpoint (RX/TX)     : " + bus.webSocketUrl);
-//    LogUtil.nativeLog("");
-//    LogUtil.nativeLog("Total TXs              : " + bus.txNumber);
-//    LogUtil.nativeLog("Total RXs              : " + bus.rxNumber);
-    LogUtil.nativeLog("");
-    LogUtil.nativeLog("Endpoints");
-    LogUtil.nativeLog("  Remote (total)       : " + bus.remotes.size());
-    LogUtil.nativeLog("  Local (total)        : " + bus.subscriptions.size());
-
-    LogUtil.displaySeparator();
+  public Set<String> getRemoteServices() {
+    return new HashSet<String>(remotes.keySet());
   }
 
-  private static void _listAvailableServicesToLog() {
-
-    LogUtil.displayDebuggerUtilityTitle("Service and Routing Table");
-    LogUtil.nativeLog("[REMOTES]");
-
-    for (final String remoteName : ((ClientMessageBusImpl) ErraiBus.get()).remotes.keySet()) {
-      LogUtil.nativeLog(remoteName);
-    }
-
-    LogUtil.nativeLog("[LOCALS]");
-
-    for (final String localName : ((ClientMessageBusImpl) ErraiBus.get()).subscriptions.keySet()) {
-      LogUtil.nativeLog(localName + " (" + ((ClientMessageBusImpl) ErraiBus.get()).subscriptions.get(localName).size()
-          + ")");
-    }
-
-    LogUtil.displaySeparator();
-  }
-
-  private static void _showErrorConsole() {
-    ((ClientMessageBusImpl) ErraiBus.get()).ensureInitErrorDialog();
-    ((ClientMessageBusImpl) ErraiBus.get()).errorDialog.show();
+  public Set<String> getLocalServices() {
+    return new HashSet<String>(subscriptions.keySet());
   }
 
   /**
