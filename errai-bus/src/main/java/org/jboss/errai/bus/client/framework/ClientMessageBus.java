@@ -29,13 +29,13 @@ import java.util.Set;
 public interface ClientMessageBus extends MessageBus {
   public static final String REMOTE_QUEUE_ID_HEADER = "RemoteQueueID";
 
-  /**
-   * Add a {@link Runnable} initialization task to be executed after the bus has successfully finished it's
-   * initialization and is now communicating with the remote bus.
-   *
-   * @param run a {@link Runnable} task.
-   */
-  public void addPostInitTask(Runnable run);
+//  /**
+//   * Add a {@link Runnable} initialization task to be executed after the bus has successfully finished it's
+//   * initialization and is now communicating with the remote bus.
+//   *
+//   * @param run a {@link Runnable} task.
+//   */
+//  public void addPostInitTask(Runnable run);
 
   /**
    * Adds the given listener instance to this bus. The listener will be notified
@@ -62,20 +62,6 @@ public interface ClientMessageBus extends MessageBus {
   public void removeLifecycleListener(BusLifecycleListener l);
 
   /**
-   * Adds a {@link PreInitializationListener} to this bus instance. It will be
-   * notified before the bus initialization starts the first time and on each
-   * subsequent reconnect.
-   *
-   * @param listener
-   *          listener to add, must not be null
-   * @deprecated bus initialization and reconnection are part of the bus
-   *             lifecycle, and should be observed via a bus lifecycle listener.
-   *             See {@link #addLifecycleListener(BusLifecycleListener)}.
-   */
-  @Deprecated
-  public void addPreInitializationListener(PreInitializationListener listener);
-
-  /**
    * Takes this bus out of the "local only" state, causing it to try and connect
    * with the server (unless remote communication is globally disabled).
    *
@@ -92,14 +78,6 @@ public interface ClientMessageBus extends MessageBus {
    */
   public void stop(boolean sendDisconnectToServer);
 
-  /**
-   * Returns true if the bus has successfully initialized and can relay messages.
-   *
-   * @return boolean indicating if bus is initialized.
-   */
-  public boolean isInitialized();
-
-
   public Set<String> getAllRegisteredSubjects();
 
   /**
@@ -110,14 +88,6 @@ public interface ClientMessageBus extends MessageBus {
    *          the error handler to add.
    */
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
-
-  /**
-   * Parses the given JSON message and reacts to its contents.
-   *
-   * @param text
-   *         the JSON message payload.
-   */
-  void handleJsonMessage(String text);
 
 
   /**

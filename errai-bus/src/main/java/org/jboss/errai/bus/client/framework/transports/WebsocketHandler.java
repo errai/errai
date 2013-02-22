@@ -22,10 +22,8 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.framework.ClientWebSocketChannel;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -45,6 +43,8 @@ public class WebsocketHandler implements TransportHandler {
   private String webSocketToken;
   private Object webSocketChannel;
   private HttpPollingHandler longPollingTransport;
+
+  private boolean configured;
   private boolean hosed;
 
   public WebsocketHandler(final MessageCallback messageCallback, final ClientMessageBusImpl messageBus) {
@@ -54,7 +54,7 @@ public class WebsocketHandler implements TransportHandler {
   }
 
   @Override
-  public void configure(Message capabilitiesMessage) {
+  public void configure(final Message capabilitiesMessage) {
     webSocketUrl = capabilitiesMessage.get(String.class, MessageParts.WebSocketURL);
     webSocketToken = capabilitiesMessage.get(String.class, MessageParts.WebSocketToken);
 
@@ -62,6 +62,9 @@ public class WebsocketHandler implements TransportHandler {
 
     if (hosed) {
       LogUtil.log("server reported it supports websockets but did not send configuration information.");
+    }
+    else {
+      configured = true;
     }
   }
 
@@ -84,7 +87,7 @@ public class WebsocketHandler implements TransportHandler {
   @Override
   public void transmit(final List<Message> txMessages) {
     if (webSocketChannel != null) {
-      if (!transmitToSocket(webSocketChannel, BusTools.encodeMessages(txMessages))) {
+      if (!transmitToSocket(webSocketChannel, BusToolsCli.encodeMessages(txMessages))) {
         LogUtil.log("websocket channel is closed. falling back to comet");
         messageBus.reconsiderTransport();
       }
@@ -106,9 +109,9 @@ public class WebsocketHandler implements TransportHandler {
         break;
 
       case WebsocketChannelOpen:
-        longPollingTransport.stop();
+        longPollingTransport.stop(false);
         // send final message to open the channel
-        ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
+        transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
 
         LogUtil.log("web socket channel successfully negotiated. comet channel deactivated.");
         break;
@@ -126,17 +129,17 @@ public class WebsocketHandler implements TransportHandler {
   }
 
   @Override
-  public void stop() {
+  public void stop(boolean stopAllCurrentRequests) {
   }
 
   @Override
   public boolean isUsable() {
-    return !hosed;
+    return configured && !hosed;
   }
 
   public void attachWebSocketChannel(final Object o) {
     LogUtil.log("web socket opened. sending negotiation message.");
-    ClientWebSocketChannel.transmitToSocket(o, getWebSocketNegotiationString());
+    transmitToSocket(o, getWebSocketNegotiationString());
     webSocketChannel = o;
   }
 
@@ -147,11 +150,14 @@ public class WebsocketHandler implements TransportHandler {
   }
 
   private void handleReceived(String json) {
-    messageCallback.callback(JSONUtilCli.decodeCommandMessage(json));
+    BusToolsCli.decodeToCallback(json, messageCallback);
+  }
+
+  public String toString() {
+    return "WebSockets";
   }
 
   public native Object attemptWebSocketConnect(final String websocketAddr) /*-{
-      var messageBus = this.@org.jboss.errai.bus.client.framework.transports.WebsocketHandler::messageBus;
       var socket;
       if (window.WebSocket) {
           socket = new WebSocket(websocketAddr);

@@ -17,7 +17,7 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -131,7 +131,7 @@ public class Dataservice implements Attachable {
       stmt.setString(3, fromBus);
       stmt.setString(4, toBus);
       stmt.setString(5, service);
-      stmt.setString(6, BusTools.encodeMessage(message));
+      stmt.setString(6, BusToolsCli.encodeMessage(message));
       stmt.execute();
     }
     catch (Throwable e) {

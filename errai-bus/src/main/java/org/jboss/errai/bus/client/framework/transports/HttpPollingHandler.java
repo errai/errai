@@ -24,16 +24,13 @@ import com.google.gwt.http.client.RequestTimeoutException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
-import junit.framework.AssertionFailedError;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.util.LogUtil;
 
@@ -47,6 +44,10 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class HttpPollingHandler implements TransportHandler {
+  public static int POLL_FREQUENCY = 500;
+
+  private boolean configured;
+
   private final MessageCallback messageCallback;
   private final ClientMessageBusImpl messageBus;
 
@@ -102,11 +103,12 @@ public class HttpPollingHandler implements TransportHandler {
 
   @Override
   public void configure(Message capabilitiesMessage) {
+    configured = true;
   }
 
   @Override
   public boolean isUsable() {
-    return true;
+    return configured;
   }
 
   @Override
@@ -117,13 +119,15 @@ public class HttpPollingHandler implements TransportHandler {
   //TODO: reimplement throttling
   @Override
   public void transmit(final List<Message> txMessages) {
-    final String message = BusTools.encodeMessages(txMessages);
+    if (txMessages.isEmpty()) return;
+
+    final String message = BusToolsCli.encodeMessages(txMessages);
 
     try {
       txActive = true;
 
       try {
-        sendOutboundRequest(message, Collections.<String, String>emptyMap(), new RequestCallback() {
+        final RequestCallback callback = new RequestCallback() {
           int statusCode = 0;
 
           @Override
@@ -147,21 +151,7 @@ public class HttpPollingHandler implements TransportHandler {
               return;
             }
 
-            /**
-             * If the server bus returned us some client-destined messages in
-             * response to our send, handle them now.
-             */
-            try {
-              messageBus.handleJsonMessage(response.getText());
-            }
-            catch (AssertionFailedError e) {
-              throw e;
-            }
-            catch (Throwable e) {
-              for (final Message txM : txMessages) {
-                messageBus.callErrorHandler(txM, e);
-              }
-            }
+            BusToolsCli.decodeToCallback(response.getText(), messageCallback);
           }
 
           @Override
@@ -174,7 +164,9 @@ public class HttpPollingHandler implements TransportHandler {
               }
             }
           }
-        });
+        };
+
+        sendOutboundRequest(message, Collections.<String, String>emptyMap(), callback);
       }
       catch (Exception e) {
         for (final Message txM : txMessages) {
@@ -218,24 +210,27 @@ public class HttpPollingHandler implements TransportHandler {
       final Map<String, String> extraParameters,
       final RequestCallback callback) throws RequestException {
 
-    StringBuilder extraParmsString = new StringBuilder();
-    for (Map.Entry<String, String> entry : extraParameters.entrySet()) {
+    final StringBuilder extraParmsString = new StringBuilder();
+    for (final Map.Entry<String, String> entry : extraParameters.entrySet()) {
       extraParmsString.append("&").append(URL.encodePathSegment(entry.getKey())).append("=").append(URL.encodePathSegment(entry.getValue()));
     }
 
     final RequestBuilder builder = new RequestBuilder(
         method,
-        URL.encode(ClientMessageBusImpl.getApplicationLocation(serviceEntryPoint)) + "?z=" + getNextRequestNumber()
-            + "&clientId=" + messageBus.getClientId() + extraParmsString.toString()
+        URL.encode(messageBus.getApplicationLocation(serviceEntryPoint)) + "?z=" + getNextRequestNumber()
+            + "&clientId=" + URL.encodePathSegment(messageBus.getClientId()) + extraParmsString.toString()
     );
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
 
     final Request request = builder.sendRequest(payload, new RequestCallback() {
       @Override
       public void onResponseReceived(final Request request, final Response response) {
-        // LogUtil.log("rx rcvd: " + response.getText());
+//        if (!response.getText().equals("[]")) {
+//          LogUtil.log("rx rcvd: " + response.getText());
+//        }
         pendingRequests.remove(request);
         callback.onResponseReceived(request, response);
+        rxNumber++;
       }
 
       @Override
@@ -244,8 +239,11 @@ public class HttpPollingHandler implements TransportHandler {
         callback.onError(request, exception);
       }
     });
+
     pendingRequests.add(request);
-    //  LogUtil.log("tx sent: " + payload);
+//    if (payload != null) {
+//      LogUtil.log("tx sent: " + payload);
+//    }
     return request;
   }
 
@@ -261,11 +259,8 @@ public class HttpPollingHandler implements TransportHandler {
     return txNumber++;
   }
 
-  /**
-   * Sends a new GET request to the server bus, to see if there are any messages
-   * for us. Does nothing if the bus is in LOCAL_ONLY mode.
-   */
-  private void performPoll() {
+
+  public void performPoll() {
     Request request = null;
     try {
       if (rxActive)
@@ -293,15 +288,16 @@ public class HttpPollingHandler implements TransportHandler {
   }
 
   @Override
-  public void stop() {
+  public void stop(boolean stopAllCurrentRequests) {
     receiveCommCallback.cancel();
 
-    // Now stop all the in-flight XHRs
-    for (final Request r : pendingRequests) {
-      r.cancel();
+    if (stopAllCurrentRequests) {
+      // Now stop all the in-flight XHRs
+      for (final Request r : pendingRequests) {
+        r.cancel();
+      }
+      pendingRequests.clear();
     }
-    pendingRequests.clear();
-
   }
 
   private boolean throttleOutgoing() {
@@ -309,9 +305,11 @@ public class HttpPollingHandler implements TransportHandler {
   }
 
   private class NoPollRequestCallback extends LongPollRequestCallback {
+    private boolean onePoll = false;
     @Override
     public void schedule() {
-      if (!canceled) {
+      if (!onePoll) {
+        onePoll = true;
         performPoll();
       }
     }
@@ -413,25 +411,28 @@ public class HttpPollingHandler implements TransportHandler {
         }
       }
 
+      if (messageBus.getState() == ClientMessageBusImpl.State.CONNECTION_INTERRUPTED)
+        messageBus.setState(ClientMessageBusImpl.State.CONNECTED);
+
       retries = 0;
 
-      for (MarshalledMessage m : JSONUtilCli.decodePayload(response.getText())) {
-        messageCallback.callback(JSONUtilCli.decodeCommandMessage(m.getMessage()));
-      }
+      BusToolsCli.decodeToCallback(response.getText(), messageCallback);
 
       schedule();
     }
 
     public void schedule() {
-      if (canceled)
+      if (canceled) {
+        LogUtil.log(toString() + "is cancelled. will not reschedule.");
         return;
+      }
 
       new Timer() {
         @Override
         public void run() {
           performPoll();
         }
-      }.schedule(150);
+      }.schedule(POLL_FREQUENCY);
     }
 
     public void cancel() {
@@ -440,5 +441,15 @@ public class HttpPollingHandler implements TransportHandler {
   }
 
 
-  public static int POLL_FREQUENCY = 250;
+  public String toString() {
+    if (receiveCommCallback instanceof NoPollRequestCallback) {
+      return "NoPolling";
+    }
+    else if (receiveCommCallback instanceof ShortPollRequestCallback) {
+      return "ShortPolling";
+    }
+    else {
+      return "LongPolling";
+    }
+  }
 }

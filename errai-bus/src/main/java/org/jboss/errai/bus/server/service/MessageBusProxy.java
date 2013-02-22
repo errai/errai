@@ -142,18 +142,6 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public synchronized void addGlobalListener(MessageListener listener) {
-    Assert.notNull("message listener cannot be null", listener);
-
-    if (proxyClosed) {
-      proxied.addGlobalListener(listener);
-    }
-    else {
-      heldGlobalListener.add(listener);
-    }
-  }
-
-  @Override
   public synchronized void addSubscribeListener(SubscribeListener listener) {
     Assert.notNull("subscribe listener cannot be null", listener);
 
@@ -300,10 +288,6 @@ public class MessageBusProxy implements ServerMessageBus {
 
     for (UnsubscribeListener unsubscribeListener : heldUnsubscribeListener) {
       bus.addUnsubscribeListener(unsubscribeListener);
-    }
-
-    for (MessageListener listener : heldGlobalListener) {
-      bus.addGlobalListener(listener);
     }
 
     for (Message message : heldMessages) {

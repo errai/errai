@@ -216,10 +216,6 @@ public class BusTestClient implements MessageBus {
   }
 
   @Override
-  public void addGlobalListener(final MessageListener listener) {
-  }
-
-  @Override
   public void addSubscribeListener(final SubscribeListener listener) {
     subscribeListeners.add(listener);
   }

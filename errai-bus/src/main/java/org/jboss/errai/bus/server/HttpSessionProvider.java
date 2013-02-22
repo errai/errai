@@ -176,7 +176,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     @Override
     public String toString() {
       return "HttpSessionWrapper{" +
-              ", sessionId='" + sessionId + '\'' +
+              "sessionId='" + sessionId + '\'' +
               ", remoteQueueID='" + remoteQueueID + '\'' +
               '}';
     }

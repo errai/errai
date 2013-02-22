@@ -44,7 +44,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
     bus.addLifecycleListener(listener);
-  };
+  }
+
+  ;
 
   @Override
   protected void gwtTearDown() throws Exception {
@@ -61,14 +63,12 @@ public class LifecycleEventTests extends AbstractErraiTest {
   public void testNormalFullLifecycle() throws Exception {
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
-    // we expect the bus already fired an ASSOCIATING event way before we had a
-    // chance to observe it (i.e. in its constructor). So we expect the listener's
-    // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
 
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
@@ -86,21 +86,19 @@ public class LifecycleEventTests extends AbstractErraiTest {
   public void testRecoverFromExpiredSession() throws Exception {
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
-    // we expect the bus already fired an ASSOCIATING event way before we had a
-    // chance to observe it (i.e. in its constructor). So we expect the listener's
-    // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
 
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
         // simulate session expiration
         MessageBuilder.createMessage()
-        .toSubject("ExpiryService")
-        .signalling().noErrorHandling().sendNowWith(bus);
+            .toSubject("ExpiryService")
+            .signalling().noErrorHandling().sendNowWith(bus);
 
         expectedEventTypes.add(EventType.OFFLINE);
 
@@ -119,14 +117,12 @@ public class LifecycleEventTests extends AbstractErraiTest {
   public void testRecoverFromNetworkError() throws Exception {
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
-    // we expect the bus already fired an ASSOCIATING event way before we had a
-    // chance to observe it (i.e. in its constructor). So we expect the listener's
-    // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
 
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
@@ -152,14 +148,12 @@ public class LifecycleEventTests extends AbstractErraiTest {
   public void ignoreTestPersistentNetworkError() throws Exception {
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
-    // we expect the bus already fired an ASSOCIATING event way before we had a
-    // chance to observe it (i.e. in its constructor). So we expect the listener's
-    // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
 
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
@@ -198,14 +192,12 @@ public class LifecycleEventTests extends AbstractErraiTest {
 
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
-    // we expect the bus already fired an ASSOCIATING event way before we had a
-    // chance to observe it (i.e. in its constructor). So we expect the listener's
-    // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
 
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
@@ -234,14 +226,12 @@ public class LifecycleEventTests extends AbstractErraiTest {
     System.out.println("Begin testLocalDeliveryAfterStoppedBus()");
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
-    // we expect the bus already fired an ASSOCIATING event way before we had a
-    // chance to observe it (i.e. in its constructor). So we expect the listener's
-    // log to be empty at this point.
     assertEquals(expectedEventTypes, listener.getEventTypes());
 
     runAfterInit(new Runnable() {
       @Override
       public void run() {
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
@@ -252,17 +242,6 @@ public class LifecycleEventTests extends AbstractErraiTest {
             finishTest();
           }
         });
-
-        // XXX in Errai 2.2, to enable local offline delivery, we have to setInitialized(true) just after the disassociating event.
-        // We plan to remove setInitialized() completely in 3.0.
-        BusLifecycleAdapter offlineInitializer = new BusLifecycleAdapter() {
-          @Override
-          public void busDisassociating(BusLifecycleEvent e) {
-            ((ClientMessageBusImpl) bus).setInitialized(true);
-          }
-        };
-        bus.addLifecycleListener(offlineInitializer);
-        listenersToRemove.add(offlineInitializer);
 
         // stop the bus and send disconnect signal to server
         bus.stop(true);
@@ -290,8 +269,11 @@ public class LifecycleEventTests extends AbstractErraiTest {
    * {@link BusLifecycleListener#busDisassociating(BusLifecycleEvent)}: when you
    * do not call bus.setInitialized(true), local message delivery is deferred
    * until the bus reconnects.
+   *
+   *
+   * NOTE: The contract is no longer true. If a local message can be delivered, it will be, regardless of bus state.
    */
-  public void testLocalDeliveryAfterBusRestarted() throws Exception {
+  public void ignoreTestLocalDeliveryAfterBusRestarted() throws Exception {
     final List<EventType> expectedEventTypes = new ArrayList<EventType>();
 
     // we expect the bus already fired an ASSOCIATING event way before we had a
@@ -305,6 +287,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
 
       @Override
       public void run() {
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
@@ -326,13 +309,13 @@ public class LifecycleEventTests extends AbstractErraiTest {
         MessageBuilder.createMessage("myLocalTestSubject").withValue("cows often say moo")
             .errorsHandledBy(new BusErrorCallback() {
 
-          @Override
-          public boolean error(Message message, Throwable throwable) {
-            throwable.printStackTrace();
-            fail("Got an error sending local message");
-            return false;
-          }
-        }).sendNowWith(bus);
+              @Override
+              public boolean error(Message message, Throwable throwable) {
+                throwable.printStackTrace();
+                fail("Got an error sending local message");
+                return false;
+              }
+            }).sendNowWith(bus);
 
         assertFalse("Message delivery should be deferred in this state", receivedLocalMessage);
 
@@ -384,13 +367,14 @@ public class LifecycleEventTests extends AbstractErraiTest {
         // simulate 404 on bus endpoint URL
         originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
 
+        expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
         expectedEventTypes.add(EventType.OFFLINE);
         pollUntilListenerSees(expectedEventTypes, new Runnable() {
 
           @Override
           public void run() {
-            RecordedEvent recordedEvent = listener.getEvents().get(1);
+            RecordedEvent recordedEvent = listener.getEvents().get(2);
             assertEquals("Picked wrong event from recorder", EventType.OFFLINE, recordedEvent.getType());
             BusLifecycleEvent actualEvent = recordedEvent.getEvent();
             TransportError error = actualEvent.getReason();
@@ -400,14 +384,14 @@ public class LifecycleEventTests extends AbstractErraiTest {
             assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
             assertNotNull("Request object was not provided", error.getRequest());
             assertTrue("Bus should be planning to retry failed connection attempt",
-                    error.getRetryInfo().getDelayUntilNextRetry() >= 0);
+                error.getRetryInfo().getDelayUntilNextRetry() >= 0);
             assertEquals(0, error.getRetryInfo().getRetryCount());
 
             List<TransportError> transportErrors = errorHandler.getTransportErrors();
             assertTrue("No errors were recorded", !transportErrors.isEmpty());
             assertTrue("Got too many errors: " + transportErrors, transportErrors.size() <= 2);
             assertSame("Lifecycle listener and error handler should see exact same TransportError object",
-                    transportErrors.get(0), error);
+                transportErrors.get(0), error);
           }
         });
       }
@@ -453,7 +437,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
 
             List<TransportError> transportErrors = errorHandler.getTransportErrors();
             assertSame("Lifecycle listener and error handler should see exact same TransportError object",
-                    transportErrors.get(transportErrors.size() - 1), error);
+                transportErrors.get(transportErrors.size() - 1), error);
 
             int expectedRetryCount = 0;
             for (TransportError oldError : transportErrors.subList(0, transportErrors.size() - 1)) {

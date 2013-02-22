@@ -54,14 +54,14 @@ import org.jboss.errai.marshalling.client.api.MarshallerFramework;
  */
 public class CDI {
   public static final String CDI_SUBJECT_PREFIX = "cdi.event:";
-  public static final String SERVER_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "Dispatcher";
-  public static final String CLIENT_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "ClientDispatcher";
-  private static final String CLIENT_ALREADY_FIRED_RESOURCE = CDI_SUBJECT_PREFIX + "AlreadyFired";
+
+  public static final String CDI_SERVICE_SUBJECT_PREFIX = "cdi.event:";
+  public static final String SERVER_DISPATCHER_SUBJECT = CDI_SERVICE_SUBJECT_PREFIX + "Dispatcher";
+  public static final String CLIENT_DISPATCHER_SUBJECT = CDI_SERVICE_SUBJECT_PREFIX + "ClientDispatcher";
+  private static final String CLIENT_ALREADY_FIRED_RESOURCE = CDI_SERVICE_SUBJECT_PREFIX + "AlreadyFired";
 
   private static final Set<String> remoteEvents = new HashSet<String>();
   private static boolean active = false;
-  // private static final List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
-  private static final List<Runnable> postInitTasks = new ArrayList<Runnable>();
 
   private static Map<String, List<MessageCallback>> eventObservers = new HashMap<String, List<MessageCallback>>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
@@ -92,7 +92,6 @@ public class CDI {
     active = false;
     //  deferredEvents.clear();
     fireOnSubscribe.clear();
-    postInitTasks.clear();
     eventObservers.clear();
     lookupTable = Collections.emptyMap();
   }
@@ -277,12 +276,7 @@ public class CDI {
   }
 
   public static void addPostInitTask(final Runnable runnable) {
-    if (active) {
-      runnable.run();
-    }
-    else {
-      postInitTasks.add(runnable);
-    }
+    InitVotes.registerOneTimeDependencyCallback(CDI.class, runnable);
   }
 
   private static void fireOnSubscribe(final String type, final Message message) {
@@ -304,10 +298,6 @@ public class CDI {
   }
 
 
-  public static void removePostInitTasks() {
-    postInitTasks.clear();
-  }
-
   public static void activate(String... remoteTypes) {
     if (!active) {
       addRemoteEventTypes(remoteTypes);
@@ -315,13 +305,9 @@ public class CDI {
 
       fireAllIfWaiting();
 
-      for (final Runnable r : postInitTasks) {
-        r.run();
-      }
-
       LogUtil.log("activated CDI eventing subsystem.");
+      InitVotes.voteFor(CDI.class);
     }
-    InitVotes.voteFor(CDI.class);
   }
 
   static class MessageFireDeferral {

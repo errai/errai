@@ -135,12 +135,6 @@ public interface MessageBus {
    */
   public boolean isSubscribed(String subject);
 
-  /**
-   * Registers a global listener, that can intercept all messages before they are transmitted.
-   *
-   * @param listener
-   */
-  public void addGlobalListener(MessageListener listener);
 
   /**
    * Registers a subscription listener, which is fired whenever a new subscription is created.

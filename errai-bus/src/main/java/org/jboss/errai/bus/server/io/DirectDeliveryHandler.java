@@ -17,9 +17,9 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.util.LocalContext;
-import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class DirectDeliveryHandler implements MessageDeliveryHandler, Wakeable, 
   @Override
   public boolean deliver(final MessageQueue queue, final Message message) throws IOException {
     try {
-      directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
+      directSocketChannel.write("[" + BusToolsCli.encodeMessage(message) + "]");
       return true;
     }
     catch (Throwable e) {

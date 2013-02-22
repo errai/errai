@@ -102,7 +102,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
-  private final List<MessageListener> listeners = new ArrayList<MessageListener>();
   private final TransmissionBuffer transmissionbuffer;
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
@@ -651,26 +650,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       return;
     }
 
-    if (!fireGlobalMessageListeners(message)) {
-      if (message.hasPart(ReplyTo) && message.hasResource(Resources.Session.name())) {
-        /**
-         * Inform the sender that we did not dispatchGlobal the message.
-         */
-
-        final Map<String, Object> rawMsg = new HashMap<String, Object>();
-        rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
-
-        try {
-          enqueueForDelivery(getQueueByMessage(message), CommandMessage.createWithParts(rawMsg));
-        }
-        catch (NoSubscribersToDeliverTo nstdt) {
-          handleMessageDeliveryFailure(this, message, "No subscribers to deliver to", nstdt, false);
-        }
-      }
-
-      return;
-    }
-
     if (isMonitor()) {
       if (message.isFlagSet(RoutingFlag.FromRemote)) {
         busMonitor.notifyIncomingMessageFromRemote(
@@ -775,15 +754,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void send(final MessageQueue queue, final Message message, final boolean fireListeners) {
     try {
-      if (fireListeners && !fireGlobalMessageListeners(message)) {
-        if (message.hasPart(ReplyTo)) {
-          final Map<String, Object> rawMsg = new HashMap<String, Object>();
-          rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
-          enqueueForDelivery(queue, CommandMessage.createWithParts(rawMsg));
-        }
-        return;
-      }
-
       if (isMonitor()) {
         busMonitor.notifyOutgoingMessageToRemote(queue.getSession().getSessionId(), message);
       }
@@ -1258,19 +1228,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         .contains(getQueueBySession(sessionId));
   }
 
-
-  private boolean fireGlobalMessageListeners(final Message message) {
-    boolean allowContinue = true;
-
-    for (final MessageListener listener : listeners) {
-      if (!listener.handleMessage(message)) {
-        allowContinue = false;
-      }
-    }
-
-    return allowContinue;
-  }
-
   private void fireSubscribeListeners(final SubscriptionEvent event) {
     if (isMonitor()) {
       busMonitor.notifyNewSubscriptionEvent(event);
@@ -1322,19 +1279,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           event.setDisposeListener(false);
         }
       }
-    }
-  }
-
-  /**
-   * Adds a global listener
-   *
-   * @param listener
-   *     - global listener to add
-   */
-  @Override
-  public void addGlobalListener(final MessageListener listener) {
-    synchronized (listeners) {
-      listeners.add(listener);
     }
   }
 

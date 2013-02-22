@@ -13,11 +13,12 @@ public class Wormhole {
   public static String changeBusEndpointUrl(ClientMessageBus bus, String newUrl) {
     String oldUrl = ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT;
     ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT = newUrl;
+
+    System.out.println("CHANGED ENDPOINT TO: " + newUrl);
     return oldUrl;
   }
 
   public static Set<String> getRemoteSubscriptions(ClientMessageBus bus) {
     return ((ClientMessageBusImpl) bus).getRemoteSubscriptions();
   }
-
 }

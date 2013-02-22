@@ -31,6 +31,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.client.framework.TransportErrorHandler;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 
 import java.util.Collections;
 import java.util.Set;
@@ -40,7 +41,7 @@ import java.util.Set;
  * client {@link org.jboss.errai.bus.client.framework.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
 public class ErraiBus implements EntryPoint {
-  private static MessageBus bus;
+  private static ClientMessageBus bus;
 
   static {
     if (GWT.isClient()) {
@@ -84,10 +85,6 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void addGlobalListener(MessageListener listener) {
-        }
-
-        @Override
         public void addSubscribeListener(SubscribeListener listener) {
         }
 
@@ -100,28 +97,11 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void addPostInitTask(Runnable run) {
-        }
-
-        @Override
-        public void addPreInitializationListener(PreInitializationListener listener) {
-        }
-
-        @Override
         public void init() {
         }
 
         @Override
         public void stop(boolean sendDisconnectToServer) {
-        }
-
-        @Override
-        public boolean isInitialized() {
-          return false;
-        }
-
-        @Override
-        public void handleJsonMessage(String text) {
         }
 
         @Override
@@ -147,6 +127,12 @@ public class ErraiBus implements EntryPoint {
       };
     }
 
+    InitVotes.registerPersistentPreInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        bus.init();
+      }
+    });
   }
 
   /**

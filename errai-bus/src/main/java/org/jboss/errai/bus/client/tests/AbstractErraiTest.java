@@ -43,7 +43,6 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    InitVotes.reset();
     InitVotes.setTimeoutMillis(60000);
 
     if (!(TaskManagerFactory.get() instanceof ClientTaskManager)) {
@@ -56,20 +55,15 @@ public abstract class AbstractErraiTest extends GWTTestCase {
         }
       });
     }
-
-    System.out.println("set-up");
-    if (bus == null) {
-      System.out.println("GET()");
-      bus = (ClientMessageBusImpl) ErraiBus.get();
-    }
-    else {
-      bus.init();
-    }
+    bus = (ClientMessageBus) ErraiBus.get();
+    InitVotes.startInitPolling();
   }
 
   @Override
   protected void gwtTearDown() throws Exception {
+    System.out.println("tearing down test ...");
     bus.stop(true);
+    InitVotes.reset();
   }
 
   /**

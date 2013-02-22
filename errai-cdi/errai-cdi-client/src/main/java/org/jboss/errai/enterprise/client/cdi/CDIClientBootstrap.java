@@ -15,18 +15,21 @@
  */
 package org.jboss.errai.enterprise.client.cdi;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 
 import com.google.gwt.core.client.EntryPoint;
+import org.jboss.errai.ioc.client.api.TimerType;
 
 /**
  * The GWT entry point for the Errai CDI module.
@@ -35,75 +38,63 @@ import com.google.gwt.core.client.EntryPoint;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CDIClientBootstrap implements EntryPoint {
-  public void onModuleLoad() {
-    final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+  static final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
-    final Runnable busReadyEvent = new Runnable() {
-      public void run() {
-        if (bus.isRemoteCommunicationEnabled()) {
-          MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
-              .command(CDICommands.AttachRemote)
-              .done()
-              .sendNowWith(bus);
-        }
-        else {
-          InitVotes.waitFor(CDI.class);
-          CDI.activate();
-        }
+  final static Runnable initRemoteCdiSubsystem = new Runnable() {
 
-        CDI.fireEvent(new BusReadyEvent());
-      }
+    public void run() {
+      LogUtil.log("CDI subsystem syncing with server ...");
+      MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+          .command(CDICommands.AttachRemote)
+          .done()
+          .sendNowWith(bus);
 
-      public String toString() {
-        return "BusReadyEvent";
-      }
-    };
-
-    bus.addPostInitTask(busReadyEvent);
-
-    if (!bus.isSubscribed(CDI.CLIENT_DISPATCHER_SUBJECT)) {
-      bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
-        public void callback(Message message) {
-          switch (CDICommands.valueOf(message.getCommandType())) {
-            case AttachRemote:
-              CDI.activate(message.get(String.class, MessageParts.RemoteServices).split(","));
-              break;
-
-            case RemoteSubscribe:
-              CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
-
-              break;
-            case CDIEvent:
-              CDI.consumeEventFromMessage(message);
-              break;
-          }
-        }
-      });
+      CDI.fireEvent(new BusReadyEvent());
     }
 
-    /*
-     * Register an initialization lister to run the bus ready event.  This will be added
-     * post-initialization, so it is designed to fire on bus reconnection events.
-     */
-    bus.addPostInitTask(new Runnable() {
-      public void run() {
-        bus.addPreInitializationListener(new PreInitializationListener() {
-          public void beforeInitialization() {
-            bus.addPostInitTask(busReadyEvent);
+    public String toString() {
+      return "BusReadyEvent";
+    }
+  };
+
+  final static Runnable declareServices = new Runnable() {
+    final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+
+    @Override
+    public void run() {
+      if (!bus.isSubscribed(CDI.CLIENT_DISPATCHER_SUBJECT)) {
+        LogUtil.log("declare CDI dispatch service");
+        bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
+          public void callback(final Message message) {
+            switch (CDICommands.valueOf(message.getCommandType())) {
+              case AttachRemote:
+                CDI.activate(message.get(String.class, MessageParts.RemoteServices).split(","));
+                break;
+
+              case RemoteSubscribe:
+                CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
+
+                break;
+              case CDIEvent:
+                CDI.consumeEventFromMessage(message);
+                break;
+            }
           }
         });
       }
-    });
+    }
+  };
 
-//    bus.addPostInitTask(new Runnable() {
-//      @Override
-//      public void run() {
-//        CDI.activate();
-//      }
-//
-//      public String toString() {
-//        return "CDI service activate";
-//      }
-//    });
+  public void onModuleLoad() {
+    InitVotes.registerPersistentPreInitCallback(declareServices);
+    InitVotes.waitFor(CDI.class);
+
+    if (bus.isRemoteCommunicationEnabled()) {
+      InitVotes.registerPersistentDependencyCallback(ClientMessageBus.class, initRemoteCdiSubsystem);
+    }
+    else {
+      CDI.activate();
+      CDI.fireEvent(new BusReadyEvent());
+    }
   }
 }

@@ -28,7 +28,7 @@ public interface TransportHandler {
 
   public void start();
 
-  public void stop();
+  public void stop(boolean stopAllCurrentRequests);
 
   public void transmit(List<Message> txMessages);
 

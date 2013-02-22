@@ -99,7 +99,6 @@ public class EventDispatcher implements MessageCallback {
       switch (CDICommands.valueOf(message.getCommandType())) {
         case RemoteSubscribe:
           if (afterBeanDiscovery != null) {
-
             final String signature = getSignatureFromMessage(message);
             final String typeName = message.get(String.class, CDIProtocol.BeanType);
             final Class<?> type = Class.forName(typeName);
@@ -175,6 +174,11 @@ public class EventDispatcher implements MessageCallback {
             MessageBuilder.createConversation(message).toSubject(CDI.CLIENT_DISPATCHER_SUBJECT)
                 .command(CDICommands.AttachRemote)
                 .with(MessageParts.RemoteServices, getEventTypes()).done().reply();
+          }
+          else {
+            MessageBuilder.createConversation(message).toSubject(CDI.CLIENT_DISPATCHER_SUBJECT)
+                .command(CDICommands.AttachRemote)
+                .with(MessageParts.RemoteServices, "").done().reply();
           }
 
           localContext.setAttribute(CDI_EVENT_CHANNEL_OPEN, "1");

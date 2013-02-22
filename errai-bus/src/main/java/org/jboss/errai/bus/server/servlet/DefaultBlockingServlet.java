@@ -18,7 +18,10 @@ package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
-import java.io.IOException;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,13 +33,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.server.api.MessageQueue;
-import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
-import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
@@ -156,12 +156,24 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
             return;
         }
 
+        InputStream stream = httpServletRequest.getInputStream();
+
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(stream, "UTF-8")
+        );
+
+        System.out.println("=====");
+        char[] buf = new char[10];
+        while (reader.read(buf) > 0) {
+          System.out.print(new String(buf));
+        }
+
+        System.out.println("=====");
+
         sendDisconnectDueToSessionExpiry(outputStream);
         return;
       }
 
-      // note about caching: clients now include a uniquifier in a request parameter called "z"
-      // so no-cache headers are now unnecessary.
       final boolean sse;
       if (httpServletRequest.getParameter("sse") != null) {
         httpServletResponse.setContentType("text/event-stream");
@@ -179,7 +191,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
         queue.setTimeout(getSSETimeout() + 1000);
 
         while (System.currentTimeMillis() < timeout) {
-          outputStream.write("retry: 150\nevent: bus-traffic\n\ndata: ".getBytes());
+          outputStream.write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
           queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
           outputStream.write("\n\n".getBytes());
           outputStream.flush();

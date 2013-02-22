@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
  */
 public class ErrorHelper {
-  private static final Logger log = LoggerFactory.getLogger(ErrorHelper.class);
 
   /**
    * Creates the stacktrace for the error message and sends it via conversation to the <tt>ClientBusErrors</tt>
@@ -126,8 +125,12 @@ public class ErrorHelper {
             .noErrorHandling().sendNowWith(bus);
       }
     }
-    catch (QueueUnavailableException e) {
-      log.debug("couldn't send error to non-existent queue (client probably disconnected)", e);
+    catch (RuntimeException e) {
+      // note: this is handled this way, because this is shared server and client code.
+      if (e.getClass().getName().equals("org.jboss.errai.bus.server.QueueUnavailableException")) {
+        // ignore.
+      }
+      throw e;
     }
   }
 
@@ -141,8 +144,12 @@ public class ErrorHelper {
           .flag(RoutingFlag.NonGlobalRouting)
           .noErrorHandling().sendNowWith(bus);
     }
-    catch (QueueUnavailableException e) {
-      log.debug("couldn't send error to non-existent queue (client probably disconnected)", e);
+    catch (RuntimeException e) {
+      // note: this is handled this way, because this is shared server and client code.
+      if (e.getClass().getName().equals("org.jboss.errai.bus.server.QueueUnavailableException")) {
+        // ignore.
+      }
+      throw e;
     }
   }
 

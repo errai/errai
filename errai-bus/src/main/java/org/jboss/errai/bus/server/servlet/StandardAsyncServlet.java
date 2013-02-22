@@ -105,7 +105,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     });
     if (sse) {
       synchronized (queue.getActivationLock()) {
-        writer.write("retry: 150\nevent: bus-traffic\n\ndata: ".getBytes());
+        writer.write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
 
         if (queue.messagesWaiting()) {
           queue.poll(false, writer);

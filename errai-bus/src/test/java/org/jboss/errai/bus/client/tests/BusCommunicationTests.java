@@ -57,7 +57,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   public void testBasicRoundTrip() {
-
     runAfterInit(new Runnable() {
       @Override
       public void run() {

@@ -41,7 +41,6 @@ public class BusStatusWidget extends Composite implements BusLifecycleListener {
   private final Button stopTrueButton = new Button("bus.stop(true)");
   private final Button stopFalseButton = new Button("bus.stop(false)");
   private final Button initButton = new Button("bus.init()");
-  private final CheckBox busInitialized = new CheckBox("bus.initialized");
 
   public BusStatusWidget() {
     initWidget(me);
@@ -73,48 +72,34 @@ public class BusStatusWidget extends Composite implements BusLifecycleListener {
       }
     });
 
-    busInitialized.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        ((ClientMessageBusImpl) ErraiBus.get()).setInitialized(busInitialized.getValue());
-      }
-    });
-
     me.add(statusImage);
     me.add(statusLabel);
     me.add(stopFalseButton);
     me.add(stopTrueButton);
     me.add(initButton);
-    me.add(busInitialized);
   }
 
   @Override
   public void busAssociating(BusLifecycleEvent e) {
     statusLabel.setText("Connecting");
     statusImage.setResource(resources.yellow());
-    busInitialized.setValue(e.getBus().isInitialized());
   }
 
   @Override
   public void busDisassociating(BusLifecycleEvent e) {
     statusLabel.setText("Local Only");
     statusImage.setResource(resources.red());
-    busInitialized.setValue(e.getBus().isInitialized());
   }
 
   @Override
   public void busOnline(BusLifecycleEvent e) {
     statusLabel.setText("Connected");
     statusImage.setResource(resources.green());
-    busInitialized.setValue(e.getBus().isInitialized());
   }
 
   @Override
   public void busOffline(BusLifecycleEvent e) {
     statusLabel.setText("Connecting");
     statusImage.setResource(resources.yellow());
-    busInitialized.setValue(e.getBus().isInitialized());
   }
-
 }

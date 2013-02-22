@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.json;
+package org.jboss.errai.bus.client.util;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
@@ -22,14 +22,19 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
@@ -41,89 +46,81 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JSONUtilCli {
+public class BusToolsCli {
   private static boolean autoDemarshall = true;
 
-  public static List<MarshalledMessage> decodePayload(final String value) {
-    if (value == null || value.trim().length() == 0) return Collections.emptyList();
+  public static void decodeToCallback(final String jsonString, final MessageCallback callback) {
+    for (Message message : decodePayload(jsonString))  {
+      callback.callback(message);
+    }
+  }
 
-    /**
-     * We have to do a two-stage decoding of the message.  We cannot fully decode the message here, as we
-     * cannot be sure the destination endpoint exists within this Errai bundle.  So we extract the ToSubject
-     * field and send the un-parsed JSON object onwards.
-     *
-     */
+  public static List<Message> decodePayload(final String jsonString) {
+    if (jsonString == null || jsonString.trim().length() == 0) return Collections.emptyList();
+
     JSONValue val;
 
     try {
-      val = JSONParser.parseStrict(value);
+      val = JSONParser.parseStrict(jsonString);
     }
     catch (ClassCastException e) {
       if (!GWT.isProdMode()) {
-        val = JSONParser.parseStrict(value);
+        val = JSONParser.parseStrict(jsonString);
       }
       else {
         val = null;
       }
     }
 
-    if (val == null) {
-      return Collections.emptyList();
+    if (val == null || val.isArray() == null) {
+      throw new RuntimeException("illegal payload: must be JSONArray");
     }
-    final JSONArray arr = val.isArray();
-    if (arr == null) {
-      throw new RuntimeException("unrecognized payload" + val.toString());
-    }
-    final ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
-    unwrap(list, arr);
-    return list;
 
+    final JSONArray jsonArray = val.isArray();
+    final List<Message> messageList = new ArrayList<Message>(jsonArray.size());
+    for (int i = 0; i < jsonArray.size(); i++) {
+       messageList.add(decodeCommandMessage(GWTJSON.wrap(jsonArray.get(i))));
+    }
+
+    return messageList;
   }
 
-  private static void unwrap(final List<MarshalledMessage> messages, final JSONArray val) {
-    for (int i = 0; i < val.size(); i++) {
-      final JSONValue v = val.get(i);
-      if (v.isArray() != null) {
-        unwrap(messages, v.isArray());
-      }
-      else {
-        messages.add(new MarshalledMessageImpl((JSONObject) v));
-      }
+  public static String encodeMessage(final Message message) {
+    if (message instanceof HasEncoded) {
+      return ((HasEncoded) message).getEncoded();
+    }
+    else {
+      return ErraiProtocol.encodePayload(message.getParts());
     }
   }
 
-  public static class MarshalledMessageImpl implements MarshalledMessage {
-    public final JSONObject o;
-
-    public MarshalledMessageImpl(JSONObject o) {
-      this.o = o;
+  public static String encodeMessages(final Collection<Message> messages) {
+    final StringBuilder sbuf = new StringBuilder("[");
+    boolean first = true;
+    for (Message m : messages) {
+      if (!first) {
+        sbuf.append(',');
+      }
+      sbuf.append(encodeMessage(m));
+      first = false;
     }
+    return sbuf.append("]").toString();
+  }
 
-    public Object getMessage() {
-      return o;
-    }
-
-    public String getSubject() {
-      return o.get("ToSubject").isString().stringValue();
-    }
+  public static Message decodeCommandMessage(final EJValue value) {
+    return CommandMessage.createWithParts(decodePayloadMap(value))
+        .setResource(RequestDispatcher.class.getName(), requestDispatcherProvider)
+        .setResource("Session", clientSession);
   }
 
   @SuppressWarnings({"unchecked"})
-  public static Map<String, Object> decodePayload(final Object value) {
-    if (value == null) {
-      return null;
-    }
-    if (!(value instanceof JSONObject)) {
-      throw new RuntimeException("bad payload: " + value);
-    }
-
+  private static Map<String, Object> decodePayloadMap(final EJValue value) {
     if (autoDemarshall) {
-      return ErraiProtocol.decodePayload(GWTJSON.wrap((JSONObject) value));
+      return ErraiProtocol.decodePayload(value);
     }
     else {
-      nativeLog("using no-auto envelope demarshaller");
-      return ErraiProtocolEnvelopeNoAutoMarshaller.INSTANCE.demarshall(
-              GWTJSON.wrap((JSONObject) value), MarshallingSessionProviderFactory.getEncoding());
+      LogUtil.log("using no-auto envelope demarshaller");
+      return ErraiProtocolEnvelopeNoAutoMarshaller.INSTANCE.demarshall(value, MarshallingSessionProviderFactory.getEncoding());
     }
   }
 
@@ -188,18 +185,7 @@ public class JSONUtilCli {
   };
 
 
-  public static Message decodeCommandMessage(final Object value) {
-    return CommandMessage.createWithParts(decodePayload(value))
-        .setResource(RequestDispatcher.class.getName(), requestDispatcherProvider)
-        .setResource("Session", clientSession);
-  }
-
   public static void setAutoDemarshall(boolean autoDemarshall1) {
     autoDemarshall = autoDemarshall1;
   }
-
-  private static native void nativeLog(String message) /*-{
-    window.console.log(message);
-  }-*/;
-
 }
