@@ -18,6 +18,12 @@ public class SyncRequestOperation<X> {
     NEW,
 
     /**
+     * Indicates that an entity instance that the remote side already knows
+     * about has been deleted by the requesting side.
+     */
+    DELETED,
+
+    /**
      * Indicates an entity instance whose identity is already known to the
      * system the change list is being sent to. This newState's non-identity state
      * may have changed.
@@ -42,6 +48,11 @@ public class SyncRequestOperation<X> {
   public static <X> SyncRequestOperation<X> unchanged(X knownState) {
     // XXX would be better to use a type hierarchy of SyncRequestOperations than to say newState is null
     return new SyncRequestOperation<X>(Type.UNCHANGED, null, knownState);
+  }
+
+  public static <X> SyncRequestOperation<X> deleted(X knownState) {
+    // XXX would be better to use a type hierarchy of SyncRequestOperations than to say newState is null
+    return new SyncRequestOperation<X>(Type.DELETED, null, knownState);
   }
 
   public Type getType() {

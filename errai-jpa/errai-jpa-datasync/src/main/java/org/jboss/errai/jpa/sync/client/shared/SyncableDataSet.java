@@ -120,6 +120,14 @@ public class SyncableDataSet<E> {
         }
         break;
 
+      case DELETED:
+        // have to check for null in case someone else already deleted this entity
+        if (localState != null) {
+          localResults.remove(remoteId);
+          em.remove(localState);
+        }
+        break;
+
       default:
         throw new UnsupportedOperationException("Unknown sync request type: " + syncReq.getType());
       }

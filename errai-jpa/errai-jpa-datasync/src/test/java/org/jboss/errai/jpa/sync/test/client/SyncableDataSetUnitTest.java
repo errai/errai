@@ -2,7 +2,7 @@ package org.jboss.errai.jpa.sync.test.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -250,8 +250,58 @@ public class SyncableDataSetUnitTest {
 
   @Test
   public void testSendLocalDelete() throws Exception {
-    // TODO
-    fail("not implemented");
+    SimpleEntity remoteSimpleEntity = new SimpleEntity();
+    remoteSimpleEntity.setDate(new Timestamp(123456700000L));
+    remoteSimpleEntity.setInteger(9);
+    remoteSimpleEntity.setString("You will be terminated");
+    em.persist(remoteSimpleEntity);
+    em.flush();
+    em.detach(remoteSimpleEntity);
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    // this sync request claims we were told in the past that the server has localSimpleEntity
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(SyncRequestOperation.deleted(remoteSimpleEntity));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is empty, as expected
+    assertEquals("Got unexpected response: " + syncResponse, 0, syncResponse.size());
+
+    // verify the server deleted the entity
+    List<SimpleEntity> newQueryResult = query.getResultList();
+    assertTrue("Uh-oh! Entity should have been deleted! " + newQueryResult, newQueryResult.isEmpty());
+  }
+
+  /**
+   * Tests that it is harmless to say we deleted an entity that's already gone
+   * on the server.
+   */
+  @Test
+  public void testSendLocalDeleteForRemotelyDeletedEntity() throws Exception {
+    SimpleEntity remoteSimpleEntity = new SimpleEntity();
+    remoteSimpleEntity.setDate(new Timestamp(123456700000L));
+    remoteSimpleEntity.setInteger(9);
+    remoteSimpleEntity.setString("You will be terminated");
+    em.flush();
+    em.remove(remoteSimpleEntity);
+    em.detach(remoteSimpleEntity);
+
+    TypedQuery<SimpleEntity> query = em.createQuery("SELECT se FROM SimpleEntity se", SimpleEntity.class);
+    SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from(em, query);
+
+    // this sync request claims we were told in the past that the server has localSimpleEntity
+    List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    syncRequest.add(SyncRequestOperation.deleted(remoteSimpleEntity));
+
+    // now do the actual sync
+    List<SyncResponse<SimpleEntity>> syncResponse = sds.coldSync(syncRequest);
+
+    // ensure the response is empty, as expected
+    assertEquals("Got unexpected response: " + syncResponse, 0, syncResponse.size());
   }
 
   /**
