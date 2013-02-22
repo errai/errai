@@ -173,7 +173,69 @@ public class BusToolsCli {
   };
 
 
+  public static ResourceProvider<RequestDispatcher> getRequestDispatcherProvider() {
+    return requestDispatcherProvider;
+  }
+
   public static void setAutoDemarshall(boolean autoDemarshall1) {
     autoDemarshall = autoDemarshall1;
   }
+
+  /**
+   * Sets the application root for the remote message bus endpoints.
+   *
+   * @param path
+   *     path to use when sending requests to the JAX-RS endpoint
+   */
+  @SuppressWarnings("UnusedDeclaration")
+  public static native void setApplicationRoot(final String path) /*-{
+      if (path == null) {
+          $wnd.erraiBusApplicationRoot = undefined;
+      }
+      else {
+          $wnd.erraiBusApplicationRoot = path;
+      }
+  }-*/;
+
+  /**
+   * Returns the application root for the remote message bus endpoints.
+   *
+   * @return path with trailing slash, or empty string if undefined or
+   *         explicitly set to empty
+   */
+  public static native String getApplicationRoot() /*-{
+      //noinspection JSUnresolvedVariable
+      if ($wnd.erraiBusApplicationRoot === undefined || $wnd.erraiBusApplicationRoot.length === 0) {
+          return "";
+      }
+      else {
+          //noinspection JSUnresolvedVariable
+          if ($wnd.erraiBusApplicationRoot.substr(-1) !== "/") {
+              //noinspection JSUnresolvedVariable
+              return $wnd.erraiBusApplicationRoot + "/";
+          }
+          //noinspection JSUnresolvedVariable
+          return $wnd.erraiBusApplicationRoot;
+      }
+  }-*/;
+
+  /**
+   * Checks whether remote bus communication is enabled.
+   * <p/>
+   * The JavaScript variable <code>erraiBusRemoteCommunicationEnabled</code> can
+   * be used to control this value. If the variable is not present in the window
+   * object, the default value <code>true</code> is returned.
+   *
+   * @return true if remote communication enabled, otherwise false.
+   */
+  public static native boolean isRemoteCommunicationEnabled() /*-{
+      //noinspection JSUnresolvedVariable
+      if ($wnd.erraiBusRemoteCommunicationEnabled === undefined || $wnd.erraiBusRemoteCommunicationEnabled.length === 0) {
+          return true;
+      }
+      else {
+          //noinspection JSUnresolvedVariable
+          return $wnd.erraiBusRemoteCommunicationEnabled;
+      }
+  }-*/;
 }

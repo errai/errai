@@ -481,7 +481,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         finishTest();
       }
-    }.schedule(15000);
+    }.schedule(7000);
   }
 
   public void testNonExistingCommandMessage() {

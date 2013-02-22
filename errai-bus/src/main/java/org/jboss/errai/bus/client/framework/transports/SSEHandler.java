@@ -20,6 +20,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.util.LogUtil;
@@ -139,13 +140,13 @@ public class SSEHandler implements TransportHandler {
     LogUtil.log("SSE channel opened.");
     retries = 0;
 
-    if (clientMessageBus.getState() == ClientMessageBusImpl.State.CONNECTION_INTERRUPTED)
-      clientMessageBus.setState(ClientMessageBusImpl.State.CONNECTED);
+    if (clientMessageBus.getState() == BusState.CONNECTION_INTERRUPTED)
+      clientMessageBus.setState(BusState.CONNECTED);
   }
 
   private void notifyDisconnected() {
     LogUtil.log("SSE channel disconnected.");
-    clientMessageBus.setState(ClientMessageBusImpl.State.CONNECTION_INTERRUPTED);
+    clientMessageBus.setState(BusState.CONNECTION_INTERRUPTED);
 
     connected = false;
     disconnect(sseChannel);

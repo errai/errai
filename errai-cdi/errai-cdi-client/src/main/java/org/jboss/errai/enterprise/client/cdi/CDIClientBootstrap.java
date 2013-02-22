@@ -15,13 +15,13 @@
  */
 package org.jboss.errai.enterprise.client.cdi;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
@@ -29,7 +29,6 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 
 import com.google.gwt.core.client.EntryPoint;
-import org.jboss.errai.ioc.client.api.TimerType;
 
 /**
  * The GWT entry point for the Errai CDI module.
@@ -89,7 +88,7 @@ public class CDIClientBootstrap implements EntryPoint {
     InitVotes.registerPersistentPreInitCallback(declareServices);
     InitVotes.waitFor(CDI.class);
 
-    if (bus.isRemoteCommunicationEnabled()) {
+    if (BusToolsCli.isRemoteCommunicationEnabled()) {
       InitVotes.registerPersistentDependencyCallback(ClientMessageBus.class, initRemoteCdiSubsystem);
     }
     else {

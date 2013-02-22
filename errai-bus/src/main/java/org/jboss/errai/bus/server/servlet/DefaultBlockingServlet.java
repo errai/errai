@@ -156,20 +156,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
             return;
         }
 
-        InputStream stream = httpServletRequest.getInputStream();
-
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(stream, "UTF-8")
-        );
-
-        System.out.println("=====");
-        char[] buf = new char[10];
-        while (reader.read(buf) > 0) {
-          System.out.print(new String(buf));
-        }
-
-        System.out.println("=====");
-
         sendDisconnectDueToSessionExpiry(outputStream);
         return;
       }

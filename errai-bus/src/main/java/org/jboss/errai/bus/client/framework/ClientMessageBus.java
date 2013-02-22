@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.client.framework;
 
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
 
 import java.util.Set;
 
@@ -65,7 +64,7 @@ public interface ClientMessageBus extends MessageBus {
    * Takes this bus out of the "local only" state, causing it to try and connect
    * with the server (unless remote communication is globally disabled).
    *
-   * @see ClientMessageBusImpl#isRemoteCommunicationEnabled()
+   * @see org.jboss.errai.bus.client.util.BusToolsCli#isRemoteCommunicationEnabled()
    */
   public void init();
 

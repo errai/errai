@@ -29,6 +29,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.Assert;
@@ -68,25 +69,31 @@ public class HttpPollingHandler implements TransportHandler {
    */
   private LongPollRequestCallback receiveCommCallback = new NoPollRequestCallback();
 
-  private HttpPollingHandler(MessageCallback messageCallback, ClientMessageBusImpl messageBus) {
+  private HttpPollingHandler(final MessageCallback messageCallback, final ClientMessageBusImpl messageBus) {
     this.messageCallback = Assert.notNull(messageCallback);
     this.messageBus = messageBus;
   }
 
-  public static HttpPollingHandler newLongPollingInstance(MessageCallback messageCallback, ClientMessageBusImpl messageBus) {
-    HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
+  public static HttpPollingHandler newLongPollingInstance(final MessageCallback messageCallback,
+                                                          final ClientMessageBusImpl messageBus) {
+
+    final HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
     handler.receiveCommCallback = handler.new LongPollRequestCallback();
     return handler;
   }
 
-  public static HttpPollingHandler newShortPollingInstance(MessageCallback messageCallback, ClientMessageBusImpl messageBus) {
-    HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
+  public static HttpPollingHandler newShortPollingInstance(final MessageCallback messageCallback,
+                                                           final ClientMessageBusImpl messageBus) {
+
+    final HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
     handler.receiveCommCallback = handler.new ShortPollRequestCallback();
     return handler;
   }
 
-  public static HttpPollingHandler newNoPollingInstance(MessageCallback messageCallback, ClientMessageBusImpl messageBus) {
-    HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
+  public static HttpPollingHandler newNoPollingInstance(final MessageCallback messageCallback,
+                                                        final ClientMessageBusImpl messageBus) {
+
+    final HttpPollingHandler handler = new HttpPollingHandler(messageCallback, messageBus);
     handler.receiveCommCallback = handler.new NoPollRequestCallback();
     return handler;
   }
@@ -102,7 +109,7 @@ public class HttpPollingHandler implements TransportHandler {
   private final Set<Request> pendingRequests = new HashSet<Request>();
 
   @Override
-  public void configure(Message capabilitiesMessage) {
+  public void configure(final Message capabilitiesMessage) {
     configured = true;
   }
 
@@ -212,7 +219,9 @@ public class HttpPollingHandler implements TransportHandler {
 
     final StringBuilder extraParmsString = new StringBuilder();
     for (final Map.Entry<String, String> entry : extraParameters.entrySet()) {
-      extraParmsString.append("&").append(URL.encodePathSegment(entry.getKey())).append("=").append(URL.encodePathSegment(entry.getValue()));
+      extraParmsString.append("&").append(
+          URL.encodePathSegment(entry.getKey())).append("=").append(URL.encodePathSegment(entry.getValue())
+      );
     }
 
     final RequestBuilder builder = new RequestBuilder(
@@ -288,7 +297,7 @@ public class HttpPollingHandler implements TransportHandler {
   }
 
   @Override
-  public void stop(boolean stopAllCurrentRequests) {
+  public void stop(final boolean stopAllCurrentRequests) {
     receiveCommCallback.cancel();
 
     if (stopAllCurrentRequests) {
@@ -333,7 +342,7 @@ public class HttpPollingHandler implements TransportHandler {
   }
 
   @Override
-  public void handleProtocolExtension(Message message) {
+  public void handleProtocolExtension(final Message message) {
   }
 
 
@@ -344,11 +353,11 @@ public class HttpPollingHandler implements TransportHandler {
     protected boolean canceled = false;
 
     @Override
-    public void onError(Request request, Throwable throwable) {
+    public void onError(final Request request, final Throwable throwable) {
       onError(request, throwable, -1);
     }
 
-    public void onError(final Request request, final Throwable throwable, int statusCode) {
+    public void onError(final Request request, final Throwable throwable, final int statusCode) {
       //   final boolean willRetry = retries <= maxRetries;
       final int retryDelay = retries * 1000;
       final RetryInfo retryInfo = new RetryInfo(retryDelay, retries);
@@ -411,8 +420,8 @@ public class HttpPollingHandler implements TransportHandler {
         }
       }
 
-      if (messageBus.getState() == ClientMessageBusImpl.State.CONNECTION_INTERRUPTED)
-        messageBus.setState(ClientMessageBusImpl.State.CONNECTED);
+      if (messageBus.getState() == BusState.CONNECTION_INTERRUPTED)
+        messageBus.setState(BusState.CONNECTED);
 
       retries = 0;
 

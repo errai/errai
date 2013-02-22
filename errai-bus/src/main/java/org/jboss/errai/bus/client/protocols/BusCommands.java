@@ -92,10 +92,6 @@ public enum BusCommands {
 
   SessionExpired,
 
-  RemoteMonitorAttach,
-
-  RemoteMonitorDetach,
-
   WebsocketChannelVerify,
 
   WebsocketChannelOpen,
