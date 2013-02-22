@@ -449,7 +449,6 @@ public class HttpPollingHandler implements TransportHandler {
     }
   }
 
-
   public String toString() {
     if (receiveCommCallback instanceof NoPollRequestCallback) {
       return "NoPolling";

@@ -223,7 +223,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       @Override
       @SuppressWarnings({"unchecked"})
       public void callback(final Message message) {
-        switch (BusCommands.valueOf(message.getCommandType())) {
+        BusCommands busCommands = BusCommands.valueOf(message.getCommandType());
+        if (busCommands == null) {
+          busCommands = BusCommands.Unknown;
+        }
+        switch (busCommands) {
           case RemoteSubscribe:
             if (message.hasPart(MessageParts.SubjectsList)) {
               LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
@@ -286,9 +290,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 break;
 
               case CONNECTING:
-                // do nothing
-                break;
-
               case LOCAL_ONLY:
                 // do nothing
                 break;
@@ -308,10 +309,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           case Resend:
             break;
 
+          case Unknown:
           default:
             transportHandler.handleProtocolExtension(message);
             break;
-
         }
       }
     }, false);

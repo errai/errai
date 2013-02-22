@@ -49,8 +49,6 @@ public class SSEHandler implements TransportHandler {
   public SSEHandler(MessageCallback messageCallback, ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
     this.messageCallback = messageCallback;
-
-
     this.pollingHandler = HttpPollingHandler.newNoPollingInstance(messageCallback, clientMessageBus);
   }
 
@@ -70,6 +68,7 @@ public class SSEHandler implements TransportHandler {
 
   @Override
   public void start() {
+    stopped = false;
     if (connected) {
       return;
     }

@@ -20,6 +20,7 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversat
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
 import static org.jboss.errai.bus.client.util.ErrorHelper.sendClientError;
+import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.getNewOneTimeToken;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
 import static org.jboss.errai.common.client.protocols.MessageParts.ConnectionSessionKey;
 import static org.jboss.errai.common.client.protocols.MessageParts.RemoteServices;
@@ -376,6 +377,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case WebsocketChannelVerify:
               if (message.hasPart(MessageParts.WebSocketToken)) {
                 if (verifyOneTimeToken(session, message.get(String.class, MessageParts.WebSocketToken))) {
+                  final String reconnectionToken = getNewOneTimeToken(session);
 
                   final LocalContext localContext = LocalContext.get(session);
 
@@ -385,7 +387,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   createConversation(message)
                       .toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.WebsocketChannelOpen)
+                      .with(MessageParts.WebSocketToken, reconnectionToken)
                       .done().sendNowWith(ServerMessageBusImpl.this, false);
+                }
+                else {
                 }
               }
               break;

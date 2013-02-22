@@ -96,5 +96,7 @@ public enum BusCommands {
 
   WebsocketChannelOpen,
 
-  WebsocketNegotiationFailed
+  WebsocketNegotiationFailed,
+
+  Unknown;
 }
