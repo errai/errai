@@ -36,6 +36,7 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
@@ -195,5 +196,10 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected final long getSSETimeout() {
     return sseTimeout;
+  }
+
+  protected static boolean shouldWait(HttpServletRequest request) {
+    final String wait = request.getParameter("wait");
+    return ErraiServiceConfigurator.LONG_POLLING && "1".equals(wait);
   }
 }

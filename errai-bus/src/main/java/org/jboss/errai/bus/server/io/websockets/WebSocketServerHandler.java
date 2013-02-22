@@ -95,8 +95,6 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
   private final Map<Channel, QueueSession> activeChannels = new ConcurrentHashMap<Channel, QueueSession>();
 
-  private final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-
   private WebSocketServerHandshaker handshaker = null;
   private ErraiService svc;
 

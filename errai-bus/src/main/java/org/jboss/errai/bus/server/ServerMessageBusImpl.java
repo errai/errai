@@ -17,14 +17,12 @@
 package org.jboss.errai.bus.server;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
-import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
 import static org.jboss.errai.bus.client.util.ErrorHelper.sendClientError;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.getNewOneTimeToken;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
 import static org.jboss.errai.common.client.protocols.MessageParts.ConnectionSessionKey;
 import static org.jboss.errai.common.client.protocols.MessageParts.RemoteServices;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.AbstractModule;
@@ -33,12 +31,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.ConversationMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
@@ -81,7 +77,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -127,6 +122,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Set<String> reservedNames = new HashSet<String>();
 
+  private final boolean sseEnabled;
   private final boolean webSocketServlet;
   private final boolean webSocketServer;
 
@@ -143,8 +139,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   @Inject
   public ServerMessageBusImpl(final ErraiService service, final ErraiServiceConfigurator config) {
 
-    this.webSocketServer = config
-        .getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER);
+    this.sseEnabled = ErraiConfigAttribs.ENABLE_SSE_SUPPORT.getBoolean(config);
+    this.webSocketServer = ErraiConfigAttribs.ENABLE_WEB_SOCKET_SERVER.getBoolean(config);
 
     final int webSocketPort;
     final String webSocketPath;
@@ -362,7 +358,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 msg.set(MessageParts.WebSocketToken, WebSocketTokenManager.getNewOneTimeToken(session));
               }
 
-              capabilitiesBuffer.append(",").append(Capabilities.SSE.name());
+              if (sseEnabled) {
+                capabilitiesBuffer.append(",").append(Capabilities.SSE.name());
+              }
 
               msg.set(MessageParts.CapabilitiesFlags, capabilitiesBuffer.toString());
 

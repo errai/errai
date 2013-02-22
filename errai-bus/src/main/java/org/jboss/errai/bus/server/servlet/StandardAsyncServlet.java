@@ -62,14 +62,14 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     }
 
     final boolean sse;
-     if (request.getParameter("sse") != null) {
-       response.setContentType("text/event-stream");
-       sse = true;
-     }
-     else {
-       response.setContentType("application/json");
-       sse = false;
-     }
+    if (request.getParameter("sse") != null) {
+      response.setContentType("text/event-stream");
+      sse = true;
+    }
+    else {
+      response.setContentType("application/json");
+      sse = false;
+    }
 
 
     queue.heartBeat();
@@ -180,7 +180,12 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       service.store(createCommandMessage(session, request));
       final MessageQueue queue = service.getBus().getQueue(session);
       if (queue != null) {
-        queue.poll(false, new OutputStreamWriteAdapter(response.getOutputStream()));
+        if (shouldWait(request)) {
+          doGet(request, response);
+        }
+        else {
+          queue.poll(false, new OutputStreamWriteAdapter(response.getOutputStream()));
+        }
       }
     }
     catch (Exception e) {

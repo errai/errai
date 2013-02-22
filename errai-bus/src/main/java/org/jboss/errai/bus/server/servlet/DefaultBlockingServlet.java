@@ -139,7 +139,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
     service.store(createCommandMessage(session, httpServletRequest));
 
-    pollForMessages(session, httpServletRequest, httpServletResponse, false);
+    pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest));
   }
 
   private void pollForMessages(final QueueSession session, final HttpServletRequest httpServletRequest,

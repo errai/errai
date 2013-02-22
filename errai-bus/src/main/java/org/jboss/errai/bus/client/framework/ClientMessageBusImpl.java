@@ -371,7 +371,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           .set(PriorityProcessing, "1")
           .set(MessageParts.RemoteServices, getAdvertisableSubjects());
 
-      ((HttpPollingHandler) transportHandler).sendOutboundRequest(BusToolsCli.encodeMessage(initialMessage),
+      ((HttpPollingHandler) transportHandler).sendPollingRequest(BusToolsCli.encodeMessage(initialMessage),
           connectHeader, new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {

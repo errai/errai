@@ -67,7 +67,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     BootstrapContext context = new BootstrapContext(this, bus, config);
     new OrderedBootstrap().execute(context);
 
-    if (config.getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER)) {
+    if (ErraiConfigAttribs.ENABLE_WEB_SOCKET_SERVER.getBoolean(config)) {
       WebSocketServer server = new WebSocketServer(this);
       server.start();
     }
