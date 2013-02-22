@@ -47,10 +47,9 @@ import org.jboss.errai.bus.client.framework.transports.HttpPollingHandler;
 import org.jboss.errai.bus.client.framework.transports.SSEHandler;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.bus.client.framework.transports.WebsocketHandler;
-import org.jboss.errai.bus.client.util.BusErrorDialog;
-import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.client.util.ManagementCli;
+import org.jboss.errai.bus.client.util.BusToolsCli;
+import org.jboss.errai.bus.client.util.ManagementConsole;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -123,10 +122,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private State state = State.LOCAL_ONLY;
 
-  private BusErrorDialog errorDialog;
-
   private long lastSleepTick = System.currentTimeMillis();
   private boolean lastSleepCheckWasOnline = false;
+  private final ManagementConsole managementConsole;
 
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
@@ -135,7 +133,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public ClientMessageBusImpl() {
     setBusToInitializableState();
 
-    new ManagementCli(this);
+    managementConsole = new ManagementConsole(this);
 
     clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999)) + "-"
         + (System.currentTimeMillis() % (com.google.gwt.user.client.Random.nextInt(99999) + 1));
@@ -208,7 +206,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       public void callback(final Message message) {
         final String errorTo = message.get(String.class, MessageParts.ErrorTo);
         if (errorTo == null) {
-          displayError(message.get(String.class, MessageParts.ErrorMessage),
+          managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
               message.get(String.class, MessageParts.AdditionalDetails), null);
         }
         else {
@@ -322,7 +320,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             stop(false);
 
             if (message.hasPart("Reason")) {
-              displayError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
+              managementConsole.displayError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
             }
             break;
           case Heartbeat:
@@ -340,12 +338,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }, false);
 
-
+    // The purpose of this timer is to let the bus yield and give other modules a chance to register
+    // services before we send our state synchronization message. This is not strictly necessary
+    // but significantly decreases network chattiness since more (if not all known services)
+    // can then be listed in the initial handshake message.
     new Timer() {
       @Override
       public void run() {
         if (!sendInitialMessage()) {
-          displayError("Could not connect to remote bus", "", null);
+          managementConsole.displayError("Could not connect to remote bus", "", null);
         }
       }
     }.schedule(50);
@@ -607,7 +608,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           callback.callback(message);
         }
         catch (Exception e) {
-          displayError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
+          managementConsole.displayError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
         }
       }
     };
@@ -759,7 +760,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (message.getErrorCallback() != null) {
       message.getErrorCallback().error(message, t);
     }
-    displayError(t.getMessage(), "none", t);
+    managementConsole.displayError(t.getMessage(), "none", t);
   }
 
   public void encodeAndTransmit(final Message message) {
@@ -931,14 +932,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           }
           catch (Exception e) {
             e.printStackTrace();
-            displayError("Error attaching to bus",
+            managementConsole.displayError("Error attaching to bus",
                 e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
           }
         }
 
         @Override
         public void onError(final Request request, final Throwable exception) {
-          displayError("Could not connect to remote bus", "", exception);
+          managementConsole.displayError("Could not connect to remote bus", "", exception);
         }
       });
     }
@@ -1007,26 +1008,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return decode.append("</tbody></table>").toString();
   }
 
-  public void displayError(final String message, final String additionalDetails, final Throwable e) {
-    showError(message + " -- Additional Details: " + additionalDetails, e);
-    errorDialog.show();
-  }
-
-  private void ensureInitErrorDialog() {
-    if (errorDialog == null) {
-      errorDialog = new BusErrorDialog(this);
-    }
-  }
-
-  private void showError(final String message, final Throwable e) {
-    ensureInitErrorDialog();
-    errorDialog.addError(message, "", e);
-
-    if (LogUtil.isNativeJavaScriptLoggerSupported()) {
-      LogUtil.nativeLog(message);
-    }
-  }
-
   /**
    * When called, the MessageBus assumes that the currently active transport is no longer capable of operating. The
    * MessageBus then find the best remaining handler and activates it.
@@ -1081,11 +1062,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         cb.callback(msg);
       }
     }
-  }
-
-  public void showErrorConsole() {
-    ensureInitErrorDialog();
-    errorDialog.show();
   }
 
   public Set<String> getRemoteServices() {

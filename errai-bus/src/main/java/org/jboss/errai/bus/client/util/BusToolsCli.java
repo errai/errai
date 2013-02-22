@@ -58,19 +58,7 @@ public class BusToolsCli {
   public static List<Message> decodePayload(final String jsonString) {
     if (jsonString == null || jsonString.trim().length() == 0) return Collections.emptyList();
 
-    JSONValue val;
-
-    try {
-      val = JSONParser.parseStrict(jsonString);
-    }
-    catch (ClassCastException e) {
-      if (!GWT.isProdMode()) {
-        val = JSONParser.parseStrict(jsonString);
-      }
-      else {
-        val = null;
-      }
-    }
+    JSONValue val = JSONParser.parseStrict(jsonString);
 
     if (val == null || val.isArray() == null) {
       throw new RuntimeException("illegal payload: must be JSONArray");

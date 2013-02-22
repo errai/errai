@@ -44,6 +44,7 @@ public class BusErrorDialog extends DialogBox {
   Panel contentPanel = new AbsolutePanel();
 
   public BusErrorDialog(final ClientMessageBusImpl clientMessageBus) {
+    hide();
     setModal(false);
 
     final VerticalPanel panel = new VerticalPanel();
@@ -156,7 +157,6 @@ public class BusErrorDialog extends DialogBox {
       resize();
       show();
       center();
-      setModal(true);
     }
   }
 

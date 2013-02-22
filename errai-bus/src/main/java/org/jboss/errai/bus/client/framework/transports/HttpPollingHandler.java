@@ -160,7 +160,7 @@ public class HttpPollingHandler implements TransportHandler {
 
             for (final Message txM : txMessages) {
               if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
-                messageBus.displayError("Failed to communicate with remote bus", "", exception);
+                LogUtil.log("failed to communicate with remote bus: " + exception);
               }
             }
           }

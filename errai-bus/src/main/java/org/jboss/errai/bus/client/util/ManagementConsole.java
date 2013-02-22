@@ -23,27 +23,43 @@ import org.jboss.errai.common.client.util.LogUtil;
 /**
  * @author Mike Brock
  */
-public class ManagementCli {
+public class ManagementConsole {
   private final ClientMessageBusImpl clientMessageBus;
+  private BusErrorDialog errorDialog;
 
-  public ManagementCli(ClientMessageBusImpl clientMessageBus) {
+  public ManagementConsole(ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
+    this.errorDialog = new BusErrorDialog(clientMessageBus);
     declareDebugFunction();
   }
+
+  public void displayError(final String message, final String additionalDetails, final Throwable e) {
+    showError(message + " -- Additional Details: " + additionalDetails, e);
+  }
+
+
+  private void showError(final String message, final Throwable e) {
+    errorDialog.addError(message, "", e);
+
+    if (LogUtil.isNativeJavaScriptLoggerSupported()) {
+      LogUtil.nativeLog(message);
+    }
+  }
+
 
   private native void declareDebugFunction() /*-{
       var thisRef = this;
 
       $wnd.errai_status = function () {
-          thisRef.@org.jboss.errai.bus.client.util.ManagementCli::displayStatus();
+          thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::displayStatus();
       };
 
       $wnd.errai_list_services = function () {
-          thisRef.@org.jboss.errai.bus.client.util.ManagementCli::listServices()();
+          thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::listServices()();
       };
 
       $wnd.errai_show_error_console = function () {
-          thisRef.@org.jboss.errai.bus.client.util.ManagementCli::showErrorConsole()();
+          thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::showErrorConsole()();
       }
   }-*/;
 
@@ -66,7 +82,8 @@ public class ManagementCli {
   }
 
   private void showErrorConsole() {
-    clientMessageBus.showErrorConsole();
+    this.errorDialog.center();
+    this.errorDialog.show();
   }
 
   /**
