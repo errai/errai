@@ -223,8 +223,6 @@ public class HttpPollingHandler implements TransportHandler {
   public void performPoll() {
     Request request = null;
     try {
-
-
       final List<Message> toSend;
       if (heldMessages.isEmpty()) {
         toSend = Collections.emptyList();
@@ -237,9 +235,6 @@ public class HttpPollingHandler implements TransportHandler {
       request = sendPollingRequest(BusToolsCli.encodeMessages(toSend), Collections.<String, String>emptyMap(), receiveCommCallback);
     }
     catch (RequestTimeoutException e) {
-
-      // don't call the error handler here; it will be fired in onError()
-
       receiveCommCallback.onError(null, e);
     }
     catch (Throwable t) {
@@ -465,20 +460,10 @@ public class HttpPollingHandler implements TransportHandler {
       waitChannel = false;
     }
 
-    return sendRequest(RequestBuilder.POST, serviceEntryPoint, payload, parmsMap, callback, waitChannel);
-  }
-
-  public Request sendRequest(
-      final RequestBuilder.Method method,
-      final String serviceEntryPoint,
-      final String payload,
-      final Map<String, String> extraParameters,
-      final RequestCallback callback,
-      final boolean isWaitingChannel) throws RequestException {
     rxActive = true;
 
     final StringBuilder extraParmsString = new StringBuilder();
-    for (final Map.Entry<String, String> entry : extraParameters.entrySet()) {
+    for (final Map.Entry<String, String> entry : parmsMap.entrySet()) {
       extraParmsString.append("&").append(
           URL.encodePathSegment(entry.getKey())).append("=").append(URL.encodePathSegment(entry.getValue())
       );
@@ -487,7 +472,7 @@ public class HttpPollingHandler implements TransportHandler {
     final Iterator<RxInfo> iterator = pendingRequests.iterator();
     while (iterator.hasNext()) {
       final RxInfo pendingRx = iterator.next();
-      if (isWaitingChannel && pendingRx.getRequest().isPending() && pendingRx.isWaiting()) {
+      if (waitChannel && pendingRx.getRequest().isPending() && pendingRx.isWaiting()) {
         return null;
       }
 
@@ -497,13 +482,13 @@ public class HttpPollingHandler implements TransportHandler {
     }
 
     final RequestBuilder builder = new RequestBuilder(
-        method,
+        RequestBuilder.POST,
         URL.encode(messageBus.getApplicationLocation(serviceEntryPoint)) + "?z=" + getNextRequestNumber()
             + "&clientId=" + URL.encodePathSegment(messageBus.getClientId()) + extraParmsString.toString()
     );
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
 
-    final RxInfo rxInfo = new RxInfo(System.currentTimeMillis(), isWaitingChannel);
+    final RxInfo rxInfo = new RxInfo(System.currentTimeMillis(), waitChannel);
 
     try {
       final Request request = builder.sendRequest(payload, new RequestCallback() {

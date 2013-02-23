@@ -16,18 +16,6 @@
 
 package org.jboss.errai.bus.server.servlet;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -36,6 +24,17 @@ import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.common.client.protocols.MessageParts;
+
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
@@ -70,7 +69,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   public static ConnectionPhase getConnectionPhase(final HttpServletRequest request) {
     if (request.getParameter("phase") == null) return ConnectionPhase.NORMAL;
     else {
-      String phase = request.getParameter("phase");
+      final String phase = request.getParameter("phase");
       if ("connection".equals(phase)) {
         return ConnectionPhase.CONNECTING;
       }
@@ -178,7 +177,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       }
     });
   }
-
 
   protected void sendDisconnectDueToSessionExpiry(final HttpServletResponse response) throws IOException {
     response.setStatus(401);

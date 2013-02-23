@@ -17,24 +17,22 @@
 package org.jboss.errai.bus.server.io.websockets;
 
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 /**
  * @author Mike Brock
  */
 public class WebSocketServer {
-
   private ErraiService svc;
   private Logger log = getLogger(getClass());
 
@@ -70,5 +68,4 @@ public class WebSocketServer {
 
     log.info("started web socket server on port: " + port);
   }
-
 }
