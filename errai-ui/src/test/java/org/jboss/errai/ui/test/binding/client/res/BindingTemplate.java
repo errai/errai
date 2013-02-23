@@ -30,12 +30,12 @@ public class BindingTemplate extends Composite {
 
   @Inject
   @Bound(property = "lastChanged", converter = BindingDateConverter.class)
-  @DataField
+  @DataField("dateField")
   private TextBox date;
 
   // This guards against regressions of ERRAI-489
   @Inject @Bound @DataField("phone") 
-  private Label phoneNumber;
+  private TextBox phoneNumber;
   
   private final TestModel model;
   
@@ -54,6 +54,10 @@ public class BindingTemplate extends Composite {
 
   public TextBox getDateTextBox() {
     return date;
+  }
+  
+  public TextBox getPhoneNumberBox() {
+    return phoneNumber;
   }
   
   public TestModel getModel() {

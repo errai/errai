@@ -27,7 +27,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import com.google.gwt.user.client.ui.Composite;
 
 /**
- * This annotation may only be used in subclasses of {@link Composite} that has been annotated with {@link Templated},
+ * This annotation may only be used in subclasses of {@link Composite} that have been annotated with {@link Templated},
  * or in a super-class of said {@link Composite} types.
  * <p>
  * Indicates that a {@link DataField} should automatically be bound to a property of a data model associated with a
@@ -44,8 +44,9 @@ import com.google.gwt.user.client.ui.Composite;
 public @interface Bound {
 
   /**
-   * The name of the data model property to bind the {@link DataField} to, following Java bean conventions. If omitted,
-   * the data field will be bound to the data model property with matching name.
+   * The name of the data model property (or a property chain) to bind the {@link DataField} to, following Java bean
+   * conventions. If omitted, the widget will be bound to the data model property with the same name as the field
+   * which is the target of this annotation.
    */
   String property() default "";
 
