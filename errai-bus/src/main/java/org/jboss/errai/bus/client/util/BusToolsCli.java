@@ -16,9 +16,7 @@
 
 package org.jboss.errai.bus.client.util;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.ErraiBus;
@@ -28,12 +26,10 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
-import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
@@ -50,7 +46,7 @@ public class BusToolsCli {
   private static boolean autoDemarshall = true;
 
   public static void decodeToCallback(final String jsonString, final MessageCallback callback) {
-    for (Message message : decodePayload(jsonString))  {
+    for (final Message message : decodePayload(jsonString))  {
       callback.callback(message);
     }
   }
@@ -157,6 +153,11 @@ public class BusToolsCli {
 
     @Override
     public void addSessionEndListener(SessionEndListener listener) {
+    }
+
+    @Override
+    public boolean isValid() {
+      return true;
     }
   };
 

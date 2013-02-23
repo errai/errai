@@ -29,6 +29,7 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
@@ -87,9 +88,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     try {
       service.store(createCommandMessage(session, httpServletRequest));
     }
-    catch (Exception e) {
-      if (!e.getMessage().contains("expired")) {
-        writeExceptionToOutputStream(httpServletResponse, e);
+    catch (QueueUnavailableException e) {
+      if (!session.isValid()) {
+        sendDisconnectDueToSessionExpiry(httpServletResponse);
       }
     }
   }
@@ -107,7 +108,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             return;
         }
 
-        sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
+        sendDisconnectDueToSessionExpiry(httpServletResponse);
 
         return;
       }

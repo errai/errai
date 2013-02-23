@@ -31,6 +31,7 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -150,12 +151,13 @@ public class WebsocketHandler implements TransportHandler {
   }
 
   @Override
-  public void stop(final boolean stopAllCurrentRequests) {
+  public Collection<Message> stop(final boolean stopAllCurrentRequests) {
     longPollingTransport.stop(stopAllCurrentRequests);
     if (webSocketChannel != null) {
       disconnectSocket(webSocketChannel);
     }
     stopped = true;
+    return Collections.emptyList();
   }
 
   @Override

@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.framework.transports;
 
 import org.jboss.errai.bus.client.api.Message;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public interface TransportHandler {
 
   public void start();
 
-  public void stop(boolean stopAllCurrentRequests);
+  public Collection<Message> stop(boolean stopAllCurrentRequests);
 
   public void transmit(List<Message> txMessages);
 

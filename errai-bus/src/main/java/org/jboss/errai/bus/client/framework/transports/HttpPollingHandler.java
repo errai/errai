@@ -36,9 +36,9 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.util.LogUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -58,6 +58,7 @@ public class HttpPollingHandler implements TransportHandler {
   private final ClientMessageBusImpl messageBus;
 
   private final List<Message> heldMessages = new ArrayList<Message>();
+  private final List<Message> undeliveredMessages = new ArrayList<Message>();
 
   private int txNumber = 0;
   private int rxNumber = 0;
@@ -67,7 +68,6 @@ public class HttpPollingHandler implements TransportHandler {
   boolean rxActive = false;
 
   int retries = 0;
-
 
   /**
    * Keeps track of all pending requests, both incoming (receive builders) and
@@ -146,10 +146,13 @@ public class HttpPollingHandler implements TransportHandler {
     heldMessages.clear();
     toSend.addAll(txMessages);
 
+    undeliveredMessages.addAll(toSend);
+
     final String message = BusToolsCli.encodeMessages(toSend);
 
     try {
       txActive = true;
+      final long startTime = System.currentTimeMillis();
 
       try {
         final RequestCallback callback = new RequestCallback() {
@@ -158,7 +161,18 @@ public class HttpPollingHandler implements TransportHandler {
           @Override
           public void onResponseReceived(final Request request, final Response response) {
             statusCode = response.getStatusCode();
-            if (statusCode >= 400) {
+
+            // Messages can be considered re-sendable on an expired session only if the request has been in-flight
+            // for less than 2 seconds.
+            if (statusCode == 200) {
+              undeliveredMessages.removeAll(toSend);
+            }
+            else if (statusCode == 401) {
+              if (System.currentTimeMillis() - startTime > 2000) {
+                undeliveredMessages.removeAll(toSend);
+              }
+            }
+            else if (statusCode >= 400) {
               final TransportIOException tioe
                   = new TransportIOException(response.getText(), response.getStatusCode(),
                   "Failure communicating with server");
@@ -235,19 +249,28 @@ public class HttpPollingHandler implements TransportHandler {
 
       DefaultErrorCallback.INSTANCE.error(null, t);
     }
-
   }
 
   @Override
-  public void stop(final boolean stopAllCurrentRequests) {
+  public Collection<Message> stop(final boolean stopAllCurrentRequests) {
     receiveCommCallback.cancel();
+    try {
+      if (stopAllCurrentRequests) {
+        // Now stop all the in-flight XHRs
+        for (final RxInfo r : pendingRequests) {
+          r.getRequest().cancel();
+        }
+        pendingRequests.clear();
 
-    if (stopAllCurrentRequests) {
-      // Now stop all the in-flight XHRs
-      for (final RxInfo r : pendingRequests) {
-        r.getRequest().cancel();
+        final ArrayList<Message> messages = new ArrayList<Message>(undeliveredMessages);
+        return messages;
       }
-      pendingRequests.clear();
+      else {
+        return Collections.emptyList();
+      }
+    }
+    finally {
+      undeliveredMessages.clear();
     }
   }
 
@@ -318,6 +341,8 @@ public class HttpPollingHandler implements TransportHandler {
       switch (statusCode) {
         case 0:
         case 1:
+        case 401:
+          break;
         case 400: // happens when JBossAS is going down
         case 404: // happens after errai app is undeployed
         case 408: // request timeout--probably worth retrying
@@ -360,6 +385,9 @@ public class HttpPollingHandler implements TransportHandler {
           case 305:
           case 307:
             break;
+          case 401:
+            BusToolsCli.decodeToCallback(response.getText(), messageCallback);
+            break;
           default:
             onError(request,
                 new TransportIOException("unexpected response code: " + statusCode, statusCode, response
@@ -380,7 +408,6 @@ public class HttpPollingHandler implements TransportHandler {
 
     public void schedule() {
       if (canceled) {
-        LogUtil.log(toString() + "is cancelled. will not reschedule.");
         return;
       }
 
@@ -389,7 +416,7 @@ public class HttpPollingHandler implements TransportHandler {
         public void run() {
           performPoll();
         }
-      }.schedule(POLL_FREQUENCY_MS);
+      }.schedule(1);
     }
 
     public void cancel() {
@@ -476,11 +503,13 @@ public class HttpPollingHandler implements TransportHandler {
     );
     builder.setHeader("Content-Type", "application/json; charset=utf-8");
 
+    final RxInfo rxInfo = new RxInfo(System.currentTimeMillis(), isWaitingChannel);
+
     try {
       final Request request = builder.sendRequest(payload, new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {
-          pendingRequests.remove(request);
+          pendingRequests.remove(rxInfo);
           callback.onResponseReceived(request, response);
           rxNumber++;
           rxActive = false;
@@ -488,13 +517,15 @@ public class HttpPollingHandler implements TransportHandler {
 
         @Override
         public void onError(final Request request, final Throwable exception) {
-          pendingRequests.remove(request);
+          pendingRequests.remove(rxInfo);
           callback.onError(request, exception);
           rxActive = false;
         }
       });
 
-      pendingRequests.add(new RxInfo(System.currentTimeMillis(), isWaitingChannel, request));
+      rxInfo.setRequest(request);
+      pendingRequests.add(rxInfo);
+
       return request;
     }
     catch (RequestException e) {
@@ -515,13 +546,16 @@ public class HttpPollingHandler implements TransportHandler {
   }
 
   private static class RxInfo {
-    private final Request request;
+    private Request request;
     private final boolean waiting;
     private final long time;
 
-    private RxInfo(long time, boolean waiting, Request request) {
+    private RxInfo(long time, boolean waiting) {
       this.time = time;
       this.waiting = waiting;
+    }
+
+    public void setRequest(Request request) {
       this.request = request;
     }
 

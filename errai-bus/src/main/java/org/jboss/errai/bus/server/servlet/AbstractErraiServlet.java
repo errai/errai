@@ -176,8 +176,9 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   }
 
 
-  protected void sendDisconnectDueToSessionExpiry(OutputStream stream) throws IOException {
-    writeToOutputStream(stream, new MarshalledMessage() {
+  protected void sendDisconnectDueToSessionExpiry(final HttpServletResponse response) throws IOException {
+    response.setStatus(401);
+    writeToOutputStream(response.getOutputStream(), new MarshalledMessage() {
       @Override
       public String getSubject() {
         return "ClientBus";

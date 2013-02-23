@@ -33,7 +33,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
   /**
    * If set non-null by a test, this endpoint URL will be restored during teardown.
    */
-  private String originalBusEndpointUrl = null;
+  private Wormhole.Fixer endpointFixer = null;
 
   @Override
   public String getModuleName() {
@@ -53,9 +53,8 @@ public class LifecycleEventTests extends AbstractErraiTest {
     for (BusLifecycleListener listener : listenersToRemove) {
       bus.removeLifecycleListener(listener);
     }
-    if (originalBusEndpointUrl != null) {
-      Wormhole.changeBusEndpointUrl(bus, originalBusEndpointUrl);
-      System.out.println("tearDown(): set endpoint back to " + originalBusEndpointUrl);
+    if (endpointFixer != null) {
+      endpointFixer.fix();
     }
     super.gwtTearDown();
   }
@@ -127,7 +126,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
         // simulate 404 on bus endpoint URL
-        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+        endpointFixer = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
 
         expectedEventTypes.add(EventType.OFFLINE);
         expectedEventTypes.add(EventType.ONLINE);
@@ -137,9 +136,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
         new Timer() {
           @Override
           public void run() {
-            Wormhole.changeBusEndpointUrl(bus, originalBusEndpointUrl);
+            endpointFixer.fix();
           }
-        }.schedule(500);
+        }.schedule(5000);
       }
     });
   }
@@ -158,7 +157,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
         // simulate 404 on bus endpoint URL
-        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+        endpointFixer = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
 
         expectedEventTypes.add(EventType.OFFLINE);
         expectedEventTypes.add(EventType.DISASSOCIATING);
@@ -175,7 +174,9 @@ public class LifecycleEventTests extends AbstractErraiTest {
       public void busDisassociating(BusLifecycleEvent e) {
         // simulate server back online after extended outage
         // (or changing endpoint to fail over to an online server)
-        Wormhole.changeBusEndpointUrl(bus, originalBusEndpointUrl);
+
+        endpointFixer.fix();
+      //  Wormhole.changeBusEndpointUrl(bus, originalBusEndpointUrl);
 
         // explicit bus restart (in a timer so it doesn't make other listeners
         // see events out of order due to recursive event delivery)
@@ -202,7 +203,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
         assertEquals(expectedEventTypes, listener.getEventTypes());
 
         // simulate 404 on bus endpoint URL
-        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+        endpointFixer = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
 
         expectedEventTypes.add(EventType.OFFLINE);
         expectedEventTypes.add(EventType.DISASSOCIATING);
@@ -269,8 +270,8 @@ public class LifecycleEventTests extends AbstractErraiTest {
    * {@link BusLifecycleListener#busDisassociating(BusLifecycleEvent)}: when you
    * do not call bus.setInitialized(true), local message delivery is deferred
    * until the bus reconnects.
-   *
-   *
+   * <p/>
+   * <p/>
    * NOTE: The contract is no longer true. If a local message can be delivered, it will be, regardless of bus state.
    */
   public void ignoreTestLocalDeliveryAfterBusRestarted() throws Exception {
@@ -365,7 +366,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
       @Override
       public void run() {
         // simulate 404 on bus endpoint URL
-        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+        endpointFixer = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
 
         expectedEventTypes.add(EventType.ASSOCIATING);
         expectedEventTypes.add(EventType.ONLINE);
@@ -414,7 +415,7 @@ public class LifecycleEventTests extends AbstractErraiTest {
       @Override
       public void run() {
         // simulate 404 on bus endpoint URL
-        originalBusEndpointUrl = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
+        endpointFixer = Wormhole.changeBusEndpointUrl(bus, "invalid.url");
 
         expectedEventTypes.add(EventType.ONLINE);
         expectedEventTypes.add(EventType.OFFLINE);

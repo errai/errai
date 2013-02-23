@@ -70,6 +70,8 @@ public enum ErraiConfigAttribs {
   ENABLE_CLUSTERING("errai.bus.enable_clustering", "false"),
   CLUSTERING_PROVIDER("errai.bus.clustering_provider", "org.jboss.errai.bus.server.cluster.noop.NoopClusteringProvider"),
 
+  MESSAGE_QUEUE_TIMEOUT_SECS("errai.bus.message_queue_timeout_secs", "90"),
+
   SSE_TIMEOUT("errai.bus.servlet_sse_timeout", "60000");
 
   protected final String attributeName;

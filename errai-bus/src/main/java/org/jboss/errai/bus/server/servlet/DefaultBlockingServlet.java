@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.servlet;
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -137,7 +138,13 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest));
 
-    service.store(createCommandMessage(session, httpServletRequest));
+    try {
+      service.store(createCommandMessage(session, httpServletRequest));
+    }
+    catch (QueueUnavailableException e) {
+      sendDisconnectDueToSessionExpiry(httpServletResponse);
+      return;
+    }
 
     pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest));
   }
@@ -156,7 +163,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
             return;
         }
 
-        sendDisconnectDueToSessionExpiry(outputStream);
+        sendDisconnectDueToSessionExpiry(httpServletResponse);
         return;
       }
 
@@ -174,13 +181,14 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
       if (sse) {
         final long timeout = System.currentTimeMillis() + getSSETimeout();
-        queue.setTimeout(getSSETimeout() + 1000);
+       // queue.setTimeout(getSSETimeout() + 1000);
 
         while (System.currentTimeMillis() < timeout) {
           outputStream.write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
           queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
           outputStream.write("\n\n".getBytes());
           outputStream.flush();
+          queue.heartBeat();
         }
       }
       else {

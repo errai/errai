@@ -25,6 +25,8 @@ import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.util.LogUtil;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -76,11 +78,11 @@ public class SSEHandler implements TransportHandler {
   }
 
   @Override
-  public void stop(boolean stopAllCurrentRequests) {
+  public Collection<Message> stop(boolean stopAllCurrentRequests) {
     stopped = true;
-    pollingHandler.stop(stopAllCurrentRequests);
     disconnect(sseChannel);
     sseChannel = null;
+    return  pollingHandler.stop(stopAllCurrentRequests);
   }
 
   @Override

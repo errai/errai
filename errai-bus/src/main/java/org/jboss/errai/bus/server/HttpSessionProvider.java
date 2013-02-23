@@ -108,6 +108,11 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     }
 
     @Override
+    public boolean isValid() {
+      return container.getSession(remoteQueueID) != null;
+    }
+
+    @Override
     public void setAttribute(final String attribute, final Object value) {
       container.sharedAttributes.put(attribute, value);
     }

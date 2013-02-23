@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
@@ -57,7 +58,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         case DISCONNECTING:
           return;
       }
-      sendDisconnectDueToSessionExpiry(response.getOutputStream());
+      sendDisconnectDueToSessionExpiry(response);
       return;
     }
 
@@ -76,7 +77,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
     final AsyncContext asyncContext = request.startAsync();
     asyncContext.setTimeout(getSSETimeout());
-    queue.setTimeout(getSSETimeout() + 1000);
+    queue.setTimeout(getSSETimeout() + 5000);
 
     final OutputStreamWriteAdapter writer = new OutputStreamWriteAdapter(response.getOutputStream());
 
@@ -177,7 +178,15 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
     try {
-      service.store(createCommandMessage(session, request));
+
+      try {
+        service.store(createCommandMessage(session, request));
+      }
+      catch (QueueUnavailableException e) {
+        sendDisconnectDueToSessionExpiry(response);
+        return;
+      }
+
       final MessageQueue queue = service.getBus().getQueue(session);
       if (queue != null) {
         if (shouldWait(request)) {

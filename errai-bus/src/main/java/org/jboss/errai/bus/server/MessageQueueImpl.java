@@ -46,9 +46,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * messages.
  */
 public class MessageQueueImpl implements MessageQueue {
-  private static final long DEFAULT_TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-      TimeUnit.SECONDS.toMillis(600) : TimeUnit.SECONDS.toMillis(60);
-
   private final QueueSession session;
 
   private boolean initLock = true;
@@ -58,7 +55,7 @@ public class MessageQueueImpl implements MessageQueue {
 
   private volatile MessageDeliveryHandler deliveryHandler = BufferDeliveryHandler.getInstance();
   private volatile QueueActivationCallback activationCallback;
-  private volatile long timeout = DEFAULT_TIMEOUT;
+  private volatile long timeout;
 
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
@@ -67,14 +64,13 @@ public class MessageQueueImpl implements MessageQueue {
   private final Object pageLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
 
-
-
   private static final Logger log = getLogger(MessageQueueImpl.class);
 
-  public MessageQueueImpl(final TransmissionBuffer buffer, final QueueSession session) {
+  public MessageQueueImpl(final TransmissionBuffer buffer, final QueueSession session, final int timeoutSecs) {
     this.buffer = buffer;
     this.session = session;
     this.bufferColor = BufferColor.getNewColorFromHead(buffer);
+    this.timeout = (timeoutSecs * 1000);
   }
 
   /**

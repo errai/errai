@@ -122,6 +122,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Set<String> reservedNames = new HashSet<String>();
 
+  private final int messageQueueTimeoutSecs;
+
   private final boolean sseEnabled;
   private final boolean webSocketServlet;
   private final boolean webSocketServer;
@@ -138,7 +140,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    */
   @Inject
   public ServerMessageBusImpl(final ErraiService service, final ErraiServiceConfigurator config) {
-
+    this.messageQueueTimeoutSecs = ErraiConfigAttribs.MESSAGE_QUEUE_TIMEOUT_SECS.getInt(config);
     this.sseEnabled = ErraiConfigAttribs.ENABLE_SSE_SUPPORT.getBoolean(config);
     this.webSocketServer = ErraiConfigAttribs.ENABLE_WEB_SOCKET_SERVER.getBoolean(config);
 
@@ -288,7 +290,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   messageQueues.get(session).stopQueue();
                 }
 
-                queue = new MessageQueueImpl(transmissionbuffer, session);
+                queue = new MessageQueueImpl(transmissionbuffer, session, messageQueueTimeoutSecs);
 
                 addQueue(session, queue);
 

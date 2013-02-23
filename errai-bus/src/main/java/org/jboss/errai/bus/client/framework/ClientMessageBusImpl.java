@@ -152,11 +152,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void setBusToInitializableState() {
     this.remotes.clear();
-    this.subscriptions.clear();
-
     this.onSubscribeHooks.clear();
     this.onUnsubscribeHooks.clear();
-    this.deferredMessages.clear();
     this.transportHandler = BOOTSTRAP_HANDLER;
 
     setupDefaultHandlers();
@@ -198,20 +195,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     LogUtil.log("bus initialization started ...");
     setBusToInitializableState();
 
-    directSubscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        final String errorTo = message.get(String.class, MessageParts.ErrorTo);
-        if (errorTo == null) {
-          managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
-              message.get(String.class, MessageParts.AdditionalDetails), null);
-        }
-        else {
-          message.toSubject(errorTo);
-          message.sendNowWith(ClientMessageBusImpl.this);
-        }
-      }
-    }, false);
 
     registerInitVoteCallbacks();
 
@@ -219,103 +202,125 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       remoteSubscribe(BuiltInServices.ServerEchoService.name());
     }
 
-    directSubscribe(BuiltInServices.ClientBus.name(), new MessageCallback() {
-      @Override
-      @SuppressWarnings({"unchecked"})
-      public void callback(final Message message) {
-        BusCommands busCommands = BusCommands.valueOf(message.getCommandType());
-        if (busCommands == null) {
-          busCommands = BusCommands.Unknown;
+    if (!isSubscribed(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)) {
+      directSubscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+        @Override
+        public void callback(final Message message) {
+          final String errorTo = message.get(String.class, MessageParts.ErrorTo);
+          if (errorTo == null) {
+            managementConsole.displayError(message.get(String.class, MessageParts.ErrorMessage),
+                message.get(String.class, MessageParts.AdditionalDetails), null);
+          }
+          else {
+            message.toSubject(errorTo);
+            message.sendNowWith(ClientMessageBusImpl.this);
+          }
         }
-        switch (busCommands) {
-          case RemoteSubscribe:
-            if (message.hasPart(MessageParts.SubjectsList)) {
-              LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
+      }, false);
+    }
 
-              for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
-                remoteSubscribe(subject);
+    if (!isSubscribed(BuiltInServices.ClientBus.name())) {
+      directSubscribe(BuiltInServices.ClientBus.name(), new MessageCallback() {
+        @Override
+        @SuppressWarnings({"unchecked"})
+        public void callback(final Message message) {
+          BusCommands busCommands = BusCommands.valueOf(message.getCommandType());
+          if (busCommands == null) {
+            busCommands = BusCommands.Unknown;
+          }
+          switch (busCommands) {
+            case RemoteSubscribe:
+              if (message.hasPart(MessageParts.SubjectsList)) {
+                LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
+
+                for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
+                  remoteSubscribe(subject);
+                }
               }
-            }
-            else {
-              remoteSubscribe(message.get(String.class, Subject));
-            }
-            break;
-
-          case RemoteUnsubscribe:
-            unsubscribeAll(message.get(String.class, Subject));
-            break;
-
-          case FinishAssociation:
-            LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
-
-            loadRpcProxies();
-            processCapabilities(message);
-
-            for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
-              remoteSubscribe(svc);
-            }
-
-            sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
-            remoteSubscribe(BuiltInServices.ServerBus.name());
-
-            if (!deferredSubscriptions.isEmpty()) {
-              for (final Runnable deferredSubscription : deferredSubscriptions) {
-                deferredSubscription.run();
+              else {
+                remoteSubscribe(message.get(String.class, Subject));
               }
-              deferredSubscriptions.clear();
+              break;
 
-              encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                  .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.RemoteSubscribe)
-                  .set(PriorityProcessing, "1")
-                  .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
-            }
+            case RemoteUnsubscribe:
+              unsubscribeAll(message.get(String.class, Subject));
+              break;
 
-            // We don't want to declare the subscription listeners until after we've sent our initial state
-            // to the bus.
-            declareSubscriptionListeners();
+            case FinishAssociation:
+              LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
 
-            setState(BusState.CONNECTED);
-            startSleepDetector();
-            sendAllDeferred();
-            InitVotes.voteFor(ClientMessageBus.class);
-            LogUtil.log("bus federated and running.");
-            break;
+              loadRpcProxies();
+              processCapabilities(message);
 
-          case SessionExpired:
-            switch (getState()) {
-              case CONNECTED:
-                // try to reconnect
-                stop(false);
-                init();
-                break;
+              for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+                remoteSubscribe(svc);
+              }
 
-              case CONNECTING:
-              case LOCAL_ONLY:
-                // do nothing
-                break;
-            }
+              sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
+              remoteSubscribe(BuiltInServices.ServerBus.name());
 
-            break;
+              if (!deferredSubscriptions.isEmpty()) {
+                for (final Runnable deferredSubscription : deferredSubscriptions) {
+                  deferredSubscription.run();
+                }
+                deferredSubscriptions.clear();
 
-          case Disconnect:
-            stop(false);
+                encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                    .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.RemoteSubscribe)
+                    .set(PriorityProcessing, "1")
+                    .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
+              }
 
-            if (message.hasPart("Reason")) {
-              managementConsole.displayError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
-            }
-            break;
+              // We don't want to declare the subscription listeners until after we've sent our initial state
+              // to the bus.
+              declareSubscriptionListeners();
 
-          case Heartbeat:
-          case Resend:
-            break;
+              setState(BusState.CONNECTED);
+              startSleepDetector();
+              sendAllDeferred();
+              InitVotes.voteFor(ClientMessageBus.class);
+              LogUtil.log("bus federated and running.");
+              break;
 
-          case Unknown:
-          default:
-            transportHandler.handleProtocolExtension(message);
-            break;
+            case SessionExpired:
+              switch (getState()) {
+                case CONNECTED:
+                case CONNECTING:
+                  LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
+
+                  // try to reconnect
+                  InitVotes.reset();
+                  stop(false);
+                  init();
+                  break;
+
+                case LOCAL_ONLY:
+                  // do nothing
+                  break;
+              }
+
+              break;
+
+            case Disconnect:
+              stop(false);
+
+              if (message.hasPart("Reason")) {
+                managementConsole.displayError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
+              }
+              break;
+
+            case Heartbeat:
+            case Resend:
+              break;
+
+            case Unknown:
+            default:
+              transportHandler.handleProtocolExtension(message);
+              break;
+          }
         }
-      }
-    }, false);
+      }, false);
+    }
 
     // The purpose of this timer is to let the bus yield and give other modules a chance to register
     // services before we send our state synchronization message. This is not strictly necessary
@@ -345,19 +350,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (getState() != BusState.LOCAL_ONLY) {
       LogUtil.log("aborting startup. bus is not in correct state.");
-      return ;
+      return;
     }
-
 
     setState(BusState.CONNECTING);
 
     try {
       LogUtil.log("sending initial handshake to remote bus");
 
-      // XXX sending a custom HTTP header here is very fancy, but invites compatibility
-      // problems (for example with CORS requests, locked down intermediate proxies, old
-      // browsers, etc). It seems that we send this header if-and-only-if CommandType is
-      // ConnectToQueue. We should look at making the server message bus not require it.
       final Map<String, String> connectHeader = Collections.singletonMap("phase", "connection");
 
       for (final Runnable deferredSubscription : deferredSubscriptions) {
@@ -457,22 +457,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void stop(final boolean sendDisconnect, final TransportError reason) {
     LogUtil.log("stopping bus ...");
+    if (state != BusState.LOCAL_ONLY)
+      setState(BusState.LOCAL_ONLY, reason);
 
     // Optionally tell the server we're going away (this causes two POST requests)
-    try {
-      if (sendDisconnect && BusToolsCli.isRemoteCommunicationEnabled()) {
-        encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-            .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.Disconnect)
-            .set(MessageParts.PriorityProcessing, "1"));
-      }
+    if (sendDisconnect && BusToolsCli.isRemoteCommunicationEnabled()) {
+      encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+          .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.Disconnect)
+          .set(MessageParts.PriorityProcessing, "1"));
+    }
 
-      subscriptions.clear();
-      transportHandler.stop(true);
-    }
-    finally {
-      if (state != BusState.LOCAL_ONLY)
-        setState(BusState.LOCAL_ONLY, reason);
-    }
+    deferredMessages.addAll(transportHandler.stop(true));
   }
 
   private void startSleepDetector() {
@@ -894,6 +889,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     transportHandler.transmit(highPriority);
     transportHandler.transmit(lowPriority);
+    deferredMessages.clear();
   }
 
   public boolean handleTransportError(final BusTransportError transportError) {
@@ -1083,7 +1079,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       case CONNECTED:
         if (newState == BusState.CONNECTING || newState == BusState.CONNECTION_INTERRUPTED) {
-         events.add(BusEventType.OFFLINE);
+          events.add(BusEventType.OFFLINE);
         }
         else if (newState == BusState.LOCAL_ONLY) {
           events.add(BusEventType.OFFLINE);
