@@ -15,20 +15,20 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.DomEvent.Type;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
-import com.google.gwt.resources.client.TextResource;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -70,18 +70,20 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.util.TypeLiteral;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates the code required for {@link Templated} classes.
@@ -495,29 +497,30 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
 
     /*
-     * Bind each widget if data binder is found and has been initialized.
+     * Bind each bound data field if data binder is found and has been initialized.
      */
-    final BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
-    for (final Entry<String, Statement> dataField : dataFields.entrySet()) {
-      final Bound bound = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType()).get(dataField.getKey());
-      if (bound != null) {
-        if (binderLookup != null) {
-          final String property = bound.property().equals("") ? dataField.getKey() : bound.property();
-          // Check if bound property exists in data model type
-          if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
-            throw new GenerationException("Invalid binding of DataField " + dataField.getKey() + " in class "
-                + ctx.getInjector().getInjectedType() + "! Property " + property + " not resolvable from class "
-                + binderLookup.getDataModelType() + ". Hint: All types in a property chain must be @Bindable!");
-          }
+    Map<String, BoundDataField> boundDataFields = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType());
+    BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
+    for (Entry<String, BoundDataField> boundDataField : boundDataFields.entrySet()) {
+      Bound bound = boundDataField.getValue().getBound();
+      if (binderLookup != null) {
+        String property = bound.property().equals("") ? boundDataField.getKey() : bound.property();
+        // Check if bound property exists in data model type
+        if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
+          throw new GenerationException("Invalid binding of DataField " + boundDataField.getValue().getName() 
+              + " in class " + ctx.getInjector().getInjectedType() + "! Property " + property 
+              + " not resolvable from class " + binderLookup.getDataModelType() + 
+              ". Hint: All types in a property chain must be @Bindable!");
+        }
 
-          final Statement converter =
-              bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
-          binderBlock.append(Stmt.loadVariable("binder").invoke("bind", dataField.getValue(), property, converter));
-        }
-        else {
-          throw new GenerationException("No @AutoBound data binder found for @Bound @DataField " + dataField.getKey()
-              + " in class " + ctx.getInjector().getInjectedType());
-        }
+        Statement converter =
+            bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
+        binderBlock.append(Stmt.loadVariable("binder")
+            .invoke("bind", boundDataField.getValue().getWidgetStatement(), property, converter));
+      }
+      else {
+        throw new GenerationException("No @AutoBound data binder found for @Bound @DataField " 
+            + boundDataField.getValue().getName() + " in class " + ctx.getInjector().getInjectedType());
       }
     }
 

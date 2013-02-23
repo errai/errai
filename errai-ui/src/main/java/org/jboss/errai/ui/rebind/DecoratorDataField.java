@@ -72,8 +72,11 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, String fieldName,
       Bound bound, Statement instance) {
     dataFieldMap(ctx, ctx.getEnclosingType()).put(name, instance);
-    dataFieldBoundMap(ctx, ctx.getEnclosingType()).put(fieldName, bound);
     dataFieldTypeMap(ctx, ctx.getEnclosingType()).put(name, type);
+    
+    if (bound != null) {
+      dataFieldBoundMap(ctx, ctx.getEnclosingType()).put(fieldName, new BoundDataField(bound, instance, name));
+    }
   }
 
   private String getTemplateDataFieldName(DataField annotation, String deflt) {
@@ -102,13 +105,14 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    * Get the map of {@link DataField} names and {@link Bound} instances.
    */
   @SuppressWarnings("unchecked")
-  private static Map<String, Bound> dataFieldBoundMap(InjectableInstance<?> ctx, MetaClass templateType) {
+  private static Map<String, BoundDataField> dataFieldBoundMap(InjectableInstance<?> ctx, MetaClass templateType) {
     String mapName = dataFieldBoundMapName(templateType);
 
-    Map<String, Bound> bindings = (Map<String, Bound>) ctx.getInjectionContext().getAttribute(
-            mapName);
+    Map<String, BoundDataField> bindings = (Map<String, BoundDataField>) 
+      ctx.getInjectionContext().getAttribute(mapName);
+    
     if (bindings == null) {
-      bindings = new LinkedHashMap<String, Bound>();
+      bindings = new LinkedHashMap<String, BoundDataField>();
       ctx.getInjectionContext().setAttribute(mapName, bindings);
     }
 
@@ -159,16 +163,17 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    * Get the aggregate map of {@link DataField} names to {@link Bound} instances.
    */
   @SuppressWarnings("unchecked")
-  public static Map<String, Bound> aggregateDataFieldBoundMap(InjectableInstance<?> ctx, MetaClass componentType) {
+  public static Map<String, BoundDataField> aggregateDataFieldBoundMap(InjectableInstance<?> ctx, 
+      MetaClass componentType) {
 
-    Map<String, Bound> result = new LinkedHashMap<String, Bound>();
+    Map<String, BoundDataField> result = new LinkedHashMap<String, BoundDataField>();
 
     if (componentType.getSuperClass() != null) {
       result.putAll(aggregateDataFieldBoundMap(ctx, componentType.getSuperClass()));
     }
 
-    Map<String, Bound> dataFields = (Map<String, Bound>) ctx.getInjectionContext().getAttribute(
-            dataFieldBoundMapName(componentType));
+    Map<String, BoundDataField> dataFields = (Map<String, BoundDataField>) 
+      ctx.getInjectionContext().getAttribute(dataFieldBoundMapName(componentType));
     if (dataFields != null) {
       result.putAll(dataFields);
     }

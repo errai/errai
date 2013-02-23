@@ -40,6 +40,9 @@ import org.jboss.errai.jpa.test.entity.MethodAccessedZentity;
 import org.jboss.errai.jpa.test.entity.StandaloneLifecycleListener;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -684,15 +687,19 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNotNull(original.getId());
     em.clear();
 
-    // now we pull the JSON out of local storage and snip out the primitiveInt.
+    // now we pull the JSON out of local storage and yank out the primitiveInt.
     // the idea is to simulate having stored a version of Zentity that didn't have the primitiveInt attribute
     Key<Zentity, Long> key = Key.get((ErraiEntityManager) em, Zentity.class, original.getId());
     String originalZentityJson = LocalStorage.get(key.toJson());
-    String encodedPrimitiveInt = "\"primitiveInt\":0,";
-    int indexOfPrimitiveInt = originalZentityJson.indexOf(encodedPrimitiveInt);
+    JSONObject jsonEntity = JSONParser.parseStrict(originalZentityJson).isObject();
     assertTrue("Sanity check failed: didn't find primitiveInt stored in backend entry: " + originalZentityJson,
-            indexOfPrimitiveInt > 0);
-    LocalStorage.put(key.toJson(), originalZentityJson.replace(encodedPrimitiveInt, ""));
+            jsonEntity.containsKey("primitiveInt"));
+    
+    // this actually removes the key from the object
+    jsonEntity.put("primitiveInt", null);
+    assertFalse(jsonEntity.containsKey("primitiveInt"));
+    
+    LocalStorage.put(key.toJson(), jsonEntity.toString());
 
     // now try and retrieve this "old version" of Zentity
     Zentity fetched = em.find(Zentity.class, original.getId());  // <-- this line used to blow up with NPE

@@ -50,7 +50,7 @@ public class TodoListApp extends Composite {
 
   @EventHandler("newItemBox")
   void onNewItem(KeyDownEvent event) {
-    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER && !newItemBox.getText().equals("")) {
       TodoItem item = new TodoItem();
       item.setText(newItemBox.getText());
       em.persist(item);
