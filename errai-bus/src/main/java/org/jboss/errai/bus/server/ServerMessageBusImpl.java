@@ -122,8 +122,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Set<String> reservedNames = new HashSet<String>();
 
+  private final boolean hostedModeTesting;
+  private final boolean doLongPolling;
   private final int messageQueueTimeoutSecs;
-
   private final boolean sseEnabled;
   private final boolean webSocketServlet;
   private final boolean webSocketServer;
@@ -140,6 +141,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    */
   @Inject
   public ServerMessageBusImpl(final ErraiService service, final ErraiServiceConfigurator config) {
+    this.hostedModeTesting = ErraiConfigAttribs.HOSTED_MODE_TESTING.getBoolean(config);
+    this.doLongPolling = !hostedModeTesting && ErraiConfigAttribs.DO_LONG_POLL.getBoolean(config);
     this.messageQueueTimeoutSecs = ErraiConfigAttribs.MESSAGE_QUEUE_TIMEOUT_SECS.getInt(config);
     this.sseEnabled = ErraiConfigAttribs.ENABLE_SSE_SUPPORT.getBoolean(config);
     this.webSocketServer = ErraiConfigAttribs.ENABLE_WEB_SOCKET_SERVER.getBoolean(config);
@@ -155,11 +158,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       webSocketPort = -1;
     }
     else {
-      webSocketPath = config.hasProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) ?
-          config.getProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) :
-          WebSocketServerHandler.WEBSOCKET_PATH;
-
-      webSocketPort = WebSocketServer.getWebSocketPort(config);
+      webSocketPath = ErraiConfigAttribs.WEB_SOCKET_URL.get(config);
+      webSocketPort = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(config);
     }
 
     final Integer bufferSize = ErraiConfigAttribs.BUS_BUFFER_SIZE.getInt(config);
@@ -216,7 +216,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     transmissionbuffer = buffer;
-
 
     /**
      * Define the default ServerBus service used for intrabus communication.
@@ -326,14 +325,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               final StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
               final boolean first;
-              if (ErraiServiceConfigurator.LONG_POLLING) {
+              if (doLongPolling) {
                 capabilitiesBuffer.append(Capabilities.LongPolling.name());
                 first = false;
               }
               else {
                 capabilitiesBuffer.append(Capabilities.ShortPolling.name());
                 first = false;
-                msg.set(MessageParts.PollFrequency, ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
+                msg.set(MessageParts.PollFrequency, hostedModeTesting ? 50 : 250);
               }
 
               if (webSocketServer || webSocketServlet) {

@@ -25,17 +25,6 @@ import java.util.Map;
  * The <tt>ErraiServiceConfigurator</tt> is a template for creating a configuration for a service
  */
 public interface ErraiServiceConfigurator {
-  public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
-  public static final String ERRAI_SESSION_PROVIDER_IMPLEMENTATION = "errai.session_provider_implementation";
-  public static final String DO_LONG_POLL = "org.jboss.errai.bus.do_long_poll";
-  public static final String WEB_SOCKET_URL ="errai.bus.web_socket_url";
-  public static final String WEB_SOCKET_PORT = "errai.bus.web_socket_port";
-
-  public static boolean HOSTED_MODE_TESTING = Boolean.getBoolean("errai.hosted_mode_testing");
-  public static boolean LONG_POLLING = !HOSTED_MODE_TESTING
-          && (System.getProperty(ErraiServiceConfigurator.DO_LONG_POLL) == null
-          || Boolean.getBoolean(ErraiServiceConfigurator.DO_LONG_POLL));
-
   /**
    * Provides access to the {@link org.jboss.errai.common.metadata.MetaDataScanner}
    * that is used to read component annotation meta data.

@@ -73,25 +73,31 @@ public class MessageQueueImpl implements MessageQueue {
     this.timeout = (timeoutSecs * 1000);
   }
 
-  /**
-   * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
-   * need to be sent from the specified bus to another.</p>
-   * <p/>
-   * Fodod</p>
-   *
-   * @param wait
-   *     - boolean is true if we should wait until the queue is ready. In this case, a
-   *     <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
-   * @param outstream
-   *     - output stream to write the polling results to.
-   */
-  public boolean poll(boolean wait, final ByteWriteAdapter outstream) throws IOException {
+  @Override
+  public boolean poll(ByteWriteAdapter stream) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
 
     if (deliveryHandler instanceof Buffered) {
-      return ((Buffered) deliveryHandler).copyFromBuffer(wait, this, outstream);
+      return ((Buffered) deliveryHandler).copyFromBuffer(this, stream);
+    }
+    else {
+      // this can happen during the hand off to WebSockets.
+      log.debug("call to poll() when DeliveryHandler does not implement Buffered.");
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean poll(java.util.concurrent.TimeUnit timeUnit, int time, ByteWriteAdapter stream) throws IOException {
+    if (!queueRunning) {
+      throw new QueueUnavailableException("queue is not available");
+    }
+
+    if (deliveryHandler instanceof Buffered) {
+      return ((Buffered) deliveryHandler).copyFromBuffer(timeUnit, time, this, stream);
     }
     else {
       // this can happen during the hand off to WebSockets.

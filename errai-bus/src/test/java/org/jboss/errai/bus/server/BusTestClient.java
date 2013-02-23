@@ -93,12 +93,11 @@ public class BusTestClient implements MessageBus {
   private class PollingRunnable implements Runnable {
     @Override
     public void run() {
-
       final UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
       final OutputStreamWriteAdapter writeAdapter = new OutputStreamWriteAdapter(outputStream);
 
       try {
-        if (!remoteBus.getMessageQueues().get(serverSession).poll(false, writeAdapter)) {
+        if (!remoteBus.getMessageQueues().get(serverSession).poll(writeAdapter)) {
           return;
         }
       }
@@ -107,12 +106,11 @@ public class BusTestClient implements MessageBus {
       }
 
       try {
-        ByteArrayInputStream inStream = new ByteArrayInputStream(outputStream.toByteArray());
+        final List<Message> messages = MessageFactory.createCommandMessage(localSession,
+            new ByteArrayInputStream(outputStream.toByteArray()));
 
-        final List<Message> messages = MessageFactory.createCommandMessage(localSession, inStream);
-
-        for (Message m : messages) {
-          send(m);
+        for (Message message : messages) {
+          send(message);
         }
       }
       catch (UnsupportedEncodingException e) {

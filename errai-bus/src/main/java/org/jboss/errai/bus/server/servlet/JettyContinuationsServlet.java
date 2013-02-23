@@ -179,7 +179,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     httpServletResponse.setHeader("Pragma", "no-cache");
     httpServletResponse.setHeader("Expires", "-1");
     httpServletResponse.setContentType("application/json");
-    return queue.poll(false, new OutputStreamWriteAdapter(stream));
+    return queue.poll(new OutputStreamWriteAdapter(stream));
   }
 
   private static class JettyQueueActivationCallback implements QueueActivationCallback {

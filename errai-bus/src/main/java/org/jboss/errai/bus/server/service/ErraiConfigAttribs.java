@@ -16,10 +16,16 @@
 
 package org.jboss.errai.bus.server.service;
 
+import org.jboss.errai.bus.server.HttpSessionProvider;
+import org.jboss.errai.bus.server.SimpleDispatcher;
+
 /**
  * @author Mike Brock
  */
 public enum ErraiConfigAttribs {
+
+  ERRAI_DISPATCHER_IMPLEMENTATION("errai.dispatcher_implementation", SimpleDispatcher.class.getName()),
+  ERRAI_SESSION_PROVIDER_IMPLEMENTATION("errai.session_provider_implementation", HttpSessionProvider.class.getName()),
 
   /**
    * The buffer size in megabytes. If this attribute is specified along with {@link #BUS_BUFFER_SEGMENT_SIZE}
@@ -58,8 +64,17 @@ public enum ErraiConfigAttribs {
    */
   BUS_BUFFER_ALLOCATION_MODE("errai.bus.buffer_allocation_mode", "direct"),
 
+  HOSTED_MODE_TESTING("errai.hosted_mode_testing", "false"),
+  DO_LONG_POLL("org.jboss.errai.bus.do_long_poll", "true"),
+  LONG_POLL_TIMEOUT("errai.bus.long_poll_timeout", "45000"),
+
   ENABLE_SSE_SUPPORT("errai.bus.enable_sse_support", "true"),
+  SSE_TIMEOUT("errai.bus.servlet_sse_timeout", "60000"),
+
   ENABLE_WEB_SOCKET_SERVER("errai.bus.enable_web_socket_server", "false"),
+  WEB_SOCKET_URL("errai.bus.web_socket_url", "/websocket.bus"),
+  WEB_SOCKET_PORT("errai.bus.web_socket_port", "8085"),
+
   WEBSOCKET_SERVLET_ENABLED("errai.bus.websocket.servlet.enabled", "false"),
   WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket"),
 
@@ -70,9 +85,8 @@ public enum ErraiConfigAttribs {
   ENABLE_CLUSTERING("errai.bus.enable_clustering", "false"),
   CLUSTERING_PROVIDER("errai.bus.clustering_provider", "org.jboss.errai.bus.server.cluster.noop.NoopClusteringProvider"),
 
-  MESSAGE_QUEUE_TIMEOUT_SECS("errai.bus.message_queue_timeout_secs", "90"),
+  MESSAGE_QUEUE_TIMEOUT_SECS("errai.bus.message_queue_timeout_secs", "90");
 
-  SSE_TIMEOUT("errai.bus.servlet_sse_timeout", "60000");
 
   protected final String attributeName;
   protected final String defaultValue;

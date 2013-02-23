@@ -93,7 +93,7 @@ public class BusTests extends TestCase {
 
     MessageQueueImpl messageQueue = new MessageQueueImpl(buffer, session, 60);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    messageQueue.poll(false, new OutputStreamWriteAdapter(outputStream));
+    messageQueue.poll(new OutputStreamWriteAdapter(outputStream));
 
     assertEquals("[]", new String(outputStream.toByteArray()));
   }

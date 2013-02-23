@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
@@ -115,7 +116,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest)),
-        httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
+        httpServletRequest, httpServletResponse, isLongPollingEnabled());
   }
 
   /**
@@ -168,7 +169,10 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
       }
 
       final boolean sse;
-      if (httpServletRequest.getParameter("sse") != null) {
+      if (!wait) {
+        sse = false;
+      }
+      else if (httpServletRequest.getParameter("sse") != null) {
         httpServletResponse.setContentType("text/event-stream");
         sse = true;
       }
@@ -181,20 +185,23 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
       if (sse) {
         final long timeout = System.currentTimeMillis() + getSSETimeout();
-       // queue.setTimeout(getSSETimeout() + 1000);
 
         while (System.currentTimeMillis() < timeout) {
           outputStream.write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
-          queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
+          queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
           outputStream.write("\n\n".getBytes());
           outputStream.flush();
           queue.heartBeat();
         }
       }
-      else {
-        queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
-        outputStream.close();
+      else if (wait) {
+        queue.poll(TimeUnit.MILLISECONDS, getLongPollTimeout(), new OutputStreamWriteAdapter(outputStream));
       }
+      else {
+        queue.poll(new OutputStreamWriteAdapter(outputStream));
+      }
+
+      outputStream.close();
     }
     catch (final Throwable t) {
       t.printStackTrace();

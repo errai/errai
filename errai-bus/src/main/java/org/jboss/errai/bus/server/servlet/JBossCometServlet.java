@@ -311,16 +311,11 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
    * @param queue               - the queue holding the messages to be transmitted
    * @throws IOException - if an input or output error occurs while the servlet is handling the HTTP request
    */
-  public void transmitMessages(final HttpServletResponse httpServletResponse, MessageQueue queue) throws IOException {
-
-//          log.info("Transmitting messages to client (Queue:" + queue.hashCode() + ")");
+  public void transmitMessages(final HttpServletResponse httpServletResponse, final MessageQueue queue) throws IOException {
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.setContentType("application/json");
-    queue.poll(false, new OutputStreamWriteAdapter(httpServletResponse.getOutputStream()));
-
-    //   queue.heartBeat();
+    queue.poll(new OutputStreamWriteAdapter(httpServletResponse.getOutputStream()));
   }
-
 
   private static final String CONFIG_PROBLEM_TEXT =
       "\n\n*************************************************************************************************\n"

@@ -23,14 +23,12 @@ import java.nio.charset.Charset;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.SessionProvider;
@@ -56,10 +54,17 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
   }
 
+  private boolean longPollingEnabled;
+  private int longPollTimeout;
   private int sseTimeout;
 
-  private void setSseTimeout() {
-    sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(service.getConfiguration());
+  private void configureSettings() {
+    final ErraiServiceConfigurator config = service.getConfiguration();
+
+    final boolean hostedModeTesting = ErraiConfigAttribs.HOSTED_MODE_TESTING.getBoolean(config);
+    longPollingEnabled = !hostedModeTesting && ErraiConfigAttribs.DO_LONG_POLL.getBoolean(config);
+    longPollTimeout = ErraiConfigAttribs.LONG_POLL_TIMEOUT.getInt(config);
+    sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(config);
   }
 
   public static ConnectionPhase getConnectionPhase(final HttpServletRequest request) {
@@ -81,14 +86,14 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   public void init(final ServletConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
-    setSseTimeout();
+    configureSettings();
   }
 
 
   public void initAsFilter(final FilterConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
-    setSseTimeout();
+    configureSettings();
   }
 
   @Override
@@ -124,7 +129,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     stream.write(']');
 
   }
-
 
   protected void writeExceptionToOutputStream(
       final HttpServletResponse httpServletResponse,
@@ -195,12 +199,19 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     return request.getParameter("clientId");
   }
 
-  protected final long getSSETimeout() {
+  protected int getLongPollTimeout() {
+    return longPollTimeout;
+  }
+
+  protected final int getSSETimeout() {
     return sseTimeout;
   }
 
-  protected static boolean shouldWait(HttpServletRequest request) {
-    final String wait = request.getParameter("wait");
-    return ErraiServiceConfigurator.LONG_POLLING && "1".equals(wait);
+  public boolean isLongPollingEnabled() {
+    return longPollingEnabled;
+  }
+
+  protected boolean shouldWait(final HttpServletRequest request) {
+    return longPollingEnabled && "1".equals(request.getParameter("wait"));
   }
 }

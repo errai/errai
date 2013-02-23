@@ -20,6 +20,7 @@ package org.jboss.errai.bus.server.io.websockets;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
@@ -37,14 +38,12 @@ public class WebSocketServer {
   private ErraiService svc;
   private Logger log = getLogger(getClass());
 
-  private static final int DEFAULT_PORT = 8085;
-
   public WebSocketServer(ErraiService svc) {
     this.svc = svc;
   }
 
   public void start() {
-    int port = getWebSocketPort(svc.getConfiguration());
+    int port = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(svc.getConfiguration());
 
     // Configure the server.
     final ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -72,11 +71,4 @@ public class WebSocketServer {
     log.info("started web socket server on port: " + port);
   }
 
-  public static int getWebSocketPort(ErraiServiceConfigurator config) {
-    Integer port = config.getIntProperty(ErraiServiceConfigurator.WEB_SOCKET_PORT);
-    if (port == null) {
-      port = DEFAULT_PORT;
-    }
-    return port;
-  }
 }

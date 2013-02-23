@@ -109,7 +109,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         writer.write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
 
         if (queue.messagesWaiting()) {
-          queue.poll(false, writer);
+          queue.poll(writer);
           writer.write("\n\n".getBytes());
         }
 
@@ -118,7 +118,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
           public void activate(final MessageQueue queue) {
             try {
               queue.setActivationCallback(null);
-              queue.poll(false, writer);
+              queue.poll(writer);
 
               writer.write("\n\n".getBytes());
 
@@ -142,7 +142,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     else {
       synchronized (queue.getActivationLock()) {
         if (queue.messagesWaiting()) {
-          queue.poll(false, writer);
+          queue.poll(writer);
           return;
         }
 
@@ -150,7 +150,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
           @Override
           public void activate(final MessageQueue queue) {
             try {
-              queue.poll(false, writer);
+              queue.poll(writer);
               queue.setActivationCallback(null);
 
               queue.heartBeat();
@@ -193,7 +193,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
           doGet(request, response);
         }
         else {
-          queue.poll(false, new OutputStreamWriteAdapter(response.getOutputStream()));
+          queue.poll(new OutputStreamWriteAdapter(response.getOutputStream()));
         }
       }
     }
