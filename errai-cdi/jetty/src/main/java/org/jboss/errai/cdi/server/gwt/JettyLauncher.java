@@ -15,19 +15,13 @@
  */
 package org.jboss.errai.cdi.server.gwt;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Iterator;
-
-import javax.imageio.ImageIO;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.google.gwt.core.ext.ServletContainer;
+import com.google.gwt.core.ext.ServletContainerLauncher;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dev.shell.jetty.JettyNullLogger;
+import com.google.gwt.dev.util.InstalledHelpInfo;
+import com.google.gwt.dev.util.Util;
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpFields.Field;
@@ -43,13 +37,17 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
 
-import com.google.gwt.core.ext.ServletContainer;
-import com.google.gwt.core.ext.ServletContainerLauncher;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.dev.shell.jetty.JettyNullLogger;
-import com.google.gwt.dev.util.InstalledHelpInfo;
-import com.google.gwt.dev.util.Util;
+import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Iterator;
 
 /**
  * A {@link ServletContainerLauncher} for an embedded Jetty server.
@@ -57,12 +55,12 @@ import com.google.gwt.dev.util.Util;
 public class JettyLauncher extends ServletContainerLauncher {
 
   private static String[] __dftConfigurationClasses =
-            {
-                    "org.mortbay.jetty.webapp.WebInfConfiguration", //
-                "org.mortbay.jetty.plus.webapp.EnvConfiguration",//jetty-env
-                "org.mortbay.jetty.plus.webapp.Configuration", //web.xml
-                "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",//jettyWeb
-            };
+      {
+          "org.mortbay.jetty.webapp.WebInfConfiguration", //
+          "org.mortbay.jetty.plus.webapp.EnvConfiguration",//jetty-env
+          "org.mortbay.jetty.plus.webapp.Configuration", //web.xml
+          "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",//jettyWeb
+      };
 
   /**
    * Log jetty requests/responses to TreeLogger.
@@ -94,7 +92,8 @@ public class JettyLauncher extends ServletContainerLauncher {
       if (status >= 500) {
         logStatus = TreeLogger.ERROR;
         logHeaders = TreeLogger.INFO;
-      } else if (status == 404) {
+      }
+      else if (status == 404) {
         if ("/favicon.ico".equals(request.getRequestURI())
             && request.getQueryString() == null) {
           /*
@@ -103,14 +102,17 @@ public class JettyLauncher extends ServletContainerLauncher {
            */
           logStatus = TreeLogger.TRACE;
           logHeaders = TreeLogger.DEBUG;
-        } else {
+        }
+        else {
           logStatus = TreeLogger.WARN;
           logHeaders = TreeLogger.INFO;
         }
-      } else if (status >= 400) {
+      }
+      else if (status >= 400) {
         logStatus = TreeLogger.WARN;
         logHeaders = TreeLogger.INFO;
-      } else {
+      }
+      else {
         logStatus = normalLogLevel;
         logHeaders = TreeLogger.DEBUG;
       }
@@ -118,7 +120,8 @@ public class JettyLauncher extends ServletContainerLauncher {
       String userString = request.getRemoteUser();
       if (userString == null) {
         userString = "";
-      } else {
+      }
+      else {
         userString += "@";
       }
       String bytesString = "";
@@ -154,7 +157,7 @@ public class JettyLauncher extends ServletContainerLauncher {
   /**
    * An adapter for the Jetty logging system to GWT's TreeLogger. This
    * implementation class is only public to allow {@link Log} to instantiate it.
-   *
+   * <p/>
    * The weird static data / default construction setup is a game we play with
    * {@link Log}'s static initializer to prevent the initial log message from
    * going to stderr.
@@ -243,7 +246,7 @@ public class JettyLauncher extends ServletContainerLauncher {
     private final WebAppContext wac;
 
     public JettyServletContainer(TreeLogger logger, Server server,
-        WebAppContext wac, int actualPort, File appRootDir) {
+                                 WebAppContext wac, int actualPort, File appRootDir) {
       this.logger = logger;
       this.server = server;
       this.wac = wac;
@@ -269,11 +272,13 @@ public class JettyLauncher extends ServletContainerLauncher {
         wac.start();
         server.start();
         branch.log(TreeLogger.INFO, "Reload completed successfully");
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         branch.log(TreeLogger.ERROR, "Unable to restart embedded Jetty server",
             e);
         throw new UnableToCompleteException();
-      } finally {
+      }
+      finally {
         // Reset the top-level logger.
         Log.setLog(new JettyTreeLogger(logger));
       }
@@ -289,10 +294,12 @@ public class JettyLauncher extends ServletContainerLauncher {
         server.stop();
         server.setStopAtShutdown(false);
         branch.log(TreeLogger.TRACE, "Stopped successfully");
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         branch.log(TreeLogger.ERROR, "Unable to stop embedded Jetty server", e);
         throw new UnableToCompleteException();
-      } finally {
+      }
+      finally {
         // Reset the top-level logger.
         Log.setLog(new JettyTreeLogger(logger));
       }
@@ -305,7 +312,7 @@ public class JettyLauncher extends ServletContainerLauncher {
    * Jetty {@code WebAppContext} will create new instances of servlets, but it
    * will not create a brand new {@link ClassLoader}. By creating a new {@code
    * ClassLoader} each time, we re-read updated classes from disk.
-   *
+   * <p/>
    * Also provides special class filtering to isolate the web app from the GWT
    * hosting environment.
    */
@@ -382,13 +389,21 @@ public class JettyLauncher extends ServletContainerLauncher {
         if (isSystemPath(name)) {
           try {
             return systemClassLoader.loadClass(name);
-          } catch (ClassNotFoundException e) {
+          }
+          catch (ClassNotFoundException e) {
           }
         }
 
         try {
           return super.findClass(name);
-        } catch (ClassNotFoundException e) {
+        }
+        catch (NoClassDefFoundError e) {
+          // Don't allow server classes to be loaded from the outside.
+          if (isServerPath(name)) {
+            throw e;
+          }
+        }
+        catch (ClassNotFoundException e) {
           // Don't allow server classes to be loaded from the outside.
           if (isServerPath(name)) {
             throw e;
@@ -413,7 +428,7 @@ public class JettyLauncher extends ServletContainerLauncher {
       }
 
       private boolean addContainingClassPathEntry(String warnMessage,
-          URL resource, String resourceName) {
+                                                  URL resource, String resourceName) {
         TreeLogger.Type logLevel = (System.getProperty(PROPERTY_NOWARN_WEBAPP_CLASSPATH) == null)
             ? TreeLogger.WARN : TreeLogger.DEBUG;
         TreeLogger branch = logger.branch(logLevel, warnMessage);
@@ -423,12 +438,14 @@ public class JettyLauncher extends ServletContainerLauncher {
           assert foundStr.endsWith(resourceName);
           classPathURL = foundStr.substring(0, foundStr.length()
               - resourceName.length());
-        } else if (resource.getProtocol().equals("jar")) {
+        }
+        else if (resource.getProtocol().equals("jar")) {
           assert foundStr.startsWith("jar:");
           assert foundStr.endsWith("!/" + resourceName);
           classPathURL = foundStr.substring(4, foundStr.length()
               - (2 + resourceName.length()));
-        } else {
+        }
+        else {
           branch.log(TreeLogger.ERROR,
               "Found resouce but unrecognized URL format: '" + foundStr + '\'');
           return false;
@@ -439,7 +456,8 @@ public class JettyLauncher extends ServletContainerLauncher {
         try {
           addClassPath(classPathURL);
           return true;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
           branch.log(TreeLogger.ERROR, "Failed add container URL: '"
               + classPathURL + '\'', e);
           return false;
@@ -467,7 +485,7 @@ public class JettyLauncher extends ServletContainerLauncher {
 
     @SuppressWarnings("unchecked")
     private WebAppContextWithReload(TreeLogger logger, String webApp,
-        String contextPath) {
+                                    String contextPath) {
       super(webApp, contextPath);
       this.logger = logger;
 
@@ -537,7 +555,7 @@ public class JettyLauncher extends ServletContainerLauncher {
    * @param port
    */
   private static void setupConnector(AbstractConnector connector,
-      String bindAddress, int port) {
+                                     String bindAddress, int port) {
     if (bindAddress != null) {
       connector.setHost(bindAddress.toString());
     }
@@ -585,7 +603,8 @@ public class JettyLauncher extends ServletContainerLauncher {
         String value = null;
         if (equals < 0) {
           tag = arg;
-        } else {
+        }
+        else {
           tag = arg.substring(0, equals);
           value = arg.substring(equals + 1);
         }
@@ -598,13 +617,16 @@ public class JettyLauncher extends ServletContainerLauncher {
           }
           keyStore = keyStoreUrl.toExternalForm();
           keyStorePassword = "localhost";
-        } else if ("keystore".equals(tag)) {
+        }
+        else if ("keystore".equals(tag)) {
           useSsl = true;
           keyStore = value;
-        } else if ("password".equals(tag)) {
+        }
+        else if ("password".equals(tag)) {
           useSsl = true;
           keyStorePassword = value;
-        } else if ("pwfile".equals(tag)) {
+        }
+        else if ("pwfile".equals(tag)) {
           useSsl = true;
           keyStorePassword = Util.readFileAsString(new File(value)).trim();
           if (keyStorePassword == null) {
@@ -612,15 +634,18 @@ public class JettyLauncher extends ServletContainerLauncher {
                 "Unable to read keystore password from '" + value + "'");
             return false;
           }
-        } else if ("clientAuth".equals(tag)) {
+        }
+        else if ("clientAuth".equals(tag)) {
           useSsl = true;
           try {
             clientAuth = ClientAuth.valueOf(value);
-          } catch (IllegalArgumentException e) {
+          }
+          catch (IllegalArgumentException e) {
             logger.log(TreeLogger.WARN, "Ignoring invalid clientAuth of '"
                 + value + "'");
           }
-        } else {
+        }
+        else {
           logger.log(TreeLogger.ERROR, "Unexpected argument to "
               + JettyLauncher.class.getSimpleName() + ": " + arg);
           return false;
@@ -712,7 +737,7 @@ public class JettyLauncher extends ServletContainerLauncher {
   }
 
   protected JettyServletContainer createServletContainer(TreeLogger logger,
-      File appRootDir, Server server, WebAppContext wac, int localPort) {
+                                                         File appRootDir, Server server, WebAppContext wac, int localPort) {
     return new JettyServletContainer(logger, server, wac, localPort, appRootDir);
   }
 
@@ -784,14 +809,14 @@ public class JettyLauncher extends ServletContainerLauncher {
   /**
    * This is a modified version of JreMemoryLeakPreventionListener.java found
    * in the Apache Tomcat project at
-   *
+   * <p/>
    * http://svn.apache.org/repos/asf/tomcat/trunk/java/org/apache/catalina/core/
    * JreMemoryLeakPreventionListener.java
-   *
+   * <p/>
    * Relevant part of the Tomcat NOTICE, retrieved from
    * http://svn.apache.org/repos/asf/tomcat/trunk/NOTICE Apache Tomcat Copyright
    * 1999-2010 The Apache Software Foundation
-   *
+   * <p/>
    * This product includes software developed by The Apache Software Foundation
    * (http://www.apache.org/).
    */
@@ -813,17 +838,23 @@ public class JettyLauncher extends ServletContainerLauncher {
       Method method = clazz.getDeclaredMethod("requestLatency",
           new Class[]{long.class});
       method.invoke(null, Long.valueOf(3600000));
-    } catch (ClassNotFoundException e) {
+    }
+    catch (ClassNotFoundException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.gcDaemonFail", e);
-    } catch (SecurityException e) {
+    }
+    catch (SecurityException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.gcDaemonFail", e);
-    } catch (NoSuchMethodException e) {
+    }
+    catch (NoSuchMethodException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.gcDaemonFail", e);
-    } catch (IllegalArgumentException e) {
+    }
+    catch (IllegalArgumentException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.gcDaemonFail", e);
-    } catch (IllegalAccessException e) {
+    }
+    catch (IllegalAccessException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.gcDaemonFail", e);
-    } catch (InvocationTargetException e) {
+    }
+    catch (InvocationTargetException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.gcDaemonFail", e);
     }
 
@@ -835,18 +866,24 @@ public class JettyLauncher extends ServletContainerLauncher {
       Class<?> policyClass = Class.forName("javax.security.auth.Policy");
       Method method = policyClass.getMethod("getPolicy");
       method.invoke(null);
-    } catch (ClassNotFoundException e) {
+    }
+    catch (ClassNotFoundException e) {
       // Ignore. The class is deprecated.
-    } catch (SecurityException e) {
+    }
+    catch (SecurityException e) {
       // Ignore. Don't need call to getPolicy() to be successful,
       // just need to trigger static initializer.
-    } catch (NoSuchMethodException e) {
+    }
+    catch (NoSuchMethodException e) {
       logger.log(TreeLogger.WARN, "jreLeakPrevention.authPolicyFail", e);
-    } catch (IllegalArgumentException e) {
+    }
+    catch (IllegalArgumentException e) {
       logger.log(TreeLogger.WARN, "jreLeakPrevention.authPolicyFail", e);
-    } catch (IllegalAccessException e) {
+    }
+    catch (IllegalAccessException e) {
       logger.log(TreeLogger.WARN, "jreLeakPrevention.authPolicyFail", e);
-    } catch (InvocationTargetException e) {
+    }
+    catch (InvocationTargetException e) {
       logger.log(TreeLogger.WARN, "jreLeakPrevention.authPolicyFail", e);
     }
 
@@ -876,9 +913,11 @@ public class JettyLauncher extends ServletContainerLauncher {
       URL url = new URL("jar:file://dummy.jar!/");
       URLConnection uConn = url.openConnection();
       uConn.setDefaultUseCaches(false);
-    } catch (MalformedURLException e) {
+    }
+    catch (MalformedURLException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.jarUrlConnCacheFail", e);
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.jarUrlConnCacheFail", e);
     }
 
@@ -890,7 +929,8 @@ public class JettyLauncher extends ServletContainerLauncher {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     try {
       factory.newDocumentBuilder();
-    } catch (ParserConfigurationException e) {
+    }
+    catch (ParserConfigurationException e) {
       logger.log(TreeLogger.ERROR, "jreLeakPrevention.xmlParseFail", e);
     }
   }

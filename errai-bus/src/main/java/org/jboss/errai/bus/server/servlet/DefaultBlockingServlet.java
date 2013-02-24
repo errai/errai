@@ -22,7 +22,6 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -34,10 +33,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -116,7 +112,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest)),
-        httpServletRequest, httpServletResponse, isLongPollingEnabled());
+        httpServletRequest, httpServletResponse, isLongPollingEnabled(), isSSERequest(httpServletRequest));
   }
 
   /**
@@ -147,12 +143,18 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
       return;
     }
 
-    pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest));
+    pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest), false);
   }
 
   private void pollForMessages(final QueueSession session, final HttpServletRequest httpServletRequest,
-                               final HttpServletResponse httpServletResponse, final boolean wait) throws IOException {
+                               final HttpServletResponse httpServletResponse, final boolean wait, final boolean sse) throws IOException {
     try {
+      if (sse) {
+        prepareSSE(httpServletResponse);
+      }
+      else {
+        prepareCometPoll(httpServletResponse);
+      }
 
       final MessageQueue queue = service.getBus().getQueue(session);
 
@@ -168,30 +170,17 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
         return;
       }
 
-      final boolean sse;
-      if (!wait) {
-        sse = false;
-      }
-      else if (httpServletRequest.getParameter("sse") != null) {
-        httpServletResponse.setContentType("text/event-stream");
-        sse = true;
-      }
-      else {
-        httpServletResponse.setContentType("application/json");
-        sse = false;
-      }
-
       queue.heartBeat();
 
       if (sse) {
         final long timeout = System.currentTimeMillis() + getSSETimeout();
-
         while (System.currentTimeMillis() < timeout) {
-          outputStream.write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
           queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
           outputStream.write("\n\n".getBytes());
           outputStream.flush();
           queue.heartBeat();
+
+          prepareSSEContinue(httpServletResponse);
         }
       }
       else if (wait) {

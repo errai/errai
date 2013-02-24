@@ -25,6 +25,9 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.EnvironmentConfig;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
@@ -57,7 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
  * classes annotated with the {@link Portable} annotation, and custom mappings annotated with {@link CustomMapping}.
- * 
+ *
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
@@ -192,10 +195,14 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       mergeDefinition(def);
     }
 
-    final Set<Class<?>> cliMarshallers = scanner.getTypesAnnotatedWith(ClientMarshaller.class);
+    //   final Set<Class<?>> cliMarshallers = scanner.getTypesAnnotatedWith(ClientMarshaller.class);
 
-    for (final Class<?> marshallerCls : cliMarshallers) {
-      if (Marshaller.class.isAssignableFrom(marshallerCls)) {
+    final Collection<MetaClass> cliMarshallers = ClassScanner.getTypesAnnotatedWith(ClientMarshaller.class);
+    final MetaClass Marshaller_MC = MetaClassFactory.get(Marshaller.class);
+
+    for (final MetaClass marshallerMetaClass : cliMarshallers) {
+      if (Marshaller_MC.isAssignableFrom(marshallerMetaClass)) {
+        final Class<? extends Marshaller> marshallerCls = marshallerMetaClass.asClass().asSubclass(Marshaller.class);
         try {
           final Class<?> type =
               (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
@@ -274,8 +281,18 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     exposedClasses.add(MetaClassFactory.get(Object.class));
-    exposedClasses.addAll(getEnvironmentConfig().getExposedClasses());
-    mappingAliases.putAll(getEnvironmentConfig().getMappingAliases());
+
+
+    EnvUtil.clearCache();
+    final EnvironmentConfig environmentConfig = getEnvironmentConfig();
+
+    exposedClasses.addAll(environmentConfig.getExposedClasses());
+
+    final Map<String, String> configuredMappingAliases = new HashMap<String, String>();
+    configuredMappingAliases.putAll(environmentConfig.getMappingAliases());
+    configuredMappingAliases.putAll(defaultMappingAliases());
+
+    mappingAliases.putAll(configuredMappingAliases);
 
     final Map<MetaClass, MetaClass> aliasToMarshaller = new HashMap<MetaClass, MetaClass>();
 
@@ -312,9 +329,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    // it is not accidental that we're not re-using the mappingAliases collection above
-    // we only want to deal with the property file specified aliases here.
-    for (final Map.Entry<String, String> entry : getEnvironmentConfig().getMappingAliases().entrySet()) {
+    for (final Map.Entry<String, String> entry : configuredMappingAliases.entrySet()) {
       try {
         aliasToMarshaller.put(MetaClassFactory.get(entry.getKey()), MetaClassFactory.get(entry.getValue()));
       }
@@ -322,6 +337,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         throw new RuntimeException("error loading mapping alias", t);
       }
     }
+
 
     for (final Map.Entry<MetaClass, MetaClass> entry : aliasToMarshaller.entrySet()) {
       final MappingDefinition def = getDefinition(entry.getValue());
@@ -332,7 +348,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       final MappingDefinition aliasDef = new MappingDefinition(
           def.getMarshallerInstance(), entry.getKey(), false
-          );
+      );
       if (def.getMarshallerInstance() instanceof DefaultDefinitionMarshaller) {
         aliasDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasDef));
       }
@@ -366,6 +382,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         }
       }
     }
+
+    assert getDefinition("java.util.Arrays$ArrayList") != null;
+
     log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
@@ -385,7 +404,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final boolean isConcrete = !(type.isAbstract() || type.isInterface());
     if (!type.isArray() && !type.isEnum() && !isConcrete && !hasPortableSubtypes) {
       throw new IllegalStateException("A field of type " + type
-            + " appears in a portable class, but " + type + " has no portable implementations.");
+          + " appears in a portable class, but " + type + " has no portable implementations.");
     }
     return (hasPortableSubtypes && !hasMarshaller) || (hasPortableSubtypes && hasMarshaller && isConcrete);
   }
@@ -393,7 +412,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   /**
    * Populates the inheritance map with all supertypes (except java.lang.Object) and all directly- and
    * indirectly-implemented interfaces of the given class.
-   * 
+   *
    * @param mappingClass
    */
   private void fillInheritanceMap(final MetaClass mappingClass) {
@@ -486,6 +505,30 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   @Override
   public Collection<MappingDefinition> getMappingDefinitions() {
     return Collections.unmodifiableCollection(new ArrayList<MappingDefinition>(MAPPING_DEFINITIONS.values()));
+  }
+
+  private static Map<String, String> defaultMappingAliases() {
+    Map<String, String> mappingAliases = new HashMap<String, String>();
+    mappingAliases.put("java.util.Arrays$ArrayList", "java.util.List");
+    mappingAliases.put("java.util.Collections$UnmodifiableList", "java.util.List");
+    mappingAliases.put("java.util.Collections$UnmodifiableSet", "java.util.Set");
+    mappingAliases.put("java.util.Collections$UnmodifiableMap", "java.util.Map");
+    mappingAliases.put("java.util.Collections$UnmodifiableRandomAccessList", "java.util.List");
+    mappingAliases.put("java.util.Collections$SynchronizedList", "java.util.List");
+    mappingAliases.put("java.util.Collections$SynchronizedSet", "java.util.Set");
+    mappingAliases.put("java.util.Collections$SynchronizedMap", "java.util.Map");
+    mappingAliases.put("java.util.Collections$SynchronizedRandomAccessList", "java.util.List");
+    mappingAliases.put("java.util.Collections$UnmodifiableSortedMap", "java.util.SortedMap");
+    mappingAliases.put("java.util.Collections$SynchronizedSortedMap", "java.util.SortedMap");
+    mappingAliases.put("java.util.Collections$UnmodifiableSortedSet", "java.util.SortedSet");
+    mappingAliases.put("java.util.Collections$SynchronizedSortedSet", "java.util.SortedSet");
+    mappingAliases.put("java.util.Collections$EmptySet", "java.util.Set");
+    mappingAliases.put("java.util.Collections$EmptyList", "java.util.List");
+    mappingAliases.put("java.util.Collections$EmptyMap", "java.util.Map");
+    mappingAliases.put("java.util.Collections$SingletonSet", "java.util.Set");
+    mappingAliases.put("java.util.Collections$SingletonList", "java.util.List");
+    mappingAliases.put("java.util.Collections$SingletonMap", "java.util.Map");
+    return mappingAliases;
   }
 
   @Override

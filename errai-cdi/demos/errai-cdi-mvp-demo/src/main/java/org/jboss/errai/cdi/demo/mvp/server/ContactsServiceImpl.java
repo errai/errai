@@ -7,9 +7,9 @@ import java.util.Iterator;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.demo.mvp.shared.Contact;
-import org.jboss.errai.cdi.demo.mvp.shared.ContactDetails;
-import org.jboss.errai.cdi.demo.mvp.shared.ContactsService;
+import org.jboss.errai.cdi.demo.mvp.client.shared.Contact;
+import org.jboss.errai.cdi.demo.mvp.client.shared.ContactDetails;
+import org.jboss.errai.cdi.demo.mvp.client.shared.ContactsService;
 
 @ApplicationScoped @Service
 public class ContactsServiceImpl implements ContactsService {

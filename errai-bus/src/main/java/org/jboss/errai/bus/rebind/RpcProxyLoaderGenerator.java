@@ -16,11 +16,10 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
@@ -32,6 +31,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
@@ -42,10 +42,11 @@ import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.config.util.ThreadUtil;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
@@ -72,6 +73,12 @@ public class RpcProxyLoaderGenerator extends Generator implements AsyncCodeGener
             .treeLogger(logger)
             .generatorContext(context)
             .interfaceType(RpcProxyLoader.class)
+            .runIfStarting(new Runnable() {
+              @Override
+              public void run() {
+                GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+              }
+            })
             .build()
             .submit();
 
@@ -107,9 +114,10 @@ public class RpcProxyLoaderGenerator extends Generator implements AsyncCodeGener
     final MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
 
-    for (final MetaClass remote : ClassScanner.getTypesAnnotatedWith(Remote.class,
-        RebindUtils.findTranslatablePackages(context))) {
-      
+    final Collection<MetaClass> typesAnnotatedWith = ClassScanner.getTypesAnnotatedWith(Remote.class,
+        RebindUtils.findTranslatablePackages(context));
+
+    for (final MetaClass remote : typesAnnotatedWith) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         final ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();

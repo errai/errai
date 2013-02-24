@@ -16,20 +16,21 @@
 
 package org.jboss.errai.config.rebind;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.typeinfo.TypeOracleException;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.CacheUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.typeinfo.TypeOracleException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Mike Brock
@@ -46,6 +47,8 @@ public final class AsyncGenerators {
 
   private static final Map<Class, AsyncCodeGenerator> codeGenerators = new ConcurrentHashMap<Class, AsyncCodeGenerator>();
   private static final Map<Class, Future<String>> activeFutures = new ConcurrentHashMap<Class, Future<String>>();
+  private static final Set<Object> startingNotifiedSet = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
+  private static final Set<Object> startedNotifiedSet = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
 
   static Future<String> getFutureFor(final AsyncGenerationJob job) {
     synchronized (lock) {
@@ -125,6 +128,8 @@ public final class AsyncGenerators {
       if (started && job.getGeneratorContext() != currentContext) {
         codeGenerators.clear();
         activeFutures.clear();
+        startedNotifiedSet.clear();
+        startingNotifiedSet.clear();
         started = false;
       }
 
@@ -136,8 +141,8 @@ public final class AsyncGenerators {
 
         currentContext = job.getGeneratorContext();
 
-        job.notifyStarting();
-        job.notifyStarted();
+        notifyStarting(job);
+        notifyStarted(job);
 
         for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GenerateAsync.class)) {
           try {
@@ -171,8 +176,24 @@ public final class AsyncGenerators {
         }
       }
       else {
-        job.notifyStarted();
+        notifyStarted(job);
       }
     }
+  }
+
+  private static void notifyStarting(AsyncGenerationJob job) {
+    if (startingNotifiedSet.contains(job)) {
+      return;
+    }
+    startingNotifiedSet.add(job);
+    job.notifyStarting();
+  }
+
+  private static void notifyStarted(AsyncGenerationJob job) {
+    if (startedNotifiedSet.contains(job)) {
+      return;
+    }
+    startedNotifiedSet.add(job);
+    job.notifyStarted();
   }
 }

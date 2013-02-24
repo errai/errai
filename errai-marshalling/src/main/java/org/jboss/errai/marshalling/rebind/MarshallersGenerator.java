@@ -258,12 +258,7 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
             GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
           }
         })
-        .runIfStarted(new Runnable() {
-          @Override
-          public void run() {
-            DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
-          }
-        }).build().submit();
+        .build().submit();
 
 
     final String s = future.get();

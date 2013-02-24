@@ -25,10 +25,6 @@ import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
@@ -133,7 +129,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999)) + "-"
         + (System.currentTimeMillis() % (com.google.gwt.user.client.Random.nextInt(99999) + 1));
-
 
     IN_SERVICE_ENTRY_POINT = "in." + getClientId() + ".erraiBus";
     OUT_SERVICE_ENTRY_POINT = "out." + getClientId() + ".erraiBus";
@@ -355,46 +350,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     setState(BusState.CONNECTING);
 
-    try {
-      LogUtil.log("sending initial handshake to remote bus");
+//    try {
+    LogUtil.log("sending initial handshake to remote bus");
 
-      final Map<String, String> connectHeader = Collections.singletonMap("phase", "connection");
-
-      for (final Runnable deferredSubscription : deferredSubscriptions) {
-        deferredSubscription.run();
-      }
-      deferredSubscriptions.clear();
-
-      final Message initialMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
-          .command(BusCommands.Associate)
-          .set(ToSubject, "ServerBus")
-          .set(PriorityProcessing, "1")
-          .set(MessageParts.RemoteServices, getAdvertisableSubjects());
-
-      ((HttpPollingHandler) transportHandler).sendPollingRequest(BusToolsCli.encodeMessage(initialMessage),
-          connectHeader, new RequestCallback() {
-        @Override
-        public void onResponseReceived(final Request request, final Response response) {
-          try {
-            LogUtil.log("received response from initial handshake.");
-            BusToolsCli.decodeToCallback(response.getText(), transportToBusCallback);
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-            managementConsole.displayError("Error attaching to bus",
-                e.getMessage() + "<br/>Message Contents:<br/>" + response.getText(), e);
-          }
-        }
-
-        @Override
-        public void onError(final Request request, final Throwable exception) {
-          managementConsole.displayError("Could not connect to remote bus", "", exception);
-        }
-      });
+    for (final Runnable deferredSubscription : deferredSubscriptions) {
+      deferredSubscription.run();
     }
-    catch (RequestException e) {
-      e.printStackTrace();
-    }
+    deferredSubscriptions.clear();
+
+    final Message initialMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
+        .command(BusCommands.Associate)
+        .set(ToSubject, "ServerBus")
+        .set(PriorityProcessing, "1")
+        .set(MessageParts.RemoteServices, getAdvertisableSubjects())
+        .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, Collections.singletonMap("phase", "connection"));
+
+    transportHandler.transmit(Collections.singletonList(initialMessage));
   }
 
   private void processCapabilities(final Message message) {
@@ -840,7 +811,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-
   /**
    * Checks if subject is already listed in the subscriptions map
    *
@@ -1068,6 +1038,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         break;
 
       case CONNECTION_INTERRUPTED:
+        if (newState == BusState.CONNECTED) {
+          LogUtil.log("the connection has resumed.");
+        }
+
       case CONNECTING:
         if (newState == BusState.LOCAL_ONLY) {
           events.add(BusEventType.DISASSOCIATING);

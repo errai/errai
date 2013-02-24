@@ -179,14 +179,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.web</groupId>
-      <artifactId>jbossweb</artifactId>
-      <scope>provided</scope>
-      <version>7.0.14.Final</version>
-    </dependency>
-
-
-    <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-vfs</artifactId>
       <version>3.0.1.GA</version>
@@ -236,12 +228,6 @@
       <version>4.0.0.Alpha1.errai.r1</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-websockets</artifactId>
-      <version>0.2.Alpha1</version>
-      <scope>provided</scope>
-    </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>

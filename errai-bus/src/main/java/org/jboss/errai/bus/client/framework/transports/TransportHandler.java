@@ -25,6 +25,8 @@ import java.util.List;
 * @author Mike Brock
 */
 public interface TransportHandler {
+  public static final String EXTRA_URI_PARMS_RESOURCE = "^ExtraURIParameters";
+
   public void configure(Message capabilitiesMessage);
 
   public void start();

@@ -18,23 +18,19 @@ package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
-import java.io.IOException;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.QueueUnavailableException;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.api.QueueActivationCallback;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.server.QueueUnavailableException;
-import org.jboss.errai.bus.server.api.MessageQueue;
-import org.jboss.errai.bus.server.api.QueueActivationCallback;
-import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
-import org.jboss.errai.common.client.util.TimeUnit;
+import java.io.IOException;
 
 /**
  * An implementation of {@link AbstractErraiServlet} leveraging asynchronous support of Servlet 3.0.
@@ -62,16 +58,13 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       return;
     }
 
-    final boolean sse;
-    if (request.getParameter("sse") != null) {
-      response.setContentType("text/event-stream");
-      sse = true;
+    final boolean sse = isSSERequest(request);
+    if (sse) {
+      prepareSSE(response);
     }
     else {
-      response.setContentType("application/json");
-      sse = false;
+      prepareSSEContinue(response);
     }
-
 
     queue.heartBeat();
 
@@ -106,8 +99,6 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     });
     if (sse) {
       synchronized (queue.getActivationLock()) {
-        writer.write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
-
         if (queue.messagesWaiting()) {
           queue.poll(writer);
           writer.write("\n\n".getBytes());
@@ -122,6 +113,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
               writer.write("\n\n".getBytes());
 
+              prepareSSEContinue(response);
               queue.heartBeat();
               writer.flush();
             }
@@ -178,7 +170,6 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
     final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), getClientId(request));
     try {
-
       try {
         service.store(createCommandMessage(session, request));
       }

@@ -91,11 +91,11 @@ public enum ErraiConfigAttribs {
   protected final String attributeName;
   protected final String defaultValue;
 
-  private ErraiConfigAttribs(String attributeName) {
+  private ErraiConfigAttribs(final String attributeName) {
     this(attributeName, null);
   }
 
-  ErraiConfigAttribs(String attributeName, String defaultValue) {
+  ErraiConfigAttribs(final String attributeName, final String defaultValue) {
     this.attributeName = attributeName;
     this.defaultValue = defaultValue;
   }
@@ -119,7 +119,7 @@ public enum ErraiConfigAttribs {
     configurator.setProperty(getAttributeName(), value);
   }
 
-  private void setDefaultValue(ErraiServiceConfigurator configurator) {
+  private void setDefaultValue(final ErraiServiceConfigurator configurator) {
     if (defaultValue != null && !configurator.hasProperty(getAttributeName())) {
       configurator.setProperty(getAttributeName(), defaultValue);
     }

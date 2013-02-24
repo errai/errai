@@ -34,7 +34,6 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
@@ -134,11 +133,6 @@ public class IOCBootstrapGenerator {
       final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
       final String gen;
-
-      if (context != null) {
-        // context == null during some tests, in which case we don't have a GWT type oracle
-        GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-      }
 
       log.info("generating IOC bootstrapping class...");
       final long st = System.currentTimeMillis();

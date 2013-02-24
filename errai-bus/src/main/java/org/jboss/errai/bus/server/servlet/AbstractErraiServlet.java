@@ -212,4 +212,21 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   protected boolean shouldWait(final HttpServletRequest request) {
     return longPollingEnabled && "1".equals(request.getParameter("wait"));
   }
+
+  protected boolean isSSERequest(final HttpServletRequest request) {
+    return request.getParameter("sse") != null;
+  }
+
+  protected void prepareCometPoll(final HttpServletResponse response) {
+    response.setContentType("application/json");
+  }
+
+  protected void prepareSSE(final HttpServletResponse response) throws IOException {
+    response.setContentType("text/event-stream");
+    prepareSSEContinue(response);
+  }
+
+  protected void prepareSSEContinue(final HttpServletResponse response) throws IOException {
+    response.getOutputStream().write("retry: 500\nevent: bus-traffic\n\ndata: ".getBytes());
+  }
 }

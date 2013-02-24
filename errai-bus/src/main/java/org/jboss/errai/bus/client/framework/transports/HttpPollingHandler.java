@@ -33,6 +33,7 @@ import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 
 import java.util.ArrayList;
@@ -64,10 +65,20 @@ public class HttpPollingHandler implements TransportHandler {
   private int rxNumber = 0;
   private long lastTx = System.currentTimeMillis();
 
+  private Timer throttleTimer = new Timer() {
+    @Override
+    public void run() {
+      final List<Message> messageList = new ArrayList<Message>(heldMessages);
+      heldMessages.clear();
+      transmit(messageList);
+    }
+  };
+
   boolean txActive = false;
   boolean rxActive = false;
 
-  int retries = 0;
+  int rxRetries = 0;
+  int txRetries = 0;
 
   /**
    * Keeps track of all pending requests, both incoming (receive builders) and
@@ -134,17 +145,42 @@ public class HttpPollingHandler implements TransportHandler {
   //TODO: reimplement throttling
   @Override
   public void transmit(final List<Message> txMessages) {
-    if (txMessages.isEmpty()) return;
-
-    if (throttleOutgoing()) {
-      heldMessages.addAll(txMessages);
+    if (txMessages.isEmpty()) {
       return;
     }
 
     final List<Message> toSend = new ArrayList<Message>();
-    toSend.addAll(heldMessages);
-    heldMessages.clear();
-    toSend.addAll(txMessages);
+
+    boolean canDefer = true;
+    final Map<String, String> specialParms;
+    if (txMessages.size() == 1 && txMessages.get(0).hasResource(EXTRA_URI_PARMS_RESOURCE)) {
+      toSend.add(txMessages.get(0));
+      specialParms = (Map<String, String>) txMessages.get(0).getResource(Map.class, EXTRA_URI_PARMS_RESOURCE);
+    }
+    else {
+      for (final Message message : txMessages) {
+        if (message.hasPart(MessageParts.PriorityProcessing)) {
+          canDefer = false;
+        }
+        else if (message.hasResource(EXTRA_URI_PARMS_RESOURCE)) {
+          throw new IllegalStateException("cannot send payload. messages with special URI parms must be sent one at a time.");
+        }
+      }
+
+      final int window = throttleOutgoing();
+      if (canDefer && window < 0) {
+        heldMessages.addAll(txMessages);
+        throttleTimer.schedule(-window + 50);
+        return;
+      }
+      throttleTimer.cancel();
+      heldMessages.clear();
+
+      toSend.addAll(txMessages);
+      toSend.addAll(heldMessages);
+
+      specialParms = Collections.emptyMap();
+    }
 
     undeliveredMessages.addAll(toSend);
 
@@ -160,34 +196,55 @@ public class HttpPollingHandler implements TransportHandler {
 
           @Override
           public void onResponseReceived(final Request request, final Response response) {
+            txActive = false;
             statusCode = response.getStatusCode();
 
-            // Messages can be considered re-sendable on an expired session only if the request has been in-flight
-            // for less than 2 seconds.
-            if (statusCode == 200) {
-              undeliveredMessages.removeAll(toSend);
-            }
-            else if (statusCode == 401) {
-              if (System.currentTimeMillis() - startTime > 2000) {
-                undeliveredMessages.removeAll(toSend);
-              }
-            }
-            else if (statusCode >= 400) {
-              final TransportIOException tioe
-                  = new TransportIOException(response.getText(), response.getStatusCode(),
-                  "Failure communicating with server");
 
-              if (messageBus.handleTransportError(new BusTransportError(request, tioe, statusCode, RetryInfo.NO_RETRY))) {
-                return;
-              }
+            final int retryDelay = txRetries * 1000;
+            final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
+            final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
 
-              LogUtil.log("connection problem. server returned status code: " + response.getStatusCode() + " ("
-                  + response.getStatusText() + ")");
-
-              for (final Message txM : txMessages) {
-                messageBus.callErrorHandler(txM, tioe);
-              }
+            if (messageBus.handleTransportError(transportError)) {
               return;
+            }
+
+            switch (statusCode) {
+              case 0:
+              case 1:
+              case 400: // happens when JBossAS is going down
+              case 401:
+                if (System.currentTimeMillis() - startTime > 2000) {
+                  undeliveredMessages.removeAll(toSend);
+                }
+              case 404: // happens after errai app is undeployed
+              case 408: // request timeout--probably worth retrying
+              case 500: // we expect this may happen during restart of some non-JBoss servers
+              case 502: // bad gateway--could happen if long poll request was proxied to a down server
+              case 503: // temporary overload (probably on a proxy)
+              case 504: // gateway timeout--same possibilities as 502
+                LogUtil.log("attempting Tx reconnection -- attempt: " + (txRetries + 1));
+                txRetries++;
+
+                new Timer() {
+                  @Override
+                  public void run() {
+                    undeliveredMessages.removeAll(toSend);
+                    transmit(toSend);
+                  }
+                }.schedule(retryDelay);
+
+                return;
+
+              case 200:
+                undeliveredMessages.removeAll(toSend);
+                break;
+
+              default:
+                // polling error is probably unrecoverable; go to local-only mode
+                DefaultErrorCallback.INSTANCE.error(null, null);
+
+                messageBus.handleTransportError(transportError);
+                messageBus.reconsiderTransport();
             }
 
             BusToolsCli.decodeToCallback(response.getText(), messageCallback);
@@ -195,6 +252,7 @@ public class HttpPollingHandler implements TransportHandler {
 
           @Override
           public void onError(final Request request, final Throwable exception) {
+            txActive = false;
             messageBus.handleTransportError(new BusTransportError(request, exception, statusCode, RetryInfo.NO_RETRY));
 
             for (final Message txM : txMessages) {
@@ -205,7 +263,7 @@ public class HttpPollingHandler implements TransportHandler {
           }
         };
 
-        sendPollingRequest(message, Collections.<String, String>emptyMap(), callback);
+        sendPollingRequest(message, specialParms, callback);
       }
       catch (Exception e) {
         for (final Message txM : txMessages) {
@@ -218,7 +276,6 @@ public class HttpPollingHandler implements TransportHandler {
       txActive = false;
     }
   }
-
 
   public void performPoll() {
     Request request = null;
@@ -257,8 +314,7 @@ public class HttpPollingHandler implements TransportHandler {
         }
         pendingRequests.clear();
 
-        final ArrayList<Message> messages = new ArrayList<Message>(undeliveredMessages);
-        return messages;
+        return new ArrayList<Message>(undeliveredMessages);
       }
       else {
         return Collections.emptyList();
@@ -312,7 +368,6 @@ public class HttpPollingHandler implements TransportHandler {
   public void handleProtocolExtension(final Message message) {
   }
 
-
   private class LongPollRequestCallback implements RequestCallback {
     /**
      * Subclasses MUST check this flag is still false before calling performPoll().
@@ -325,8 +380,8 @@ public class HttpPollingHandler implements TransportHandler {
     }
 
     public void onError(final Request request, final Throwable throwable, final int statusCode) {
-      final int retryDelay = retries * 1000;
-      final RetryInfo retryInfo = new RetryInfo(retryDelay, retries);
+      final int retryDelay = rxRetries * 1000;
+      final RetryInfo retryInfo = new RetryInfo(retryDelay, rxRetries);
       final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);
 
       if (messageBus.handleTransportError(transportError)) {
@@ -345,8 +400,8 @@ public class HttpPollingHandler implements TransportHandler {
         case 502: // bad gateway--could happen if long poll request was proxied to a down server
         case 503: // temporary overload (probably on a proxy)
         case 504: // gateway timeout--same possibilities as 502
-          LogUtil.log("attempting reconnection -- attempt: " + (retries + 1));
-          retries++;
+          LogUtil.log("attempting Rx reconnection -- attempt: " + (rxRetries + 1));
+          rxRetries++;
 
           new Timer() {
             @Override
@@ -394,7 +449,7 @@ public class HttpPollingHandler implements TransportHandler {
       if (messageBus.getState() == BusState.CONNECTION_INTERRUPTED)
         messageBus.setState(BusState.CONNECTED);
 
-      retries = 0;
+      rxRetries = 0;
 
       BusToolsCli.decodeToCallback(response.getText(), messageCallback);
 
@@ -518,7 +573,6 @@ public class HttpPollingHandler implements TransportHandler {
     }
   }
 
-
   public int getNextRequestNumber() {
     if (txNumber == Integer.MAX_VALUE) {
       txNumber = 0;
@@ -526,8 +580,8 @@ public class HttpPollingHandler implements TransportHandler {
     return txNumber++;
   }
 
-  private boolean throttleOutgoing() {
-    return (System.currentTimeMillis() - lastTx) < THROTTLE_TIME_MS;
+  private int throttleOutgoing() {
+    return (int) (System.currentTimeMillis() - lastTx) - THROTTLE_TIME_MS;
   }
 
   private static class RxInfo {

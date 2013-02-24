@@ -16,20 +16,11 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -63,11 +54,18 @@ import org.jboss.errai.databinding.client.api.InitialState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * Generates the proxy loader for {@link Bindable}s.
@@ -193,11 +191,10 @@ public class BindableProxyLoaderGenerator extends Generator implements AsyncCode
   private Set<MetaClass> getBindableTypesFromErraiAppProperties() {
     final Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
 
-    final Enumeration<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
-    while (erraiAppProperties.hasMoreElements()) {
+    final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
+    for (URL url : erraiAppProperties) {
       InputStream inputStream = null;
       try {
-        final URL url = erraiAppProperties.nextElement();
         log.debug("Checking " + url.getFile() + " for bindable types...");
         inputStream = url.openStream();
 
