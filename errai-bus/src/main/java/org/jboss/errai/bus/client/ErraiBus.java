@@ -21,8 +21,6 @@ import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.framework.BusMonitor;
@@ -102,10 +100,6 @@ public class ErraiBus implements EntryPoint {
 
         @Override
         public void stop(boolean sendDisconnectToServer) {
-        }
-
-        @Override
-        public void reconsiderTransport() {
         }
 
         @Override

@@ -21,21 +21,11 @@ import org.jboss.errai.bus.client.api.BusLifecycleListener;
 import java.util.Set;
 
 /**
- * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
+ * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionality.
  *
  * @author Mike Brock
  */
 public interface ClientMessageBus extends MessageBus {
-  public static final String REMOTE_QUEUE_ID_HEADER = "RemoteQueueID";
-
-//  /**
-//   * Add a {@link Runnable} initialization task to be executed after the bus has successfully finished it's
-//   * initialization and is now communicating with the remote bus.
-//   *
-//   * @param run a {@link Runnable} task.
-//   */
-//  public void addPostInitTask(Runnable run);
-
   /**
    * Adds the given listener instance to this bus. The listener will be notified
    * each time the bus transitions to a different lifecycle state.
@@ -77,6 +67,12 @@ public interface ClientMessageBus extends MessageBus {
    */
   public void stop(boolean sendDisconnectToServer);
 
+  /**
+   * Returns a set of all reject subjects in the bus.
+   *
+   * @return
+   *        a set of all registered subjects.
+   */
   public Set<String> getAllRegisteredSubjects();
 
   /**
@@ -87,11 +83,4 @@ public interface ClientMessageBus extends MessageBus {
    *          the error handler to add.
    */
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
-
-
-  /**
-   * When called, the MessageBus assumes that the currently active transport is no longer capable of operating. The
-   * MessageBus then find the best remaining handler and activates it.
-   */
-  void reconsiderTransport();
 }

@@ -27,15 +27,55 @@ import java.util.List;
 public interface TransportHandler {
   public static final String EXTRA_URI_PARMS_RESOURCE = "^ExtraURIParameters";
 
+  /**
+   * Called to configure the transport. The Message instance passed to the handler, is the initial response message
+   * from the server during the ErraiBus protocol handshake, which contains the capabilities data for the remote
+   * bus.
+   *
+   * @param capabilitiesMessage
+   *        the capabilities message from the message bus on handshake.
+   */
   public void configure(Message capabilitiesMessage);
 
+  /**
+   * Called to start the transport.
+   */
   public void start();
 
+  /**
+   * Called to stop the transport.
+   *
+   * @param stopAllCurrentRequests
+   *        specifying <tt>true</tt> will cause any in-flight messages which have not returned to be immediately
+   *        cancelled.
+   *
+   * @return
+   *        a list of messages which were not delivered before the transport was stopped.
+   */
   public Collection<Message> stop(boolean stopAllCurrentRequests);
 
+  /**
+   * Transmits the specified list of {@link Message} to the remote bus over the transport.
+   *
+   * @param txMessages
+   *        a list of {@link Message} to be transmitted.
+   */
   public void transmit(List<Message> txMessages);
 
+  /**
+   * Allows extension to the standard ErraiBus Protocol by optionally handling any unknown protocol verbs from the
+   * wire.
+   *
+   * @param message
+   */
   public void handleProtocolExtension(Message message);
 
+  /**
+   * Indicates whether the transport is usable. This method is called during transport switching by the bus to
+   * determine which transport to use. The first usable transport is chosen and started.
+   *
+   * @return
+   *      <tt>true</tt> if the handler is usable.
+   */
   public boolean isUsable();
 }

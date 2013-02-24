@@ -18,16 +18,8 @@ package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
@@ -36,6 +28,12 @@ import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The <tt>JettyContinuationsServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
@@ -60,7 +58,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(),
-        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+        getClientId(httpServletRequest)),
         httpServletRequest, httpServletResponse, true);
   }
 
@@ -83,7 +81,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       throws ServletException, IOException {
 
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(),
-        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+        getClientId(httpServletRequest));
 
     try {
       service.store(createCommandMessage(session, httpServletRequest));

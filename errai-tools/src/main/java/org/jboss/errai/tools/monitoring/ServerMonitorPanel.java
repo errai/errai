@@ -16,10 +16,14 @@
 
 package org.jboss.errai.tools.monitoring;
 
+import static java.lang.String.valueOf;
+import static javax.swing.SwingUtilities.invokeLater;
+import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
+
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.bus.server.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
@@ -36,14 +40,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static java.lang.String.valueOf;
-import static javax.swing.SwingUtilities.invokeLater;
-import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
 
 public class ServerMonitorPanel implements Attachable {
   private MainMonitorGUI mainMonitorGUI;
@@ -232,7 +232,7 @@ public class ServerMonitorPanel implements Attachable {
     if (messageBus instanceof ServerMessageBus) {
       // this is the serverside bus.
       ServerMessageBus smb = (ServerMessageBus) messageBus;
-      List<MessageCallback> receivers = smb.getReceivers(currentlySelectedService);
+      Collection<MessageCallback> receivers = smb.getReceivers(currentlySelectedService);
 
       DefaultMutableTreeNode receiversNode
               = new DefaultMutableTreeNode("Receivers (" + receivers.size() + ")", true);

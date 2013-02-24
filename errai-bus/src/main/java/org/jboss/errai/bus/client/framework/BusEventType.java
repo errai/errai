@@ -20,8 +20,11 @@ import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
 
 /**
-* @author Mike Brock
-*/
+ * An enumeration which represents the logical states that the bus can be in.
+ *
+ * @author Jonathan Fuerth
+ * @author Christian Sadilek
+ */
 public enum BusEventType {
   ASSOCIATING {
     @Override

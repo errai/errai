@@ -120,12 +120,10 @@ public interface MessageBus {
    */
   public Subscription subscribeLocal(String subject, MessageCallback receiver);
 
-  /*
+  /**
   * Unsubscribe all listeners registered for the specified subject.
   */
-
   public void unsubscribeAll(String subject);
-
 
   /**
    * Returns true if there the specified subject has one or more listeners registered.

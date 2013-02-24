@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 public class DeliveryPlan {
+  private static final int MAX_GENERATIONS_BEFORE_DEOPTIMIZE = 100;
+
+  private final int generation;
   private final MessageCallback[] deliverTo;
 
   public DeliveryPlan() {
+    this.generation = 0;
     deliverTo = new MessageCallback[0];
   }
 
-  private DeliveryPlan(MessageCallback[] deliverTo) {
+  private DeliveryPlan(final int generation, MessageCallback[] deliverTo) {
+    this.generation = generation;
     this.deliverTo = deliverTo;
   }
 
@@ -35,23 +43,23 @@ public class DeliveryPlan {
       throw new NullPointerException("null callback");
     }
 
-    return new DeliveryPlan(new MessageCallback[] { callback });
+    return new DeliveryPlan(0, new MessageCallback[]{callback});
   }
 
   public void deliver(final Message m) {
-    for (MessageCallback callback : deliverTo) {
+    for (final MessageCallback callback : deliverTo) {
       callback.callback(m);
     }
   }
 
-  public MessageCallback[] getDeliverTo() {
+  public Collection<MessageCallback> getDeliverTo() {
     final MessageCallback[] newArray = new MessageCallback[deliverTo.length];
 
     //noinspection ManualArrayCopy
     for (int i = 0; i < deliverTo.length; i++) {
       newArray[i] = deliverTo[i];
     }
-    return newArray;
+    return Arrays.asList(newArray);
   }
 
   public int getTotalReceivers() {
@@ -71,7 +79,10 @@ public class DeliveryPlan {
     }
     newPlan[newPlan.length - 1] = callback;
 
-    return new DeliveryPlan(newPlan);
+    if (generation > MAX_GENERATIONS_BEFORE_DEOPTIMIZE) {
+      return DynamicDeliveryPlan.newDynamicDeliveryPlan(deliverTo).newDeliveryPlanWith(callback);
+    }
+    return new DeliveryPlan(generation + 1, newPlan);
   }
 
   public DeliveryPlan newDeliveryPlanWithOut(final MessageCallback callback) {
@@ -87,6 +98,10 @@ public class DeliveryPlan {
       newPlan[found ? i - 1 : i] = deliverTo[i];
     }
 
-    return new DeliveryPlan(newPlan);
+    if (generation > MAX_GENERATIONS_BEFORE_DEOPTIMIZE) {
+      return DynamicDeliveryPlan.newDynamicDeliveryPlan(newPlan);
+    }
+
+    return new DeliveryPlan(generation + 1, newPlan);
   }
 }

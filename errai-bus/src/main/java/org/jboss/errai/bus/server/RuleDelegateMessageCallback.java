@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.base;
+package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
-import org.jboss.errai.bus.client.framework.DeliveryPlan;
 
 
 /**

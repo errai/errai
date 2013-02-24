@@ -33,6 +33,7 @@ import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.common.client.api.Assert;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,7 +202,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public synchronized List<MessageCallback> getReceivers(String subject) {
+  public synchronized Collection<MessageCallback> getReceivers(String subject) {
     if (proxyClosed) {
       return proxied.getReceivers(subject);
     }

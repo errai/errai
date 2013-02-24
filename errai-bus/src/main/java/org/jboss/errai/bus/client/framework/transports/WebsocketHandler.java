@@ -22,12 +22,10 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusState;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 
@@ -105,8 +103,6 @@ public class WebsocketHandler implements TransportHandler {
     if (webSocketChannel != null) {
       if (!transmitToSocket(webSocketChannel, BusToolsCli.encodeMessages(txMessages))) {
         longPollingTransport.transmit(txMessages);
-//        LogUtil.log("websocket channel is closed. falling back to comet");
-//        messageBus.reconsiderTransport();
       }
     }
     else {
@@ -143,9 +139,9 @@ public class WebsocketHandler implements TransportHandler {
 
       case WebsocketNegotiationFailed:
         hosed = true;
-        messageBus.reconsiderTransport();
-
+        disconnectSocket(webSocketChannel);
         webSocketChannel = null;
+        messageBus.reconsiderTransport();
         break;
     }
   }

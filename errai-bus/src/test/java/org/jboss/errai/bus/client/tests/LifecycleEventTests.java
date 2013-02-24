@@ -1,24 +1,22 @@
 package org.jboss.errai.bus.client.tests;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.user.client.Timer;
+import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.BusLifecycleAdapter;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.TransportError;
 import org.jboss.errai.bus.client.framework.Wormhole;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener.EventType;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener.RecordedEvent;
 
-import com.google.gwt.user.client.Timer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LifecycleEventTests extends AbstractErraiTest {
 
@@ -381,8 +379,15 @@ public class LifecycleEventTests extends AbstractErraiTest {
             TransportError error = actualEvent.getReason();
             assertNotNull("No error information", error);
             assertEquals("Wrong status code", 404, error.getStatusCode());
-            assertNotNull("Throwable was not provided", error.getException());
-            assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
+
+
+            // this is no longer a reliable test, since the error detection is more sophisticated
+            // and can encounter a 404 error WITHOUT encountering a GWT RequestBuilder exception.
+            // This is because we detect problems on both send and receive. Not just receive anymore.
+
+         //   assertNotNull("Throwable was not provided", error.getException());
+         //   assertEquals("Wrong exception type", TransportIOException.class, error.getException().getClass());
+
             assertNotNull("Request object was not provided", error.getRequest());
             assertTrue("Bus should be planning to retry failed connection attempt",
                 error.getRetryInfo().getDelayUntilNextRetry() >= 0);
@@ -390,7 +395,11 @@ public class LifecycleEventTests extends AbstractErraiTest {
 
             List<TransportError> transportErrors = errorHandler.getTransportErrors();
             assertTrue("No errors were recorded", !transportErrors.isEmpty());
-            assertTrue("Got too many errors: " + transportErrors, transportErrors.size() <= 2);
+
+            // It's possible for the send and receive channels to both encounter errors at the same time
+            // in an unpredictable manner, making this assertion unreliable.
+            // assertTrue("Got too many errors: " + transportErrors, transportErrors.size() <= 2);
+
             assertSame("Lifecycle listener and error handler should see exact same TransportError object",
                 transportErrors.get(0), error);
           }

@@ -38,11 +38,9 @@ import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.ConversationMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusMonitor;
-import org.jboss.errai.bus.client.framework.DeliveryPlan;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
@@ -57,7 +55,6 @@ import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.PageUtil;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
 import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
@@ -73,7 +70,6 @@ import org.slf4j.Logger;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -995,17 +991,26 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       subscriptions.put(subject, plan = DeliveryPlan.newDeliveryPlan(receiver));
     }
     else {
-      subscriptions.put(subject, plan.newDeliveryPlanWith(receiver));
+      final DeliveryPlan newPlan = plan.newDeliveryPlanWith(receiver);
+
+//      if (newPlan != plan) {
+        subscriptions.put(subject, newPlan);
+//      }
     }
 
     return plan;
   }
 
   private DeliveryPlan removeFromDeliveryPlan(final String subject, final MessageCallback receiver) {
-    DeliveryPlan plan = subscriptions.get(subject);
+    final DeliveryPlan plan = subscriptions.get(subject);
 
     if (plan != null) {
-      subscriptions.put(subject, plan = plan.newDeliveryPlanWithOut(receiver));
+      final DeliveryPlan newPlan = plan.newDeliveryPlanWithOut(receiver);
+
+ //     if (newPlan != plan) {
+        subscriptions.put(subject, newPlan);
+ //     }
+
       fireUnsubscribeListeners(
           new SubscriptionEvent(false, "InBus", plan.getTotalReceivers(), false, subject));
     }
@@ -1376,8 +1381,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   @Override
-  public List<MessageCallback> getReceivers(final String subject) {
-    return Collections.unmodifiableList(Arrays.asList(subscriptions.get(subject).getDeliverTo()));
+  public Collection<MessageCallback> getReceivers(final String subject) {
+    return Collections.unmodifiableCollection(subscriptions.get(subject).getDeliverTo());
   }
 
   private boolean isMonitor() {

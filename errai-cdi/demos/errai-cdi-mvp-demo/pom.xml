@@ -394,8 +394,8 @@
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>Contacts.html</runTarget>
-          <extraJvmArgs>${argLine} -Xmx512m</extraJvmArgs>
-          <soyc>false</soyc>
+          <extraJvmArgs>${argLine} -Xmx1g</extraJvmArgs>
+          <disableCastChecking>true</disableCastChecking>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
         </configuration>

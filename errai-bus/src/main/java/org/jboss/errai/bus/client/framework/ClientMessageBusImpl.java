@@ -190,7 +190,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     LogUtil.log("bus initialization started ...");
     setBusToInitializableState();
 
-
     registerInitVoteCallbacks();
 
     if (BusToolsCli.isRemoteCommunicationEnabled()) {
@@ -928,7 +927,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * When called, the MessageBus assumes that the currently active transport is no longer capable of operating. The
    * MessageBus then find the best remaining handler and activates it.
    */
-  @Override
   public void reconsiderTransport() {
     TransportHandler newHandler = null;
     for (final TransportHandler handler : availableHandlers.values()) {

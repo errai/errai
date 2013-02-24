@@ -16,16 +16,16 @@
 
 package org.jboss.errai.bus.server.api;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
@@ -96,7 +96,7 @@ public interface ServerMessageBus extends MessageBus {
    * @param subject The subject.
    * @return
    */
-  public List<MessageCallback> getReceivers(String subject);
+  public Collection<MessageCallback> getReceivers(String subject);
 
   public boolean hasRemoteSubscriptions(String subject);
 

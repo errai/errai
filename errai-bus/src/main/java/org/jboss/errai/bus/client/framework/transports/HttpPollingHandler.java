@@ -50,7 +50,7 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class HttpPollingHandler implements TransportHandler {
-  public static int THROTTLE_TIME_MS = 150;
+  public static int THROTTLE_TIME_MS = 175;
   public static int POLL_FREQUENCY_MS = 500;
 
   private boolean configured;
@@ -68,13 +68,21 @@ public class HttpPollingHandler implements TransportHandler {
   private Timer throttleTimer = new Timer() {
     @Override
     public void run() {
-      final List<Message> messageList = new ArrayList<Message>(heldMessages);
-      heldMessages.clear();
-      transmit(messageList);
+      transmit(getDeferredToSend());
     }
   };
 
+
+  /**
+   * Set to true when an outbound transmission is in progress. This flag is designed to guard against more than
+   * one transmission from happening at once.
+   */
   boolean txActive = false;
+
+  /**
+   * Set to true when an inbound transmission (ie. a long poll) is in progress. This flag is designed to guard
+   * against more than one transmission from happening at once.
+   */
   boolean rxActive = false;
 
   int rxRetries = 0;
@@ -142,6 +150,28 @@ public class HttpPollingHandler implements TransportHandler {
     receiveCommCallback.schedule();
   }
 
+  private boolean throttleMessages(final List<Message> txMessages) {
+    final int window = throttleOutgoing();
+    if (window <= 0) {
+      heldMessages.addAll(txMessages);
+      throttleTimer.schedule(-window);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  private List<Message> getDeferredToSend() {
+    throttleTimer.cancel();
+    try {
+      return new ArrayList<Message>(heldMessages);
+    }
+    finally {
+      heldMessages.clear();
+    }
+  }
+
   //TODO: reimplement throttling
   @Override
   public void transmit(final List<Message> txMessages) {
@@ -167,20 +197,18 @@ public class HttpPollingHandler implements TransportHandler {
         }
       }
 
-      final int window = throttleOutgoing();
-      if (canDefer && window < 0) {
-        heldMessages.addAll(txMessages);
-        throttleTimer.schedule(-window + 50);
+      if (canDefer && throttleMessages(txMessages)) {
         return;
       }
-      throttleTimer.cancel();
-      heldMessages.clear();
-
-      toSend.addAll(txMessages);
-      toSend.addAll(heldMessages);
+      else {
+        toSend.addAll(txMessages);
+        toSend.addAll(getDeferredToSend());
+      }
 
       specialParms = Collections.emptyMap();
     }
+
+  //  LogUtil.log("tx:" + toSend);
 
     undeliveredMessages.addAll(toSend);
 
@@ -199,15 +227,6 @@ public class HttpPollingHandler implements TransportHandler {
             txActive = false;
             statusCode = response.getStatusCode();
 
-
-            final int retryDelay = txRetries * 1000;
-            final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
-            final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
-
-            if (messageBus.handleTransportError(transportError)) {
-              return;
-            }
-
             switch (statusCode) {
               case 0:
               case 1:
@@ -222,6 +241,15 @@ public class HttpPollingHandler implements TransportHandler {
               case 502: // bad gateway--could happen if long poll request was proxied to a down server
               case 503: // temporary overload (probably on a proxy)
               case 504: // gateway timeout--same possibilities as 502
+              {
+                final int retryDelay = Math.min(txRetries * 1000, 10000);
+                final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
+                final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
+
+                if (messageBus.handleTransportError(transportError)) {
+                  return;
+                }
+
                 LogUtil.log("attempting Tx reconnection -- attempt: " + (txRetries + 1));
                 txRetries++;
 
@@ -234,17 +262,23 @@ public class HttpPollingHandler implements TransportHandler {
                 }.schedule(retryDelay);
 
                 return;
-
+              }
               case 200:
                 undeliveredMessages.removeAll(toSend);
                 break;
 
-              default:
+              default: {
+                final BusTransportError transportError = new BusTransportError(request, null, statusCode, RetryInfo.NO_RETRY);
+
+                if (messageBus.handleTransportError(transportError)) {
+                  return;
+                }
+
                 // polling error is probably unrecoverable; go to local-only mode
                 DefaultErrorCallback.INSTANCE.error(null, null);
 
                 messageBus.handleTransportError(transportError);
-                messageBus.reconsiderTransport();
+              }
             }
 
             BusToolsCli.decodeToCallback(response.getText(), messageCallback);
@@ -285,8 +319,7 @@ public class HttpPollingHandler implements TransportHandler {
         toSend = Collections.emptyList();
       }
       else {
-        toSend = new ArrayList<Message>(heldMessages);
-        heldMessages.clear();
+        toSend = new ArrayList<Message>(getDeferredToSend());
       }
 
       request = sendPollingRequest(BusToolsCli.encodeMessages(toSend), Collections.<String, String>emptyMap(), receiveCommCallback);
@@ -380,7 +413,8 @@ public class HttpPollingHandler implements TransportHandler {
     }
 
     public void onError(final Request request, final Throwable throwable, final int statusCode) {
-      final int retryDelay = rxRetries * 1000;
+      final int retryDelay = Math.min(rxRetries * 1000, 10000);
+
       final RetryInfo retryInfo = new RetryInfo(retryDelay, rxRetries);
       final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);
 
@@ -417,8 +451,6 @@ public class HttpPollingHandler implements TransportHandler {
           DefaultErrorCallback.INSTANCE.error(null, throwable);
 
           messageBus.handleTransportError(transportError);
-          messageBus.reconsiderTransport();
-
       }
     }
 
