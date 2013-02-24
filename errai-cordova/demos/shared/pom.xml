@@ -436,7 +436,7 @@
         <configuration>
           <inplace>true</inplace>
           <logLevel>INFO</logLevel>
-          <extraJvmArgs>-Xmx512m</extraJvmArgs>
+          <extraJvmArgs>-Xmx1g</extraJvmArgs>
 
           <!-- Configure GWT's development mode (formerly known as hosted 
             mode) to not start the default server (embedded jetty), but to download the 

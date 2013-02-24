@@ -242,7 +242,7 @@ public class HttpPollingHandler implements TransportHandler {
               case 503: // temporary overload (probably on a proxy)
               case 504: // gateway timeout--same possibilities as 502
               {
-                final int retryDelay = Math.min(txRetries * 1000, 10000);
+                final int retryDelay = Math.min((txRetries * 1000) + 1, 10000);
                 final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
                 final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
 
@@ -413,7 +413,7 @@ public class HttpPollingHandler implements TransportHandler {
     }
 
     public void onError(final Request request, final Throwable throwable, final int statusCode) {
-      final int retryDelay = Math.min(rxRetries * 1000, 10000);
+      final int retryDelay = Math.min((rxRetries * 1000) + 1, 10000);
 
       final RetryInfo retryInfo = new RetryInfo(retryDelay, rxRetries);
       final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);

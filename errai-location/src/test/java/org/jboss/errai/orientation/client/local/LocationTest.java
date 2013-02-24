@@ -25,7 +25,8 @@ public class LocationTest extends AbstractErraiCDITest {
     asyncTest(new Runnable() {
       @Override
       public void run() {
-        LocationObserverTestModule module = IOC.getBeanManager().lookupBean(LocationObserverTestModule.class).getInstance();
+        final LocationObserverTestModule module
+            = IOC.getBeanManager().lookupBean(LocationObserverTestModule.class).getInstance();
 
          module.fireMockEvent();
 
