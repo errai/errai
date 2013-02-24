@@ -78,4 +78,11 @@ public interface TransportHandler {
    *      <tt>true</tt> if the handler is usable.
    */
   public boolean isUsable();
+
+  /**
+   * Returns the {@link TransportStatistics} instance.
+   *
+   * @return
+   */
+  public TransportStatistics getStatistics();
 }

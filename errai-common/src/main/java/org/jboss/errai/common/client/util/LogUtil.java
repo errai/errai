@@ -46,7 +46,7 @@ public final class LogUtil {
   }-*/;
 
   public static void displaySeparator() {
-    nativeLog("------------------------------------------------");
+    nativeLog("-------------------------------------------------------------------");
   }
 
   public static void displayDebuggerUtilityTitle(final String title) {

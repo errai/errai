@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * @author Mike Brock
  */
-public class WebsocketHandler implements TransportHandler {
+public class WebsocketHandler implements TransportHandler, TransportStatistics {
   private final MessageCallback messageCallback;
   private final ClientMessageBusImpl messageBus;
 
@@ -46,11 +46,19 @@ public class WebsocketHandler implements TransportHandler {
   private Object webSocketChannel;
   private HttpPollingHandler longPollingTransport;
 
+  private long connectedTime;
+  private long lastTransmission;
+
+  private int txCount;
+  private int rxCount;
+
   private boolean configured;
   private boolean hosed;
   private boolean stopped;
 
   private int retries;
+
+  private String unsupportedReason = "Server Does Not Support";
 
   public WebsocketHandler(final MessageCallback messageCallback, final ClientMessageBusImpl messageBus) {
     this.longPollingTransport = HttpPollingHandler.newLongPollingInstance(messageCallback, messageBus);
@@ -61,6 +69,7 @@ public class WebsocketHandler implements TransportHandler {
   @Override
   public void configure(final Message capabilitiesMessage) {
     if (!isWebSocketSupported()) {
+      unsupportedReason = "No Browser Support";
       LogUtil.log("websockets not supported by browser");
       hosed = true;
       return;
@@ -89,13 +98,7 @@ public class WebsocketHandler implements TransportHandler {
 
     LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
 
-    final Object o = attemptWebSocketConnect(webSocketUrl);
-
-    if (o instanceof String) {
-      LogUtil.log("could not use web sockets. reason: " + o);
-      hosed = true;
-      messageBus.reconsiderTransport();
-    }
+    attemptWebSocketConnect(webSocketUrl);
   }
 
   @Override
@@ -103,6 +106,8 @@ public class WebsocketHandler implements TransportHandler {
     if (webSocketChannel != null) {
       if (!transmitToSocket(webSocketChannel, BusToolsCli.encodeMessages(txMessages))) {
         longPollingTransport.transmit(txMessages);
+        txCount++;
+        lastTransmission = System.currentTimeMillis();
       }
     }
     else {
@@ -139,6 +144,7 @@ public class WebsocketHandler implements TransportHandler {
 
       case WebsocketNegotiationFailed:
         hosed = true;
+        unsupportedReason = "Negotiation Failed (Bad Key)";
         disconnectSocket(webSocketChannel);
         webSocketChannel = null;
         messageBus.reconsiderTransport();
@@ -165,6 +171,7 @@ public class WebsocketHandler implements TransportHandler {
     LogUtil.log("web socket opened. sending negotiation message.");
     transmitToSocket(o, getWebSocketNegotiationString());
     webSocketChannel = o;
+    connectedTime = System.currentTimeMillis();
   }
 
   private String getWebSocketNegotiationString() {
@@ -175,6 +182,8 @@ public class WebsocketHandler implements TransportHandler {
 
   private void handleReceived(String json) {
     BusToolsCli.decodeToCallback(json, messageCallback);
+    rxCount++;
+    lastTransmission = System.currentTimeMillis();
   }
 
   public String toString() {
@@ -238,6 +247,7 @@ public class WebsocketHandler implements TransportHandler {
     messageBus.setState(BusState.CONNECTION_INTERRUPTED);
     disconnectSocket(webSocketChannel);
     webSocketChannel = null;
+    connectedTime = -1;
 
     if (!stopped) {
       retries++;
@@ -250,5 +260,65 @@ public class WebsocketHandler implements TransportHandler {
         }
       }.schedule(retries * 1000);
     }
+  }
+
+  @Override
+  public TransportStatistics getStatistics() {
+    return this;
+  }
+
+  @Override
+  public String getTransportDescription() {
+    return "WebSockets";
+  }
+
+  @Override
+  public String getUnsupportedDescription() {
+    return unsupportedReason;
+  }
+
+  @Override
+  public int getMessagesSent() {
+    return txCount;
+  }
+
+  @Override
+  public int getMessagesReceived() {
+    return rxCount;
+  }
+
+  @Override
+  public long getConnectedTime() {
+    return connectedTime;
+  }
+
+  @Override
+  public long getLastTransmissionTime() {
+    return lastTransmission;
+  }
+
+  @Override
+  public int getMeasuredLatency() {
+    return -1;
+  }
+
+  @Override
+  public boolean isFullDuplex() {
+    return true;
+  }
+
+  @Override
+  public String getRxEndpoint() {
+    return webSocketUrl;
+  }
+
+  @Override
+  public String getTxEndpoint() {
+    return null;
+  }
+
+  @Override
+  public int getPendingMessages() {
+    return 0;
   }
 }

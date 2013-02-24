@@ -16,8 +16,14 @@
 
 package org.jboss.errai.bus.client.util;
 
+import static org.jboss.errai.common.client.util.LogUtil.displayDebuggerUtilityTitle;
+import static org.jboss.errai.common.client.util.LogUtil.displaySeparator;
+import static org.jboss.errai.common.client.util.LogUtil.nativeLog;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.framework.transports.TransportHandler;
+import org.jboss.errai.bus.client.framework.transports.TransportStatistics;
 import org.jboss.errai.common.client.util.LogUtil;
 
 /**
@@ -27,7 +33,7 @@ public class ManagementConsole {
   private final ClientMessageBusImpl clientMessageBus;
   private BusErrorDialog errorDialog;
 
-  public ManagementConsole(ClientMessageBusImpl clientMessageBus) {
+  public ManagementConsole(final ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
     this.errorDialog = new BusErrorDialog(clientMessageBus);
     declareDebugFunction();
@@ -37,12 +43,11 @@ public class ManagementConsole {
     showError(message + " -- Additional Details: " + additionalDetails, e);
   }
 
-
   private void showError(final String message, final Throwable e) {
     errorDialog.addError(message, "", e);
 
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
-      LogUtil.nativeLog(message);
+      nativeLog(message);
     }
   }
 
@@ -51,7 +56,7 @@ public class ManagementConsole {
       var thisRef = this;
 
       $wnd.errai_status = function () {
-          thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::displayStatus();
+          thisRef.@org.jboss.errai.bus.client.util.ManagementConsole::displayStatus()();
       };
 
       $wnd.errai_list_services = function () {
@@ -65,20 +70,20 @@ public class ManagementConsole {
 
   private void listServices() {
 
-    LogUtil.displayDebuggerUtilityTitle("Service and Routing Table");
-    LogUtil.nativeLog("[REMOTES]");
+    displayDebuggerUtilityTitle("Service and Routing Table");
+    nativeLog("[REMOTES]");
 
     for (final String remoteName : clientMessageBus.getRemoteServices()) {
-      LogUtil.nativeLog(remoteName);
+      nativeLog(remoteName);
     }
 
-    LogUtil.nativeLog("[LOCALS]");
+    nativeLog("[LOCALS]");
 
     for (final String localName : clientMessageBus.getLocalServices()) {
-      LogUtil.nativeLog(localName);
+      nativeLog(localName);
     }
 
-    LogUtil.displaySeparator();
+    displaySeparator();
   }
 
   private void showErrorConsole() {
@@ -90,27 +95,62 @@ public class ManagementConsole {
    * Debugging functions.
    */
   private void displayStatus() {
-
-    LogUtil.displayDebuggerUtilityTitle("ErraiBus Status");
+    displayDebuggerUtilityTitle("ErraiBus Transport Status");
 
     final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
-//    LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
-    LogUtil.nativeLog("");
-//    LogUtil.nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
-//    LogUtil.nativeLog("  Endpoint (RX)        : " + getApplicationRoot() + bus.IN_SERVICE_ENTRY_POINT);
-//    LogUtil.nativeLog("  Endpoint (TX)        : " + getApplicationRoot() + bus.OUT_SERVICE_ENTRY_POINT);
-//    LogUtil.nativeLog("  Pending Requests     : " + bus.pendingRequests.size());
-//    LogUtil.nativeLog("");
-//    LogUtil.nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
-//    LogUtil.nativeLog("  Endpoint (RX/TX)     : " + bus.webSocketUrl);
-//    LogUtil.nativeLog("");
-//    LogUtil.nativeLog("Total TXs              : " + bus.txNumber);
-//    LogUtil.nativeLog("Total RXs              : " + bus.rxNumber);
-//    LogUtil.nativeLog("");
-//    LogUtil.nativeLog("Endpoints");
-//    LogUtil.nativeLog("  Remote (total)       : " + clientMessageBus.ge.size());
-//    LogUtil.nativeLog("  Local (total)        : " + bus.subscriptions.size());
 
-    LogUtil.displaySeparator();
+    nativeLog("Bus State               : " + (bus.getState()));
+    nativeLog("Wire Protocol           : V3.JSON");
+    nativeLog("Active Channel          : " + (bus.getTransportHandler()));
+
+//    LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
+    displaySeparator();
+    final TransportStatistics stats = bus.getTransportHandler().getStatistics();
+
+    nativeLog("Channel Details:");
+    nativeLog("  Channel Description   : " + (stats.getTransportDescription()));
+    if (stats.isFullDuplex()) {
+      nativeLog("  Endpoint (RX/TX)      : " + (stats.getRxEndpoint()));
+    }
+    else {
+      nativeLog("  Endpoint (RX)         : " + (stats.getRxEndpoint()));
+      nativeLog("  Endpoint (TX)         : " + (stats.getTxEndpoint()));
+    }
+    nativeLog("  Pending Transmissions : " + (stats.getPendingMessages()));
+    nativeLog("");
+    nativeLog("  TX Count              : " + (stats.getMessagesSent()));
+    nativeLog("  RX Count              : " + (stats.getMessagesReceived()));
+    final long connectedTime = stats.getConnectedTime();
+    if (connectedTime == -1) {
+      nativeLog("  Time Connected        : Not Connected.");
+    }
+    else {
+      nativeLog("  Time Connected        : " + ((System.currentTimeMillis() - connectedTime) / 1000) + " secs.");
+    }
+    nativeLog("  Last Activity (TX/RX) : " + ((System.currentTimeMillis() - stats.getLastTransmissionTime()) / 1000) + " secs ago.");
+    final int measuredLatency = stats.getMeasuredLatency();
+    nativeLog("  Measured Latency      : " + (measuredLatency == -1 ? "N/A" : measuredLatency + "ms" ));
+
+    displaySeparator();
+
+    nativeLog("Available Handlers:");
+    for (final TransportHandler handler : bus.getAllAvailableHandlers()) {
+      if (handler.isUsable()) {
+        nativeLog("  > " + handler.getStatistics().getTransportDescription() + " " + (handler == bus.getTransportHandler() ? "**" : ""));
+      }
+    }
+    nativeLog("Unavailable Handlers");
+    for (final TransportHandler handler : bus.getAllAvailableHandlers()) {
+      if (!handler.isUsable()) {
+        nativeLog("  > " + handler.getStatistics().getTransportDescription() + " [reason: " + handler.getStatistics().getUnsupportedDescription() + "]");
+      }
+    }
+
+    displaySeparator();
+
+    nativeLog("Note: RX and TX counts are network events, not individual messages.");
+    displaySeparator();
   }
+
+
 }

@@ -31,12 +31,15 @@ import java.util.List;
 /**
  * @author Mike Brock
  */
-public class SSEHandler implements TransportHandler {
+public class SSEHandler implements TransportHandler, TransportStatistics {
   private final ClientMessageBusImpl clientMessageBus;
   private final MessageCallback messageCallback;
 
   private final HttpPollingHandler pollingHandler;
   private String sseEntryPoint;
+
+  private int rxCount;
+  private long connectedTime;
 
   private boolean stopped;
   private boolean connected;
@@ -44,6 +47,8 @@ public class SSEHandler implements TransportHandler {
 
   private boolean configured;
   private boolean hosed;
+
+  private String unsupportedReason = "Server Does Not Support";
 
   private Object sseChannel;
 
@@ -57,6 +62,7 @@ public class SSEHandler implements TransportHandler {
   public void configure(Message capabilitiesMessage) {
     if (!isSSESupported()) {
       hosed = true;
+      unsupportedReason = "No Browser Support";
       LogUtil.log("this browser does not support SSE");
       return;
     }
@@ -81,7 +87,7 @@ public class SSEHandler implements TransportHandler {
     stopped = true;
     disconnect(sseChannel);
     sseChannel = null;
-    return  pollingHandler.stop(stopAllCurrentRequests);
+    return pollingHandler.stop(stopAllCurrentRequests);
   }
 
   @Override
@@ -99,11 +105,12 @@ public class SSEHandler implements TransportHandler {
   }
 
   private void handleReceived(final String json) {
+    rxCount++;
     BusToolsCli.decodeToCallback(json, messageCallback);
   }
 
   private static native void disconnect(Object channel) /*-{
-     channel.close();
+      channel.close();
   }-*/;
 
   private native boolean isSSESupported() /*-{
@@ -115,19 +122,19 @@ public class SSEHandler implements TransportHandler {
 
       var errorHandler = function (e) {
           if (e.srcElement.readyState === EventSource.CLOSED) {
-                thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
+              thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
           }
 
       };
 
-      var openHandler = function(e) {
-         thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyConnected()();
+      var openHandler = function (e) {
+          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyConnected()();
       }
 
       var sseSource = new EventSource(sseAddress);
-        sseSource.addEventListener('message', function (e) {
-            thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::handleReceived(Ljava/lang/String;)(e.data);
-        }, false);
+      sseSource.addEventListener('message', function (e) {
+          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::handleReceived(Ljava/lang/String;)(e.data);
+      }, false);
 
       sseSource.onerror = errorHandler;
       sseSource.onopen = openHandler;
@@ -136,6 +143,7 @@ public class SSEHandler implements TransportHandler {
   }-*/;
 
   private void notifyConnected() {
+    connectedTime = System.currentTimeMillis();
     connected = true;
     LogUtil.log("SSE channel opened.");
     retries = 0;
@@ -146,6 +154,7 @@ public class SSEHandler implements TransportHandler {
 
   private void notifyDisconnected() {
     LogUtil.log("SSE channel disconnected.");
+    connectedTime = -1;
     clientMessageBus.setState(BusState.CONNECTION_INTERRUPTED);
 
     connected = false;
@@ -168,5 +177,65 @@ public class SSEHandler implements TransportHandler {
   @Override
   public String toString() {
     return "SSE";
+  }
+
+  @Override
+  public TransportStatistics getStatistics() {
+    return this;
+  }
+
+  @Override
+  public String getTransportDescription() {
+    return "HTTP + Server-Sent Events";
+  }
+
+  @Override
+  public String getUnsupportedDescription() {
+    return unsupportedReason;
+  }
+
+  @Override
+  public int getMessagesSent() {
+    return pollingHandler.getMessagesSent();
+  }
+
+  @Override
+  public int getMessagesReceived() {
+    return rxCount;
+  }
+
+  @Override
+  public long getConnectedTime() {
+    return connectedTime;
+  }
+
+  @Override
+  public int getMeasuredLatency() {
+    return pollingHandler.getMeasuredLatency();
+  }
+
+  @Override
+  public long getLastTransmissionTime() {
+    return pollingHandler.getLastTransmissionTime();
+  }
+
+  @Override
+  public boolean isFullDuplex() {
+    return false;
+  }
+
+  @Override
+  public String getRxEndpoint() {
+    return clientMessageBus.getInServiceEntryPoint();
+  }
+
+  @Override
+  public String getTxEndpoint() {
+    return clientMessageBus.getOutServiceEntryPoint();
+  }
+
+  @Override
+  public int getPendingMessages() {
+    return pollingHandler.getStatistics().getPendingMessages();
   }
 }

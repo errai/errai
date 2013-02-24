@@ -52,6 +52,7 @@ import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +98,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private Map<String, TransportHandler> availableHandlers;
 
-  private final TransportHandler BOOTSTRAP_HANDLER = HttpPollingHandler.newNoPollingInstance(transportToBusCallback, ClientMessageBusImpl.this);
+  private final TransportHandler BOOTSTRAP_HANDLER
+      = HttpPollingHandler.newNoPollingInstance(transportToBusCallback, ClientMessageBusImpl.this);
 
   /**
    * The current transport handler that's in use. This field is never null; it bottoms out at the No-polling version of HttpPollingHandler.
@@ -1001,6 +1003,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void removeLifecycleListener(final BusLifecycleListener l) {
     lifecycleListeners.remove(l);
+  }
+
+  public TransportHandler getTransportHandler() {
+    return transportHandler;
+  }
+
+  public Collection<TransportHandler> getAllAvailableHandlers() {
+    return availableHandlers.values();
   }
 
   /**

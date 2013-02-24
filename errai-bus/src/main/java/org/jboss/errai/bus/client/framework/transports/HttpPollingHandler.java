@@ -49,7 +49,7 @@ import java.util.Set;
 /**
  * @author Mike Brock
  */
-public class HttpPollingHandler implements TransportHandler {
+public class HttpPollingHandler implements TransportHandler, TransportStatistics {
   public static int THROTTLE_TIME_MS = 175;
   public static int POLL_FREQUENCY_MS = 500;
 
@@ -63,7 +63,11 @@ public class HttpPollingHandler implements TransportHandler {
 
   private int txNumber = 0;
   private int rxNumber = 0;
+
+  private long connectedTime = -1;
   private long lastTx = System.currentTimeMillis();
+
+  private int measuredLatency = -1;
 
   private Timer throttleTimer = new Timer() {
     @Override
@@ -71,7 +75,6 @@ public class HttpPollingHandler implements TransportHandler {
       transmit(getDeferredToSend());
     }
   };
-
 
   /**
    * Set to true when an outbound transmission is in progress. This flag is designed to guard against more than
@@ -208,8 +211,6 @@ public class HttpPollingHandler implements TransportHandler {
       specialParms = Collections.emptyMap();
     }
 
-  //  LogUtil.log("tx:" + toSend);
-
     undeliveredMessages.addAll(toSend);
 
     final String message = BusToolsCli.encodeMessages(toSend);
@@ -246,6 +247,8 @@ public class HttpPollingHandler implements TransportHandler {
                 final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
                 final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
 
+                notifyDisconnected();
+
                 if (messageBus.handleTransportError(transportError)) {
                   return;
                 }
@@ -264,6 +267,9 @@ public class HttpPollingHandler implements TransportHandler {
                 return;
               }
               case 200:
+                if (connectedTime == -1) {
+                  connectedTime = System.currentTimeMillis() ;
+                }
                 undeliveredMessages.removeAll(toSend);
                 break;
 
@@ -287,6 +293,8 @@ public class HttpPollingHandler implements TransportHandler {
           @Override
           public void onError(final Request request, final Throwable exception) {
             txActive = false;
+            notifyDisconnected();
+
             messageBus.handleTransportError(new BusTransportError(request, exception, statusCode, RetryInfo.NO_RETRY));
 
             for (final Message txM : txMessages) {
@@ -418,6 +426,8 @@ public class HttpPollingHandler implements TransportHandler {
       final RetryInfo retryInfo = new RetryInfo(retryDelay, rxRetries);
       final BusTransportError transportError = new BusTransportError(request, throwable, statusCode, retryInfo);
 
+      notifyDisconnected();
+
       if (messageBus.handleTransportError(transportError)) {
         return;
       }
@@ -478,10 +488,7 @@ public class HttpPollingHandler implements TransportHandler {
         }
       }
 
-      if (messageBus.getState() == BusState.CONNECTION_INTERRUPTED)
-        messageBus.setState(BusState.CONNECTED);
-
-      rxRetries = 0;
+      notifyConnected();
 
       BusToolsCli.decodeToCallback(response.getText(), messageCallback);
 
@@ -568,6 +575,8 @@ public class HttpPollingHandler implements TransportHandler {
       }
     }
 
+    final long latencyTime = System.currentTimeMillis();
+
     final RequestBuilder builder = new RequestBuilder(
         RequestBuilder.POST,
         URL.encode(messageBus.getApplicationLocation(serviceEntryPoint)) + "?z=" + getNextRequestNumber()
@@ -581,6 +590,10 @@ public class HttpPollingHandler implements TransportHandler {
       final Request request = builder.sendRequest(payload, new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {
+          if (!waitChannel) {
+            measuredLatency = (int) (System.currentTimeMillis() - latencyTime);
+          }
+
           pendingRequests.remove(rxInfo);
           callback.onResponseReceived(request, response);
           rxNumber++;
@@ -616,6 +629,21 @@ public class HttpPollingHandler implements TransportHandler {
     return (int) (System.currentTimeMillis() - lastTx) - THROTTLE_TIME_MS;
   }
 
+  private void notifyConnected() {
+    if (connectedTime == -1) {
+       connectedTime = System.currentTimeMillis();
+     }
+
+     if (messageBus.getState() == BusState.CONNECTION_INTERRUPTED)
+       messageBus.setState(BusState.CONNECTED);
+
+     rxRetries = 0;
+  }
+
+  private void notifyDisconnected() {
+    connectedTime = -1;
+  }
+
   private static class RxInfo {
     private Request request;
     private final boolean waiting;
@@ -645,13 +673,73 @@ public class HttpPollingHandler implements TransportHandler {
 
   public String toString() {
     if (receiveCommCallback instanceof NoPollRequestCallback) {
-      return "NoPolling";
+      return "No Polling";
     }
     else if (receiveCommCallback instanceof ShortPollRequestCallback) {
-      return "ShortPolling";
+      return "Short Polling";
     }
     else {
-      return "LongPolling";
+      return "Long Polling";
     }
+  }
+
+  @Override
+  public TransportStatistics getStatistics() {
+    return this;
+  }
+
+  @Override
+  public String getTransportDescription() {
+    return "HTTP " + toString();
+  }
+
+  @Override
+  public int getMessagesSent() {
+    return txNumber;
+  }
+
+  @Override
+  public int getMessagesReceived() {
+    return rxNumber;
+  }
+
+  @Override
+  public long getConnectedTime() {
+    return connectedTime;
+  }
+
+  @Override
+  public long getLastTransmissionTime() {
+    return lastTx;
+  }
+
+  @Override
+  public int getMeasuredLatency() {
+    return measuredLatency;
+  }
+
+  @Override
+  public boolean isFullDuplex() {
+    return false;
+  }
+
+  @Override
+  public String getRxEndpoint() {
+    return messageBus.getInServiceEntryPoint();
+  }
+
+  @Override
+  public String getTxEndpoint() {
+    return messageBus.getOutServiceEntryPoint();
+  }
+
+  @Override
+  public String getUnsupportedDescription() {
+    return "Server Does Not Support";
+  }
+
+  @Override
+  public int getPendingMessages() {
+    return heldMessages.size();
   }
 }
