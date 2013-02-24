@@ -1,7 +1,6 @@
 package org.jboss.errai.orientation.client.local;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 
 /**
@@ -23,18 +22,16 @@ public class LocationTest extends AbstractErraiCDITest {
   }
 
   public void testLocationEventIsFired() {
-    CDI.addPostInitTask(new Runnable() {
+    asyncTest(new Runnable() {
       @Override
       public void run() {
         LocationObserverTestModule module = IOC.getBeanManager().lookupBean(LocationObserverTestModule.class).getInstance();
 
-        module.fireMockEvent();
+         module.fireMockEvent();
 
-        assertEquals("Wrong number of events received:", 1, module.getReceivedEvents().size());
-        finishTest();
+         assertEquals("Wrong number of events received:", 1, module.getReceivedEvents().size());
+         finishTest();
       }
     });
-
-    delayTestFinish(60000);
   }
 }
