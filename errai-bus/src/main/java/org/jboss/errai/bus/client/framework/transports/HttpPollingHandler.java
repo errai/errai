@@ -69,7 +69,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
   private int measuredLatency = -1;
 
-  private Timer throttleTimer = new Timer() {
+  private final Timer throttleTimer = new Timer() {
     @Override
     public void run() {
       transmit(getDeferredToSend());
@@ -267,9 +267,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
                 return;
               }
               case 200:
-                if (connectedTime == -1) {
-                  connectedTime = System.currentTimeMillis() ;
-                }
+                notifyConnected();
                 undeliveredMessages.removeAll(toSend);
                 break;
 

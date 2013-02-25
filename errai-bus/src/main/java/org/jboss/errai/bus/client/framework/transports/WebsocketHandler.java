@@ -46,7 +46,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   private Object webSocketChannel;
   private HttpPollingHandler longPollingTransport;
 
-  private long connectedTime;
+  private long connectedTime = -1;
   private long lastTransmission;
 
   private int txCount;

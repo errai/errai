@@ -39,7 +39,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   private String sseEntryPoint;
 
   private int rxCount;
-  private long connectedTime;
+  private long connectedTime = -1;
 
   private boolean stopped;
   private boolean connected;
