@@ -27,6 +27,9 @@ import java.util.List;
 public interface TransportHandler {
   public static final String EXTRA_URI_PARMS_RESOURCE = "^ExtraURIParameters";
 
+  static final String UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT = "Not configured / Server does not support";
+  static final String UNSUPPORTED_MESSAGE_NO_CLIENT_SUPPORT = "Browser does not support";
+
   /**
    * Called to configure the transport. The Message instance passed to the handler, is the initial response message
    * from the server during the ErraiBus protocol handshake, which contains the capabilities data for the remote

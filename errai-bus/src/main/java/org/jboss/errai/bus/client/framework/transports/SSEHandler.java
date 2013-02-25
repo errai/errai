@@ -48,7 +48,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   private boolean configured;
   private boolean hosed;
 
-  private String unsupportedReason = "Server Does Not Support";
+  private String unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
 
   private Object sseChannel;
 
@@ -60,9 +60,11 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   @Override
   public void configure(Message capabilitiesMessage) {
+    configured = true;
+
     if (!isSSESupported()) {
       hosed = true;
-      unsupportedReason = "No Browser Support";
+      unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
       LogUtil.log("this browser does not support SSE");
       return;
     }
@@ -70,16 +72,27 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     this.sseEntryPoint = URL.encode(clientMessageBus.getApplicationLocation(clientMessageBus.getInServiceEntryPoint()))
         + "?z=0000&sse=1&clientId=" + URL.encodePathSegment(clientMessageBus.getClientId());
 
-    configured = true;
   }
 
   @Override
   public void start() {
     stopped = false;
     if (connected) {
+      LogUtil.log("did not start SSE handler: already started.");
       return;
     }
     sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint);
+
+
+    // time out after 2 seconds and attempt reconnect. (note: this is really to deal with a bug a firefox).
+    new Timer() {
+      @Override
+      public void run() {
+        if (!connected) {
+          notifyDisconnected();
+        }
+      }
+    }.schedule(2000);
   }
 
   @Override
@@ -124,10 +137,9 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
           if (e.srcElement.readyState === EventSource.CLOSED) {
               thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
           }
-
       };
 
-      var openHandler = function (e) {
+      var openHandler = function () {
           thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyConnected()();
       }
 

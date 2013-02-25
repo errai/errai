@@ -26,6 +26,8 @@ import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.bus.client.framework.transports.TransportStatistics;
 import org.jboss.errai.common.client.util.LogUtil;
 
+import java.util.Collection;
+
 /**
  * @author Mike Brock
  */
@@ -99,48 +101,59 @@ public class ManagementConsole {
 
     final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
+    final boolean federatedApp = BusToolsCli.isRemoteCommunicationEnabled();
+
     nativeLog("Bus State               : " + (bus.getState()));
     nativeLog("Wire Protocol           : V3.JSON");
-    nativeLog("Active Channel          : " + (bus.getTransportHandler()));
+    nativeLog("Active Channel          : " + (!federatedApp ? "None" : (bus.getTransportHandler())));
 
-//    LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
     displaySeparator();
     final TransportStatistics stats = bus.getTransportHandler().getStatistics();
 
     nativeLog("Channel Details:");
-    nativeLog("  Channel Description   : " + (stats.getTransportDescription()));
-    if (stats.isFullDuplex()) {
-      nativeLog("  Endpoint (RX/TX)      : " + (stats.getRxEndpoint()));
+    if (federatedApp) {
+      nativeLog("  Channel Description   : " + (stats.getTransportDescription()));
+      if (stats.isFullDuplex()) {
+        nativeLog("  Endpoint (RX/TX)      : " + (stats.getRxEndpoint()));
+      }
+      else {
+        nativeLog("  Endpoint (RX)         : " + (stats.getRxEndpoint()));
+        nativeLog("  Endpoint (TX)         : " + (stats.getTxEndpoint()));
+      }
+      nativeLog("  Pending Transmissions : " + (stats.getPendingMessages()));
+      nativeLog("");
+      nativeLog("  TX Count              : " + (stats.getMessagesSent()));
+      nativeLog("  RX Count              : " + (stats.getMessagesReceived()));
+      final long connectedTime = stats.getConnectedTime();
+      if (connectedTime == -1) {
+        nativeLog("  Time Connected        : Not Connected.");
+      }
+      else {
+        nativeLog("  Time Connected        : " + ((System.currentTimeMillis() - connectedTime) / 1000) + " secs.");
+      }
+      nativeLog("  Last Activity (TX/RX) : " + ((System.currentTimeMillis() - stats.getLastTransmissionTime()) / 1000) + " secs ago.");
+      final int measuredLatency = stats.getMeasuredLatency();
+      nativeLog("  Measured Latency      : " + (measuredLatency == -1 ? "N/A" : measuredLatency + "ms"));
     }
     else {
-      nativeLog("  Endpoint (RX)         : " + (stats.getRxEndpoint()));
-      nativeLog("  Endpoint (TX)         : " + (stats.getTxEndpoint()));
+      nativeLog("  <No transport configured>");
     }
-    nativeLog("  Pending Transmissions : " + (stats.getPendingMessages()));
-    nativeLog("");
-    nativeLog("  TX Count              : " + (stats.getMessagesSent()));
-    nativeLog("  RX Count              : " + (stats.getMessagesReceived()));
-    final long connectedTime = stats.getConnectedTime();
-    if (connectedTime == -1) {
-      nativeLog("  Time Connected        : Not Connected.");
-    }
-    else {
-      nativeLog("  Time Connected        : " + ((System.currentTimeMillis() - connectedTime) / 1000) + " secs.");
-    }
-    nativeLog("  Last Activity (TX/RX) : " + ((System.currentTimeMillis() - stats.getLastTransmissionTime()) / 1000) + " secs ago.");
-    final int measuredLatency = stats.getMeasuredLatency();
-    nativeLog("  Measured Latency      : " + (measuredLatency == -1 ? "N/A" : measuredLatency + "ms" ));
 
     displaySeparator();
 
     nativeLog("Available Handlers:");
-    for (final TransportHandler handler : bus.getAllAvailableHandlers()) {
+    final Collection<TransportHandler> allAvailableHandlers = bus.getAllAvailableHandlers();
+
+    if (allAvailableHandlers.isEmpty()) {
+      nativeLog(" [none]");
+    }
+    for (final TransportHandler handler : allAvailableHandlers) {
       if (handler.isUsable()) {
         nativeLog("  > " + handler.getStatistics().getTransportDescription() + " " + (handler == bus.getTransportHandler() ? "**" : ""));
       }
     }
     nativeLog("Unavailable Handlers");
-    for (final TransportHandler handler : bus.getAllAvailableHandlers()) {
+    for (final TransportHandler handler : allAvailableHandlers) {
       if (!handler.isUsable()) {
         nativeLog("  > " + handler.getStatistics().getTransportDescription() + " [reason: " + handler.getStatistics().getUnsupportedDescription() + "]");
       }

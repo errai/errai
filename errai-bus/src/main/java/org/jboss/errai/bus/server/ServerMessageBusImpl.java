@@ -1110,6 +1110,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       if (broadcastable && !message.isFlagSet(RoutingFlag.NonGlobalRouting)) {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
+
         try {
           if (queues.isEmpty()) return;
 

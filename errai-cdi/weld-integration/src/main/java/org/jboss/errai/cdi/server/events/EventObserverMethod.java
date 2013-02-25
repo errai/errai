@@ -17,6 +17,16 @@ package org.jboss.errai.cdi.server.events;
 
 import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.enterprise.client.cdi.CDICommands;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+
+import javax.enterprise.event.Reception;
+import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.spi.ObserverMethod;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,17 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import javax.enterprise.event.Reception;
-import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.spi.ObserverMethod;
-
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.enterprise.client.cdi.CDICommands;
-import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
  * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the

@@ -129,7 +129,7 @@ public class App {
       else if (el.getClassName().contains("change")) {
         el.setInnerText(tick.getFormattedChange());
         String strobeCssColor = tick.getChange().signum() >= 0 ? "rgb(40, 155, 40)" : "rgb(155, 40, 40)";
-        strobe(el, strobeCssColor, "rgb(0, 0, 0)");
+        //strobe(el, strobeCssColor, "rgb(0, 0, 0)");
       }
       else if (el.getClassName().contains("time")) {
         DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM);

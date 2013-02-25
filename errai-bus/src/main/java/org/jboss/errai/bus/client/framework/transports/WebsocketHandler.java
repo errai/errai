@@ -58,7 +58,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   private int retries;
 
-  private String unsupportedReason = "Server Does Not Support";
+  private String unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
 
   public WebsocketHandler(final MessageCallback messageCallback, final ClientMessageBusImpl messageBus) {
     this.longPollingTransport = HttpPollingHandler.newLongPollingInstance(messageCallback, messageBus);
@@ -68,8 +68,10 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   @Override
   public void configure(final Message capabilitiesMessage) {
+    configured = true;
+
     if (!isWebSocketSupported()) {
-      unsupportedReason = "No Browser Support";
+      unsupportedReason = UNSUPPORTED_MESSAGE_NO_CLIENT_SUPPORT;
       LogUtil.log("websockets not supported by browser");
       hosed = true;
       return;
@@ -82,9 +84,6 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
     if (hosed) {
       LogUtil.log("server reported it supports websockets but did not send configuration information.");
-    }
-    else {
-      configured = true;
     }
   }
 
@@ -274,7 +273,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   @Override
   public String getUnsupportedDescription() {
-    return unsupportedReason;
+    return UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
   }
 
   @Override

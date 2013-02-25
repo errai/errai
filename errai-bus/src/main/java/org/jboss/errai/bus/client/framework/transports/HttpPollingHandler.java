@@ -733,7 +733,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
   @Override
   public String getUnsupportedDescription() {
-    return "Server Does Not Support";
+    return UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
   }
 
   @Override
