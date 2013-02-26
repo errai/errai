@@ -1,21 +1,17 @@
 package org.jboss.errai.demo.grocery.client.shared;
 
-import java.util.Date;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
-
 import org.jboss.errai.databinding.client.api.Bindable;
+
+import javax.persistence.*;
+import java.util.Date;
 
 @Bindable
 @Entity
 @EntityListeners(EventTranslator.ItemLifecycleListener.class)
-@NamedQuery(name="allItemsByName", query="SELECT i FROM Item i ORDER BY i.name")
+@NamedQueries({
+  @NamedQuery(name="allItemsByName", query="SELECT i FROM Item i ORDER BY i.name"),
+  @NamedQuery(name="allItems", query="SELECT i FROM Item i ORDER BY :sortBy")
+})
 public class Item {
 
   @Id @GeneratedValue

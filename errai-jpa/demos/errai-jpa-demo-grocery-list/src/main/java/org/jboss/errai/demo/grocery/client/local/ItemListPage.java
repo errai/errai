@@ -23,6 +23,7 @@ public class ItemListPage extends Composite {
 
   @Inject private @DataField GroceryListWidget listWidget;
   @Inject private @DataField ItemForm newItemForm;
+  @Inject private @DataField SortWidget sortWidget;
 
   @PostConstruct
   private void initInstance() {
