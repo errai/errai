@@ -17,10 +17,18 @@ import com.google.gwt.maps.client.placeslib.*;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import org.gwtopenmaps.openlayers.client.*;
+import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
+import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.OverviewMap;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
+import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
+import org.gwtopenmaps.openlayers.client.geometry.LinearRing;
+import org.gwtopenmaps.openlayers.client.geometry.Point;
+import org.gwtopenmaps.openlayers.client.geometry.Polygon;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.OSM;
+import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
@@ -56,6 +64,8 @@ public class StorePage extends Composite {
 
   private Marker marker;
   private Markers markers;
+  private Vector vectorLayer;
+  private ModifyFeature modifyControl;
 
   @PageShown
   private void setup() {
@@ -97,17 +107,32 @@ public class StorePage extends Composite {
         defaultMapOptions.setNumZoomLevels(16);
         final MapWidget mapWidget = new MapWidget("100%", "100%", defaultMapOptions);
         mapContainer.add(mapWidget);
-        Map map = mapWidget.getMap();
+        final Map map = mapWidget.getMap();
 
         OSM osm = OSM.Mapnik("Mapnik");
         osm.setIsBaseLayer(true);
         map.addLayer(osm);
+        vectorLayer = new Vector("Fence");
+        map.addLayer(vectorLayer);
         markers = new Markers("Markers");
         map.addLayer(markers);
         map.addControl(new OverviewMap());
         map.addControl(new ScaleLine());
 
-        placeMarkerAtStoreLocation(mapWidget);
+        ModifyFeatureOptions featureOptions = new ModifyFeatureOptions();
+        featureOptions.setMode(ModifyFeature.RESIZE);
+        featureOptions.onModificationEnd(new ModifyFeature.OnModificationEndListener() {
+          @Override
+          public void onModificationEnd(VectorFeature vectorFeature) {
+            float diameter = vectorFeature.getGeometry().getBounds().getWidth();
+            storeBinder.getModel().setRadius(diameter / 2);
+          }
+        });
+
+        modifyControl = new ModifyFeature(vectorLayer, featureOptions);
+        map.addControl(modifyControl);
+
+        placeMarkerAtStoreLocation(map);
 
         // set up autocomplete search box for this place
         AutocompleteType[] types = new AutocompleteType[2];
@@ -137,8 +162,9 @@ public class StorePage extends Composite {
             store.setAddress(result.getFormatted_Address());
             store.setLatitude(center.getLatitude());
             store.setLongitude(center.getLongitude());
+            store.setRadius(100);
 
-            placeMarkerAtStoreLocation(mapWidget);
+            placeMarkerAtStoreLocation(map);
           }
         });
       }
@@ -167,7 +193,7 @@ public class StorePage extends Composite {
    *
    * @param map the map to place the marker on
    */
-  private void placeMarkerAtStoreLocation(final MapWidget map) {
+  private void placeMarkerAtStoreLocation(final Map map) {
     // first remove old marker, if any
     if (marker != null) {
       markers.removeMarker(marker);
@@ -177,11 +203,13 @@ public class StorePage extends Composite {
     LatLng center = getStoreLocation();
     if (center != null) {
       Size size = new Size(25, 22);
-      Icon icon = new Icon("img/marker.png", size);
-      marker = new Marker(convertPoint(map.getMap().getProjection(), center), icon);
+      Pixel pixel = new Pixel(-15, -11);
+      Icon icon = new Icon("img/marker.png", size, pixel);
+      marker = new Marker(convertPoint(map.getProjection(), center), icon);
       markers.addMarker(marker);
 
-      centerMap(map.getMap(), center, 15);
+      centerMap(map, center, 15);
+      drawGeoFence(map);
     }
     else {
       Geolocation geolocation = Geolocation.getIfSupported();
@@ -191,18 +219,43 @@ public class StorePage extends Composite {
           @Override
           public void onSuccess(Position result) {
             LatLng here = LatLng.newInstance(result.getCoordinates().getLatitude(), result.getCoordinates().getLongitude());
-            centerMap(map.getMap(), here, 14);
+            centerMap(map, here, 14);
           }
 
           @Override
           public void onFailure(PositionError reason) {
             // fall back to Google's IP Geolocation
-            centerMap(map.getMap(), getIpBasedLocation(), 13);
+            centerMap(map, getIpBasedLocation(), 13);
           }
         });
       }
     }
   }
+
+  private void drawGeoFence(Map map) {
+    LonLat center = map.getCenter();
+    center.transform(map.getProjection(), DEFAULT_PROJECTION.getProjectionCode());
+
+    Point[] points = new Point[40];
+
+    int angle = 0;
+    for (int i = 0; i < 40; i++) {
+      angle += 360 / 40;
+      float radius = storeBinder.getModel().getRadius();
+      LonLat lonLat = LonLat.narrowToLonLat(destinationVincenty(center.lon(), center.lat(), angle, radius));
+      lonLat.transform("EPSG:4326", map.getProjection());
+      points[i] = new Point(lonLat.lon(), lonLat.lat());
+    }
+    LinearRing ring = new LinearRing(points);
+    Polygon polygon = new Polygon(new LinearRing[]{ring});
+
+    vectorLayer.addFeature(new VectorFeature(polygon));
+    modifyControl.activate();
+  }
+
+  private native JSObject destinationVincenty(double lon, double lat, int angle, float radius) /*-{
+    return $wnd.OpenLayers.Util.destinationVincenty(new $wnd.OpenLayers.LonLat(lon, lat), angle, radius);
+  }-*/;
 
   private void centerMap(Map map, LatLng center, int zoomLevel) {
     LonLat lonlat = convertPoint(map.getProjection(), center);

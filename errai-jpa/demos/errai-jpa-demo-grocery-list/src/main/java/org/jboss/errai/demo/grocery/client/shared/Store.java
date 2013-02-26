@@ -28,6 +28,8 @@ public class Store {
   private double latitude;
   private double longitude;
 
+  private float radius;
+
   @OneToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE})
   private List<Department> departments = new ArrayList<Department>();
 
@@ -63,6 +65,14 @@ public class Store {
     this.longitude = longitude;
   }
 
+  public float getRadius() {
+    return radius;
+  }
+
+  public void setRadius(float radius) {
+    this.radius = radius;
+  }
+
   public List<Department> getDepartments() {
     return departments;
   }
@@ -77,7 +87,14 @@ public class Store {
 
   @Override
   public String toString() {
-    return "Store [id=" + id + ", name=" + name + ", address=" + address + ", latitude=" + latitude + ", longitude="
-            + longitude + ", departments=" + departments + "]";
+    return "Store{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", address='" + address + '\'' +
+        ", latitude=" + latitude +
+        ", longitude=" + longitude +
+        ", radius=" + radius +
+        ", departments=" + departments +
+        '}';
   }
 }
