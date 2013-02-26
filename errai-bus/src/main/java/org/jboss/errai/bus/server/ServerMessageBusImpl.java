@@ -355,7 +355,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 msg.set(MessageParts.WebSocketToken, WebSocketTokenManager.getNewOneTimeToken(session));
               }
 
-              if (sseEnabled) {
+              if (sseEnabled && !session.hasAttribute("NoSSE")) {
                 capabilitiesBuffer.append(",").append(Capabilities.SSE.name());
               }
 

@@ -137,6 +137,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
       var errorHandler = function (e) {
           if (e.srcElement.readyState === EventSource.CLOSED) {
+              console.log("the sse channel hung up!")
               thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
           }
       };
@@ -157,8 +158,10 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   }-*/;
 
   private void notifyConnected() {
-    connectedTime = System.currentTimeMillis();
     connected = true;
+
+    initialTimeoutTimer.cancel();
+    connectedTime = System.currentTimeMillis();
     LogUtil.log("SSE channel opened.");
     retries = 0;
 
@@ -167,6 +170,8 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   }
 
   private void notifyDisconnected() {
+    new Throwable().printStackTrace();
+
     initialTimeoutTimer.cancel();
     LogUtil.log("SSE channel disconnected.");
     connectedTime = -1;

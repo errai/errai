@@ -175,12 +175,11 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
       if (sse) {
         final long timeout = System.currentTimeMillis() + getSSETimeout();
         while (System.currentTimeMillis() < timeout) {
+          prepareSSEContinue(httpServletResponse);
+          outputStream.flush();
           queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
           outputStream.write("\n\n".getBytes());
-          outputStream.flush();
           queue.heartBeat();
-
-          prepareSSEContinue(httpServletResponse);
         }
       }
       else if (wait) {

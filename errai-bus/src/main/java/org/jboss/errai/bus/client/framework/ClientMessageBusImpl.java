@@ -272,7 +272,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               declareSubscriptionListeners();
 
               setState(BusState.CONNECTED);
-              startSleepDetector();
+//              startSleepDetector();
               sendAllDeferred();
               InitVotes.voteFor(ClientMessageBus.class);
               LogUtil.log("bus federated and running.");
@@ -351,7 +351,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     setState(BusState.CONNECTING);
 
-//    try {
     LogUtil.log("sending initial handshake to remote bus");
 
     for (final Runnable deferredSubscription : deferredSubscriptions) {
@@ -367,6 +366,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, Collections.singletonMap("phase", "connection"));
 
     transportHandler.transmit(Collections.singletonList(initialMessage));
+    transportHandler.start();
   }
 
   private void processCapabilities(final Message message) {
@@ -441,35 +441,35 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     deferredMessages.addAll(transportHandler.stop(true));
   }
-
-  private void startSleepDetector() {
-    new Timer() {
-      @Override
-      public void run() {
-        final long currentTime = System.currentTimeMillis();
-
-        if (lastSleepTick - currentTime > 30000) {
-          LogUtil.log("we might be asleep.");
-
-          if (state == BusState.LOCAL_ONLY && lastSleepCheckWasOnline) {
-            init();
-          }
-          else {
-            sendInterrogationEcho(2000, new Runnable() {
-              @Override
-              public void run() {
-                stop(false);
-                init();
-              }
-            });
-          }
-        }
-
-        lastSleepTick = currentTime;
-        lastSleepCheckWasOnline = (state == BusState.CONNECTED);
-      }
-    }.scheduleRepeating(1000);
-  }
+//
+//  private void startSleepDetector() {
+//    new Timer() {
+//      @Override
+//      public void run() {
+//        final long currentTime = System.currentTimeMillis();
+//
+//        if (lastSleepTick - currentTime > 30000) {
+//          LogUtil.log("we might be asleep.");
+//
+//          if (state == BusState.LOCAL_ONLY && lastSleepCheckWasOnline) {
+//            init();
+//          }
+//          else {
+//            sendInterrogationEcho(2000, new Runnable() {
+//              @Override
+//              public void run() {
+//                stop(false);
+//                init();
+//              }
+//            });
+//          }
+//        }
+//
+//        lastSleepTick = currentTime;
+//        lastSleepCheckWasOnline = (state == BusState.CONNECTED);
+//      }
+//    }.scheduleRepeating(1000);
+//  }
 
   private String getAdvertisableSubjects() {
     String subjects = "";
@@ -494,31 +494,31 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return sessionId;
   }
 
-  private void sendInterrogationEcho(final int timeoutMillis, final Runnable failure) {
-    final String receivingSubject = "^ClientEchoReceiver";
-
-    final Timer failureTimer = new Timer() {
-      @Override
-      public void run() {
-        failure.run();
-        unsubscribeAll(receivingSubject);
-      }
-    };
-
-    failureTimer.schedule(timeoutMillis);
-
-    subscribe(receivingSubject, new MessageCallback() {
-      @Override
-      public void callback(final Message message) {
-        unsubscribeAll(receivingSubject);
-        failureTimer.cancel();
-      }
-    });
-
-    CommandMessage.createWithParts(new HashMap<String, Object>())
-        .toSubject("ServerEchoService")
-        .set(MessageParts.Value, "HelloServer");
-  }
+//  private void sendInterrogationEcho(final int timeoutMillis, final Runnable failure) {
+//    final String receivingSubject = "^ClientEchoReceiver";
+//
+//    final Timer failureTimer = new Timer() {
+//      @Override
+//      public void run() {
+//        failure.run();
+//        unsubscribeAll(receivingSubject);
+//      }
+//    };
+//
+//    failureTimer.schedule(timeoutMillis);
+//
+//    subscribe(receivingSubject, new MessageCallback() {
+//      @Override
+//      public void callback(final Message message) {
+//        unsubscribeAll(receivingSubject);
+//        failureTimer.cancel();
+//      }
+//    });
+//
+//    CommandMessage.createWithParts(new HashMap<String, Object>())
+//        .toSubject("ServerEchoService")
+//        .set(MessageParts.Value, "HelloServer");
+//  }
 
   /**
    * Removes all subscriptions attached to the specified subject

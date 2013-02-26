@@ -57,7 +57,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
-    pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(),
+    pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest)),
         httpServletRequest, httpServletResponse, true);
   }
@@ -80,8 +80,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
 
-    final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(),
+    final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest));
+
+    session.setAttribute("NoSSE", Boolean.TRUE);
 
     try {
       service.store(createCommandMessage(session, httpServletRequest));
@@ -91,6 +93,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         sendDisconnectDueToSessionExpiry(httpServletResponse);
       }
     }
+
+    pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest));
   }
 
   private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
