@@ -103,12 +103,8 @@ public class Album {
   public static final List<CallbackLogEntry> CALLBACK_LOG = new ArrayList<CallbackLogEntry>();
 
 
-  @SuppressWarnings("unused")
   @PrePersist private void prePersist() { CALLBACK_LOG.add(new CallbackLogEntry(this, PrePersist.class)); };
-
-  @SuppressWarnings("unused")
   @PostPersist private void postPersist() { CALLBACK_LOG.add(new CallbackLogEntry(this, PostPersist.class)); };
-
   @PreRemove void preRemove() { CALLBACK_LOG.add(new CallbackLogEntry(this, PreRemove.class)); };
   @PostRemove void postRemove() { CALLBACK_LOG.add(new CallbackLogEntry(this, PostRemove.class)); };
   @PreUpdate protected void preUpdate() { CALLBACK_LOG.add(new CallbackLogEntry(this, PreUpdate.class)); };
