@@ -16,6 +16,11 @@
 
 package org.jboss.errai.codegen.test.model;
 
+import com.google.common.collect.Multimap;
+
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 /**
  * @author Mike Brock
  */
@@ -38,4 +43,8 @@ public class ToProxyBean {
   public Integer getBlah() {
     return blah;
   }
+
+  public <W extends Annotation> void methodWithTypeArgs(Class<W> annotation, Multimap<String, String> map) {
+  }
+
 }

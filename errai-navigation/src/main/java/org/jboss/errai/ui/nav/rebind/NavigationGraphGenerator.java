@@ -49,6 +49,7 @@ import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageShown;
 import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
+import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -383,6 +384,7 @@ public class NavigationGraphGenerator extends Generator {
       out.println("digraph Navigation {");
       final MetaClass transitionToType = MetaClassFactory.get(TransitionTo.class);
       final MetaClass transitionAnchorType = MetaClassFactory.get(TransitionAnchor.class);
+      final MetaClass transitionAnchorFactoryType = MetaClassFactory.get(TransitionAnchorFactory.class);
       for (Map.Entry<String, MetaClass> entry : pages.entrySet()) {
         String pageName = entry.getKey();
         MetaClass pageClass = entry.getValue();
@@ -395,7 +397,9 @@ public class NavigationGraphGenerator extends Generator {
         out.println();
 
         for (MetaField field : getAllFields(pageClass)) {
-          if (field.getType().getErased().equals(transitionToType) || field.getType().getErased().equals(transitionAnchorType)) {
+          if (field.getType().getErased().equals(transitionToType)
+                  || field.getType().getErased().equals(transitionAnchorType)
+                  || field.getType().getErased().equals(transitionAnchorFactoryType)) {
             MetaType targetPageType = field.getType().getParameterizedType().getTypeParameters()[0];
             String targetPageName = pages.inverse().get(targetPageType);
 

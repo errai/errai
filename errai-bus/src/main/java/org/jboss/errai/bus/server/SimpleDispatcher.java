@@ -46,7 +46,7 @@ public class SimpleDispatcher implements RequestDispatcher {
       bus.sendGlobal(message);
     }
     catch (QueueUnavailableException e) {
-      handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
+      throw e;
     }
     catch (Throwable e) {
       message.setResource("Exception", e.getCause());

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ui.cordova;
 
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.Configuration;
 
@@ -30,8 +31,8 @@ public class LocationAwareClientMessageBus extends ClientMessageBusImpl {
   private static final Logger LOG = Logger.getLogger(LocationAwareClientMessageBus.class.getName());
 
   @Override
-  protected String getApplicationLocation(String serviceEntryPoint) {
-    Configuration configuration = getConfiguration();
+  public String getApplicationLocation(String serviceEntryPoint) {
+    Configuration configuration = GWT.create(Configuration.class);
     if (configuration instanceof Configuration.NotSpecified) {
       throw new IllegalArgumentException("you need to implement Configuration in order to point to the server location");
     }

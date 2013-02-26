@@ -16,23 +16,17 @@
 
 package org.jboss.errai.bus.server.io;
 
-import static java.lang.System.nanoTime;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.buffers.Buffer;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.BufferOverflowException;
 import org.jboss.errai.bus.server.util.MarkedByteWriteAdapter;
-import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This implementation of {@link MessageDeliveryHandler} facilitates the buffering of all inbound message
@@ -77,26 +71,46 @@ public class BufferDeliveryHandler implements MessageDeliveryHandler, Buffered, 
     //   discardPageData(queue);
   }
 
+
   @Override
-  public boolean copyFromBuffer(final boolean waitForData,
-                                final MessageQueue queue,
+  public boolean copyFromBuffer(final MessageQueue queue,
                                 final ByteWriteAdapter toAdapter) throws IOException {
 
 
     final MarkedByteWriteAdapter markedOutputStream = new MarkedByteWriteAdapter(toAdapter);
 
     try {
-      if (waitForData) {
-        queue.getBuffer().readWait(TimeUnit.SECONDS, 20, markedOutputStream, queue.getBufferColor(),
-            new MultiMessageFilter());
-      }
-      else {
-        queue.getBuffer().read(markedOutputStream, queue.getBufferColor(), new MultiMessageFilter());
-      }
+      queue.getBuffer().read(markedOutputStream, queue.getBufferColor(), new MultiMessageFilter());
 
       markedOutputStream.flush();
 
-      if (markedOutputStream.dataWasWritten()) {
+      if (markedOutputStream.dataWasWritten() && markedOutputStream.getBytesWritten() > 2) {
+        queue.resetMessageCount();
+        return true;
+      }
+    }
+    catch (BufferOverflowException e) {
+      queue.getBufferColor().getSequence().set(queue.getBuffer().getHeadSequence());
+      log.warn("buffer data was evicted for session " + queue.getSession().getSessionId()
+          + " due to overflow condition. (consider increasing buffer size with errai.bus.buffer_size "
+          + "in ErraiService.properties)");
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean copyFromBuffer(TimeUnit timeUnit, int timeout, MessageQueue queue, ByteWriteAdapter toAdapter)
+      throws IOException {
+    final MarkedByteWriteAdapter markedOutputStream = new MarkedByteWriteAdapter(toAdapter);
+
+    try {
+      queue.getBuffer().readWait(timeUnit, timeout, markedOutputStream, queue.getBufferColor(),
+          new MultiMessageFilter());
+
+      markedOutputStream.flush();
+
+      if (markedOutputStream.dataWasWritten() && markedOutputStream.getBytesWritten() > 2) {
         queue.resetMessageCount();
         return true;
       }

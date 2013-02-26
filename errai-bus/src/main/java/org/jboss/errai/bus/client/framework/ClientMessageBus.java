@@ -16,40 +16,16 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import org.jboss.errai.bus.client.api.BusLifecycleListener;
+
 import java.util.Set;
 
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
-
 /**
- * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
+ * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionality.
  *
  * @author Mike Brock
  */
 public interface ClientMessageBus extends MessageBus {
-  public static final String REMOTE_QUEUE_ID_HEADER = "RemoteQueueID";
-
-  /**
-   * Add a {@link Runnable} initialization task to be executed after the bus has successfully finished it's
-   * initialization and is now communicating with the remote bus.
-   *
-   * @param run a {@link Runnable} task.
-   */
-  public void addPostInitTask(Runnable run);
-
-  /**
-   * Adds a {@link SessionExpirationListener} to this bus instance.
-   *
-   * @param listener
-   *          listener to add, must not be null
-   * @deprecated session expiration is part of the bus lifecycle, and should be
-   *             observed via a bus lifecycle listener. See
-   *             {@link #addLifecycleListener(BusLifecycleListener)}.
-   */
-  @Deprecated
-  public void addSessionExpirationListener(SessionExpirationListener listener);
-
   /**
    * Adds the given listener instance to this bus. The listener will be notified
    * each time the bus transitions to a different lifecycle state.
@@ -75,24 +51,10 @@ public interface ClientMessageBus extends MessageBus {
   public void removeLifecycleListener(BusLifecycleListener l);
 
   /**
-   * Adds a {@link PreInitializationListener} to this bus instance. It will be
-   * notified before the bus initialization starts the first time and on each
-   * subsequent reconnect.
-   *
-   * @param listener
-   *          listener to add, must not be null
-   * @deprecated bus initialization and reconnection are part of the bus
-   *             lifecycle, and should be observed via a bus lifecycle listener.
-   *             See {@link #addLifecycleListener(BusLifecycleListener)}.
-   */
-  @Deprecated
-  public void addPreInitializationListener(PreInitializationListener listener);
-
-  /**
    * Takes this bus out of the "local only" state, causing it to try and connect
    * with the server (unless remote communication is globally disabled).
    *
-   * @see ClientMessageBusImpl#isRemoteCommunicationEnabled()
+   * @see org.jboss.errai.bus.client.util.BusToolsCli#isRemoteCommunicationEnabled()
    */
   public void init();
 
@@ -106,30 +68,12 @@ public interface ClientMessageBus extends MessageBus {
   public void stop(boolean sendDisconnectToServer);
 
   /**
-   * Returns true if the bus has successfully initialized and can relay messages.
+   * Returns a set of all reject subjects in the bus.
    *
-   * @return boolean indicating if bus is initialized.
+   * @return
+   *        a set of all registered subjects.
    */
-  public boolean isInitialized();
-
-  /**
-   * Sets the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
-   *
-   * @param logAdapter The log adapter this bus should log to. Must not be null.
-   * @deprecated Use java.util logging instead. It is supported by GWT.
-   */
-  @Deprecated
-  public void setLogAdapter(LogAdapter logAdapter);
-
   public Set<String> getAllRegisteredSubjects();
-
-  /**
-   * Returns the LogAdapter that this message bus uses for logging. This method will be removed in Errai 3.0.
-   *
-   * @deprecated Use java.util logging instead. It is supported by GWT.
-   */
-  @Deprecated
-  public LogAdapter getLogAdapter();
 
   /**
    * Adds a global transport error handler to deal with any errors which arise
@@ -139,5 +83,4 @@ public interface ClientMessageBus extends MessageBus {
    *          the error handler to add.
    */
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
-
 }

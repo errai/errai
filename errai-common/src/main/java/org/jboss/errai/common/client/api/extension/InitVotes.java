@@ -18,18 +18,20 @@ package org.jboss.errai.common.client.api.extension;
 
 import static org.jboss.errai.common.client.util.LogUtil.log;
 
+import com.google.gwt.core.client.GWT;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.common.client.util.TimeUnit;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import org.jboss.errai.common.client.api.tasks.AsyncTask;
-import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.util.TimeUnit;
-
-import com.google.gwt.core.client.GWT;
 
 /**
  * The <tt>InitVotes</tt> class provides the central algorithm around which disparate services within the Errai
@@ -44,11 +46,16 @@ public final class InitVotes {
   private InitVotes() {
   }
 
+  private static final List<Runnable> preInitCallbacks = new ArrayList<Runnable>();
+  private static final Map<String, List<Runnable>> dependencyCallbacks = new HashMap<String, List<Runnable>>();
   private static final List<Runnable> initCallbacks = new ArrayList<Runnable>();
-  private static final List<Runnable> oneTimeInitCallbacks = new ArrayList<Runnable>();
+  private static final List<InitFailureListener> initFailureListeners = new ArrayList<InitFailureListener>();
 
   private static boolean armed = false;
   private static final Set<String> waitForSet = new HashSet<String>();
+
+  // a list of both strings and runnable references that are marked done.
+  private static final Set<Object> completedSet = new HashSet<Object>();
 
   private static int timeoutMillis = !GWT.isProdMode() ? 90000 : 45000;
 
@@ -57,21 +64,24 @@ public final class InitVotes {
 
   private static boolean _initWait = false;
 
-  private static final List<InitFailureListener> initFailureListeners
-      = new ArrayList<InitFailureListener>();
-
   private static final Object lock = new Object();
-
 
   /**
    * Resets the state, clearing all current waiting votes and disarming the startup process. Calling <tt>reset()</tt>
-   * does not however clear out any initialization callbacks registered with {@link #registerInitCallback(Runnable)}.
+   * does not however clear out any initialization callbacks registered with {@link #registerPersistentInitCallback(Runnable)}.
    */
   public static void reset() {
     synchronized (lock) {
+      LogUtil.log("init polling system reset ...");
+
       cancelFailTimer();
-      oneTimeInitCallbacks.clear();
+      _clearOneTimeRunnables(preInitCallbacks);
+      _clearOneTimeRunnables(initCallbacks);
+      for (final Map.Entry<String, List<Runnable>> entry : dependencyCallbacks.entrySet()) {
+        _clearOneTimeRunnables(entry.getValue());
+      }
       waitForSet.clear();
+      completedSet.clear();
       armed = false;
     }
   }
@@ -108,6 +118,11 @@ public final class InitVotes {
 
   private static void waitFor(final String topic) {
     synchronized (lock) {
+      if (completedSet.contains(topic)) {
+//        throw new RuntimeException("cannot declare a wait on '" + topic + "' as it is already marked completed!");
+        return;
+      }
+
       if (waitForSet.contains(topic)) return;
 
       log("wait for: " + topic);
@@ -123,7 +138,7 @@ public final class InitVotes {
   /**
    * Votes for initialization and removes a lock on the initialization of framework services. If the initialization
    * process has been armed and this vote releases the final dependency, the initialization process will be triggered,
-   * calling all the registered initialization callbacks. See: {@link #registerInitCallback(Runnable)}
+   * calling all the registered initialization callbacks. See: {@link #registerPersistentInitCallback(Runnable)}
    *
    * @param clazz
    *     a class reference
@@ -135,8 +150,12 @@ public final class InitVotes {
   private static void voteFor(final String topic) {
     synchronized (lock) {
       if (waitForSet.remove(topic)) {
-        log("vote For: " + topic);
+        log("vote for: " + topic);
+
+        completedSet.add(topic);
       }
+
+      _runAllRunnables(dependencyCallbacks.get(topic));
 
       if (!waitForSet.isEmpty())
         log("  still waiting for -> " + waitForSet);
@@ -170,32 +189,76 @@ public final class InitVotes {
     initDelay = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 250, runnable);
   }
 
+  public static void registerPersistentDependencyCallback(final Class clazz, final Runnable runnable) {
+    _registerDependencyCallback(clazz.getName(), runnable);
+  }
+
+  public static void registerOneTimeDependencyCallback(final Class clazz, final Runnable runnable) {
+    registerPersistentDependencyCallback(clazz, new OneTimeRunnable(runnable));
+  }
+
+  private static void _registerDependencyCallback(final String topic, final Runnable runnable) {
+    synchronized (lock) {
+      List<Runnable> callbacks = dependencyCallbacks.get(topic);
+      if (callbacks == null) {
+        dependencyCallbacks.put(topic, callbacks = new ArrayList<Runnable>());
+      }
+      if (!callbacks.contains(runnable)) {
+        callbacks.add(runnable);
+      }
+
+      if (completedSet.contains(topic) && !completedSet.contains(runnable)) {
+        runnable.run();
+      }
+    }
+  }
+
+  public static void registerPersistentPreInitCallback(final Runnable runnable) {
+    synchronized (lock) {
+      if (!preInitCallbacks.contains(runnable)) {
+        preInitCallbacks.add(runnable);
+
+        if (armed) {
+         runnable.run();
+        }
+      }
+    }
+  }
+
+
+  public static void registerOneTimePreInitCallback(final Runnable runnable) {
+    registerPersistentPreInitCallback(new OneTimeRunnable(runnable));
+  }
+
   /**
    * Registers a callback task to be executed once initialization occurs. Callbacks registered with this method
    * will be persistent <em>across</em> multiple initializations, and will not be cleared out even if {@link #reset()}
    * is called. If this is not desirable, see: {@link #registerOneTimeInitCallback};
+   * <p>
+   * As of Errai 3.0, the callback list is de-duped based on instance to simplify initialization code in modules. You
+   * can now safely re-add a Runnable in initialization code as long as it is always guaranteed to be the same instance.*
    *
    * @param runnable
    *     a callback to execute
    */
-  public static void registerInitCallback(final Runnable runnable) {
+  public static void registerPersistentInitCallback(final Runnable runnable) {
     synchronized (lock) {
-      initCallbacks.add(runnable);
+      if (!initCallbacks.contains(runnable)) {
+        initCallbacks.add(runnable);
+      }
     }
   }
 
   /**
    * Registers a one-time callback task to be executed once initialization occurs. Unlike callbacks registered with
-   * {@link #registerInitCallback(Runnable)} Callback(Runnable)}, callbacks registered with this method will only
+   * {@link #registerPersistentInitCallback(Runnable)} Callback(Runnable)}, callbacks registered with this method will only
    * be executed once and will never be used again if framework services are re-initialized.
    *
    * @param runnable
    *     a callback to execute
    */
   public static void registerOneTimeInitCallback(final Runnable runnable) {
-    synchronized (lock) {
-      oneTimeInitCallbacks.add(runnable);
-    }
+    registerPersistentInitCallback(new OneTimeRunnable(runnable));
   }
 
   /**
@@ -208,6 +271,15 @@ public final class InitVotes {
   public static void registerInitFailureListener(final InitFailureListener failureListener) {
     initFailureListeners.add(failureListener);
   }
+
+  public static void startInitPolling() {
+    if (armed) {
+      LogUtil.log("WARN: did not start polling. already armed.");
+      return;
+    }
+    beginInit();
+  }
+
 
   private static void beginInit() {
     synchronized (lock) {
@@ -241,6 +313,8 @@ public final class InitVotes {
           }
         }
       });
+
+      _runAllRunnables(preInitCallbacks);
     }
   }
 
@@ -255,19 +329,7 @@ public final class InitVotes {
       armed = false;
       cancelFailTimer();
 
-      final Iterator<Runnable> iterator = oneTimeInitCallbacks.iterator();
-      while (iterator.hasNext()) {
-        try {
-          iterator.next().run();
-        }
-        finally {
-          iterator.remove();
-        }
-      }
-
-      for (final Runnable callback : initCallbacks) {
-        callback.run();
-      }
+      _runAllRunnables(initCallbacks);
     }
   }
 
@@ -276,6 +338,48 @@ public final class InitVotes {
       if (initTimeout != null && !initTimeout.isCancelled()) {
         initTimeout.cancel(true);
       }
+    }
+  }
+
+  private static void _runAllRunnables(final List<Runnable> runnables) {
+    if (runnables == null) return;
+
+    final Iterator<Runnable> runnableIterable = runnables.iterator();
+    while (runnableIterable.hasNext()) {
+      final Runnable runnable = runnableIterable.next();
+      if (completedSet.contains(runnable)) {
+        continue;
+      }
+
+      completedSet.add(runnable);
+
+      if (runnable instanceof OneTimeRunnable) {
+        runnableIterable.remove();
+      }
+      runnable.run();
+    }
+  }
+
+  private static void _clearOneTimeRunnables(final List<Runnable> runnables) {
+    final Iterator<Runnable> runnableIterable = runnables.iterator();
+    while (runnableIterable.hasNext()) {
+      final Runnable runnable = runnableIterable.next();
+      if (runnable instanceof OneTimeRunnable) {
+        runnableIterable.remove();
+      }
+    }
+  }
+
+  private static class OneTimeRunnable implements Runnable {
+    private final Runnable delegate;
+
+    private OneTimeRunnable(Runnable delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void run() {
+      delegate.run();
     }
   }
 }

@@ -34,8 +34,15 @@ import java.lang.annotation.Annotation;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
 
-  public InjectableInstance(final T annotation, final TaskType taskType, final MetaConstructor constructor, final MetaMethod method,
-                            final MetaField field, final MetaClass type, final MetaParameter parm, final Injector injector, final InjectionContext injectionContext) {
+  public InjectableInstance(final T annotation,
+                            final TaskType taskType,
+                            final MetaConstructor constructor,
+                            final MetaMethod method,
+                            final MetaField field,
+                            final MetaClass type,
+                            final MetaParameter parm,
+                            final Injector injector,
+                            final InjectionContext injectionContext) {
 
     super(annotation, taskType, constructor, method, field, type, parm, injector, injectionContext);
   }
@@ -56,10 +63,14 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     //noinspection unchecked
     return new InjectableInstance(
         context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint, method),
-        !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method, null,
-        method, null,
+        !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method,
+        null,
+        method,
+        null,
         method.getDeclaringClass(),
-        null, injector, context);
+        null,
+        injector,
+        context);
 
   }
 
@@ -70,18 +81,31 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     if (parm.getDeclaringMember() instanceof MetaConstructor) {
 
       //noinspection unchecked
-      return new InjectableInstance(context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
+      return new InjectableInstance(
+          context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
           parm.getDeclaringMember()),
-          TaskType.Parameter, ((MetaConstructor) parm.getDeclaringMember()),
-          null, null, parm.getDeclaringMember().getDeclaringClass(), parm, injector, context);
+          TaskType.Parameter,
+          ((MetaConstructor) parm.getDeclaringMember()),
+          null,
+          null,
+          parm.getDeclaringMember().getDeclaringClass(),
+          parm,
+          injector,
+          context);
     }
     else {
       //noinspection unchecked
-      return new InjectableInstance(context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
+      return new InjectableInstance(
+          context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
           parm.getDeclaringMember()),
-          TaskType.Parameter, null,
-          ((MetaMethod) parm.getDeclaringMember()), null, parm.getDeclaringMember().getDeclaringClass(),
-          parm, injector, context);
+          TaskType.Parameter,
+          null,
+          ((MetaMethod) parm.getDeclaringMember()),
+          null,
+          parm.getDeclaringMember().getDeclaringClass(),
+          parm,
+          injector,
+          context);
     }
   }
 
@@ -90,12 +114,16 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
                                                                                       final InjectionContext context) {
 
     //noinspection unchecked
-    return new InjectableInstance(context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
-        field),
-        !field.isPublic() ? TaskType.PrivateField : TaskType.Field, null,
-        null, field,
+    return new InjectableInstance(
+        context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,field),
+        !field.isPublic() ? TaskType.PrivateField : TaskType.Field,
+        null,
+        null,
+        field,
         field.getDeclaringClass(),
-        null, injector, context);
+        null,
+        injector,
+        context);
 
   }
 
@@ -167,8 +195,8 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     final MetaClass targetType = getInjector() == null ? getEnclosingType() : getInjector().getInjectedType();
 
     Injector targetInjector
-        = isProxy() ? injectionContext.getProxiedInjector(targetType, getQualifyingMetadata()) :
-        injectionContext.getQualifiedInjector(targetType, getQualifyingMetadata());
+        = isProxy() ? injectionContext.getProxiedInjector(targetType, getQualifyingMetadata())
+        : injectionContext.getQualifiedInjector(targetType, getQualifyingMetadata());
 
     if (!isProxy()) {
       if (!targetInjector.isCreated()) {

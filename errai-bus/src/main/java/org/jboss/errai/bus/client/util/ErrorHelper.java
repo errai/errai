@@ -22,7 +22,10 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
@@ -33,10 +36,14 @@ public class ErrorHelper {
    * Creates the stacktrace for the error message and sends it via conversation to the <tt>ClientBusErrors</tt>
    * subject
    *
-   * @param bus          - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
-   * @param message      - the message that has encountered the error
-   * @param errorMessage - the error message produced
-   * @param e            - the exception received
+   * @param bus
+   *     - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
+   * @param message
+   *     - the message that has encountered the error
+   * @param errorMessage
+   *     - the error message produced
+   * @param e
+   *     - the exception received
    */
   public static void sendClientError(MessageBus bus, Message message, String errorMessage, Throwable e) {
     if (DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(message.getSubject())) {
@@ -86,80 +93,109 @@ public class ErrorHelper {
   /**
    * Sends the error message via conversation to the <tt>ClientBusErrors</tt> subject
    *
-   * @param bus               - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
-   * @param message           - the message that has encountered the error
-   * @param errorMessage      - the error message produced
-   * @param additionalDetails - the stacktrace represented as a <tt>String</tt>
+   * @param bus
+   *     - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
+   * @param message
+   *     - the message that has encountered the error
+   * @param errorMessage
+   *     - the error message produced
+   * @param additionalDetails
+   *     - the stacktrace represented as a <tt>String</tt>
    */
   public static void sendClientError(MessageBus bus, Message message, String errorMessage, String additionalDetails) {
-    if (DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(message.getSubject())) {
-      /**
-       * Trying to send an error to the client when the client obviously can't receive it!
-       */
+    try {
+      if (DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(message.getSubject())) {
+        /**
+         * Trying to send an error to the client when the client obviously can't receive it!
+         */
 
-      System.err.println("*** An error occured that could not be delivered to the client.");
-      System.err.println("Error Message: " + message.get(String.class, "ErrorMessage"));
-      System.err.println("Details      : " + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
+        System.err.println("*** An error occured that could not be delivered to the client.");
+        System.err.println("Error Message: " + message.get(String.class, "ErrorMessage"));
+        System.err.println("Details      : " + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
 
+      }
+      else {
+
+        MessageBuilder.createConversation(message)
+            .toSubject(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
+            .with("ErrorMessage", errorMessage)
+            .with("AdditionalDetails", additionalDetails)
+            .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
+            .with(MessageParts.Throwable, message.getResource(Object.class, "Exception"))
+            .noErrorHandling().sendNowWith(bus);
+      }
     }
-    else {
-
-      MessageBuilder.createConversation(message)
-              .toSubject(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
-              .with("ErrorMessage", errorMessage)
-              .with("AdditionalDetails", additionalDetails)
-              .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
-              .with(MessageParts.Throwable, message.getResource(Object.class, "Exception"))
-              .noErrorHandling().sendNowWith(bus);
+    catch (RuntimeException e) {
+      // note: this is handled this way, because this is shared server and client code.
+      if (e.getClass().getName().equals("org.jboss.errai.bus.server.QueueUnavailableException")) {
+        // ignore.
+      }
+      throw e;
     }
   }
 
   public static void sendClientError(MessageBus bus, String queueId, String errorMessage, String additionalDetails) {
-    MessageBuilder.createMessage()
-            .toSubject(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
-            .with("ErrorMessage", errorMessage)
-            .with("AdditionalDetails", additionalDetails)
-            .with(MessageParts.SessionID, queueId)
-            .flag(RoutingFlag.NonGlobalRouting)
-            .noErrorHandling().sendNowWith(bus);
+    try {
+      MessageBuilder.createMessage()
+          .toSubject(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
+          .with("ErrorMessage", errorMessage)
+          .with("AdditionalDetails", additionalDetails)
+          .with(MessageParts.SessionID, queueId)
+          .flag(RoutingFlag.NonGlobalRouting)
+          .noErrorHandling().sendNowWith(bus);
+    }
+    catch (RuntimeException e) {
+      // note: this is handled this way, because this is shared server and client code.
+      if (e.getClass().getName().equals("org.jboss.errai.bus.server.QueueUnavailableException")) {
+        // ignore.
+      }
+      throw e;
+    }
   }
 
 
   /**
    * Sends a disconnect command message to the client bus
    *
-   * @param bus     - the bus responsible for sending messages for the server
-   * @param message - the message that has encountered the error
+   * @param bus
+   *     - the bus responsible for sending messages for the server
+   * @param message
+   *     - the message that has encountered the error
    */
   public static void disconnectRemoteBus(MessageBus bus, Message message) {
     MessageBuilder.createConversation(message)
-            .toSubject("ClientBus")
-            .command(BusCommands.Disconnect)
-            .noErrorHandling().sendNowWith(bus);
+        .toSubject("ClientBus")
+        .command(BusCommands.Disconnect)
+        .noErrorHandling().sendNowWith(bus);
   }
 
 
   /**
    * Handles the failed delivery of a message, and sends the error to the appropriate place
    *
-   * @param bus          - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
-   * @param message      - the message that has encountered the error
-   * @param errorMessage - the error message produced
-   * @param e            - the exception received
-   * @param disconnect   - true if the bus should be disconnected after the error has been sent
+   * @param bus
+   *     - the <tt>MessageBus</tt> that has received the <tt>message</tt> and <tt>errorMessage</tt>
+   * @param message
+   *     - the message that has encountered the error
+   * @param errorMessage
+   *     - the error message produced
+   * @param e
+   *     - the exception received
+   * @param disconnect
+   *     - true if the bus should be disconnected after the error has been sent
    */
   public static void handleMessageDeliveryFailure(MessageBus bus, Message message, String errorMessage, Throwable e, boolean disconnect) {
     String logMessage =
         "*** Message delivery failure ***" +
-        "\nBus: " + bus.toString() +
-        "\nMessage: " + message +
-        "\nerrorMessage: " + errorMessage +
-        "\nexception: " + e +
-        "\ndisconnect: " + disconnect;
-    
+            "\nBus: " + bus.toString() +
+            "\nMessage: " + message +
+            "\nerrorMessage: " + errorMessage +
+            "\nexception: " + e +
+            "\ndisconnect: " + disconnect;
+
     if (e != null) e.printStackTrace();
     System.err.println(logMessage);
-    
+
     try {
       if (message.getErrorCallback() != null) {
         if (!message.getErrorCallback().error(message, e)) {
@@ -169,7 +205,7 @@ public class ErrorHelper {
 
       sendClientError(bus, message, errorMessage, e);
 
- //     if (e != null) throw new MessageDeliveryFailure(e);
+      //     if (e != null) throw new MessageDeliveryFailure(e);
     }
     finally {
       if (disconnect) disconnectRemoteBus(bus, message);

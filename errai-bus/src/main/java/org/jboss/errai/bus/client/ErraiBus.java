@@ -21,18 +21,15 @@ import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.LogAdapter;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.client.framework.TransportErrorHandler;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 
 import java.util.Collections;
 import java.util.Set;
@@ -42,7 +39,7 @@ import java.util.Set;
  * client {@link org.jboss.errai.bus.client.framework.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
 public class ErraiBus implements EntryPoint {
-  private static MessageBus bus;
+  private static ClientMessageBus bus;
 
   static {
     if (GWT.isClient()) {
@@ -86,10 +83,6 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void addGlobalListener(MessageListener listener) {
-        }
-
-        @Override
         public void addSubscribeListener(SubscribeListener listener) {
         }
 
@@ -102,18 +95,6 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void addPostInitTask(Runnable run) {
-        }
-
-        @Override
-        public void addSessionExpirationListener(SessionExpirationListener listener) {
-        }
-
-        @Override
-        public void addPreInitializationListener(PreInitializationListener listener) {
-        }
-
-        @Override
         public void init() {
         }
 
@@ -122,22 +103,8 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public boolean isInitialized() {
-          return false;
-        }
-
-        @Override
-        public void setLogAdapter(LogAdapter logAdapter) {
-        }
-
-        @Override
         public Set<String> getAllRegisteredSubjects() {
           return Collections.emptySet();
-        }
-
-        @Override
-        public LogAdapter getLogAdapter() {
-          return null;
         }
 
         @Override
@@ -154,6 +121,12 @@ public class ErraiBus implements EntryPoint {
       };
     }
 
+    InitVotes.registerPersistentPreInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        bus.init();
+      }
+    });
   }
 
   /**

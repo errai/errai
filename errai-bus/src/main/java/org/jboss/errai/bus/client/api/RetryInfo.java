@@ -8,6 +8,7 @@ package org.jboss.errai.bus.client.api;
  */
 public final class RetryInfo {
 
+  public static final RetryInfo NO_RETRY = new RetryInfo(-1, 0);
   private long delayUntilNextRetry;
   private int retryCount;
 

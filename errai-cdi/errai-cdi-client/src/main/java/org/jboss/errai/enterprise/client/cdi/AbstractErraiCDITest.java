@@ -46,11 +46,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
     if (disableBus) {
       setRemoteCommunicationEnabled(false);
     }
-    InitVotes.reset();
     InitVotes.setTimeoutMillis(60000);
-    super.gwtSetUp();
-
-    CDI.removePostInitTasks();
 
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
@@ -58,11 +54,16 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
     new CDI().__resetSubsystem();
     new Container().onModuleLoad();
     new CDIClientBootstrap().onModuleLoad();
+
+    InitVotes.startInitPolling();
+
+    super.gwtSetUp();
   }
 
   @Override
   protected void gwtTearDown() throws Exception {
     setRemoteCommunicationEnabled(true);
+    InitVotes.reset();
     super.gwtTearDown();
   }
 

@@ -72,4 +72,9 @@ public class IntrabusQueueSession implements QueueSession {
   @Override
   public void addSessionEndListener(SessionEndListener listener) {
   }
+
+  @Override
+  public boolean isValid() {
+    return true;
+  }
 }

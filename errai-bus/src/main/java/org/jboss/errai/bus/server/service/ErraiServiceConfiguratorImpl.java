@@ -101,39 +101,48 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   /**
    * Returns true if the configuration has this <tt>key</tt> property
    *
-   * @param key - the property too search for
+   * @param key
+   *     - the property too search for
+   *
    * @return false if the property does not exist
    */
   public boolean hasProperty(String key) {
-    return properties.containsKey(key);
+    return properties.containsKey(key) || System.getProperty(key) != null;
   }
 
   /**
    * Gets the property associated with the key
    *
-   * @param key - the key to search for
+   * @param key
+   *     - the key to search for
+   *
    * @return the property, if it exists, null otherwise
    */
   public String getProperty(String key) {
-    return properties.get(key);
+    if (properties.containsKey(key)) {
+      return properties.get(key);
+    }
+    else{
+      return System.getProperty(key);
+    }
   }
 
   @Override
   public boolean getBooleanProperty(String key) {
-    return properties.containsKey(key) && "true".equals(properties.get(key));
+    return hasProperty(key) && "true".equals(getProperty(key));
   }
 
 
   @Override
   public Integer getIntProperty(String key) {
-    if (properties.containsKey(key)) {
-      String val = properties.get(key);
+    if (hasProperty(key)) {
+      String val = getProperty(key);
       try {
         return Integer.parseInt(val);
       }
       catch (NumberFormatException e) {
         throw new RuntimeException("expected an integer value for key '" + key + "': but got: "
-                + properties.get(key));
+            + val);
       }
     }
     return null;
@@ -142,8 +151,11 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   /**
    * Gets the resources attached to the specified resource class
    *
-   * @param resourceClass - the class to search the resources for
-   * @param <T>           - the class type
+   * @param resourceClass
+   *     - the class to search the resources for
+   * @param <T>
+   *     - the class type
+   *
    * @return the resource of type <tt>T</tt>
    */
   @SuppressWarnings({"unchecked"})

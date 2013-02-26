@@ -42,12 +42,6 @@
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-vfs</artifactId>
-      <version>3.0.1.GA</version>
-      <scope>provided</scope>
-    </dependency>
 
     <!--<dependency>-->
     <!--<groupId>org.jboss.errai</groupId>-->

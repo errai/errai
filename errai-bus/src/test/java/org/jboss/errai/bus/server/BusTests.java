@@ -78,6 +78,11 @@ public class BusTests extends TestCase {
       @Override
       public void addSessionEndListener(SessionEndListener listener) {
       }
+
+      @Override
+      public boolean isValid() {
+        return true;
+      }
     };
 
     BufferColor global = BufferColor.getAllBuffersColor();
@@ -86,9 +91,9 @@ public class BusTests extends TestCase {
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bufData.getBytes());
     buffer.write(byteArrayInputStream, global);
 
-    MessageQueueImpl messageQueue = new MessageQueueImpl(buffer, session);
+    MessageQueueImpl messageQueue = new MessageQueueImpl(buffer, session, 60);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    messageQueue.poll(false, new OutputStreamWriteAdapter(outputStream));
+    messageQueue.poll(new OutputStreamWriteAdapter(outputStream));
 
     assertEquals("[]", new String(outputStream.toByteArray()));
   }

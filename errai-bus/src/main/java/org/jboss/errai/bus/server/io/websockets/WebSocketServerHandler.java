@@ -15,6 +15,12 @@
  */
 package org.jboss.errai.bus.server.io.websockets;
 
+import static io.netty.handler.codec.http.HttpHeaders.isKeepAlive;
+import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
+import static io.netty.handler.codec.http.HttpMethod.GET;
+import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+
 import io.netty.buffer.ChannelBuffers;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -46,25 +52,8 @@ import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJString;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.JSONDecoder;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static io.netty.handler.codec.http.HttpHeaders.isKeepAlive;
-import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
-import static io.netty.handler.codec.http.HttpMethod.GET;
-import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -79,16 +68,25 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The working prototype ErraiBus Websocket Server.
  */
 public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
   public static final String SESSION_ATTR_WS_STATUS = "WebSocketStatus";
-
   public static final String WEBSOCKET_AWAIT_ACTIVATION = "AwaitingActivation";
   public static final String WEBSOCKET_ACTIVE = "Active";
-
   public static final String WEBSOCKET_PATH = "/websocket.bus";
 
   private final Map<Channel, QueueSession> activeChannels = new ConcurrentHashMap<Channel, QueueSession>();
@@ -131,7 +129,6 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
   }
 
   private void handleWebSocketFrame(final ChannelHandlerContext ctx, final WebSocketFrame frame) {
-
     // Check for closing frame
     if (frame instanceof CloseWebSocketFrame) {
       activeChannels.remove(ctx.getChannel());
@@ -148,17 +145,34 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
           .getName()));
     }
 
-    @SuppressWarnings("unchecked") final EJObject val = JSONDecoder.decode(((TextWebSocketFrame) frame).getText()).isObject();
+    @SuppressWarnings("unchecked") final EJValue val = JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
 
     final QueueSession session;
 
     // this is not an active channel.
     if (!activeChannels.containsKey(ctx.getChannel())) {
-      final String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
+      if (val == null) {
+        sendMessage(ctx, getFailedNegotiation("illegal handshake"));
+        return;
+      }
+
+      final EJObject ejObject = val.isObject();
+
+      if (ejObject == null) {
+        return;
+      }
+
+      final EJValue ejValue = ejObject.get(MessageParts.CommandType.name());
+
+      if (ejValue.isNull()) {
+        sendMessage(ctx, getFailedNegotiation("illegal handshake"));
+      }
+
+      final String commandType = ejValue.isString().stringValue();
 
       // this client apparently wants to connect.
       if (BusCommands.Associate.name().equals(commandType)) {
-        final String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
+        final String sessionKey = ejObject.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
         // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (session = svc.getBus().getSessionBySessionId(sessionKey)) != null) {
@@ -167,22 +181,35 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
           if (localContext.hasAttribute(SESSION_ATTR_WS_STATUS) &&
               WEBSOCKET_ACTIVE.equals(localContext.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
 
-            // open the channel
-            activeChannels.put(ctx.getChannel(), session);
-
-            // set the session queue into direct channel mode.
             final MessageQueue queueBySession = svc.getBus().getQueueBySession(sessionKey);
             queueBySession.setDeliveryHandler(DirectDeliveryHandler.createFor(new NettyQueueChannel(ctx.getChannel())));
 
-            // remove the web socket token so it cannot be re-used for authentication.
-            localContext.removeAttribute(MessageParts.WebSocketToken.name());
+            // open the channel
+            activeChannels.put(ctx.getChannel(), session);
+            ctx.getChannel().getCloseFuture().addListener(new ChannelFutureListener() {
+              @Override
+              public void operationComplete(final ChannelFuture channelFuture) throws Exception {
+                activeChannels.remove(ctx.getChannel());
+                queueBySession.setDeliveryHandlerToDefault();
+              }
+            });
+
+            // set the session queue into direct channel mode.
+
             localContext.removeAttribute(SESSION_ATTR_WS_STATUS);
+
+//            service.schedule(new Runnable() {
+//              @Override
+//              public void run() {
+//                ctx.getChannel().close();
+//              }
+//            }, 5, TimeUnit.SECONDS);
 
             return;
           }
 
           // check the activation key matches.
-          final EJString activationKey = val.get(MessageParts.WebSocketToken.name()).isString();
+          final EJString activationKey = ejObject.get(MessageParts.WebSocketToken.name()).isString();
           if (activationKey == null || !WebSocketTokenManager.verifyOneTimeToken(session, activationKey.stringValue())) {
             // nope. go away!
             sendMessage(ctx, getFailedNegotiation("bad negotiation key"));
@@ -212,14 +239,12 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     }
     else {
       // this is an active session. send the message.
-
       session = activeChannels.get(ctx.getChannel());
 
-      final Message msg = MessageFactory.createCommandMessage(session, ((TextWebSocketFrame) frame).getText());
-
-      msg.setResource(HttpServletRequest.class.getName(), new SyntheticHttpServletRequest());
-
-      svc.store(msg);
+      for (final Message msg : MessageFactory.createCommandMessage(session, val)) {
+        msg.setResource(HttpServletRequest.class.getName(), new SyntheticHttpServletRequest());
+        svc.store(msg);
+      }
     }
   }
 

@@ -18,7 +18,10 @@ package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
-import java.io.IOException;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.QueueUnavailableException;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,13 +33,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.server.api.MessageQueue;
-import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
-import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
@@ -87,7 +85,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-
   }
 
   @Override
@@ -115,7 +112,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
     pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest)),
-        httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
+        httpServletRequest, httpServletResponse, isLongPollingEnabled(), isSSERequest(httpServletRequest));
   }
 
   /**
@@ -138,24 +135,25 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
     final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
         getClientId(httpServletRequest));
 
-    service.store(createCommandMessage(session, httpServletRequest));
+    try {
+      service.store(createCommandMessage(session, httpServletRequest));
+    }
+    catch (QueueUnavailableException e) {
+      sendDisconnectDueToSessionExpiry(httpServletResponse);
+      return;
+    }
 
-    pollForMessages(session, httpServletRequest, httpServletResponse, false);
+    pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest), false);
   }
 
   private void pollForMessages(final QueueSession session, final HttpServletRequest httpServletRequest,
-                               final HttpServletResponse httpServletResponse, final boolean wait) throws IOException {
+                               final HttpServletResponse httpServletResponse, final boolean wait, final boolean sse) throws IOException {
     try {
-      // note about caching: clients now include a uniquifier in a request parameter called "z"
-      // so no-cache headers are now unnecessary.
-      final boolean sse;
-      if (httpServletRequest.getParameter("sse") != null) {
-        httpServletResponse.setContentType("text/event-stream");
-        sse = true;
+      if (sse) {
+        prepareSSE(httpServletResponse);
       }
       else {
-        httpServletResponse.setContentType("application/json");
-        sse = false;
+        prepareCometPoll(httpServletResponse);
       }
 
       final MessageQueue queue = service.getBus().getQueue(session);
@@ -168,7 +166,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
             return;
         }
 
-        sendDisconnectDueToSessionExpiry(outputStream);
+        sendDisconnectDueToSessionExpiry(httpServletResponse);
         return;
       }
 
@@ -176,19 +174,22 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
       if (sse) {
         final long timeout = System.currentTimeMillis() + getSSETimeout();
-        queue.setTimeout(getSSETimeout() + 1000);
-
         while (System.currentTimeMillis() < timeout) {
-          outputStream.write("retry: 150\nevent: bus-traffic\n\ndata: ".getBytes());
-          queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
-          outputStream.write("\n\n".getBytes());
+          prepareSSEContinue(httpServletResponse);
           outputStream.flush();
+          queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
+          outputStream.write("\n\n".getBytes());
+          queue.heartBeat();
         }
       }
-      else {
-        queue.poll(wait, new OutputStreamWriteAdapter(outputStream));
-        outputStream.close();
+      else if (wait) {
+        queue.poll(TimeUnit.MILLISECONDS, getLongPollTimeout(), new OutputStreamWriteAdapter(outputStream));
       }
+      else {
+        queue.poll(new OutputStreamWriteAdapter(outputStream));
+      }
+
+      outputStream.close();
     }
     catch (final Throwable t) {
       t.printStackTrace();

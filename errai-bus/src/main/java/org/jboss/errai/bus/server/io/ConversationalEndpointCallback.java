@@ -20,18 +20,19 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversat
 import static org.mvel2.DataConversion.canConvert;
 import static org.mvel2.DataConversion.convert;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.server.QueueUnavailableException;
+import org.jboss.errai.bus.server.api.RpcContext;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.server.api.RpcContext;
 
 /**
  * <tt>ConversationalEndpointCallback</tt> creates a conversation that invokes an endpoint function
@@ -124,6 +125,9 @@ public class ConversationalEndpointCallback implements MessageCallback {
                 .with("MethodReply", methReply)
                 .noErrorHandling().sendNowWith(bus);
       }
+    }
+    catch (QueueUnavailableException e) {
+      throw e;
     }
     catch (MessageDeliveryFailure e) {
       throw e;

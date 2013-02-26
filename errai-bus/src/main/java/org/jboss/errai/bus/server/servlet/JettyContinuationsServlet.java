@@ -18,23 +18,22 @@ package org.jboss.errai.bus.server.servlet;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The <tt>JettyContinuationsServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
@@ -58,8 +57,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
-    pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(),
-        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+    pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
+        getClientId(httpServletRequest)),
         httpServletRequest, httpServletResponse, true);
   }
 
@@ -81,17 +80,21 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
       throws ServletException, IOException {
 
-    final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(),
-        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+    final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(true),
+        getClientId(httpServletRequest));
+
+    session.setAttribute("NoSSE", Boolean.TRUE);
 
     try {
       service.store(createCommandMessage(session, httpServletRequest));
     }
-    catch (Exception e) {
-      if (!e.getMessage().contains("expired")) {
-        writeExceptionToOutputStream(httpServletResponse, e);
+    catch (QueueUnavailableException e) {
+      if (!session.isValid()) {
+        sendDisconnectDueToSessionExpiry(httpServletResponse);
       }
     }
+
+    pollForMessages(session, httpServletRequest, httpServletResponse, shouldWait(httpServletRequest));
   }
 
   private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
@@ -107,7 +110,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             return;
         }
 
-        sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
+        sendDisconnectDueToSessionExpiry(httpServletResponse);
 
         return;
       }
@@ -178,7 +181,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     httpServletResponse.setHeader("Pragma", "no-cache");
     httpServletResponse.setHeader("Expires", "-1");
     httpServletResponse.setContentType("application/json");
-    return queue.poll(false, new OutputStreamWriteAdapter(stream));
+    return queue.poll(new OutputStreamWriteAdapter(stream));
   }
 
   private static class JettyQueueActivationCallback implements QueueActivationCallback {

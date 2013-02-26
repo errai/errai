@@ -17,13 +17,12 @@
 package org.jboss.errai.bus.server;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
-import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
 import static org.jboss.errai.bus.client.util.ErrorHelper.sendClientError;
+import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.getNewOneTimeToken;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
 import static org.jboss.errai.common.client.protocols.MessageParts.ConnectionSessionKey;
 import static org.jboss.errai.common.client.protocols.MessageParts.RemoteServices;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.AbstractModule;
@@ -32,20 +31,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.ConversationMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusMonitor;
-import org.jboss.errai.bus.client.framework.DeliveryPlan;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
@@ -60,7 +55,6 @@ import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.PageUtil;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
 import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
@@ -76,11 +70,9 @@ import org.slf4j.Logger;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -102,7 +94,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Singleton
 public class ServerMessageBusImpl implements ServerMessageBus {
-  private final List<MessageListener> listeners = new ArrayList<MessageListener>();
   private final TransmissionBuffer transmissionbuffer;
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
@@ -127,6 +118,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Set<String> reservedNames = new HashSet<String>();
 
+  private final boolean hostedModeTesting;
+  private final boolean doLongPolling;
+  private final int messageQueueTimeoutSecs;
+  private final boolean sseEnabled;
   private final boolean webSocketServlet;
   private final boolean webSocketServer;
 
@@ -142,9 +137,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    */
   @Inject
   public ServerMessageBusImpl(final ErraiService service, final ErraiServiceConfigurator config) {
-
-    this.webSocketServer = config
-        .getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER);
+    this.hostedModeTesting = ErraiConfigAttribs.HOSTED_MODE_TESTING.getBoolean(config);
+    this.doLongPolling = !hostedModeTesting && ErraiConfigAttribs.DO_LONG_POLL.getBoolean(config);
+    this.messageQueueTimeoutSecs = ErraiConfigAttribs.MESSAGE_QUEUE_TIMEOUT_SECS.getInt(config);
+    this.sseEnabled = ErraiConfigAttribs.ENABLE_SSE_SUPPORT.getBoolean(config);
+    this.webSocketServer = ErraiConfigAttribs.ENABLE_WEB_SOCKET_SERVER.getBoolean(config);
 
     final int webSocketPort;
     final String webSocketPath;
@@ -157,11 +154,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       webSocketPort = -1;
     }
     else {
-      webSocketPath = config.hasProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) ?
-          config.getProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) :
-          WebSocketServerHandler.WEBSOCKET_PATH;
-
-      webSocketPort = WebSocketServer.getWebSocketPort(config);
+      webSocketPath = ErraiConfigAttribs.WEB_SOCKET_URL.get(config);
+      webSocketPort = ErraiConfigAttribs.WEB_SOCKET_PORT.getInt(config);
     }
 
     final Integer bufferSize = ErraiConfigAttribs.BUS_BUFFER_SIZE.getInt(config);
@@ -218,7 +212,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     transmissionbuffer = buffer;
-
 
     /**
      * Define the default ServerBus service used for intrabus communication.
@@ -292,7 +285,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   messageQueues.get(session).stopQueue();
                 }
 
-                queue = new MessageQueueImpl(transmissionbuffer, session);
+                queue = new MessageQueueImpl(transmissionbuffer, session, messageQueueTimeoutSecs);
 
                 addQueue(session, queue);
 
@@ -328,14 +321,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               final StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
               final boolean first;
-              if (ErraiServiceConfigurator.LONG_POLLING) {
-                capabilitiesBuffer.append(Capabilities.LongPollAvailable.name());
+              if (doLongPolling) {
+                capabilitiesBuffer.append(Capabilities.LongPolling.name());
                 first = false;
               }
               else {
-                capabilitiesBuffer.append(Capabilities.NoLongPollAvailable.name());
+                capabilitiesBuffer.append(Capabilities.ShortPolling.name());
                 first = false;
-                msg.set(MessageParts.PollFrequency, ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
+                msg.set(MessageParts.PollFrequency, hostedModeTesting ? 50 : 250);
               }
 
               if (webSocketServer || webSocketServlet) {
@@ -362,7 +355,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 msg.set(MessageParts.WebSocketToken, WebSocketTokenManager.getNewOneTimeToken(session));
               }
 
-              capabilitiesBuffer.append(",").append(Capabilities.SSE.name());
+              if (sseEnabled && !session.hasAttribute("NoSSE")) {
+                capabilitiesBuffer.append(",").append(Capabilities.SSE.name());
+              }
 
               msg.set(MessageParts.CapabilitiesFlags, capabilitiesBuffer.toString());
 
@@ -377,6 +372,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case WebsocketChannelVerify:
               if (message.hasPart(MessageParts.WebSocketToken)) {
                 if (verifyOneTimeToken(session, message.get(String.class, MessageParts.WebSocketToken))) {
+                  final String reconnectionToken = getNewOneTimeToken(session);
 
                   final LocalContext localContext = LocalContext.get(session);
 
@@ -386,7 +382,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   createConversation(message)
                       .toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.WebsocketChannelOpen)
+                      .with(MessageParts.WebSocketToken, reconnectionToken)
                       .done().sendNowWith(ServerMessageBusImpl.this, false);
+                }
+                else {
                 }
               }
               break;
@@ -651,26 +650,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       return;
     }
 
-    if (!fireGlobalMessageListeners(message)) {
-      if (message.hasPart(ReplyTo) && message.hasResource(Resources.Session.name())) {
-        /**
-         * Inform the sender that we did not dispatchGlobal the message.
-         */
-
-        final Map<String, Object> rawMsg = new HashMap<String, Object>();
-        rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
-
-        try {
-          enqueueForDelivery(getQueueByMessage(message), CommandMessage.createWithParts(rawMsg));
-        }
-        catch (NoSubscribersToDeliverTo nstdt) {
-          handleMessageDeliveryFailure(this, message, "No subscribers to deliver to", nstdt, false);
-        }
-      }
-
-      return;
-    }
-
     if (isMonitor()) {
       if (message.isFlagSet(RoutingFlag.FromRemote)) {
         busMonitor.notifyIncomingMessageFromRemote(
@@ -775,15 +754,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void send(final MessageQueue queue, final Message message, final boolean fireListeners) {
     try {
-      if (fireListeners && !fireGlobalMessageListeners(message)) {
-        if (message.hasPart(ReplyTo)) {
-          final Map<String, Object> rawMsg = new HashMap<String, Object>();
-          rawMsg.put(MessageParts.CommandType.name(), MessageNotDelivered.name());
-          enqueueForDelivery(queue, CommandMessage.createWithParts(rawMsg));
-        }
-        return;
-      }
-
       if (isMonitor()) {
         busMonitor.notifyOutgoingMessageToRemote(queue.getSession().getSessionId(), message);
       }
@@ -1021,17 +991,26 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       subscriptions.put(subject, plan = DeliveryPlan.newDeliveryPlan(receiver));
     }
     else {
-      subscriptions.put(subject, plan.newDeliveryPlanWith(receiver));
+      final DeliveryPlan newPlan = plan.newDeliveryPlanWith(receiver);
+
+//      if (newPlan != plan) {
+        subscriptions.put(subject, newPlan);
+//      }
     }
 
     return plan;
   }
 
   private DeliveryPlan removeFromDeliveryPlan(final String subject, final MessageCallback receiver) {
-    DeliveryPlan plan = subscriptions.get(subject);
+    final DeliveryPlan plan = subscriptions.get(subject);
 
     if (plan != null) {
-      subscriptions.put(subject, plan = plan.newDeliveryPlanWithOut(receiver));
+      final DeliveryPlan newPlan = plan.newDeliveryPlanWithOut(receiver);
+
+ //     if (newPlan != plan) {
+        subscriptions.put(subject, newPlan);
+ //     }
+
       fireUnsubscribeListeners(
           new SubscriptionEvent(false, "InBus", plan.getTotalReceivers(), false, subject));
     }
@@ -1131,6 +1110,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       if (broadcastable && !message.isFlagSet(RoutingFlag.NonGlobalRouting)) {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
+
         try {
           if (queues.isEmpty()) return;
 
@@ -1258,19 +1238,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         .contains(getQueueBySession(sessionId));
   }
 
-
-  private boolean fireGlobalMessageListeners(final Message message) {
-    boolean allowContinue = true;
-
-    for (final MessageListener listener : listeners) {
-      if (!listener.handleMessage(message)) {
-        allowContinue = false;
-      }
-    }
-
-    return allowContinue;
-  }
-
   private void fireSubscribeListeners(final SubscriptionEvent event) {
     if (isMonitor()) {
       busMonitor.notifyNewSubscriptionEvent(event);
@@ -1322,19 +1289,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           event.setDisposeListener(false);
         }
       }
-    }
-  }
-
-  /**
-   * Adds a global listener
-   *
-   * @param listener
-   *     - global listener to add
-   */
-  @Override
-  public void addGlobalListener(final MessageListener listener) {
-    synchronized (listeners) {
-      listeners.add(listener);
     }
   }
 
@@ -1428,8 +1382,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   @Override
-  public List<MessageCallback> getReceivers(final String subject) {
-    return Collections.unmodifiableList(Arrays.asList(subscriptions.get(subject).getDeliverTo()));
+  public Collection<MessageCallback> getReceivers(final String subject) {
+    return Collections.unmodifiableCollection(subscriptions.get(subject).getDeliverTo());
   }
 
   private boolean isMonitor() {

@@ -15,6 +15,21 @@
  */
 package org.jboss.errai.common.metadata;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.reflections.Configuration;
+import org.jboss.errai.reflections.Reflections;
+import org.jboss.errai.reflections.ReflectionsException;
+import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.MethodAnnotationsScanner;
+import org.jboss.errai.reflections.util.ConfigurationBuilder;
+import org.jboss.errai.reflections.vfs.Vfs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -35,25 +50,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.Multimap;
-
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.reflections.Configuration;
-import org.jboss.errai.reflections.Reflections;
-import org.jboss.errai.reflections.ReflectionsException;
-import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
-import org.jboss.errai.reflections.scanners.MethodAnnotationsScanner;
-import org.jboss.errai.reflections.util.ConfigurationBuilder;
-import org.jboss.errai.reflections.vfs.Vfs;
 
 /**
  * Scans component meta data. The scanner creates a {@link DeploymentContext} that identifies nested subdeployments
@@ -68,9 +70,12 @@ import org.jboss.errai.reflections.vfs.Vfs;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MetaDataScanner extends Reflections {
+  private static final Logger log = LoggerFactory.getLogger(MetaDataScanner.class);
+  private static final String EXTENSION_KEY = "errai.class_scanning_extension";
+
   public static class CacheHolder implements CacheStore {
     final Map<String, Set<SortableClassFileWrapper>> ANNOTATIONS_TO_CLASS =
-          new ConcurrentHashMap<String, Set<SortableClassFileWrapper>>();
+        new ConcurrentHashMap<String, Set<SortableClassFileWrapper>>();
 
     @Override
     public void clear() {
@@ -90,7 +95,21 @@ public class MetaDataScanner extends Reflections {
 
   MetaDataScanner(final List<URL> urls, File cacheFile) {
     super(getConfiguration(urls));
-
+    try {
+      for (final Class<? extends Vfs.UrlType> cls : findExtensions()) {
+        try {
+          final Vfs.UrlType urlType = cls.asSubclass(Vfs.UrlType.class).newInstance();
+          registerTypeHandler(urlType);
+          log.info("added class scanning extensions: " + cls.getName());
+        }
+        catch (Throwable t) {
+          throw new RuntimeException("could not load scanner extension: " + cls.getName(), t);
+        }
+      }
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+    }
     if (cacheFile != null) {
       collect(cacheFile);
     }
@@ -98,6 +117,75 @@ public class MetaDataScanner extends Reflections {
       scan();
     }
   }
+
+  private List<Class<? extends Vfs.UrlType>> findExtensions() {
+    final Collection<URL> erraiAppProperties = getErraiAppProperties();
+
+    final List<Class<? extends Vfs.UrlType>> extensions = new ArrayList<Class<? extends Vfs.UrlType>>();
+
+    for (URL url : erraiAppProperties) {
+      InputStream inputStream = null;
+      try {
+        inputStream = url.openStream();
+
+        final ResourceBundle props = new PropertyResourceBundle(inputStream);
+        if (props != null) {
+
+          for (final Object o : props.keySet()) {
+            final String key = (String) o;
+
+            if (key.equals(EXTENSION_KEY)) {
+              final String clsName = props.getString(key);
+              try {
+
+                final Class<?> aClass = Thread.currentThread().getContextClassLoader().loadClass(clsName);
+                extensions.add(aClass.asSubclass(Vfs.UrlType.class));
+              }
+              catch (Throwable t) {
+                throw new RuntimeException("could not load class scanning extension: " + clsName, t);
+              }
+            }
+          }
+        }
+      }
+      catch (IOException e) {
+        throw new RuntimeException("error reading ErraiApp.properties", e);
+      }
+      finally {
+        if (inputStream != null) {
+          try {
+            inputStream.close();
+          }
+          catch (IOException e) {
+            //
+          }
+        }
+      }
+    }
+    return extensions;
+  }
+
+  private static Collection<URL> getErraiAppProperties() {
+    try {
+      final Set<URL> urlList = new HashSet<URL>();
+      Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("ErraiApp.properties");
+
+      while (resources.hasMoreElements()) {
+        urlList.add(resources.nextElement());
+      }
+
+      resources = MetaDataScanner.class.getClassLoader().getResources("ErraiApp.properties");
+      while (resources.hasMoreElements()) {
+        urlList.add(resources.nextElement());
+      }
+
+      return urlList;
+    }
+    catch (IOException e) {
+      throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
+    }
+  }
+
 
   private static Configuration getConfiguration(final List<URL> urls) {
     return new ConfigurationBuilder()
@@ -130,7 +218,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   public static MetaDataScanner createInstance(final List<URL> urls, final File cacheFile) {
-    registerUrlTypeHandlers();
+    registerDefaultHandlers();
 
     final DeploymentContext ctx = new DeploymentContext(urls);
     final List<URL> actualUrls = ctx.process();
@@ -140,11 +228,13 @@ public class MetaDataScanner extends Reflections {
     return scanner;
   }
 
-  private static void registerUrlTypeHandlers() {
-    final List<Vfs.UrlType> urlTypes = Vfs.getDefaultUrlTypes();
-    urlTypes.add(new VfsUrlType());
-    urlTypes.add(new WarUrlType());
+  public static void registerTypeHandler(Vfs.UrlType handler) {
+    Vfs.addDefaultURLTypes(handler);
+  }
 
+  private static void registerDefaultHandlers() {
+    final List<Vfs.UrlType> urlTypes = Vfs.getDefaultUrlTypes();
+    urlTypes.add(new WarUrlType());
     // thread safe?
     Vfs.setDefaultURLTypes(urlTypes);
   }

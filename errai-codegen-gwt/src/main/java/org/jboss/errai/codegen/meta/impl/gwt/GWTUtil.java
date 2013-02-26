@@ -16,13 +16,13 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassCache;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -34,13 +34,12 @@ import org.jboss.errai.common.rebind.CacheStore;
 import org.jboss.errai.common.rebind.CacheUtil;
 import org.jboss.errai.config.rebind.EnvUtil;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JArrayType;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -173,12 +172,12 @@ public class GWTUtil {
 
       for (final JClassType type : typeOracle.getTypes()) {
         if (!translatable.contains(type.getPackage().getName())) {
-          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Skipping non-translatable " + type.getQualifiedSourceName());
+ //         logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Skipping non-translatable " + type.getQualifiedSourceName());
           continue;
         }
 
         if (type.isAnnotation() != null || type.getQualifiedSourceName().equals("java.lang.annotation.Annotation")) {
-          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
+   //       logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
 
           if (!MetaClassFactory.canLoadClass(type.getQualifiedBinaryName())) {
             throw new RuntimeException("a new annotation has been introduced (" + type.getQualifiedSourceName() + "); "
@@ -203,6 +202,5 @@ public class GWTUtil {
     tOCache.populatedFrom = context;
 
     CacheUtil.getCache(EnvUtil.EnvironmentConfigCache.class).clear();
-
   }
 }

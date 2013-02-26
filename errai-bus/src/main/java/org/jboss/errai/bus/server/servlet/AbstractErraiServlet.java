@@ -16,26 +16,25 @@
 
 package org.jboss.errai.bus.server.servlet;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.common.client.protocols.MessageParts;
+
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
@@ -54,16 +53,23 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
   }
 
+  private boolean longPollingEnabled;
+  private int longPollTimeout;
   private int sseTimeout;
 
-  private void setSseTimeout() {
-     sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(service.getConfiguration());
-   }
+  private void configureSettings() {
+    final ErraiServiceConfigurator config = service.getConfiguration();
+
+    final boolean hostedModeTesting = ErraiConfigAttribs.HOSTED_MODE_TESTING.getBoolean(config);
+    longPollingEnabled = !hostedModeTesting && ErraiConfigAttribs.DO_LONG_POLL.getBoolean(config);
+    longPollTimeout = ErraiConfigAttribs.LONG_POLL_TIMEOUT.getInt(config);
+    sseTimeout = ErraiConfigAttribs.SSE_TIMEOUT.getInt(config);
+  }
 
   public static ConnectionPhase getConnectionPhase(final HttpServletRequest request) {
-    if (request.getHeader("phase") == null) return ConnectionPhase.NORMAL;
+    if (request.getParameter("phase") == null) return ConnectionPhase.NORMAL;
     else {
-      String phase = request.getHeader("phase");
+      final String phase = request.getParameter("phase");
       if ("connection".equals(phase)) {
         return ConnectionPhase.CONNECTING;
       }
@@ -79,14 +85,14 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   public void init(final ServletConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
-    setSseTimeout();
+    configureSettings();
   }
 
 
   public void initAsFilter(final FilterConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
-    setSseTimeout();
+    configureSettings();
   }
 
   @Override
@@ -97,9 +103,13 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   /**
    * Writes the message to the output stream
    *
-   * @param stream - the stream to write to
-   * @param m      - the message to write to the stream
-   * @throws java.io.IOException - is thrown if any input/output errors occur while writing to the stream
+   * @param stream
+   *     - the stream to write to
+   * @param m
+   *     - the message to write to the stream
+   *
+   * @throws java.io.IOException
+   *     - is thrown if any input/output errors occur while writing to the stream
    */
   public static void writeToOutputStream(final OutputStream stream, final MarshalledMessage m) throws IOException {
     stream.write('[');
@@ -119,10 +129,9 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   }
 
-
   protected void writeExceptionToOutputStream(
-          final HttpServletResponse httpServletResponse,
-          final Throwable t) throws IOException {
+      final HttpServletResponse httpServletResponse,
+      final Throwable t) throws IOException {
 
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.addHeader("Payload-Size", "1");
@@ -140,7 +149,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       @Override
       public Object getMessage() {
         StringBuilder b = new StringBuilder("{\"ErrorMessage\":\"").append(t.getMessage()).append("\"," +
-                "\"AdditionalDetails\":\"");
+            "\"AdditionalDetails\":\"");
         for (StackTraceElement e : t.getStackTrace()) {
           b.append(e.toString()).append("<br/>");
         }
@@ -162,16 +171,16 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
       @Override
       public Object getMessage() {
-        return reason != null ? "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.Disconnect + "\"," +
-                "\"Reason\":\"" + reason + "\"}"
-                : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}";
+        return reason != null ? "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.Disconnect + "\"," +
+            "\"Reason\":\"" + reason + "\"}"
+            : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}";
       }
     });
   }
 
-
-  protected void sendDisconnectDueToSessionExpiry(OutputStream stream) throws IOException {
-    writeToOutputStream(stream, new MarshalledMessage() {
+  protected void sendDisconnectDueToSessionExpiry(final HttpServletResponse response) throws IOException {
+    response.setStatus(401);
+    writeToOutputStream(response.getOutputStream(), new MarshalledMessage() {
       @Override
       public String getSubject() {
         return "ClientBus";
@@ -179,20 +188,45 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
       @Override
       public Object getMessage() {
-        return "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.SessionExpired + "\"}";
+        return "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.SessionExpired.name() + "\"}";
       }
     });
   }
 
   protected static String getClientId(HttpServletRequest request) {
-    String clientId = request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER);
-    if (clientId == null) {
-      clientId = request.getParameter("clientId");
-    }
-    return clientId;
+    return request.getParameter("clientId");
   }
 
-  protected final long getSSETimeout() {
+  protected int getLongPollTimeout() {
+    return longPollTimeout;
+  }
+
+  protected final int getSSETimeout() {
     return sseTimeout;
+  }
+
+  public boolean isLongPollingEnabled() {
+    return longPollingEnabled;
+  }
+
+  protected boolean shouldWait(final HttpServletRequest request) {
+    return longPollingEnabled && "1".equals(request.getParameter("wait"));
+  }
+
+  protected boolean isSSERequest(final HttpServletRequest request) {
+    return request.getParameter("sse") != null;
+  }
+
+  protected void prepareCometPoll(final HttpServletResponse response) {
+    response.setContentType("application/json");
+  }
+
+  protected void prepareSSE(final HttpServletResponse response) throws IOException {
+    response.setContentType("text/event-stream");
+    response.getOutputStream().write("retry: 500\n\n".getBytes());
+  }
+
+  protected void prepareSSEContinue(final HttpServletResponse response) throws IOException {
+    response.getOutputStream().write("data: ".getBytes());
   }
 }

@@ -16,6 +16,22 @@
 
 package org.jboss.errai.config.rebind;
 
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.ext.GeneratorContext;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.QuickDeps;
+import org.jboss.errai.common.client.api.annotations.NonPortable;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.config.util.ClassScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,22 +50,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.util.QuickDeps;
-import org.jboss.errai.common.client.api.annotations.NonPortable;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.util.ClassScanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * @author Mike Brock
@@ -145,11 +145,11 @@ public abstract class EnvUtil {
 
     exposedClasses.addAll(exposedFromScanner);
 
-    final Enumeration<URL> erraiAppProperties = getErraiAppProperties();
-    while (erraiAppProperties.hasMoreElements()) {
+    final Collection<URL> erraiAppProperties = getErraiAppProperties();
+
+    for (URL url : erraiAppProperties) {
       InputStream inputStream = null;
       try {
-        final URL url = erraiAppProperties.nextElement();
 
         log.debug("checking " + url.getFile() + " for configured types ...");
 
@@ -210,7 +210,6 @@ public abstract class EnvUtil {
                   throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
                 }
               }
-              continue;
             }
           }
         }
@@ -240,9 +239,23 @@ public abstract class EnvUtil {
     return new EnvironmentConfig(mappingAliases, exposedClasses, portableNonExposed, explicitTypes, frameworkProps);
   }
 
-  public static Enumeration<URL> getErraiAppProperties() {
+  public static Collection<URL> getErraiAppProperties() {
+    final Multimap<String,String> erraiProperties = ScannerSingleton.getOrCreateInstance().getErraiProperties();
+
     try {
-      return Thread.currentThread().getContextClassLoader().getResources("ErraiApp.properties");
+      final Set<URL> urlList = new HashSet<URL>();
+      Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("ErraiApp.properties");
+
+      while (resources.hasMoreElements()) {
+        urlList.add(resources.nextElement());
+      }
+
+      resources = EnvUtil.class.getClassLoader().getResources("ErraiApp.properties");
+      while (resources.hasMoreElements()) {
+        urlList.add(resources.nextElement());
+      }
+
+      return urlList;
     }
     catch (IOException e) {
       throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
@@ -257,6 +270,10 @@ public abstract class EnvUtil {
     if (type.getSuperClass() != null) {
       fillInInterfacesAndSuperTypes(set, type.getSuperClass());
     }
+  }
+
+  public static void clearCache() {
+    CacheUtil.getCache(EnvironmentConfigCache.class).clear();
   }
 
   /**
@@ -415,6 +432,8 @@ public abstract class EnvUtil {
       return cache.getCache(context);
     }
 
+
+    EnvUtil.clearCache();
     final EnvironmentConfig config = getEnvironmentConfig();
 
     long time = System.currentTimeMillis();

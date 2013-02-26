@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server.security.auth.rules;
 
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
-import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -83,7 +83,7 @@ public class RolesRequiredRule implements BooleanRoutingRule {
             .command(SecurityCommands.SecurityChallenge)
             .with(SecurityParts.CredentialsRequired, "Name,Password")
             .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
-            .with(SecurityParts.RejectedMessage, ServerBusTools.encodeMessage(message))
+            .with(SecurityParts.RejectedMessage, BusToolsCli.encodeMessage(message))
             .copyResource("Session", message)
             .errorsHandledBy(new ErrorCallback<Message>() {
               public boolean error(Message message, Throwable throwable) {

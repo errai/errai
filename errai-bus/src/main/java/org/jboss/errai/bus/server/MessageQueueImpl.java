@@ -46,9 +46,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * messages.
  */
 public class MessageQueueImpl implements MessageQueue {
-  private static final long DEFAULT_TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-      TimeUnit.SECONDS.toMillis(600) : TimeUnit.SECONDS.toMillis(60);
-
   private final QueueSession session;
 
   private boolean initLock = true;
@@ -58,7 +55,7 @@ public class MessageQueueImpl implements MessageQueue {
 
   private volatile MessageDeliveryHandler deliveryHandler = BufferDeliveryHandler.getInstance();
   private volatile QueueActivationCallback activationCallback;
-  private volatile long timeout = DEFAULT_TIMEOUT;
+  private volatile long timeout;
 
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
@@ -67,35 +64,40 @@ public class MessageQueueImpl implements MessageQueue {
   private final Object pageLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
 
-
-
   private static final Logger log = getLogger(MessageQueueImpl.class);
 
-  public MessageQueueImpl(final TransmissionBuffer buffer, final QueueSession session) {
+  public MessageQueueImpl(final TransmissionBuffer buffer, final QueueSession session, final int timeoutSecs) {
     this.buffer = buffer;
     this.session = session;
     this.bufferColor = BufferColor.getNewColorFromHead(buffer);
+    this.timeout = (timeoutSecs * 1000);
   }
 
-  /**
-   * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
-   * need to be sent from the specified bus to another.</p>
-   * <p/>
-   * Fodod</p>
-   *
-   * @param wait
-   *     - boolean is true if we should wait until the queue is ready. In this case, a
-   *     <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
-   * @param outstream
-   *     - output stream to write the polling results to.
-   */
-  public boolean poll(boolean wait, final ByteWriteAdapter outstream) throws IOException {
+  @Override
+  public boolean poll(ByteWriteAdapter stream) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
 
     if (deliveryHandler instanceof Buffered) {
-      return ((Buffered) deliveryHandler).copyFromBuffer(wait, this, outstream);
+      return ((Buffered) deliveryHandler).copyFromBuffer(this, stream);
+    }
+    else {
+      // this can happen during the hand off to WebSockets.
+      log.debug("call to poll() when DeliveryHandler does not implement Buffered.");
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean poll(java.util.concurrent.TimeUnit timeUnit, int time, ByteWriteAdapter stream) throws IOException {
+    if (!queueRunning) {
+      throw new QueueUnavailableException("queue is not available");
+    }
+
+    if (deliveryHandler instanceof Buffered) {
+      return ((Buffered) deliveryHandler).copyFromBuffer(timeUnit, time, this, stream);
     }
     else {
       // this can happen during the hand off to WebSockets.

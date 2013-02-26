@@ -25,14 +25,14 @@ public enum Capabilities {
   /**
    * This message bus can communicate updates using HTTP long polling, commonly known as COMET.
    */
-  LongPollAvailable,
+  LongPolling,
 
   /**
    * Indicates that this message bus can communicate using HTTP short polling.
    * <p>
    * Implementation note: This flag is WACK, man.
    */
-  NoLongPollAvailable,
+  ShortPolling,
 
   /**
    * This message bus can communicate updates using the Errai protocol over a WebSocket channel.
@@ -43,10 +43,4 @@ public enum Capabilities {
    * This message bus can communicate using Server-Sent Events
    */
   SSE,
-
-  /**
-   * This message bus is just a proxy for another bus. All messages are
-   * forwarded on to another bus for processing.
-   */
-  Proxy;
 }

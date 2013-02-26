@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <name>Errai::Bus::Demos</name>
   <artifactId>errai-bus-demos</artifactId>
@@ -79,7 +79,7 @@
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc-bus-support</artifactId>
@@ -187,7 +187,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <execute />
+                    <execute/>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -200,7 +200,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -212,8 +212,6 @@
   </build>
 
   <profiles>
-
-
     <profile>
       <id>jetty</id>
       <activation>
@@ -225,108 +223,19 @@
     </profile>
 
     <profile>
-      <id>jboss5</id>
-
-      <properties>
-        <webDescriptor>jboss5</webDescriptor>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-ioc</artifactId>
-          <exclusions>
-            <exclusion>
-              <artifactId>jsr250-api</artifactId>
-              <groupId>javax.annotation</groupId>
-            </exclusion>
-          </exclusions>
-          <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-          <version>${slf4j.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <version>${slf4j.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.javassist</groupId>
-          <artifactId>javassist</artifactId>
-          <version>3.15.0-GA</version>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
-      <id>jboss6</id>
-
-      <properties>
-        <webDescriptor>jboss6</webDescriptor>
-      </properties>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-ioc</artifactId>
-          <exclusions>
-            <exclusion>
-              <artifactId>jsr250-api</artifactId>
-              <groupId>javax.annotation</groupId>
-            </exclusion>
-            <exclusion>
-              <artifactId>javax.inject</artifactId>
-              <groupId>javax.inject</groupId>
-            </exclusion>
-          </exclusions>
-          <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>javax.inject</groupId>
-          <artifactId>javax.inject</artifactId>
-          <version>1</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-          <version>${slf4j.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <version>${slf4j.version}</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.javassist</groupId>
-          <artifactId>javassist</artifactId>
-          <version>3.15.0-GA</version>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-    </profile>
-
-    <profile>
       <id>jboss7</id>
 
       <properties>
         <webDescriptor>jboss7</webDescriptor>
       </properties>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.errai</groupId>
+          <artifactId>errai-jboss-as-support</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>
@@ -338,15 +247,15 @@
     </profile>
 
     <!--<profile>-->
-      <!--<id>macJvmSettings</id>-->
-      <!--<activation>-->
-        <!--<os>-->
-          <!--<family>mac</family>-->
-        <!--</os>-->
-      <!--</activation>-->
-      <!--<properties>-->
-        <!--<argLine>-d32 -XX:CompileThreshold=1000</argLine>-->
-      <!--</properties>-->
+    <!--<id>macJvmSettings</id>-->
+    <!--<activation>-->
+    <!--<os>-->
+    <!--<family>mac</family>-->
+    <!--</os>-->
+    <!--</activation>-->
+    <!--<properties>-->
+    <!--<argLine>-d32 -XX:CompileThreshold=1000</argLine>-->
+    <!--</properties>-->
     <!--</profile>-->
   </profiles>
 </project>

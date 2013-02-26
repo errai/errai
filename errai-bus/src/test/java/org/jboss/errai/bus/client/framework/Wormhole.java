@@ -10,14 +10,35 @@ import java.util.Set;
  */
 public class Wormhole {
 
-  public static String changeBusEndpointUrl(ClientMessageBus bus, String newUrl) {
-    String oldUrl = ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT;
+  public static Fixer changeBusEndpointUrl(ClientMessageBus bus, String newUrl) {
+    String oldInEntryPoint = ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT;
+    String oldOutEntryPoint = ((ClientMessageBusImpl) bus).OUT_SERVICE_ENTRY_POINT;
+
     ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT = newUrl;
-    return oldUrl;
+    ((ClientMessageBusImpl) bus).OUT_SERVICE_ENTRY_POINT = newUrl;
+
+    System.out.println("CHANGED ENDPOINT TO: " + newUrl);
+    return new Fixer(bus, oldInEntryPoint, oldOutEntryPoint);
+  }
+
+  public static class Fixer {
+    ClientMessageBus bus;
+    String oldInEntryPoint;
+    String oldOutEntryPoint;
+
+    Fixer(ClientMessageBus bus, String oldInEntryPoint, String oldOutEntryPoint) {
+      this.bus = bus;
+      this.oldInEntryPoint = oldInEntryPoint;
+      this.oldOutEntryPoint = oldOutEntryPoint;
+    }
+
+    public void fix() {
+      ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT = oldInEntryPoint;
+      ((ClientMessageBusImpl) bus).OUT_SERVICE_ENTRY_POINT = oldOutEntryPoint;
+    }
   }
 
   public static Set<String> getRemoteSubscriptions(ClientMessageBus bus) {
     return ((ClientMessageBusImpl) bus).getRemoteSubscriptions();
   }
-
 }

@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.util.BusTools;
 
 /**
@@ -28,7 +29,7 @@ import org.jboss.errai.bus.client.util.BusTools;
 public class ServerBusTools extends BusTools {
   public static ByteArrayInputStream encodeMessageToByteArrayInputStream(Message message) {
     try {
-      return new ByteArrayInputStream(encodeMessage(message).getBytes("UTF-8"));
+      return new ByteArrayInputStream(BusToolsCli.encodeMessage(message).getBytes("UTF-8"));
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 appears not to be supported by this JRE, but that's impossible");
     }

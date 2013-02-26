@@ -126,6 +126,24 @@ public class MessageFactory {
     }
   }
 
+  public static List<Message> createCommandMessage(QueueSession session, EJValue value) {
+    if (value.isObject() != null) {
+      return Collections.singletonList(from(getParts(value), session, null));
+    }
+    else if (value.isArray() != null) {
+      EJArray arr = value.isArray();
+      List<Message> messages = new ArrayList<Message>(arr.size());
+      for (int i = 0; i < arr.size(); i++) {
+        messages.add(from(getParts(arr.get(i)), session, null));
+      }
+      return messages;
+    }
+    else {
+      throw new RuntimeException("bad payload");
+    }
+  }
+
+
 
   private static Map getParts(EJValue value) {
     return ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(value,

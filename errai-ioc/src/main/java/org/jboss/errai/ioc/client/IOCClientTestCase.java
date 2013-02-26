@@ -56,14 +56,19 @@ public abstract class IOCClientTestCase extends GWTTestCase {
   @Override
   public void gwtSetUp() throws Exception {
     try {
-      InitVotes.reset();
       bootstrapContainer();
     }
     catch (Exception t) {
       t.printStackTrace();
       throw t;
     }
+  }
 
+  @Override
+  protected void gwtTearDown() throws Exception {
+    InitVotes.reset();
+
+    super.gwtTearDown();
   }
 
   public static interface ContainerBootstrapper {

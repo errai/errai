@@ -77,18 +77,6 @@ public interface TransportError {
   public void stopDefaultErrorHandling();
 
   /**
-   * Returns the {@link BusControl} object, which permits shutting down or
-   * reinitialization of the bus.
-   *
-   * @return a {@link BusControl} reference.
-   *
-   * @deprecated Use {@link ClientMessageBus#stop(boolean)} and
-   *             {@link ClientMessageBus#init()} to stop and start the bus.
-   */
-  @Deprecated
-  public BusControl getBusControl();
-
-  /**
    * Provides the retry information for the failed action that led to this error.
    *
    * @return A RetryInfo object. Never null.

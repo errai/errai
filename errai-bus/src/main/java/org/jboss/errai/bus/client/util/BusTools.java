@@ -16,14 +16,28 @@
 
 package org.jboss.errai.bus.client.util;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
+import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Queue;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class BusTools {
@@ -46,27 +60,6 @@ public class BusTools {
   public static boolean isReservedName(final String name) {
     return RESERVED_SERVICES.contains(name);
   }
-  
-  public static String encodeMessage(final Message message) {
-    if (message instanceof HasEncoded) {
-      return ((HasEncoded) message).getEncoded();
-    }
-    else {
-      return ErraiProtocol.encodePayload(message.getParts());
-    }
-  }
-  
-  public static String encodeMessages(final Queue<Message> messages) {
-    final StringBuilder sbuf = new StringBuilder("[");
-    boolean first = true;
-    Message m;
-    while ((m = messages.poll()) != null) {
-      if (!first) {
-        sbuf.append(',');
-      }
-      sbuf.append(encodeMessage(m));
-      first = false;
-    }
-    return sbuf.append("]").toString();
-  }
+
+
 }

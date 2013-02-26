@@ -15,24 +15,23 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
+import static com.google.inject.Guice.createInjector;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.HttpSessionProvider;
-import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.google.inject.Guice.createInjector;
 
 /**
  * Load the default components configured through ErraiService.properties.
@@ -47,7 +46,7 @@ class DefaultComponents implements BootstrapExecution {
 
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
 
-   // MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
+    // MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
 
     /*** Authentication Adapter ***/
 
@@ -98,20 +97,18 @@ class DefaultComponents implements BootstrapExecution {
 
     /*** Dispatcher ***/
 
-    RequestDispatcher dispatcher = createInjector(new AbstractModule() {
+    final RequestDispatcher dispatcher = createInjector(new AbstractModule() {
 
       @Override
       protected void configure() {
-        Class<? extends RequestDispatcher> dispatcherImplementation = SimpleDispatcher.class;
+        final Class<? extends RequestDispatcher> dispatcherImplementation;
+        final String dispatcherImpl = ErraiConfigAttribs.ERRAI_DISPATCHER_IMPLEMENTATION.get(config);
 
-        if (config.hasProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION)) {
-          try {
-            dispatcherImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_DISPATCHER_IMPLEMENTATION))
-                .asSubclass(RequestDispatcher.class);
-          }
-          catch (Exception e) {
-            throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
-          }
+        try {
+          dispatcherImplementation = Class.forName(dispatcherImpl).asSubclass(RequestDispatcher.class);
+        }
+        catch (Exception e) {
+          throw new ErraiBootstrapFailure("could not load request dispatcher implementation class", e);
         }
 
         log.info("using dispatcher implementation: " + dispatcherImplementation.getName());
@@ -127,19 +124,18 @@ class DefaultComponents implements BootstrapExecution {
 
     /*** Session Provider ***/
 
-    SessionProvider sessionProvider = createInjector(new AbstractModule() {
+    final SessionProvider sessionProvider = createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        Class<? extends SessionProvider> sessionProviderImplementation = HttpSessionProvider.class;
+        final Class<? extends SessionProvider> sessionProviderImplementation;
+        final String sessionProviderImpl = ErraiConfigAttribs.ERRAI_SESSION_PROVIDER_IMPLEMENTATION.get(config);
 
-        if (config.hasProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION)) {
-          try {
-            sessionProviderImplementation = Class.forName(config.getProperty(ErraiServiceConfigurator.ERRAI_SESSION_PROVIDER_IMPLEMENTATION))
-                .asSubclass(SessionProvider.class);
-          }
-          catch (Exception e) {
-            throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
-          }
+        try {
+          sessionProviderImplementation = Class.forName(sessionProviderImpl)
+              .asSubclass(SessionProvider.class);
+        }
+        catch (Exception e) {
+          throw new ErraiBootstrapFailure("could not load session provider implementation class", e);
         }
 
         log.info("using session provider implementation: " + sessionProviderImplementation.getName());

@@ -27,16 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -46,7 +44,6 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * CDI client interface.
@@ -57,14 +54,14 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  */
 public class CDI {
   public static final String CDI_SUBJECT_PREFIX = "cdi.event:";
-  public static final String SERVER_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "Dispatcher";
-  public static final String CLIENT_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "ClientDispatcher";
-  private static final String CLIENT_ALREADY_FIRED_RESOURCE = CDI_SUBJECT_PREFIX + "AlreadyFired";
+
+  public static final String CDI_SERVICE_SUBJECT_PREFIX = "cdi.event:";
+  public static final String SERVER_DISPATCHER_SUBJECT = CDI_SERVICE_SUBJECT_PREFIX + "Dispatcher";
+  public static final String CLIENT_DISPATCHER_SUBJECT = CDI_SERVICE_SUBJECT_PREFIX + "ClientDispatcher";
+  private static final String CLIENT_ALREADY_FIRED_RESOURCE = CDI_SERVICE_SUBJECT_PREFIX + "AlreadyFired";
 
   private static final Set<String> remoteEvents = new HashSet<String>();
   private static boolean active = false;
-  // private static final List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
-  private static final List<Runnable> postInitTasks = new ArrayList<Runnable>();
 
   private static Map<String, List<MessageCallback>> eventObservers = new HashMap<String, List<MessageCallback>>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
@@ -93,9 +90,7 @@ public class CDI {
 
     remoteEvents.clear();
     active = false;
-    //  deferredEvents.clear();
     fireOnSubscribe.clear();
-    postInitTasks.clear();
     eventObservers.clear();
     lookupTable = Collections.emptyMap();
   }
@@ -107,7 +102,7 @@ public class CDI {
   /**
    * Return a list of string representations for the qualifiers.
    *
-   * @param qualifiers
+   * @param qualifiers -
    *
    * @return
    */
@@ -144,11 +139,6 @@ public class CDI {
     else {
       beanRef = payload;
     }
-
-//    if (!local && !active) {
-//      deferredEvents.add(new DeferredEvent(beanRef, qualifiers));
-//      return;
-//    }
 
     final Map<String, Object> messageMap = new HashMap<String, Object>();
     messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
@@ -217,7 +207,6 @@ public class CDI {
     }
   }
 
-
   public static void consumeEventFromMessage(final Message message) {
     final String beanType = message.get(String.class, CDIProtocol.BeanType);
 
@@ -280,16 +269,10 @@ public class CDI {
   }
 
   public static void addPostInitTask(final Runnable runnable) {
-    if (active) {
-      runnable.run();
-    }
-    else {
-      postInitTasks.add(runnable);
-    }
+    InitVotes.registerOneTimeDependencyCallback(CDI.class, runnable);
   }
 
   private static void fireOnSubscribe(final String type, final Message message) {
-
     if (MarshallerFramework.canMarshall(type)) {
       final MessageFireDeferral deferral = new MessageFireDeferral(System.currentTimeMillis(), message);
 
@@ -307,24 +290,16 @@ public class CDI {
   }
 
 
-  public static void removePostInitTasks() {
-    postInitTasks.clear();
-  }
-
-  public static void activate(String... remoteTypes) {
+  public static void activate(final String... remoteTypes) {
     if (!active) {
       addRemoteEventTypes(remoteTypes);
       active = true;
 
       fireAllIfWaiting();
 
-      for (final Runnable r : postInitTasks) {
-        r.run();
-      }
-
       LogUtil.log("activated CDI eventing subsystem.");
+      InitVotes.voteFor(CDI.class);
     }
-    InitVotes.voteFor(CDI.class);
   }
 
   static class MessageFireDeferral {
@@ -350,6 +325,6 @@ public class CDI {
   }
 
   private static boolean isRemoteCommunicationEnabled() {
-    return ((ClientMessageBusImpl) ErraiBus.get()).isRemoteCommunicationEnabled();
+    return BusToolsCli.isRemoteCommunicationEnabled();
   }
 }

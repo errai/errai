@@ -66,12 +66,6 @@ public interface BusLifecycleListener {
    * failed connection attempts, or because the application stopped the bus
    * explicitly.
    * <p>
-   * The state of the bus is reset just before this event is delivered. If you
-   * want local message delivery to continue working (as opposed to having all
-   * message delivery--including local--deferred until the bus is connected
-   * again) then call {@link ClientMessageBusImpl#setInitialized(boolean)} with
-   * a value of <tt>true</tt> when receiving this event.
-   * <p>
    * When you want to try to connect to the server again (for example, to fail
    * over to another server, after a set timeout has elapsed, or in response to
    * the user clicking a "Reconnect" button in the user interface), call

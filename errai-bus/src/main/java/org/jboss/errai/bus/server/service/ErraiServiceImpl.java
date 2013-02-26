@@ -24,6 +24,7 @@ import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
+import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
@@ -67,7 +68,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     BootstrapContext context = new BootstrapContext(this, bus, config);
     new OrderedBootstrap().execute(context);
 
-    if (config.getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER)) {
+    if (ErraiConfigAttribs.ENABLE_WEB_SOCKET_SERVER.getBoolean(config)) {
       WebSocketServer server = new WebSocketServer(this);
       server.start();
     }
@@ -90,6 +91,9 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
      */
     try {
       getDispatcher().dispatchGlobal(message);
+    }
+    catch (QueueUnavailableException e) {
+      throw e;
     }
     catch (Throwable t) {
       t.printStackTrace();

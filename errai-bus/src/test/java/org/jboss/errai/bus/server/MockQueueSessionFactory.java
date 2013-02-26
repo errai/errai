@@ -60,6 +60,11 @@ public abstract class MockQueueSessionFactory {
       @Override
       public void addSessionEndListener(SessionEndListener listener) {
       }
+
+      @Override
+      public boolean isValid() {
+        return true;
+      }
     };
   }
 

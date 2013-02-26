@@ -18,7 +18,7 @@ package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
-import org.jboss.errai.bus.server.util.ServerBusTools;
+import org.jboss.errai.bus.client.util.BusToolsCli;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -521,7 +521,7 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
     * it would be wacky to make the monitoring API such that we had to scan for one or the other, this
     * is much more consistent from an API point-of-view.
     */
-    tableModel.addMessage(time, ServerBusTools.encodeMessage(message));
+    tableModel.addMessage(time, BusToolsCli.encodeMessage(message));
   }
 
   public void attach(ActivityProcessor proc) {

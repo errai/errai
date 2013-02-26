@@ -1,20 +1,27 @@
 package org.jboss.errai.reflections;
 
+import static java.util.Arrays.asList;
+import static org.jboss.errai.reflections.TestModel.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.jboss.errai.reflections.scanners.*;
-import org.jboss.errai.reflections.serializers.JsonSerializer;
-import org.jboss.errai.reflections.serializers.XmlSerializer;
+import org.jboss.errai.reflections.scanners.ConvertersScanner;
+import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.MethodAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.ResourcesScanner;
+import org.jboss.errai.reflections.scanners.SubTypesScanner;
+import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
 import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
 import org.jboss.errai.reflections.vfs.Vfs;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,11 +30,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.jboss.errai.reflections.TestModel.*;
 
 /**
  *
@@ -212,37 +214,37 @@ public class ReflectionsTest {
     testAll();
   }
 
-  @Test @Ignore
-  public void jsonCollect() {
-    Predicate<String> filter = new FilterBuilder().include("org.jboss.errai.reflections.TestModel\\$.*");
-    Reflections testModelReflections = new Reflections(new ConfigurationBuilder()
-        .filterInputsBy(filter)
-        .setScanners(
-            new SubTypesScanner().filterResultsBy(filter),
-            new TypeAnnotationsScanner().filterResultsBy(filter))
-        .setUrls(asList(ClasspathHelper.forClass(TestModel.class))));
-
-    testModelReflections.scan();
-
-    String path = getUserDir() + "/target/test-classes" + "/META-INF/reflections/testModel-reflections.json";
-
-    final JsonSerializer serializer = new JsonSerializer();
-    testModelReflections.save(path, serializer);
-
-    reflections = new Reflections(new ConfigurationBuilder()).collect("META-INF/reflections",
-        new FilterBuilder().include(".*-reflections.json"),
-        serializer);
-
-    reflections.scan();
-
-
-    reflections.collect("META-INF/reflections",
-        new FilterBuilder().include(".*-reflections.xml").exclude("testModel-reflections.xml"),
-        new XmlSerializer());
-
-
-    testAll();
-  }
+//  @Test @Ignore
+//  public void jsonCollect() {
+//    Predicate<String> filter = new FilterBuilder().include("org.jboss.errai.reflections.TestModel\\$.*");
+//    Reflections testModelReflections = new Reflections(new ConfigurationBuilder()
+//        .filterInputsBy(filter)
+//        .setScanners(
+//            new SubTypesScanner().filterResultsBy(filter),
+//            new TypeAnnotationsScanner().filterResultsBy(filter))
+//        .setUrls(asList(ClasspathHelper.forClass(TestModel.class))));
+//
+//    testModelReflections.scan();
+//
+//    String path = getUserDir() + "/target/test-classes" + "/META-INF/reflections/testModel-reflections.json";
+//
+//    final JsonSerializer serializer = new JsonSerializer();
+//    testModelReflections.save(path, serializer);
+//
+//    reflections = new Reflections(new ConfigurationBuilder()).collect("META-INF/reflections",
+//        new FilterBuilder().include(".*-reflections.json"),
+//        serializer);
+//
+//    reflections.scan();
+//
+//
+//    reflections.collect("META-INF/reflections",
+//        new FilterBuilder().include(".*-reflections.xml").exclude("testModel-reflections.xml"),
+//        new XmlSerializer());
+//
+//
+//    testAll();
+//  }
 
   public static String getUserDir() {
     File file = new File(System.getProperty("user.dir"));

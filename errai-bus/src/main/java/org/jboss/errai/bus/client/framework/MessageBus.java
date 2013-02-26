@@ -120,12 +120,10 @@ public interface MessageBus {
    */
   public Subscription subscribeLocal(String subject, MessageCallback receiver);
 
-  /*
+  /**
   * Unsubscribe all listeners registered for the specified subject.
   */
-
   public void unsubscribeAll(String subject);
-
 
   /**
    * Returns true if there the specified subject has one or more listeners registered.
@@ -135,12 +133,6 @@ public interface MessageBus {
    */
   public boolean isSubscribed(String subject);
 
-  /**
-   * Registers a global listener, that can intercept all messages before they are transmitted.
-   *
-   * @param listener
-   */
-  public void addGlobalListener(MessageListener listener);
 
   /**
    * Registers a subscription listener, which is fired whenever a new subscription is created.

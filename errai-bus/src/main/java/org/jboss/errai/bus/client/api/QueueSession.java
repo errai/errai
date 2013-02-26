@@ -127,4 +127,6 @@ public interface QueueSession {
    *          the listener to be notified at session end.
    */
   public void addSessionEndListener(SessionEndListener listener);
+
+  public boolean isValid();
 }
