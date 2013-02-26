@@ -78,6 +78,11 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
         add(friend2);
       }
     });
+    friend1.setFriends(new ArrayList<User>() {
+      {
+        add(friend2);
+      }
+    });
     user.setFriendsNameMap(new HashMap<Integer, String>() {
       {
         put(13, "friend1-first");
@@ -93,6 +98,8 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
 
     String jackson = MarshallingWrapper.toJSON(user);
 
+    System.out.println(jackson);
+    
     call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
@@ -113,7 +120,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     users.add(new User(12l, "first2", "last2", 40, Gender.MALE, null));
 
     String jackson = MarshallingWrapper.toJSON(users);
-
+    System.out.println(jackson);
     call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
@@ -268,5 +275,4 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     assertNotNull("key5 should not be null", map);
     assertEquals("mapValue", map.get("mapKey"));
   }
-
 }
