@@ -50,16 +50,25 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
   private String unsupportedReason = UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
 
+  private final Timer initialTimeoutTimer = new Timer() {
+    @Override
+    public void run() {
+      if (!connected) {
+        notifyDisconnected();
+      }
+    }
+  };
+
   private Object sseChannel;
 
-  public SSEHandler(MessageCallback messageCallback, ClientMessageBusImpl clientMessageBus) {
+  public SSEHandler(final MessageCallback messageCallback, final ClientMessageBusImpl clientMessageBus) {
     this.clientMessageBus = clientMessageBus;
     this.messageCallback = messageCallback;
     this.pollingHandler = HttpPollingHandler.newNoPollingInstance(messageCallback, clientMessageBus);
   }
 
   @Override
-  public void configure(Message capabilitiesMessage) {
+  public void configure(final Message capabilitiesMessage) {
     configured = true;
 
     if (!isSSESupported()) {
@@ -85,18 +94,11 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
 
     // time out after 2 seconds and attempt reconnect. (note: this is really to deal with a bug a firefox).
-    new Timer() {
-      @Override
-      public void run() {
-        if (!connected) {
-          notifyDisconnected();
-        }
-      }
-    }.schedule(2000);
+    initialTimeoutTimer.schedule(2500);
   }
 
   @Override
-  public Collection<Message> stop(boolean stopAllCurrentRequests) {
+  public Collection<Message> stop(final boolean stopAllCurrentRequests) {
     stopped = true;
     disconnect(sseChannel);
     sseChannel = null;
@@ -104,12 +106,12 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   }
 
   @Override
-  public void transmit(List<Message> txMessages) {
+  public void transmit(final List<Message> txMessages) {
     this.pollingHandler.transmit(txMessages);
   }
 
   @Override
-  public void handleProtocolExtension(Message message) {
+  public void handleProtocolExtension(final Message message) {
   }
 
   @Override
@@ -141,7 +143,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
       var openHandler = function () {
           thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyConnected()();
-      }
+      };
 
       var sseSource = new EventSource(sseAddress);
       sseSource.addEventListener('message', function (e) {
@@ -165,6 +167,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   }
 
   private void notifyDisconnected() {
+    initialTimeoutTimer.cancel();
     LogUtil.log("SSE channel disconnected.");
     connectedTime = -1;
     clientMessageBus.setState(BusState.CONNECTION_INTERRUPTED);
