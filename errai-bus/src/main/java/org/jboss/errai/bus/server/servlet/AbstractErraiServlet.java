@@ -223,9 +223,10 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected void prepareSSE(final HttpServletResponse response) throws IOException {
     response.setContentType("text/event-stream");
+    response.getOutputStream().write("retry: 500\n\n".getBytes());
   }
 
   protected void prepareSSEContinue(final HttpServletResponse response) throws IOException {
-    response.getOutputStream().write("retry: 500\n\ndata: ".getBytes());
+    response.getOutputStream().write("data: ".getBytes());
   }
 }
