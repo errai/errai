@@ -97,7 +97,12 @@ public class JacksonTransformer {
         if (!objectId.equals("-1")) {
           JSONValue backRef = objectCache.get(objectId);
           if (backRef != null) {
-            parent.put(key, backRef);
+            if (parent != null) {
+              parent.put(key, backRef);
+            }
+            else {
+              return backRef.isObject();
+            }
           }
           else {
             objectCache.put(objectId, obj);
@@ -116,16 +121,19 @@ public class JacksonTransformer {
             if (arr.get(i).isObject() != null && arr.get(i).isObject().get(NUMERIC_VALUE) != null) {
               arr.set(i, arr.get(i).isObject().get(NUMERIC_VALUE));
             }
-            else {
-              toJackson(arr.get(i), QUALIFIED_VALUE, obj, objectCache);
+            else if (arr.get(i).isObject() != null) {
+              arr.set(i, toJackson(arr.get(i), null, null, objectCache));
             }
           }
-          if (parent != null) {
-            parent.put(key, obj.get(k));
-          }
-          else {
-            return arr;
-          }
+
+          if (k.equals(QUALIFIED_VALUE)) {
+            if (parent != null) {
+              parent.put(key, arr);
+            }
+            else {
+              return arr;
+            }
+          } 
         }
         else if (k.equals(ENUM_STRING_VALUE)) {
           if (parent != null) {
@@ -168,10 +176,10 @@ public class JacksonTransformer {
         toJackson(obj.get(k), k, obj, objectCache);
       }
     }
-   
+
     return cleanUpEmbeddedJson(obj);
   }
-  
+
   private static JSONObject cleanUpEmbeddedJson(JSONObject obj) {
     if (obj != null) {
       for (String k : obj.keySet()) {
