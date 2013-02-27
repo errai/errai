@@ -1,21 +1,14 @@
 package org.jboss.errai.demo.grocery.client.shared;
 
+import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.demo.grocery.client.local.producer.StoreListProducer;
+
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-
-import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.demo.grocery.client.local.StoresPage;
-
 @Bindable @Entity
-@EntityListeners(StoresPage.StoreListener.class)
+@EntityListeners(StoreListProducer.StoreListener.class)
 @NamedQuery(name="allStores", query="SELECT s FROM Store s ORDER BY s.name")
 public class Store {
 

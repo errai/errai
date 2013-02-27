@@ -1,14 +1,9 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import com.google.gwt.ajaxloader.client.AjaxLoader;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.geolocation.client.Geolocation;
-import com.google.gwt.geolocation.client.Position;
-import com.google.gwt.geolocation.client.PositionError;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.events.place.PlaceChangeMapEvent;
@@ -32,6 +27,7 @@ import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
+import org.jboss.errai.demo.grocery.client.local.map.LocationProvider;
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.nav.client.local.*;
@@ -40,6 +36,8 @@ import org.jboss.errai.ui.shared.api.annotations.*;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+
+import static org.jboss.errai.demo.grocery.client.local.map.LocationProvider.LocationCallback;
 
 @Dependent
 @Templated("#main") @Page
@@ -58,6 +56,8 @@ public class StorePage extends Composite {
   @Inject private @Bound @DataField TextBox address;
   @Inject private @DataField SuggestBox addDepartment;
   @Inject private @DataField DepartmentList departmentList;
+
+  @Inject private LocationProvider locationProvider;
 
   private @PageState("id") Long requestedStoreId;
   @Inject private TransitionTo<StoresPage> backToStoresPage;
@@ -212,23 +212,12 @@ public class StorePage extends Composite {
       drawGeoFence(map);
     }
     else {
-      Geolocation geolocation = Geolocation.getIfSupported();
-      if (geolocation != null) {
-        geolocation.getCurrentPosition(new Callback<Position, PositionError>() {
-
-          @Override
-          public void onSuccess(Position result) {
-            LatLng here = LatLng.newInstance(result.getCoordinates().getLatitude(), result.getCoordinates().getLongitude());
-            centerMap(map, here, 14);
-          }
-
-          @Override
-          public void onFailure(PositionError reason) {
-            // fall back to Google's IP Geolocation
-            centerMap(map, getIpBasedLocation(), 13);
-          }
-        });
-      }
+      locationProvider.getCurrentPosition(new LocationCallback() {
+        @Override
+        public void onSuccess(LatLng result) {
+          centerMap(map, result, 13);
+        }
+      });
     }
   }
 
@@ -266,15 +255,6 @@ public class StorePage extends Composite {
     LonLat lonlat = new LonLat(center.getLongitude(), center.getLatitude());
     lonlat.transform(DEFAULT_PROJECTION.getProjectionCode(), mapProjection);
     return lonlat;
-  }
-
-  /**
-   * Returns Google's guess at the user's physical location based on their IP address.
-   */
-  private static LatLng getIpBasedLocation() {
-    return LatLng.newInstance(
-            AjaxLoader.getClientLocation().getLatitude(),
-            AjaxLoader.getClientLocation().getLongitude());
   }
 
   /**

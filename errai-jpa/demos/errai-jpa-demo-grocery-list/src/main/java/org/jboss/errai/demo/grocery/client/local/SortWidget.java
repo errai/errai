@@ -28,6 +28,9 @@ public class SortWidget extends Composite {
   @Inject @DataField
   Anchor department;
 
+  @Inject @DataField
+  Anchor store;
+
   @EventHandler("name")
   public void onNameItemClick(ClickEvent e) {
     changeSortOrder(NAME);
@@ -41,6 +44,11 @@ public class SortWidget extends Composite {
   @EventHandler("department")
   public void onDepartmentItemClick(ClickEvent e) {
     changeSortOrder(DEPARTMENT);
+  }
+
+  @EventHandler("store")
+  public void onStoreItemClick(ClickEvent e) {
+    changeSortOrder(STORE_LOCATION);
   }
 
   private void changeSortOrder(GroceryListWidget.SortBy order) {

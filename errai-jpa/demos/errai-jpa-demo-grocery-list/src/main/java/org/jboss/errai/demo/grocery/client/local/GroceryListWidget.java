@@ -1,6 +1,9 @@
 package org.jboss.errai.demo.grocery.client.local;
 
+import org.jboss.errai.demo.grocery.client.local.producer.StoreListProducer;
+import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Item;
+import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.client.widget.ListWidget;
 
 import javax.annotation.PostConstruct;
@@ -10,9 +13,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static java.util.Collections.sort;
 
 @Singleton
 public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
@@ -20,7 +24,10 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
   @Inject
   EntityManager entityManager;
 
-  private SortBy sortField = SortBy.DEPARTMENT;
+  @Inject
+  ItemStoreDistanceComparator distanceComparator;
+
+  private SortBy sortField = SortBy.NAME;
 
   public enum SortBy {
     NAME(new Comparator<Item>() {
@@ -32,7 +39,7 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
     RECENTLY_ADDED(new Comparator<Item>() {
       @Override
       public int compare(Item one, Item two) {
-        return one.getAddedOn().compareTo(two.getAddedOn());
+        return two.getAddedOn().compareTo(one.getAddedOn());
       }
     }),
     DEPARTMENT(new Comparator<Item>() {
@@ -40,7 +47,8 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
       public int compare(Item one, Item two) {
         return one.getDepartment().getName().compareTo(two.getDepartment().getName());
       }
-    });
+    }),
+    STORE_LOCATION(null);
 
     private final Comparator<Item> itemComparator;
 
@@ -63,7 +71,11 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
     TypedQuery<Item> query = entityManager.createNamedQuery("allItems", Item.class);
     List<Item> itemList = query.getResultList();
 
-    Collections.sort(itemList, sortField.itemComparator);
+    if (sortField != SortBy.STORE_LOCATION) {
+      sort(itemList, sortField.itemComparator);
+    } else {
+      sort(itemList, distanceComparator);
+    }
     setItems(itemList);
   }
 
@@ -74,5 +86,32 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
 
   public void sortBy(SortBy field) {
     this.sortField = field;
+  }
+
+  public static class ItemStoreDistanceComparator implements Comparator<Item> {
+    @Inject
+    StoreListProducer storeListProducer;
+
+    @Override
+    public int compare(Item one, Item two) {
+      int itemOneIndex = 0;
+      int itemTwoIndex = 0;
+
+      List<Store> stores = storeListProducer.getStoresSortedOnDistance();
+      for (int i = 0, storesSize = stores.size(); i < storesSize; i++) {
+        Store store = stores.get(i);
+        for (Department department : store.getDepartments()) {
+          if (department.getName().equals(one.getDepartment().getName())) {
+            itemOneIndex = i;
+          }
+          if (department.getName().equals(two.getDepartment().getName())) {
+            itemTwoIndex = i;
+          }
+        }
+      }
+
+
+      return (itemOneIndex < itemTwoIndex ? -1 : (itemOneIndex == itemTwoIndex ? 0 : 1));
+    }
   }
 }
