@@ -56,7 +56,7 @@ public class ItemForm extends Composite {
   @PostConstruct
   private void setupSuggestions() {
     MultiWordSuggestOracle iso = (MultiWordSuggestOracle) name.getSuggestOracle();
-    for (Item i : em.createNamedQuery("allItemsByName", Item.class).getResultList()) {
+    for (Item i : em.createNamedQuery("allItems", Item.class).getResultList()) {
       iso.add(i.getName());
     }
 

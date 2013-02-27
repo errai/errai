@@ -8,10 +8,7 @@ import java.util.Date;
 @Bindable
 @Entity
 @EntityListeners(EventTranslator.ItemLifecycleListener.class)
-@NamedQueries({
-  @NamedQuery(name="allItemsByName", query="SELECT i FROM Item i ORDER BY i.name"),
-  @NamedQuery(name="allItems", query="SELECT i FROM Item i ORDER BY :sortBy")
-})
+@NamedQuery(name="allItems", query="SELECT i FROM Item i")
 public class Item {
 
   @Id @GeneratedValue
