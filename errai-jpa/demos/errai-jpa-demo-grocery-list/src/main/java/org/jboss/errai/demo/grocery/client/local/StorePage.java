@@ -242,8 +242,8 @@ public class StorePage extends Composite {
     modifyControl.activate();
   }
 
-  private native JSObject destinationVincenty(double lon, double lat, int angle, float radius) /*-{
-    return $wnd.OpenLayers.Util.destinationVincenty(new $wnd.OpenLayers.LonLat(lon, lat), angle, radius);
+  private native JSObject destinationVincenty(double lon, double lat, int angle, float distance) /*-{
+    return $wnd.OpenLayers.Util.destinationVincenty(new $wnd.OpenLayers.LonLat(lon, lat), angle, distance);
   }-*/;
 
   private void centerMap(Map map, LatLng center, int zoomLevel) {
