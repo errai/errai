@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.util;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.laundry.Laundry;
 import org.jboss.errai.bus.client.api.laundry.LaundryList;

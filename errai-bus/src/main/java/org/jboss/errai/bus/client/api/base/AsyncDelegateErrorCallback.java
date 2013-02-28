@@ -19,7 +19,7 @@ package org.jboss.errai.bus.client.api.base;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 
 /**
  * An error callback decorator for repeating tasks which automatically cancels
@@ -41,7 +41,7 @@ public class AsyncDelegateErrorCallback implements ErrorCallback<Message> {
    *          The ErrorCallback that should be wrapped. Can be null, in which
    *          case errors in executions of {@code task} are logged to System.out.
    */
-  public AsyncDelegateErrorCallback(HasAsyncTaskRef task, ErrorCallback delegate) {
+  public AsyncDelegateErrorCallback(final HasAsyncTaskRef task, final ErrorCallback delegate) {
     this.asyncTaskRef = Assert.notNull(task);
     this.delegate = delegate;
   }
@@ -55,7 +55,7 @@ public class AsyncDelegateErrorCallback implements ErrorCallback<Message> {
    *         value is always {@code true}.
    */
   @Override
-  public boolean error(Message message, Throwable throwable) {
+  public boolean error(final Message message, final Throwable throwable) {
     if (asyncTaskRef.getAsyncTask() == null) {
       System.err.println("Unable to access async task reference! Cannot safely cancel task.");
     }

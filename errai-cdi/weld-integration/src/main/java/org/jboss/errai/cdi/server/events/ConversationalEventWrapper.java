@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 
 import java.util.Set;
 

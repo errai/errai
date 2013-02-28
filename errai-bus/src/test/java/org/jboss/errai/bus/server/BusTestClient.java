@@ -18,18 +18,17 @@ package org.jboss.errai.bus.server;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.framework.BusMonitor;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
-import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.MessageFactory;
@@ -86,8 +85,7 @@ public class BusTestClient implements MessageBus {
   }
 
   public static BusTestClient create(final ErraiService service) {
-    final BusTestClient busTestClient = new BusTestClient(service.getBus());
-    return busTestClient;
+    return new BusTestClient(service.getBus());
   }
 
   private class PollingRunnable implements Runnable {
@@ -109,7 +107,7 @@ public class BusTestClient implements MessageBus {
         final List<Message> messages = MessageFactory.createCommandMessage(localSession,
             new ByteArrayInputStream(outputStream.toByteArray()));
 
-        for (Message message : messages) {
+        for (final Message message : messages) {
           send(message);
         }
       }
@@ -119,21 +117,17 @@ public class BusTestClient implements MessageBus {
       catch (IOException e) {
         e.printStackTrace();
       }
-
     }
   }
 
   public void connect() {
-    final Message m = CommandMessage.createWithParts(new HashMap<String, Object>())
+    remoteBus.sendGlobal(CommandMessage.createWithParts(new HashMap<String, Object>())
         .toSubject("ServerBus")
         .command(BusCommands.Associate)
         .set(MessageParts.RemoteServices, getAdvertisableSubjects())
         .set(MessageParts.PriorityProcessing, "1")
-        .setResource("Session", serverSession);
-
-    m.setFlag(RoutingFlag.FromRemote);
-
-    remoteBus.sendGlobal(m);
+        .setResource("Session", serverSession)
+        .setFlag(RoutingFlag.FromRemote));
 
     executorService.scheduleAtFixedRate(new PollingRunnable(), 0, 10, TimeUnit.MILLISECONDS);
   }
@@ -227,7 +221,7 @@ public class BusTestClient implements MessageBus {
   public void attachMonitor(final BusMonitor monitor) {
   }
 
-  private void sendToRemote(Message message) {
+  private void sendToRemote(final Message message) {
     message.setResource(Resources.Session.name(), serverSession);
     if (!init) {
       deferredDeliveryList.add(message);
@@ -240,8 +234,8 @@ public class BusTestClient implements MessageBus {
   private void drainDeliveryList() {
     if (init) {
       // only send priority processing messages first.
-      List<Message> deferred = new ArrayList<Message>();
-      for (Message message : deferredDeliveryList) {
+      final List<Message> deferred = new ArrayList<Message>();
+      for (final Message message : deferredDeliveryList) {
         message.setResource("Session", serverSession);
         message.setFlag(RoutingFlag.FromRemote);
         message.setResource(RequestDispatcher.class.getName(), new ResourceProvider<RequestDispatcher>() {
@@ -262,7 +256,7 @@ public class BusTestClient implements MessageBus {
       }
       deferredDeliveryList.clear();
 
-      for (Message message : deferred) {
+      for (final Message message : deferred) {
         remoteBus.sendGlobal(message);
       }
     }
@@ -301,7 +295,7 @@ public class BusTestClient implements MessageBus {
   }
 
   private void fireInitCallbacks() {
-    for (Runnable init : initCallbacks) {
+    for (final Runnable init : initCallbacks) {
       init.run();
     }
   }
@@ -322,7 +316,7 @@ public class BusTestClient implements MessageBus {
     }
   }
 
-  public void addInitCallback(Runnable runnable) {
+  public void addInitCallback(final Runnable runnable) {
     if (finishedInit) {
       runnable.run();
     }
@@ -355,17 +349,17 @@ public class BusTestClient implements MessageBus {
 
   private class TestRequestDispatcher implements RequestDispatcher {
     @Override
-    public void dispatchGlobal(Message message) throws Exception {
+    public void dispatchGlobal(final Message message) throws Exception {
       remoteBus.sendGlobal(message);
     }
 
     @Override
-    public void dispatch(Message message) throws Exception {
+    public void dispatch(final Message message) throws Exception {
       remoteBus.send(message);
     }
   }
 
-  public void changeBus(ErraiService service) {
+  public void changeBus(final ErraiService service) {
     remoteBus.closeQueue(serverSession.getSessionId());
     remoteBus = service.getBus();
 

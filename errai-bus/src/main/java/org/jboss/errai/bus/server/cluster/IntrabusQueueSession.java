@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.cluster;
 
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.SessionEndListener;
+import org.jboss.errai.bus.server.api.SessionEndListener;
 
 import java.util.Collection;
 

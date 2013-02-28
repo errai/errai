@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.server.mock;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiService;

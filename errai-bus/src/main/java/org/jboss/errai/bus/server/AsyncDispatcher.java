@@ -18,8 +18,8 @@ package org.jboss.errai.bus.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.service.ErraiService;
 

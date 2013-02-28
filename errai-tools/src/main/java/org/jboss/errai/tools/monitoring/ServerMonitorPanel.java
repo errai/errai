@@ -20,8 +20,8 @@ import static java.lang.String.valueOf;
 import static javax.swing.SwingUtilities.invokeLater;
 import static org.jboss.errai.tools.monitoring.UiHelper.getSwIcon;
 
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.server.api.ServerMessageBus;

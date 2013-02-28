@@ -16,16 +16,16 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import java.util.Map;
-
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
+
+import java.util.Map;
 
 /**
  * Internal wrapper class that makes any type of given message (the <i>wrapped
@@ -43,13 +43,13 @@ class ConversationMessageWrapper implements Message {
    * @param newMessage
    *          The new message to be wrapped. Not null.
    */
-  public ConversationMessageWrapper(Message inReplyTo, Message newMessage) {
+  public ConversationMessageWrapper(final Message inReplyTo, final Message newMessage) {
     this.message = Assert.notNull(inReplyTo);
     this.newMessage = Assert.notNull(newMessage);
   }
 
   @Override
-  public Message toSubject(String subject) {
+  public Message toSubject(final String subject) {
     newMessage.toSubject(subject);
     return this;
   }
@@ -60,13 +60,13 @@ class ConversationMessageWrapper implements Message {
   }
 
   @Override
-  public Message command(String type) {
+  public Message command(final String type) {
     newMessage.command(type);
     return this;
   }
 
   @Override
-  public Message command(Enum<?> type) {
+  public Message command(final Enum<?> type) {
     newMessage.command(type);
     return this;
   }
@@ -77,75 +77,75 @@ class ConversationMessageWrapper implements Message {
   }
 
   @Override
-  public Message set(String part, Object value) {
+  public Message set(final String part, final Object value) {
     newMessage.set(part, value);
     return this;
   }
 
   @Override
-  public Message set(Enum<?> part, Object value) {
+  public Message set(final Enum<?> part, final Object value) {
     newMessage.set(part, value);
     return this;
   }
 
   @Override
-  public Message setProvidedPart(String part, ResourceProvider<?> provider) {
+  public Message setProvidedPart(final String part, final ResourceProvider<?> provider) {
     newMessage.setProvidedPart(part, provider);
     return this;
   }
 
   @Override
-  public Message setProvidedPart(Enum<?> part, ResourceProvider<?> provider) {
+  public Message setProvidedPart(final Enum<?> part, final ResourceProvider<?> provider) {
     newMessage.setProvidedPart(part, provider);
     return this;
   }
 
   @Override
-  public boolean hasPart(String part) {
+  public boolean hasPart(final String part) {
     return newMessage.hasPart(part);
   }
 
   @Override
-  public boolean hasPart(Enum<?> part) {
+  public boolean hasPart(final Enum<?> part) {
     return newMessage.hasPart(part);
   }
 
   @Override
-  public void remove(String part) {
+  public void remove(final String part) {
     newMessage.remove(part);
   }
 
   @Override
-  public void remove(Enum<?> part) {
+  public void remove(final Enum<?> part) {
     newMessage.remove(part);
   }
 
   @Override
-  public Message copy(String part, Message m) {
+  public Message copy(final String part, final Message m) {
     newMessage.copy(part, m);
     return this;
   }
 
   @Override
-  public Message copy(Enum<?> part, Message m) {
+  public Message copy(final Enum<?> part, final Message m) {
     newMessage.copy(part, m);
     return this;
   }
 
   @Override
-  public Message setParts(Map<String, Object> parts) {
+  public Message setParts(final Map<String, Object> parts) {
     newMessage.setParts(parts);
     return this;
   }
 
   @Override
-  public Message addAllParts(Map<String, Object> parts) {
+  public Message addAllParts(final Map<String, Object> parts) {
     newMessage.addAllParts(parts);
     return this;
   }
 
   @Override
-  public Message addAllProvidedParts(Map<String, ResourceProvider<?>> provided) {
+  public Message addAllProvidedParts(final Map<String, ResourceProvider<?>> provided) {
     newMessage.addAllProvidedParts(provided);
     return this;
   }
@@ -161,81 +161,82 @@ class ConversationMessageWrapper implements Message {
   }
 
   @Override
-  public void addResources(Map<String, ?> resources) {
+  public void addResources(final Map<String, ?> resources) {
     newMessage.addResources(resources);
   }
 
   @Override
-  public Message setResource(String key, Object res) {
+  public Message setResource(final String key, final Object res) {
     newMessage.setResource(key, res);
     return this;
   }
 
   @Override
-  public <T> T getResource(Class<T> type, String key) {
+  public <T> T getResource(final Class<T> type, final String key) {
     return newMessage.getResource(type, key);
   }
 
   @Override
-  public boolean hasResource(String key) {
+  public boolean hasResource(final String key) {
     return newMessage.hasResource(key);
   }
 
   @Override
-  public Message copyResource(String key, Message m) {
+  public Message copyResource(final String key, final Message m) {
     newMessage.copyResource(key, m);
     return this;
   }
 
   @Override
-  public Message errorsCall(ErrorCallback callback) {
+  public Message errorsCall(final ErrorCallback callback) {
     newMessage.errorsCall(callback);
     return this;
   }
 
   @Override
-  public ErrorCallback getErrorCallback() {
+  public ErrorCallback<Message> getErrorCallback() {
     return newMessage.getErrorCallback();
   }
 
 
   @Override
-  public <T> T getValue(Class<T> type) {
+  public <T> T getValue(final Class<T> type) {
     return newMessage.getValue(type);
   }
 
   @Override
-  public <T> T get(Class<T> type, String part) {
+  public <T> T get(final Class<T> type, final String part) {
     return newMessage.get(type, part);
   }
 
   @Override
-  public <T> T get(Class<T> type, Enum<?> part) {
+  public <T> T get(final Class<T> type, final Enum<?> part) {
     return newMessage.get(type, part);
   }
 
   @Override
-  public void setFlag(RoutingFlag flag) {
+  public Message setFlag(final RoutingFlag flag) {
     newMessage.setFlag(flag);
+    return this;
   }
 
   @Override
-  public void unsetFlag(RoutingFlag flag) {
+  public void unsetFlag(final RoutingFlag flag) {
     newMessage.unsetFlag(flag);
   }
 
   @Override
-  public boolean isFlagSet(RoutingFlag flag) {
+  public boolean isFlagSet(final RoutingFlag flag) {
     return newMessage.isFlagSet(flag);
   }
 
   @Override
-  public void sendNowWith(MessageBus viaThis) {
+  public void sendNowWith(final MessageBus viaThis) {
     viaThis.send(this);
   }
 
   @Override
-  public void sendNowWith(RequestDispatcher viaThis) {
+  public void sendNowWith(final RequestDispatcher viaThis) {
     try {
       viaThis.dispatch(this);
     }

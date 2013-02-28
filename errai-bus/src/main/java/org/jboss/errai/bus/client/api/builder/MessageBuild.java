@@ -15,7 +15,7 @@
  */
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 /**

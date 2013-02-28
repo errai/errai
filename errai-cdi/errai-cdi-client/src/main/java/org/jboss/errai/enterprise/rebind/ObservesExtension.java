@@ -19,7 +19,7 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;

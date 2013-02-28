@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.Finishable;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -34,9 +33,6 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
-import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
@@ -52,7 +48,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncInjectorResolveCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncTypeInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
@@ -643,4 +638,34 @@ public class AsyncInjectUtil {
     ctx.addInlineBeanReference(parm, stmt);
     return stmt;
   }
+
+  public static Statement generateCallback(final MetaClass type,
+                                final Statement... fieldAccessStmt) {
+
+    final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
+        MetaClassFactory.typeParametersOf(type));
+
+   // final IOCProcessingContext processingContext = ctx.getProcessingContext();
+
+    final BlockBuilder<AnonymousClassStructureBuilder> statements = Stmt.newObject(callbackClass).extend()
+        .publicOverridesMethod("callback", Parameter.of(type, "bean"));
+
+    for (final Statement stmt : fieldAccessStmt) {
+      statements.append(stmt);
+    }
+
+ //   ctx.setAttribute(RECEIVING_CALLBACK_ATTRIB, statements);
+
+    final ObjectBuilder finish = statements.finish()
+        .publicOverridesMethod("toString")
+        .append(Stmt.load(type).invoke("getName").returnValue()).finish()
+        .finish();
+//
+
+//    processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
+//    processingContext.append(Stmt.loadVariable("async").invoke("wait", Refs.get(callbackVarName)));
+
+    return finish;
+  }
+
 }

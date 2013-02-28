@@ -1,8 +1,8 @@
 package org.jboss.errai.ioc.support.bus.tests.client.res;
 
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import javax.inject.Inject;

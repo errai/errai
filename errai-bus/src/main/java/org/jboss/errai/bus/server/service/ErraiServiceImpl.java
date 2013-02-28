@@ -18,10 +18,9 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.QueueUnavailableException;

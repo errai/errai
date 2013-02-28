@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.support.bus.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 import javax.inject.Provider;

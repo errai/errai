@@ -16,7 +16,7 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.mvel2.util.StringAppender;
 
 import javax.swing.*;

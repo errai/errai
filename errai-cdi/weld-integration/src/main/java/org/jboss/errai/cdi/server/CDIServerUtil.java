@@ -15,7 +15,7 @@
  */
 package org.jboss.errai.cdi.server;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.annotations.Service;
 

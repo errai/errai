@@ -21,8 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 /**
  * Indicates that the annotated type, field, or method is a bus service endpoint

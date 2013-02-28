@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 
 import java.util.Set;
 
 /**
- * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionality.
+ * An extended client-specific/in-browser interface of {@link org.jboss.errai.bus.client.api.messaging.MessageBus}, which defines client-specific functionality.
  *
  * @author Mike Brock
  */

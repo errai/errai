@@ -26,7 +26,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.ObserverMethod;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.cdi.server.CDIServerUtil;
 import org.jboss.errai.cdi.server.TypeRegistry;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Observes CDI {@link javax.enterprise.inject.spi.BeforeShutdown} events and unsubcribes
- * previously registered subjects with the {@link org.jboss.errai.bus.client.framework.MessageBus}
+ * previously registered subjects with the {@link org.jboss.errai.bus.client.api.messaging.MessageBus}
  *
  * @author Heiko Braun <hbraun@redhat.com>
  */

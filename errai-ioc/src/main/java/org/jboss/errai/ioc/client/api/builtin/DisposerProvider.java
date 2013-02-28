@@ -21,10 +21,10 @@ public class DisposerProvider implements ContextualTypeProvider<Disposer> {
   SyncBeanManager beanManager;
 
   @Override
-  public Disposer provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
+  public Disposer provide(final Class<?>[] typeArguments, final Annotation[] qualifiers) {
     return new Disposer() {
       @Override
-      public void dispose(Object beanInstance) {
+      public void dispose(final Object beanInstance) {
         beanManager.destroyBean(beanInstance);
       }
     };

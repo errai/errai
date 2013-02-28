@@ -17,8 +17,7 @@
 package org.jboss.errai.bus.client.tests;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.api.tasks.ClientTaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManager;

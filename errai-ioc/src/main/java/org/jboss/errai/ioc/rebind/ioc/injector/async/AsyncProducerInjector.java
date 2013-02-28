@@ -2,7 +2,6 @@ package org.jboss.errai.ioc.rebind.ioc.injector.async;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.castTo;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import org.jboss.errai.codegen.Modifier;
@@ -12,6 +11,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -31,6 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.AsyncInjectionTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
@@ -39,7 +40,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProducerInjector;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
 import javax.enterprise.inject.Disposes;
@@ -248,13 +248,15 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     else {
       callbackBuilder.append(
           Stmt.loadVariable("context")
-            .invoke("getSingletonInstanceOrNew", Refs.get("injContext"),
-                Refs.get(creationalCallbackVarName),
-                Refs.get(InjectUtil.getVarNameFromType(injectedType, injectableInstance)),
-                injectedType, qualifyingMetadata.getQualifiers())
+              .invoke("getSingletonInstanceOrNew", Refs.get("injContext"),
+                  Refs.get(creationalCallbackVarName),
+                  Refs.get(InjectUtil.getVarNameFromType(injectedType, injectableInstance)),
+                  injectedType, qualifyingMetadata.getQualifiers())
       );
     }
 
+
+    registerDestructorCallback(injectableInstance, disposerMethod);
     return null;
   }
 
@@ -276,17 +278,20 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     return null;
   }
 
-  private void registerDestructorCallback(final InjectionContext injectionContext,
-                                          final BlockBuilder<?> bb,
-                                          final Statement beanValue,
+  private void registerDestructorCallback(final InjectableInstance injectableInstance,
                                           final MetaMethod disposerMethod) {
+
+    final InjectionContext injectionContext = injectableInstance.getInjectionContext();
+
 
     if (disposerMethod == null) {
       return;
     }
 
+    final BlockBuilder<?> bb
+        = (BlockBuilder<?>) injectionContext.getAttribute(AsyncInjectionTask.RECEIVING_CALLBACK_ATTRIB);
+
     final String varName = InjectUtil.getUniqueVarName() + "_XXX";
-    bb._(Stmt.declareFinalVariable(varName, injectedType, beanValue));
 
     final MetaClass destructionCallbackType =
         parameterizedAs(DestructionCallback.class, typeParametersOf(injectedType));
@@ -301,18 +306,38 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
       injectionContext.addExposedMethod(disposerMethod);
     }
 
-    final Statement disposerInvoke = InjectUtil.invokePublicOrPrivateMethod(injectionContext,
-        Refs.get(producerInjectableInstance.getTargetInjector().getInstanceVarName()),
-        disposerMethod,
-        Refs.get("obj"));
+    final String producerClassCallbackVar = InjectUtil.getUniqueVarName();
+    final MetaClass producerClassType = producerInjectableInstance.getTargetInjector().getInjectedType();
+    final MetaClass creationalCallback_MC
+        = MetaClassFactory.parameterizedAs(CreationalCallback.class, typeParametersOf(producerClassType));
 
-    initMeth._(disposerInvoke);
+    final Statement callback = AsyncInjectUtil.generateCallback(producerClassType,
+        InjectUtil.invokePublicOrPrivateMethod(injectionContext,
+            Refs.get("bean"),
+            disposerMethod,
+            Refs.get("obj")));
+
+    initMeth._(Stmt.declareFinalVariable(producerClassCallbackVar, creationalCallback_MC, callback));
+
+
+    if (producerInjectableInstance.getTargetInjector().isSingleton()) {
+      initMeth._(Stmt.loadVariable("context")
+          .invoke("getSingletonInstanceOrNew", Refs.get("injContext"),
+              Refs.get(producerInjectableInstance.getTargetInjector().getCreationalCallbackVarName()),
+              Refs.get(producerClassCallbackVar),
+              producerClassType, producerInjectableInstance.getTargetInjector()
+              .getQualifyingMetadata().getQualifiers()));
+    }
+    else {
+      initMeth._(Stmt.loadVariable(producerInjectableInstance.getTargetInjector().getCreationalCallbackVarName())
+          .invoke("getInstance", Refs.get(producerClassCallbackVar), Refs.get("context")));
+    }
 
     final AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
     bb._(Stmt.declareFinalVariable(destroyVarName, destructionCallbackType, classStructureBuilder.finish()));
     bb._(Stmt.loadVariable("context").invoke("addDestructionCallback",
-        Refs.get(varName), Refs.get(destroyVarName)));
+        Refs.get("bean"), Refs.get(destroyVarName)));
   }
 
   public void doBindings(final BlockBuilder<?> block,
@@ -406,6 +431,7 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
       if (injector != this
           && injector instanceof ProducerInjector
           && methodSignatureMaches((MetaMethod) ((AsyncProducerInjector) injector).producerMember, producerMethod)) {
+
         if (this.beanName == null) {
           this.beanName = injector.getBeanName();
         }

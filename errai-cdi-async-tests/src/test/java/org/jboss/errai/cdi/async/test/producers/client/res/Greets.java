@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2012 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.cdi.async.test.producers.client.res;
 
-import org.jboss.errai.bus.client.api.Message;
+import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * This class allows different implementations of Message to be provided based on whether or not you're on the
- * client or server.
+ * @author Mike Brock
  */
-public interface MessageProvider {
-  /**
-   * Gets the appropriate message
-   *
-   * @return the appropriate message
-   */
-  public Message get();
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Greets {
 }

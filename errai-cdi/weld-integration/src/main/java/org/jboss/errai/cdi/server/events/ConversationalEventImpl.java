@@ -30,7 +30,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.util.TypeLiteral;
 import javax.inject.Qualifier;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import org.jboss.weld.manager.BeanManagerImpl;

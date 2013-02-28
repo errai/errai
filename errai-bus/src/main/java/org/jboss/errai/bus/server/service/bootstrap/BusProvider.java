@@ -16,7 +16,7 @@
 package org.jboss.errai.bus.server.service.bootstrap;
 
 import org.jboss.errai.common.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>

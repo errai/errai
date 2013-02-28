@@ -17,10 +17,10 @@
 package org.jboss.errai.js.client.bus;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.js.client.bus.marshall.MsgTools;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportPackage;

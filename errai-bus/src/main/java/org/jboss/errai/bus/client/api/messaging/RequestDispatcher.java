@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
-
-import org.jboss.errai.bus.client.api.Message;
+package org.jboss.errai.bus.client.api.messaging;
 
 /**
  * The <tt>RequestDispatcher</tt> interface provides a way to create a message delivery system into the bus

@@ -24,7 +24,7 @@ import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.common.client.api.BatchCaller;

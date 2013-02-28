@@ -19,16 +19,16 @@ package org.jboss.errai.bus.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.framework.BusMonitor;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.Subscription;
-import org.jboss.errai.bus.client.framework.TransportErrorHandler;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.TransportErrorHandler;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 
 import java.util.Collections;
@@ -36,7 +36,7 @@ import java.util.Set;
 
 /**
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
- * client {@link org.jboss.errai.bus.client.framework.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
+ * client {@link org.jboss.errai.bus.client.api.messaging.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
 public class ErraiBus implements EntryPoint {
   private static ClientMessageBus bus;

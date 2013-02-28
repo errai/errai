@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.HasEncoded;
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 
 /**
  * Internal wrapper that extends {@link ConversationMessageWrapper} for wrapping messages that also implement

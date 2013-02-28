@@ -23,7 +23,7 @@
   <set-property name="user.agent" value="safari" />
 
   <replace-with class="org.jboss.errai.ui.cordova.LocationAwareClientMessageBus">
-    <when-type-is class="org.jboss.errai.bus.client.framework.MessageBus"/>
+    <when-type-is class="org.jboss.errai.bus.client.api.messaging.MessageBus"/>
   </replace-with>
 
   <source path="cordova" />

@@ -25,13 +25,8 @@ public class NoSubscribersToDeliverTo extends MessageDeliveryFailure {
   private static final long serialVersionUID = -5385972750788483158L;
   private final String subject;
 
-  public NoSubscribersToDeliverTo(String subject) {
+  public NoSubscribersToDeliverTo(final String subject) {
     super("no subscribers to deliver to for subject: " + subject);
-    this.subject = subject;
-  }
-
-  public NoSubscribersToDeliverTo(String message, String subject, Throwable cause) {
-    super(message, cause);
     this.subject = subject;
   }
 

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.weld.Container;
 import org.jboss.weld.injection.CurrentInjectionPoint;
 import org.jboss.weld.manager.BeanManagerImpl;

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 
 public interface BusMonitor {
   public void attach(MessageBus bus);

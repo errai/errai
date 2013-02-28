@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.service.ErraiService;

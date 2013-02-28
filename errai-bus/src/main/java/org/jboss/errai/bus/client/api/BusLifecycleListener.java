@@ -1,6 +1,5 @@
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 
 /**

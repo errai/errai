@@ -18,7 +18,7 @@ package org.jboss.errai.cdi.server;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -36,7 +36,7 @@ import java.util.Set;
 
 /**
  * Basically a bean wrapper that provides CDI meta data.
- * It's used to inject the {@link org.jboss.errai.bus.client.framework.MessageBus} into the CDI context.
+ * It's used to inject the {@link org.jboss.errai.bus.client.api.messaging.MessageBus} into the CDI context.
  *
  * @author Heiko Braun <hbraun@redhat.com>
  */

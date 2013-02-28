@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.server.api.SessionEndListener;
+
 import java.util.Collection;
 
 /**
@@ -51,7 +53,7 @@ public interface QueueSession {
   public String getParentSessionId();
 
   /**
-   * Closes this session and notifies the {@link SessionEndListener}s (optional operation; not all QueueSession
+   * Closes this session and notifies the {@link org.jboss.errai.bus.server.api.SessionEndListener}s (optional operation; not all QueueSession
    * implementations are closeable).
    * 
    * @return true, if this session was closed and listeners have been notified. In the case of a QueueSession that does

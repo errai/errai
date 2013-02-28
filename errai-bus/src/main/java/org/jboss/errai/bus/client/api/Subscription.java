@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.api.json;
+package org.jboss.errai.bus.client.api;
 
 /**
  * @author Mike Brock
  */
-public interface EJNull {
-
+public interface Subscription {
+  /**
+   * Remove the subscription.
+   */
+  public void remove();
 }

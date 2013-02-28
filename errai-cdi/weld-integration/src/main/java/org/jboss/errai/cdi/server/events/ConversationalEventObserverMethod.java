@@ -19,8 +19,8 @@ package org.jboss.errai.cdi.server.events;
 import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;

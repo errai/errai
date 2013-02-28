@@ -3,8 +3,8 @@ package org.jboss.errai.bus.client.tests;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.bus.client.framework.TransportError;
-import org.jboss.errai.bus.client.framework.TransportErrorHandler;
+import org.jboss.errai.bus.client.api.TransportError;
+import org.jboss.errai.bus.client.api.TransportErrorHandler;
 
 class RecordingTransportErrorHandler implements TransportErrorHandler {
 

@@ -16,16 +16,16 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
+import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
+import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
-import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
-import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
 /**
  * An adapter that makes the asynchronous bean manager API work with a synchronous bean manager.
@@ -43,6 +43,12 @@ public class SyncToAsyncBeanManagerAdpater implements AsyncBeanManager {
   @Override
   public void destroyBean(Object ref) {
     bm.destroyBean(ref);
+  }
+
+  @Override
+  public void destroyBean(Object ref, Runnable runnable) {
+    bm.destroyBean(ref);
+    runnable.run();
   }
 
   @Override

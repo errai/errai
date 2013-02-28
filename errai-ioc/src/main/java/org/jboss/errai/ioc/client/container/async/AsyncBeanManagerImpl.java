@@ -1,10 +1,10 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
-import org.jboss.errai.ioc.client.container.IOCSingletonBean;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -55,7 +55,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
       = new HashSet<String>();
 
   public AsyncBeanManagerImpl() {
-
 
 
     // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose of
@@ -178,6 +177,15 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     }
   }
 
+  public void destroyBean(final Object ref, final Runnable runnable) {
+    destroyBean(ref);
+    new Timer() {
+      @Override
+      public void run() {
+        runnable.run();
+      }
+    }.schedule(1);
+  }
 
   public boolean isManaged(final Object ref) {
     return creationalContextMap.containsKey(getActualBeanReference(ref));

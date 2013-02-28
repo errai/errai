@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server.api;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.BooleanRoutingRule;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 import java.util.Collection;
@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
- * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
+ * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.api.messaging.MessageBus},
  * and adds functionality so the server can transmit messages to a client and vice versa
  *
  * @author Mike Brock

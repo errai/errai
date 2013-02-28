@@ -17,7 +17,7 @@
   </replace-with>
 
   <replace-with class="org.jboss.errai.bus.client.framework.ClientMessageBusImpl">
-    <when-type-is class="org.jboss.errai.bus.client.framework.MessageBus" />
+    <when-type-is class="org.jboss.errai.bus.client.api.messaging.MessageBus" />
   </replace-with>
 
   <generate-with class="org.jboss.errai.bus.rebind.RpcProxyLoaderGenerator">

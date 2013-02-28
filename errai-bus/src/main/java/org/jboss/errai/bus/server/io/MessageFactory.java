@@ -16,14 +16,13 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.errai.marshalling.server.JSONStreamDecoder;

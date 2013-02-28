@@ -17,10 +17,10 @@
 package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.api.ResourceProvider;
 
 /**

@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 
 /**
  * This interface, <tt>RemoteCallSendable</tt> is a template for sending a message remotely. It ensures that

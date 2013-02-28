@@ -22,7 +22,7 @@ import org.jboss.as.websockets.WebSocket;
 import org.jboss.as.websockets.frame.PongFrame;
 import org.jboss.as.websockets.frame.TextFrame;
 import org.jboss.as.websockets.servlet.WebSocketServlet;
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.MessageQueue;

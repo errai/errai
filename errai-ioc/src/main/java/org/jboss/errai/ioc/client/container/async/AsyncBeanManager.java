@@ -16,15 +16,17 @@
 
 package org.jboss.errai.ioc.client.container.async;
 
+import org.jboss.errai.ioc.client.container.ClientBeanManager;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-
-import org.jboss.errai.ioc.client.container.ClientBeanManager;
 
 /**
  * @author Mike Brock
  */
-public interface AsyncBeanManager extends ClientBeanManager  {
+public interface AsyncBeanManager extends ClientBeanManager {
+  public void destroyBean(final Object ref, final Runnable runnable);
+
   /**
    * Looks up all beans with the specified bean name as specified by {@link javax.inject.Named}.
    *

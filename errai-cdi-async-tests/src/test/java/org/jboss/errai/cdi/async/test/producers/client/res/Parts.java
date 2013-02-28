@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2012 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.cdi.async.test.producers.client.res;
+
+import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Callback interface for receiving notifications when {@link QueueSession}s end.
+ * @author Mike Brock
  */
-public interface SessionEndListener {
-
-  /**
-   * Called when the {@link QueueSession} ends.
-   * 
-   * @param event
-   *          The event object that provides a reference to the session that ended. Never null.
-   */
-  public void onSessionEnd(SessionEndEvent event);
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Parts {
 }

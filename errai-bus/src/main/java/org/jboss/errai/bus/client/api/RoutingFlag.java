@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.api;
 
 /**
  * Enumeration of flags that can be used when sending messages, to specify how they should be sent

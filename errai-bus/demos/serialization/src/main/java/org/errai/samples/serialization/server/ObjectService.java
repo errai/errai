@@ -21,10 +21,10 @@ import com.google.inject.Inject;
 import org.errai.samples.serialization.client.shared.Item;
 import org.errai.samples.serialization.client.shared.Record;
 import org.errai.samples.serialization.client.shared.RecordType;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
 import java.sql.Date;

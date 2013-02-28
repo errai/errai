@@ -16,10 +16,8 @@
 
 package org.jboss.errai.bus.server;
 
-import junit.framework.TestCase;
-import org.apache.tools.ant.types.Assertions;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.mock.MockErraiService;
 import org.jboss.errai.bus.server.mock.MockErraiServiceConfigurator;

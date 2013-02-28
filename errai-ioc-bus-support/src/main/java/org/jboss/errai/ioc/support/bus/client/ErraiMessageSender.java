@@ -17,9 +17,9 @@
 package org.jboss.errai.ioc.support.bus.client;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 public final class ErraiMessageSender<T> implements Sender<T> {

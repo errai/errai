@@ -19,12 +19,12 @@ package org.jboss.errai.cdi.server;
 import static java.util.ResourceBundle.getBundle;
 import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.common.client.framework.ProxyFactory;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.bus.server.AsyncDispatcher;

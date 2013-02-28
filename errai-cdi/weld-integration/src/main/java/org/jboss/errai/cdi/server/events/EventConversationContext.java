@@ -16,7 +16,7 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.cdi.server.CDIServerUtil;
 

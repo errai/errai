@@ -1,9 +1,9 @@
 package org.jboss.errai.cdi.event.client.test;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.cdi.client.event.FunEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;

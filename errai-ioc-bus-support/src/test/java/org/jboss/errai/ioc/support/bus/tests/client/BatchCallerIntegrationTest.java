@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.BatchCaller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;

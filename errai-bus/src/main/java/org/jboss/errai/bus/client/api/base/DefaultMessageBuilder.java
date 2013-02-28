@@ -20,8 +20,8 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConve
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
 
 import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
 import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
@@ -31,9 +31,9 @@ import org.jboss.errai.bus.client.api.builder.Sendable;
 import org.jboss.errai.bus.client.api.laundry.Laundry;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.api.laundry.LaundryReclaim;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
@@ -46,11 +46,11 @@ import org.jboss.errai.common.client.util.TimeUnit;
  *
  * @author Mike Brock
  */
-@SuppressWarnings({"ConstantConditions"})
+@SuppressWarnings({"ConstantConditions", "unchecked"})
 class DefaultMessageBuilder<R extends Sendable> {
   private final Message message;
 
-  public DefaultMessageBuilder(Message message) {
+  public DefaultMessageBuilder(final Message message) {
     this.message = message;
   }
 
@@ -66,38 +66,38 @@ class DefaultMessageBuilder<R extends Sendable> {
       boolean reply = false;
 
       @Override
-      public MessageBuildSendable repliesTo(MessageCallback callback) {
+      public MessageBuildSendable repliesTo(final MessageCallback callback) {
         reply = true;
         makeConversational(message, callback);
         return this;
       }
 
       @Override
-      public void sendNowWith(MessageBus viaThis) {
+      public void sendNowWith(final MessageBus viaThis) {
         if (reply) createConversationService(viaThis, message);
         message.sendNowWith(viaThis);
       }
 
       @Override
-      public void sendNowWith(MessageBus viaThis, boolean fireMessageListener) {
+      public void sendNowWith(final MessageBus viaThis, final boolean fireMessageListener) {
         if (reply) createConversationService(viaThis, message);
         viaThis.send(message, false);
       }
 
       @Override
-      public void sendNowWith(RequestDispatcher viaThis) {
+      public void sendNowWith(final RequestDispatcher viaThis) {
         message.sendNowWith(viaThis);
       }
 
       @Override
-      public void sendGlobalWith(MessageBus viaThis) {
+      public void sendGlobalWith(final MessageBus viaThis) {
         if (reply) createConversationService(viaThis, message);
 
         viaThis.sendGlobal(message);
       }
 
       @Override
-      public void sendGlobalWith(RequestDispatcher viaThis) {
+      public void sendGlobalWith(final RequestDispatcher viaThis) {
         try {
           viaThis.dispatchGlobal(message);
         }
@@ -108,7 +108,7 @@ class DefaultMessageBuilder<R extends Sendable> {
 
       @Override
       public void reply() {
-        Message incomingMessage = getIncomingMessage();
+        final Message incomingMessage = getIncomingMessage();
 
         if (incomingMessage == null) {
           throw new IllegalStateException("Cannot reply.  Cannot find incoming message.");
@@ -118,14 +118,14 @@ class DefaultMessageBuilder<R extends Sendable> {
           throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
         }
 
-        RequestDispatcher dispatcher = (RequestDispatcher)
+        final RequestDispatcher dispatcher = (RequestDispatcher)
                 incomingMessage.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
 
         if (dispatcher == null) {
           throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
         }
 
-        Message msg = getIncomingMessage();
+        final Message msg = getIncomingMessage();
 
         message.copyResource("Session", msg);
         message.copyResource(RequestDispatcher.class.getName(), msg);
@@ -139,18 +139,18 @@ class DefaultMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public AsyncTask replyRepeating(TimeUnit unit, int interval) {
-        Message msg = getIncomingMessage();
+      public AsyncTask replyRepeating(final TimeUnit unit, final int interval) {
+        final Message msg = getIncomingMessage();
         message.copyResource("Session", msg);
-        RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+        final RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
         return _sendRepeatingWith(message, dispatcher, unit, interval);
       }
 
       @Override
-      public AsyncTask replyDelayed(TimeUnit unit, int interval) {
-        Message msg = getIncomingMessage();
+      public AsyncTask replyDelayed(final TimeUnit unit, final int interval) {
+        final Message msg = getIncomingMessage();
         message.copyResource("Session", msg);
-        RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+        final RequestDispatcher dispatcher = (RequestDispatcher) msg.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
         return _sendDelayedWith(message, dispatcher, unit, interval);
       }
 
@@ -159,16 +159,16 @@ class DefaultMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public AsyncTask sendRepeatingWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+      public AsyncTask sendRepeatingWith(final RequestDispatcher viaThis, final TimeUnit unit, final int interval) {
         return _sendRepeatingWith(message, viaThis, unit, interval);
       }
 
       @Override
-      public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+      public AsyncTask sendDelayedWith(final RequestDispatcher viaThis, final TimeUnit unit, final int interval) {
         return _sendDelayedWith(message, viaThis, unit, interval);
       }
 
-      private AsyncTask _sendRepeatingWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+      private AsyncTask _sendRepeatingWith(final Message message, final RequestDispatcher viaThis, final TimeUnit unit, final int interval) {
         final boolean isConversational = message instanceof ConversationMessageWrapper;
 
         final AsyncTask task = TaskManagerFactory.get().scheduleRepeating(unit, interval, new HasAsyncTaskRef() {
@@ -246,7 +246,7 @@ class DefaultMessageBuilder<R extends Sendable> {
           }
 
           @Override
-          public void setAsyncTask(AsyncTask task) {
+          public void setAsyncTask(final AsyncTask task) {
             synchronized (this) {
               this.task = task;
             }
@@ -267,7 +267,7 @@ class DefaultMessageBuilder<R extends Sendable> {
         });
 
         if (isConversational) {
-          Object sessionResource = ((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session");
+          final Object sessionResource = ((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session");
           final LaundryReclaim reclaim =
                   LaundryListProviderFactory.get().getLaundryList(sessionResource).add(new Laundry() {
                             @Override
@@ -288,14 +288,14 @@ class DefaultMessageBuilder<R extends Sendable> {
       }
 
 
-      public AsyncTask _sendDelayedWith(final Message message, final RequestDispatcher viaThis, TimeUnit unit, int interval) {
+      public AsyncTask _sendDelayedWith(final Message message, final RequestDispatcher viaThis, final TimeUnit unit, final int interval) {
         return TaskManagerFactory.get().schedule(unit, interval, new HasAsyncTaskRef() {
           AsyncTask task;
           AsyncDelegateErrorCallback errorCallback
                   = new AsyncDelegateErrorCallback(this, message.getErrorCallback());
 
           @Override
-          public void setAsyncTask(AsyncTask task) {
+          public void setAsyncTask(final AsyncTask task) {
             synchronized (this) {
               this.task = task;
             }
@@ -329,13 +329,13 @@ class DefaultMessageBuilder<R extends Sendable> {
 
     final MessageBuildCommand<R> parmBuilder = new MessageBuildCommand<R>() {
       @Override
-      public MessageBuildParms<R> command(Enum<?> command) {
+      public MessageBuildParms<R> command(final Enum<?> command) {
         message.command(command);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> command(String command) {
+      public MessageBuildParms<R> command(final String command) {
         message.command(command);
         return this;
       }
@@ -346,61 +346,61 @@ class DefaultMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public MessageBuildParms<R> withValue(Object value) {
+      public MessageBuildParms<R> withValue(final Object value) {
         message.set(MessageParts.Value, value);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> with(String part, Object value) {
+      public MessageBuildParms<R> with(final String part, final Object value) {
         message.set(part, value);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> flag(RoutingFlag flag) {
+      public MessageBuildParms<R> flag(final RoutingFlag flag) {
         message.setFlag(flag);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> with(Enum<?> part, Object value) {
+      public MessageBuildParms<R> with(final Enum<?> part, final Object value) {
         message.set(part, value);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> withProvided(String part, ResourceProvider<?> provider) {
+      public MessageBuildParms<R> withProvided(final String part, final ResourceProvider<?> provider) {
         message.setProvidedPart(part, provider);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider<?> provider) {
+      public MessageBuildParms<R> withProvided(final Enum<?> part, final ResourceProvider<?> provider) {
         message.setProvidedPart(part, provider);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> copy(String part, Message m) {
+      public MessageBuildParms<R> copy(final String part, final Message m) {
         message.copy(part, m);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> copy(Enum<?> part, Message m) {
+      public MessageBuildParms<R> copy(final Enum<?> part, final Message m) {
         message.copy(part, m);
         return this;
       }
 
       @Override
-      public MessageBuildParms<R> copyResource(String part, Message m) {
+      public MessageBuildParms<R> copyResource(final String part, final Message m) {
         message.copyResource(part, m);
         return this;
       }
       // XXX why does this return R?
       @Override
-      public R errorsHandledBy(ErrorCallback callback) {
+      public R errorsHandledBy(final ErrorCallback callback) {
         message.errorsCall(callback);
         return (R) sendable;
 
@@ -431,7 +431,7 @@ class DefaultMessageBuilder<R extends Sendable> {
 
     return new MessageBuildSubject<R>() {
       @Override
-      public MessageBuildCommand<R> toSubject(String subject) {
+      public MessageBuildCommand<R> toSubject(final String subject) {
         message.toSubject(subject);
         return parmBuilder;
       }

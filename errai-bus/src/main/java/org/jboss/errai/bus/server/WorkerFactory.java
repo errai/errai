@@ -16,17 +16,14 @@
 
 package org.jboss.errai.bus.server;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;

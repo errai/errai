@@ -21,7 +21,7 @@ import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.service.ErraiService;

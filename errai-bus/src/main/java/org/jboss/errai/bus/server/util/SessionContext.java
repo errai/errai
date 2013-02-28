@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.util;
 
 import java.util.Collection;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 
 public class SessionContext implements Context {

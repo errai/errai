@@ -19,7 +19,6 @@ package org.jboss.errai.bus.client.api;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BusLifecycleAdapter implements BusLifecycleListener {
-
   @Override
   public void busAssociating(BusLifecycleEvent e) {
   }
@@ -35,5 +34,4 @@ public class BusLifecycleAdapter implements BusLifecycleListener {
   @Override
   public void busOffline(BusLifecycleEvent e) {
   }
-
 }

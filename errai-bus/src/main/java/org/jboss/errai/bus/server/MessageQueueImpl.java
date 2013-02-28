@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
@@ -32,7 +32,6 @@ import org.jboss.errai.bus.server.io.Wakeable;
 import org.jboss.errai.bus.server.io.buffers.Buffer;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.common.client.util.TimeUnit;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;

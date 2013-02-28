@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 /**
 * @author Mike Brock
@@ -32,7 +32,7 @@ final class WrappedCallbackHolder {
     return wrappedCallback;
   }
 
-  public void setWrappedCallback(MessageCallback wrappedCallback) {
+  public void setWrappedCallback(final MessageCallback wrappedCallback) {
     this.wrappedCallback = wrappedCallback;
   }
 }

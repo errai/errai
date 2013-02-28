@@ -20,7 +20,7 @@ import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.InnerClass;

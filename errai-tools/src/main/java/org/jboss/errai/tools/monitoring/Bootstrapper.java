@@ -16,7 +16,7 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 
 public class Bootstrapper {
   private MessageBus bus;

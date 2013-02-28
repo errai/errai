@@ -87,16 +87,6 @@ public class AsyncBeanContext {
     _constructCheck();
   }
 
-  public void appendRunOnFinish(final Runnable runnable) {
-    if (finishFireState == FireState.FIRED) {
-      runnable.run();
-    }
-    else {
-      onFinishRunnables.add(runnable);
-      _finishCheck();
-    }
-  }
-
   public void runOnFinish(final Runnable runnable) {
     if (finishFireState == FireState.FIRED) {
       runnable.run();
@@ -164,33 +154,26 @@ public class AsyncBeanContext {
       LogUtil.log("WARNING: finish did not fire because state is already FIRED");
       return;
     }
+    if (allDependencies.isEmpty()) {
+      timeOut.cancel();
+      finishFireState = FireState.ARMED;
 
-//    if (allDependencies.isEmpty()) {
-//      new Timer() {
-//        @Override
-//        public void run() {
-          if (allDependencies.isEmpty()) {
-            timeOut.cancel();
-            finishFireState = FireState.ARMED;
+      if (!onFinishRunnables.isEmpty()) {
+        finishFireState = FireState.FIRED;
 
-            if (!onFinishRunnables.isEmpty()) {
-              finishFireState = FireState.FIRED;
-
-              final Iterator<Runnable> runnableIterable = onFinishRunnables.iterator();
-              while (runnableIterable.hasNext()) {
-                try {
-                  runnableIterable.next().run();
-                }
-                catch (Throwable t) {
-                  t.printStackTrace();
-                }
-                runnableIterable.remove();
-              }
-            }
+        final Iterator<Runnable> runnableIterable = onFinishRunnables.iterator();
+        while (runnableIterable.hasNext()) {
+          try {
+            runnableIterable.next().run();
           }
-//        }
-//      }.schedule(1); // yield.
-//    }
+          catch (Throwable t) {
+            t.printStackTrace();
+          }
+          runnableIterable.remove();
+        }
+      }
+    }
+
   }
 
   public void setComment(String comment) {

@@ -18,8 +18,8 @@ package org.jboss.errai.bus.server;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;

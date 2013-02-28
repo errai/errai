@@ -1,11 +1,10 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
-import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 
 /**
  * @author Mike Brock
