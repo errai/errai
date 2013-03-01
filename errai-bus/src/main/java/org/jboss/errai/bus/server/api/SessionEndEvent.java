@@ -21,7 +21,7 @@ import org.jboss.errai.common.client.api.Assert;
 
 
 /**
- * The event object that is delievered to {@link org.jboss.errai.bus.server.api.SessionEndListener}s when a {@link org.jboss.errai.bus.client.api.QueueSession} ends.
+ * The event object that is delievered to {@link org.jboss.errai.bus.client.api.SessionEndListener}s when a {@link org.jboss.errai.bus.client.api.QueueSession} ends.
  */
 public class SessionEndEvent {
   private final QueueSession session;

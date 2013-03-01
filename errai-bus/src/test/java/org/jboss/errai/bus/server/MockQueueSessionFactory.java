@@ -1,7 +1,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.server.api.SessionEndListener;
+import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 
 import java.util.Collection;
