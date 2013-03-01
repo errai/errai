@@ -74,6 +74,11 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
+        public Subscription subscribeShadow(String subject, MessageCallback callback) {
+          return null;
+        }
+
+        @Override
         public void unsubscribeAll(String subject) {
         }
 

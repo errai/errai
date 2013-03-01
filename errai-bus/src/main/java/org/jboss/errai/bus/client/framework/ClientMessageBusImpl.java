@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.framework;
 
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
+import static org.jboss.errai.bus.client.util.BusToolsCli.isRemoteCommunicationEnabled;
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
@@ -116,6 +117,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
   private final Map<String, List<MessageCallback>> localSubscriptions = new HashMap<String, List<MessageCallback>>();
+  private final Map<String, List<MessageCallback>> shadowSubscriptions = new HashMap<String, List<MessageCallback>>();
+
   private final Map<String, MessageCallback> remotes = new HashMap<String, MessageCallback>();
 
   private final List<TransportErrorHandler> transportErrorHandlers = new ArrayList<TransportErrorHandler>();
@@ -167,7 +170,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         put(Capabilities.WebSockets.name(), new WebsocketHandler(transportToBusCallback, ClientMessageBusImpl.this));
         put(Capabilities.SSE.name(), new SSEHandler(transportToBusCallback, ClientMessageBusImpl.this));
         put(Capabilities.LongPolling.name(),
-            HttpPollingHandler.newLongPollingInstance(transportToBusCallback,ClientMessageBusImpl.this));
+            HttpPollingHandler.newLongPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
         put(Capabilities.ShortPolling.name(),
             HttpPollingHandler.newShortPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
       }
@@ -201,7 +204,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     registerInitVoteCallbacks();
 
-    if (BusToolsCli.isRemoteCommunicationEnabled()) {
+    if (isRemoteCommunicationEnabled()) {
       remoteSubscribe(BuiltInServices.ServerEchoService.name());
     }
 
@@ -344,7 +347,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * being created.
    */
   private void sendInitialMessage() {
-    if (!BusToolsCli.isRemoteCommunicationEnabled()) {
+    if (!isRemoteCommunicationEnabled()) {
       LogUtil.log("initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)");
       InitVotes.voteFor(ClientMessageBus.class);
       return;
@@ -438,7 +441,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       setState(BusState.LOCAL_ONLY, reason);
 
     // Optionally tell the server we're going away (this causes two POST requests)
-    if (sendDisconnect && BusToolsCli.isRemoteCommunicationEnabled()) {
+    if (sendDisconnect && isRemoteCommunicationEnabled()) {
       encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
           .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.Disconnect)
           .set(MessageParts.PriorityProcessing, "1"));
@@ -498,6 +501,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public Subscription subscribeLocal(final String subject, final MessageCallback callback) {
     return _subscribe(subject, callback, true);
+  }
+
+  @Override
+  public Subscription subscribeShadow(final String subject, final MessageCallback callback) {
+    List<MessageCallback> messageCallbacks = shadowSubscriptions.get(subject);
+    if (messageCallbacks == null) {
+      shadowSubscriptions.put(subject, messageCallbacks = new ArrayList<MessageCallback>());
+    }
+    messageCallbacks.add(callback);
+
+    final List<MessageCallback> _messageCallbacks = messageCallbacks;
+    return new Subscription() {
+      @Override
+      public void remove() {
+        _messageCallbacks.remove(callback);
+      }
+    };
   }
 
   private Subscription _subscribe(final String subject, final MessageCallback callback, final boolean local) {
@@ -674,16 +694,28 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     try {
       boolean deferred = false;
+      final boolean localOnly = message.isFlagSet(RoutingFlag.DeliverLocalOnly);
+      final String subject = message.getSubject();
+
       if (message.hasPart(MessageParts.ToSubject)) {
-        if (BusToolsCli.isRemoteCommunicationEnabled() && getState() != BusState.CONNECTED) {
-          deferredMessages.add(message);
+
+        if (isRemoteCommunicationEnabled()
+            && getState() != BusState.CONNECTED
+            && !localOnly) {
+
+          if (remotes.containsKey(subject) && shadowSubscriptions.containsKey(subject)) {
+            deliverToSubscriptions(shadowSubscriptions, subject, message);
+          }
+          else {
+            deferredMessages.add(message);
+          }
+
           deferred = true;
         }
 
-        final String subject = message.getSubject();
         boolean routedToRemote = false;
 
-        if (!message.isFlagSet(RoutingFlag.DeliverLocalOnly) && remotes.containsKey(subject)) {
+        if (!localOnly && remotes.containsKey(subject)) {
           remotes.get(subject).callback(message);
           routedToRemote = true;
         }

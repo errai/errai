@@ -44,8 +44,6 @@ public class LifecycleEventTests extends AbstractErraiTest {
     bus.addLifecycleListener(listener);
   }
 
-  ;
-
   @Override
   protected void gwtTearDown() throws Exception {
     for (BusLifecycleListener listener : listenersToRemove) {

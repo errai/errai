@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2012 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.builder;
+package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.annotations.Service;
 
-public interface MessageBuildSendableWithReply extends MessageBuildSendableDispatcher {
-  public MessageBuildSendable repliesToSubject(String name);
-  public MessageBuildSendable repliesTo(MessageCallback callback);
+/**
+ * @author Mike Brock
+ */
+@Service("MaximumAwesome")
+public class MaximumAwesomeService implements MessageCallback {
+  @Override
+  public void callback(final Message message) {
+    MessageBuilder.createConversation(message)
+        .subjectProvided()
+        .withValue("FromServer")
+        .done().reply();
+  }
 }

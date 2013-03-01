@@ -25,6 +25,17 @@ import java.util.Collection;
  * @author Mike Brock
  */
 public interface AsyncBeanManager extends ClientBeanManager {
+
+  /**
+   * Destroy the bean and all other beans associated with its {@link AsyncCreationalContext}. Because some
+   * destruction activity may be asynchronous, this method accepts a second parameter as a callback to
+   * be notified when the destruction of all the beans has been done.
+   *
+   * @param ref
+   *      the reference to the bean to be destroyed.
+   * @param runnable
+   *      a runnable callback to be called when all the beans have been destroyed.
+   */
   public void destroyBean(final Object ref, final Runnable runnable);
 
   /**

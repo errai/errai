@@ -179,6 +179,11 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
 
   public void destroyBean(final Object ref, final Runnable runnable) {
     destroyBean(ref);
+
+    /**
+     * Just yield. In truth, all code will have been downloaded at this time, which means the only problem is that
+     * we need to make callback-based lookup. A minimum yield is sufficient to guarantee everything has happened.
+     */
     new Timer() {
       @Override
       public void run() {
@@ -340,7 +345,8 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
       throw new IOCResolutionException("no matching bean instances for: " + type.getName());
     }
     else {
-      throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
+      throw new IOCResolutionException("multiple matching bean instances for: "
+          + type.getName() + " matches: " + matching);
     }
   }
 

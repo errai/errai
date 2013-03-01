@@ -66,6 +66,12 @@ class DefaultMessageBuilder<R extends Sendable> {
       boolean reply = false;
 
       @Override
+      public MessageBuildSendable repliesToSubject(String subjectName) {
+        message.set(MessageParts.ReplyTo, subjectName);
+        return this;
+      }
+
+      @Override
       public MessageBuildSendable repliesTo(final MessageCallback callback) {
         reply = true;
         makeConversational(message, callback);

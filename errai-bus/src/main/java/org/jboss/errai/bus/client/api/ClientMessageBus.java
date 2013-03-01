@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.api;
 
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 import java.util.Set;
 
@@ -26,6 +27,9 @@ import java.util.Set;
  * @author Mike Brock
  */
 public interface ClientMessageBus extends MessageBus {
+
+  public Subscription subscribeShadow(String subject, MessageCallback callback);
+
   /**
    * Adds the given listener instance to this bus. The listener will be notified
    * each time the bus transitions to a different lifecycle state.

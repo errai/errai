@@ -192,7 +192,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
       outputStream.close();
     }
     catch (final Throwable t) {
-      t.printStackTrace();
       writeExceptionToOutputStream(httpServletResponse, t);
     }
   }
