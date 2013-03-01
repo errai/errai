@@ -128,9 +128,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private final List<BusLifecycleListener> lifecycleListeners = new ArrayList<BusLifecycleListener>();
 
-  private BusState state = BusState.LOCAL_ONLY;
+  private BusState state = BusState.UNINITIALIZED;
 
   private final ManagementConsole managementConsole;
+
+  private final Map<String, String> properties = new HashMap<String, String>();
+
+  private Timer initialConnectTimer;
 
   public ClientMessageBusImpl() {
     setBusToInitializableState();
@@ -333,12 +337,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     // services before we send our state synchronization message. This is not strictly necessary
     // but significantly decreases network chattiness since more (if not all known services)
     // can then be listed in the initial handshake message.
-    new Timer() {
+    initialConnectTimer = new Timer() {
       @Override
       public void run() {
         sendInitialMessage();
       }
-    }.schedule(50);
+    };
+    initialConnectTimer.schedule(50);
   }
 
   /**
@@ -350,11 +355,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!isRemoteCommunicationEnabled()) {
       LogUtil.log("initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)");
       InitVotes.voteFor(ClientMessageBus.class);
+      setState(BusState.LOCAL_ONLY);
       return;
     }
 
-    if (getState() != BusState.LOCAL_ONLY) {
-      LogUtil.log("aborting startup. bus is not in correct state.");
+    if (!getState().isStartableState()) {
+      LogUtil.log("aborting startup. bus is not in correct state. (current state: " + getState() + ")");
       return;
     }
 
@@ -367,14 +373,29 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     deferredSubscriptions.clear();
 
-    transportHandler.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
-        .command(BusCommands.Associate)
-        .set(ToSubject, "ServerBus")
-        .set(PriorityProcessing, "1")
-        .set(MessageParts.RemoteServices, getAdvertisableSubjects())
-        .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, Collections.singletonMap("phase", "connection"))));
+    if (!isProperty("chaos_monkey.dont_really_connect", "true")) {
+      transportHandler.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
+          .command(BusCommands.Associate)
+          .set(ToSubject, "ServerBus")
+          .set(PriorityProcessing, "1")
+          .set(MessageParts.RemoteServices, getAdvertisableSubjects())
+          .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, Collections.singletonMap("phase", "connection"))));
 
-    transportHandler.start();
+      transportHandler.start();
+    }
+    else {
+      final String failOnConnectAfterMs = properties.get("chaos_monkey.fail_on_connect_after_ms");
+      if (failOnConnectAfterMs != null) {
+        final int ms = Integer.parseInt(failOnConnectAfterMs);
+
+        new Timer() {
+          @Override
+          public void run() {
+            setState(BusState.CONNECTION_INTERRUPTED);
+          }
+        }.schedule(ms);
+      }
+    }
   }
 
   private void processCapabilities(final Message message) {
@@ -436,9 +457,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void stop(final boolean sendDisconnect, final TransportError reason) {
     LogUtil.log("stopping bus ...");
+    if (initialConnectTimer != null) {
+      initialConnectTimer.cancel();
+    }
 
-    if (state != BusState.LOCAL_ONLY)
+    if (degradeToUnitialized()) {
+      setState(BusState.UNINITIALIZED);
+
+      deferredMessages.clear();
+      remotes.clear();
+      deferredSubscriptions.clear();
+    }
+    else if (state != BusState.LOCAL_ONLY) {
       setState(BusState.LOCAL_ONLY, reason);
+    }
 
     // Optionally tell the server we're going away (this causes two POST requests)
     if (sendDisconnect && isRemoteCommunicationEnabled()) {
@@ -698,19 +730,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       final String subject = message.getSubject();
 
       if (message.hasPart(MessageParts.ToSubject)) {
-
-        if (isRemoteCommunicationEnabled()
-            && getState() != BusState.CONNECTED
-            && !localOnly) {
-
-          if (remotes.containsKey(subject) && shadowSubscriptions.containsKey(subject)) {
+        if (isRemoteCommunicationEnabled() && !localOnly) {
+          if (getState().isShadowDeliverable() && shadowSubscriptions.containsKey(subject)) {
             deliverToSubscriptions(shadowSubscriptions, subject, message);
+            deferred = true;
           }
-          else {
+          else if (getState() != BusState.CONNECTED) {
             deferredMessages.add(message);
+            deferred = true;
           }
-
-          deferred = true;
         }
 
         boolean routedToRemote = false;
@@ -818,6 +846,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   Set<String> getRemoteSubscriptions() {
     return remotes.keySet();
+  }
+
+  private void sendDeferredToShadow() {
+    if (!deferredMessages.isEmpty() && !shadowSubscriptions.isEmpty()) {
+      boolean deliveredMessages;
+      do {
+        deliveredMessages = false;
+        for (final Message message : new ArrayList<Message>(deferredMessages)) {
+          if (shadowSubscriptions.containsKey(message.getSubject())) {
+            System.out.println("DELIVER: " + deferredMessages);
+            deferredMessages.remove(message);
+            deliveredMessages = true;
+            deliverToSubscriptions(shadowSubscriptions, message.getSubject(), message);
+          }
+        }
+      }
+      while (!deferredMessages.isEmpty() && deliveredMessages);
+    }
   }
 
   private void sendAllDeferred() {
@@ -996,6 +1042,25 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return availableHandlers.values();
   }
 
+
+  @Override
+  public void setProperty(final String name, final String value) {
+    properties.put(name, value);
+  }
+
+  @Override
+  public void clearProperties() {
+    properties.clear();
+  }
+
+  private boolean isProperty(final String name, final String value) {
+    return properties.containsKey(name) && properties.get(name).equals(value);
+  }
+
+  private boolean degradeToUnitialized() {
+    return isProperty("chaos_monkey.degrade_to_uninitialized_on_stop", "true");
+  }
+
   /**
    * Puts the bus in the given state, firing all necessary transition events with no <tt>reason</tt> field.
    */
@@ -1018,6 +1083,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final List<BusEventType> events = new ArrayList<BusEventType>();
 
     switch (state) {
+      case UNINITIALIZED:
+        break;
+
       case LOCAL_ONLY:
         if (newState == BusState.CONNECTING) {
           events.add(BusEventType.ASSOCIATING);
@@ -1060,6 +1128,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (newState == BusState.CONNECTION_INTERRUPTED) {
       LogUtil.log("the connection to the server has been interrupted ...");
+    }
+
+    /**
+     * If the new state is a state we deliver to shadow subscriptions, we send any deferred messages to
+     * the shadow subscriptions now.
+     */
+    if (newState.isShadowDeliverable()) {
+      sendDeferredToShadow();
     }
 
     for (final BusEventType et : events) {

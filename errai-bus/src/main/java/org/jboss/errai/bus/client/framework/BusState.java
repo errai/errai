@@ -17,8 +17,28 @@
 package org.jboss.errai.bus.client.framework;
 
 /**
-* @author Mike Brock
-*/
+ * @author Mike Brock
+ */
 public enum BusState {
-  LOCAL_ONLY, CONNECTING, CONNECTION_INTERRUPTED, CONNECTED
+  UNINITIALIZED(true, false),
+  LOCAL_ONLY(true, true),
+  CONNECTING(false, false),
+  CONNECTION_INTERRUPTED(false, true),
+  CONNECTED(false, false);
+
+  private final boolean startableState;
+  private final boolean shadowDeliverable;
+
+  private BusState(final boolean startableState, final boolean shadowDeliverable) {
+    this.startableState = startableState;
+    this.shadowDeliverable = shadowDeliverable;
+  }
+
+  public boolean isStartableState() {
+    return startableState;
+  }
+
+  public boolean isShadowDeliverable() {
+    return shadowDeliverable;
+  }
 }

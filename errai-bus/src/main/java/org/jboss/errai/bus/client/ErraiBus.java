@@ -123,6 +123,14 @@ public class ErraiBus implements EntryPoint {
         @Override
         public void removeLifecycleListener(BusLifecycleListener l) {
         }
+
+        @Override
+        public void setProperty(String name, String value) {
+        }
+
+        @Override
+        public void clearProperties() {
+        }
       };
     }
 

@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.tests;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
@@ -28,9 +29,39 @@ import java.util.List;
  * @author Mike Brock
  */
 public class ShadowServicesTests extends AbstractErraiTest {
+  private final List<Timer> timerList = new ArrayList<Timer>();
+  private final List<Subscription> cleanUpPile = new ArrayList<Subscription>();
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.bus.ErraiBusTests";
+  }
+
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    super.gwtTearDown();
+    bus.clearProperties();
+    for (Timer timer : timerList) {
+      timer.cancel();
+    }
+    for (Subscription subscription : cleanUpPile) {
+      subscription.remove();
+    }
+  }
+
+  private Timer cleaned(Timer timer) {
+    timerList.add(timer);
+    return timer;
+  }
+
+  private Subscription cleaned(Subscription subscription) {
+    cleanUpPile.add(subscription);
+    return subscription;
   }
 
   public void testShadowServicesKickInProperty() {
@@ -38,6 +69,80 @@ public class ShadowServicesTests extends AbstractErraiTest {
 
     final String receivingService = "AwesomousPrime";
     final String remoteService = "MaximumAwesome";
+
+    cleaned(bus.subscribe(receivingService, new MessageCallback() {
+      @Override
+      public void callback(final Message message) {
+
+        final String value = message.getValue(String.class);
+        receivedMessages.add(value);
+        System.out.println("Received: " + value);
+      }
+    }));
+
+    cleaned(bus.subscribeShadow(remoteService, new MessageCallback() {
+      @Override
+      public void callback(final Message message) {
+        MessageBuilder.createConversation(message)
+            .subjectProvided()
+            .withValue("FromShadow")
+            .done().reply();
+      }
+    }));
+
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        cleaned(new Timer() {
+          @Override
+          public void run() {
+            MessageBuilder.createMessage()
+                .toSubject(remoteService)
+                .withValue("Boop!")
+                .done().repliesToSubject(receivingService).sendNowWith(bus);
+          }
+        }).scheduleRepeating(500);
+
+        cleaned(new Timer() {
+          @Override
+          public void run() {
+            bus.stop(false);
+          }
+        }).schedule(1500);
+
+        final List<String> expected = new ArrayList<String>();
+        expected.add("FromServer");
+        expected.add("FromShadow");
+
+        cleaned(new Timer() {
+          @Override
+          public void run() {
+            if (receivedMessages.containsAll(expected)) {
+              finishTest();
+            }
+          }
+        }).scheduleRepeating(1000);
+      }
+    });
+  }
+
+  public void testDeferralsGetSentToShadow() {
+    final List<String> receivedMessages = new ArrayList<String>();
+
+    final String receivingService = "AwesomousPrime";
+    final String remoteService = "MaximumAwesome";
+
+    // Tell the Chaos Monkey, who lives inside the bus, to not really connect to the server
+    // when asked to do so, leaving the bus in a perpetual CONNECTING state.
+    bus.setProperty("chaos_monkey.dont_really_connect", "true");
+    bus.setProperty("chaos_monkey.fail_on_connect_after_ms", "2000");
+
+    // Normally, when the bus is explicitly stopped, the state transitions to LOCAL_ONLY (which is good).
+    // But for this test, we want the bus to drop back to the UNINITIALIZED state to simulate a cold start.
+    bus.setProperty("chaos_monkey.degrade_to_uninitialized_on_stop", "true");
+
+    bus.stop(false);
 
     bus.subscribe(receivingService, new MessageCallback() {
       @Override
@@ -59,41 +164,35 @@ public class ShadowServicesTests extends AbstractErraiTest {
       }
     });
 
-    runAfterInit(new Runnable() {
+    bus.init();
+
+    final Message message = MessageBuilder.createMessage().
+        toSubject(remoteService)
+        .withValue("ZZZ")
+        .done().repliesToSubject(receivingService).getMessage();
+
+    bus.send(message);
+    bus.send(message);
+    bus.send(message);
+
+    /**
+     * We prove the messages are deferred.
+     */
+    assertEquals(0, receivedMessages.size());
+
+    delayTestFinish(30000);
+
+    new Timer() {
       @Override
       public void run() {
 
-        new Timer() {
-          @Override
-          public void run() {
-            MessageBuilder.createMessage()
-                .toSubject(remoteService)
-                .withValue("Boop!")
-                .done().repliesToSubject(receivingService).sendNowWith(bus);
-          }
-        }.scheduleRepeating(500);
-
-        new Timer() {
-          @Override
-          public void run() {
-            bus.stop(false);
-          }
-        }.schedule(1500);
-
-        final List<String> expected = new ArrayList<String>();
-        expected.add("FromServer");
-        expected.add("FromShadow");
-
-        new Timer() {
-          @Override
-          public void run() {
-            if (receivedMessages.containsAll(expected)) {
-              finishTest();
-            }
-          }
-        }.scheduleRepeating(1000);
+        /**
+         * We prove the deferrals were delivered to the shadow service.
+         */
+        assertEquals(3, receivedMessages.size());
+        finishTest();
       }
-    });
+    }.schedule(5000);
   }
 }
 
