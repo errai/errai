@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
+package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.common.client.api.Assert;
 
 

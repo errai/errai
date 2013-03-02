@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.server.api.SessionEndEvent;
+import org.jboss.errai.bus.client.api.SessionEndEvent;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.server.api.SessionProvider;

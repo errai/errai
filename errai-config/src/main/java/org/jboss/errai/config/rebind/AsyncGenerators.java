@@ -144,7 +144,8 @@ public final class AsyncGenerators {
         notifyStarting(job);
         notifyStarted(job);
 
-        for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GenerateAsync.class)) {
+        final Set<Class<?>> typesAnnotatedWith = ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GenerateAsync.class);
+        for (final Class<?> cls : typesAnnotatedWith) {
           try {
             final AsyncCodeGenerator asyncCodeGenerator
                 = cls.asSubclass(AsyncCodeGenerator.class).newInstance();

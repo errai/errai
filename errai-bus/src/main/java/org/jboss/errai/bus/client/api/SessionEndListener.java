@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.server.api.SessionEndEvent;
-
 /**
  * Callback interface for receiving notifications when {@link org.jboss.errai.bus.client.api.QueueSession}s end.
  */
