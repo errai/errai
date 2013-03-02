@@ -365,14 +365,14 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   }
 
   private class NoPollRequestCallback extends LongPollRequestCallback {
-    private boolean onePoll = false;
+//    private boolean onePoll = false;
 
     @Override
     public void schedule() {
-      if (!onePoll) {
-        onePoll = true;
-        performPoll();
-      }
+//      if (!onePoll) {
+//        onePoll = true;
+//        performPoll();
+//      }
     }
 
     @Override

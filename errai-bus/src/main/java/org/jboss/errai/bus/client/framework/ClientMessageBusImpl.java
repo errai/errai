@@ -374,14 +374,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     deferredSubscriptions.clear();
 
     if (!isProperty(ChaosMonkey.DONT_REALLY_CONNECT, "true")) {
+      final Map<String, String> properties = new HashMap<String, String>();
+      properties.put("phase", "connection");
+      properties.put("wait", "1");
+
       transportHandler.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
           .command(BusCommands.Associate)
           .set(ToSubject, "ServerBus")
           .set(PriorityProcessing, "1")
           .set(MessageParts.RemoteServices, getAdvertisableSubjects())
-          .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, Collections.singletonMap("phase", "connection"))));
+          .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, properties)));
 
-      transportHandler.start();
+       transportHandler.start();
     }
     else {
       final String failOnConnectAfterMs = properties.get(ChaosMonkey.FAIL_ON_CONNECT_AFTER_MS);
