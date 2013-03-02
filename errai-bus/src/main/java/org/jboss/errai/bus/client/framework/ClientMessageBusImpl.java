@@ -373,7 +373,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     deferredSubscriptions.clear();
 
-    if (!isProperty("chaos_monkey.dont_really_connect", "true")) {
+    if (!isProperty(ChaosMonkey.DONT_REALLY_CONNECT, "true")) {
       transportHandler.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
           .command(BusCommands.Associate)
           .set(ToSubject, "ServerBus")
@@ -384,7 +384,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       transportHandler.start();
     }
     else {
-      final String failOnConnectAfterMs = properties.get("chaos_monkey.fail_on_connect_after_ms");
+      final String failOnConnectAfterMs = properties.get(ChaosMonkey.FAIL_ON_CONNECT_AFTER_MS);
       if (failOnConnectAfterMs != null) {
         final int ms = Integer.parseInt(failOnConnectAfterMs);
 
@@ -1058,7 +1058,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private boolean degradeToUnitialized() {
-    return isProperty("chaos_monkey.degrade_to_uninitialized_on_stop", "true");
+    return isProperty(ChaosMonkey.DEGRADE_TO_UNINITIALIZED_ON_STOP, "true");
   }
 
   /**

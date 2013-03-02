@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.framework.ChaosMonkey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,12 +136,12 @@ public class ShadowServicesTests extends AbstractErraiTest {
 
     // Tell the Chaos Monkey, who lives inside the bus, to not really connect to the server
     // when asked to do so, leaving the bus in a perpetual CONNECTING state.
-    bus.setProperty("chaos_monkey.dont_really_connect", "true");
-    bus.setProperty("chaos_monkey.fail_on_connect_after_ms", "2000");
+    bus.setProperty(ChaosMonkey.DONT_REALLY_CONNECT, "true");
+    bus.setProperty(ChaosMonkey.FAIL_ON_CONNECT_AFTER_MS, "2000");
 
     // Normally, when the bus is explicitly stopped, the state transitions to LOCAL_ONLY (which is good).
     // But for this test, we want the bus to drop back to the UNINITIALIZED state to simulate a cold start.
-    bus.setProperty("chaos_monkey.degrade_to_uninitialized_on_stop", "true");
+    bus.setProperty(ChaosMonkey.DEGRADE_TO_UNINITIALIZED_ON_STOP, "true");
 
     bus.stop(false);
 
