@@ -16,12 +16,17 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
@@ -39,16 +44,12 @@ import org.jboss.errai.marshalling.server.ServerMappingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -224,6 +225,7 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
 
+    System.out.println("Starting marshaller gen.");
     if (GWT.isProdMode()) {
       log.info("compiling in production mode.");
     }
@@ -240,6 +242,7 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
       logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
     }
 
+    System.out.println("finished marshaller gen.");
     // return the fully qualified name of the class generated
     return packageName + "." + className;
   }
