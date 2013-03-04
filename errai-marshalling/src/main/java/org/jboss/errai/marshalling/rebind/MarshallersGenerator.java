@@ -225,7 +225,6 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
 
-    System.out.println("Starting marshaller gen.");
     if (GWT.isProdMode()) {
       log.info("compiling in production mode.");
     }
@@ -242,7 +241,6 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
       logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
     }
 
-    System.out.println("finished marshaller gen.");
     // return the fully qualified name of the class generated
     return packageName + "." + className;
   }
