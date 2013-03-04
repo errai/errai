@@ -94,7 +94,6 @@ public class ShadowServicesTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-
         cleaned(new Timer() {
           @Override
           public void run() {

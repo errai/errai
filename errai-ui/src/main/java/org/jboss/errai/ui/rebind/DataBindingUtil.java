@@ -56,7 +56,7 @@ public class DataBindingUtil {
     }
   }
 
-  public static DataBinderLookup getDataBinder(final InjectableInstance ctx) {
+  public static DataBinderLookup  getDataBinder(final InjectableInstance ctx) {
     final Statement dataBinderRef;
     final MetaClass dataModelType;
 

@@ -257,7 +257,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               break;
 
             case FinishAssociation:
-              LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
+              LogUtil.log("received handshake response from server. preparing to bring up the federation");
 
               loadRpcProxies();
               processCapabilities(message);
@@ -366,7 +366,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     setState(BusState.CONNECTING);
 
-    LogUtil.log("sending initial handshake to remote bus");
+    LogUtil.log("sending handshake message to remote bus");
 
     for (final Runnable deferredSubscription : deferredSubscriptions) {
       deferredSubscription.run();

@@ -347,12 +347,6 @@ public class MetaDataScanner extends Reflections {
           final InputStream stream = url.openStream();
           try {
             properties.load(stream);
-
-            if (properties.contains(ErraiAppAttribs.JUNIT_PACKAGE_ONLY)) {
-              if ("true".equalsIgnoreCase(String.valueOf(properties.get(ErraiAppAttribs.JUNIT_PACKAGE_ONLY)))) {
-                continue;
-              }
-            }
           }
           finally {
             stream.close();

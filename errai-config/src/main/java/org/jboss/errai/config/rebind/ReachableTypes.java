@@ -16,11 +16,11 @@
 
 package org.jboss.errai.config.rebind;
 
+import org.jboss.errai.common.client.api.Assert;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-
-import org.jboss.errai.common.client.api.Assert;
 
 /**
  * A class for obtaining information about whether types are reachable or not.
@@ -31,7 +31,6 @@ import org.jboss.errai.common.client.api.Assert;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public class ReachableTypes {
-
   /**
    * A shareable, threadsafe, reusable instance that reports all types as reachable and
    * reachability analysis as disabled.
