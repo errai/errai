@@ -13,7 +13,12 @@
   <inherits name="org.jboss.errai.enterprise.CDI" />
   <inherits name="com.google.gwt.maps.Maps" />
   <inherits name="org.gwtopenmaps.openlayers.OpenLayers"/>
-  
+  <inherits name="org.jboss.errai.ui.Cordova"/>
+
+  <replace-with class="org.jboss.errai.demo.grocery.client.local.Config">
+    <when-type-is class="org.jboss.errai.bus.client.framework.Configuration"/>
+  </replace-with>
+
   <source path="client"/>
   <source path="shared"/>
   

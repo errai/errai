@@ -16,6 +16,7 @@ import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.OverviewMap;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
+import org.gwtopenmaps.openlayers.client.event.MapMoveEndListener;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.LinearRing;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
@@ -30,6 +31,8 @@ import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
 import org.jboss.errai.demo.grocery.client.local.map.LocationProvider;
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ui.cordova.geofencing.GeoFencingProvider;
+import org.jboss.errai.ui.cordova.geofencing.Region;
 import org.jboss.errai.ui.nav.client.local.*;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
@@ -44,6 +47,7 @@ import static org.jboss.errai.demo.grocery.client.local.map.LocationProvider.Loc
 public class StorePage extends Composite {
 
   private static final Projection DEFAULT_PROJECTION = new Projection("EPSG:4326");
+  public static final int DEFAULT_RADIUS = 100;
 
   @Inject private EntityManager em;
 
@@ -61,6 +65,8 @@ public class StorePage extends Composite {
 
   private @PageState("id") Long requestedStoreId;
   @Inject private TransitionTo<StoresPage> backToStoresPage;
+
+  @Inject private GeoFencingProvider geoFencingProvider;
 
   private Marker marker;
   private Markers markers;
@@ -134,37 +140,43 @@ public class StorePage extends Composite {
 
         placeMarkerAtStoreLocation(map);
 
-        // set up autocomplete search box for this place
-        AutocompleteType[] types = new AutocompleteType[2];
-        types[0] = AutocompleteType.ESTABLISHMENT;
-        types[1] = AutocompleteType.GEOCODE;
+        map.addMapMoveEndListener(new MapMoveEndListener() {
 
-        Bounds extent = map.getExtent();
-        extent.transform(DEFAULT_PROJECTION, new Projection("EPSG:900913"));
-
-        AutocompleteOptions options = AutocompleteOptions.newInstance();
-        options.setTypes(types);
-        LatLng sw = LatLng.newInstance(extent.getLowerLeftX(), extent.getLowerLeftY());
-        LatLng ne = LatLng.newInstance(extent.getUpperRightX(), extent.getUpperRightY());
-        options.setBounds(LatLngBounds.newInstance(sw, ne));
-
-        final Autocomplete autoComplete = Autocomplete.newInstance(locationSearchBox.getElement(), options);
-
-        autoComplete.addPlaceChangeHandler(new PlaceChangeMapHandler() {
           @Override
-          public void onEvent(PlaceChangeMapEvent event) {
-            PlaceResult result = autoComplete.getPlace();
-            PlaceGeometry geometry = result.getGeometry();
-            LatLng center = geometry.getLocation();
+          public void onMapMoveEnd(MapMoveEndEvent eventObject) {
+            Bounds extent = map.getExtent();
+            extent.transform(DEFAULT_PROJECTION, new Projection("EPSG:900913"));
 
-            Store store = storeBinder.getModel();
-            store.setName(result.getName());
-            store.setAddress(result.getFormatted_Address());
-            store.setLatitude(center.getLatitude());
-            store.setLongitude(center.getLongitude());
-            store.setRadius(100);
+            // set up autocomplete search box for this place
+            AutocompleteType[] types = new AutocompleteType[2];
+            types[0] = AutocompleteType.ESTABLISHMENT;
+            types[1] = AutocompleteType.GEOCODE;
 
-            placeMarkerAtStoreLocation(map);
+            AutocompleteOptions options = AutocompleteOptions.newInstance();
+            options.setTypes(types);
+            LatLng sw = LatLng.newInstance(extent.getLowerLeftX(), extent.getLowerLeftY());
+            LatLng ne = LatLng.newInstance(extent.getUpperRightX(), extent.getUpperRightY());
+            options.setBounds(LatLngBounds.newInstance(sw, ne));
+
+            final Autocomplete autoComplete = Autocomplete.newInstance(locationSearchBox.getElement(), options);
+
+            autoComplete.addPlaceChangeHandler(new PlaceChangeMapHandler() {
+              @Override
+              public void onEvent(PlaceChangeMapEvent event) {
+                PlaceResult result = autoComplete.getPlace();
+                PlaceGeometry geometry = result.getGeometry();
+                LatLng center = geometry.getLocation();
+
+                Store store = storeBinder.getModel();
+                store.setName(result.getName());
+                store.setAddress(result.getFormatted_Address());
+                store.setLatitude(center.getLatitude());
+                store.setLongitude(center.getLongitude());
+                store.setRadius(DEFAULT_RADIUS);
+
+                placeMarkerAtStoreLocation(map);
+              }
+            });
           }
         });
       }
@@ -180,8 +192,13 @@ public class StorePage extends Composite {
 
   @EventHandler("saveButton")
   private void save(ClickEvent e) {
-    em.persist(storeBinder.getModel());
+    Store store = storeBinder.getModel();
+    em.persist(store);
     em.flush();
+
+    Region region = new Region((int) store.getId(), store.getLatitude(), store.getLongitude(), (int) store.getRadius());
+    geoFencingProvider.addRegion(region);
+
     backToStoresPage.go();
   }
 

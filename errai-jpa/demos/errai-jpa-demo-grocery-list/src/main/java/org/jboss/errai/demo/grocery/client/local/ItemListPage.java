@@ -1,6 +1,7 @@
 package org.jboss.errai.demo.grocery.client.local;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -16,6 +17,7 @@ import com.google.gwt.user.client.ui.Composite;
 @Dependent
 @Templated("#main")
 @Page
+@ApplicationScoped
 public class ItemListPage extends Composite {
 
   @Inject private ClientBeanManager bm;

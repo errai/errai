@@ -5,6 +5,8 @@ import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Item;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.cordova.geofencing.GeoFencingEvent;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
@@ -13,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -26,6 +29,9 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
 
   @Inject
   ItemStoreDistanceComparator distanceComparator;
+
+  @Inject
+  TransitionTo<ItemListPage> itemsTab;
 
   private SortBy sortField = SortBy.NAME;
 
@@ -68,8 +74,7 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
 
   @PostConstruct
   void refresh() {
-    TypedQuery<Item> query = entityManager.createNamedQuery("allItems", Item.class);
-    List<Item> itemList = query.getResultList();
+    List<Item> itemList = getAllItems();
 
     if (sortField != SortBy.STORE_LOCATION) {
       sort(itemList, sortField.itemComparator);
@@ -79,6 +84,11 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
     setItems(itemList);
   }
 
+  private List<Item> getAllItems() {
+    TypedQuery<Item> query = entityManager.createNamedQuery("allItems", Item.class);
+    return query.getResultList();
+  }
+
   @Override
   public Class<GroceryItemWidget> getItemWidgetType() {
     return GroceryItemWidget.class;
@@ -86,6 +96,28 @@ public class GroceryListWidget extends ListWidget<Item, GroceryItemWidget> {
 
   public void sortBy(SortBy field) {
     this.sortField = field;
+  }
+
+  public void filterOn(Store store) {
+    List<Item> itemList = getAllItems();
+    List<Item> filtered = new ArrayList<Item>(itemList.size());
+    for (Department department : store.getDepartments()) {
+      for (Item item : itemList) {
+        if (item.getDepartment().getName().equals(department.getName())) {
+          filtered.add(item);
+        }
+      }
+    }
+    setItems(filtered);
+  }
+
+  @SuppressWarnings("UnusedDeclaration")
+  public void closeToStore(@Observes GeoFencingEvent event) {
+    itemsTab.go();
+    Store store = entityManager.find(Store.class, event.getRegionId());
+    if (store != null) {
+      filterOn(store);
+    }
   }
 
   public static class ItemStoreDistanceComparator implements Comparator<Item> {

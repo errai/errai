@@ -52,6 +52,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-cordova</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
@@ -689,7 +695,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <configuration>
-          <strict>true</strict>
+          <strict>false</strict>
           <logLevel>INFO</logLevel>
           <runTarget>index.html</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:CompileThreshold=100 -XX:+UseNUMA</extraJvmArgs>
