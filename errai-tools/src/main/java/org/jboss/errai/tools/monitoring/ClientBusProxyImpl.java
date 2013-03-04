@@ -16,13 +16,14 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.MessageListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.framework.BusMonitor;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.messaging.Message;
 
 public class ClientBusProxyImpl implements MessageBus {
   private MessageBus serverBus;
@@ -31,16 +32,16 @@ public class ClientBusProxyImpl implements MessageBus {
     this.serverBus = serverBus;
   }
 
-  public void sendGlobal(org.jboss.errai.bus.client.api.Message message) {
+  public void sendGlobal(Message message) {
   }
 
-  public void send(org.jboss.errai.bus.client.api.Message message) {
+  public void send(Message message) {
   }
 
-  public void send(org.jboss.errai.bus.client.api.Message message, boolean fireListeners) {
+  public void send(Message message, boolean fireListeners) {
   }
 
-  public void conversationWith(org.jboss.errai.bus.client.api.Message message, MessageCallback callback) {
+  public void conversationWith(Message message, MessageCallback callback) {
   }
 
   public Subscription subscribe(String subject, MessageCallback receiver) {

@@ -1,7 +1,7 @@
 package org.errai.samples.helloworld.server;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.common.server.api.annotations.ExtensionComponent;
 import org.jboss.errai.common.server.api.ErraiConfig;
 import org.jboss.errai.common.server.api.ErraiConfigExtension;

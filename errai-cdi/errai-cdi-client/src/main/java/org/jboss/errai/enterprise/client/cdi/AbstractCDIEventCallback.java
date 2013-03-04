@@ -15,8 +15,8 @@
  */
 package org.jboss.errai.enterprise.client.cdi;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 import javax.enterprise.inject.Any;
 import java.util.Collections;

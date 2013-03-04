@@ -18,9 +18,9 @@ package org.jboss.errai.bus.server;
 
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.server.service.ErraiService;
 
 import com.google.inject.Inject;

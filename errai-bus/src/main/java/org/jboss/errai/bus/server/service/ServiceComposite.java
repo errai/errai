@@ -15,7 +15,7 @@
  */
 package org.jboss.errai.bus.server.service;
 
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.server.api.SessionProvider;
 
 /**

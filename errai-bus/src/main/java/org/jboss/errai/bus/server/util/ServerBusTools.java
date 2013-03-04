@@ -19,7 +19,7 @@ package org.jboss.errai.bus.server.util;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.util.BusTools;
 

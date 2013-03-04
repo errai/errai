@@ -1,7 +1,7 @@
 package org.jboss.errai.ioc.support.bus.tests.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.support.bus.tests.client.res.SimpleBean;
 

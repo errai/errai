@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.server.servlet;
 
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
@@ -105,23 +103,23 @@ public abstract class AbstractErraiServlet extends HttpServlet {
    *
    * @param stream
    *     - the stream to write to
-   * @param m
+   * @param encodedMessage
    *     - the message to write to the stream
    *
    * @throws java.io.IOException
    *     - is thrown if any input/output errors occur while writing to the stream
    */
-  public static void writeToOutputStream(final OutputStream stream, final MarshalledMessage m) throws IOException {
+  public static void writeToOutputStream(final OutputStream stream, final String encodedMessage) throws IOException {
     stream.write('[');
 
-    if (m.getMessage() == null) {
+    if (encodedMessage == null) {
       stream.write('n');
       stream.write('u');
       stream.write('l');
       stream.write('l');
     }
     else {
-      for (byte b : ((String) m.getMessage()).getBytes(UTF_8)) {
+      for (byte b : encodedMessage.getBytes(UTF_8)) {
         stream.write(b);
       }
     }
@@ -139,58 +137,33 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     final OutputStream stream = httpServletResponse.getOutputStream();
 
     stream.write('[');
+    StringBuilder b = new StringBuilder("{\"ErrorMessage\":\"").append(t.getMessage()).append("\"," +
+               "\"AdditionalDetails\":\"");
+           for (StackTraceElement e : t.getStackTrace()) {
+             b.append(e.toString()).append("<br/>");
+           }
 
-    writeToOutputStream(stream, new MarshalledMessage() {
-      @Override
-      public String getSubject() {
-        return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
-      }
+     b.append("\"}");
 
-      @Override
-      public Object getMessage() {
-        StringBuilder b = new StringBuilder("{\"ErrorMessage\":\"").append(t.getMessage()).append("\"," +
-            "\"AdditionalDetails\":\"");
-        for (StackTraceElement e : t.getStackTrace()) {
-          b.append(e.toString()).append("<br/>");
-        }
-
-        return b.append("\"}").toString();
-      }
-    });
+    writeToOutputStream(stream, b.toString());
 
     stream.write(']');
     stream.close();
   }
 
   protected void sendDisconnectWithReason(OutputStream stream, final String reason) throws IOException {
-    writeToOutputStream(stream, new MarshalledMessage() {
-      @Override
-      public String getSubject() {
-        return "ClientBus";
-      }
-
-      @Override
-      public Object getMessage() {
-        return reason != null ? "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.Disconnect + "\"," +
-            "\"Reason\":\"" + reason + "\"}"
-            : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}";
-      }
-    });
+    writeToOutputStream(stream,
+        reason != null ? "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \""
+            + MessageParts.CommandType.name() + "\":\"" + BusCommands.Disconnect + "\"," +
+                "\"Reason\":\"" + reason + "\"}"
+                : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}");
   }
 
   protected void sendDisconnectDueToSessionExpiry(final HttpServletResponse response) throws IOException {
     response.setStatus(401);
-    writeToOutputStream(response.getOutputStream(), new MarshalledMessage() {
-      @Override
-      public String getSubject() {
-        return "ClientBus";
-      }
-
-      @Override
-      public Object getMessage() {
-        return "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.SessionExpired.name() + "\"}";
-      }
-    });
+    writeToOutputStream(response.getOutputStream(),
+        "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name()
+            + "\":\"" + BusCommands.SessionExpired.name() + "\"}");
   }
 
   protected static String getClientId(HttpServletRequest request) {

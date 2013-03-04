@@ -186,9 +186,7 @@ public class AsyncCreationalContext extends AbstractCreationalContext {
           final CreationalCallback<T> callback = new CreationalCallback<T>() {
             @Override
             public void callback(final T beanInstance) {
-//              if (type.equals(beanType)) {
               injectionContext.addBean(type, beanType, beanProvider, beanInstance, qualifiers);
-//              }
               creationalCallback.callback(beanInstance);
               notifyAllWaiting(beanRef, beanInstance);
 

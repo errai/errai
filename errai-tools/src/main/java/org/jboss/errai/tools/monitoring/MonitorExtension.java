@@ -16,9 +16,9 @@
 package org.jboss.errai.tools.monitoring;
 
 import com.google.inject.Inject;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.BusMonitor;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.common.server.api.annotations.ExtensionComponent;

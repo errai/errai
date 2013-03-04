@@ -3,9 +3,8 @@ package org.jboss.errai.demo.busstress.client.shared;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.demo.busstress.client.shared.Stats;
 import org.junit.Test;
 
 /**

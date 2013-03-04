@@ -16,8 +16,8 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 
 import javax.swing.*;

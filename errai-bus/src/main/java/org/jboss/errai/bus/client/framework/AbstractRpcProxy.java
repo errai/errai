@@ -16,17 +16,18 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import java.lang.annotation.Annotation;
-
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.framework.RpcBatch;
 import org.jboss.errai.common.client.framework.RpcStub;
 
+import java.lang.annotation.Annotation;
+
 /**
- * Base class of all RPC proxies managed by the shared {@see RemoteServiceProxyFactory}. The concrete implementations of
- * this class are generated at compile time.
+ * Base class of all RPC proxies managed by the shared {@see RemoteServiceProxyFactory}. The concrete implementations
+ * of this class are generated at compile time.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

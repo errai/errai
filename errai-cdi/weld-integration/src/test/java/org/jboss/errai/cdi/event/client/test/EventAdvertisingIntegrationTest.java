@@ -3,7 +3,7 @@ package org.jboss.errai.cdi.event.client.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.cdi.client.event.LocalEventA;
 import org.jboss.errai.cdi.client.event.MyEventImpl;

@@ -19,8 +19,8 @@ package org.errai.samples.asyncdemo.server;
 import java.util.regex.Pattern;
 
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.util.TimeUnit;

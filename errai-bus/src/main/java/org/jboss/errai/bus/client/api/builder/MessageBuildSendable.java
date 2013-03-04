@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 
 /**
  * A template for sending a message. This ensures that the message is constructed properly.

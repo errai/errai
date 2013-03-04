@@ -24,8 +24,8 @@ import com.google.gwt.http.client.RequestTimeoutException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
@@ -365,14 +365,9 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   }
 
   private class NoPollRequestCallback extends LongPollRequestCallback {
-    private boolean onePoll = false;
 
     @Override
     public void schedule() {
-      if (!onePoll) {
-        onePoll = true;
-        performPoll();
-      }
     }
 
     @Override

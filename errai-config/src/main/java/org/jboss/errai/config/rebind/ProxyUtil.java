@@ -16,9 +16,7 @@
 
 package org.jboss.errai.config.rebind;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-
+import com.google.common.reflect.TypeToken;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -39,7 +37,8 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 
-import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 /**
  * Utilities to avoid redundant code for proxy generation.
@@ -69,8 +68,8 @@ public abstract class ProxyUtil {
    *         {@link org.jboss.errai.common.client.api.interceptor.CallContext}
    */
   public static AnonymousClassStructureBuilder generateProxyMethodCallContext(
-        Class<? extends RemoteCallContext> callContextType,
-        MetaClass proxyClass, MetaMethod method, Statement proceed, InterceptedCall interceptedCall) {
+        final Class<? extends RemoteCallContext> callContextType,
+        final MetaClass proxyClass, final MetaMethod method, final Statement proceed, final InterceptedCall interceptedCall) {
 
     return Stmt.newObject(callContextType).extend()
               .publicOverridesMethod("getMethodName")
@@ -122,14 +121,14 @@ public abstract class ProxyUtil {
               .finish();
   }
 
-  private static Statement generateInterceptorStackProceedMethod(Statement proceed, InterceptedCall interceptedCall) {
-    BlockStatement proceedLogic = new BlockStatement();
+  private static Statement generateInterceptorStackProceedMethod(final Statement proceed, final InterceptedCall interceptedCall) {
+    final BlockStatement proceedLogic = new BlockStatement();
     proceedLogic.addStatement(Stmt.loadVariable("status").invoke("proceed"));
 
-    BlockBuilder<ElseBlockBuilder> interceptorStack =
+    final BlockBuilder<ElseBlockBuilder> interceptorStack =
               If.isNotNull(Stmt.loadVariable("status").invoke("getNextInterceptor"));
 
-    for (Class<?> interceptor : interceptedCall.value()) {
+    for (final Class<?> interceptor : interceptedCall.value()) {
       interceptorStack.append(If.cond(Bool.equals(
               Stmt.loadVariable("status").invoke("getNextInterceptor"), interceptor))
               .append(Stmt.loadVariable("status").invoke("setProceeding", false))
@@ -149,32 +148,32 @@ public abstract class ProxyUtil {
     return proceedLogic;
   }
 
-  public static boolean shouldProxyMethod(MetaMethod method) {
-    String methodName = method.getName();
+  public static boolean shouldProxyMethod(final MetaMethod method) {
+    final String methodName = method.getName();
     
     return !method.isFinal() && !method.isStatic() && !method.isPrivate() && 
       !methodName.equals("hashCode") && !methodName.equals("equals")  && !methodName.equals("toString");
   }
   
-  public static String createCallSignature(MetaMethod m) {
-    StringBuilder append = new StringBuilder(m.getName()).append(':');
-    for (MetaParameter parm : m.getParameters()) {
+  public static String createCallSignature(final MetaMethod m) {
+    final StringBuilder append = new StringBuilder(m.getName()).append(':');
+    for (final MetaParameter parm : m.getParameters()) {
       append.append(parm.getType().getCanonicalName()).append(':');
     }
     return append.toString();
   }
 
-  public static String createCallSignature(Class<?> referenceClass, Method m) {
-    TypeToken<?> resolver = TypeToken.of(referenceClass);
-    StringBuilder append = new StringBuilder(m.getName()).append(':');
-    for (Type c : m.getGenericParameterTypes()) {
-      TypeToken<?> resolvedParamType = resolver.resolveType(c);
+  public static String createCallSignature(final Class<?> referenceClass, final Method m) {
+    final TypeToken<?> resolver = TypeToken.of(referenceClass);
+    final StringBuilder append = new StringBuilder(m.getName()).append(':');
+    for (final Type c : m.getGenericParameterTypes()) {
+      final TypeToken<?> resolvedParamType = resolver.resolveType(c);
       append.append(resolvedParamType.getRawType().getCanonicalName()).append(':');
     }
     return append.toString();
   }
 
-  public static boolean isMethodInInterface(Class<?> iface, Method member) {
+  public static boolean isMethodInInterface(final Class<?> iface, final Method member) {
     try {
       if (iface.getMethod(member.getName(), member.getParameterTypes()) != null)
         return true;
@@ -190,7 +189,7 @@ public abstract class ProxyUtil {
    * @param method
    * @return return statement for the provided method
    */
-  public static Statement generateProxyMethodReturnStatement(MetaMethod method) {
+  public static Statement generateProxyMethodReturnStatement(final MetaMethod method) {
     Statement returnStatement = null;
     if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
   

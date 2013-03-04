@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.api.messaging;
 
-import java.util.Map;
-
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.ResourceProvider;
+
+import java.util.Map;
 
 /**
  * Contract for all messages that can be transmitted on the {@link MessageBus}.
@@ -326,7 +324,7 @@ public interface Message {
    *
    * @param flag  message routing flag
    */
-  public void setFlag(RoutingFlag flag);
+  public Message setFlag(RoutingFlag flag);
 
   /**
    * Unsets the provided flag for this message.
@@ -368,7 +366,7 @@ public interface Message {
   public void sendNowWith(MessageBus viaThis);
 
   /**
-   * Transmits this message using the specified {@link org.jboss.errai.bus.client.framework.RequestDispatcher}.
+   * Transmits this message using the specified {@link RequestDispatcher}.
    *
    * @param viaThis
    *          <tt>RequestDispatcher</tt> instance to send message to

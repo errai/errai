@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 /**
  * Thrown to indicate that delivery could not be completed for a message which was given to ErraiBus. 
  */
@@ -26,15 +24,15 @@ public class MessageDeliveryFailure extends RuntimeException {
   public MessageDeliveryFailure() {
   }
 
-  public MessageDeliveryFailure(String message) {
+  public MessageDeliveryFailure(final String message) {
     super(message);
   }
 
-  public MessageDeliveryFailure(String message, Throwable cause) {
+  public MessageDeliveryFailure(final String message, final Throwable cause) {
     super(message, cause);
   }
 
-  public MessageDeliveryFailure(Throwable cause) {
+  public MessageDeliveryFailure(final Throwable cause) {
     super(cause);
   }
 }

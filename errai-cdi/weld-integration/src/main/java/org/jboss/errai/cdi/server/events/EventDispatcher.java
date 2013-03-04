@@ -15,13 +15,12 @@
  */
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.cdi.server.CDIServerUtil;
 import org.jboss.errai.cdi.server.ScopeUtil;

@@ -17,8 +17,8 @@
 package org.jboss.errai.bus.client.framework.transports;
 
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusState;
@@ -120,7 +120,8 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
       case WebsocketChannelVerify:
         LogUtil.log("received verification token for websocket connection");
 
-        longPollingTransport.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
+        longPollingTransport
+            .transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
             .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.WebsocketChannelVerify)
             .copy(MessageParts.WebSocketToken, message)));
 
@@ -136,7 +137,8 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
         webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
 
-        LogUtil.log("web socket channel successfully negotiated. comet channel deactivated. (reconnect token: " + webSocketToken + ")");
+        LogUtil.log("web socket channel successfully negotiated. comet channel deactivated. (reconnect token: "
+            + webSocketToken + ")");
 
         retries = 0;
         break;
@@ -175,8 +177,8 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   private String getWebSocketNegotiationString() {
     return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.Associate.name() + "\", \""
-        + MessageParts.ConnectionSessionKey + "\":\"" + messageBus.getSessionId() + "\"" + ",\"" + MessageParts.WebSocketToken
-        + "\":\"" + webSocketToken + "\"}";
+        + MessageParts.ConnectionSessionKey + "\":\"" + messageBus.getSessionId() + "\"" + ",\""
+        + MessageParts.WebSocketToken + "\":\"" + webSocketToken + "\"}";
   }
 
   private void handleReceived(String json) {
@@ -243,6 +245,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   private void notifyDisconnected() {
     LogUtil.log("websocket disconnected");
+
     messageBus.setState(BusState.CONNECTION_INTERRUPTED);
     disconnectSocket(webSocketChannel);
     webSocketChannel = null;
@@ -273,7 +276,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   @Override
   public String getUnsupportedDescription() {
-    return UNSUPPORTED_MESSAGE_NO_SERVER_SUPPORT;
+    return unsupportedReason;
   }
 
   @Override

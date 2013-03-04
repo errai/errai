@@ -2,8 +2,8 @@ package org.jboss.errai.bus.client.tests;
 
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 /**

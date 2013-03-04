@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
-
-import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
+package org.jboss.errai.bus.client.api.messaging;
 
 
 // TODO create tests for usage of this interface
@@ -27,7 +25,7 @@ import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
  * can cancel delivery of a message.
  * <p>
  * If your goal is to implement security policies around messages to a
- * particular subject, {@link BooleanRoutingRule} is a better choice than
+ * particular subject, {@link org.jboss.errai.bus.client.api.BooleanRoutingRule} is a better choice than
  * MessageListener.
  */
 public interface MessageListener {

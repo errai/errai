@@ -218,11 +218,9 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
-
   public void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
     creationalContextMap.put(ref, creationalContext);
   }
-
 
   @Override
   public <T> IOCBeanDef<T> registerBean(final IOCBeanDef<T> bean) {
@@ -233,7 +231,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
     return bean;
   }
 
-
   @Override
   public Collection<IOCBeanDef> lookupBeans(final String name) {
     if (!namedBeans.containsKey(name)) {
@@ -243,7 +240,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
       return namedBeans.get(name);
     }
   }
-
 
   @Override
   @SuppressWarnings("unchecked")
@@ -270,7 +266,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
 
     return Collections.unmodifiableList(matching);
   }
-
 
   @Override
   @SuppressWarnings("unchecked")
@@ -330,7 +325,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
     return Collections.unmodifiableList(matching);
   }
 
-
   @Override
   @SuppressWarnings("unchecked")
   public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
@@ -346,7 +340,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
       throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
     }
   }
-
 
   @Override
   public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {

@@ -19,8 +19,6 @@ package org.jboss.errai.bus.server.servlet;
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
@@ -147,28 +145,15 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       httpServletResponse.addHeader("Payload-Size", "1");
       httpServletResponse.setContentType("application/json");
 
-      stream.write('[');
 
-      writeToOutputStream(stream, new MarshalledMessage() {
-        @Override
-        public String getSubject() {
-          return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
-        }
+      StringBuilder b = new StringBuilder("{Error" +
+                   "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+               for (StackTraceElement e : t.getStackTrace()) {
+                 b.append(e.toString()).append("<br/>");
+               }
+       b.append("\"}").toString();
 
-        @Override
-        public Object getMessage() {
-          StringBuilder b = new StringBuilder("{Error" +
-              "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
-          for (StackTraceElement e : t.getStackTrace()) {
-            b.append(e.toString()).append("<br/>");
-          }
-
-          return b.append("\"}").toString();
-        }
-      });
-
-      stream.write(']');
-
+      writeToOutputStream(stream, b.toString());
     }
   }
 

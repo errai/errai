@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+
 /**
  * This interface, <tt>RpcProxyLoader</tt>, is used internally during compile time to produce the required proxies.
  * 

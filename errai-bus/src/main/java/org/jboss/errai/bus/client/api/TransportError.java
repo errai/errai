@@ -1,7 +1,4 @@
-package org.jboss.errai.bus.client.framework;
-
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.RetryInfo;
+package org.jboss.errai.bus.client.api;
 
 import com.google.gwt.http.client.Request;
 

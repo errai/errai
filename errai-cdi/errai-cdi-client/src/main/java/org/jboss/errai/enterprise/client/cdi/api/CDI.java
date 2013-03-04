@@ -28,12 +28,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.common.client.api.extension.InitVotes;

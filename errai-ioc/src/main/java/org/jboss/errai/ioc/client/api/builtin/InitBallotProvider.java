@@ -31,13 +31,13 @@ import java.lang.annotation.Annotation;
 @IOCProvider
 public class InitBallotProvider implements ContextualTypeProvider<InitBallot<?>> {
   @Override
-  public InitBallot provide(final Class<?>[] typeargs, Annotation[] qualifiers) {
-    InitVotes.waitFor(typeargs[0]);
+  public InitBallot provide(final Class<?>[] typeArguments, final Annotation[] qualifiers) {
+    InitVotes.waitFor(typeArguments[0]);
 
     return new InitBallot() {
       @Override
       public void voteForInit() {
-        InitVotes.voteFor(typeargs[0]);
+        InitVotes.voteFor(typeArguments[0]);
       }
     };
   }

@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 import java.util.Arrays;
 import java.util.Collection;

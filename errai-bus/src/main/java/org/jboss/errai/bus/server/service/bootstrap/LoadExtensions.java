@@ -19,7 +19,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import org.jboss.errai.common.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.common.server.api.annotations.ExtensionComponent;
 import org.jboss.errai.common.server.api.ErraiConfig;

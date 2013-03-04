@@ -77,8 +77,6 @@ public abstract class EnvUtil {
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
   public static final String SYSPROP_USE_REACHABILITY_ANALYSIS = "errai.compile.perf.perform_reachability_analysis";
 
-  private static final Logger logger = LoggerFactory.getLogger("Env");
-
   private static volatile Boolean _isJUnitTest;
 
   public static boolean isJUnitTest() {

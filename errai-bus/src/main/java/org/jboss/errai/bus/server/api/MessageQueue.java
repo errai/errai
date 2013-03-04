@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.api;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.io.ByteWriteAdapter;
 import org.jboss.errai.bus.server.io.MessageDeliveryHandler;

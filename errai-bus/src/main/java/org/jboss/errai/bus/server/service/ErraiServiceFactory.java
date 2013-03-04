@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 

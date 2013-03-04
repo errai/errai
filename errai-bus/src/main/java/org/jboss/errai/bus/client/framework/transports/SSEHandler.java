@@ -18,8 +18,8 @@ package org.jboss.errai.bus.client.framework.transports;
 
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
@@ -170,8 +170,6 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   }
 
   private void notifyDisconnected() {
-    new Throwable().printStackTrace();
-
     initialTimeoutTimer.cancel();
     LogUtil.log("SSE channel disconnected.");
     connectedTime = -1;

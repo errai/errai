@@ -17,7 +17,7 @@
 package org.jboss.errai.cdi.async.test.bm.client.res;
 
 import com.google.gwt.user.client.Random;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.ioc.client.api.LoadAsync;
 
 import javax.annotation.PreDestroy;

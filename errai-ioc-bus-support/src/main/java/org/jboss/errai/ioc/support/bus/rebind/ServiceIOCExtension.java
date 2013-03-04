@@ -21,7 +21,7 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Local;
-import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;

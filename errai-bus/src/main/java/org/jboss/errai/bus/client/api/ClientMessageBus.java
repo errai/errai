@@ -14,18 +14,38 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.BusLifecycleListener;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 import java.util.Set;
 
 /**
- * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionality.
+ * An extended client-specific/in-browser interface of {@link org.jboss.errai.bus.client.api.messaging.MessageBus}, which defines client-specific functionality.
  *
  * @author Mike Brock
  */
 public interface ClientMessageBus extends MessageBus {
+
+  /**
+   * Declares a new shadow subscription. Shadow subscriptions are specialized services
+   * that are responsible for handling the request of remote services when the bus
+   * is in a disconnected state.
+   * <p>
+   * When a message is sent by an application component to a remote service while the
+   * bus is physically disconnected from the server, the bus will consider shadow
+   * subscriptions with a matching subject name to deliver the message to.
+   * <p>
+   * Shadow subscriptions are considered routable in all bus states except
+   * <tt>CONNECTING</tt>.
+   *
+   * @param subject the subject name.
+   * @param callback
+   * @return
+   */
+  public Subscription subscribeShadow(String subject, MessageCallback callback);
+
   /**
    * Adds the given listener instance to this bus. The listener will be notified
    * each time the bus transitions to a different lifecycle state.
@@ -83,4 +103,16 @@ public interface ClientMessageBus extends MessageBus {
    *          the error handler to add.
    */
   public void addTransportErrorHandler(TransportErrorHandler errorHandler);
+
+  /**
+   * Sets a property on the bus.
+   *
+   * @param name
+   *        the property name
+   * @param value
+   *        the property value
+   */
+  public void setProperty(String name, String value);
+
+  public void clearProperties();
 }

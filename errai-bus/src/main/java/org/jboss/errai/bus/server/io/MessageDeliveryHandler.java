@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.server.api.MessageQueue;
 
 import java.io.IOException;

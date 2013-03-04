@@ -16,9 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import java.lang.annotation.Annotation;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -44,7 +41,12 @@ import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncInjectorResolveCallback;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
+import java.lang.annotation.Annotation;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class AsyncInjectionTask {
+  public static final String RECEIVING_CALLBACK_ATTRIB = AsyncInjectionTask.class.getName() + ":receivingCallback";
+
   protected final TaskType taskType;
   protected final Injector injector;
 
@@ -101,7 +103,11 @@ public class AsyncInjectionTask {
     this.parm = null;
   }
 
-  private void generateCallback(final String callbackVarName, final MetaClass type, final InjectionContext ctx, final Statement... fieldAccessStmt) {
+  private void generateCallback(final String callbackVarName,
+                                final MetaClass type,
+                                final InjectionContext ctx,
+                                final Statement... fieldAccessStmt) {
+
     final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
         MetaClassFactory.typeParametersOf(type));
 
@@ -114,11 +120,12 @@ public class AsyncInjectionTask {
       statements.append(stmt);
     }
 
+    ctx.setAttribute(RECEIVING_CALLBACK_ATTRIB, statements);
+
     final ObjectBuilder finish = statements.finish()
         .publicOverridesMethod("toString")
         .append(Stmt.load(type).invoke("getName").returnValue()).finish()
         .finish();
-
 
     processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
     processingContext.append(Stmt.loadVariable("async").invoke("wait", Refs.get(callbackVarName)));

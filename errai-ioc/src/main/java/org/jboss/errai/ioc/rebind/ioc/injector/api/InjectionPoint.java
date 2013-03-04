@@ -16,10 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -29,6 +25,10 @@ import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Mike Brock

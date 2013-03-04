@@ -1,10 +1,10 @@
 package org.jboss.errai.ioc.client.container.async;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
-import org.jboss.errai.ioc.client.container.IOCSingletonBean;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -55,7 +55,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
       = new HashSet<String>();
 
   public AsyncBeanManagerImpl() {
-
 
 
     // java.lang.Object is "special" in that it is treated like a concrete bean type for the purpose of
@@ -178,6 +177,20 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     }
   }
 
+  public void destroyBean(final Object ref, final Runnable runnable) {
+    destroyBean(ref);
+
+    /**
+     * Just yield. In truth, all code will have been downloaded at this time, which means the only problem is that
+     * we need to make callback-based lookup. A minimum yield is sufficient to guarantee everything has happened.
+     */
+    new Timer() {
+      @Override
+      public void run() {
+        runnable.run();
+      }
+    }.schedule(1);
+  }
 
   public boolean isManaged(final Object ref) {
     return creationalContextMap.containsKey(getActualBeanReference(ref));
@@ -332,7 +345,8 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
       throw new IOCResolutionException("no matching bean instances for: " + type.getName());
     }
     else {
-      throw new IOCResolutionException("multiple matching bean instances for: " + type.getName() + " matches: " + matching);
+      throw new IOCResolutionException("multiple matching bean instances for: "
+          + type.getName() + " matches: " + matching);
     }
   }
 

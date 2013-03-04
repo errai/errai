@@ -26,7 +26,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.support.bus.client.Sender;

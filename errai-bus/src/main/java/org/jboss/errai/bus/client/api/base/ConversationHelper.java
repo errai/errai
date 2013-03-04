@@ -16,10 +16,10 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
@@ -32,6 +32,9 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 class ConversationHelper {
   private static final String RES_NAME = "MessageReplyCallback";
 
+  private static volatile int counter = 0;
+  private static final Object counterLock = new Object();
+
   static void makeConversational(Message message, MessageCallback callback) {
     message.setResource(RES_NAME, callback);
     message.setFlag(RoutingFlag.Conversational);
@@ -40,14 +43,11 @@ class ConversationHelper {
   static void createConversationService(MessageBus bus, Message m) {
     if (m.isFlagSet(RoutingFlag.Conversational)) {
       final String replyService = m.getSubject() + ":" + count() + ":RespondTo:RPC";
-      bus.subscribe(replyService, m.getResource(MessageCallback.class, RES_NAME));
-      bus.subscribe(replyService, new ServiceCanceller(replyService, bus));
+      bus.subscribe(replyService, new ServiceCanceller(bus.subscribe(replyService, m.getResource(MessageCallback.class, RES_NAME))));
+
       m.set(MessageParts.ReplyTo, replyService);
     }
   }
-
-  private static volatile int counter = 0;
-  private static final Object counterLock = new Object();
 
   static int count() {
     synchronized (counterLock) {

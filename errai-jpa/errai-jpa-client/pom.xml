@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <name>Errai::JPA::Client</name>
@@ -59,7 +59,7 @@
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava-gwt</artifactId>
@@ -71,10 +71,26 @@
       <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/java/</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources/</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/java/</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources/</directory>
+      </testResource>
+    </testResources>
   </build>
 
   <profiles>

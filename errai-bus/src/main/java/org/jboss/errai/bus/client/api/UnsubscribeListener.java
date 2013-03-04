@@ -16,14 +16,13 @@
 
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 
 /**
  * Callback interface for receiving notifications when a subscription is
  * de-registered on the bus.
  *
- * @see MessageBus#addUnsubscribeListener(UnsubscribeListener)
+ * @see org.jboss.errai.bus.client.api.messaging.MessageBus#addUnsubscribeListener(UnsubscribeListener)
  */
 public interface UnsubscribeListener {
 

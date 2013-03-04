@@ -17,17 +17,16 @@
 package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.BusErrorCallback;
-import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.HasEncoded;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
 import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
-import org.jboss.errai.bus.client.framework.MessageProvider;
-import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.api.messaging.MessageProvider;
+import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.common.client.api.RemoteCallback;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.
@@ -42,7 +41,7 @@ import org.jboss.errai.bus.client.framework.RoutingFlag;
  * </pre>
  * <p>
  * You can transmit a message using the the <tt>sendNowWith(RequestDispatcher)</tt> method by providing an instance of
- * {@link org.jboss.errai.bus.client.framework.MessageBus}.
+ * {@link org.jboss.errai.bus.client.api.messaging.MessageBus}.
  * <p>
  * Messages can be constructed using user-defined standard protocols through the use of enumerations. Both
  * <tt>commandType</tt> and message parts can be defined through the use of enumerations. This helps create
@@ -108,7 +107,7 @@ public class MessageBuilder {
    *         constructs messages properly
    */
   @SuppressWarnings({ "unchecked" })
-  public static MessageBuildCommand<MessageBuildSendableWithReply> createMessage(String subject) {
+  public static MessageBuildCommand<MessageBuildSendableWithReply> createMessage(final String subject) {
     return new DefaultMessageBuilder(provider.get()).start().toSubject(subject);
   }
 
@@ -121,8 +120,8 @@ public class MessageBuilder {
    *         constructs messages properly
    */
   @SuppressWarnings({ "unchecked" })
-  public static MessageBuildSubject<MessageReplySendable> createConversation(Message message) {
-    Message newMessage = provider.get();
+  public static MessageBuildSubject<MessageReplySendable> createConversation(final Message message) {
+    final Message newMessage = provider.get();
     newMessage.setFlag(RoutingFlag.NonGlobalRouting);
     if (newMessage instanceof HasEncoded) {
       return new DefaultMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage))
@@ -145,8 +144,8 @@ public class MessageBuilder {
    *         constructs messages properly
    */
   @SuppressWarnings({ "unchecked" })
-  public static MessageBuildCommand<MessageReplySendable> createConversation(Message message, String subject) {
-    Message newMessage = provider.get();
+  public static MessageBuildCommand<MessageReplySendable> createConversation(final Message message, final String subject) {
+    final Message newMessage = provider.get();
     if (newMessage instanceof HasEncoded) {
       return new DefaultMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage))
           .start()
@@ -182,7 +181,7 @@ public class MessageBuilder {
    * @return A proxy for the remote service. Methods invoked on this object will communicate with the remote service
    *         over the message bus.
    */
-  public static <R, T> T createCall(RemoteCallback<R> callback, Class<T> service) {
+  public static <R, T> T createCall(final RemoteCallback<R> callback, final Class<T> service) {
     return new DefaultRemoteCallBuilder(CommandMessage.create()).call(callback, service);
   }
 
@@ -202,7 +201,7 @@ public class MessageBuilder {
    * @return A proxy for the remote service. Methods invoked on this object will communicate with the remote service
    *         over the message bus.
    */
-  public static <R, T> T createCall(RemoteCallback<R> callback, BusErrorCallback errorCallback, Class<T> service) {
+  public static <R, T> T createCall(final RemoteCallback<R> callback, final BusErrorCallback errorCallback, final Class<T> service) {
     return new DefaultRemoteCallBuilder(CommandMessage.create()).call(callback, errorCallback, service);
   }
 
@@ -211,7 +210,7 @@ public class MessageBuilder {
    *
    * @param provider  to set this' provider to
    */
-  public static void setMessageProvider(MessageProvider provider) {
+  public static void setMessageProvider(final MessageProvider provider) {
     MessageBuilder.provider = provider;
   }
 

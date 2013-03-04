@@ -16,7 +16,7 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 
 import java.util.ArrayList;
 import java.util.List;

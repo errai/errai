@@ -21,12 +21,12 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.HasEncoded;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
@@ -54,7 +54,7 @@ public class BusToolsCli {
   public static List<Message> decodePayload(final String jsonString) {
     if (jsonString == null || jsonString.trim().length() == 0) return Collections.emptyList();
 
-    JSONValue val = JSONParser.parseStrict(jsonString);
+    final JSONValue val = JSONParser.parseStrict(jsonString);
 
     if (val == null || val.isArray() == null) {
       throw new RuntimeException("illegal payload: must be JSONArray");
@@ -81,7 +81,7 @@ public class BusToolsCli {
   public static String encodeMessages(final Collection<Message> messages) {
     final StringBuilder sbuf = new StringBuilder("[");
     boolean first = true;
-    for (Message m : messages) {
+    for (final Message m : messages) {
       if (!first) {
         sbuf.append(',');
       }
@@ -152,7 +152,7 @@ public class BusToolsCli {
     }
 
     @Override
-    public void addSessionEndListener(SessionEndListener listener) {
+    public void addSessionEndListener(final SessionEndListener listener) {
     }
 
     @Override
@@ -178,7 +178,7 @@ public class BusToolsCli {
     return requestDispatcherProvider;
   }
 
-  public static void setAutoDemarshall(boolean autoDemarshall1) {
+  public static void setAutoDemarshall(final boolean autoDemarshall1) {
     autoDemarshall = autoDemarshall1;
   }
 

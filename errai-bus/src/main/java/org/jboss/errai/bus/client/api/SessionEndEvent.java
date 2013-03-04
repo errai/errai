@@ -20,7 +20,7 @@ import org.jboss.errai.common.client.api.Assert;
 
 
 /**
- * The event object that is delievered to {@link SessionEndListener}s when a {@link QueueSession} ends.
+ * The event object that is delievered to {@link org.jboss.errai.bus.client.api.SessionEndListener}s when a {@link org.jboss.errai.bus.client.api.QueueSession} ends.
  */
 public class SessionEndEvent {
   private final QueueSession session;
@@ -30,7 +30,7 @@ public class SessionEndEvent {
    * 
    * @param session the session that is ending. Not null.
    */
-  public SessionEndEvent(QueueSession session) {
+  public SessionEndEvent(final QueueSession session) {
     this.session = Assert.notNull(session);
   }
 

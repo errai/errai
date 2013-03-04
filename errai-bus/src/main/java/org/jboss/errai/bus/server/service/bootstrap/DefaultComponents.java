@@ -19,8 +19,8 @@ import static com.google.inject.Guice.createInjector;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;

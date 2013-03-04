@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.api.messaging;
 
-import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
 
 /**
  * A message bus is capable of transmitting and receiving messages using the publisher/subscriber

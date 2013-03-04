@@ -17,12 +17,12 @@
 package org.jboss.errai.bus.client.api;
 
 /**
- * Callback interface for receiving notifications when {@link QueueSession}s end.
+ * Callback interface for receiving notifications when {@link org.jboss.errai.bus.client.api.QueueSession}s end.
  */
 public interface SessionEndListener {
 
   /**
-   * Called when the {@link QueueSession} ends.
+   * Called when the {@link org.jboss.errai.bus.client.api.QueueSession} ends.
    * 
    * @param event
    *          The event object that provides a reference to the session that ended. Never null.

@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.client.api.laundry;
 
-import java.lang.annotation.Retention;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -33,7 +32,6 @@ class ClientLaundryList implements LaundryList {
       }
       catch (Exception e) {
         // TODO GWT.log("Laundry item failed in cleaning", e);
-        //System.out.println("Laundry item failed in cleaning");
         e.printStackTrace(System.out);
       }
       iter.remove();

@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service;
+
+package org.jboss.errai.cdi.async.test.producers.client.res;
+
+import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Jul 19, 2010
+ * @author Mike Brock
  */
-public interface ServiceLocator<S> {
-  ErraiService<S> locateService();
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Response {
 }

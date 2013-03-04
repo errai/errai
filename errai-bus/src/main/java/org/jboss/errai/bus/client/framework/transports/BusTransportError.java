@@ -18,7 +18,7 @@ package org.jboss.errai.bus.client.framework.transports;
 
 import com.google.gwt.http.client.Request;
 import org.jboss.errai.bus.client.api.RetryInfo;
-import org.jboss.errai.bus.client.framework.TransportError;
+import org.jboss.errai.bus.client.api.TransportError;
 import org.jboss.errai.common.client.api.Assert;
 
 /**

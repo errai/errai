@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.framework;
 
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
+import static org.jboss.errai.bus.client.util.BusToolsCli.isRemoteCommunicationEnabled;
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
@@ -29,9 +30,16 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.TransportError;
+import org.jboss.errai.bus.client.api.TransportErrorHandler;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
@@ -102,12 +110,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       = HttpPollingHandler.newNoPollingInstance(transportToBusCallback, ClientMessageBusImpl.this);
 
   /**
-   * The current transport handler that's in use. This field is never null; it bottoms out at the No-polling version of HttpPollingHandler.
+   * The current transport handler that's in use. This field is never null; it bottoms out at the No-polling version
+   * of HttpPollingHandler.
    */
   private TransportHandler transportHandler = BOOTSTRAP_HANDLER;
 
   private final Map<String, List<MessageCallback>> subscriptions = new HashMap<String, List<MessageCallback>>();
   private final Map<String, List<MessageCallback>> localSubscriptions = new HashMap<String, List<MessageCallback>>();
+  private final Map<String, List<MessageCallback>> shadowSubscriptions = new HashMap<String, List<MessageCallback>>();
+
   private final Map<String, MessageCallback> remotes = new HashMap<String, MessageCallback>();
 
   private final List<TransportErrorHandler> transportErrorHandlers = new ArrayList<TransportErrorHandler>();
@@ -117,12 +128,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private final List<BusLifecycleListener> lifecycleListeners = new ArrayList<BusLifecycleListener>();
 
-  private BusState state = BusState.LOCAL_ONLY;
-
-  private long lastSleepTick = System.currentTimeMillis();
-  private boolean lastSleepCheckWasOnline = false;
+  private BusState state = BusState.UNINITIALIZED;
 
   private final ManagementConsole managementConsole;
+
+  private final Map<String, String> properties = new HashMap<String, String>();
+
+  private Timer initialConnectTimer;
 
   public ClientMessageBusImpl() {
     setBusToInitializableState();
@@ -161,8 +173,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       {
         put(Capabilities.WebSockets.name(), new WebsocketHandler(transportToBusCallback, ClientMessageBusImpl.this));
         put(Capabilities.SSE.name(), new SSEHandler(transportToBusCallback, ClientMessageBusImpl.this));
-        put(Capabilities.LongPolling.name(), HttpPollingHandler.newLongPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
-        put(Capabilities.ShortPolling.name(), HttpPollingHandler.newShortPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
+        put(Capabilities.LongPolling.name(),
+            HttpPollingHandler.newLongPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
+        put(Capabilities.ShortPolling.name(),
+            HttpPollingHandler.newShortPollingInstance(transportToBusCallback, ClientMessageBusImpl.this));
       }
     });
   }
@@ -182,7 +196,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (getState() == BusState.CONNECTED) {
 
       /**
-       * This is an optimization to improve unit testing speed. If a testcase does not tear down the bus after
+       * This is an optimization to improve unit testing speed. If a test case does not tear down the bus after
        * each test, calling this will ensure that any services dependent on the bus will still be loaded.
        */
       InitVotes.voteFor(ClientMessageBus.class);
@@ -194,7 +208,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     registerInitVoteCallbacks();
 
-    if (BusToolsCli.isRemoteCommunicationEnabled()) {
+    if (isRemoteCommunicationEnabled()) {
       remoteSubscribe(BuiltInServices.ServerEchoService.name());
     }
 
@@ -243,7 +257,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               break;
 
             case FinishAssociation:
-              LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
+              LogUtil.log("received handshake response from server. preparing to bring up the federation");
 
               loadRpcProxies();
               processCapabilities(message);
@@ -272,7 +286,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               declareSubscriptionListeners();
 
               setState(BusState.CONNECTED);
-//              startSleepDetector();
               sendAllDeferred();
               InitVotes.voteFor(ClientMessageBus.class);
               LogUtil.log("bus federated and running.");
@@ -301,7 +314,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               stop(false);
 
               if (message.hasPart("Reason")) {
-                managementConsole.displayError("The bus was disconnected by the server", "Reason: " + message.get(String.class, "Reason"), null);
+                managementConsole
+                    .displayError("The bus was disconnected by the server", "Reason: "
+                        + message.get(String.class, "Reason"), null);
               }
               break;
 
@@ -322,51 +337,69 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     // services before we send our state synchronization message. This is not strictly necessary
     // but significantly decreases network chattiness since more (if not all known services)
     // can then be listed in the initial handshake message.
-    new Timer() {
+    initialConnectTimer = new Timer() {
       @Override
       public void run() {
         sendInitialMessage();
       }
-    }.schedule(50);
+    };
+    initialConnectTimer.schedule(50);
   }
 
   /**
    * Sends the initial message to connect to the queue, to establish an HTTP
    * session. Otherwise, concurrent requests will result in multiple sessions
    * being created.
-   *
-   * @return true if initial message was sent successfully.
    */
   private void sendInitialMessage() {
-    if (!BusToolsCli.isRemoteCommunicationEnabled()) {
+    if (!isRemoteCommunicationEnabled()) {
       LogUtil.log("initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)");
       InitVotes.voteFor(ClientMessageBus.class);
+      setState(BusState.LOCAL_ONLY);
       return;
     }
 
-    if (getState() != BusState.LOCAL_ONLY) {
-      LogUtil.log("aborting startup. bus is not in correct state.");
+    if (!getState().isStartableState()) {
+      LogUtil.log("aborting startup. bus is not in correct state. (current state: " + getState() + ")");
       return;
     }
 
     setState(BusState.CONNECTING);
 
-    LogUtil.log("sending initial handshake to remote bus");
+    LogUtil.log("sending handshake message to remote bus");
 
     for (final Runnable deferredSubscription : deferredSubscriptions) {
       deferredSubscription.run();
     }
     deferredSubscriptions.clear();
 
-    final Message initialMessage = CommandMessage.createWithParts(new HashMap<String, Object>())
-        .command(BusCommands.Associate)
-        .set(ToSubject, "ServerBus")
-        .set(PriorityProcessing, "1")
-        .set(MessageParts.RemoteServices, getAdvertisableSubjects())
-        .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, Collections.singletonMap("phase", "connection"));
+    if (!isProperty(ChaosMonkey.DONT_REALLY_CONNECT, "true")) {
+      final Map<String, String> properties = new HashMap<String, String>();
+      properties.put("phase", "connection");
+      properties.put("wait", "1");
 
-    transportHandler.transmit(Collections.singletonList(initialMessage));
-    transportHandler.start();
+      transportHandler.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
+          .command(BusCommands.Associate)
+          .set(ToSubject, "ServerBus")
+          .set(PriorityProcessing, "1")
+          .set(MessageParts.RemoteServices, getAdvertisableSubjects())
+          .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, properties)));
+
+       transportHandler.start();
+    }
+    else {
+      final String failOnConnectAfterMs = properties.get(ChaosMonkey.FAIL_ON_CONNECT_AFTER_MS);
+      if (failOnConnectAfterMs != null) {
+        final int ms = Integer.parseInt(failOnConnectAfterMs);
+
+        new Timer() {
+          @Override
+          public void run() {
+            setState(BusState.CONNECTION_INTERRUPTED);
+          }
+        }.schedule(ms);
+      }
+    }
   }
 
   private void processCapabilities(final Message message) {
@@ -419,7 +452,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
     });
-
   }
 
   @Override
@@ -429,11 +461,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void stop(final boolean sendDisconnect, final TransportError reason) {
     LogUtil.log("stopping bus ...");
-    if (state != BusState.LOCAL_ONLY)
+    if (initialConnectTimer != null) {
+      initialConnectTimer.cancel();
+    }
+
+    if (degradeToUnitialized()) {
+      setState(BusState.UNINITIALIZED);
+
+      deferredMessages.clear();
+      remotes.clear();
+      deferredSubscriptions.clear();
+    }
+    else if (state != BusState.LOCAL_ONLY) {
       setState(BusState.LOCAL_ONLY, reason);
+    }
 
     // Optionally tell the server we're going away (this causes two POST requests)
-    if (sendDisconnect && BusToolsCli.isRemoteCommunicationEnabled()) {
+    if (sendDisconnect && isRemoteCommunicationEnabled()) {
       encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
           .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.Disconnect)
           .set(MessageParts.PriorityProcessing, "1"));
@@ -441,35 +485,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     deferredMessages.addAll(transportHandler.stop(true));
   }
-//
-//  private void startSleepDetector() {
-//    new Timer() {
-//      @Override
-//      public void run() {
-//        final long currentTime = System.currentTimeMillis();
-//
-//        if (lastSleepTick - currentTime > 30000) {
-//          LogUtil.log("we might be asleep.");
-//
-//          if (state == BusState.LOCAL_ONLY && lastSleepCheckWasOnline) {
-//            init();
-//          }
-//          else {
-//            sendInterrogationEcho(2000, new Runnable() {
-//              @Override
-//              public void run() {
-//                stop(false);
-//                init();
-//              }
-//            });
-//          }
-//        }
-//
-//        lastSleepTick = currentTime;
-//        lastSleepCheckWasOnline = (state == BusState.CONNECTED);
-//      }
-//    }.scheduleRepeating(1000);
-//  }
 
   private String getAdvertisableSubjects() {
     String subjects = "";
@@ -493,32 +508,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public String getSessionId() {
     return sessionId;
   }
-
-//  private void sendInterrogationEcho(final int timeoutMillis, final Runnable failure) {
-//    final String receivingSubject = "^ClientEchoReceiver";
-//
-//    final Timer failureTimer = new Timer() {
-//      @Override
-//      public void run() {
-//        failure.run();
-//        unsubscribeAll(receivingSubject);
-//      }
-//    };
-//
-//    failureTimer.schedule(timeoutMillis);
-//
-//    subscribe(receivingSubject, new MessageCallback() {
-//      @Override
-//      public void callback(final Message message) {
-//        unsubscribeAll(receivingSubject);
-//        failureTimer.cancel();
-//      }
-//    });
-//
-//    CommandMessage.createWithParts(new HashMap<String, Object>())
-//        .toSubject("ServerEchoService")
-//        .set(MessageParts.Value, "HelloServer");
-//  }
 
   /**
    * Removes all subscriptions attached to the specified subject
@@ -548,6 +537,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public Subscription subscribeLocal(final String subject, final MessageCallback callback) {
     return _subscribe(subject, callback, true);
+  }
+
+  @Override
+  public Subscription subscribeShadow(final String subject, final MessageCallback callback) {
+    List<MessageCallback> messageCallbacks = shadowSubscriptions.get(subject);
+    if (messageCallbacks == null) {
+      shadowSubscriptions.put(subject, messageCallbacks = new ArrayList<MessageCallback>());
+    }
+    messageCallbacks.add(callback);
+
+    final List<MessageCallback> _messageCallbacks = messageCallbacks;
+    return new Subscription() {
+      @Override
+      public void remove() {
+        _messageCallbacks.remove(callback);
+      }
+    };
   }
 
   private Subscription _subscribe(final String subject, final MessageCallback callback, final boolean local) {
@@ -618,7 +624,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           callback.callback(message);
         }
         catch (Exception e) {
-          managementConsole.displayError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
+          managementConsole
+              .displayError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
         }
       }
     };
@@ -723,16 +730,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     try {
       boolean deferred = false;
+      final boolean localOnly = message.isFlagSet(RoutingFlag.DeliverLocalOnly);
+      final String subject = message.getSubject();
+
       if (message.hasPart(MessageParts.ToSubject)) {
-        if (BusToolsCli.isRemoteCommunicationEnabled() && getState() != BusState.CONNECTED) {
-          deferredMessages.add(message);
-          deferred = true;
+        if (isRemoteCommunicationEnabled() && !localOnly) {
+          if (getState().isShadowDeliverable() && shadowSubscriptions.containsKey(subject)) {
+            deliverToSubscriptions(shadowSubscriptions, subject, message);
+            deferred = true;
+          }
+          else if (getState() != BusState.CONNECTED) {
+            deferredMessages.add(message);
+            deferred = true;
+          }
         }
 
-        final String subject = message.getSubject();
         boolean routedToRemote = false;
 
-        if (!message.isFlagSet(RoutingFlag.DeliverLocalOnly) && remotes.containsKey(subject)) {
+        if (!localOnly && remotes.containsKey(subject)) {
           remotes.get(subject).callback(message);
           routedToRemote = true;
         }
@@ -835,6 +850,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   Set<String> getRemoteSubscriptions() {
     return remotes.keySet();
+  }
+
+  private void sendDeferredToShadow() {
+    if (!deferredMessages.isEmpty() && !shadowSubscriptions.isEmpty()) {
+      boolean deliveredMessages;
+      do {
+        deliveredMessages = false;
+        for (final Message message : new ArrayList<Message>(deferredMessages)) {
+          if (shadowSubscriptions.containsKey(message.getSubject())) {
+            System.out.println("DELIVER: " + deferredMessages);
+            deferredMessages.remove(message);
+            deliveredMessages = true;
+            deliverToSubscriptions(shadowSubscriptions, message.getSubject(), message);
+          }
+        }
+      }
+      while (!deferredMessages.isEmpty() && deliveredMessages);
+    }
   }
 
   private void sendAllDeferred() {
@@ -1013,6 +1046,25 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return availableHandlers.values();
   }
 
+
+  @Override
+  public void setProperty(final String name, final String value) {
+    properties.put(name, value);
+  }
+
+  @Override
+  public void clearProperties() {
+    properties.clear();
+  }
+
+  private boolean isProperty(final String name, final String value) {
+    return properties.containsKey(name) && properties.get(name).equals(value);
+  }
+
+  private boolean degradeToUnitialized() {
+    return isProperty(ChaosMonkey.DEGRADE_TO_UNINITIALIZED_ON_STOP, "true");
+  }
+
   /**
    * Puts the bus in the given state, firing all necessary transition events with no <tt>reason</tt> field.
    */
@@ -1035,6 +1087,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     final List<BusEventType> events = new ArrayList<BusEventType>();
 
     switch (state) {
+      case UNINITIALIZED:
+        break;
+
       case LOCAL_ONLY:
         if (newState == BusState.CONNECTING) {
           events.add(BusEventType.ASSOCIATING);
@@ -1077,6 +1132,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (newState == BusState.CONNECTION_INTERRUPTED) {
       LogUtil.log("the connection to the server has been interrupted ...");
+    }
+
+    /**
+     * If the new state is a state we deliver to shadow subscriptions, we send any deferred messages to
+     * the shadow subscriptions now.
+     */
+    if (newState.isShadowDeliverable()) {
+      sendDeferredToShadow();
     }
 
     for (final BusEventType et : events) {

@@ -5,11 +5,11 @@ import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.BusLifecycleAdapter;
 import org.jboss.errai.bus.client.api.BusLifecycleEvent;
 import org.jboss.errai.bus.client.api.BusLifecycleListener;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.bus.client.framework.TransportError;
+import org.jboss.errai.bus.client.api.TransportError;
 import org.jboss.errai.bus.client.framework.Wormhole;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener;
 import org.jboss.errai.bus.client.tests.support.RecordingBusLifecycleListener.EventType;
@@ -43,8 +43,6 @@ public class LifecycleEventTests extends AbstractErraiTest {
     super.gwtSetUp();
     bus.addLifecycleListener(listener);
   }
-
-  ;
 
   @Override
   protected void gwtTearDown() throws Exception {

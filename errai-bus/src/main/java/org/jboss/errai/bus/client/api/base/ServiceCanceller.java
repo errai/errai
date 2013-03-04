@@ -16,29 +16,27 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 
 /**
  * Reusable bus subscriber which, upon receipt of any message, unsubscribes all subscribers (including itself) on the
  * subject it is subscribed to. This effectively makes all listeners on the subject that ServiceCanceller is subscribed
  * into "one shot" receivers.
- * <p>
+ * <p/>
  * Within the framework, ServiceCanceller is used for cleaning up conversational message endpoints (because they are
  * only expected to receive a single message).
  */
 public class ServiceCanceller implements MessageCallback {
-  private final String serviceName;
-  private final MessageBus bus;
+  private final Subscription subscription;
 
-  public ServiceCanceller(String serviceName, MessageBus bus) {
-    this.serviceName = serviceName;
-    this.bus = bus;
+  public ServiceCanceller(final Subscription subscription) {
+    this.subscription = subscription;
   }
 
   @Override
-  public void callback(Message message) {
-    bus.unsubscribeAll(serviceName);
+  public void callback(final Message message) {
+    subscription.remove();
   }
 }

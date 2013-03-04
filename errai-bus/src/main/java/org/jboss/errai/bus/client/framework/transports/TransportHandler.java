@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.framework.transports;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.messaging.Message;
 
 import java.util.Collection;
 import java.util.List;

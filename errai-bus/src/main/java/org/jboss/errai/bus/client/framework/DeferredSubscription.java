@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import org.jboss.errai.bus.client.api.Subscription;
+
 /**
  * @author Mike Brock
  */

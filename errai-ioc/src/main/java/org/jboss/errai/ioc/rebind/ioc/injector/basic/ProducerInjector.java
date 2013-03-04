@@ -23,8 +23,8 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
+import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
@@ -44,10 +44,8 @@ import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -231,6 +229,7 @@ public class ProducerInjector extends AbstractInjector {
     }
 
     final String varName = InjectUtil.getUniqueVarName();
+
     bb._(Stmt.declareFinalVariable(varName, injectedType, beanValue));
 
     final MetaClass destructionCallbackType =
@@ -309,12 +308,6 @@ public class ProducerInjector extends AbstractInjector {
         .initializesWith(producerCreationalCallback).finish();
 
     registerWithBeanManager(injectionContext, null);
-
-//    final Injector injector = injectionContext.getInjector(producerMember.getDeclaringClass());
-//    injectionContext.getProcessingContext()
-//        .appendToEnd(
-//            Stmt.loadVariable(injector.getCreationalCallbackVarName()).invoke("getInstance", Refs.get("context"))
-//        );
 
     injectionContext.getProcessingContext().popBlockBuilder();
   }

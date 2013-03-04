@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.api;
 
 /**
  * A transport error handler is used for handling errors which arise from network communication problems between the
