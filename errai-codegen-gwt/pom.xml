@@ -34,12 +34,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-config</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <!-- This should not be packaged with the Errai Distro. There are no

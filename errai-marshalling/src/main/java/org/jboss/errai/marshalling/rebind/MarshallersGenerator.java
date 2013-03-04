@@ -28,7 +28,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
@@ -256,7 +255,7 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
         .runIfStarting(new Runnable() {
           @Override
           public void run() {
-            GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+            EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
           }
         })
         .build().submit();

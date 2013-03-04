@@ -9,40 +9,12 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.enterprise.util.TypeLiteral;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.GeneratedValue;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
+import javax.persistence.*;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
@@ -72,7 +44,6 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Implementations;
@@ -86,6 +57,7 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.AsyncCodeGenerator;
 import org.jboss.errai.config.rebind.AsyncGenerationJob;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
@@ -138,7 +110,7 @@ public class ErraiEntityManagerGenerator extends Generator implements AsyncCodeG
           .runIfStarting(new Runnable() {
             @Override
             public void run() {
-              GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+              EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
             }
           }).build().submit();
 

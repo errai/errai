@@ -21,7 +21,6 @@ import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ThreadUtil;
 
@@ -77,7 +76,7 @@ public abstract class AbstractProxyLoaderGenerator extends Generator implements 
             .runIfStarting(new Runnable() {
               @Override
               public void run() {
-                GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+                EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
               }
             })
             .build()

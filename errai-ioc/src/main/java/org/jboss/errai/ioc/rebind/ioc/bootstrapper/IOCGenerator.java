@@ -16,25 +16,23 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import java.io.PrintWriter;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AsyncCodeGenerator;
 import org.jboss.errai.config.rebind.AsyncGenerationJob;
-import org.jboss.errai.config.rebind.AsyncGenerators;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.ioc.client.Bootstrapper;
 
-import java.io.PrintWriter;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import com.google.gwt.core.ext.Generator;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * The main generator class for the Errai IOC framework.
@@ -78,7 +76,7 @@ public class IOCGenerator extends Generator implements AsyncCodeGenerator {
               .runIfStarting(new Runnable() {
                 @Override
                 public void run() {
-                  GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+                  EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
                 }
               }).build().submit();
 
