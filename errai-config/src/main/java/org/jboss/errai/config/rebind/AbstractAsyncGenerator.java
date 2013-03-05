@@ -29,42 +29,56 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 
 /**
- * Base class of all code generators that generate proxy loaders.
+ * Base class of all asynchronous code generators.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractProxyLoaderGenerator extends Generator implements AsyncCodeGenerator {
+public abstract class AbstractAsyncGenerator extends Generator implements AsyncCodeGenerator {
 
   @Override
   public Future<String> generateAsync(final TreeLogger logger, final GeneratorContext context) {
     return ThreadUtil.submit(new Callable<String>() {
       @Override
       public String call() throws Exception {
-        return generate(context);
+        return generate(logger, context);
       }
     });
   }
 
   /**
-   * Starts the asynchronous generators if they haven't been started yet and waits for the
-   * asynchronous proxy loader generator to complete.
+   * Called by {@link #generateAsync(TreeLogger, GeneratorContext)} to carry out the actual code
+   * generation.
    * 
-   * @param proxyLoader
-   *          the proxy loader interface for which an implementation should be generated.
+   * @param context
+   *          the generator context to use.
+   * 
+   * @return the generated code.
+   */
+  protected abstract String generate(final TreeLogger logger, final GeneratorContext context);
+
+  /**
+   * Starts all asynchronous generators if they haven't been started yet and waits for the
+   * completion of the generator responsible for the provided interface type.
+   * 
+   * @param interfaceType
+   *          the interface for which an implementation should be generated.
    * @param context
    *          the generation context to use.
    * @param logger
    *          the tree logger to use.
    * @param packageName
-   *          the package name of the generated proxy loader.
+   *          the package name of the generated class.
    * @param className
-   *          the class name of the generated proxy loader implementation.
+   *          the name of the generated class.
    * 
-   * @return the fully qualified class name of the generated proxy loader.
+   * @return the fully qualified name of the generated class.
    */
-  protected String generateProxyLoader(final Class<?> proxyLoader, final GeneratorContext context,
+  protected String startAsyncGeneratorsAndWaitFor(
+      final Class<?> interfaceType,
+      final GeneratorContext context,
       final TreeLogger logger,
-      final String packageName, final String className) {
+      final String packageName,
+      final String className) {
 
     try {
       final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
@@ -72,7 +86,7 @@ public abstract class AbstractProxyLoaderGenerator extends Generator implements 
         final Future<String> future = AsyncGenerationJob.createBuilder()
             .treeLogger(logger)
             .generatorContext(context)
-            .interfaceType(proxyLoader)
+            .interfaceType(interfaceType)
             .runIfStarting(new Runnable() {
               @Override
               public void run() {
@@ -80,7 +94,8 @@ public abstract class AbstractProxyLoaderGenerator extends Generator implements 
               }
             })
             .build()
-            // this causes all asynchronous code generators to run if this is the first one that executes.
+            // this causes all asynchronous code generators to run if this is the first one that
+            // executes.
             .submit();
 
         final String gen = future.get();
@@ -93,21 +108,10 @@ public abstract class AbstractProxyLoaderGenerator extends Generator implements 
       }
     }
     catch (Throwable e) {
+      e.printStackTrace();
       logger.log(TreeLogger.ERROR, "Error generating " + className, e);
     }
 
     return packageName + "." + className;
   }
-
-  /**
-   * Generates the actual proxy loader implementation as required by concrete implementations of
-   * this class.
-   * 
-   * @param context
-   *          the generator context to use.
-   * 
-   * @return the generated proxy loader implementation.
-   */
-  protected abstract String generate(final GeneratorContext context);
-
 }

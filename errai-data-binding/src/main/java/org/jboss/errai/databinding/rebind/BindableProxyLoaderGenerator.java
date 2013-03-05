@@ -40,7 +40,7 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.AbstractProxyLoaderGenerator;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
@@ -65,7 +65,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @GenerateAsync(BindableProxyLoader.class)
-public class BindableProxyLoaderGenerator extends AbstractProxyLoaderGenerator {
+public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
   private final Logger log = LoggerFactory.getLogger(BindableProxyLoaderGenerator.class);
   private final String packageName = BindableProxyLoader.class.getPackage().getName();
   private final String className = BindableProxyLoader.class.getSimpleName() + "Impl";
@@ -74,11 +74,11 @@ public class BindableProxyLoaderGenerator extends AbstractProxyLoaderGenerator {
   public String generate(final TreeLogger logger, final GeneratorContext context, String typeName)
       throws UnableToCompleteException {
 
-    return generateProxyLoader(BindableProxyLoader.class, context, logger, packageName, className);
+    return startAsyncGeneratorsAndWaitFor(BindableProxyLoader.class, context, logger, packageName, className);
   }
 
   @Override
-  protected String generate(final GeneratorContext context) {
+  protected String generate(final TreeLogger logger, final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
