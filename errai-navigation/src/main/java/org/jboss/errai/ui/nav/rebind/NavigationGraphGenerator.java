@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Implementations;
@@ -38,19 +37,11 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.ui.nav.client.local.HistoryToken;
-import org.jboss.errai.ui.nav.client.local.Page;
-import org.jboss.errai.ui.nav.client.local.PageHidden;
-import org.jboss.errai.ui.nav.client.local.PageHiding;
-import org.jboss.errai.ui.nav.client.local.PageShowing;
-import org.jboss.errai.ui.nav.client.local.PageShown;
-import org.jboss.errai.ui.nav.client.local.PageState;
-import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
-import org.jboss.errai.ui.nav.client.local.TransitionAnchorFactory;
-import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.*;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
@@ -73,7 +64,7 @@ public class NavigationGraphGenerator extends Generator {
   @Override
   public String generate(TreeLogger logger, GeneratorContext context,
           String typeName) throws UnableToCompleteException {
-    GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+    EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
 
     final ClassStructureBuilder<?> classBuilder =
             Implementations.extend(NavigationGraph.class, "GeneratedNavigationGraph");

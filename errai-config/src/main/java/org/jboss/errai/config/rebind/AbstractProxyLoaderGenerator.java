@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 JBoss, by Red Hat, Inc
+ * Copyright 2012 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.util.ThreadUtil;
 
@@ -77,7 +76,7 @@ public abstract class AbstractProxyLoaderGenerator extends Generator implements 
             .runIfStarting(new Runnable() {
               @Override
               public void run() {
-                GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+                EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
               }
             })
             .build()

@@ -1088,8 +1088,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     switch (state) {
       case UNINITIALIZED:
-        break;
-
       case LOCAL_ONLY:
         if (newState == BusState.CONNECTING) {
           events.add(BusEventType.ASSOCIATING);

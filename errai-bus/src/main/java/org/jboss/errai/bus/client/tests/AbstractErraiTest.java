@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -23,8 +24,6 @@ import org.jboss.errai.common.client.api.tasks.ClientTaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
-
-import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Base test class for testing ErraiBus-based code. Located in the main distribution so it can be extended
@@ -42,6 +41,8 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtSetUp() throws Exception {
+    bus = (ClientMessageBus) ErraiBus.get();
+
     InitVotes.setTimeoutMillis(60000);
 
     if (!(TaskManagerFactory.get() instanceof ClientTaskManager)) {
@@ -54,7 +55,6 @@ public abstract class AbstractErraiTest extends GWTTestCase {
         }
       });
     }
-    bus = (ClientMessageBus) ErraiBus.get();
     InitVotes.startInitPolling();
   }
 
