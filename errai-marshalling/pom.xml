@@ -52,7 +52,6 @@
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
-            <version>1.0-SP4</version>
         </dependency>
 
         <dependency>
@@ -69,6 +68,7 @@
                       dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
             <scope>provided</scope>
         </dependency>
+        
     </dependencies>
 
     <build>

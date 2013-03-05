@@ -29,7 +29,6 @@
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
-            <version>1.0-SP4</version>
             <scope>provided</scope>
         </dependency>
 
@@ -57,9 +56,9 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.2</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>

@@ -68,14 +68,6 @@
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -89,7 +81,6 @@
       <groupId>javax.enterprise</groupId>
       <artifactId>cdi-api</artifactId>
       <scope>provided</scope>
-      <version>1.0-SP4</version>
     </dependency>
 
     <!-- Errai Core -->
@@ -203,13 +194,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
     
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
 
   </dependencies>
@@ -343,7 +332,6 @@
         <dependency>
           <groupId>org.javassist</groupId>
           <artifactId>javassist</artifactId>
-          <version>3.15.0-GA</version>
           <scope>provided</scope>
         </dependency>
 
@@ -724,12 +712,6 @@
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
           <version>1.2.16</version>
-        </dependency>
-        <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.8.1</version>
-          <scope>compile</scope>
         </dependency>
         <dependency>
           <groupId>org.jboss.ejb3</groupId>

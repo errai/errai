@@ -70,7 +70,6 @@
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
-            <version>1.0-SP4</version>
             <!--<scope>provided</scope> -->
         </dependency>
 
@@ -92,9 +91,17 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+           <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+
+           <!-- src/main/java contains JUnit test harness stuff, so can't use test scope -->
+           <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <profiles>
