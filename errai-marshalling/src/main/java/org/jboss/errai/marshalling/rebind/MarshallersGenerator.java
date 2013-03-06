@@ -223,8 +223,8 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
       log.info("compiling in production mode.");
     }
 
-   logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
-   return startAsyncGeneratorsAndWaitFor(MarshallerFactory.class, context, logger, packageName, className);
+    logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
+    return startAsyncGeneratorsAndWaitFor(MarshallerFactory.class, context, logger, packageName, className);
   }
 
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";

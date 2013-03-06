@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
+
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
@@ -374,7 +375,6 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
    * Renders the page-to-page navigation graph into the file {@code navgraph.gv} in the
    * {@code .errai} cache directory.
    * 
-   * @param fromClass
    */
   private void renderNavigationToDotFile(BiMap<String, MetaClass> pages) {
     final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath(), "navgraph.gv");

@@ -147,7 +147,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
   }
 
   private void pollForMessages(final QueueSession session, final HttpServletRequest httpServletRequest,
-                               final HttpServletResponse httpServletResponse, final boolean wait, final boolean sse) throws IOException {
+                               final HttpServletResponse httpServletResponse, boolean wait, final boolean sse) throws IOException {
     try {
       if (sse) {
         prepareSSE(httpServletResponse);

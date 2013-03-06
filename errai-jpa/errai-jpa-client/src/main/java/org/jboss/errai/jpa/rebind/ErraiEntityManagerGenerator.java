@@ -54,6 +54,7 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
+
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
@@ -88,7 +89,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   public String generate(final TreeLogger logger, final GeneratorContext context,
                          String typeName) throws UnableToCompleteException {
 
-    return startAsyncGeneratorsAndWaitFor(ErraiEntityManager.class, 
+    return startAsyncGeneratorsAndWaitFor(ErraiEntityManager.class,
         context, logger, GENERATED_PACKAGE, GENERATED_CLASS_NAME);
   }
 
@@ -256,12 +257,12 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
   /**
    * Generates the event delivery methods for the given JPA Entity type.
-   * 
+   *
    * @param entityType
-   *          The metaclass representing the entity type.
+   *     The metaclass representing the entity type.
    * @param classBuilder
-   *          The target builder to receive the generated methods. For the generated code to be
-   *          valid, this should be a builder of a subclass of {@link ErraiEntityType}.
+   *     The target builder to receive the generated methods. For the generated code to be
+   *     valid, this should be a builder of a subclass of {@link ErraiEntityType}.
    */
   protected void generateLifecycleEventDeliveryMethods(
       MetaClass entityType,
@@ -290,7 +291,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
                   entityType.getName());
             }
             if (!callback.isPublic()) {
-              PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[] {});
+              PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[]{});
               methodBuilder.append(
                   Stmt.loadVariable("this")
                       .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.newObject(listenerClass),
@@ -307,7 +308,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       // listener methods on the entity class itself
       for (MetaMethod callback : entityType.getMethodsAnnotatedWith(eventType)) {
         if (!callback.isPublic()) {
-          PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[] {});
+          PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[]{});
           methodBuilder.append(
               Stmt.loadVariable("this")
                   .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.loadVariable("targetEntity")));
@@ -324,9 +325,9 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
    * Returns true if the given Java member is annotated as a JPA generated value.
    * <p/>
    * TODO: support this determination for XML-configured entities.
-   * 
+   *
    * @param javaMember
-   *          the Java member for the attribute in question
+   *     the Java member for the attribute in question
    */
   protected boolean isGeneratedValue(Member javaMember) {
     if (javaMember instanceof Field) {
@@ -345,10 +346,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   /**
    * Determines if the given attribute is an association. This is necessary because the Hibernate
    * implementation of SingularAttribute.isAssociation always returns false.
-   * 
+   *
    * @param attr
-   *          The attribute to test for association-ness.
-   * 
+   *     The attribute to test for association-ness.
+   *
    * @return True iff the attribute's Java Member is annotated with {@code ManyToMany},
    *         {@code ManyToOne}, {@code OneToMany}, or {@code OneToOne}.
    */
@@ -361,10 +362,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
   /**
    * Returns a human-readable variable name that is unique to the given type.
-   * 
+   *
    * @param forType
-   *          The type you want a variable name for.
-   * 
+   *     The type you want a variable name for.
+   *
    * @return A legal Java identifier that can be used to refer to the given type.
    */
   private static String entitySnapshotVarName(Class<?> forType) {
@@ -374,10 +375,10 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   /**
    * Extracts the list of cascade types from the given Java Member, which is expected to be a Field
    * or a Method.
-   * 
+   *
    * @param javaMember
-   *          The Java Member of the attribute.
-   * 
+   *     The Java Member of the attribute.
+   *
    * @return The array of CascadeType that specifies all types that should be cascaded, or null if
    *         the Member does not have any of the relationship annotations (ManyToMany, ManyToOne,
    *         OneToMany, OneToOne).
@@ -554,17 +555,17 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
         if (attr.getJavaType() == Long.class || attr.getJavaType() == long.class) {
           generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {
-              });
+          });
           generatorType = LongIdGenerator.class;
         }
         else if (attr.getJavaType() == Integer.class || attr.getJavaType() == int.class) {
           generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Integer>>() {
-              });
+          });
           generatorType = IntIdGenerator.class;
         }
         else if (attr.getJavaType() == BigInteger.class) {
           generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<BigInteger>>() {
-              });
+          });
           generatorType = BigIntegerIdGenerator.class;
         }
         else {
@@ -647,7 +648,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         // First we need to generate an accessor for the field.
         MetaField field = MetaClassFactory.get((Field) getJavaMember(attr));
         PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, "jsni", containingClassBuilder, field,
-            new Modifier[] {});
+            new Modifier[]{});
 
         BlockStatement methodBody = new BlockStatement();
 
@@ -709,7 +710,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
     @Override
     public java.lang.reflect.Type[] getActualTypeArguments() {
-      return new java.lang.reflect.Type[] { entityType };
+      return new java.lang.reflect.Type[]{entityType};
     }
 
     @Override
