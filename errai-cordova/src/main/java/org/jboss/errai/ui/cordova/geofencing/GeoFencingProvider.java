@@ -20,10 +20,10 @@ public class GeoFencingProvider {
 
   @AfterInitialization
   public void init() {
-    addRegionListener();
+    initRegionListener();
   }
 
-  private native void addRegionListener() /*-{
+  private native void initRegionListener() /*-{
     var instance = this;
     $doc.addEventListener("region-update", function (event) {
       var fid = event.regionupdate.fid;
