@@ -28,6 +28,7 @@ import org.jboss.errai.databinding.client.MockHandler;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelWidget;
 import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
 import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 import org.jboss.errai.databinding.client.api.Convert;
@@ -246,6 +247,20 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setName("initial model value");
     DataBinder.forModel(model, InitialState.FROM_MODEL).bind(textBox, "name");
     assertEquals("Model not initialized based on widget's state", "initial model value", textBox.getValue());
+  }
+  
+  @Test
+  public void testBindingToCustomHasValueType() {
+    TestModelWidget widget = new TestModelWidget();
+    
+    TestModel childModel = new TestModel();
+    childModel.setName("child");
+    
+    TestModel model = new TestModel();
+    model.setChild(childModel);
+    
+    DataBinder<TestModel> binder = DataBinder.forModel(model, InitialState.FROM_MODEL).bind(widget, "child");
+    assertEquals("Widget not updated based on model's state", childModel, binder.getModel().getChild());
   }
 
   @Test

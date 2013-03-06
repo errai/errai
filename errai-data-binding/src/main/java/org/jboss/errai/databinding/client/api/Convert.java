@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -126,8 +127,8 @@ public class Convert {
   @SuppressWarnings({ "unchecked" })
   public static <M, W> W toWidgetValue(Widget widget, Class<M> modelValueType, M modelValue, Converter<M, W> converter) {
     return (W) toWidgetValue(
-        inferWidgetValueType(Assert.notNull(widget)),
-        Assert.notNull(modelValueType),
+        inferWidgetValueType(Assert.notNull(widget), Assert.notNull(modelValueType)),
+        modelValueType,
         modelValue,
         converter);
   }
@@ -190,7 +191,7 @@ public class Convert {
   public static <M, W> M toModelValue(Class<M> modelValueType, Widget widget, W widgetValue, Converter<M, W> converter) {
     return (M) toModelValue(
         Assert.notNull(modelValueType),
-        inferWidgetValueType(Assert.notNull(widget)),
+        inferWidgetValueType(Assert.notNull(widget), modelValueType),
         widgetValue,
         converter);
   }
@@ -262,13 +263,16 @@ public class Convert {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Class inferWidgetValueType(Widget widget) {
-    Class widgetValueType = String.class;
-
+  private static Class inferWidgetValueType(Widget widget, Class<?> defaultWidgetValueType) {
+    Class widgetValueType = null;
+    
     if (widget instanceof HasValue) {
       Object value = ((HasValue) widget).getValue();
       if (value != null) {
         widgetValueType = value.getClass();
+      }
+      else if (widget instanceof TextBoxBase) {
+        widgetValueType = String.class;
       }
       else if (widget instanceof DateBox || widget instanceof DatePicker) {
         widgetValueType = Date.class;
@@ -285,7 +289,14 @@ public class Convert {
       else if (widget instanceof IntegerBox) {
         widgetValueType = Integer.class;
       }
+      else {
+        widgetValueType = defaultWidgetValueType;
+      }
+    } 
+    else {
+      widgetValueType = String.class;
     }
+    
     return widgetValueType;
   }
 }
