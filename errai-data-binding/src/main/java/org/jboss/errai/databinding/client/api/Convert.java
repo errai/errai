@@ -17,6 +17,8 @@
 package org.jboss.errai.databinding.client.api;
 
 import java.awt.Checkbox;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,6 +103,12 @@ public class Convert {
       }
       else if (toType.equals(Date.class)) {
         return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).parse((String) o);
+      }
+      else if (toType.equals(BigDecimal.class)) {
+        return new BigDecimal((String) o);
+      }
+      else if (toType.equals(BigInteger.class)) {
+        return new BigInteger((String) o);
       }
     }
     return o;
