@@ -1,10 +1,10 @@
 package org.jboss.errai.ui.cordova.geofencing;
 
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import org.jboss.errai.ioc.client.api.AfterInitialization;
 
 /**
  * GeoFencingProvider provides geo fencing events dependent on the Geofencing cordova plugin
@@ -24,6 +24,8 @@ public class GeoFencingProvider {
   }
 
   private native void addRegionListener() /*-{
+   if (!$wnd.DGGeofencing) return;
+  
     var instance = this;
     $doc.addEventListener("region-update", function (event) {
       var fid = event.regionupdate.fid;
@@ -37,6 +39,8 @@ public class GeoFencingProvider {
   }
 
   private native void addRegion(int id, double latitude, double longitude, int radius) /*-{
+    if (!$wnd.DGGeofencing) return;
+    
     $wnd.DGGeofencing.addRegion(
             {"fid":id, "radius":radius, "latitude":latitude, "longitude":longitude},
             function (result) {
@@ -50,6 +54,8 @@ public class GeoFencingProvider {
   }
 
   private native void removeRegion(int id, double latitude, double longitude) /*-{
+    if (!$wnd.DGGeofencing) return;
+  
     $wnd.DGGeofencing.removeRegion(
             {"fid":id, "latitude":latitude, "longitude":longitude},
             function () {
