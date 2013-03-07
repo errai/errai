@@ -19,7 +19,6 @@
         <dependency>
             <groupId>org.jfrog.maven.annomojo</groupId>
             <artifactId>maven-plugin-anno</artifactId>
-            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.jade.plugins.common</groupId>
@@ -29,7 +28,20 @@
         </dependency>
     </dependencies>
 
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jfrog.maven.annomojo</groupId>
+                <artifactId>maven-plugin-anno</artifactId>
+                <version>1.4.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>1.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <repositories>
         <repository>
             <id>jfrog-plugins</id>
