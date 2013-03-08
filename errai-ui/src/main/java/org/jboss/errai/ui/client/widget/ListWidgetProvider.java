@@ -10,12 +10,14 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
- * Provides instances of ListWidget for cases where the app does not have any reason to provide its own subclass of ListWidget.
- *
+ * Provides instances of ListWidget for cases where the app does not have any reason to provide its
+ * own subclass of ListWidget.
+ * 
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@IOCProvider @Singleton
+@IOCProvider
+@Singleton
 public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, ?>> {
 
   private static class GenericListWidget<M, W extends HasModel<M> & IsWidget> extends ListWidget<M, W> {
