@@ -1,15 +1,13 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
 
-public class LongIdGenerator implements Iterator<Long> {
+public class LongIdGenerator implements ErraiIdGenerator<Long> {
 
   static final Map<String, Object> NO_SIDE_EFFECTS_OPTION =
            Collections.singletonMap(ErraiEntityManager.NO_SIDE_EFFECTS, (Object) Boolean.TRUE);
 
-  private final ErraiEntityManager entityManager;
   private final ErraiSingularAttribute<?, Long> attr;
 
   /**
@@ -25,8 +23,7 @@ public class LongIdGenerator implements Iterator<Long> {
    */
   private final double probeJumpSize = 1000;
 
-  public LongIdGenerator(ErraiEntityManager entityManager, ErraiSingularAttribute<?, Long> attr) {
-    this.entityManager = entityManager;
+  public LongIdGenerator(ErraiSingularAttribute<?, Long> attr) {
     this.attr = attr;
   }
 
@@ -36,13 +33,13 @@ public class LongIdGenerator implements Iterator<Long> {
    * @return true
    */
   @Override
-  public boolean hasNext() {
+  public boolean hasNext(ErraiEntityManager entityManager) {
     return true;
   }
 
 
   @Override
-  public Long next() {
+  public Long next(ErraiEntityManager entityManager) {
     while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId, NO_SIDE_EFFECTS_OPTION) != null) {
       nextCandidateId += (long) (Math.random() * probeJumpSize);
 
@@ -54,15 +51,4 @@ public class LongIdGenerator implements Iterator<Long> {
 
     return nextCandidateId++;
   }
-
-  /**
-   * Not a supported operation.
-   *
-   * @throws {@link UnsupportedOperationException} on every invocation.
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
-
 }

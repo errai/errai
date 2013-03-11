@@ -1,7 +1,5 @@
 package org.jboss.errai.jpa.client.local;
 
-import java.util.Iterator;
-
 import javax.persistence.metamodel.SingularAttribute;
 
 /**
@@ -29,5 +27,5 @@ public interface ErraiSingularAttribute<X, T> extends ErraiAttribute<X, T>, Sing
    * @throws UnsupportedOperationException
    *           if this attribute is not a {@code @GeneratedValue}.
    */
-  public Iterator<T> getValueGenerator();
+  public ErraiIdGenerator<T> getValueGenerator();
 }

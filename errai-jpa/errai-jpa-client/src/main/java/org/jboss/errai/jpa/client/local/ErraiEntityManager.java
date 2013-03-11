@@ -21,23 +21,19 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
-import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
+import org.jboss.errai.jpa.client.local.backend.StorageBackendFactory;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 /**
- * The Errai specialization of the JPA 2.0 EntityManager interface, together
- * with an implementation of much of the logic. When the end-user project is
- * compiled, a concrete subclass of this class is generated. The subclass
- * populates the metamodel with the type and attribute information required for
- * enumerating and creating entity instances, and enumerating, reading, and
- * writing their fields.
+ * The Errai implementation and specialization of the JPA 2.0 EntityManager interface.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public abstract class ErraiEntityManager implements EntityManager {
+public class ErraiEntityManager implements EntityManager {
 
   /**
    * Hint that can be used with {@link #find(Class, Object, Map)} to specify
@@ -55,7 +51,7 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * The metamodel. Gets populated on first call to {@link #getMetamodel()}.
    */
-  final ErraiMetamodel metamodel = new ErraiMetamodel();
+  final ErraiMetamodel metamodel;
 
   /**
    * All persistent instances known to this entity manager.
@@ -72,46 +68,29 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * The actual storage backend.
    */
-  private final StorageBackend backend = new WebStorageBackend(this); // XXX publishing reference to partially constructed object
+  private final StorageBackend backend;
 
   /**
    * All the named queries. Populated by a generated method in the
    * GeneratedErraiEntityManager subclass.
    */
-  final Map<String, TypedQueryFactory> namedQueries = new HashMap<String, TypedQueryFactory>();
+  final Map<String, TypedQueryFactory> namedQueries;
 
   /**
-   * Constructor for subclasses.
+   * Constructor for building custom-purpose EntityManager instances. For common
+   * usecases, simply use {@code @Inject EntityManager em} and let the
+   * {@link ErraiEntityManagerProvider} handle the prerequisites for you.
    */
-  protected ErraiEntityManager() {
+  public ErraiEntityManager(
+          ErraiMetamodel metamodel,
+          Map<String, TypedQueryFactory> namedQueries,
+          StorageBackendFactory storageBackendFactory) {
+    this.metamodel = Assert.notNull(metamodel);
+    this.namedQueries = Assert.notNull(namedQueries);
+
+    // Caution: we're handing out a reference to this partially constructed instance!
+    this.backend = storageBackendFactory.createInstanceFor(this);
   }
-
-  /**
-   * Populates the metamodel of this EntityManager. Called by getMetamodel() one
-   * time only.
-   * <p>
-   * The implementation of this method must populate the metamodel with all
-   * known entity types, managed types, and so on. The implementation must
-   * freeze the metamodel before returning. The first call to
-   * {@link #getMetamodel()} throws RuntimeException if
-   * {@code this.metamodel.isFrozen() == false} after this method returns.
-   * <p>
-   * Note that this method is normally implemented by a generated subclass, but
-   * handwritten subclasses may also be useful for testing purposes.
-   */
-  protected abstract void populateMetamodel();
-
-  /**
-   * Populates the collection of named queries in this EntityManager. Called by
-   * {@link #createNamedQuery(String, Class)} if the namedQueries map is empty.
-   * <p>
-   * The implementation of this method must add factories for all known named
-   * queries to the {@link #namedQueries} map.
-   * <p>
-   * Note that this method is normally implemented by a generated subclass, but
-   * handwritten subclasses may also be useful for testing purposes.
-   */
-  protected abstract void populateNamedQueries();
 
   /**
    * This method performs the unchecked (but safe) cast of
@@ -165,7 +144,7 @@ public abstract class ErraiEntityManager implements EntityManager {
    *         instance.
    */
   private <X, T> T generateAndSetLocalId(X entityInstance, ErraiSingularAttribute<X, T> attr) {
-    T nextId = attr.getValueGenerator().next();
+    T nextId = attr.getValueGenerator().next(this);
     attr.set(entityInstance, nextId);
     return nextId;
   }
@@ -456,10 +435,7 @@ public abstract class ErraiEntityManager implements EntityManager {
   @Override
   public ErraiMetamodel getMetamodel() {
     if (!metamodel.isFrozen()) {
-      populateMetamodel();
-      if (!metamodel.isFrozen()) {
-        throw new RuntimeException("The populateMetamodel() method didn't call metamodel.freeze()!");
-      }
+      throw new RuntimeException("The metamodel isn't frozen!");
     }
     return metamodel;
   }
@@ -545,12 +521,9 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public <T> TypedQuery<T> createNamedQuery(String name, Class<T> resultClass) {
-    if (namedQueries.isEmpty()) {
-      populateNamedQueries();
-    }
     TypedQueryFactory factory = namedQueries.get(name);
     if (factory == null) throw new IllegalArgumentException("No named query \"" + name + "\"");
-    return factory.createIfCompatible(resultClass);
+    return factory.createIfCompatible(resultClass, this);
   }
 
   @Override

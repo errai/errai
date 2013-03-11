@@ -21,7 +21,8 @@ public class ErraiEntityManagerProvider implements Provider<ErraiEntityManager> 
   @Override
   public ErraiEntityManager get() {
     if (INSTANCE == null) {
-      INSTANCE = GWT.create(ErraiEntityManager.class);
+      ErraiEntityManagerFactory factory = GWT.create(ErraiEntityManagerFactory.class);
+      INSTANCE = factory.createEntityManager();
     }
     return INSTANCE;
   }

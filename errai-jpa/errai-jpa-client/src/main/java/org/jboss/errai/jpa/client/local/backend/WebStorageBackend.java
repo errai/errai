@@ -22,6 +22,13 @@ import com.google.gwt.json.client.JSONValue;
  */
 public class WebStorageBackend implements StorageBackend {
 
+  public static final StorageBackendFactory FACTORY = new StorageBackendFactory() {
+    @Override
+    public StorageBackend createInstanceFor(ErraiEntityManager em) {
+      return new WebStorageBackend(em);
+    }
+  };
+
   private final ErraiEntityManager em;
 
   public WebStorageBackend(ErraiEntityManager erraiEntityManager) {

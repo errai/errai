@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,11 +83,15 @@ import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiEntityManagerFactory;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
+import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
 import org.jboss.errai.jpa.client.local.IntIdGenerator;
 import org.jboss.errai.jpa.client.local.LongIdGenerator;
+import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 
 import com.google.gwt.core.ext.GeneratorContext;
@@ -98,7 +101,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 @GenerateAsync(ErraiEntityManager.class)
 public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   private final static String GENERATED_PACKAGE = ErraiEntityManager.class.getPackage().getName();
-  private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManager";
+  private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManagerFactory";
   private static final List<Class<? extends Annotation>> LIFECYCLE_EVENT_TYPES;
 
   static {
@@ -125,25 +128,35 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
     EntityManagerFactory emf = createHibernateEntityManagerFactory(logger, context);
     try {
-      return generateEntityManagerClass(logger, context, emf);
+      return generateEntityManagerFactoryClass(logger, context, emf);
     }
     finally {
       emf.close();
     }
   }
 
-  private String generateEntityManagerClass(
+  private String generateEntityManagerFactoryClass(
       TreeLogger logger, GeneratorContext context, EntityManagerFactory emf) {
     EntityManager em = emf.createEntityManager();
     Metamodel mm = em.getMetamodel();
 
     final ClassStructureBuilder<?> classBuilder =
-        Implementations.extend(ErraiEntityManager.class, GENERATED_CLASS_NAME);
+        Implementations.implement(ErraiEntityManagerFactory.class, GENERATED_CLASS_NAME);
 
-    generatePopulateMetamodelMethod(classBuilder, mm);
+    classBuilder.publicMethod(ErraiEntityManager.class, "createEntityManager")
+      .append(
+          Stmt.nestedCall(Stmt.newObject(ErraiEntityManager.class,
+              Stmt.loadVariable("this").invoke("createMetamodel"),
+              Stmt.loadVariable("this").invoke("createNamedQueries"),
+              Stmt.loadStatic(WebStorageBackend.class, "FACTORY")))
+          .returnValue())
+      .finish();
 
-    // pnqm = populate named queries method
-    MethodCommentBuilder<?> pnqm = classBuilder.protectedMethod(void.class, "populateNamedQueries");
+    generateCreateMetamodelMethod(classBuilder, mm);
+
+    // cnqm = create named queries method
+    MethodCommentBuilder<?> cnqm = classBuilder.protectedMethod(Map.class, "createNamedQueries");
+    cnqm.append(Stmt.declareFinalVariable("namedQueries", Map.class, Stmt.newObject(HashMap.class)));
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     List<NamedQuery> namedQueries = new ArrayList<NamedQuery>();
@@ -163,14 +176,14 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     // now generate all the query factories
     for (NamedQuery namedQuery : namedQueries) {
       try {
-        pnqm._(Stmt.codeComment("**"));
-        pnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
-        pnqm._(Stmt.codeComment("** " + namedQuery.query()));
-        pnqm._(Stmt.codeComment("**"));
+        cnqm._(Stmt.codeComment("**"));
+        cnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
+        cnqm._(Stmt.codeComment("** " + namedQuery.query()));
+        cnqm._(Stmt.codeComment("**"));
         TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, namedQuery);
         Statement generatedFactory =
-            generator.generate(Stmt.loadVariable("this"), classBuilder.getClassDefinition().getContext());
-        pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
+            generator.generate(classBuilder.getClassDefinition().getContext());
+        cnqm._(Stmt.loadVariable("namedQueries")
             .invoke("put",
                 Stmt.loadLiteral(namedQuery.name()),
                 generatedFactory));
@@ -186,7 +199,8 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         throw wrapperException;
       }
     }
-    pnqm.finish();
+    cnqm.append(Stmt.loadVariable("namedQueries").returnValue());
+    cnqm.finish();
 
     String out = classBuilder.toJavaString();
     final File fileCacheDir = RebindUtils.getErraiCacheDir();
@@ -204,10 +218,11 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     return out;
   }
 
-  private void generatePopulateMetamodelMethod(
+  private void generateCreateMetamodelMethod(
       final ClassStructureBuilder<?> classBuilder, Metamodel mm) {
-    // pmm = "populate metamodel method"
-    MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
+    // cmm = "create metamodel method"
+    MethodBlockBuilder<?> cmm = classBuilder.privateMethod(ErraiMetamodel.class, "createMetamodel");
+    cmm.append(Stmt.declareVariable("metamodel", Stmt.newObject(ErraiMetamodel.class)));
 
     List<MetaClass> globalEntityListeners = new ArrayList<MetaClass>();
     for (Class<?> globalListener : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GlobalEntityListener.class)) {
@@ -217,7 +232,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     for (final EntityType<?> et : mm.getEntities()) {
 
       // first, create a variable for the EntityType
-      String entityTypeVarName = generateErraiEntityType(et, pmm, globalEntityListeners);
+      String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners);
 
       MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
 
@@ -226,26 +241,27 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
             attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
-        pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
+        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
       for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
             attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
-        pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
+        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
 
       // XXX using StringStatement because this gives OutOfScopeException for metamodel:
       // pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType",
       // Variable.get(entityTypeVarName)));
-      pmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
+      cmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
     }
 
     // XXX using StringStatement because this gives OutOfScopeException for metamodel:
     // pmm.append(Stmt.loadClassMember("metamodel").invoke("freeze"));
-    pmm.append(new StringStatement("metamodel.freeze()"));
+    cmm.append(new StringStatement("metamodel.freeze()"));
 
-    pmm.finish();
+    cmm.append(Stmt.loadVariable("metamodel").returnValue());
+    cmm.finish();
   }
 
   public static EntityManagerFactory createHibernateEntityManagerFactory(TreeLogger logger, GeneratorContext context) {
@@ -493,7 +509,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         return Stmt.loadLiteral(isGeneratedValue(getJavaMember(attr))).returnValue();
       }
 
-      // provide generated value iterator
+      // provide value generator
       if (sourceObject instanceof SingularAttribute && method.getName().equals("getValueGenerator")) {
         return generateGetValueGenerator(sourceObject, containingClassBuilder);
       }
@@ -591,20 +607,20 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       if (isGeneratedValue(getJavaMember(attr))) {
 
         MetaClass generatorDeclaredType;
-        Class<? extends Iterator<?>> generatorType;
+        Class<? extends ErraiIdGenerator<?>> generatorType;
 
         if (attr.getJavaType() == Long.class || attr.getJavaType() == long.class) {
-          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<ErraiIdGenerator<Long>>() {
           });
           generatorType = LongIdGenerator.class;
         }
         else if (attr.getJavaType() == Integer.class || attr.getJavaType() == int.class) {
-          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Integer>>() {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<ErraiIdGenerator<Integer>>() {
           });
           generatorType = IntIdGenerator.class;
         }
         else if (attr.getJavaType() == BigInteger.class) {
-          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<BigInteger>>() {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<ErraiIdGenerator<BigInteger>>() {
           });
           generatorType = BigIntegerIdGenerator.class;
         }
@@ -615,8 +631,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
         containingClassBuilder
             .privateField("valueGenerator", generatorDeclaredType)
-            .initializesWith(Stmt.newObject(generatorType)
-                .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
+            .initializesWith(Stmt.newObject(generatorType).withParameters(Variable.get("this")))
             .finish();
 
         // StringStatement is a workaround: codegen says valueGenerator is out of scope when we do
