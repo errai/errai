@@ -421,7 +421,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     MetaClass cls = def.getMappingClass();
 
     while ((cls = cls.getSuperClass()) != null) {
-      if (hasDefinition(cls)) {
+      if (hasDefinition(cls) && cls.getParameterizedType() == null) {
         final MappingDefinition toMerge = getDefinition(cls);
         final Set<String> parentKeys = new HashSet<String>();
 

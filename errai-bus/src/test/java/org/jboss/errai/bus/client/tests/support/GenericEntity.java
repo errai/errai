@@ -22,6 +22,9 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
 public class GenericEntity<T> {
+  // causes the generation of a field accessor to test subtype specific field accessors for generic types.
+  private T privateField;
+  
   T field;
   List<T> list;
 

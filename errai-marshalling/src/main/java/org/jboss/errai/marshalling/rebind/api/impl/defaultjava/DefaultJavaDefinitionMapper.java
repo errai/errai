@@ -202,8 +202,7 @@ public class DefaultJavaDefinitionMapper {
 
     do {
       for (final MetaField field : c.getDeclaredFields()) {
-        if (definitionsFactory.hasDefinition(field.getDeclaringClass())
-                || field.isTransient() || field.isStatic()) {
+        if (field.isTransient() || field.isStatic()) {
           continue;
         }
 

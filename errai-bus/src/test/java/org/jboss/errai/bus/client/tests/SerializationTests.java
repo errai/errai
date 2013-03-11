@@ -1846,6 +1846,58 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  public void testGenericEntitySubtypeInteger() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final GenericEntitySubtypeInteger entity = new GenericEntitySubtypeInteger();
+        entity.setField(12);
+        entity.setList(Arrays.asList(1,2,3,4));
+
+        MessageBuilder.createCall(new RemoteCallback<GenericEntitySubtypeInteger>() {
+          @Override
+          public void callback(GenericEntitySubtypeInteger response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testGenericEntitySubtypeInteger(entity);
+      }
+    });
+  }
+  
+  public void testGenericEntitySubtypeString() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final GenericEntitySubtypeString entity = new GenericEntitySubtypeString();
+        entity.setField("12");
+        entity.setList(Arrays.asList("1","2","3","4"));
+
+        MessageBuilder.createCall(new RemoteCallback<GenericEntitySubtypeString>() {
+          @Override
+          public void callback(GenericEntitySubtypeString response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testGenericEntitySubtypeString(entity);
+      }
+    });
+  }
 
   public void testGenericEntityUsingList() {
     runAfterInit(new Runnable() {
