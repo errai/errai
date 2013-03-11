@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.framework.transports;
 
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.BusState;
@@ -26,6 +27,7 @@ import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.util.LogUtil;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -91,7 +93,6 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       return;
     }
     sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint);
-
 
     // time out after 2 seconds and attempt reconnect. (note: this is really to deal with a bug a firefox).
     initialTimeoutTimer.schedule(2500);
@@ -184,6 +185,11 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
         @Override
         public void run() {
           LogUtil.log("attempting reconnection ... ");
+
+          transmit(Collections.singletonList(MessageBuilder.createMessage()
+              .toSubject("ServerEchoService")
+              .signalling().done().repliesToSubject("ClientBus").getMessage()));
+
           pollingHandler.performPoll();
           start();
         }

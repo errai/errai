@@ -29,7 +29,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.AbstractProxyLoaderGenerator;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
@@ -44,7 +44,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @GenerateAsync(JaxrsProxyLoader.class)
-public class JaxrsProxyLoaderGenerator extends AbstractProxyLoaderGenerator {
+public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
   private final String packageName = JaxrsProxyLoader.class.getPackage().getName();
   private final String className = JaxrsProxyLoader.class.getSimpleName() + "Impl";
 
@@ -52,11 +52,11 @@ public class JaxrsProxyLoaderGenerator extends AbstractProxyLoaderGenerator {
   public String generate(final TreeLogger logger, final GeneratorContext context, String typeName)
       throws UnableToCompleteException {
 
-    return generateProxyLoader(JaxrsProxyLoader.class, context, logger, packageName, className);
+    return startAsyncGeneratorsAndWaitFor(JaxrsProxyLoader.class, context, logger, packageName, className);
   }
 
   @Override
-  protected String generate(final GeneratorContext context) {
+  protected String generate(final TreeLogger logger, final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
 

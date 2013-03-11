@@ -292,21 +292,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               break;
 
             case SessionExpired:
-              switch (getState()) {
-                case CONNECTED:
-                case CONNECTING:
-                  LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
+              LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
 
-                  // try to reconnect
-                  InitVotes.reset();
-                  stop(false);
-                  init();
-                  break;
-
-                case LOCAL_ONLY:
-                  // do nothing
-                  break;
-              }
+              // try to reconnect
+              InitVotes.reset();
+              stop(false);
+              init();
 
               break;
 
@@ -385,7 +376,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           .set(MessageParts.RemoteServices, getAdvertisableSubjects())
           .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, properties)));
 
-       transportHandler.start();
+      transportHandler.start();
     }
     else {
       final String failOnConnectAfterMs = properties.get(ChaosMonkey.FAIL_ON_CONNECT_AFTER_MS);

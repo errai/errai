@@ -163,6 +163,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       synchronized (queue.getActivationLock()) {
         if (queue.messagesWaiting()) {
           queue.poll(writer);
+          asyncContext.complete();
           return;
         }
 

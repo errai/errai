@@ -245,17 +245,5 @@
         <webDescriptor>tomcat</webDescriptor>
       </properties>
     </profile>
-
-    <!--<profile>-->
-    <!--<id>macJvmSettings</id>-->
-    <!--<activation>-->
-    <!--<os>-->
-    <!--<family>mac</family>-->
-    <!--</os>-->
-    <!--</activation>-->
-    <!--<properties>-->
-    <!--<argLine>-d32 -XX:CompileThreshold=1000</argLine>-->
-    <!--</properties>-->
-    <!--</profile>-->
   </profiles>
 </project>

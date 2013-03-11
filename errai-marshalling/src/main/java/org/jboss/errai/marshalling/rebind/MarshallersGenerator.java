@@ -18,24 +18,19 @@ package org.jboss.errai.marshalling.rebind;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
-import org.jboss.errai.config.rebind.AsyncCodeGenerator;
-import org.jboss.errai.config.rebind.AsyncGenerationJob;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
-import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
@@ -54,7 +49,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @GenerateAsync(MarshallerFactory.class)
-public class MarshallersGenerator extends Generator implements AsyncCodeGenerator {
+public class MarshallersGenerator extends AbstractAsyncGenerator {
   private static final Logger logger = LoggerFactory.getLogger(Generator.class);
 
   public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai.marshalling.server.impl";
@@ -228,53 +223,8 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
       log.info("compiling in production mode.");
     }
 
-    try {
-      logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
-
-      // Generate class source code
-      generateMarshallerBootstrapper(logger, context);
-    }
-    catch (Throwable e) {
-      // record sendNowWith logger that Map generation threw an exception
-      e.printStackTrace();
-      logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
-    }
-
-    // return the fully qualified name of the class generated
-    return packageName + "." + className;
-  }
-
-  public void generateMarshallerBootstrapper(final TreeLogger logger, final GeneratorContext context) throws Exception {
-    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    if (printWriter == null) return;
-
-    final Future<String> future = AsyncGenerationJob.createBuilder()
-        .treeLogger(logger)
-        .generatorContext(context)
-        .interfaceType(MarshallerFactory.class)
-        .runIfStarting(new Runnable() {
-          @Override
-          public void run() {
-            EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-          }
-        })
-        .build().submit();
-
-
-    final String s = future.get();
-    printWriter.write(s);
-
-    context.commit(logger, printWriter);
-  }
-
-  @Override
-  public Future<String> generateAsync(final TreeLogger logger, final GeneratorContext context) {
-    return ThreadUtil.submit(new Callable<String>() {
-      @Override
-      public String call() throws Exception {
-        return _generate(context);
-      }
-    });
+    logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
+    return startAsyncGeneratorsAndWaitFor(MarshallerFactory.class, context, logger, packageName, className);
   }
 
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
@@ -283,7 +233,8 @@ public class MarshallersGenerator extends Generator implements AsyncCodeGenerato
   private static volatile String _clientMarshallerCache;
   private static final Object generatorLock = new Object();
 
-  private String _generate(final GeneratorContext context) {
+  @Override
+  protected String generate(final TreeLogger treeLogger, final GeneratorContext context) {
     synchronized (generatorLock) {
       final boolean junitOrDevMode = !EnvUtil.isProdMode();
 

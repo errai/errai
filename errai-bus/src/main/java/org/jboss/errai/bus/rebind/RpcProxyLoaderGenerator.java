@@ -33,7 +33,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.AbstractProxyLoaderGenerator;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 
@@ -47,7 +47,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @GenerateAsync(RpcProxyLoader.class)
-public class RpcProxyLoaderGenerator extends AbstractProxyLoaderGenerator {
+public class RpcProxyLoaderGenerator extends AbstractAsyncGenerator {
   private final String packageName = RpcProxyLoader.class.getPackage().getName();
   private final String className = RpcProxyLoader.class.getSimpleName() + "Impl";
 
@@ -55,11 +55,11 @@ public class RpcProxyLoaderGenerator extends AbstractProxyLoaderGenerator {
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
 
-    return generateProxyLoader(RpcProxyLoader.class, context, logger, packageName, className);
+    return startAsyncGeneratorsAndWaitFor(RpcProxyLoader.class, context, logger, packageName, className);
   }
 
   @Override
-  protected String generate(final GeneratorContext context) {
+  protected String generate(final TreeLogger logger, final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
 
     final MethodBlockBuilder<?> loadProxies =

@@ -51,7 +51,6 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.ReachableTypes;
-import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -145,14 +144,6 @@ public class MarshallerGeneratorFactory {
     if (Boolean.getBoolean("errai.codegen.printOut")) {
       System.out.println(gen);
     }
-
-    ThreadUtil.execute(new Runnable() {
-      @Override
-      public void run() {
-        RebindUtils.writeStringToFile(cacheFile, gen);
-      }
-    });
-
 
     return gen;
   }

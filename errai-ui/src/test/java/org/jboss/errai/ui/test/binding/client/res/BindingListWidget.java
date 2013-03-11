@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ui.test.binding.client.res;
 
+import java.util.List;
+
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.test.common.client.TestModel;
 
@@ -34,7 +36,7 @@ public class BindingListWidget extends ListWidget<TestModel, BindingItemWidget> 
   }
 
   @Override
-  protected void onItemsRendered() {
+  protected void onItemsRendered(List<TestModel> model) {
     itemsRenderedCalled++;
   }
 

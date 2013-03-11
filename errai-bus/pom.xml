@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright 2011 JBoss, by Red Hat, Inc
   ~
@@ -13,10 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
   <name>Errai::Bus</name>
   <artifactId>errai-bus</artifactId>
@@ -118,13 +117,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -188,7 +185,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
     </dependency>
 
 
@@ -209,7 +205,6 @@
     <dependency>
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
-      <version>3.15.0-GA</version>
     </dependency>
 
 
@@ -227,7 +222,6 @@
       <artifactId>netty</artifactId>
       <version>4.0.0.Alpha1.errai.r1</version>
     </dependency>
-
 
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -301,9 +295,8 @@
                   <value>${project.build.directory}</value>
                 </property>
 
-                <!--
-                Do not accidently package server test marshallers when building Errai
-                -->
+                <!-- Do not accidently package server test marshallers when 
+                  building Errai -->
                 <property>
                   <name>errai.marshalling.server.classOutput.enabled</name>
                   <value>false</value>

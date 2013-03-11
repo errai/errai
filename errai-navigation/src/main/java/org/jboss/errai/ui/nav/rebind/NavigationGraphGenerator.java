@@ -37,7 +37,9 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
+import org.jboss.errai.config.rebind.GenerateAsync;
+
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
@@ -47,27 +49,34 @@ import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Generates the GeneratedNavigationGraph class based on {@code @Page} and
- * {@code @DefaultPage} annotations.
- *
+ * Generates the GeneratedNavigationGraph class based on {@code @Page} and {@code @DefaultPage}
+ * annotations.
+ * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class NavigationGraphGenerator extends Generator {
+@GenerateAsync(NavigationGraph.class)
+public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
+  private static final String GENERATED_CLASS_NAME = "GeneratedNavigationGraph"; 
+  
   @Override
   public String generate(TreeLogger logger, GeneratorContext context,
           String typeName) throws UnableToCompleteException {
-    EnvUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
 
+    return startAsyncGeneratorsAndWaitFor(NavigationGraph.class, 
+        context, logger, NavigationGraph.class.getPackage().getName(), GENERATED_CLASS_NAME);
+  }
+
+  @Override
+  protected String generate(TreeLogger logger, GeneratorContext context) {
     final ClassStructureBuilder<?> classBuilder =
-            Implementations.extend(NavigationGraph.class, "GeneratedNavigationGraph");
+        Implementations.extend(NavigationGraph.class, GENERATED_CLASS_NAME);
 
     // accumulation of (name, pageclass) mappings for dupe detection and dot file generation
     BiMap<String, MetaClass> pageNames = HashBiMap.create();
@@ -80,7 +89,7 @@ public class NavigationGraphGenerator extends Generator {
     for (MetaClass pageClass : pages) {
       if (!pageClass.isAssignableTo(Widget.class)) {
         throw new GenerationException(
-                "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must be a subtype " +
+            "Class " + pageClass.getFullyQualifiedName() + " is annotated with @Page, so it must be a subtype " +
                 "of Widget.");
       }
       Page annotation = pageClass.getAnnotation(Page.class);
@@ -89,7 +98,7 @@ public class NavigationGraphGenerator extends Generator {
       MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
       if (prevPageWithThisName != null) {
         throw new GenerationException(
-                "Page names must be unique, but " + prevPageWithThisName + " and " + pageClass +
+            "Page names must be unique, but " + prevPageWithThisName + " and " + pageClass +
                 " are both named [" + pageName + "]");
       }
       Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
@@ -100,16 +109,16 @@ public class NavigationGraphGenerator extends Generator {
         ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
         pageImplStmt = Variable.get("defaultPage");
         ctor.append(
-                Stmt.nestedCall(Refs.get("pagesByName"))
+            Stmt.nestedCall(Refs.get("pagesByName"))
                 .invoke("put", "", pageImplStmt));
       }
       else if (pageName.equals("")) {
         throw new GenerationException(
-                "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
+            "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
                 " page with startingPage=true is permitted to have an empty path.");
       }
       ctor.append(
-              Stmt.nestedCall(Refs.get("pagesByName"))
+          Stmt.nestedCall(Refs.get("pagesByName"))
               .invoke("put", pageName, pageImplStmt));
     }
     ctor.finish();
@@ -118,7 +127,7 @@ public class NavigationGraphGenerator extends Generator {
 
     if (pages.size() > 0 && defaultPages.size() == 0) {
       throw new GenerationException(
-              "No @Page classes have startingPage=true. Exactly one @Page class" +
+          "No @Page classes have startingPage=true. Exactly one @Page class" +
               " must be designated as the starting page.");
     }
     if (defaultPages.size() > 1) {
@@ -127,16 +136,11 @@ public class NavigationGraphGenerator extends Generator {
         defaultPageList.append("\n  ").append(mc.getFullyQualifiedName());
       }
       throw new GenerationException(
-              "Found more than one @Page with startingPage=true: " + defaultPageList +
+          "Found more than one @Page with startingPage=true: " + defaultPageList +
               "\nExactly one @Page class must be designated as the starting page.");
     }
 
     String out = classBuilder.toJavaString();
-    final File fileCacheDir = RebindUtils.getErraiCacheDir();
-    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/"
-            + classBuilder.getClassDefinition().getName() + ".java");
-
-    RebindUtils.writeStringToFile(cacheFile, out);
 
     if (Boolean.getBoolean("errai.codegen.printOut")) {
       System.out.println("---NavigationGraph-->");
@@ -144,25 +148,11 @@ public class NavigationGraphGenerator extends Generator {
       System.out.println("<--NavigationGraph---");
     }
 
-    PrintWriter printWriter = context.tryCreate(
-            logger,
-            classBuilder.getClassDefinition().getPackageName(),
-            classBuilder.getClassDefinition().getName());
-
-    // printWriter is null if code has already been generated.
-    if (printWriter != null) {
-      printWriter.append(out);
-      context.commit(logger, printWriter);
-    }
-
-    return classBuilder.getClassDefinition().getFullyQualifiedName();
-
+    return out;
   }
-
   /**
-   * Generates a new instance of an anonymous inner class that implements the
-   * PageNode interface.
-   *
+   * Generates a new instance of an anonymous inner class that implements the PageNode interface.
+   * 
    * @param pageClass
    *          The class providing the widget content for the page.
    * @param pageName
@@ -194,178 +184,197 @@ public class NavigationGraphGenerator extends Generator {
 
   /**
    * Appends the method that calls the {@code @PageHiding} method of the widget.
-   *
+   * 
    * @param pageImplBuilder
-   *          The class builder for the implementation of PageNode we are adding
-   *          the method to.
+   *          The class builder for the implementation of PageNode we are adding the method to.
    * @param pageClass
-   *          The "content type" (Widget subclass) of the page. This is the type
-   *          the user annotated with {@code @Page}.
+   *          The "content type" (Widget subclass) of the page. This is the type the user annotated
+   *          with {@code @Page}.
    */
   private void appendPageHidingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-	  createAndProcessHideMethod(pageImplBuilder, pageClass, PageHiding.class);
+    createAndProcessHideMethod(pageImplBuilder, pageClass, PageHiding.class);
   }
 
   /**
    * Appends the method that calls the {@code @PageHidden} method of the widget.
-   *
+   * 
    * @param pageImplBuilder
-   *          The class builder for the implementation of PageNode we are adding
-   *          the method to.
+   *          The class builder for the implementation of PageNode we are adding the method to.
    * @param pageClass
-   *          The "content type" (Widget subclass) of the page. This is the type
-   *          the user annotated with {@code @Page}.
+   *          The "content type" (Widget subclass) of the page. This is the type the user annotated
+   *          with {@code @Page}.
    */
   private void appendPageHiddenMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-	  createAndProcessHideMethod(pageImplBuilder, pageClass, PageHidden.class);
+    createAndProcessHideMethod(pageImplBuilder, pageClass, PageHidden.class);
   }
 
-  private void createAndProcessHideMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, Class<? extends Annotation> annotation) {
-	  BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
-	            Parameter.of(pageClass, "widget"))
-	            .body();
-	  checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, false);
+  private void createAndProcessHideMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass,
+      Class<? extends Annotation> annotation) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
+              Parameter.of(pageClass, "widget"))
+              .body();
+    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, false);
   }
 
-  private void checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder, BlockBuilder<?> method, MetaClass pageClass, Class<? extends Annotation> annotation, boolean methodCanTakeParameters) {
-	  List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(annotation);
-	    if (annotatedMethods.size() > 1) {
-	      throw new UnsupportedOperationException(
-	              "A @Page can have at most 1 " + createAnnotionName(annotation) + " method, but " + pageClass + " has " + annotatedMethods.size());
-	    }
+  private void checkMethodAndAddPrivateAccessors(AnonymousClassStructureBuilder pageImplBuilder,
+      BlockBuilder<?> method, MetaClass pageClass, Class<? extends Annotation> annotation,
+      boolean methodCanTakeParameters) {
+    List<MetaMethod> annotatedMethods = pageClass.getMethodsAnnotatedWith(annotation);
+    if (annotatedMethods.size() > 1) {
+      throw new UnsupportedOperationException(
+                "A @Page can have at most 1 " + createAnnotionName(annotation) + " method, but " + pageClass + " has "
+                    + annotatedMethods.size());
+    }
 
-	    for (MetaMethod metaMethod : annotatedMethods) {
-	      if (!metaMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
-	        throw new UnsupportedOperationException(
-	        		createAnnotionName(annotation) + " methods must have a void return type, but " +
-	                metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
-	                " returns " + metaMethod.getReturnType().getFullyQualifiedName());
-	      }
+    for (MetaMethod metaMethod : annotatedMethods) {
+      if (!metaMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
+        throw new UnsupportedOperationException(
+              createAnnotionName(annotation) + " methods must have a void return type, but " +
+                  metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
+                  " returns " + metaMethod.getReturnType().getFullyQualifiedName());
+      }
 
-	      Object[] paramValues = new Object[metaMethod.getParameters().length + 1];
-	      paramValues[0] = Stmt.loadVariable("widget");
+      Object[] paramValues = new Object[metaMethod.getParameters().length + 1];
+      paramValues[0] = Stmt.loadVariable("widget");
 
-	      // assemble parameters for private method invoker (first param is the widget instance)
-	      PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, metaMethod, new Modifier[] {});
+      // assemble parameters for private method invoker (first param is the widget instance)
+      PrivateAccessUtil.addPrivateAccessStubs("jsni", pageImplBuilder, metaMethod, new Modifier[] {});
 
-	      if(methodCanTakeParameters) {
-		      for (int i = 1; i < paramValues.length; i++) {
-		        MetaParameter paramSpec = metaMethod.getParameters()[i - 1];
-		        if (paramSpec.getType().equals(MetaClassFactory.get(HistoryToken.class))) {
-		          paramValues[i] = Stmt.loadVariable("state");
-		        }
-		        else {
-		          throw new UnsupportedOperationException(
-		                 createAnnotionName(annotation) + " method " +
-		                		  metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
-		                  " has an illegal parameter of type " + paramSpec.getType().getFullyQualifiedName());
-		        }
-		      }
+      if (methodCanTakeParameters) {
+        for (int i = 1; i < paramValues.length; i++) {
+          MetaParameter paramSpec = metaMethod.getParameters()[i - 1];
+          if (paramSpec.getType().equals(MetaClassFactory.get(HistoryToken.class))) {
+            paramValues[i] = Stmt.loadVariable("state");
+          }
+          else {
+            throw new UnsupportedOperationException(
+                     createAnnotionName(annotation) + " method " +
+                          metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
+                         " has an illegal parameter of type " + paramSpec.getType().getFullyQualifiedName());
+          }
+        }
 
-	      } else {
-	    	  if (metaMethod.getParameters().length != 0) {
-	  	        throw new UnsupportedOperationException(
-	  	        		createAnnotionName(annotation) + " methods cannot take parameters, but " +
-	  	                metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
-	  	                " does.");
-	  	      }
-	      }
+      }
+      else {
+        if (metaMethod.getParameters().length != 0) {
+          throw new UnsupportedOperationException(
+                  createAnnotionName(annotation) + " methods cannot take parameters, but " +
+                      metaMethod.getDeclaringClass().getFullyQualifiedName() + "." + metaMethod.getName() +
+                      " does.");
+        }
+      }
 
-	      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(metaMethod), paramValues));
-	    }
+      method.append(Stmt.loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(metaMethod), paramValues));
+    }
 
-	    method.finish();
+    method.finish();
   }
 
   private String createAnnotionName(Class<? extends Annotation> annotation) {
-	  return "@" + annotation.getSimpleName();
+    return "@" + annotation.getSimpleName();
   }
 
   private String createMethodNameFromAnnotation(Class<? extends Annotation> annotation) {
-	  return StringUtils.uncapitalize(annotation.getSimpleName());
+    return StringUtils.uncapitalize(annotation.getSimpleName());
   }
 
   private void appendPageShowingMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-	  appendPageShowMethod(pageImplBuilder, pageClass, PageShowing.class, true);
+    appendPageShowMethod(pageImplBuilder, pageClass, PageShowing.class, true);
   }
 
   private void appendPageShownMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass) {
-	  appendPageShowMethod(pageImplBuilder, pageClass, PageShown.class, false);
+    appendPageShowMethod(pageImplBuilder, pageClass, PageShown.class, false);
   }
 
-  private void appendPageShowMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass, Class<? extends Annotation> annotation, boolean addPrivateAccessors) {
-	    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
-	            Parameter.of(pageClass, "widget"),
-	            Parameter.of(HistoryToken.class, "state"))
-	            .body();
+  private void appendPageShowMethod(AnonymousClassStructureBuilder pageImplBuilder, MetaClass pageClass,
+      Class<? extends Annotation> annotation, boolean addPrivateAccessors) {
+    BlockBuilder<?> method = pageImplBuilder.publicMethod(void.class, createMethodNameFromAnnotation(annotation),
+              Parameter.of(pageClass, "widget"),
+              Parameter.of(HistoryToken.class, "state"))
+              .body();
 
-	    int idx = 0;
-	    for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
-	      PageState psAnno = field.getAnnotation(PageState.class);
-	      String fieldName = field.getName();
-	      String queryParamName = psAnno.value();
-	      if (queryParamName == null || queryParamName.trim().isEmpty()) {
-	        queryParamName = fieldName;
-	      }
+    int idx = 0;
+    for (MetaField field : pageClass.getFieldsAnnotatedWith(PageState.class)) {
+      PageState psAnno = field.getAnnotation(PageState.class);
+      String fieldName = field.getName();
+      String queryParamName = psAnno.value();
+      if (queryParamName == null || queryParamName.trim().isEmpty()) {
+        queryParamName = fieldName;
+      }
 
-	      if(addPrivateAccessors) {
-	    	  PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field, new Modifier[] {});
-	      }
+      if (addPrivateAccessors) {
+        PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Write, "jsni", pageImplBuilder, field,
+            new Modifier[] {});
+      }
 
-	      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
+      String injectorName = PrivateAccessUtil.getPrivateFieldInjectorName(field);
 
-	      MetaClass erasedFieldType = field.getType().getErased();
-	      if (erasedFieldType.isAssignableTo(Collection.class)) {
-	        MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(field.getType());
-	        if (elementType == null) {
-	          throw new UnsupportedOperationException(
-	                  "Found a @PageState field with a Collection type but without a concrete type parameter. " +
-	                  "Collection-typed @PageState fields must specify a concrete type parameter.");
-	        }
-	        if (erasedFieldType.equals(MetaClassFactory.get(Set.class))) {
-	          method.append(Stmt.declareVariable(fieldName, Stmt.newObject(HashSet.class)));
-	        }
-	        else if (erasedFieldType.equals(MetaClassFactory.get(List.class))
-	                || erasedFieldType.equals(MetaClassFactory.get(Collection.class))) {
-	          method.append(Stmt.declareVariable(fieldName, Stmt.newObject(ArrayList.class)));
-	        }
-	        else {
-	          throw new UnsupportedOperationException(
-	                  "Found a @PageState field which is a collection of type " + erasedFieldType.getFullyQualifiedName() +
-	                  ". For collection-valued fields, only the exact types java.util.Collection, java.util.Set, and " +
-	                  "java.util.List are supported at this time.");
-	        }
+      MetaClass erasedFieldType = field.getType().getErased();
+      if (erasedFieldType.isAssignableTo(Collection.class)) {
+        MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(field.getType());
+        if (elementType == null) {
+          throw new UnsupportedOperationException(
+                    "Found a @PageState field with a Collection type but without a concrete type parameter. " +
+                        "Collection-typed @PageState fields must specify a concrete type parameter.");
+        }
+        if (erasedFieldType.equals(MetaClassFactory.get(Set.class))) {
+          method.append(Stmt.declareVariable(fieldName, Stmt.newObject(HashSet.class)));
+        }
+        else if (erasedFieldType.equals(MetaClassFactory.get(List.class))
+                  || erasedFieldType.equals(MetaClassFactory.get(Collection.class))) {
+          method.append(Stmt.declareVariable(fieldName, Stmt.newObject(ArrayList.class)));
+        }
+        else {
+          throw new UnsupportedOperationException(
+                    "Found a @PageState field which is a collection of type "
+                        + erasedFieldType.getFullyQualifiedName()
+                        +
+                        ". For collection-valued fields, only the exact types java.util.Collection, java.util.Set, and "
+                        +
+                        "java.util.List are supported at this time.");
+        }
 
-	        // for (String fv{idx} : state.get({fieldName}))
-	        method.append(
-	          Stmt.loadVariable("state").invoke("getState").invoke("get", queryParamName).foreach("elem", Object.class)
-	            .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
-	            .append(Stmt.loadVariable(fieldName).invoke("add", paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
-	            .finish()
-	          );
-	        method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), Stmt.loadVariable(fieldName)));
-	      }
-	      else {
-	        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke("getState").invoke("get", queryParamName)));
-	        method.append(
-	          If.cond(Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
-	              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), defaultValueStatement(erasedFieldType))).finish()
-	            .else_()
-	              .append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"), paramFromStringStatement(erasedFieldType, Stmt.loadVariable("fv" + idx).invoke("iterator").invoke("next"))))
-	              .finish()
-	          );
-	      }
-	      idx++;
-	    }
+        // for (String fv{idx} : state.get({fieldName}))
+        method.append(
+            Stmt.loadVariable("state").invoke("getState").invoke("get", queryParamName).foreach("elem", Object.class)
+                .append(Stmt.declareVariable("fv" + idx, Stmt.castTo(String.class, Stmt.loadVariable("elem"))))
+                .append(
+                    Stmt.loadVariable(fieldName).invoke("add",
+                        paramFromStringStatement(elementType, Stmt.loadVariable("fv" + idx))))
+                .finish()
+            );
+        method.append(Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"),
+            Stmt.loadVariable(fieldName)));
+      }
+      else {
+        method.append(Stmt.declareFinalVariable("fv" + idx, Collection.class, Stmt.loadVariable("state").invoke(
+            "getState").invoke("get", queryParamName)));
+        method.append(
+            If.cond(
+                Bool.or(Bool.isNull(Stmt.loadVariable("fv" + idx)), Stmt.loadVariable("fv" + idx).invoke("isEmpty")))
+                .append(
+                    Stmt.loadVariable("this").invoke(injectorName, Stmt.loadVariable("widget"),
+                        defaultValueStatement(erasedFieldType))).finish()
+                .else_()
+                .append(
+                    Stmt.loadVariable("this").invoke(
+                        injectorName,
+                        Stmt.loadVariable("widget"),
+                        paramFromStringStatement(erasedFieldType, Stmt.loadVariable("fv" + idx).invoke("iterator")
+                            .invoke("next"))))
+                .finish()
+            );
+      }
+      idx++;
+    }
 
-	    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, true);
-	  }
+    checkMethodAndAddPrivateAccessors(pageImplBuilder, method, pageClass, annotation, true);
+  }
 
   /**
-   * Renders the page-to-page navigation graph into the file {@code navgraph.gv}
-   * in the {@code .errai} cache directory.
-   *
-   * @param fromClass
+   * Renders the page-to-page navigation graph into the file {@code navgraph.gv} in the
+   * {@code .errai} cache directory.
+   * 
    */
   private void renderNavigationToDotFile(BiMap<String, MetaClass> pages) {
     final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath(), "navgraph.gv");
@@ -400,7 +409,8 @@ public class NavigationGraphGenerator extends Generator {
         }
       }
       out.println("}");
-    } catch (FileNotFoundException e) {
+    }
+    catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
     finally {
@@ -433,7 +443,8 @@ public class NavigationGraphGenerator extends Generator {
       return Stmt.invokeStatic(Boolean.class, "valueOf", stringValue);
     }
     else {
-      throw new UnsupportedOperationException("@PageState fields of type " + toType.getFullyQualifiedName() + " are not supported");
+      throw new UnsupportedOperationException("@PageState fields of type " + toType.getFullyQualifiedName()
+          + " are not supported");
     }
   }
 
@@ -446,13 +457,12 @@ public class NavigationGraphGenerator extends Generator {
         return Stmt.load(false);
       }
       else {
-        throw new UnsupportedOperationException("Don't know how to make a default value for @PageState field of type " + type.getFullyQualifiedName());
+        throw new UnsupportedOperationException("Don't know how to make a default value for @PageState field of type "
+            + type.getFullyQualifiedName());
       }
     }
     else {
       return Stmt.load(null);
     }
   }
-
-
 }
