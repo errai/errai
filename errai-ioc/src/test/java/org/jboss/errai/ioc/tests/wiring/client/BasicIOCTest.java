@@ -28,6 +28,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
+import org.jboss.errai.ioc.tests.wiring.client.res.TestProviderDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
 import org.junit.runner.RunWith;
@@ -165,4 +166,17 @@ public class  BasicIOCTest extends IOCClientTestCase {
     
     assertSame(IOC.getBeanManager(), bean.getBeanManager());
   }
+
+  public void testProvidedValueLookup() {
+    TestProviderDependentBean dependentBean = IOC.getBeanManager().lookupBean(TestProviderDependentBean.class)
+        .getInstance();
+
+    assertNotNull(dependentBean);
+    assertNotNull(dependentBean.getTestProvidedIface());
+    assertEquals("foo", dependentBean.getTestProvidedIface().getText());
+
+
+
+  }
+
 }
