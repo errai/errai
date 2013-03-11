@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.gen2.picker.client.SliderBar;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.events.place.PlaceChangeMapEvent;
@@ -27,6 +28,8 @@ import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
 import org.jboss.errai.demo.grocery.client.local.map.LocationProvider;
 import org.jboss.errai.demo.grocery.client.shared.Department;
@@ -58,6 +61,8 @@ public class StorePage extends Composite {
   @Inject private @DataField TextBox locationSearchBox;
   @Inject private @Bound @DataField TextBox name;
   @Inject private @Bound @DataField TextBox address;
+  @Inject private @Bound @DataField SliderBar radius;
+
   @Inject private @DataField SuggestBox addDepartment;
   @Inject private @DataField DepartmentList departmentList;
 
@@ -132,6 +137,13 @@ public class StorePage extends Composite {
           public void onModificationEnd(VectorFeature vectorFeature) {
             float diameter = vectorFeature.getGeometry().getBounds().getWidth();
             storeBinder.getModel().setRadius(diameter / 2);
+          }
+        });
+
+        storeBinder.addPropertyChangeHandler("radius", new PropertyChangeHandler<Double>() {
+          @Override
+          public void onPropertyChange(PropertyChangeEvent<Double> event) {
+            reDrawGeoFence(map);
           }
         });
 
@@ -226,7 +238,7 @@ public class StorePage extends Composite {
       markers.addMarker(marker);
 
       centerMap(map, center, 15);
-      drawGeoFence(map);
+      reDrawGeoFence(map);
     }
     else {
       locationProvider.getCurrentPosition(new LocationCallback() {
@@ -238,16 +250,17 @@ public class StorePage extends Composite {
     }
   }
 
-  private void drawGeoFence(Map map) {
+  private void reDrawGeoFence(Map map) {
     LonLat center = map.getCenter();
     center.transform(map.getProjection(), DEFAULT_PROJECTION.getProjectionCode());
+    removeGeoFence();
 
     Point[] points = new Point[40];
 
     int angle = 0;
     for (int i = 0; i < 40; i++) {
       angle += 360 / 40;
-      float radius = storeBinder.getModel().getRadius();
+      double radius = storeBinder.getModel().getRadius();
       LonLat lonLat = LonLat.narrowToLonLat(destinationVincenty(center.lon(), center.lat(), angle, radius));
       lonLat.transform("EPSG:4326", map.getProjection());
       points[i] = new Point(lonLat.lon(), lonLat.lat());
@@ -259,7 +272,15 @@ public class StorePage extends Composite {
     modifyControl.activate();
   }
 
-  private native JSObject destinationVincenty(double lon, double lat, int angle, float distance) /*-{
+  private void removeGeoFence() {
+    if (vectorLayer.getFeatures() != null) {
+      for (VectorFeature vectorFeature : vectorLayer.getFeatures()) {
+        vectorLayer.removeFeature(vectorFeature);
+      }
+    }
+  }
+
+  private native JSObject destinationVincenty(double lon, double lat, int angle, double distance) /*-{
     return $wnd.OpenLayers.Util.destinationVincenty(new $wnd.OpenLayers.LonLat(lon, lat), angle, distance);
   }-*/;
 
