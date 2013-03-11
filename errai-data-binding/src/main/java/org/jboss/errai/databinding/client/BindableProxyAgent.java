@@ -16,20 +16,6 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.jboss.errai.common.client.api.Assert;
-import org.jboss.errai.databinding.client.api.Convert;
-import org.jboss.errai.databinding.client.api.Converter;
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
-import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
-
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -38,6 +24,19 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.databinding.client.api.Convert;
+import org.jboss.errai.databinding.client.api.Converter;
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
+import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the target model and bound widgets in sync.
@@ -48,7 +47,7 @@ import com.google.gwt.user.client.ui.Widget;
  * {@link DataBinder#DataBinder(Object, InitialState)})</li>
  * 
  * <li>Update the bound widget when a setter method is invoked on the model (see
- * {@link #updateWidgetAndFireEvent(String, Object, Object)}). Works for widgets that either implement {@link HasValue}
+ * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for widgets that either implement {@link HasValue}
  * or {@link HasText})</li>
  * 
  * <li>Update the bound widgets when a non-accessor method is invoked on the model (by comparing all bound properties to
@@ -147,7 +146,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
 
   /**
    * Binds the provided widget to the specified property (or property chain) of the model instance associated with this
-   * proxy (see {@link #setModel(Object, InitialState)}).
+   * proxy (see {@link DataBinder#setModel(Object, InitialState)}).
    * 
    * @param widget
    *          the widget to bind to, must not be null.
@@ -284,9 +283,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Updates all bound widgets if necessary (if a bound property's value has changed). This method is invoked in case a
    * bound property changed outside the property's write method (when using a non accessor method).
-   * 
-   * @param <P>
-   *          The property type of the changed property.
    */
   void updateWidgetsAndFireEvents() {
     for (String property : propertyTypes.keySet()) {
@@ -327,8 +323,6 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * 
    * @param <P>
    *          The property type of the changed property.
-   * @param source
-   *          The source object.
    * @param property
    *          The name of the property that changed.
    * @param oldValue
