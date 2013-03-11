@@ -1,14 +1,14 @@
 package org.jboss.errai.codegen.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Utility class with methods that generate code to access private, default
@@ -184,8 +184,9 @@ public class PrivateAccessUtil {
   }
 
   public static String getPrivateFieldInjectorName(final MetaField field) {
-    return condensify(field.getDeclaringClass()
-        .getFullyQualifiedName()) + "_" + field.getName();
+    return condensify(field.getDeclaringClass().getFullyQualifiedName())
+        + "_" + condensify(field.getType().getFullyQualifiedName())
+        + "_" + field.getName();
   }
 
   public static String getPrivateMethodName(final MetaMethod method) {

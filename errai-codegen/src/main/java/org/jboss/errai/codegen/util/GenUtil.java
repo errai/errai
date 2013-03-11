@@ -16,6 +16,12 @@
 
 package org.jboss.errai.codegen.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Modifier;
@@ -37,16 +43,9 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.DataConversion;
 import org.mvel2.util.NullType;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

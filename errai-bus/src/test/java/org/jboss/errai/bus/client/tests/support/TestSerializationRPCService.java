@@ -162,6 +162,10 @@ public interface TestSerializationRPCService {
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);
 
   public GenericEntity testGenericEntity(GenericEntity e);
+  
+  public GenericEntitySubtypeInteger testGenericEntitySubtypeInteger(GenericEntitySubtypeInteger e);
+  
+  public GenericEntitySubtypeString testGenericEntitySubtypeString(GenericEntitySubtypeString e);
 
   public EntityWithSuperClassField testEntityWithSuperClassField(EntityWithSuperClassField e);
 
