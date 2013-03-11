@@ -21,7 +21,7 @@ public class Store {
   private double latitude;
   private double longitude;
 
-  private float radius;
+  private double radius;
 
   @OneToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE})
   private List<Department> departments = new ArrayList<Department>();
@@ -58,11 +58,11 @@ public class Store {
     this.longitude = longitude;
   }
 
-  public float getRadius() {
+  public double getRadius() {
     return radius;
   }
 
-  public void setRadius(float radius) {
+  public void setRadius(double radius) {
     this.radius = radius;
   }
 
