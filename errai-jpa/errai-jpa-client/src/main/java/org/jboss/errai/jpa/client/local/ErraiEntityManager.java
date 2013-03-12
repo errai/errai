@@ -93,6 +93,20 @@ public class ErraiEntityManager implements EntityManager {
   }
 
   /**
+   * Creates an EntityManager that knows about all the same managed types and
+   * named queries as the given entity manager, but works from a different
+   * storage backend. When combined with the namespacing support of a storage
+   * backend, this allows you to work with several independent entity managers
+   * at the same time.
+   *
+   * @param delegateEntityManager
+   * @param namespacedStorageBackend
+   */
+  public ErraiEntityManager(ErraiEntityManager delegateEntityManager, StorageBackendFactory namespacedStorageBackend) {
+    this(delegateEntityManager.getMetamodel(), delegateEntityManager.namedQueries, namespacedStorageBackend);
+  }
+
+  /**
    * This method performs the unchecked (but safe) cast of
    * {@code object.getClass()} to {@code Class<T>}. Using this method avoids the
    * need to mark larger blocks of code with a SuppressWarnings annotation.

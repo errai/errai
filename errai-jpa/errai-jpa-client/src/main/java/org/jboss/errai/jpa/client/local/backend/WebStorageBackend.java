@@ -16,7 +16,14 @@ import com.google.gwt.json.client.JSONValue;
 
 /**
  * The storage backend for HTML WebStorage, a storage facility supported by most
- * browsers for at least 2.5 million characters of data, (5 megabytes of unicode text).
+ * browsers for at least 2.5 million characters of data, (5 megabytes of Unicode
+ * text).
+ * <p>
+ * This backend supports <i>namespacing</i>, which is a way of dividing up the
+ * storage into any number of non-overlapping buckets. For any two namespaces
+ * <i>A</i> and <i>B</i> (<i>A</i> != <i>B</i>), the storage backend for
+ * namespace <i>A</i> will never see, modify, or otherwise or interfere with
+ * anything stored in the storage backend for namespace <i>B</i>.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
@@ -30,20 +37,59 @@ public class WebStorageBackend implements StorageBackend {
   };
 
   private final ErraiEntityManager em;
+  private final String namespace;
 
+  /**
+   * Creates a WebStorageBackend that works with entities in the default storage
+   * namespace.
+   *
+   * @param erraiEntityManager
+   *          the ErraiEntityManager this storage backend will be used with (it
+   *          is used for resolving entity references).
+   */
   public WebStorageBackend(ErraiEntityManager erraiEntityManager) {
+    this(erraiEntityManager, "");
+  }
+
+  /**
+   * Creates a WebStorageBackend that works with entities in the given storage
+   * namespace.
+   *
+   * @param erraiEntityManager
+   *          the ErraiEntityManager this storage backend will be used with (it
+   *          is used for resolving entity references).
+   * @param namespace
+   *          The namespace to operate within. Must not be null.
+   */
+  public WebStorageBackend(ErraiEntityManager erraiEntityManager, String namespace) {
     em = Assert.notNull(erraiEntityManager);
+    this.namespace = Assert.notNull(namespace);
   }
 
   @Override
   public void removeAll() {
-    LocalStorage.removeAll();
+
+    // this is done in two phases because it would be bad to modify the key set while iterating over it
+    final List<String> toRemove = new ArrayList<String>();
+
+    LocalStorage.forEachKey(new EntryVisitor() {
+      @Override
+      public void visit(String key, String value) {
+        if (parseNamespacedKey(em, key, false) != null) {
+          toRemove.add(key);
+        }
+      }
+    });
+
+    for (String key : toRemove) {
+      LocalStorage.remove(key);
+    }
   }
 
   @Override
   public <X> void put(Key<X,?> key, X value) {
     ErraiEntityType<X> entityType = key.getEntityType();
-    String keyJson = key.toJson();
+    String keyJson = namespace + key.toJson();
     JSONValue valueJson = entityType.toJson(em, value);
     System.out.println(">>>put '" + keyJson + "'");
     LocalStorage.put(keyJson, valueJson.toString());
@@ -52,7 +98,7 @@ public class WebStorageBackend implements StorageBackend {
   @Override
   public <X> X get(Key<X, ?> key) {
     ErraiEntityType<X> entityType = key.getEntityType();
-    String keyJson = key.toJson();
+    String keyJson = namespace + key.toJson();
     String valueJson = LocalStorage.get(keyJson);
     System.out.println("<<<get '" + keyJson + "' : " + valueJson);
     X entity;
@@ -74,7 +120,7 @@ public class WebStorageBackend implements StorageBackend {
     LocalStorage.forEachKey(new EntryVisitor() {
       @Override
       public void visit(String key, String value) {
-        Key<?, ?> k = Key.fromJson(em, key, false);
+        Key<?, ?> k = parseNamespacedKey(em, key, false);
         if (k == null) return;
         System.out.println("getAll(): considering " + value);
         if (k.getEntityType() == type) {
@@ -105,7 +151,7 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public boolean contains(Key<?, ?> key) {
-    String keyJson = key.toJson();
+    String keyJson = namespace + key.toJson();
     boolean contains = LocalStorage.get(keyJson) != null;
     System.out.println("<<<contains '" + keyJson + "' : " + contains);
     return contains;
@@ -113,14 +159,14 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public <X> void remove(Key<X, ?> key) {
-    String keyJson = key.toJson();
+    String keyJson = namespace + key.toJson();
     LocalStorage.remove(keyJson);
   }
 
   @Override
   public <X> boolean isModified(Key<X, ?> key, X value) {
     ErraiEntityType<X> entityType = key.getEntityType();
-    String keyJson = key.toJson();
+    String keyJson = namespace + key.toJson();
     JSONValue newValueJson = entityType.toJson(em, value);
     JSONValue oldValueJson = JSONParser.parseStrict(LocalStorage.get(keyJson));
     boolean modified = !JsonUtil.equals(newValueJson, oldValueJson);
@@ -130,5 +176,12 @@ public class WebStorageBackend implements StorageBackend {
       System.out.println("   New: " + newValueJson);
     }
     return modified;
+  }
+
+  private Key<?, ?> parseNamespacedKey(ErraiEntityManager em, String key, boolean failIfNotFound) {
+    if ( (!key.startsWith(namespace)) || namespace.length() >= key.length()) return null;
+    key = key.substring(namespace.length());
+    if (key.charAt(0) != '{') return null;
+    return Key.fromJson(em, key, failIfNotFound);
   }
 }

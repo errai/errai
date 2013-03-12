@@ -16,14 +16,13 @@ import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 @GlobalEntityListener
 public class TestingGlobalEntityListener {
 
-  // ------ Lifecycle callbacks (assorted access levels to test that they all work) ------
-
   /**
    * A place to record JPA entity lifecycle events when they happen so they can
    * be verified in the test suite.
    */
   public static final List<CallbackLogEntry> CALLBACK_LOG = new ArrayList<CallbackLogEntry>();
 
+  // ------ Lifecycle callbacks (assorted access levels to test that they all work) ------
   @PrePersist private void prePersist(Object entity) { CALLBACK_LOG.add(new CallbackLogEntry(entity, PrePersist.class)); };
   @PostPersist private void postPersist(Object entity) { CALLBACK_LOG.add(new CallbackLogEntry(entity, PostPersist.class)); };
   @PreRemove void preRemove(Object entity) { CALLBACK_LOG.add(new CallbackLogEntry(entity, PreRemove.class)); };

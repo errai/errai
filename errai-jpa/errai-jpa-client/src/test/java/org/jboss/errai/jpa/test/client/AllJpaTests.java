@@ -35,7 +35,8 @@ import org.junit.runners.Suite;
   IdGeneratorTest.class,
   ErraiCascadeTest.class,
   HibernateCascadeTest.class,
-  JsonUtilTest.class})
+  JsonUtilTest.class,
+  NamespacedEntityManagerTest.class})
 public class AllJpaTests {
 
 }
