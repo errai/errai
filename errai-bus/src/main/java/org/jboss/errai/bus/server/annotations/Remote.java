@@ -37,7 +37,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
  *
  *     public class ClientClass {
  *       {@code @Inject}
- *       private Caller<MyService> myService;
+ *       private Caller&lt;MyService&gt; myService;
  *
  *       ...
  *
