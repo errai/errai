@@ -16,7 +16,9 @@
 
 package org.jboss.errai.uibinder.test.client.res;
 
-import com.google.gwt.core.client.GWT;
+import javax.annotation.PostConstruct;
+import javax.inject.Singleton;
+
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -25,9 +27,6 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.inject.Inject;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Singleton;
 
 /**
  * @author Mike Brock

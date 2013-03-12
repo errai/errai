@@ -34,6 +34,7 @@ import org.jboss.errai.ioc.client.api.PackageTarget;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXParseException;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -182,7 +183,7 @@ public class UiBinderGenerator extends Generator {
     MessagesWriter messages = new MessagesWriter(oracle, BINDER_URI, logger,
             templatePath, determinePackage(interfaceType), implName);
 
-    boolean useLazyWidgetBuilders = useLazyWidgetBuilders(logger, propertyOracle);
+    boolean useLazyWidgetBuilders = useLazyWidgetBuilders(logger, propertyOracle) && !designTime.isDesignTime();
     FieldManager fieldManager = new FieldManager(oracle, logger, useLazyWidgetBuilders);
 
     UiBinderWriter uiBinderWriter = new UiBinderWriter(interfaceType, implName,
@@ -221,12 +222,13 @@ public class UiBinderGenerator extends Generator {
       }
       doc = new W3cDomHelper(logger.getTreeLogger(), resourceOracle).documentFor(
               content, resource.getPath());
-    }
-    catch (SAXParseException e) {
-      logger.die(
-              "Error parsing XML (line " + e.getLineNumber() + "): "
-                      + e.getMessage(), e);
-    }
+    } catch (IOException iex) {
+      logger.die("Error opening resource:" + resource.getLocation(), iex);
+	} catch (SAXParseException e) {
+	  logger.die(
+	     "Error parsing XML (line " + e.getLineNumber() + "): "
+	         + e.getMessage(), e);
+	}
     return doc;
   }
 
