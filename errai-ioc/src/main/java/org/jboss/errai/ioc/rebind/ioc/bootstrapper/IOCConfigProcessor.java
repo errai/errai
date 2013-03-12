@@ -39,7 +39,6 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
-import org.jboss.errai.ioc.rebind.ioc.extension.ProvidedClassAnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
 import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
 import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
@@ -47,9 +46,6 @@ import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.ProducerInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -189,7 +185,7 @@ public class IOCConfigProcessor {
                                         final Annotation annotation,
                                         final IOCProcessingContext context) {
 
-              final MetaClass providerClassType = instance.getType();
+              final MetaClass providerClassType = instance.getEnclosingType();
 
               if (!checkIfEnabled(providerClassType)) {
                 return;
@@ -303,7 +299,7 @@ public class IOCConfigProcessor {
                                         final Annotation annotation,
                                         final IOCProcessingContext context) {
 
-              if (!checkIfEnabled(instance.getType())) {
+              if (!checkIfEnabled(instance.getEnclosingType())) {
                 return;
               }
 
@@ -370,7 +366,8 @@ public class IOCConfigProcessor {
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
 
-              final List<Injector> injectors = new ArrayList<Injector>(injectionContext.getInjectors(instance.getType()));
+              final List<Injector> injectors
+                  = new ArrayList<Injector>(injectionContext.getInjectors(instance.getEnclosingType()));
               final Injector injector;
 
               final Iterator<Injector> injectorIterator = injectors.iterator();
@@ -390,7 +387,8 @@ public class IOCConfigProcessor {
                 injector = injectors.get(0);
               }
               else {
-                injector = injectionContext.getInjectorFactory().getTypeInjector(instance.getType(), injectionContext);
+                injector = injectionContext.getInjectorFactory()
+                    .getTypeInjector(instance.getEnclosingType(), injectionContext);
               }
 
               if (injector.isEnabled() && injector.isRegularTypeInjector()) {
@@ -407,7 +405,7 @@ public class IOCConfigProcessor {
             public boolean handle(final InjectableInstance instance,
                                   final Annotation annotation,
                                   final IOCProcessingContext context) {
-              final Injector injector = injectionContext.getInjector(instance.getType());
+              final Injector injector = injectionContext.getInjector(instance.getEnclosingType());
 
               if (injector.isEnabled()) {
                 injector.renderProvider(instance);

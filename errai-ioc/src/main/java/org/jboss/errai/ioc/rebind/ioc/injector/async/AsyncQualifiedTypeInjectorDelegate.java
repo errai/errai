@@ -30,7 +30,7 @@ public class AsyncQualifiedTypeInjectorDelegate extends QualifiedTypeInjectorDel
               .invoke("addBean", type, delegate.getInjectedType(), Refs.get(getCreationalCallbackVarName()),
                   isSingleton(), md.render(), null, false));
 
-      for (final RegistrationHook hook : registrationHooks) {
+      for (final RegistrationHook hook : getRegistrationHooks()) {
         hook.onRegister(context, valueRef);
       }
     }

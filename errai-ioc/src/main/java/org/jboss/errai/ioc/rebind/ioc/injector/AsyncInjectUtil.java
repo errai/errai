@@ -380,7 +380,6 @@ public class AsyncInjectUtil {
             inj.getQualifyingMetadata().getQualifiers());
       }
 
-
       return inj.getBeanInstance(injectableInstance);
     }
     else {
@@ -554,13 +553,11 @@ public class AsyncInjectUtil {
     final MetaClass[] parmTypes = InjectUtil.parametersToClassTypeArray(parms);
     final Statement[] parmValues = new Statement[parmTypes.length];
 
-    for (int i = 0; i < parmTypes.length; i++
-        ) {
+    for (int i = 0; i < parmTypes.length; i++) {
       final Statement stmt;
       final MetaClass parmType = parmTypes[i];
       final MetaParameter metaParameter = parms[i];
       try {
-
         final QualifyingMetadata qualifyingMetadata = ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(
             parms[i].getAnnotations()
         );
@@ -645,8 +642,6 @@ public class AsyncInjectUtil {
     final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
         MetaClassFactory.typeParametersOf(type));
 
-   // final IOCProcessingContext processingContext = ctx.getProcessingContext();
-
     final BlockBuilder<AnonymousClassStructureBuilder> statements = Stmt.newObject(callbackClass).extend()
         .publicOverridesMethod("callback", Parameter.of(type, "bean"));
 
@@ -654,16 +649,10 @@ public class AsyncInjectUtil {
       statements.append(stmt);
     }
 
- //   ctx.setAttribute(RECEIVING_CALLBACK_ATTRIB, statements);
-
     final ObjectBuilder finish = statements.finish()
         .publicOverridesMethod("toString")
         .append(Stmt.load(type).invoke("getName").returnValue()).finish()
         .finish();
-//
-
-//    processingContext.append(Stmt.declareFinalVariable(callbackVarName, callbackClass, finish));
-//    processingContext.append(Stmt.loadVariable("async").invoke("wait", Refs.get(callbackVarName)));
 
     return finish;
   }

@@ -43,9 +43,9 @@ import java.util.Map;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
-public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
+public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
 
-  public DecoratorDataField(Class<DataField> decoratesWith) {
+  public DataFieldCodeDecorator(Class<DataField> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -210,7 +210,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    * of {@link DataField} names and variable {@link Statement} instances.
    */
   private static final String dataFieldMapName(MetaClass composite) {
-    return DecoratorDataField.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
+    return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
   }
   
   /**
@@ -218,7 +218,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    * of {@link DataField} names and {@link Bound} instances.
    */
   private static final String dataFieldBoundMapName(MetaClass composite) {
-    return DecoratorDataField.class.getName() + "_DATA_FIELD_BOUND_MAP_" + composite.getName();
+    return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_BOUND_MAP_" + composite.getName();
   }
 
   /**
@@ -226,6 +226,6 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    * of {@link DataField} names and variable {@link MetaClass} types.
    */
   private static final String dataFieldTypeMapName(MetaClass composite) {
-    return DecoratorDataField.class.getName() + "_DATA_FIELD_TYPE_MAP_" + composite.getName();
+    return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_TYPE_MAP_" + composite.getName();
   }
 }

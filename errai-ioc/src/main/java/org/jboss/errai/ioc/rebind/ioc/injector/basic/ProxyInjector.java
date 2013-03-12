@@ -18,7 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.injector.basic;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.newObject;
 
@@ -92,8 +91,10 @@ public class ProxyInjector extends AbstractInjector {
     final BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
             .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
-    final Statement proxyResolver = proxyResolverBody._(loadVariable(varName)
-            .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
+    final Statement proxyResolver = proxyResolverBody._(
+        ProxyMaker.closeProxy(Refs.get(varName), Refs.get("obj"))
+
+    ).finish().finish();
 
     proxyResolverBody._(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
 

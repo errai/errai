@@ -90,12 +90,12 @@ import java.util.regex.Pattern;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
-public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
+public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
 
-  private static final Logger logger = LoggerFactory.getLogger(DecoratorTemplated.class);
+  private static final Logger logger = LoggerFactory.getLogger(TemplatedCodeDecorator.class);
 
-  public DecoratorTemplated(final Class<Templated> decoratesWith) {
+  public TemplatedCodeDecorator(final Class<Templated> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -214,7 +214,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                                                  final List<Statement> initStmts, final Statement component,
                                                  final String dataFieldElementsVarName, final Statement fieldsMap) {
 
-    final Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
+    final Map<String, MetaClass> dataFieldTypes = DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getType());
     dataFieldTypes.put("this", ctx.getType());
 
     final MetaClass declaringClass = ctx.getEnclosingType();
@@ -479,7 +479,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
      */
-    final Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+    final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getType());
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
           .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
@@ -497,7 +497,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     /*
      * Bind each bound data field if data binder is found and has been initialized.
      */
-    Map<String, BoundDataField> boundDataFields = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType());
+    Map<String, BoundDataField> boundDataFields = DataFieldCodeDecorator.aggregateDataFieldBoundMap(ctx, ctx.getType());
     BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
     for (Entry<String, BoundDataField> boundDataField : boundDataFields.entrySet()) {
       Bound bound = boundDataField.getValue().getBound();

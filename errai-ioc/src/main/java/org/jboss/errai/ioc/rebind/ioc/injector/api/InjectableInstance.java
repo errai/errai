@@ -129,7 +129,8 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   /**
    * Returns an instance of a {@link Statement} which represents the value associated for injection at this
-   * InjectionPoint.
+   * InjectionPoint. This statement may represent a raw field access, a method call to a getter method, or an
+   * internalized variable in the bootstrapper which is holding the value.
    *
    * @return a statement representing the value of the injection point.
    */
@@ -243,4 +244,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         throw new RuntimeException("cannot call tasktype: " + taskType);
     }
   }
+
+
 }
