@@ -24,11 +24,11 @@ public class ModuleWithDeclarativeBinding {
   @Bound(property="child.name")
   private final TextBox name = new TextBox();
 
-  @Bound(property = "lastChanged", converter = BindingDateConverter.class)
+  // Test @Bound annotation on getter method
   private final TextBox date = new TextBox();
 
-  @Bound 
-  // tests automatic initialization
+  //tests automatic initialization
+  @Bound  
   private TextBox age;
   
   private final TestModel model;
@@ -45,7 +45,8 @@ public class ModuleWithDeclarativeBinding {
   public TextBox getNameTextBox() {
     return name;
   }
-
+  
+  @Bound(property = "lastChanged", converter = BindingDateConverter.class)
   public TextBox getDateTextBox() {
     return date;
   }

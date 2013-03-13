@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.api.DataBinder;
@@ -68,18 +69,18 @@ public class DataBindingUtil {
 
     final Collection<Object> allInjectors = beanMetric.getAllInjectors();
     if (allInjectors.size() > 1) {
-      throw new GenerationException("multiple @AutoBound data binders found in constructor of " +
-          ctx.getEnclosingType());
+      throw new GenerationException("Multiple @AutoBound data binders found in " + ctx.getEnclosingType());
     }
     else if (allInjectors.size() == 1) {
       final Object injectorElement = allInjectors.iterator().next();
-
+      
       if (injectorElement instanceof MetaConstructor || injectorElement instanceof MetaMethod) {
         final MetaParameter mp = beanMetric.getConsolidatedMetaParameters().iterator().next();
 
         checkTypeIsDataBinder(mp.getType());
         dataModelType = (MetaClass) mp.getType().getParameterizedType().getTypeParameters()[0];
         dataBinderRef = ctx.getInjectionContext().getInlineBeanReference(mp);
+        ctx.ensureMemberExposed();
       }
       else {
         final MetaField field = (MetaField) allInjectors.iterator().next();
@@ -89,6 +90,7 @@ public class DataBindingUtil {
         dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
             PrivateAccessUtil.getPrivateFieldInjectorName(field),
             Variable.get(ctx.getInjector().getInstanceVarName()));
+        ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
       }
     }
     else {
@@ -100,6 +102,7 @@ public class DataBindingUtil {
           dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
               PrivateAccessUtil.getPrivateFieldInjectorName(field),
               Variable.get(ctx.getInjector().getInstanceVarName()));
+          ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
           break;
         }
       }

@@ -24,30 +24,26 @@ import java.lang.annotation.Target;
 import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 
-import com.google.gwt.user.client.ui.Composite;
-
 /**
- * This annotation may only be used in subclasses of {@link Composite} that have been annotated with
- * {@link Templated}, or in a super-class of said {@link Composite} types.
+ * Indicates that an annotated widget field or the widget returned by an annotated method should
+ * automatically be bound to a property of a data model associated with a {@link DataBinder} (see
+ * {@link AutoBound}).
  * <p>
- * It indicates that a {@link DataField} should automatically be bound to a property of a data model
- * associated with a {@link DataBinder} (see {@link AutoBound}).
- * <p>
- * If no property is specified, the {@link DataField} is bound to the data model property with the
- * same name as the field which is the target of this annotation.
+ * If no property is specified, the widget is bound to the data model property with the
+ * same name as the field or method which is the target of this annotation.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
+@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @SuppressWarnings("rawtypes")
 public @interface Bound {
 
   /**
-   * The name of the data model property (or a property chain) to bind the {@link DataField} to,
+   * The name of the data model property (or a property chain) to bind the widget to,
    * following Java bean conventions. If omitted, the widget will be bound to the data model
-   * property with the same name as the field which is the target of this annotation.
+   * property with the same name as the field or method which is the target of this annotation.
    */
   String property() default "";
 

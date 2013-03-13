@@ -35,10 +35,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.util.If;
-import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -73,7 +70,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
     BlockBuilder<AnonymousClassStructureBuilder> initBlock = initBlockCache.get(declaringClass);
 
     // Ensure private accessors are generated for data binder and bound widget fields
-    exposeFields(declaringClass, ctx);
+    ctx.ensureMemberExposed();
 
     final DataBindingUtil.DataBinderLookup binderLookup = DataBindingUtil.getDataBinder(ctx);
     if (binderLookup != null) {
@@ -83,7 +80,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
         statements.add(
             If.isNull(Variable.get("binder")).append(
                 Stmt.loadVariable("binder").assignValue(
-                    Stmt.invokeStatic(DataBinder.class, "forType",Stmt.load(binderLookup.getDataModelType()))))
+                    Stmt.invokeStatic(DataBinder.class, "forType", Stmt.load(binderLookup.getDataModelType()))))
                 .finish());
       }
 
@@ -98,13 +95,15 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       }
 
       Statement widget = ctx.getValueStatement();
-      // Ensure the @Bound field is a widget
+      // Ensure the @Bound field or method provides a widget
       if (!ctx.getElementTypeOrMethodReturnType().isAssignableTo(Widget.class)) {
-        throw new GenerationException("@Bound field " + ctx.getMemberName() + " must be a widget type but is of type: "
+        throw new GenerationException("@Bound field or method " + ctx.getMemberName()
+            + " in class " + ctx.getInjector().getInjectedType()
+            + " must provide a widget type but provides: "
             + ctx.getElementTypeOrMethodReturnType().getFullyQualifiedName());
       }
       // and has been initialized
-      if (!ctx.isAnnotationPresent(Inject.class)) {
+      if (!ctx.isAnnotationPresent(Inject.class) && ctx.getField() != null) {
         Statement widgetInit = Stmt.invokeStatic(
             ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
             PrivateAccessUtil.getPrivateFieldInjectorName(ctx.getField()),
@@ -114,18 +113,18 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
         statements.add(If.isNull(widget).append(widgetInit).finish());
       }
 
-      // Generate the binding for the bound field
+      // Generate the binding
       Statement converter =
             bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
       statements.add(Stmt.loadVariable("binder").invoke("bind", widget, property, converter));
     }
     else {
-      throw new GenerationException("No @AutoBound data binder found for @Bound field "
+      throw new GenerationException("No @AutoBound data binder found for @Bound field or method"
             + ctx.getMemberName() + " in class " + ctx.getInjector().getInjectedType());
     }
 
     // The first decorator to run will generate the initialization callback, the subsequent
-    // decorators (for other fields of the same class) will just amend the block.
+    // decorators (for other bound fields/methods of the same class) will just amend the block.
     if (initBlock == null) {
       initBlock = createInitCallback(declaringClass, "obj");
       initBlockCache.put(declaringClass, initBlock);
@@ -144,7 +143,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
    * Generates an anonymous {@link InitializationCallback} that will contain the auto binding logic.
    */
   private BlockBuilder<AnonymousClassStructureBuilder> createInitCallback(final MetaClass type, final String initVar) {
-    
+
     BlockBuilder<AnonymousClassStructureBuilder> block =
         Stmt.newObject(parameterizedAs(InitializationCallback.class, typeParametersOf(type)))
             .extend()
@@ -152,25 +151,4 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
 
     return block;
   }
-
-  /**
-   * Ensures private accessors are generated for data binder and bound widget fields.
-   * 
-   * @param declaringClass
-   *          the class in which the bound field was declared
-   * @param ctx
-   *          the injection context
-   */
-  private void exposeFields(final MetaClass declaringClass, InjectableInstance<Bound> ctx) {
-    final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
-    for (final MetaField field : declaringClass.getFields()) {
-      if (field.getType().getErased().equals(databinderMetaClass)) {
-        ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
-      }
-    }
-    if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Widget.class)) {
-      ctx.getInjectionContext().addExposedField(ctx.getField(), PrivateAccessType.Both);
-    }
-  }
-
 }
