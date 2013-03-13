@@ -179,17 +179,16 @@ public class BindableProxyGenerator {
       MetaClass paramType = setterMethod.getParameters()[0].getType();
 
       // If the set method we are proxying returns a value, capture that value into a local variable
-      Statement callSetterOnTarget = null;
       Statement returnValueOfSetter = null;
       String returnValName = ensureSafeLocalVariableName("returnValueOfSetter", setterMethod);
+      Statement callSetterOnTarget = 
+        target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
       if (!setterMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
         callSetterOnTarget =
             Stmt.declareFinalVariable(returnValName, setterMethod.getReturnType(), callSetterOnTarget);
         returnValueOfSetter = Stmt.nestedCall(Refs.get(returnValName)).returnValue();
       }
       else {
-        callSetterOnTarget =
-            target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
         returnValueOfSetter = EmptyStatement.INSTANCE;
       }
 
