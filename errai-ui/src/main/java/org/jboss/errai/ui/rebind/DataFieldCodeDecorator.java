@@ -54,7 +54,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     ctx.ensureMemberExposed();
     Statement instance = ctx.getValueStatement();
     String name = getTemplateDataFieldName(ctx.getAnnotation(), ctx.getMemberName());
-    if (ctx.getEnclosingType().isAssignableTo(Element.class)) {
+    if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Element.class)) {
       if (ctx.isAnnotationPresent(Inject.class)) {
         throw new GenerationException("@DataField [" + name + "] in class ["
                 + ctx.getEnclosingType().getFullyQualifiedName() + "] is of type ["
@@ -63,7 +63,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
       }
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
-    saveDataField(ctx, ctx.getEnclosingType(), name, ctx.getMemberName(), ctx.getAnnotation(Bound.class), instance);
+    saveDataField(ctx, ctx.getElementTypeOrMethodReturnType(), name, ctx.getMemberName(), ctx.getAnnotation(Bound.class), instance);
 
     return new ArrayList<Statement>();
 

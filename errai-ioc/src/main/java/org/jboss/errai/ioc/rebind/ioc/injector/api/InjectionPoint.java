@@ -92,13 +92,13 @@ public class InjectionPoint<T> {
 
   /**
    * Returns the element type or a method return type, based on what the injection point is.
-   * <p>
+   * <p/>
    * <strong>Parameters</strong>:
    * <pre><code>
    *  public class MyClass {
    *   public void MyClass(@A Set set) {
    *   }
-   *
+   * <p/>
    *   public void setMethod(Foo foo, @B Bar t) {
    *   }
    *  }
@@ -106,7 +106,7 @@ public class InjectionPoint<T> {
    * If the element being decorated is the parameter where <tt>@A</tt> represents the injection/decorator point,
    * then the type returned by this method will be <tt>Set</tt>. If the element being decorated is the parameter
    * where <tt>@B</tt> represents the injection point, then the type returned by this method will be <tt>Bar</tt>.
-   * <p>
+   * <p/>
    * <strong>Fields</strong>:
    * <pre><code>
    *  public class MyClass {
@@ -115,13 +115,13 @@ public class InjectionPoint<T> {
    * </code></pre>
    * If the element being decorated is the field where <tt>@A</tt> represents the injection/decorator point,
    * then the type returned by this method wil be <tt>Map</tt>.
-   * <p>
+   * <p/>
    * <strong>Methods</strong>:
    * <pre><code>
    *  public class MyClass {
    *    {@literal @}A private List getList() {
    *    }
-   *
+   * <p/>
    *    {@literal @}B private void doSomething() {
    *    }
    *  }
@@ -130,7 +130,7 @@ public class InjectionPoint<T> {
    * then the type returned by this method will be <tt>List</tt>. If the element being decorated is the method
    * where <tt>@B</tt> represents the injection/decorator point, then the type returned by this method will be
    * <tt>void</tt>.
-   * <p>
+   * <p/>
    * <strong>Constructor and Types</strong>:
    * <pre><code>
    *  {@literal @}A
@@ -145,19 +145,34 @@ public class InjectionPoint<T> {
    * decorated is the constructor where <tt>@B</tt> represents the injection/decorator point, then the type
    * returned by this method will be <tt>MyClass</tt>.
    *
-   * @return
-   *    The underlying type of the element or return type for a method.
+   * @return The underlying type of the element or return type for a method.
    */
   public MetaClass getElementTypeOrMethodReturnType() {
     switch (taskType) {
       case PrivateField:
       case Field:
-        return type = field.getType();
+        return field.getType();
       case PrivateMethod:
       case Method:
-        return type = method.getReturnType();
+        return method.getReturnType();
       case Parameter:
-        return type = parm.getType();
+        return parm.getType();
+      case Type:
+        return type;
+      default:
+        throw new RuntimeException("unsupported operation: getType for task: " + taskType);
+    }
+  }
+
+  public MetaClass getElementType() {
+    switch (taskType) {
+      case PrivateField:
+      case Field:
+        return field.getType();
+      case PrivateMethod:
+      case Method:
+      case Parameter:
+        return parm.getType();
       case Type:
         return type;
       default:
@@ -167,8 +182,8 @@ public class InjectionPoint<T> {
 
   /**
    * Returns the parameter reference if the injection point is a parameter, otherwise returns <tt>null</tt>.
-   * @return
-   *    the {@link MetaParameter} reference if the injection point is a parameter, otherwise <tt>null</tt>.
+   *
+   * @return the {@link MetaParameter} reference if the injection point is a parameter, otherwise <tt>null</tt>.
    */
   public MetaParameter getParm() {
     return parm;
@@ -176,6 +191,7 @@ public class InjectionPoint<T> {
 
   /**
    * Returns the {@link Injector} reference for the the bean
+   *
    * @return
    */
   public Injector getInjector() {
