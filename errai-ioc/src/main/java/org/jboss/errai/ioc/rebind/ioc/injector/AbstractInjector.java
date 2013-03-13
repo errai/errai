@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.WeaveType;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -39,7 +40,6 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import javax.enterprise.inject.New;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,6 +72,7 @@ public abstract class AbstractInjector implements Injector {
   private List<RenderingHook> renderingHooks;
   private List<Runnable> disablingCallbacks;
   private Map<MetaMethod, Map<WeaveType, Collection<Statement>>> weavingStatements;
+  private Map<String, ProxyMaker.ProxyProperty> proxyPropertyMap;
 
   protected Map<String, Object> attributes;
 
@@ -424,6 +425,16 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
+  public Map<String, ProxyMaker.ProxyProperty> getProxyPropertyMap() {
+    if (proxyPropertyMap == null) {
+      return Collections.emptyMap();
+    }
+    else {
+      return proxyPropertyMap;
+    }
+  }
+
+  @Override
   public boolean isProxied() {
     return !getWeavingStatements().isEmpty();
   }
@@ -433,20 +444,28 @@ public abstract class AbstractInjector implements Injector {
       final BuildMetaClass type = ProxyMaker.makeProxy(
           getInjectedType(),
           context.getProcessingContext().isGwtTarget() ? "jsni" : "reflection",
+          getProxyPropertyMap(),
           getWeavingStatementsMap()
       );
 
-      context.getProcessingContext().getBootstrapClass()
-              .addInnerClass(new InnerClass(type));
 
-      return Arrays.asList(
-          Stmt.declareFinalVariable(
-                  getProxyInstanceVarName(),
-                  type,
-                  Stmt.newObject(type)
-              ),
-          ProxyMaker.closeProxy(Refs.get(getProxyInstanceVarName()), Refs.get(getInstanceVarName()))
+      final List<Statement> proxyCloseStmts = new ArrayList<Statement>();
+      context.getProcessingContext().getBootstrapClass()
+          .addInnerClass(new InnerClass(type));
+
+      proxyCloseStmts.add(Stmt.declareFinalVariable(
+          getProxyInstanceVarName(),
+          type,
+          Stmt.newObject(type)
+      ));
+
+      proxyCloseStmts.add(ProxyMaker.closeProxy(Refs.get(getProxyInstanceVarName()), Refs.get(getInstanceVarName())));
+
+      proxyCloseStmts.addAll(ProxyMaker.createAllPropertyBindings(
+          Refs.get(getProxyInstanceVarName()), getProxyPropertyMap())
       );
+
+      return proxyCloseStmts;
     }
     else {
       return Collections.emptyList();
@@ -484,6 +503,22 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public void addInvokeAfter(final MetaMethod method, Statement statement) {
     addWeavedStatement(method, statement, WeaveType.AfterInvoke);
+  }
+
+
+  @Override
+  public ProxyMaker.ProxyProperty addProxyProperty(String propertyName, Class type, Statement statement) {
+    return addProxyProperty(propertyName, MetaClassFactory.get(type), statement);
+  }
+
+  @Override
+  public ProxyMaker.ProxyProperty addProxyProperty(String propertyName, MetaClass type, Statement statementReference) {
+    if (proxyPropertyMap == null) {
+      proxyPropertyMap = new HashMap<String, ProxyMaker.ProxyProperty>();
+    }
+    final ProxyMaker.ProxyProperty value = new ProxyMaker.ProxyProperty(propertyName, type, statementReference);
+    proxyPropertyMap.put(propertyName, value);
+    return value;
   }
 }
 

@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.tests.decorator.rebind;
 
+import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -29,6 +30,13 @@ public class LogCallDecorator extends IOCDecoratorExtension<LogCall> {
 
     ctx.getInjector().addInvokeAfter(ctx.getMethod(),
         Stmt.invokeStatic(TestDataCollector.class, "afterInvoke", Refs.get("a0"), Refs.get("a1")));
+
+    final ProxyMaker.ProxyProperty foobar
+        = ctx.getInjector().addProxyProperty("foobar", String.class, Stmt.load("foobie!"));
+
+    ctx.getInjector().addInvokeAfter(ctx.getMethod(),
+      Stmt.invokeStatic(TestDataCollector.class, "property", "foobar", foobar)
+    );
 
     return Collections.emptyList();
   }

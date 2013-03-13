@@ -5,6 +5,9 @@ import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.decorator.client.res.MyDecoratedBean;
 import org.jboss.errai.ioc.tests.decorator.client.res.TestDataCollector;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Mike Brock
  */
@@ -23,5 +26,10 @@ public class DecoratorAPITests extends AbstractErraiIOCTest {
 
     assertEquals(instance.getTestMap(), TestDataCollector.getBeforeInvoke());
     assertEquals(instance.getTestMap(), TestDataCollector.getAfterInvoke());
+
+    Map<String, Object> expectedProperties = new HashMap<String, Object>();
+    expectedProperties.put("foobar", "foobie!");
+
+    assertEquals(expectedProperties, TestDataCollector.getProperties());
   }
 }

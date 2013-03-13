@@ -10,6 +10,8 @@ public class TestDataCollector {
   private static final Map<String, Integer> beforeInvoke = new HashMap<String, Integer>();
   private static final Map<String, Integer> afterInvoke = new HashMap<String, Integer>();
 
+  public static final Map<String, Object> properties = new HashMap<String, Object>();
+
   public static void beforeInvoke(String a, Integer b) {
     beforeInvoke.put(a, b);
   }
@@ -18,11 +20,19 @@ public class TestDataCollector {
     afterInvoke.put(a, b);
   }
 
+  public static void property(String a, Object b) {
+    properties.put(a, b);
+  }
+
   public static Map<String, Integer> getBeforeInvoke() {
     return beforeInvoke;
   }
 
   public static Map<String, Integer> getAfterInvoke() {
     return afterInvoke;
+  }
+
+  public static Map<String, Object> getProperties() {
+    return properties;
   }
 }

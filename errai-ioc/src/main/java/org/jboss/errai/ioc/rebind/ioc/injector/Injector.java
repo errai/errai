@@ -1,5 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.WeaveType;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -261,4 +262,10 @@ public interface Injector {
   void addInvokeBefore(MetaMethod method, Statement statement);
 
   void addInvokeAfter(MetaMethod method, Statement statement);
+
+  ProxyMaker.ProxyProperty addProxyProperty(String propertyName, Class type, Statement statement);
+
+  ProxyMaker.ProxyProperty addProxyProperty(String propertyName, MetaClass type, Statement statement);
+
+  Map<String, ProxyMaker.ProxyProperty> getProxyPropertyMap();
 }
