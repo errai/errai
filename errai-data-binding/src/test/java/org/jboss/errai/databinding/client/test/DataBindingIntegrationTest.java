@@ -122,7 +122,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TestModel model = DataBinder.forType(TestModel.class).bind(textBox, "age").getModel();
 
     model.setAge(25);
-    assertEquals("Widget not properly updated", "25", textBox.getText());
+    assertEquals("Widget not properly updated", model.getAge().toString(), textBox.getText());
 
     textBox.setValue("52", true);
     assertEquals("Model not properly updated", Integer.valueOf(52), model.getAge());
