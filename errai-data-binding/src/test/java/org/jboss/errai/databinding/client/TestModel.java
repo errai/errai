@@ -16,6 +16,8 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.Date;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.junit.Ignore;
@@ -54,6 +56,8 @@ public class TestModel {
   // test for the case there's a field name collision in the generated proxy
   @SuppressWarnings("unused")
   private String agent;
+  
+  private Date lastChanged;
   
   public int getId() {
     return id;
@@ -125,6 +129,14 @@ public class TestModel {
     this.oldValue = oldValue;
   }
 
+  public Date getLastChanged() {
+    return lastChanged;
+  }
+  
+  public void setLastChanged(Date lastChanged) {
+    this.lastChanged = lastChanged;
+  }
+  
   // these methods are used to test property changes using non accessor methods
   public void activate() {
     this.active = true;
@@ -196,4 +208,5 @@ public class TestModel {
     return "Model [id=" + id + ", value=" + value + ", _name=" + _name + ", _age=" + _age + ", active=" + active
         + ", child=" + child + "]";
   }
+
 }

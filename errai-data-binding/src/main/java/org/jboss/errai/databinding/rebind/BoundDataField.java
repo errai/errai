@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.rebind;
+package org.jboss.errai.databinding.rebind;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
 
 /**
  * Represents a bound data field and holds all relevant metadata.

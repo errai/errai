@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.rebind;
+package org.jboss.errai.databinding.rebind;
+
+import java.util.Collection;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -32,9 +34,10 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 
-import java.util.Collection;
-
 /**
+ * Utility to retrieve an injected {@link AutoBound} data binder.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class DataBindingUtil {
@@ -56,12 +59,12 @@ public class DataBindingUtil {
     }
   }
 
-  public static DataBinderLookup  getDataBinder(final InjectableInstance ctx) {
-    final Statement dataBinderRef;
-    final MetaClass dataModelType;
+  public static DataBinderLookup getDataBinder(final InjectableInstance<?> ctx) {
+    Statement dataBinderRef = null;
+    MetaClass dataModelType = null;
 
-    final InjectUtil.BeanMetric beanMetric
-        = InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), ctx.getEnclosingType(), AutoBound.class);
+    final InjectUtil.BeanMetric beanMetric =
+        InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), ctx.getEnclosingType(), AutoBound.class);
 
     final Collection<Object> allInjectors = beanMetric.getAllInjectors();
     if (allInjectors.size() > 1) {
@@ -89,10 +92,20 @@ public class DataBindingUtil {
       }
     }
     else {
-      return null;
+      final MetaClass declaringClass = ctx.getEnclosingType();
+      for (final MetaField field : declaringClass.getFields()) {
+        if (field.isAnnotationPresent(AutoBound.class)) {
+          checkTypeIsDataBinder(field.getType());
+          dataModelType = (MetaClass) field.getType().getParameterizedType().getTypeParameters()[0];
+          dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(field),
+              Variable.get(ctx.getInjector().getInstanceVarName()));
+          break;
+        }
+      }
     }
 
-    return new DataBinderLookup(dataModelType, dataBinderRef);
+    return (dataBinderRef != null) ? new DataBinderLookup(dataModelType, dataBinderRef) : null;
   }
 
   private static void checkTypeIsDataBinder(MetaClass type) {

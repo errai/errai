@@ -16,10 +16,11 @@
 
 package org.jboss.errai.ui.test.binding.client.res;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.jboss.errai.databinding.client.api.Converter;
+
+import com.google.gwt.i18n.client.DateTimeFormat;
 
 /**
  * Converter for testing purposes.
@@ -31,11 +32,7 @@ public class BindingDateConverter implements Converter<Date, String> {
   public static final Date TEST_DATE;
   
   static {
-    Calendar cal = Calendar.getInstance();
-    cal.set(Calendar.DAY_OF_MONTH, 22);
-    cal.set(Calendar.MONTH, 6);
-    cal.set(Calendar.YEAR, 1980);
-    TEST_DATE = cal.getTime();
+    TEST_DATE = DateTimeFormat.getFormat("yyyy/MM/dd").parse("1980/22/06");
   }
   
   @Override

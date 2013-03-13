@@ -15,6 +15,55 @@
  */
 package org.jboss.errai.ui.rebind;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.codegen.Cast;
+import org.jboss.errai.codegen.InnerClass;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ui.shared.Template;
+import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.SinkNative;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -29,65 +78,11 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.codegen.Cast;
-import org.jboss.errai.codegen.InnerClass;
-import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ElseBlockBuilder;
-import org.jboss.errai.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.exception.GenerationException;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.codegen.util.If;
-import org.jboss.errai.codegen.util.PrivateAccessType;
-import org.jboss.errai.codegen.util.Refs;
-import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.rebind.DataBindingValidator;
-import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ui.shared.Template;
-import org.jboss.errai.ui.shared.TemplateUtil;
-import org.jboss.errai.ui.shared.api.annotations.Bound;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
-import org.jboss.errai.ui.shared.api.annotations.SinkNative;
-import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.util.TypeLiteral;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Generates the code required for {@link Templated} classes.
  *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
- * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
 public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
@@ -108,11 +103,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] must extend base class [" + Composite.class.getName() + "].");
     }
 
-    final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
-
     for (final MetaField field : declaringClass.getFields()) {
-      if (field.isAnnotationPresent(DataField.class)
-          || field.getType().getErased().equals(databinderMetaClass)) {
+      if (field.isAnnotationPresent(DataField.class)) {
         ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
       }
     }
@@ -465,16 +457,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                                              final Statement dataFieldElements,
                                              final Statement fieldsMap) {
 
-
-    final DataBindingUtil.DataBinderLookup binderLookup = DataBindingUtil.getDataBinder(ctx);
-
-    /*
-     * Create a reference to the composite's data binder
-     */
-    if (binderLookup != null) {
-      initStmts.add(Stmt.declareVariable("binder", DataBinder.class, binderLookup.getValueAccessor()));
-    }
-
     /*
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
@@ -492,43 +474,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      */
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
-    }
-
-    /*
-     * Bind each bound data field if data binder is found and has been initialized.
-     */
-    Map<String, BoundDataField> boundDataFields = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType());
-    BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
-    for (Entry<String, BoundDataField> boundDataField : boundDataFields.entrySet()) {
-      Bound bound = boundDataField.getValue().getBound();
-      if (binderLookup != null) {
-        String property = bound.property().equals("") ? boundDataField.getKey() : bound.property();
-        // Check if bound property exists in data model type
-        if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
-          throw new GenerationException("Invalid binding of DataField " + boundDataField.getValue().getName() 
-              + " in class " + ctx.getInjector().getInjectedType() + "! Property " + property 
-              + " not resolvable from class " + binderLookup.getDataModelType() + 
-              ". Hint: All types in a property chain must be @Bindable!");
-        }
-
-        Statement converter =
-            bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
-        binderBlock.append(Stmt.loadVariable("binder")
-            .invoke("bind", boundDataField.getValue().getWidgetStatement(), property, converter));
-      }
-      else {
-        throw new GenerationException("No @AutoBound data binder found for @Bound @DataField " 
-            + boundDataField.getValue().getName() + " in class " + ctx.getInjector().getInjectedType());
-      }
-    }
-
-    if (binderLookup != null) {
-      initStmts.add(binderBlock
-          .finish()
-          .else_()
-          .append(Stmt.invokeStatic(GWT.class, "log", "DataBinder in class "
-              + ctx.getEnclosingType().getFullyQualifiedName()
-              + " has not been initialized - skipping automatic binding!")).finish());
     }
 
     /*

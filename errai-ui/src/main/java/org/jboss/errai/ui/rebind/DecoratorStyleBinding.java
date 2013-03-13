@@ -16,8 +16,11 @@
 
 package org.jboss.errai.ui.rebind;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Element;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -25,6 +28,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.databinding.rebind.DataBindingUtil;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
@@ -34,10 +38,8 @@ import org.jboss.errai.ui.shared.api.style.StyleBindingChangeHandler;
 import org.jboss.errai.ui.shared.api.style.StyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Element;
 
 /**
  * @author Mike Brock
@@ -122,7 +124,7 @@ public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
     return stmts;
   }
 
-  private static List<? extends Statement> bindHandlingMethod(final InjectableInstance ctx, final MetaParameter parameter) {
+  private static List<? extends Statement> bindHandlingMethod(final InjectableInstance<?> ctx, final MetaParameter parameter) {
     final Statement elementAccessor;
     if (MetaClassFactory.get(Element.class).isAssignableFrom(parameter.getType())) {
       elementAccessor = Refs.get("element");
@@ -156,7 +158,7 @@ public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
     return stmts;
   }
 
-  private static void addCleanup(final InjectableInstance ctx, final List<Statement> stmts) {
+  private static void addCleanup(final InjectableInstance<?> ctx, final List<Statement> stmts) {
     if (!ctx.getInjector().hasAttribute(STYLE_BINDING_HOUSEKEEPING_ATTR)) {
       final Statement destructionCallback = InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj",
           Arrays.<Statement>asList(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
