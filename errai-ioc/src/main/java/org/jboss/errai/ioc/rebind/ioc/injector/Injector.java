@@ -268,4 +268,10 @@ public interface Injector {
   ProxyMaker.ProxyProperty addProxyProperty(String propertyName, MetaClass type, Statement statement);
 
   Map<String, ProxyMaker.ProxyProperty> getProxyPropertyMap();
+
+  /**
+   * This method should be called to ensure that the proxies have been updated to reflect any code weavings that may
+   * have been added.
+   */
+  public void updateProxies();
 }

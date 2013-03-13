@@ -277,7 +277,7 @@ public class AsyncInjectUtil {
 
         for (final Class<? extends Annotation> a : decorators) {
           final ElementType[] elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-              : new ElementType[]{ElementType.FIELD};
+              : new ElementType[]{ElementType.METHOD};
 
           for (final ElementType elType : elTypes) {
             switch (elType) {

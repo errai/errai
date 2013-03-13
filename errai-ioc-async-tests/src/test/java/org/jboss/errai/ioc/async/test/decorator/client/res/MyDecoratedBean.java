@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2012 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.test;
+package org.jboss.errai.ioc.async.test.decorator.client.res;
 
-import com.google.gwt.junit.client.GWTTestCase;
-import org.jboss.errai.ioc.client.Container;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+
+import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractErraiIOCTest extends GWTTestCase {
+@Singleton
+public class MyDecoratedBean {
+  private final Map<String, Integer> testMap = new HashMap<String, Integer>();
 
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    new IOCBeanManagerLifecycle().resetBeanManager();
-    new Container().bootstrapContainer();
+  @LogCall
+  public void someMethod(final String text, final Integer blah) {
+    testMap.put(text, blah);
   }
 
-  protected void $(Runnable runnable) {
-    delayTestFinish(30000);
-    Container.$(runnable);
+  public Map<String, Integer> getTestMap() {
+    return testMap;
   }
 }
-

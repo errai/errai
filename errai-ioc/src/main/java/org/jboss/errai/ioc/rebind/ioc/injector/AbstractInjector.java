@@ -440,6 +440,10 @@ public abstract class AbstractInjector implements Injector {
   }
 
   public List<Statement> createProxyDeclaration(InjectionContext context) {
+    return createProxyDeclaration(context, Refs.get(getInstanceVarName()));
+  }
+
+  public List<Statement> createProxyDeclaration(InjectionContext context, Statement beanRef) {
     if (isProxied()) {
       final BuildMetaClass type = ProxyMaker.makeProxy(
           getInjectedType(),
@@ -459,11 +463,9 @@ public abstract class AbstractInjector implements Injector {
           Stmt.newObject(type)
       ));
 
-      proxyCloseStmts.add(ProxyMaker.closeProxy(Refs.get(getProxyInstanceVarName()), Refs.get(getInstanceVarName())));
+      proxyCloseStmts.add(ProxyMaker.closeProxy(Refs.get(getProxyInstanceVarName()), beanRef));
 
-      proxyCloseStmts.addAll(ProxyMaker.createAllPropertyBindings(
-          Refs.get(getProxyInstanceVarName()), getProxyPropertyMap())
-      );
+      proxyCloseStmts.addAll(ProxyMaker.createAllPropertyBindings(Refs.get(getProxyInstanceVarName()), getProxyPropertyMap()));
 
       return proxyCloseStmts;
     }
@@ -519,6 +521,10 @@ public abstract class AbstractInjector implements Injector {
     final ProxyMaker.ProxyProperty value = new ProxyMaker.ProxyProperty(propertyName, type, statementReference);
     proxyPropertyMap.put(propertyName, value);
     return value;
+  }
+
+  @Override
+  public void updateProxies() {
   }
 }
 

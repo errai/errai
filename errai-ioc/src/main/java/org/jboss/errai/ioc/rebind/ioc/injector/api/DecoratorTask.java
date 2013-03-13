@@ -133,6 +133,7 @@ public class DecoratorTask extends InjectionTask {
           parm, injector, ctx))) {
         ctx.getProcessingContext().append(stmt);
       }
+      injector.updateProxies();
     }
     return true;
   }

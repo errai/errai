@@ -67,7 +67,7 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
       switch (taskType) {
         case PrivateField:
         case Field:
-          for (Annotation a : field.getAnnotations()) {
+          for (final Annotation a : field.getAnnotations()) {
             if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
               annotation = field.getAnnotation(a.annotationType());
               break TaskSwitch;
@@ -79,7 +79,7 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
         case PrivateMethod:
         case Method:
           if (!ctx.getDecoratorAnnotationsBy(ElementType.METHOD).contains(dec.decoratesWith())) {
-            for (Annotation a : method.getAnnotations()) {
+            for (final Annotation a : method.getAnnotations()) {
               if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
                 annotation = method.getAnnotation(a.annotationType());
                 break TaskSwitch;
@@ -100,7 +100,7 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
           break;
         case Type:
           if (!ctx.getDecoratorAnnotationsBy(ElementType.TYPE).contains(dec.decoratesWith())) {
-            for (Annotation a : type.getAnnotations()) {
+            for (final Annotation a : type.getAnnotations()) {
               if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
                 annotation = type.getAnnotation(a.annotationType());
                 break TaskSwitch;
@@ -113,7 +113,7 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
           break;
         case Parameter:
           if (!ctx.getDecoratorAnnotationsBy(ElementType.PARAMETER).contains(dec.decoratesWith())) {
-            for (Annotation a : parm.getAnnotations()) {
+            for (final Annotation a : parm.getAnnotations()) {
               if (ctx.isMetaAnnotationFor(a.annotationType(), dec.decoratesWith())) {
                 annotation = parm.getAnnotation(a.annotationType());
                 break TaskSwitch;
@@ -126,10 +126,11 @@ public class AsyncDecoratorTask extends AsyncInjectionTask {
           break;
       }
 
-      for (final Statement stmt : dec.generateDecorator(new InjectableInstance(annotation, taskType, constructor, method, field, type,
-          parm, injector, ctx))) {
+      for (final Statement stmt : dec.generateDecorator(
+          new InjectableInstance(annotation, taskType, constructor, method, field, type, parm, injector, ctx))) {
         ctx.getProcessingContext().append(stmt);
       }
+      injector.updateProxies();
     }
     return true;
   }
