@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2012 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.test;
+package org.jboss.errai.ioc.async.test.decorator.client.res;
 
-import com.google.gwt.junit.client.GWTTestCase;
-import org.jboss.errai.ioc.client.Container;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractErraiIOCTest extends GWTTestCase {
-
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    new IOCBeanManagerLifecycle().resetBeanManager();
-    new Container().bootstrapContainer();
-  }
-
-  protected void $(Runnable runnable) {
-    delayTestFinish(30000);
-    Container.$(runnable);
-  }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LogCall {
 }
-

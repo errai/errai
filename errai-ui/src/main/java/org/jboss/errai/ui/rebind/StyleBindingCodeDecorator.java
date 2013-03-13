@@ -45,11 +45,11 @@ import com.google.gwt.user.client.Element;
  * @author Mike Brock
  */
 @CodeDecorator
-public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
+public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBinding> {
   private static final String DATA_BINDING_CONFIG_ATTR = "StyleBinding:DataBinderConfigured";
   private static final String STYLE_BINDING_HOUSEKEEPING_ATTR = "StyleBinding:HousekeepingReg";
 
-  public DecoratorStyleBinding(Class<StyleBinding> decoratesWith) {
+  public StyleBindingCodeDecorator(Class<StyleBinding> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -106,7 +106,7 @@ public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
             ctx.getRawAnnotation().annotationType(),
             Stmt.nestedCall(valueAccessor).invoke("getElement")));
 
-    if (!ctx.getInjector().hasAttribute(DecoratorStyleBinding.class.getName())) {
+    if (!ctx.getInjector().hasAttribute(StyleBindingCodeDecorator.class.getName())) {
       final Statement initCallback = InjectUtil.createInitializationCallback(ctx.getEnclosingType(), "obj",
           Collections.<Statement>singletonList(
               Stmt.invokeStatic(StyleBindingsRegistry.class, "get").invoke("updateStyles"))
@@ -116,7 +116,7 @@ public class DecoratorStyleBinding extends IOCDecoratorExtension<StyleBinding> {
           .invoke("addInitializationCallback", Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
 
 
-      ctx.getInjector().setAttribute(DecoratorStyleBinding.class.getName(), Boolean.TRUE);
+      ctx.getInjector().setAttribute(StyleBindingCodeDecorator.class.getName(), Boolean.TRUE);
     }
 
     addCleanup(ctx, stmts);

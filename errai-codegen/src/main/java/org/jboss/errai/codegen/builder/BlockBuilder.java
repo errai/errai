@@ -65,5 +65,7 @@ public interface BlockBuilder<T> extends Finishable<T>, Iterable<Statement> {
    * @return the last statement in the block.
    */
   public Statement peek();
+
+  public void clear();
 }
 

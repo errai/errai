@@ -33,7 +33,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
-import org.mvel2.ast.AssertNode;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -258,11 +257,11 @@ public class IOCProcessingContext {
   }
 
   public void handleDiscoveryOfType(final InjectionPoint injectionPoint) {
-    if (discovered.contains(injectionPoint.getType())) return;
+    if (discovered.contains(injectionPoint.getEnclosingType())) return;
     for (final TypeDiscoveryListener listener : typeDiscoveryListeners) {
       listener.onDiscovery(this, injectionPoint);
     }
-    discovered.add(injectionPoint.getType());
+    discovered.add(injectionPoint.getEnclosingType());
   }
 
   public Class<? extends BootstrapInjectionContext> getBootstrapContextClass() {

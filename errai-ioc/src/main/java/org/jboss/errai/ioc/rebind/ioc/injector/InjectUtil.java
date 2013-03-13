@@ -23,13 +23,9 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -68,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,10 +111,33 @@ public class InjectUtil {
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          processingContext.append(
-              Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements))
+          final Statement objectInstantiate = Stmt.newObject(type, parameterStatements);
 
+//          if (injector.isProxied()) {
+//            processingContext.append(
+//                Stmt.declareFinalVariable(
+//                    injector.getProxyInstanceVarName(),
+//                    type,
+//                    ProxyMaker.makeProxy(
+//                        type,
+//                        ctx.getProcessingContext().isGwtTarget() ? "jsni" : "reflection",
+//                        injector.getWeavingStatementsMap()
+//                    )
+//                )
+//            );
+//            processingContext.append(
+//                Stmt.declareFinalVariable(injector.getInstanceVarName(), type, objectInstantiate)
+//            );
+//
+//            processingContext.append(
+//                ProxyMaker.closeProxy(Refs.get(injector.getProxyInstanceVarName()), Refs.get(injector.getInstanceVarName()))
+//            );
+//          }
+//          else {
+          processingContext.append(
+              Stmt.declareFinalVariable(injector.getInstanceVarName(), type, objectInstantiate)
           );
+//          }
           callback.beanConstructed(ConstructionType.CONSTRUCTOR);
 
           handleInjectionTasks(ctx, injectionTasks);
@@ -142,6 +160,27 @@ public class InjectUtil {
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
+//          if (injector.isProxied()) {
+//            processingContext.append(
+//                Stmt.declareFinalVariable(
+//                    injector.getProxyInstanceVarName(),
+//                    type,
+//                    ProxyMaker.makeProxy(
+//                        type,
+//                        ctx.getProcessingContext().isGwtTarget() ? "jsni" : "reflection",
+//                        injector.getWeavingStatementsMap()
+//                    )
+//                )
+//            );
+//            processingContext.append(
+//                Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type))
+//            );
+//
+//            processingContext.append(
+//                ProxyMaker.closeProxy(Refs.get(injector.getProxyInstanceVarName()), Refs.get(injector.getInstanceVarName()))
+//            );
+//          }
+//          else {
           processingContext.append(
               Stmt.declareVariable(type)
                   .asFinal()
@@ -149,6 +188,7 @@ public class InjectUtil {
                   .initializeWith(Stmt.newObject(type))
 
           );
+//          }
 
           callback.beanConstructed(ConstructionType.FIELD);
 
@@ -160,6 +200,7 @@ public class InjectUtil {
       };
     }
   }
+
 
   private static void handleInjectionTasks(final InjectionContext ctx,
                                            final List<InjectionTask> tasks) {
@@ -734,7 +775,7 @@ public class InjectUtil {
       case Parameter:
         return getQualifiersFromAnnotations(injectableInstance.getParm().getAnnotations());
       case Type:
-        return getQualifiersFromAnnotations(injectableInstance.getType().getAnnotations());
+        return getQualifiersFromAnnotations(injectableInstance.getEnclosingType().getAnnotations());
       default:
         return Collections.emptyList();
     }

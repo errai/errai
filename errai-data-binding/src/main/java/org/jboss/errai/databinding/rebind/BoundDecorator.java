@@ -99,9 +99,9 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
 
       Statement widget = ctx.getValueStatement();
       // Ensure the @Bound field is a widget
-      if (!ctx.getType().isAssignableTo(Widget.class)) {
+      if (!ctx.getElementTypeOrMethodReturnType().isAssignableTo(Widget.class)) {
         throw new GenerationException("@Bound field " + ctx.getMemberName() + " must be a widget type but is of type: "
-            + ctx.getType().getFullyQualifiedName());
+            + ctx.getElementTypeOrMethodReturnType().getFullyQualifiedName());
       }
       // and has been initialized
       if (!ctx.isAnnotationPresent(Inject.class)) {
@@ -109,7 +109,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
             ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
             PrivateAccessUtil.getPrivateFieldInjectorName(ctx.getField()),
             Refs.get(ctx.getInjector().getInstanceVarName()),
-            ObjectBuilder.newInstanceOf(ctx.getType()));
+            ObjectBuilder.newInstanceOf(ctx.getElementTypeOrMethodReturnType()));
 
         statements.add(If.isNull(widget).append(widgetInit).finish());
       }
@@ -168,7 +168,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
         ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
       }
     }
-    if (ctx.getType().isAssignableTo(Widget.class)) {
+    if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Widget.class)) {
       ctx.getInjectionContext().addExposedField(ctx.getField(), PrivateAccessType.Both);
     }
   }

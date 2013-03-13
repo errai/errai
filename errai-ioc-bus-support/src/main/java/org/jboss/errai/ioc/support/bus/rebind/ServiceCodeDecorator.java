@@ -44,8 +44,8 @@ import java.util.List;
 
 @SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
-public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
-  public ServiceIOCExtension(final Class<Service> decoratesWith) {
+public class ServiceCodeDecorator extends IOCDecoratorExtension<Service> {
+  public ServiceCodeDecorator(final Class<Service> decoratesWith) {
     super(decoratesWith);
   }
 

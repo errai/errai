@@ -50,7 +50,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
                               T annotation,
                               IOCProcessingContext context) {
 
-    MetaClass mc = instance.getType();
+    MetaClass mc = instance.getEnclosingType();
     processDependencies(control, mc, instance.getInjectionContext());
   }
 

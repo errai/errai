@@ -58,10 +58,10 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
     context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
       @Override
       public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
-        if (injectionPoint.getType().isAssignableFrom(UiBinder.class)) {
+        if (injectionPoint.getEnclosingType().isAssignableFrom(UiBinder.class)) {
           MetaClass uiBinderParameterized = MetaClassFactory.parameterizedAs(UiBinder.class,
                   MetaClassFactory
-                          .typeParametersOf(injectionPoint.getType().getParameterizedType().getTypeParameters()[0],
+                          .typeParametersOf(injectionPoint.getEnclosingType().getParameterizedType().getTypeParameters()[0],
                                   injectionPoint.getEnclosingType()));
 
           BuildMetaClass uiBinderBoilerPlaterIface = ClassBuilder.define(injectionPoint.getEnclosingType().getName()
@@ -122,13 +122,13 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
           staticInit.addStatement(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
                   injectionPoint.getEnclosingType(), Refs.get(varName)));
         }
-        else if (injectionPoint.getType().isAssignableTo(SafeHtmlTemplates.class)) {
+        else if (injectionPoint.getEnclosingType().isAssignableTo(SafeHtmlTemplates.class)) {
           final String varName = "safeTemplateInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
                   .replaceAll("\\.", "_");
 
           if (Boolean.getBoolean("errai.simulatedClient")) {
             context.append(Stmt.declareVariable(SafeHtmlTemplates.class).named(varName).initializeWith(
-                    ObjectBuilder.newInstanceOf(injectionPoint.getType())
+                    ObjectBuilder.newInstanceOf(injectionPoint.getEnclosingType())
                             .extend()
                             .publicOverridesMethod("link", Parameter.of(SafeUri.class, "safe"),
                                     Parameter.of(String.class, "str"))
@@ -139,8 +139,8 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
 
           }
           else {
-            context.append(Stmt.declareVariable(injectionPoint.getType()).named(varName).initializeWith(
-                    Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(injectionPoint.getType()))
+            context.append(Stmt.declareVariable(injectionPoint.getEnclosingType()).named(varName).initializeWith(
+                    Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(injectionPoint.getEnclosingType()))
             ));
           }
 
@@ -177,7 +177,7 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
 
             @Override
             public MetaClass getInjectedType() {
-              return injectionPoint.getType();
+              return injectionPoint.getEnclosingType();
             }
           });
         }

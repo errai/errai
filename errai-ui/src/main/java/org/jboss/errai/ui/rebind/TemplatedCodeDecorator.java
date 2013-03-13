@@ -85,12 +85,12 @@ import com.google.gwt.user.client.ui.Widget;
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 @CodeDecorator
-public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
+public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
 
-  private static final Logger logger = LoggerFactory.getLogger(DecoratorTemplated.class);
+  private static final Logger logger = LoggerFactory.getLogger(TemplatedCodeDecorator.class);
 
-  public DecoratorTemplated(final Class<Templated> decoratesWith) {
+  public TemplatedCodeDecorator(final Class<Templated> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -206,8 +206,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                                                  final List<Statement> initStmts, final Statement component,
                                                  final String dataFieldElementsVarName, final Statement fieldsMap) {
 
-    final Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
-    dataFieldTypes.put("this", ctx.getType());
+    final Map<String, MetaClass> dataFieldTypes = DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
+    dataFieldTypes.put("this", ctx.getEnclosingType());
 
     final MetaClass declaringClass = ctx.getEnclosingType();
 
@@ -461,10 +461,10 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
      */
-    final Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+    final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getEnclosingType());
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
-      initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
-          .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
+      initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getEnclosingType()
+          .getFullyQualifiedName(), getTemplateFileName(ctx.getEnclosingType()), Cast.to(Widget.class, field.getValue()),
           dataFieldElements, field.getKey()));
     }
 

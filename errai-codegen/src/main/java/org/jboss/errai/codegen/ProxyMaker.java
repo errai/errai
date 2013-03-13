@@ -19,14 +19,6 @@ package org.jboss.errai.codegen;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.codegen.util.Stmt.throw_;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -45,11 +37,31 @@ import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @author Mike Brock
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class ProxyMaker {
+  public static final String PROXY_BIND_METHOD = "__$setProxiedInstance$";
+
+  private final Map<MetaMethod, Map<WeaveType, Collection<Statement>>> weavingStatements;
+  private final Map<String, ProxyProperty> proxyProperties;
+
+  private ProxyMaker(final Map<String, ProxyProperty> proxyProperties,
+                     final Map<MetaMethod, Map<WeaveType, Collection<Statement>>> weavingStatements) {
+    this.proxyProperties = proxyProperties;
+    this.weavingStatements = weavingStatements;
+  }
 
   public static BuildMetaClass makeProxy(final String proxyClassName, final Class cls) {
     return makeProxy(proxyClassName, cls, "reflection");
@@ -61,7 +73,6 @@ public class ProxyMaker {
     return makeProxy(proxyClassName, MetaClassFactory.get(cls), privateAccessorType);
   }
 
-  public static final String PROXY_BIND_METHOD = "__$setProxiedInstance$";
 
   public static BuildMetaClass makeProxy(final String proxyClassName,
                                          final MetaClass toProxy) {
@@ -71,6 +82,39 @@ public class ProxyMaker {
   public static BuildMetaClass makeProxy(final String proxyClassName,
                                          final MetaClass toProxy,
                                          final String privateAccessorType) {
+    return makeProxy(proxyClassName, toProxy, privateAccessorType, Collections.<String, ProxyProperty>emptyMap(),
+        Collections.<MetaMethod, Map<WeaveType, Collection<Statement>>>emptyMap());
+  }
+
+  public static BuildMetaClass makeProxy(final MetaClass toProxy,
+                                         final String privateAccessorType,
+                                         final Map<MetaMethod, Map<WeaveType, Collection<Statement>>> weavingStatements) {
+    return makeProxy(toProxy, privateAccessorType, Collections.<String, ProxyProperty>emptyMap(), weavingStatements);
+
+  }
+
+  public static BuildMetaClass makeProxy(final MetaClass toProxy,
+                                         final String privateAccessorType,
+                                         final Map<String, ProxyProperty> proxyProperties,
+                                         final Map<MetaMethod, Map<WeaveType, Collection<Statement>>> weavingStatements) {
+    return makeProxy(
+        PrivateAccessUtil.condensify(toProxy.getPackageName()) + "_" + toProxy.getName() + "_proxy",
+        toProxy,
+        privateAccessorType, proxyProperties, weavingStatements);
+  }
+
+  public static BuildMetaClass makeProxy(final String proxyClassName,
+                                         final MetaClass toProxy,
+                                         final String privateAccessorType,
+                                         final Map<String, ProxyProperty> proxyProperties,
+                                         final Map<MetaMethod, Map<WeaveType, Collection<Statement>>> weavingStatements) {
+    return new ProxyMaker(proxyProperties, weavingStatements).make(proxyClassName, toProxy, privateAccessorType);
+  }
+
+
+  BuildMetaClass make(final String proxyClassName,
+                      final MetaClass toProxy,
+                      final String privateAccessorType) {
     final ClassStructureBuilder builder;
 
     final Override override = new Override() {
@@ -114,6 +158,15 @@ public class ProxyMaker {
     }
 
     builder.privateField(proxyVar, toProxy).finish();
+
+    final Set<Map.Entry<String, ProxyProperty>> entries = proxyProperties.entrySet();
+    for (final Map.Entry<String, ProxyProperty> entry : entries) {
+      builder.privateField(entry.getValue().getEncodedProperty(), entry.getValue().getType()).finish();
+      builder.packageMethod(void.class, "$set_" + entry.getKey(), Parameter.of(entry.getValue().getType(), "o"))
+          .append(Stmt.loadVariable(entry.getValue().getEncodedProperty()).assignValue(Refs.get("o")))
+          .finish();
+    }
+
     for (final MetaMethod method : toProxy.getMethods()) {
       final String methodString = GenUtil.getMethodString(method);
       if (renderedMethods.contains(methodString) || method.getName().equals("hashCode")
@@ -142,6 +195,9 @@ public class ProxyMaker {
           .parameters(defParameters)
           .throws_(method.getCheckedExceptions());
 
+      methBody.appendAll(getAroundInvokeStatements(method));
+      methBody.appendAll(getBeforeStatements(method));
+
       final List<Parameter> parms = defParameters.getParameters();
 
       final Statement[] statementVars = new Statement[parms.size()];
@@ -154,9 +210,7 @@ public class ProxyMaker {
 
         final Statement[] privateAccessStmts = new Statement[statementVars.length + 1];
         privateAccessStmts[0] = Refs.get(proxyVar);
-        for (int i = 0; i < statementVars.length; i++) {
-          privateAccessStmts[i + 1] = statementVars[i];
-        }
+        System.arraycopy(statementVars, 0, privateAccessStmts, 1, statementVars.length);
 
         if (method.getReturnType().isVoid()) {
           methBody._(loadVariable("this").invoke(PrivateAccessUtil.getPrivateMethodName(method), privateAccessStmts));
@@ -173,6 +227,9 @@ public class ProxyMaker {
           methBody._(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
         }
       }
+
+      methBody.appendAll(getAfterStatements(method));
+      methBody.appendAll(getAroundInvokeStatements(method));
 
       methBody.finish();
     }
@@ -212,4 +269,75 @@ public class ProxyMaker {
 
     return builder.getClassDefinition();
   }
+
+  private Collection<Statement> getWeavingStatements(final MetaMethod method, final WeaveType type) {
+    final Map<WeaveType, Collection<Statement>> weaveTypeListMap = weavingStatements.get(method);
+    if (weaveTypeListMap == null) {
+      return Collections.emptyList();
+    }
+    else {
+      final Collection<Statement> statementList = weaveTypeListMap.get(type);
+      if (statementList == null) {
+        return Collections.emptyList();
+      }
+      else {
+        return Collections.unmodifiableCollection(statementList);
+      }
+    }
+  }
+
+  public Collection<Statement> getAroundInvokeStatements(final MetaMethod method) {
+    return getWeavingStatements(method, WeaveType.AroundInvoke);
+  }
+
+  public Collection<Statement> getBeforeStatements(final MetaMethod method) {
+    return getWeavingStatements(method, WeaveType.BeforeInvoke);
+  }
+
+  public Collection<Statement> getAfterStatements(final MetaMethod method) {
+    return getWeavingStatements(method, WeaveType.AfterInvoke);
+  }
+
+  public static Statement closeProxy(final Statement proxyReference, final Statement beanInstance) {
+    return Stmt.nestedCall(proxyReference).invoke(PROXY_BIND_METHOD, beanInstance);
+  }
+
+  public static Collection<Statement> createAllPropertyBindings(final Statement proxyRef,
+                                                                final Map<String, ProxyProperty> proxyProperties) {
+    final List<Statement> statementList = new ArrayList<Statement>();
+    for (final Map.Entry<String, ProxyProperty> entry : proxyProperties.entrySet()) {
+      statementList.add(Stmt.nestedCall(proxyRef).invoke("$set_" + entry.getKey(), entry.getValue().getValueReference()));
+    }
+    return statementList;
+  }
+
+  public static class ProxyProperty implements Statement {
+    private final String propertyName;
+    private final MetaClass type;
+    private final Statement valueReference;
+
+    public ProxyProperty(final String propertyName, final MetaClass type, final Statement valueReference) {
+      this.propertyName = propertyName;
+      this.type = type;
+      this.valueReference = valueReference;
+    }
+
+    public MetaClass getType() {
+      return type;
+    }
+
+    public Statement getValueReference() {
+      return valueReference;
+    }
+
+    private String getEncodedProperty() {
+      return "$P_" + propertyName + "_P$";
+    }
+
+    @Override
+    public String generate(Context context) {
+      return getEncodedProperty();
+    }
+  }
+
 }

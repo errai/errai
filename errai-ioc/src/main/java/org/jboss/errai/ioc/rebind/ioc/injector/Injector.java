@@ -1,12 +1,18 @@
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
+import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.WeaveType;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RenderingHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Defines an injector which is responsible for providing instance references of beans to the code generating
@@ -133,6 +139,14 @@ public interface Injector {
    */
   String getInstanceVarName();
 
+
+  /**
+   * The unique variable name for the proxied bean instance.
+   *
+   * @return the unique variable name for the proxy of the bean in the bootstrapper.
+   */
+  String getProxyInstanceVarName();
+
   /**
    * The unique variable name for the InitalizationCallback associated with a bean CreationalContext in the
    * boostrapper method.
@@ -226,15 +240,6 @@ public interface Injector {
    */
   void setEnabled(boolean enabled);
 
-
-//  /**
-//   * Set the enabled state of the bean permanently to hard disabled. This means that the bean cannot be re-enabled.
-//   *
-//   * @param enabled
-//   */
-//  void setHardDisabled(boolean enabled);
-
-
   /**
    * Returns true if the injector type is a regular type injector. (ie. not a proxy injector, producer injector, etc).
    *
@@ -242,10 +247,31 @@ public interface Injector {
    */
   boolean isRegularTypeInjector();
 
-
   public void setAttribute(String name, Object value);
 
   public Object getAttribute(String name);
 
   public boolean hasAttribute(String name);
+
+  public Map<MetaMethod, Map<WeaveType, Collection<Statement>>> getWeavingStatementsMap();
+
+  public boolean isProxied();
+
+  void addInvokeAround(MetaMethod method, Statement statement);
+
+  void addInvokeBefore(MetaMethod method, Statement statement);
+
+  void addInvokeAfter(MetaMethod method, Statement statement);
+
+  ProxyMaker.ProxyProperty addProxyProperty(String propertyName, Class type, Statement statement);
+
+  ProxyMaker.ProxyProperty addProxyProperty(String propertyName, MetaClass type, Statement statement);
+
+  Map<String, ProxyMaker.ProxyProperty> getProxyPropertyMap();
+
+  /**
+   * This method should be called to ensure that the proxies have been updated to reflect any code weavings that may
+   * have been added.
+   */
+  public void updateProxies();
 }
