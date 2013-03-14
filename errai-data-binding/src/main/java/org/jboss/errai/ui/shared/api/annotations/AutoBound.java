@@ -28,8 +28,8 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * <p>
  * It indicates that the annotated {@link DataBinder} is used to automatically bind all
  * corresponding widgets to properties of a data model (the model instance associated with the data
- * binder instance). The corresponding widgets are inferred from all fields and methods annotated
- * with {@link Bound} of the class that defines the {@link DataBinder} and all its super classes.
+ * binder instance). The widgets are inferred from all fields and methods annotated with
+ * {@link Bound} of the class that defines the {@link DataBinder} and all its super classes.
  * <p>
  * There can only be one auto bound {@link DataBinder} per class.
  * 

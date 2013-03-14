@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.MockHandler;
-import org.jboss.errai.databinding.client.ModuleWithDeclarativeBinding;
+import org.jboss.errai.databinding.client.DeclarativeBindingModule;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.databinding.client.NonExistingPropertyException;
 import org.jboss.errai.databinding.client.TestModel;
@@ -659,7 +659,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   
   @Test
   public void testDeclarativeBinding() {
-    ModuleWithDeclarativeBinding module = IOC.getBeanManager().lookupBean(ModuleWithDeclarativeBinding.class).getInstance();
+    DeclarativeBindingModule module = IOC.getBeanManager().lookupBean(DeclarativeBindingModule.class).getInstance();
 
     Label idLabel = module.getLabel();
     assertNotNull(idLabel);
@@ -692,7 +692,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     age.setValue("0", true);
     
     assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
-    assertEquals("Model (lastUpdate) was not updated using custom converter!", ModuleWithDeclarativeBinding.TEST_DATE, model
+    assertEquals("Model (lastUpdate) was not updated using custom converter!", DeclarativeBindingModule.TEST_DATE, model
         .getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", age.getValue(), model.getAge().toString());
   }

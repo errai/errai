@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 @EntryPoint
-public class ModuleWithDeclarativeBinding {
+public class DeclarativeBindingModule extends DeclarativeBindingSuperType {
   public static final Date TEST_DATE = DateTimeFormat.getFormat("yyyy/MM/dd").parse("1980/22/06");
 
   @Bound
@@ -34,7 +34,7 @@ public class ModuleWithDeclarativeBinding {
   private final TestModel model;
   
   @Inject
-  public ModuleWithDeclarativeBinding(@AutoBound DataBinder<TestModel> binder) {
+  public DeclarativeBindingModule(@AutoBound DataBinder<TestModel> binder) {
     model = binder.getModel();
   }
 
@@ -46,10 +46,10 @@ public class ModuleWithDeclarativeBinding {
     return name;
   }
   
-  @Bound(property = "lastChanged", converter = BindingDateConverter.class)
-  public TextBox getDateTextBox() {
-    return date;
-  }
+ // @Bound(property = "lastChanged", converter = BindingDateConverter.class)
+ // public TextBox getDateTextBox() {
+ //   return date;
+//  }
   
   public TextBox getAge() {
     return age;

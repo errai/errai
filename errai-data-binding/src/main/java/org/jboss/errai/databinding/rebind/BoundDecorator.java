@@ -119,12 +119,12 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       statements.add(Stmt.loadVariable("binder").invoke("bind", widget, property, converter));
     }
     else {
-      throw new GenerationException("No @AutoBound data binder found for @Bound field or method"
+      throw new GenerationException("No @AutoBound data binder found for @Bound field or method "
             + ctx.getMemberName() + " in class " + ctx.getInjector().getInjectedType());
     }
 
     // The first decorator to run will generate the initialization callback, the subsequent
-    // decorators (for other bound fields/methods of the same class) will just amend the block.
+    // decorators (for other bound widgets of the same class) will just amend the block.
     if (initBlock == null) {
       initBlock = createInitCallback(declaringClass, "obj");
       initBlockCache.put(declaringClass, initBlock);
