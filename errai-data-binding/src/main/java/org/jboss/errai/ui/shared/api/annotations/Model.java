@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * @author Mike Brock
  */
 @Documented
-@Target({ ElementType.FIELD })
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Model {
 

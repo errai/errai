@@ -16,7 +16,15 @@
 
 package org.jboss.errai.databinding.rebind;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -30,10 +38,15 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
+import org.jboss.errai.ui.shared.api.annotations.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility to retrieve an injected {@link AutoBound} data binder.
@@ -42,9 +55,12 @@ import org.jboss.errai.ui.shared.api.annotations.AutoBound;
  * @author Mike Brock
  */
 public class DataBindingUtil {
+  private static final Logger log = LoggerFactory.getLogger(DataBindingUtil.class);
+
   public static class DataBinderLookup {
     private final MetaClass dataModelType;
     private final Statement valueAccessor;
+    
 
     public DataBinderLookup(final MetaClass dataModelType, final Statement valueAccessor) {
       this.dataModelType = dataModelType;
@@ -64,9 +80,56 @@ public class DataBindingUtil {
     Statement dataBinderRef = null;
     MetaClass dataModelType = null;
 
-    final InjectUtil.BeanMetric beanMetric =
-        InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), 
-            ctx.getInjector().getInjectedType(), AutoBound.class);
+    InjectUtil.BeanMetric beanMetric =
+        InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(),
+            ctx.getInjector().getInjectedType(), Model.class);
+
+    if (!beanMetric.getAllInjectors().isEmpty()) {
+      final Collection<Object> allInjectors = beanMetric.getAllInjectors();
+      if (allInjectors.size() > 1) {
+        throw new GenerationException("Multiple @Models injected in " + ctx.getEnclosingType());
+      }
+      else if (allInjectors.size() == 1) {
+        final Object injectorElement = allInjectors.iterator().next();
+        
+        if (injectorElement instanceof MetaConstructor || injectorElement instanceof MetaMethod) {
+          final MetaParameter mp = beanMetric.getConsolidatedMetaParameters().iterator().next();
+          
+          dataModelType = mp.getType();
+          checkTypeIsBindable(dataModelType);
+          dataBinderRef = ctx.getInjectionContext().getInlineBeanReference(mp);
+          ctx.ensureMemberExposed();
+        }
+        else {
+          final MetaField field = (MetaField) allInjectors.iterator().next();
+
+          dataModelType = field.getType();
+          checkTypeIsBindable(dataModelType);
+          dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(field),
+              Variable.get(ctx.getInjector().getInstanceVarName()));
+          ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
+        }
+        return new DataBinderLookup(dataModelType, dataBinderRef);
+      }
+    }
+    else {
+      List<MetaField> modelFields = ctx.getInjector().getInjectedType().getFieldsAnnotatedWith(Model.class);
+      if (!modelFields.isEmpty()) {
+        throw new GenerationException("Found one or more fields annotated with @Model but missing @Inject "
+            + modelFields.toString());
+      }
+
+      List<MetaParameter> modelParameters = ctx.getInjector().getInjectedType().getParametersAnnotatedWith(Model.class);
+      if (!modelParameters.isEmpty()) {
+        throw new GenerationException(
+            "Found one or more constructor or method parameters annotated with @Model but missing @Inject "
+                + modelParameters.toString());
+      }
+    }
+    
+    beanMetric = InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), 
+        ctx.getInjector().getInjectedType(), AutoBound.class);
 
     final Collection<Object> allInjectors = beanMetric.getAllInjectors();
     if (allInjectors.size() > 1) {
@@ -74,7 +137,7 @@ public class DataBindingUtil {
     }
     else if (allInjectors.size() == 1) {
       final Object injectorElement = allInjectors.iterator().next();
-      
+
       if (injectorElement instanceof MetaConstructor || injectorElement instanceof MetaMethod) {
         final MetaParameter mp = beanMetric.getConsolidatedMetaParameters().iterator().next();
 
@@ -119,5 +182,59 @@ public class DataBindingUtil {
       throw new GenerationException("type of @AutoBound element must be " + DataBinder.class.getName() +
           "; was: " + type.getFullyQualifiedName());
     }
+  }
+  
+  private static void checkTypeIsBindable(MetaClass type) {
+    if (!type.isAnnotationPresent(Bindable.class) && ! getConfiguredBindableTypes().contains(type)) {
+      throw new GenerationException(type.getName() + " must be a @Bindable type when used as @Model");
+    }
+    
+  }
+  
+  /**
+   * Reads bindable types from all ErraiApp.properties files on the classpath.
+   * 
+   * @return a set of meta classes representing the configured bindable types.
+   */
+  public static Set<MetaClass> getConfiguredBindableTypes() {
+    final Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
+
+    final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
+    for (URL url : erraiAppProperties) {
+      InputStream inputStream = null;
+      try {
+        log.debug("Checking " + url.getFile() + " for bindable types...");
+        inputStream = url.openStream();
+
+        final ResourceBundle props = new PropertyResourceBundle(inputStream);
+        for (final String key : props.keySet()) {
+          if (key.equals("errai.ui.bindableTypes")) {
+            for (final String s : props.getString(key).split(" ")) {
+              try {
+                bindableTypes.add(MetaClassFactory.get(s.trim()));
+              }
+              catch (Exception e) {
+                throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
+              }
+            }
+            break;
+          }
+        }
+      }
+      catch (IOException e) {
+        throw new RuntimeException("Error reading ErraiApp.properties", e);
+      }
+      finally {
+        if (inputStream != null) {
+          try {
+            inputStream.close();
+          }
+          catch (IOException e) {
+            log.warn("Failed to close input stream", e);
+          }
+        }
+      }
+    }
+    return bindableTypes;
   }
 }

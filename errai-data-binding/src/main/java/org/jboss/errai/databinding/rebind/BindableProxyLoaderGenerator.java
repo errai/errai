@@ -16,13 +16,8 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.jboss.errai.codegen.Cast;
@@ -41,7 +36,6 @@ import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
-import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
@@ -86,7 +80,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
         ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context));
     
     Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
-    bindableTypes.addAll(getBindableTypesFromErraiAppProperties());
+    bindableTypes.addAll(DataBindingUtil.getConfiguredBindableTypes());
 
     for (MetaClass bindable : bindableTypes) {
       if (bindable.isFinal()) {
@@ -122,53 +116,6 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     return classBuilder.toJavaString();
-  }
-
-  /**
-   * Reads bindable types from all ErraiApp.properties files on the classpath.
-   * 
-   * @return a set of meta classes representing the configured bindable types.
-   */
-  private Set<MetaClass> getBindableTypesFromErraiAppProperties() {
-    final Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
-
-    final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
-    for (URL url : erraiAppProperties) {
-      InputStream inputStream = null;
-      try {
-        log.debug("Checking " + url.getFile() + " for bindable types...");
-        inputStream = url.openStream();
-
-        final ResourceBundle props = new PropertyResourceBundle(inputStream);
-        for (final String key : props.keySet()) {
-          if (key.equals("errai.ui.bindableTypes")) {
-            for (final String s : props.getString(key).split(" ")) {
-              try {
-                bindableTypes.add(MetaClassFactory.get(s.trim()));
-              }
-              catch (Exception e) {
-                throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
-              }
-            }
-            break;
-          }
-        }
-      }
-      catch (IOException e) {
-        throw new RuntimeException("Error reading ErraiApp.properties", e);
-      }
-      finally {
-        if (inputStream != null) {
-          try {
-            inputStream.close();
-          }
-          catch (IOException e) {
-            log.warn("Failed to close input stream", e);
-          }
-        }
-      }
-    }
-    return bindableTypes;
   }
 
   /**
