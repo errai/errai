@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ui.shared.api.annotations;
-
-import javax.inject.Qualifier;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.jboss.errai.ioc.client.container;
 
 /**
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-@Documented
-@Qualifier
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Model {
+public final class RefHolder<T> {
+  private T ref;
 
+  public T get() {
+    return ref;
+  }
+
+  public void set(T ref) {
+    this.ref = ref;
+  }
 }

@@ -16,16 +16,7 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
-
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -38,7 +29,9 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
@@ -48,23 +41,47 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 /**
  * Utility to retrieve an injected {@link AutoBound} data binder.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class DataBindingUtil {
+  public static final Annotation[] MODEL_QUALIFICATION = new Annotation[]{new Model() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Model.class;
+    }
+  }};
+
   private static final Logger log = LoggerFactory.getLogger(DataBindingUtil.class);
+
+  public static enum DataBindingType {
+    DATA_BINDER,
+    RAW_MODEL
+  }
 
   public static class DataBinderLookup {
     private final MetaClass dataModelType;
     private final Statement valueAccessor;
-    
+    private final DataBindingType type;
 
-    public DataBinderLookup(final MetaClass dataModelType, final Statement valueAccessor) {
+    public DataBinderLookup(final MetaClass dataModelType, final Statement valueAccessor, DataBindingType type) {
       this.dataModelType = dataModelType;
       this.valueAccessor = valueAccessor;
+      this.type = type;
     }
 
     public MetaClass getDataModelType() {
@@ -73,6 +90,10 @@ public class DataBindingUtil {
 
     public Statement getValueAccessor() {
       return valueAccessor;
+    }
+
+    public DataBindingType getType() {
+      return type;
     }
   }
 
@@ -91,10 +112,10 @@ public class DataBindingUtil {
       }
       else if (allInjectors.size() == 1) {
         final Object injectorElement = allInjectors.iterator().next();
-        
+
         if (injectorElement instanceof MetaConstructor || injectorElement instanceof MetaMethod) {
           final MetaParameter mp = beanMetric.getConsolidatedMetaParameters().iterator().next();
-          
+
           dataModelType = mp.getType();
           checkTypeIsBindable(dataModelType);
           dataBinderRef = ctx.getInjectionContext().getInlineBeanReference(mp);
@@ -105,12 +126,10 @@ public class DataBindingUtil {
 
           dataModelType = field.getType();
           checkTypeIsBindable(dataModelType);
-          dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
-              PrivateAccessUtil.getPrivateFieldInjectorName(field),
-              Variable.get(ctx.getInjector().getInstanceVarName()));
+          dataBinderRef = Stmt.loadVariable("dataBinderHolder").invoke("get");
           ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
         }
-        return new DataBinderLookup(dataModelType, dataBinderRef);
+        return new DataBinderLookup(dataModelType, dataBinderRef, DataBindingType.RAW_MODEL);
       }
     }
     else {
@@ -127,8 +146,8 @@ public class DataBindingUtil {
                 + modelParameters.toString());
       }
     }
-    
-    beanMetric = InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), 
+
+    beanMetric = InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(),
         ctx.getInjector().getInjectedType(), AutoBound.class);
 
     final Collection<Object> allInjectors = beanMetric.getAllInjectors();
@@ -172,7 +191,7 @@ public class DataBindingUtil {
       }
     }
 
-    return (dataBinderRef != null) ? new DataBinderLookup(dataModelType, dataBinderRef) : null;
+    return (dataBinderRef != null) ? new DataBinderLookup(dataModelType, dataBinderRef, DataBindingType.DATA_BINDER) : null;
   }
 
   private static void checkTypeIsDataBinder(MetaClass type) {
@@ -183,17 +202,17 @@ public class DataBindingUtil {
           "; was: " + type.getFullyQualifiedName());
     }
   }
-  
+
   private static void checkTypeIsBindable(MetaClass type) {
-    if (!type.isAnnotationPresent(Bindable.class) && ! getConfiguredBindableTypes().contains(type)) {
+    if (!type.isAnnotationPresent(Bindable.class) && !getConfiguredBindableTypes().contains(type)) {
       throw new GenerationException(type.getName() + " must be a @Bindable type when used as @Model");
     }
-    
+
   }
-  
+
   /**
    * Reads bindable types from all ErraiApp.properties files on the classpath.
-   * 
+   *
    * @return a set of meta classes representing the configured bindable types.
    */
   public static Set<MetaClass> getConfiguredBindableTypes() {
@@ -236,5 +255,14 @@ public class DataBindingUtil {
       }
     }
     return bindableTypes;
+  }
+
+  public static Collection<MetaClass> getAllBindableTypes(final GeneratorContext context) {
+    Collection<MetaClass> annotatedBindableTypes =
+        ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context));
+
+    Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
+    bindableTypes.addAll(DataBindingUtil.getConfiguredBindableTypes());
+    return annotatedBindableTypes;
   }
 }
