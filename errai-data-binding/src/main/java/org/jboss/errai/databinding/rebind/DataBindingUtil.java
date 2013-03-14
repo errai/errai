@@ -65,11 +65,12 @@ public class DataBindingUtil {
     MetaClass dataModelType = null;
 
     final InjectUtil.BeanMetric beanMetric =
-        InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), ctx.getEnclosingType(), AutoBound.class);
+        InjectUtil.getFilteredBeanMetric(ctx.getInjectionContext(), 
+            ctx.getInjector().getInjectedType(), AutoBound.class);
 
     final Collection<Object> allInjectors = beanMetric.getAllInjectors();
     if (allInjectors.size() > 1) {
-      throw new GenerationException("Multiple @AutoBound data binders found in " + ctx.getEnclosingType());
+      throw new GenerationException("Multiple @AutoBound data binders injected in " + ctx.getEnclosingType());
     }
     else if (allInjectors.size() == 1) {
       final Object injectorElement = allInjectors.iterator().next();
