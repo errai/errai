@@ -119,7 +119,11 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       statements.add(Stmt.loadVariable("binder").invoke("bind", widget, property, converter));
     }
     else {
+<<<<<<< HEAD
       throw new GenerationException("No @Model or @AutoBound data binder found for @Bound field or method "
+=======
+      throw new GenerationException("No @AutoBound data binder found for @Bound field or method "
+>>>>>>> afc92b3ab67f1aeeb3e981501a65df2964e86ba7
             + ctx.getMemberName() + " in class " + ctx.getInjector().getInjectedType());
     }
 

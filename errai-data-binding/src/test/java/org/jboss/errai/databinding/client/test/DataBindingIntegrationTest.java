@@ -24,7 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.databinding.client.*;
+import org.jboss.errai.databinding.client.BindableProxy;
+import org.jboss.errai.databinding.client.MockHandler;
+import org.jboss.errai.databinding.client.DeclarativeBindingModule;
+import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.NonExistingPropertyException;
+import org.jboss.errai.databinding.client.TestModel;
+import org.jboss.errai.databinding.client.TestModelWidget;
+import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
+import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
