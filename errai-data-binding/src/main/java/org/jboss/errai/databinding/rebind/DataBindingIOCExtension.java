@@ -16,6 +16,8 @@
 
 package org.jboss.errai.databinding.rebind;
 
+import java.util.Collection;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -23,46 +25,55 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.IOCExtension;
+import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCConfigProcessor;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-
-import java.util.Collection;
+import org.jboss.errai.ui.shared.api.annotations.Model;
 
 /**
+ * The purpose of this IOC extension is to provide bean instances of bindable types that are
+ * qualified with {@link Model} and to expose the {@link DataBinder} that manages the model
+ * instance in a {@link RefHolder}.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 @IOCExtension
 public class DataBindingIOCExtension implements IOCExtensionConfigurator {
   @Override
-  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext, final IOCConfigProcessor procFactory) {
-
-  }
+  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext, 
+      final IOCConfigProcessor procFactory) {}
 
   @Override
-  public void afterInitialization(final IOCProcessingContext context, InjectionContext injectionContext, IOCConfigProcessor procFactory) {
+  @SuppressWarnings("rawtypes")
+  public void afterInitialization(final IOCProcessingContext context, InjectionContext injectionContext,
+      IOCConfigProcessor procFactory) {
+
     final Collection<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.getGeneratorContext());
 
     for (final MetaClass modelBean : allBindableTypes) {
       injectionContext.registerInjector(new AbstractInjector() {
         {
-          this.qualifyingMetadata = context.getQualifyingMetadataFactory().createFrom(DataBindingUtil.MODEL_QUALIFICATION);
+          this.qualifyingMetadata =
+              context.getQualifyingMetadataFactory().createFrom(DataBindingUtil.MODEL_QUALIFICATION);
         }
 
         @Override
-        public void renderProvider(InjectableInstance injectableInstance) {
-        }
+        public void renderProvider(InjectableInstance injectableInstance) {}
 
         @Override
         public Statement getBeanInstance(InjectableInstance injectableInstance) {
           final String dataBinderVar = modelBean.getName() + "_DataBinder";
-          final MetaClass parameterizedDataBinder_MC
+          final MetaClass binderClass
               = MetaClassFactory.parameterizedAs(DataBinder.class, MetaClassFactory.typeParametersOf(modelBean));
-          context.append(Stmt.declareFinalVariable(dataBinderVar, parameterizedDataBinder_MC, Stmt.invokeStatic(DataBinder.class, "forType", modelBean)));
-          context.append(Stmt.loadVariable("dataBinderHolder").invoke("set", Refs.get(dataBinderVar)));
+          context.append(
+              Stmt.declareFinalVariable(dataBinderVar, binderClass, 
+                  Stmt.invokeStatic(DataBinder.class,"forType", modelBean)));
+          context.append(Stmt.loadVariable(BoundDecorator.HOLDER_VAR_NAME).invoke("set", Refs.get(dataBinderVar)));
           return Stmt.loadVariable(dataBinderVar).invoke("getModel");
         }
 

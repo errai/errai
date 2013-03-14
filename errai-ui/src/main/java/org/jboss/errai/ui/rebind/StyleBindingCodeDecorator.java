@@ -88,7 +88,7 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
 
     final List<Statement> stmts = new ArrayList<Statement>();
 
-    final DataBindingUtil.DataBinderLookup dataBinder = DataBindingUtil.getDataBinder(ctx);
+    final DataBindingUtil.DataBinderRef dataBinder = DataBindingUtil.lookupDataBinderRef(ctx);
 
     if (dataBinder != null) {
       if (!ctx.getInjector().hasAttribute(DATA_BINDING_CONFIG_ATTR)) {

@@ -650,51 +650,18 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
   
   @Test
-  public void testDeclarativeBinding() {
-    DeclarativeBindingModule module = IOC.getBeanManager().lookupBean(DeclarativeBindingModule.class).getInstance();
-
-    Label idLabel = module.getLabel();
-    assertNotNull(idLabel);
-    assertEquals("id", idLabel.getText());
-
-    TextBox nameTextBox = module.getNameTextBox();
-    assertNotNull(nameTextBox);
-    assertEquals("", nameTextBox.getValue());
-
-    TextBox dateTextBox = module.getDateTextBox();
-    assertNotNull(dateTextBox);
-    assertEquals("", dateTextBox.getValue());
-    
-    TextBox age = module.getAge();
-    assertNotNull(age);
-    assertEquals("", age.getValue());
-
-    TestModel model = module.getModel();
-    model.setId(1711);
-    model.getChild().setName("errai");
-    model.setLastChanged(new Date());
-    model.setAge(47);
-    assertEquals("Label (id) was not updated!", Integer.valueOf(model.getId()).toString(), idLabel.getText());
-    assertEquals("TextBox (name) was not updated!", model.getChild().getName(), nameTextBox.getValue());
-    assertEquals("TextBox (date) was not updated using custom converter!", "testdate", dateTextBox.getValue());
-    assertEquals("TextBox (age) was not updated", model.getAge().toString(), age.getValue());
-
-    nameTextBox.setValue("updated", true);
-    dateTextBox.setValue("updated", true);
-    age.setValue("0", true);
-    
-    assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
-    assertEquals("Model (lastUpdate) was not updated using custom converter!", DeclarativeBindingModule.TEST_DATE, model
-        .getLastChanged());
-    assertEquals("Model (phoneNumber) was not updated!", age.getValue(), model.getAge().toString());
+  public void testDeclarativeBindingUsingBinder() {
+    DeclarativeBindingModule module = IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingBinder.class).getInstance();
+    testDeclarativeBinding(module);
   }
   
   @Test
   public void testDeclarativeBindingUsingModel() {
-    DeclarativeBindingModuleUsingModel module = IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
-
-    assertNotNull(module.getModel());
-    
+    DeclarativeBindingModule module = IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
+    testDeclarativeBinding(module);
+  }
+  
+  public void testDeclarativeBinding(DeclarativeBindingModule module) {
     Label idLabel = module.getLabel();
     assertNotNull(idLabel);
     assertEquals("id", idLabel.getText());
@@ -726,8 +693,9 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     age.setValue("0", true);
     
     assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
-    assertEquals("Model (lastUpdate) was not updated using custom converter!", DeclarativeBindingModule.TEST_DATE, model
+    assertEquals("Model (lastUpdate) was not updated using custom converter!", DeclarativeBindingModuleUsingBinder.TEST_DATE, model
         .getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", age.getValue(), model.getAge().toString());
   }
+  
 }

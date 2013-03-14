@@ -16,10 +16,6 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -76,13 +72,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
-    Collection<MetaClass> annotatedBindableTypes =
-        ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context));
-    
-    Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
-    bindableTypes.addAll(DataBindingUtil.getConfiguredBindableTypes());
-
-    for (MetaClass bindable : bindableTypes) {
+    for (MetaClass bindable : DataBindingUtil.getAllBindableTypes(context)) {
       if (bindable.isFinal()) {
         throw new RuntimeException("@Bindable type cannot be final: " + bindable.getFullyQualifiedName());
       }
