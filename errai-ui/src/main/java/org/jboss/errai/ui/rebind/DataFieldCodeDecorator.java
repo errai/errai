@@ -15,13 +15,8 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Strings;
+import com.google.gwt.dom.client.Element;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -33,13 +28,17 @@ import org.jboss.errai.ui.shared.ElementWrapperWidget;
 import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 
-import com.google.common.base.Strings;
-import com.google.gwt.dom.client.Element;
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Store all injected {@link DataField} {@link Statement} instances into the
  * aggregate {@link Map} for this composite {@link Template}.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 @CodeDecorator
@@ -57,16 +56,15 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Element.class)) {
       if (ctx.isAnnotationPresent(Inject.class)) {
         throw new GenerationException("@DataField [" + name + "] in class ["
-                + ctx.getEnclosingType().getFullyQualifiedName() + "] is of type ["
-                + ctx.getElementTypeOrMethodReturnType().getFullyQualifiedName()
-                + "] which does not support @Inject; this instance must be created manually.");
+            + ctx.getEnclosingType().getFullyQualifiedName() + "] is of type ["
+            + ctx.getElementTypeOrMethodReturnType().getFullyQualifiedName()
+            + "] which does not support @Inject; this instance must be created manually.");
       }
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
     saveDataField(ctx, ctx.getElementTypeOrMethodReturnType(), name, ctx.getMemberName(), instance);
 
-    return new ArrayList<Statement>();
-
+    return Collections.emptyList();
   }
 
   private void saveDataField(InjectableInstance<DataField> ctx, MetaClass type, String name, String fieldName, Statement instance) {
@@ -87,7 +85,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     String dataFieldMapName = dataFieldMapName(templateType);
 
     Map<String, Statement> dataFields = (Map<String, Statement>) ctx.getInjectionContext().getAttribute(
-            dataFieldMapName);
+        dataFieldMapName);
     if (dataFields == null) {
       dataFields = new LinkedHashMap<String, Statement>();
       ctx.getInjectionContext().setAttribute(dataFieldMapName, dataFields);
@@ -95,7 +93,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
 
     return dataFields;
   }
-  
+
   /**
    * Get the map of {@link DataField} names and {@link MetaClass} types.
    */
@@ -104,7 +102,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     String dataFieldTypeMapName = dataFieldTypeMapName(templateType);
 
     Map<String, MetaClass> dataFieldTypes = (Map<String, MetaClass>) ctx.getInjectionContext().getAttribute(
-            dataFieldTypeMapName);
+        dataFieldTypeMapName);
     if (dataFieldTypes == null) {
       dataFieldTypes = new LinkedHashMap<String, MetaClass>();
       ctx.getInjectionContext().setAttribute(dataFieldTypeMapName, dataFieldTypes);
@@ -128,7 +126,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     }
 
     Map<String, Statement> dataFields = (Map<String, Statement>) ctx.getInjectionContext().getAttribute(
-            dataFieldMapName(componentType));
+        dataFieldMapName(componentType));
     if (dataFields != null) {
       result.putAll(dataFields);
     }
@@ -151,8 +149,8 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
     }
 
     Map<String, MetaClass> dataFields = (Map<String, MetaClass>) ctx.getInjectionContext().getAttribute(
-            dataFieldTypeMapName(componentType));
-    
+        dataFieldTypeMapName(componentType));
+
     if (dataFields != null) {
       result.putAll(dataFields);
     }
@@ -167,7 +165,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
   private static final String dataFieldMapName(MetaClass composite) {
     return DataFieldCodeDecorator.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
   }
-  
+
   /**
    * Using the given composite {@link Template} type, return the name of the map
    * of {@link DataField} names and variable {@link MetaClass} types.

@@ -113,31 +113,9 @@ public class InjectUtil {
 
           final Statement objectInstantiate = Stmt.newObject(type, parameterStatements);
 
-//          if (injector.isProxied()) {
-//            processingContext.append(
-//                Stmt.declareFinalVariable(
-//                    injector.getProxyInstanceVarName(),
-//                    type,
-//                    ProxyMaker.makeProxy(
-//                        type,
-//                        ctx.getProcessingContext().isGwtTarget() ? "jsni" : "reflection",
-//                        injector.getWeavingStatementsMap()
-//                    )
-//                )
-//            );
-//            processingContext.append(
-//                Stmt.declareFinalVariable(injector.getInstanceVarName(), type, objectInstantiate)
-//            );
-//
-//            processingContext.append(
-//                ProxyMaker.closeProxy(Refs.get(injector.getProxyInstanceVarName()), Refs.get(injector.getInstanceVarName()))
-//            );
-//          }
-//          else {
           processingContext.append(
               Stmt.declareFinalVariable(injector.getInstanceVarName(), type, objectInstantiate)
           );
-//          }
           callback.beanConstructed(ConstructionType.CONSTRUCTOR);
 
           handleInjectionTasks(ctx, injectionTasks);
@@ -159,28 +137,6 @@ public class InjectUtil {
           if (injector.isSingleton() && injector.isCreated()) return;
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
-
-//          if (injector.isProxied()) {
-//            processingContext.append(
-//                Stmt.declareFinalVariable(
-//                    injector.getProxyInstanceVarName(),
-//                    type,
-//                    ProxyMaker.makeProxy(
-//                        type,
-//                        ctx.getProcessingContext().isGwtTarget() ? "jsni" : "reflection",
-//                        injector.getWeavingStatementsMap()
-//                    )
-//                )
-//            );
-//            processingContext.append(
-//                Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type))
-//            );
-//
-//            processingContext.append(
-//                ProxyMaker.closeProxy(Refs.get(injector.getProxyInstanceVarName()), Refs.get(injector.getInstanceVarName()))
-//            );
-//          }
-//          else {
           processingContext.append(
               Stmt.declareVariable(type)
                   .asFinal()
@@ -188,7 +144,6 @@ public class InjectUtil {
                   .initializeWith(Stmt.newObject(type))
 
           );
-//          }
 
           callback.beanConstructed(ConstructionType.FIELD);
 
