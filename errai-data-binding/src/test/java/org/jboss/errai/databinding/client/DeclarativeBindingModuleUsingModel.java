@@ -16,18 +16,19 @@
 
 package org.jboss.errai.databinding.client;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
+import java.util.Date;
+
+import javax.inject.Inject;
+
 import org.jboss.errai.databinding.client.api.Converter;
-import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.jboss.errai.ui.shared.api.annotations.ModelSetter;
 
-import javax.inject.Inject;
-import java.util.Date;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Used for testing declarative binding using {@link Model}.
@@ -41,27 +42,33 @@ public class DeclarativeBindingModuleUsingModel extends DeclarativeBindingSuperT
   @Bound
   private final Label id = new Label("id");
 
-  @Bound(property="child.name")
+  @Bound(property = "child.name")
   private final TextBox name = new TextBox();
 
-  //tests automatic initialization
-  @Bound  
+  // tests automatic initialization
+  @Bound
   private TextBox age;
-  
-  private @Inject @Model TestModel model;
-  
+
+  @Inject
+  @Model
+  private TestModel model;
+
+  @Override
   public Label getLabel() {
     return id;
   }
 
+  @Override
   public TextBox getNameTextBox() {
     return name;
   }
-  
+
+  @Override
   public TextBox getAge() {
     return age;
   }
-  
+
+  @Override
   public TestModel getModel() {
     return model;
   }

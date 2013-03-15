@@ -16,20 +16,15 @@
 
 package org.jboss.errai.databinding.client.test;
 
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
-import org.jboss.errai.databinding.client.BindableProxy;
-import org.jboss.errai.databinding.client.DeclarativeBindingModule;
-import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingBinder;
-import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingModel;
-import org.jboss.errai.databinding.client.DeclarativeBindingModuleUsingParams;
-import org.jboss.errai.databinding.client.MockHandler;
-import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
-import org.jboss.errai.databinding.client.NonExistingPropertyException;
-import org.jboss.errai.databinding.client.TestModel;
-import org.jboss.errai.databinding.client.TestModelWidget;
-import org.jboss.errai.databinding.client.TestModelWithoutBindableAnnotation;
-import org.jboss.errai.databinding.client.WidgetAlreadyBoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.jboss.errai.databinding.client.*;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -41,17 +36,12 @@ import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Tests functionality provided by the {@link DataBinder} API.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author David Cracauer <dcracauer@gmail.com>
  */
@@ -586,7 +576,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   /**
-   * Ensures that, when a property change event is fired, the new value is already set on the model object.
+   * Ensures that, when a property change event is fired, the new value is already set on the model
+   * object.
    */
   @Test
   public void testNewValueIsSetBeforePropertyChangeEventIsFired() {
@@ -626,7 +617,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
       }
     });
 
-    // using direct field access on the target object so the bindable proxy has no chance of seeing the change
+    // using direct field access on the target object so the bindable proxy has no chance of seeing
+    // the change
     model.value = "model change";
     assertEquals("TextBox should be empty", "", textBox.getText());
 
@@ -648,7 +640,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     TextBox textBox = new TextBox();
     DataBinder<TestModel> binder = DataBinder.forModel(model).bind(textBox, "child.child.value");
 
-    // using direct field access on the target object so the bindable proxy has no chance of seeing the change
+    // using direct field access on the target object so the bindable proxy has no chance of seeing
+    // the change
     model.child = new TestModel();
     model.child.child = new TestModel();
     model.child.child.value = "model change";
@@ -675,18 +668,18 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-   public void testDeclarativeBindingUsingModelSetter() {
-     DeclarativeBindingModuleUsingModel module =
+  public void testDeclarativeBindingUsingModelSetter() {
+    DeclarativeBindingModuleUsingModel module =
          IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
-     TestModel model = new TestModel();
-     model.setName("custom model");
+    TestModel model = new TestModel();
+    model.setName("custom model");
 
-     module.setModel(model);
+    module.setModel(model);
 
-     assertTrue(module.getModel() instanceof BindableProxy);
-     assertTrue(module.getModel().equals(model));
-     testDeclarativeBinding(module);
-   }
+    assertTrue(module.getModel() instanceof BindableProxy);
+    assertTrue(module.getModel().equals(model));
+    testDeclarativeBinding(module);
+  }
 
   @Test
   public void testDeclarativeBindingUsingParams() {
@@ -727,8 +720,9 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     age.setValue("0", true);
 
     assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
-    assertEquals("Model (lastUpdate) was not updated using custom converter!", DeclarativeBindingModuleUsingBinder.TEST_DATE, model
-        .getLastChanged());
+    assertEquals("Model (lastUpdate) was not updated using custom converter!",
+        DeclarativeBindingModuleUsingBinder.TEST_DATE, model
+            .getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", age.getValue(), model.getAge().toString());
   }
 

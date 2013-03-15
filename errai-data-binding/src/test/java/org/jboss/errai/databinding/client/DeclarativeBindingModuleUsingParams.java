@@ -35,20 +35,21 @@ import com.google.gwt.user.client.ui.TextBox;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
-public class DeclarativeBindingModuleUsingParams extends DeclarativeBindingSuperType implements DeclarativeBindingModule {
+public class DeclarativeBindingModuleUsingParams extends DeclarativeBindingSuperType implements
+    DeclarativeBindingModule {
+  
   public static final Date TEST_DATE = DateTimeFormat.getFormat("yyyy/MM/dd").parse("1980/22/06");
 
   private Label id;
-  private TextBox name = new TextBox();
+  private final TextBox name;
 
-  //tests automatic initialization
-  @Bound  
+  @Bound
   private TextBox age;
-  
-  private TestModel model;
-  
+
+  private final TestModel model;
+
   @Inject
-  public DeclarativeBindingModuleUsingParams(@Model TestModel model, @Bound(property="child.name") TextBox name) {
+  public DeclarativeBindingModuleUsingParams(@Model TestModel model, @Bound(property = "child.name") TextBox name) {
     this.name = name;
     this.model = model;
   }
@@ -68,17 +69,17 @@ public class DeclarativeBindingModuleUsingParams extends DeclarativeBindingSuper
   public TextBox getNameTextBox() {
     return name;
   }
-  
+
   @Override
   public TextBox getAge() {
     return age;
   }
-  
+
   @Override
   public TestModel getModel() {
     return model;
   }
-  
+
   public static class BindingDateConverter implements Converter<Date, String> {
 
     @Override

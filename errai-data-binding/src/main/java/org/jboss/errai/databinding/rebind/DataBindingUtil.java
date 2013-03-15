@@ -16,7 +16,17 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -41,16 +51,7 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * Utility to retrieve a data binder reference. The reference is either to an injected
@@ -62,7 +63,8 @@ import java.util.Set;
 public class DataBindingUtil {
   private static final Logger log = LoggerFactory.getLogger(DataBindingUtil.class);
   public static final String TRANSIENT_BINDER_VALUE = "DataModelBinder";
-
+  public static final String BINDER_MODEL_TYPE_VALUE = "DataBinderModelType";
+  
   public static final Annotation[] MODEL_QUALIFICATION = new Annotation[] {
       new Model() {
         @Override

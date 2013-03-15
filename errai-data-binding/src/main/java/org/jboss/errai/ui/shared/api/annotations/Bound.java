@@ -25,13 +25,42 @@ import org.jboss.errai.databinding.client.api.Converter;
 import org.jboss.errai.databinding.client.api.DataBinder;
 
 /**
- * Indicates that an annotated widget field or the widget returned by an annotated method should
- * automatically be bound to a property of a data model associated with a {@link DataBinder} (see
- * {@link AutoBound} and {@link Model}).
+ * Indicates that an annotated widget should automatically be bound to a property of a data model
+ * associated with a {@link DataBinder} (see {@link AutoBound} and {@link Model}).
  * <p>
- * If no property is specified, the widget is bound to the data model property with the
- * same name as the field or method which is the target of this annotation.
- * 
+ * The annotated widget can either be a field, a method or constructor parameter or a method return
+ * type. Note that a {@link Bound} field does not have to be but can of course be injected. The
+ * following example shows all use cases for the {@link Bound} annotation.
+ * <pre>
+ *      public class MyBean {
+ *        {@code @Inject} {@code @Model} 
+ *        private MyModel model;
+ *      
+ *        {@code @Bound}
+ *        private Label boundLabel = new Label();
+ *        
+ *        {@code @Inject} {@code @Bound}
+ *        private TextBox injectedBoundTextBox;
+ *  
+ *        {@code @Inject}
+ *        public MyBean({@code @Bound} Widget boundWidget) {
+ *          this.boundWidget = boundWidget;
+ *        }
+ *        
+ *        {@code @Inject}
+ *        public void setWidget({@code @Bound} Widget boundWidget) {
+ *          this.boundWidget = boundWidget;
+ *        }
+ *  
+ *        {@code @Bound}
+ *        public Widget getWidget() {
+ *          ...
+ *        }
+ *      }
+ * </pre>
+ * If no property is specified, the widget is bound to the data model property with the same name as
+ * the field, parameter or method which is the target of this annotation.
+ * <p>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented
@@ -41,9 +70,9 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 public @interface Bound {
 
   /**
-   * The name of the data model property (or a property chain) to bind the widget to,
-   * following Java bean conventions. If omitted, the widget will be bound to the data model
-   * property with the same name as the field or method which is the target of this annotation.
+   * The name of the data model property (or a property chain) to bind the widget to, following Java
+   * bean conventions. If omitted, the widget will be bound to the data model property with the same
+   * name as the field, parameter or method which is the target of this annotation.
    */
   String property() default "";
 

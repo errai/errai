@@ -19,7 +19,14 @@ package org.jboss.errai.databinding.rebind;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.inject.Inject;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -38,12 +45,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates an {@link InitializationCallback} that contains automatic binding logic.
@@ -52,6 +54,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @CodeDecorator
 public class BoundDecorator extends IOCDecoratorExtension<Bound> {
+  
+  
   final Map<MetaClass, BlockBuilder<AnonymousClassStructureBuilder>> initBlockCache =
       new ConcurrentHashMap<MetaClass, BlockBuilder<AnonymousClassStructureBuilder>>();
 
@@ -119,6 +123,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       initBlock = createInitCallback(ctx.getEnclosingType(), "obj");
       initBlockCache.put(targetClass, initBlock);
 
+      ctx.getTargetInjector().setAttribute(DataBindingUtil.BINDER_MODEL_TYPE_VALUE, binderLookup.getDataModelType());
       ctx.getTargetInjector().addStatementToEndOfInjector(
           Stmt.loadVariable("context").invoke("addInitializationCallback",
                     Refs.get(ctx.getInjector().getInstanceVarName()), initBlock.appendAll(statements).finish().finish()));
@@ -129,7 +134,6 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
     }
 
     return Collections.emptyList();
-
   }
 
   /**

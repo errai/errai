@@ -28,8 +28,36 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 
 /**
  * Indicates that the annotated model should be managed by a {@link DataBinder} and therefore
- * automatically bound to all enclosing widgets annotated with {@link Bound}.
+ * automatically bound to all enclosing widgets.
+ * <p>
+ * The widgets are inferred from all enclosing fields and methods annotated with {@link Bound} of
+ * the class that defines the {@link Model} and all its super classes.
+ * <p>
+ * The annotated model can either be a field or a method or constructor parameter. Note that a
+ * {@link Model} field does not have to be but can of course be injected. The following example
+ * shows all use cases for the {@link Model} annotation.
  * 
+ * <pre>
+ *      public class MyBean {
+ *        {@code @Inject} {@code @Model} 
+ *        private MyModel model;
+ *      
+ *        {@code @Model}
+ *        private MyModel model = new MyModel();
+ *        
+ *        {@code @Inject}
+ *        public MyBean({@code @Model} MyModel model) {
+ *          this.model = model;
+ *        }
+ *        
+ *        {@code @Inject}
+ *        public void setModel({@code @Model} MyModel model) {
+ *          this.model = model;
+ *        }
+ *      }
+ * </pre>
+ * There can only be one {@link Model} per class.
+ * <p>
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
