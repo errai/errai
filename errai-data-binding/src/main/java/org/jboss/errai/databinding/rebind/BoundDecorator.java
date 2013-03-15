@@ -19,14 +19,7 @@ package org.jboss.errai.databinding.rebind;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.inject.Inject;
-
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -34,7 +27,6 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
@@ -42,12 +34,16 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
-import org.jboss.errai.ioc.client.container.RefHolder;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 
-import com.google.gwt.user.client.ui.Widget;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generates an {@link InitializationCallback} that contains automatic binding logic.
@@ -56,6 +52,8 @@ import com.google.gwt.user.client.ui.Widget;
  */
 @CodeDecorator
 public class BoundDecorator extends IOCDecoratorExtension<Bound> {
+  public static final String TRANSIENT_BINDER_VALUE = "DataModelBinder";
+
   public static final String HOLDER_GENERATED_ATTR = "holderGeneratedAttr";
   public static final String HOLDER_VAR_NAME = "dataBinderHolder";
 
@@ -83,7 +81,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       }
 
       // Check if the bound property exists in data model type
-      Bound bound = ctx.getAnnotation(Bound.class);
+      Bound bound = ctx.getAnnotation();
       String property = bound.property().equals("") ? ctx.getMemberName() : bound.property();
       if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
         throw new GenerationException("Invalid binding of field " + ctx.getMemberName()
@@ -127,11 +125,6 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       initBlockCache.put(targetClass, initBlock);
 
       final List<Statement> stmts = new ArrayList<Statement>(2);
-      if (!ctx.getInjector().hasAttribute(HOLDER_GENERATED_ATTR)) {
-        MetaClass holderClass = MetaClassFactory.parameterizedAs(RefHolder.class, typeParametersOf(DataBinder.class));
-        stmts.add(Stmt.declareFinalVariable(HOLDER_VAR_NAME, holderClass, Stmt.newObject(holderClass)));
-        ctx.getInjector().setAttribute(HOLDER_GENERATED_ATTR, Boolean.TRUE);
-      }
 
       stmts.add(Stmt.loadVariable("context").invoke("addInitializationCallback",
           Refs.get(ctx.getInjector().getInstanceVarName()),

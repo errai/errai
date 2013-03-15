@@ -16,17 +16,7 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
-
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -51,7 +41,16 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Utility to retrieve a data binder reference. The reference is either for an injected
@@ -119,8 +118,8 @@ public class DataBindingUtil {
    * @return the data binder reference or null if not found.
    */
   private static DataBinderRef lookupBinderForModel(final InjectableInstance<?> inst) {
-    Statement dataBinderRef = null;
-    MetaClass dataModelType = null;
+    Statement dataBinderRef;
+    MetaClass dataModelType;
 
     InjectUtil.BeanMetric beanMetric =
         InjectUtil.getFilteredBeanMetric(inst.getInjectionContext(),
@@ -147,7 +146,11 @@ public class DataBindingUtil {
 
           dataModelType = field.getType();
           assertTypeIsBindable(dataModelType);
-          dataBinderRef = Stmt.loadVariable("dataBinderHolder").invoke("get");
+
+          /**
+           * Look up the transient value from the container.
+           */
+          dataBinderRef = inst.getTransientValue(BoundDecorator.TRANSIENT_BINDER_VALUE, DataBinder.class);
           inst.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
         }
         return new DataBinderRef(dataModelType, dataBinderRef);
