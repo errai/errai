@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,17 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -41,26 +51,18 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
- * Utility to retrieve a data binder reference. The reference is either for an injected
- * {@link AutoBound} data binder or for a generated data binder for an injected {@link Model}.
+ * Utility to retrieve a data binder reference. The reference is either to an injected
+ * {@link AutoBound} data binder or to a generated data binder for an injected {@link Model}.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class DataBindingUtil {
   private static final Logger log = LoggerFactory.getLogger(DataBindingUtil.class);
+  public static final String TRANSIENT_BINDER_VALUE = "DataModelBinder";
 
   public static final Annotation[] MODEL_QUALIFICATION = new Annotation[] {
       new Model() {
@@ -147,10 +149,7 @@ public class DataBindingUtil {
           dataModelType = field.getType();
           assertTypeIsBindable(dataModelType);
 
-          /**
-           * Look up the transient value from the container.
-           */
-          dataBinderRef = inst.getTransientValue(BoundDecorator.TRANSIENT_BINDER_VALUE, DataBinder.class);
+          dataBinderRef = inst.getTransientValue(TRANSIENT_BINDER_VALUE, DataBinder.class);
           inst.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
         }
         return new DataBinderRef(dataModelType, dataBinderRef);
@@ -242,8 +241,8 @@ public class DataBindingUtil {
     final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
 
     if (!databinderMetaClass.isAssignableFrom(type)) {
-      throw new GenerationException("type of @AutoBound element must be " + DataBinder.class.getName() +
-          "; was: " + type.getFullyQualifiedName());
+      throw new GenerationException("Type of @AutoBound element must be " + DataBinder.class.getName() +
+          " but is: " + type.getFullyQualifiedName());
     }
   }
 

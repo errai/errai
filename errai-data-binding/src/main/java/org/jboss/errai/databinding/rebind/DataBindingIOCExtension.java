@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.jboss.errai.databinding.rebind;
+
+import java.util.Collection;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -33,27 +35,25 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ui.shared.api.annotations.Model;
 
-import java.util.Collection;
-
 /**
  * The purpose of this IOC extension is to provide bean instances of bindable types that are
- * qualified with {@link Model} and to expose the {@link DataBinder} that manages the model
- * instance in a {@link RefHolder}.
- *
+ * qualified with {@link Model} and to expose the {@link DataBinder}s that manage these model
+ * instances using {@link RefHolder}s.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 @IOCExtension
 public class DataBindingIOCExtension implements IOCExtensionConfigurator {
+  
   @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
-                        final IOCConfigProcessor procFactory) {
-  }
+      final IOCConfigProcessor procFactory) {}
 
   @Override
   @SuppressWarnings("rawtypes")
-  public void afterInitialization(final IOCProcessingContext context, InjectionContext injectionContext,
-                                  IOCConfigProcessor procFactory) {
+  public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext,
+      final IOCConfigProcessor procFactory) {
 
     final Collection<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.getGeneratorContext());
 
@@ -65,8 +65,7 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
         }
 
         @Override
-        public void renderProvider(InjectableInstance injectableInstance) {
-        }
+        public void renderProvider(InjectableInstance injectableInstance) {}
 
         @Override
         public Statement getBeanInstance(InjectableInstance injectableInstance) {
@@ -78,11 +77,8 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
               Stmt.declareFinalVariable(dataBinderVar, binderClass,
                   Stmt.invokeStatic(DataBinder.class, "forType", modelBean)));
 
-          /**
-           * Record a transient value -- ie. a value we want the IOC container to track and be referenceable while
-           * wiring the code, but not something that is injected.
-           */
-          injectableInstance.addTransientValue(BoundDecorator.TRANSIENT_BINDER_VALUE, DataBinder.class, Refs.get(dataBinderVar));
+          injectableInstance.addTransientValue(DataBindingUtil.TRANSIENT_BINDER_VALUE, 
+              DataBinder.class, Refs.get(dataBinderVar));
 
           return Stmt.loadVariable(dataBinderVar).invoke("getModel");
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,14 @@ package org.jboss.errai.databinding.rebind;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.inject.Inject;
+
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -38,25 +45,15 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates an {@link InitializationCallback} that contains automatic binding logic.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
 public class BoundDecorator extends IOCDecoratorExtension<Bound> {
-  public static final String TRANSIENT_BINDER_VALUE = "DataModelBinder";
-
-  public static final String HOLDER_GENERATED_ATTR = "holderGeneratedAttr";
-  public static final String HOLDER_VAR_NAME = "dataBinderHolder";
-
   final Map<MetaClass, BlockBuilder<AnonymousClassStructureBuilder>> initBlockCache =
       new ConcurrentHashMap<MetaClass, BlockBuilder<AnonymousClassStructureBuilder>>();
 
@@ -124,13 +121,9 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       initBlock = createInitCallback(ctx.getEnclosingType(), "obj");
       initBlockCache.put(targetClass, initBlock);
 
-      final List<Statement> stmts = new ArrayList<Statement>(2);
-
-      stmts.add(Stmt.loadVariable("context").invoke("addInitializationCallback",
-          Refs.get(ctx.getInjector().getInstanceVarName()),
-          initBlock.appendAll(statements).finish().finish()));
-
-      return stmts;
+      return Collections.singletonList(
+          Stmt.loadVariable("context").invoke("addInitializationCallback",
+              Refs.get(ctx.getInjector().getInstanceVarName()), initBlock.appendAll(statements).finish().finish()));
     }
     else {
       initBlock.appendAll(statements);

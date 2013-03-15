@@ -651,13 +651,15 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   
   @Test
   public void testDeclarativeBindingUsingBinder() {
-    DeclarativeBindingModule module = IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingBinder.class).getInstance();
+    DeclarativeBindingModule module = 
+      IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingBinder.class).getInstance();
     testDeclarativeBinding(module);
   }
   
   @Test
   public void testDeclarativeBindingUsingModel() {
-    DeclarativeBindingModule module = IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
+    DeclarativeBindingModule module = 
+      IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
     testDeclarativeBinding(module);
   }
   
