@@ -16,8 +16,6 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.util.Collection;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -34,6 +32,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ui.shared.api.annotations.Model;
+
+import java.util.Collection;
 
 /**
  * The purpose of this IOC extension is to provide bean instances of bindable types that are
@@ -65,10 +65,13 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
         }
 
         @Override
-        public void renderProvider(InjectableInstance injectableInstance) {}
+        public void renderProvider(InjectableInstance injectableInstance) {
+        }
 
         @Override
         public Statement getBeanInstance(InjectableInstance injectableInstance) {
+          setCreated(true);
+          setRendered(true);
           final String dataBinderVar = InjectUtil.getUniqueVarName();
           final MetaClass binderClass
               = MetaClassFactory.parameterizedAs(DataBinder.class, MetaClassFactory.typeParametersOf(modelBean));
@@ -77,7 +80,7 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
               Stmt.declareFinalVariable(dataBinderVar, binderClass,
                   Stmt.invokeStatic(DataBinder.class, "forType", modelBean)));
 
-          injectableInstance.addTransientValue(DataBindingUtil.TRANSIENT_BINDER_VALUE, 
+          injectableInstance.addTransientValue(DataBindingUtil.TRANSIENT_BINDER_VALUE,
               DataBinder.class, Refs.get(dataBinderVar));
 
           return Stmt.loadVariable(dataBinderVar).invoke("getModel");

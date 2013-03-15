@@ -19,14 +19,7 @@ package org.jboss.errai.databinding.rebind;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.inject.Inject;
-
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -45,7 +38,12 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 
-import com.google.gwt.user.client.ui.Widget;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generates an {@link InitializationCallback} that contains automatic binding logic.
@@ -121,14 +119,17 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       initBlock = createInitCallback(ctx.getEnclosingType(), "obj");
       initBlockCache.put(targetClass, initBlock);
 
-      return Collections.singletonList(
+      ctx.getTargetInjector().addStatementToEndOfInjector(
           Stmt.loadVariable("context").invoke("addInitializationCallback",
-              Refs.get(ctx.getInjector().getInstanceVarName()), initBlock.appendAll(statements).finish().finish()));
+                    Refs.get(ctx.getInjector().getInstanceVarName()), initBlock.appendAll(statements).finish().finish()));
+
     }
     else {
       initBlock.appendAll(statements);
-      return Collections.emptyList();
     }
+
+    return Collections.emptyList();
+
   }
 
   /**

@@ -16,11 +16,8 @@
 
 package org.jboss.errai.ui.rebind;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Element;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
@@ -38,8 +35,10 @@ import org.jboss.errai.ui.shared.api.style.StyleBindingChangeHandler;
 import org.jboss.errai.ui.shared.api.style.StyleBindingExecutor;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Element;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Mike Brock

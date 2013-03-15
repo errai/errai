@@ -16,18 +16,18 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.util.Date;
-
-import javax.inject.Inject;
-
-import org.jboss.errai.databinding.client.api.Converter;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ui.shared.api.annotations.Bound;
-import org.jboss.errai.ui.shared.api.annotations.Model;
-
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import org.jboss.errai.databinding.client.api.Converter;
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ui.shared.api.annotations.Bound;
+import org.jboss.errai.ui.shared.api.annotations.Model;
+import org.jboss.errai.ui.shared.api.annotations.ModelSetter;
+
+import javax.inject.Inject;
+import java.util.Date;
 
 /**
  * Used for testing declarative binding using {@link Model}.
@@ -64,6 +64,11 @@ public class DeclarativeBindingModuleUsingModel extends DeclarativeBindingSuperT
   
   public TestModel getModel() {
     return model;
+  }
+
+  @ModelSetter
+  public void setModel(TestModel model) {
+    this.model = model;
   }
   
   public static class BindingDateConverter implements Converter<Date, String> {

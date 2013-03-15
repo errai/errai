@@ -152,6 +152,9 @@ public class TypeInjector extends AbstractInjector {
       }
     });
 
+
+    callbackBuilder.appendAll(getAddToEndStatements());
+
      /*
      return the instance of the bean from the creational callback.
      */

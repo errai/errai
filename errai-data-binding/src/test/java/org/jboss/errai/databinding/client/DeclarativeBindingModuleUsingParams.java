@@ -38,22 +38,27 @@ import com.google.gwt.user.client.ui.TextBox;
 public class DeclarativeBindingModuleUsingParams extends DeclarativeBindingSuperType implements DeclarativeBindingModule {
   public static final Date TEST_DATE = DateTimeFormat.getFormat("yyyy/MM/dd").parse("1980/22/06");
 
-  @Bound
-  private final Label id = new Label("id");
-
+  private Label id;
   private TextBox name = new TextBox();
 
   //tests automatic initialization
   @Bound  
   private TextBox age;
   
-  private @Inject @Model TestModel model;
+  private TestModel model;
   
   @Inject
   public DeclarativeBindingModuleUsingParams(@Model TestModel model, @Bound(property="child.name") TextBox name) {
     this.name = name;
+    this.model = model;
   }
-  
+
+  @Inject
+  public void setLabel(@Bound Label id) {
+    this.id = id;
+    this.id.setText("id");
+  }
+
   @Override
   public Label getLabel() {
     return id;

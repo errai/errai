@@ -17,11 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -37,6 +32,11 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
   private static final String TRANSIENT_DATA_KEY = "InjectableInstance::TransientData";
@@ -154,22 +154,22 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
   }
 
   private TransientDataHolder getTransientDataHolder() {
-    if (!getInjector().hasAttribute(TRANSIENT_DATA_KEY)) {
+    if (!getTargetInjector().hasAttribute(TRANSIENT_DATA_KEY)) {
       return EMPTY_HOLDER;
     }
     else {
-      return (TransientDataHolder) getInjector().getAttribute(TRANSIENT_DATA_KEY);
+      return (TransientDataHolder) getTargetInjector().getAttribute(TRANSIENT_DATA_KEY);
     }
   }
 
   private TransientDataHolder getOrCreateWritableDataHolder() {
-    if (!getInjector().hasAttribute(TRANSIENT_DATA_KEY)) {
+    if (!getTargetInjector().hasAttribute(TRANSIENT_DATA_KEY)) {
       final TransientDataHolder holder = TransientDataHolder.makeNew();
-      getInjector().setAttribute(TRANSIENT_DATA_KEY, holder);
+      getTargetInjector().setAttribute(TRANSIENT_DATA_KEY, holder);
       return holder;
     }
     else {
-      return (TransientDataHolder) getInjector().getAttribute(TRANSIENT_DATA_KEY);
+      return (TransientDataHolder) getTargetInjector().getAttribute(TRANSIENT_DATA_KEY);
     }
   }
 
@@ -346,21 +346,11 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
   public Injector getTargetInjector() {
     final MetaClass targetType = getInjector() == null ? getEnclosingType() : getInjector().getInjectedType();
 
-    Injector targetInjector
-        = isProxy() ? injectionContext.getProxiedInjector(targetType, getQualifyingMetadata())
+    return isProxy()
+        ? injectionContext.getProxiedInjector(targetType, getQualifyingMetadata())
         : injectionContext.getQualifiedInjector(targetType, getQualifyingMetadata());
-
-    if (!isProxy()) {
-      if (!targetInjector.isCreated()) {
-        targetInjector = InjectUtil.getOrCreateProxy(injectionContext, getEnclosingType(), getQualifyingMetadata());
-        if (targetInjector.isEnabled()) {
-          targetInjector.getBeanInstance(this);
-        }
-      }
-    }
-
-    return targetInjector;
   }
+
 
   public Statement callOrBind(final Statement... values) {
     final Injector targetInjector = injector;

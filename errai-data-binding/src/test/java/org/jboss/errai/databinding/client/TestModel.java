@@ -16,11 +16,11 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.util.Date;
-
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.junit.Ignore;
+
+import java.util.Date;
 
 /**
  * Simple bindable model for testing purposes.

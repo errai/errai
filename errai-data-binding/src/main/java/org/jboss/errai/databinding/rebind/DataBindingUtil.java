@@ -16,17 +16,7 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
-
+import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -51,7 +41,16 @@ import org.jboss.errai.ui.shared.api.annotations.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Utility to retrieve a data binder reference. The reference is either to an injected
@@ -140,7 +139,7 @@ public class DataBindingUtil {
 
           dataModelType = mp.getType();
           assertTypeIsBindable(dataModelType);
-          dataBinderRef = inst.getInjectionContext().getInlineBeanReference(mp);
+          dataBinderRef = inst.getTransientValue(TRANSIENT_BINDER_VALUE, DataBinder.class);
           inst.ensureMemberExposed();
         }
         else {

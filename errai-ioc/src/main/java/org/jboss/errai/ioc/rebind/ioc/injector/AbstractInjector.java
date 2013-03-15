@@ -71,6 +71,8 @@ public abstract class AbstractInjector implements Injector {
   private List<RegistrationHook> registrationHooks;
   private List<RenderingHook> renderingHooks;
   private List<Runnable> disablingCallbacks;
+  private List<Statement> addToEndStatements;
+
   private Map<MetaMethod, Map<WeaveType, Collection<Statement>>> weavingStatements;
   private Map<String, ProxyMaker.ProxyProperty> proxyPropertyMap;
 
@@ -433,6 +435,29 @@ public abstract class AbstractInjector implements Injector {
       return proxyPropertyMap;
     }
   }
+
+  public List<Statement> getAddToEndStatements() {
+    if (addToEndStatements == null) {
+      return Collections.emptyList();
+    }
+    else {
+      return addToEndStatements;
+    }
+  }
+
+  /**
+   * Add a statement to the end of the bean injector code. Statements added here will be rendered after all other
+   * binding activity and right before the injector returns the bean reference.
+   *
+   * @param statement
+   */
+  public void addStatementToEndOfInjector(Statement statement) {
+    if (addToEndStatements == null) {
+      addToEndStatements = new ArrayList<Statement>();
+    }
+    addToEndStatements.add(statement);
+  }
+
 
   @Override
   public boolean isProxied() {

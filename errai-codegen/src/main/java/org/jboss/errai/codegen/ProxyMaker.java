@@ -306,7 +306,7 @@ public class ProxyMaker {
                                                                 final Map<String, ProxyProperty> proxyProperties) {
     final List<Statement> statementList = new ArrayList<Statement>();
     for (final Map.Entry<String, ProxyProperty> entry : proxyProperties.entrySet()) {
-      statementList.add(Stmt.nestedCall(proxyRef).invoke("$set_" + entry.getKey(), entry.getValue().getValueReference()));
+      statementList.add(Stmt.nestedCall(proxyRef).invoke("$set_" + entry.getKey(), entry.getValue().getOriginalValueReference()));
     }
     return statementList;
   }
@@ -326,8 +326,12 @@ public class ProxyMaker {
       return type;
     }
 
-    public Statement getValueReference() {
+    public Statement getOriginalValueReference() {
       return valueReference;
+    }
+
+    public Statement getProxiedValueReference() {
+      return Refs.get(getEncodedProperty());
     }
 
     private String getEncodedProperty() {

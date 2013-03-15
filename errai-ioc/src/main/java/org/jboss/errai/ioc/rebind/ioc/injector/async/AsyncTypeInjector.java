@@ -188,6 +188,8 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     return the instance of the bean from the creational callback.
     */
 
+    targetBlock.appendAll(getAddToEndStatements());
+
     targetBlock._(Stmt.loadVariable("async").invoke("finish"));
 
     /* pop the block builder of the stack now that we're done wiring. */
