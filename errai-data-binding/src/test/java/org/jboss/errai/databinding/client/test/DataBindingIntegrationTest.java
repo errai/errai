@@ -663,6 +663,13 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     testDeclarativeBinding(module);
   }
   
+  @Test
+  public void testDeclarativeBindingUsingParams() {
+    DeclarativeBindingModule module = 
+      IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingParams.class).getInstance();
+    testDeclarativeBinding(module);
+  }
+  
   public void testDeclarativeBinding(DeclarativeBindingModule module) {
     Label idLabel = module.getLabel();
     assertNotNull(idLabel);
