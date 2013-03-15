@@ -42,15 +42,35 @@ class CordovaMojo extends GroovyMojo {
         unpackProjectTemplate()
         copyContent()
         updateConfig()
+        compile()
     }
 
     def supportedPlatforms = ['Android']
-    void updateConfig() {
-        for (platform in supportedPlatforms) {
-            def baseDir = new File("${project.build.directory}/template/platforms/$platform")
-            def parser = Class.forName("org.jboss.errai.maven.cordova.${platform}Parser").newInstance(baseDir)
-            parser.updateProject(new ConfigParser(new File("${warSourceDir}/config.xml")))
-        }
+
+    void unpackProjectTemplate() {
+        executeMojo(
+                plugin(
+                        groupId('org.apache.maven.plugins'),
+                        artifactId('maven-dependency-plugin'),
+                        version('2.1')
+                ),
+                goal('unpack'),
+                configuration(
+                        element(name('artifactItems'), element(name('artifactItem'),
+                                element(name('groupId'), 'org.jboss.errai'),
+                                element(name('artifactId'), 'errai-cordova-template'),
+                                element(name('version'), '3.0-SNAPSHOT'),
+                                element(name('type'), 'tar.gz'),
+                                element(name('overWrite'), 'false'),
+                                element(name('outputDirectory'), '${project.build.directory}/template')
+                        )),
+                ),
+                executionEnvironment(
+                        project,
+                        session,
+                        pluginManager
+                )
+        )
     }
 
     void copyContent() {
@@ -69,6 +89,24 @@ class CordovaMojo extends GroovyMojo {
         ant.copy(file: "${template}/www/config.xml", todir: warSourceDir)
     }
 
+    void updateConfig() {
+        for (platform in supportedPlatforms) {
+            def baseDir = new File("${project.build.directory}/template/platforms/$platform")
+            def parser = Class.forName("org.jboss.errai.maven.cordova.${platform}Parser").newInstance(baseDir)
+            parser.updateProject(new ConfigParser(new File("${warSourceDir}/config.xml")))
+        }
+    }
+
+    void compile() {
+        supportedPlatforms.each {
+            def process = "${project.build.directory}/template/platforms/$it/cordova/build".execute()
+            process.waitFor()
+            if (process.exitValue() > 0) {
+                throw new Error("An error occurred while building the $it project. $process.in.text");
+            }
+        }
+    }
+
     String getWarSourceDir() {
         Xpp3Dom config = project.buildPlugins.find{it.key == 'org.apache.maven.plugins:maven-war-plugin'}.configuration
         if (config) {
@@ -85,31 +123,5 @@ class CordovaMojo extends GroovyMojo {
         ant.copy(todir: dir) {
             fileset(dir: www, includes: '**/*.htm, **/*.html, **/*.gif, **/*.jpg, **/*.jpeg, **/*.png, **/*.js')
         }
-    }
-
-    void unpackProjectTemplate() {
-        executeMojo(
-                plugin(
-                        groupId('org.apache.maven.plugins'),
-                        artifactId('maven-dependency-plugin'),
-                        version('2.1')
-                ),
-                goal('unpack'),
-                configuration(
-                        element(name('artifactItems'), element(name('artifactItem'),
-                                element(name('groupId'), 'org.jboss.errai'),
-                                element(name('artifactId'), 'errai-cordova-template'),
-                                element(name('version'), '3.0-SNAPSHOT'),
-                                element(name('type'), 'zip'),
-                                element(name('overWrite'), 'false'),
-                                element(name('outputDirectory'), '${project.build.directory}/template')
-                        )),
-                ),
-                executionEnvironment(
-                        project,
-                        session,
-                        pluginManager
-                )
-        )
     }
 }
