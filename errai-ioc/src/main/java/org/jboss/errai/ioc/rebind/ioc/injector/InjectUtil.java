@@ -447,6 +447,13 @@ public class InjectUtil {
     return newArray;
   }
 
+  private static InjectableInstance fixInjectableInstanceIfNeccessary(InjectableInstance instance, Injector injector) {
+    if (instance.getTaskType() == TaskType.Parameter && instance.getInjector() == null) {
+      return InjectableInstance.getParameterInjectedInstance(instance.getParm(), injector, instance.getInjectionContext());
+    }
+    return instance;
+  }
+
   public static Statement getInjectorOrProxy(final InjectionContext ctx,
                                              final InjectableInstance injectableInstance,
                                              final MetaClass clazz,
@@ -457,14 +464,14 @@ public class InjectUtil {
 
 
   public static Statement getInjectorOrProxy(final InjectionContext ctx,
-                                             final InjectableInstance injectableInstance,
+                                             InjectableInstance injectableInstance,
                                              final MetaClass clazz,
                                              final QualifyingMetadata qualifyingMetadata,
                                              final boolean alwaysProxyDependent) {
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
-
+      injectableInstance = fixInjectableInstanceIfNeccessary(injectableInstance, inj);
       /**
        * Special handling for cycles. If two beans directly depend on each other, we shimmy in a call to the
        * binding reference to check the context for the instance to avoid a hanging duplicate reference. It is to
@@ -485,7 +492,7 @@ public class InjectUtil {
       try {
         if (ctx.isInjectorRegistered(clazz, qualifyingMetadata)) {
           final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
-
+          injectableInstance = fixInjectableInstanceIfNeccessary(injectableInstance, inj);
           if (inj.isProvider()) {
             if (inj.isStatic()) {
               return inj.getBeanInstance(injectableInstance);
