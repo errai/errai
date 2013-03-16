@@ -29,8 +29,9 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * associated with a {@link DataBinder} (see {@link AutoBound} and {@link Model}).
  * <p>
  * The annotated widget can either be a field, a method or constructor parameter or a method return
- * type. Note that a {@link Bound} field does not have to be but can of course be injected. The
- * following example shows all use cases for the {@link Bound} annotation.
+ * type. Note that a {@link Bound} field can but does not have to be injected. The following example
+ * shows all use cases for the {@link Bound} annotation.
+ * 
  * <pre>
  *      public class MyBean {
  *        {@code @Inject} {@code @Model} 
@@ -58,9 +59,11 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  *        }
  *      }
  * </pre>
+ * 
  * If no property is specified, the widget is bound to the data model property with the same name as
  * the field, parameter or method which is the target of this annotation.
  * <p>
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Documented
