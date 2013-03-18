@@ -673,11 +673,12 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
          IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
     TestModel model = new TestModel();
     model.setName("custom model");
-
     module.setModel(model);
 
+    // ensure the model is proxied, caused by @ModelSetter
     assertTrue(module.getModel() instanceof BindableProxy);
-    assertTrue(module.getModel().equals(model));
+    assertTrue(module.getModel().getName().equals(model.getName()));
+    
     testDeclarativeBinding(module);
   }
 

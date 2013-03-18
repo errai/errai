@@ -28,7 +28,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * Indicates that an annotated widget should automatically be bound to a property of a data model
  * associated with a {@link DataBinder} (see {@link AutoBound} and {@link Model}).
  * <p>
- * The annotated widget can either be a field, a method or constructor parameter or a method return
+ * The annotated widget can either be a field, method or constructor parameter or a method return
  * type. Note that a {@link Bound} field can but does not have to be injected. The following example
  * shows all use cases for the {@link Bound} annotation.
  * 

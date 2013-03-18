@@ -33,7 +33,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
  * The widgets are inferred from all enclosing fields and methods annotated with {@link Bound} of
  * the class that defines the {@link Model} and all its super classes.
  * <p>
- * The annotated model can be a field and a method or constructor parameter.The following
+ * The annotated model can be a field and a method or constructor parameter. The following
  * example shows all use cases for the {@link Model} annotation.
  * 
  * <pre>

@@ -31,10 +31,10 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Provides an API to programmatically bind properties of a data model instance (any POJO annotated with
- * {@link Bindable}) to UI fields/widgets. The properties of the model and the UI components will automatically be kept
- * in sync for as long as they are bound.
- *
+ * Provides an API to programmatically bind properties of a data model instance (any POJO annotated
+ * with {@link Bindable}) to UI fields/widgets. The properties of the model and the UI components
+ * will automatically be kept in sync for as long as they are bound.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DataBinder<T> implements HasPropertyChangeHandlers {
