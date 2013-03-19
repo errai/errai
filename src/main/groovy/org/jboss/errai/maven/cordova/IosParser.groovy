@@ -67,7 +67,7 @@ class IosParser {
 
     void updateProductName(ConfigParser config) {
         def configuration = new File(xcodeproj, 'project.pbxproj')
-        def text = configuration.text.replaceAll('PRODUCT_NAME = ".*";', "PRODUCT_NAME = \"${config.name}\"")
+        def text = configuration.text.replaceAll('PRODUCT_NAME = ".*";', "PRODUCT_NAME = \"${config.name}\";")
         configuration.write text
     }
 }
