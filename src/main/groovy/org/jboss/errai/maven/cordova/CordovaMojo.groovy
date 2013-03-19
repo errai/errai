@@ -110,7 +110,10 @@ class CordovaMojo extends GroovyMojo {
     String getWarSourceDir() {
         Xpp3Dom config = project.buildPlugins.find{it.key == 'org.apache.maven.plugins:maven-war-plugin'}.configuration
         if (config) {
-            return config.getChildren().find {it.name == 'warSourceDirectory'}.value
+            def found = config.getChildren().find { it.name == 'warSourceDirectory' }
+            if (found) {
+                return found.value
+            }
         }
         return 'src/main/webapp'
     }
