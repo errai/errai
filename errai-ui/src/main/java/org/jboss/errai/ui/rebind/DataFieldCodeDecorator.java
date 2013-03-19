@@ -15,24 +15,26 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import com.google.common.base.Strings;
-import com.google.gwt.dom.client.Element;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.exception.GenerationException;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ui.shared.ElementWrapperWidget;
-import org.jboss.errai.ui.shared.Template;
-import org.jboss.errai.ui.shared.api.annotations.DataField;
-
-import javax.inject.Inject;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ui.shared.Template;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+
+import com.google.common.base.Strings;
+import com.google.gwt.dom.client.Element;
 
 
 /**
@@ -60,7 +62,7 @@ public class DataFieldCodeDecorator extends IOCDecoratorExtension<DataField> {
             + ctx.getElementTypeOrMethodReturnType().getFullyQualifiedName()
             + "] which does not support @Inject; this instance must be created manually.");
       }
-      instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
+      instance = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", instance);
     }
     saveDataField(ctx, ctx.getElementTypeOrMethodReturnType(), name, ctx.getMemberName(), instance);
 

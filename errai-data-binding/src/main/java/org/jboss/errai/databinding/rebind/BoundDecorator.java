@@ -38,6 +38,7 @@ import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
@@ -45,6 +46,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -54,8 +56,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 @CodeDecorator
 public class BoundDecorator extends IOCDecoratorExtension<Bound> {
-  
-  
+
   final Map<MetaClass, BlockBuilder<AnonymousClassStructureBuilder>> initBlockCache =
       new ConcurrentHashMap<MetaClass, BlockBuilder<AnonymousClassStructureBuilder>>();
 
@@ -69,7 +70,7 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
     final List<Statement> statements = new ArrayList<Statement>();
     BlockBuilder<AnonymousClassStructureBuilder> initBlock = initBlockCache.get(targetClass);
 
-    // Ensure private accessors are generated for data binder and bound widget fields
+    // Ensure private accessors are generated for bound widget fields
     ctx.ensureMemberExposed();
 
     final DataBindingUtil.DataBinderRef binderLookup = DataBindingUtil.lookupDataBinderRef(ctx);
@@ -90,22 +91,27 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       }
 
       Statement widget = ctx.getValueStatement();
-      // Ensure the @Bound field or method provides a widget
-      if (!ctx.getElementTypeOrMethodReturnType().isAssignableTo(Widget.class)) {
+      // Ensure the @Bound field or method provides a widget or DOM element
+      if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Widget.class)) {
+        // Ensure @Bound widget field is initialized
+        if (!ctx.isAnnotationPresent(Inject.class) && ctx.getField() != null) {
+          Statement widgetInit = Stmt.invokeStatic(
+              ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(ctx.getField()),
+              Refs.get(ctx.getInjector().getInstanceVarName()),
+              ObjectBuilder.newInstanceOf(ctx.getElementTypeOrMethodReturnType()));
+
+          statements.add(If.isNull(widget).append(widgetInit).finish());
+        }
+      }
+      else if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Element.class)) {
+        widget = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", widget);
+      }
+      else {
         throw new GenerationException("@Bound field or method " + ctx.getMemberName()
             + " in class " + ctx.getInjector().getInjectedType()
-            + " must provide a widget type but provides: "
+            + " must provide a widget or DOM element type but provides: "
             + ctx.getElementTypeOrMethodReturnType().getFullyQualifiedName());
-      }
-      // and has been initialized
-      if (!ctx.isAnnotationPresent(Inject.class) && ctx.getField() != null) {
-        Statement widgetInit = Stmt.invokeStatic(
-            ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
-            PrivateAccessUtil.getPrivateFieldInjectorName(ctx.getField()),
-            Refs.get(ctx.getInjector().getInstanceVarName()),
-            ObjectBuilder.newInstanceOf(ctx.getElementTypeOrMethodReturnType()));
-
-        statements.add(If.isNull(widget).append(widgetInit).finish());
       }
 
       // Generate the binding
@@ -126,8 +132,8 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       ctx.getTargetInjector().setAttribute(DataBindingUtil.BINDER_MODEL_TYPE_VALUE, binderLookup.getDataModelType());
       ctx.getTargetInjector().addStatementToEndOfInjector(
           Stmt.loadVariable("context").invoke("addInitializationCallback",
-                    Refs.get(ctx.getInjector().getInstanceVarName()), initBlock.appendAll(statements).finish().finish()));
-
+                    Refs.get(ctx.getInjector().getInstanceVarName()),
+                    initBlock.appendAll(statements).finish().finish()));
     }
     else {
       initBlock.appendAll(statements);

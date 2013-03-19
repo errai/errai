@@ -13,6 +13,7 @@ import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -37,7 +38,11 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     Label idLabel = template.getLabel();
     assertNotNull(idLabel);
     assertEquals("", idLabel.getText());
-
+    
+    DivElement idDiv = template.getIdDiv();
+    assertNotNull(idDiv);
+    assertEquals("", idDiv.getInnerText());
+    
     TextBox nameTextBox = template.getNameTextBox();
     assertNotNull(nameTextBox);
     assertEquals("", nameTextBox.getValue());
@@ -55,6 +60,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     model.getChild().setName("errai");
     model.setLastChanged(new Date());
     model.setPhoneNumber("+1 555");
+    assertEquals("Div (id) was not updated!", Integer.valueOf(model.getId()).toString(), idDiv.getInnerText());
     assertEquals("Label (id) was not updated!", Integer.valueOf(model.getId()).toString(), idLabel.getText());
     assertEquals("TextBox (name) was not updated!", model.getChild().getName(), nameTextBox.getValue());
     assertEquals("TextBox (date) was not updated using custom converter!", "testdate", dateTextBox.getValue());

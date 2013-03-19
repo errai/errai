@@ -10,6 +10,8 @@ import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.test.common.client.TestModel;
 
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -18,13 +20,17 @@ import com.google.gwt.user.client.ui.TextBox;
 @Templated
 public class BindingTemplate extends Composite {
 
+  @Bound(property = "id")
+  @DataField
+  private final DivElement idDiv = DOM.createElement("div").cast();
+
   @Inject
   @Bound
   @DataField
   private Label id;
 
   @Inject
-  @Bound(property="child.name")
+  @Bound(property = "child.name")
   @DataField
   private TextBox name;
 
@@ -34,14 +40,20 @@ public class BindingTemplate extends Composite {
   private TextBox date;
 
   // This guards against regressions of ERRAI-489
-  @Inject @Bound @DataField("phone") 
+  @Inject
+  @Bound
+  @DataField("phone")
   private TextBox phoneNumber;
-  
+
   private final TestModel model;
-  
+
   @Inject
   public BindingTemplate(@AutoBound DataBinder<TestModel> binder) {
     model = binder.getModel();
+  }
+
+  public DivElement getIdDiv() {
+    return idDiv;
   }
 
   public Label getLabel() {
@@ -55,11 +67,11 @@ public class BindingTemplate extends Composite {
   public TextBox getDateTextBox() {
     return date;
   }
-  
+
   public TextBox getPhoneNumberBox() {
     return phoneNumber;
   }
-  
+
   public TestModel getModel() {
     return model;
   }
