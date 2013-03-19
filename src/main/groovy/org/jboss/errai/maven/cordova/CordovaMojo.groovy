@@ -45,7 +45,7 @@ class CordovaMojo extends GroovyMojo {
         compile()
     }
 
-    def supportedPlatforms = ['Android']
+    def supportedPlatforms = ['Android', 'Ios']
 
     void unpackProjectTemplate() {
         executeMojo(

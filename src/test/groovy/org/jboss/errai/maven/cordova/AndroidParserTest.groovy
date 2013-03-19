@@ -89,7 +89,7 @@ class AndroidParserTest extends GroovyTestCase {
         assertXmlEqual("<manifest package='org.jboss.test'/>", manifest.text)
     }
 
-    static def void assertXmlEqual(expected, actual) {
+    static assertXmlEqual(expected, actual) {
         XMLUnit.setIgnoreWhitespace(true)
         def diff = new Diff(expected, actual)
         new DetailedDiff(diff).allDifferences.each {
