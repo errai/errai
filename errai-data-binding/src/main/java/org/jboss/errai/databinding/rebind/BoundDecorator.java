@@ -41,8 +41,10 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 
@@ -134,6 +136,11 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
           Stmt.loadVariable("context").invoke("addInitializationCallback",
                     Refs.get(ctx.getInjector().getInstanceVarName()),
                     initBlock.appendAll(statements).finish().finish()));
+
+      ctx.getTargetInjector().addStatementToEndOfInjector(
+          Stmt.loadVariable("context").invoke("addDestructionCallback",
+                    Refs.get(ctx.getInjector().getInstanceVarName()),
+                    createDestructionCallback(ctx.getEnclosingType(), "obj", binderLookup.getValueAccessor())));
     }
     else {
       initBlock.appendAll(statements);
@@ -152,5 +159,15 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
             .publicOverridesMethod("init", Parameter.of(type, initVar, true));
 
     return block;
+  }
+
+  /**
+   * Generates an anonymous {@link DestructionCallback} that will unbind all widgets.
+   */
+  private Statement createDestructionCallback(final MetaClass type, final String initVar, final Statement binder) {
+    List<Statement> destructionStatements = 
+      Collections.singletonList((Statement) Stmt.nestedCall(binder).invoke("unbind"));
+
+    return InjectUtil.createDestructionCallback(type, initVar, destructionStatements);
   }
 }
