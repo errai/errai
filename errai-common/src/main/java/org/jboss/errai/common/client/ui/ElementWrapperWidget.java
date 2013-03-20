@@ -19,14 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.HasHTML;
-import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -36,12 +30,8 @@ import com.google.gwt.user.client.ui.Widget;
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
-public class ElementWrapperWidget extends Widget implements HasHTML, HasValue {
-
+public class ElementWrapperWidget extends Widget implements HasHTML {
   private static Map<Element, ElementWrapperWidget> widgetMap = new HashMap<Element, ElementWrapperWidget>();
-
-  private Object value;
 
   private ElementWrapperWidget(Element wrapped) {
     if (wrapped == null) {
@@ -87,35 +77,6 @@ public class ElementWrapperWidget extends Widget implements HasHTML, HasValue {
   @Override
   public void setHTML(String html) {
     getElement().setInnerHTML(html);
-  }
-
-  @Override
-  public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {
-    return addDomHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        ValueChangeEvent.fire(ElementWrapperWidget.this, getValue());
-      }
-    }, ChangeEvent.getType());
-  }
-
-  @Override
-  public Object getValue() {
-    return value;
-  }
-
-  @Override
-  public void setValue(Object value) {
-    setValue(value, false);
-  }
-
-  @Override
-  public void setValue(Object value, boolean fireEvents) {
-    Object oldValue = getValue();
-    setText(value.toString());
-    if (fireEvents) {
-      ValueChangeEvent.fireIfNotEqual(this, oldValue, value);
-    }
   }
 
 }

@@ -35,7 +35,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     BindingTemplate template = app.getTemplate();
     assertNotNull("Template instance was not injected!", template);
 
-    Label idLabel = template.getLabel();
+    Label idLabel = template.getIdLabel();
     assertNotNull(idLabel);
     assertEquals("", idLabel.getText());
     

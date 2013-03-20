@@ -56,7 +56,7 @@ public class BindingTemplate extends Composite {
     return idDiv;
   }
 
-  public Label getLabel() {
+  public Label getIdLabel() {
     return id;
   }
 
