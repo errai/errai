@@ -58,8 +58,6 @@ public class BusToolsCli {
   public static List<Message> decodePayload(final String jsonString) {
     if (jsonString == null || jsonString.trim().length() == 0) return Collections.emptyList();
 
-    System.out.println("RECV <<" + jsonString + ">>");
-
     final JSONValue val = JSONParser.parseStrict(jsonString);
 
     if (val == null || val.isArray() == null) {

@@ -857,7 +857,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         deliveredMessages = false;
         for (final Message message : new ArrayList<Message>(deferredMessages)) {
           if (shadowSubscriptions.containsKey(message.getSubject())) {
-            System.out.println("DELIVER: " + deferredMessages);
             deferredMessages.remove(message);
             deliveredMessages = true;
             deliverToSubscriptions(shadowSubscriptions, message.getSubject(), message);

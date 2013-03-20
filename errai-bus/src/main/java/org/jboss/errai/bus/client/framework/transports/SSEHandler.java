@@ -104,6 +104,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     sseChannel = attemptSSEChannel(clientMessageBus, sseEntryPoint);
 
     // time out after 2 seconds and attempt reconnect. (note: this is really to deal with a bug a firefox).
+    initialTimeoutTimer.cancel();
     initialTimeoutTimer.schedule(2500);
   }
 
@@ -174,12 +175,13 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   }
 
   private void notifyConnected() {
-    if (!connected) {
+    initialTimeoutTimer.cancel();
+
+    if (connected) {
       return;
     }
     connected = true;
 
-    initialTimeoutTimer.cancel();
     connectedTime = System.currentTimeMillis();
     LogUtil.log("SSE channel opened.");
     retries = 0;
@@ -189,12 +191,13 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
   }
 
   private void notifyDisconnected() {
+    connected = false;
+
     initialTimeoutTimer.cancel();
     LogUtil.log("SSE channel disconnected.");
     connectedTime = -1;
     clientMessageBus.setState(BusState.CONNECTION_INTERRUPTED);
 
-    connected = false;
     disconnect(sseChannel);
 
     if (!stopped) {
