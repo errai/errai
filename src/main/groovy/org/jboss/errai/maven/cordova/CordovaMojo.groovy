@@ -99,10 +99,12 @@ class CordovaMojo extends GroovyMojo {
 
     void compile() {
         supportedPlatforms.each {
-            def process = "${project.build.directory}/template/platforms/$it/cordova/build".execute()
-            process.waitFor()
-            if (process.exitValue() > 0) {
-                throw new Error("An error occurred while building the $it project. $process.in.text");
+            ant.exec(failonerror: "true",
+                    dir: "${project.build.directory}/template/platforms/${it.toLowerCase()}/cordova",
+                    executable: './build')
+
+            if (ant.project.properties.cmdExit) {
+                throw new Error("An error occurred while building the $it project. ${ant.project.properties.cmdExit}");
             }
         }
     }
