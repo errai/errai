@@ -80,6 +80,10 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
       // Generate a reference to the bean's @AutoBound data binder
       if (initBlock == null) {
         statements.add(Stmt.declareVariable("binder", DataBinder.class, binderLookup.getValueAccessor()));
+        statements.add(If.isNull(Refs.get("binder")).append(
+                Stmt.throw_(RuntimeException.class, "@AutoBound data binder for class "
+                    + ctx.getInjector().getInjectedType()
+                    + " has not been initialized. Either initialize or add @Inject!")).finish());
       }
 
       // Check if the bound property exists in data model type
@@ -170,4 +174,5 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
 
     return InjectUtil.createDestructionCallback(type, initVar, destructionStatements);
   }
+  
 }

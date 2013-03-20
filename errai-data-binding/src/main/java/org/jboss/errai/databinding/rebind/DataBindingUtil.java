@@ -214,7 +214,7 @@ public class DataBindingUtil {
       }
     }
     else {
-      final MetaClass declaringClass = inst.getEnclosingType();
+      final MetaClass declaringClass = inst.getInjector().getInjectedType();
       for (final MetaField field : declaringClass.getFields()) {
         if (field.isAnnotationPresent(AutoBound.class)) {
           assertTypeIsDataBinder(field.getType());

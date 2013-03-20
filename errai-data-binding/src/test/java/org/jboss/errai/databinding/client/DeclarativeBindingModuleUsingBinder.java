@@ -40,18 +40,22 @@ public class DeclarativeBindingModuleUsingBinder extends DeclarativeBindingSuper
     model = binder.getModel();
   }
 
+  @Override
   public Label getLabel() {
     return id;
   }
 
+  @Override
   public TextBox getNameTextBox() {
     return name;
   }
   
+  @Override
   public TextBox getAge() {
     return age;
   }
   
+  @Override
   public TestModel getModel() {
     return model;
   }
