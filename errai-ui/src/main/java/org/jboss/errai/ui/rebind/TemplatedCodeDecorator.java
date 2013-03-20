@@ -17,7 +17,6 @@ package org.jboss.errai.ui.rebind;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -50,8 +49,10 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -120,12 +121,49 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
       initStmts.add(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("obj")));
     }
 
+    List<Statement> stmts = new ArrayList<Statement>();
     final Statement initCallback = InjectUtil.createInitializationCallback(declaringClass, "obj", initStmts);
-
-    return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
+    stmts.add(Stmt.loadVariable("context").invoke("addInitializationCallback",
         Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
+    
+    Statement destructionCallback = generateTemplateDestruction(ctx);
+    if (destructionCallback != null) {
+      stmts.add(destructionCallback);
+    }
+    return stmts;
   }
 
+  /**
+   * Generates a {@link DestructionCallback} for the {@link Templated} component.
+   * 
+   * @return statement representing the template destruction logic.
+   */
+  private Statement generateTemplateDestruction(final InjectableInstance<Templated> ctx) {
+    List<Statement> destructionStatements = new ArrayList<Statement>();
+    final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getEnclosingType());
+    final Map<String, MetaClass> dataFieldTypes = 
+      DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
+    
+    for (final String fieldName : dataFields.keySet()) {
+      Statement field = dataFields.get(fieldName);
+      MetaClass fieldType = dataFieldTypes.get(fieldName);
+      
+      if (fieldType.isAssignableTo(Element.class)) {
+        destructionStatements.add(Stmt.invokeStatic(ElementWrapperWidget.class, "removeWidget", field));
+      }
+    }
+    
+    if (destructionStatements.isEmpty())
+      return null;
+    
+    Statement destructionLogic = 
+      Stmt.loadVariable("context").invoke("addDestructionCallback",
+        Refs.get(ctx.getInjector().getInstanceVarName()), 
+        InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj", destructionStatements));
+    
+    return destructionLogic;
+  }
+  
   /**
    * Generate the actual construction logic for our {@link Templated} component
    */
@@ -176,23 +214,22 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
        * Get all of the data-field Elements from the Template
        */
       final String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
-      initStmts.add(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
-      },
-          Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
+      initStmts.add(Stmt.declareVariable(dataFieldElementsVarName,
+          new TypeLiteral<Map<String, Element>>() {},
+          Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement))
+      );
 
       /*
        * Attach Widget field children Elements to the Template DOM
        */
-
       final String fieldsMapVarName = InjectUtil.getUniqueVarName();
 
       /*
        * The Map<String, Widget> to store actual component field references.
        */
-      initStmts.add(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {
-      },
-          Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
-          })));
+      initStmts.add(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {},
+          Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {}))
+      );
       final Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
 
       generateComponentCompositions(ctx, initStmts, component, rootTemplateElement,
@@ -246,8 +283,8 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
         final ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
 
-        int eventsToSink = Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS
-            | Event.TOUCHEVENTS;
+        int eventsToSink =
+            Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS | Event.TOUCHEVENTS;
         if (method.isAnnotationPresent(SinkNative.class)) {
           eventsToSink = method.getAnnotation(SinkNative.class).value();
         }

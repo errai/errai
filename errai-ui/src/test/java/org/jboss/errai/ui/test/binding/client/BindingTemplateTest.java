@@ -71,8 +71,8 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     phoneNumberBox.setValue("+43 555", true);
     
     assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
-    assertEquals("Model (lastUpdate) was not updated using custom converter!", BindingDateConverter.TEST_DATE, model
-        .getLastChanged());
+    assertEquals("Model (lastUpdate) was not updated using custom converter!", 
+        BindingDateConverter.TEST_DATE, model.getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", phoneNumberBox.getValue(), model.getPhoneNumber());
   }
   

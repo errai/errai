@@ -60,6 +60,14 @@ public class ElementWrapperWidget extends Widget implements HasHTML, HasValue {
     }
     return widget;
   }
+  
+  public static ElementWrapperWidget removeWidget(Element element) {
+    return widgetMap.remove(element);
+  }
+  
+  public static ElementWrapperWidget removeWidget(ElementWrapperWidget widget) {
+    return widgetMap.remove(widget.getElement());
+  }
 
   @Override
   public String getText() {
@@ -84,7 +92,6 @@ public class ElementWrapperWidget extends Widget implements HasHTML, HasValue {
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler handler) {
     return addDomHandler(new ChangeHandler() {
-      
       @Override
       public void onChange(ChangeEvent event) {
         ValueChangeEvent.fire(ElementWrapperWidget.this, getValue());
