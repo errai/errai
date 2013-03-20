@@ -24,7 +24,7 @@ import org.jboss.as.websockets.frame.TextFrame;
 import org.jboss.as.websockets.servlet.WebSocketServlet;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
@@ -125,7 +125,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
       final String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
-      if (BusCommands.Associate.name().equals(commandType)) {
+      if (BusCommand.Associate.name().equals(commandType)) {
         final String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
         // has this client already attempted a connection, and is in a wait verify state
@@ -189,18 +189,18 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   private static String getFailedNegotiation(final String error) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-            + BusCommands.WebsocketNegotiationFailed.name() + "\"," +
+            + BusCommand.WebsocketNegotiationFailed.name() + "\"," +
             "\"" + MessageParts.ErrorMessage.name() + "\":\"" + error + "\"}]";
   }
 
   private static String getSuccessfulNegotiation() {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-            + BusCommands.WebsocketChannelOpen.name() + "\"}]";
+            + BusCommand.WebsocketChannelOpen.name() + "\"}]";
   }
 
   private static String getReverseChallenge(final String token) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-            + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
+            + BusCommand.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
             token + "\"}]";
   }
 }

@@ -43,7 +43,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.io.DirectDeliveryHandler;
 import org.jboss.errai.bus.server.io.MessageFactory;
@@ -171,7 +171,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
       final String commandType = ejValue.isString().stringValue();
 
       // this client apparently wants to connect.
-      if (BusCommands.Associate.name().equals(commandType)) {
+      if (BusCommand.Associate.name().equals(commandType)) {
         final String sessionKey = ejObject.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
         // has this client already attempted a connection, and is in a wait verify state
@@ -279,18 +279,18 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
   private static String getFailedNegotiation(final String error) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-        + BusCommands.WebsocketNegotiationFailed.name() + "\"," +
+        + BusCommand.WebsocketNegotiationFailed.name() + "\"," +
         "\"" + MessageParts.ErrorMessage.name() + "\":\"" + error + "\"}]";
   }
 
   private static String getSuccessfulNegotiation() {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-        + BusCommands.WebsocketChannelOpen.name() + "\"}]";
+        + BusCommand.WebsocketChannelOpen.name() + "\"}]";
   }
 
   private static String getReverseChallenge(final String token) {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
-        + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
+        + BusCommand.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
         token + "\"}]";
   }
 

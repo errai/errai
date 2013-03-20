@@ -233,8 +233,14 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
                 if (System.currentTimeMillis() - startTime > 2000) {
                   undeliveredMessages.removeAll(toSend);
                 }
-                BusToolsCli.decodeToCallback(response.getText(), messageCallback);
-                break;
+                try {
+                  if (BusToolsCli.decodeToCallback(response.getText(), messageCallback)) {
+                    break;
+                  }
+                }
+                catch (Throwable e) {
+                   // fall through.
+                }
               case 0:
               case 1:
               case 400: // happens when JBossAS is going down

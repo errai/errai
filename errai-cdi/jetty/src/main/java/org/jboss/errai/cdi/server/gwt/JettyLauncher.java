@@ -54,6 +54,10 @@ import java.util.Iterator;
  */
 public class JettyLauncher extends ServletContainerLauncher {
 
+  static {
+    System.setProperty("org.mortbay.naming.InitialContextFactory", "org.mortbay.naming.InitialContextFactory");
+  }
+
   private static String[] __dftConfigurationClasses =
       {
           "org.mortbay.jetty.webapp.WebInfConfiguration", //

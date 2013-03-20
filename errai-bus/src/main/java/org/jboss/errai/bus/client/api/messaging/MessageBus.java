@@ -47,9 +47,9 @@ import org.jboss.errai.bus.client.api.UnsubscribeListener;
  * Services always live on the bus with which they a registered.  When a new registration occurs, the service
  * becomes generally available across the entire context.  This is accomplished by notifying the proximate bus--
  * in real-time--that a subscription has been created with a
- * {@link org.jboss.errai.bus.client.protocols.BusCommands#RemoteSubscribe}
+ * {@link org.jboss.errai.bus.client.protocols.BusCommand#RemoteSubscribe}
  * command containing the subject that has just become routable.  Likewise, when a subject is unsubscribed, an
- * {@link org.jboss.errai.bus.client.protocols.BusCommands#RemoteUnsubscribe} is sent.
+ * {@link org.jboss.errai.bus.client.protocols.BusCommand#RemoteUnsubscribe} is sent.
  * <p/>
  * Creating a service subscription is straight-forward:
  * <pre><code>

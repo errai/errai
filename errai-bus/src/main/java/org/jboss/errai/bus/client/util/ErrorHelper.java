@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.RoutingFlag;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
@@ -162,7 +162,7 @@ public class ErrorHelper {
   public static void disconnectRemoteBus(MessageBus bus, Message message) {
     MessageBuilder.createConversation(message)
         .toSubject("ClientBus")
-        .command(BusCommands.Disconnect)
+        .command(BusCommand.Disconnect)
         .noErrorHandling().sendNowWith(bus);
   }
 

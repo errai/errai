@@ -34,6 +34,8 @@ import java.util.List;
  * @author Mike Brock
  */
 public class SSEHandler implements TransportHandler, TransportStatistics {
+  private static final String SSE_AGENT_SERVICE = "SSEAgent";
+
   private final ClientMessageBusImpl clientMessageBus;
   private final MessageCallback messageCallback;
 
@@ -67,6 +69,13 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
     this.clientMessageBus = clientMessageBus;
     this.messageCallback = messageCallback;
     this.pollingHandler = HttpPollingHandler.newNoPollingInstance(messageCallback, clientMessageBus);
+
+    clientMessageBus.subscribe(SSE_AGENT_SERVICE, new MessageCallback() {
+      @Override
+      public void callback(final Message message) {
+        notifyConnected();
+      }
+    });
   }
 
   @Override
@@ -138,13 +147,12 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
 
       var errorHandler = function (e) {
           if (e.srcElement.readyState === EventSource.CLOSED) {
-              console.log("the sse channel hung up!")
               thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyDisconnected()();
           }
       };
 
       var openHandler = function () {
-          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::notifyConnected()();
+          thisRef.@org.jboss.errai.bus.client.framework.transports.SSEHandler::verifyConnected()();
       };
 
       var sseSource = new EventSource(sseAddress);
@@ -158,7 +166,17 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
       return sseSource;
   }-*/;
 
+
+  private void verifyConnected() {
+    transmit(Collections.singletonList(MessageBuilder.createMessage()
+        .toSubject("ServerEchoService")
+        .signalling().done().repliesToSubject(SSE_AGENT_SERVICE).getMessage()));
+  }
+
   private void notifyConnected() {
+    if (!connected) {
+      return;
+    }
     connected = true;
 
     initialTimeoutTimer.cancel();
@@ -187,7 +205,7 @@ public class SSEHandler implements TransportHandler, TransportStatistics {
           LogUtil.log("attempting reconnection ... ");
 
           transmit(Collections.singletonList(MessageBuilder.createMessage()
-              .toSubject("ServerEchoService")
+              .toSubject("SSEAgent")
               .signalling().done().repliesToSubject("ClientBus").getMessage()));
 
           pollingHandler.performPoll();
