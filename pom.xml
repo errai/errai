@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-cordova-maven-plugin</artifactId>
-    <name>errai-cordova-maven-plugin project</name>
+    <artifactId>cordova-maven-plugin</artifactId>
+    <name>cordova maven plugin project</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
@@ -60,6 +60,13 @@
             <groupId>xmlunit</groupId>
             <artifactId>xmlunit</artifactId>
             <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

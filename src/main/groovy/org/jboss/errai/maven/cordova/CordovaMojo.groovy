@@ -93,8 +93,12 @@ class CordovaMojo extends GroovyMojo {
         for (platform in supportedPlatforms) {
             def baseDir = new File("${project.build.directory}/template/platforms/$platform")
             def parser = Class.forName("org.jboss.errai.maven.cordova.${platform}Parser").newInstance(baseDir)
-            parser.updateProject(new ConfigParser(new File("${warSourceDir}/config.xml")))
+            parser.updateProject(getConfig())
         }
+    }
+
+    def ConfigParser getConfig() {
+        new ConfigParser(new File("${warSourceDir}/config.xml"))
     }
 
     void compile() {

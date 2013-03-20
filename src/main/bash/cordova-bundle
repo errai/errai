@@ -10,7 +10,8 @@ cordova platform add android
 #rm -rf `find . -name Sample`
 
 #remove everything except config.xml from www directory
-rm -rf `find www/* | grep -v config.xml`
+rm -rf www/css/ www/spec* www/js/ www/index.html www/img/
+cp `which ios-sim` .
 
 tar zcvf ../project-template.tar.gz .
 
