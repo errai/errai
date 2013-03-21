@@ -347,8 +347,8 @@ public class BindableProxyGenerator {
       else {
         // TODO add full support for generics in errai codegen 
         logger.log(TreeLogger.WARN, "Ignoring method: " + method + " in class " + bindable + ". Methods using " +
-            "type parameters with multiple bounds are currently not supported in @Bindable types! Invoking this " +
-            "method on a bound model will have unpredictable results.");
+            "multiple type parameters or type parameters with multiple bounds are currently not supported in " +
+            "@Bindable types! Invoking this method on a bound model will have unpredictable results.");
         return null;
       }
     }
