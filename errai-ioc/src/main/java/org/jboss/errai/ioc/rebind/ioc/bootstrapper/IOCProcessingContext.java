@@ -249,11 +249,13 @@ public class IOCProcessingContext {
   }
 
   public void handleDiscoveryOfType(final InjectionPoint injectionPoint) {
-    if (discovered.contains(injectionPoint.getEnclosingType())) return;
+    if (discovered.contains(injectionPoint.getElementTypeOrMethodReturnType())) {
+      return;
+    }
     for (final TypeDiscoveryListener listener : typeDiscoveryListeners) {
       listener.onDiscovery(this, injectionPoint);
     }
-    discovered.add(injectionPoint.getEnclosingType());
+    discovered.add(injectionPoint.getElementTypeOrMethodReturnType());
   }
 
   public Class<? extends BootstrapInjectionContext> getBootstrapContextClass() {

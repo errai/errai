@@ -58,21 +58,24 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
     context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
       @Override
       public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
-        if (injectionPoint.getEnclosingType().isAssignableFrom(UiBinder.class)) {
+        final MetaClass type = injectionPoint.getElementTypeOrMethodReturnType();
+        final MetaClass enclosingType = injectionPoint.getEnclosingType();
+
+        if (type.isAssignableFrom(UiBinder.class)) {
           MetaClass uiBinderParameterized = MetaClassFactory.parameterizedAs(UiBinder.class,
                   MetaClassFactory
-                          .typeParametersOf(injectionPoint.getEnclosingType().getParameterizedType().getTypeParameters()[0],
-                                  injectionPoint.getEnclosingType()));
+                          .typeParametersOf(type.getParameterizedType().getTypeParameters()[0],
+                              enclosingType));
 
-          BuildMetaClass uiBinderBoilerPlaterIface = ClassBuilder.define(injectionPoint.getEnclosingType().getName()
-                  + "UiBinder", uiBinderParameterized)
+          BuildMetaClass uiBinderBoilerPlaterIface = ClassBuilder.define(enclosingType.getFullyQualifiedName().replaceAll("\\.", "_")
+                  + "_UiBinder", uiBinderParameterized)
                   .publicScope().staticClass().interfaceDefinition()
                   .body().getClassDefinition();
 
           UiTemplate handler = new UiTemplate() {
             @Override
             public String value() {
-              return injectionPoint.getEnclosingType().getFullyQualifiedName() + ".ui.xml";
+              return enclosingType.getFullyQualifiedName() + ".ui.xml";
             }
 
             @Override
@@ -84,7 +87,7 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
           PackageTarget packageTarget = new PackageTarget() {
             @Override
             public String value() {
-              return injectionPoint.getEnclosingType().getPackageName();
+              return enclosingType.getPackageName();
             }
 
             @Override
@@ -100,14 +103,14 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
 
           final BlockStatement staticInit = context.getBootstrapClass().getStaticInitializer();
 
-          String varName = "uiBinderInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
+          String varName = "uiBinderInst_" + enclosingType.getFullyQualifiedName()
                   .replaceAll("\\.", "_");
 
           if (Boolean.getBoolean("errai.simulatedClient")) {
             staticInit.addStatement(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
                     ObjectBuilder.newInstanceOf(uiBinderBoilerPlaterIface)
                             .extend()
-                            .publicOverridesMethod("createAndBindUi", Parameter.of(injectionPoint.getEnclosingType(), "w"))
+                            .publicOverridesMethod("createAndBindUi", Parameter.of(type, "w"))
                             .append(Stmt.loadLiteral(null).returnValue())
                             .finish().finish()
             )
@@ -120,27 +123,27 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
           }
 
           staticInit.addStatement(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
-                  injectionPoint.getEnclosingType(), Refs.get(varName)));
+              enclosingType, Refs.get(varName)));
         }
-        else if (injectionPoint.getEnclosingType().isAssignableTo(SafeHtmlTemplates.class)) {
-          final String varName = "safeTemplateInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
+        else if (type.isAssignableTo(SafeHtmlTemplates.class)) {
+          final String varName = "safeTemplateInst_" + type.getFullyQualifiedName()
                   .replaceAll("\\.", "_");
 
           if (Boolean.getBoolean("errai.simulatedClient")) {
             context.append(Stmt.declareVariable(SafeHtmlTemplates.class).named(varName).initializeWith(
-                    ObjectBuilder.newInstanceOf(injectionPoint.getEnclosingType())
-                            .extend()
-                            .publicOverridesMethod("link", Parameter.of(SafeUri.class, "safe"),
-                                    Parameter.of(String.class, "str"))
-                            .append(Stmt.loadLiteral(null).returnValue())
-                            .finish().finish()
+                ObjectBuilder.newInstanceOf(type)
+                    .extend()
+                    .publicOverridesMethod("link", Parameter.of(SafeUri.class, "safe"),
+                        Parameter.of(String.class, "str"))
+                    .append(Stmt.loadLiteral(null).returnValue())
+                    .finish().finish()
             )
             );
 
           }
           else {
-            context.append(Stmt.declareVariable(injectionPoint.getEnclosingType()).named(varName).initializeWith(
-                    Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(injectionPoint.getEnclosingType()))
+            context.append(Stmt.declareVariable(type).named(varName).initializeWith(
+                Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(type))
             ));
           }
 
@@ -177,7 +180,7 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
 
             @Override
             public MetaClass getInjectedType() {
-              return injectionPoint.getEnclosingType();
+              return type;
             }
           });
         }
