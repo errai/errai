@@ -228,7 +228,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
       notify any component waiting for this type that is is ready now.
      */
     injectableInstance.getInjectionContext().getProcessingContext()
-        .handleDiscoveryOfType(injectableInstance);
+        .handleDiscoveryOfType(injectableInstance, getInjectedType());
 
     injectContext.markProxyClosedIfNeeded(getInjectedType(), getQualifyingMetadata());
   }

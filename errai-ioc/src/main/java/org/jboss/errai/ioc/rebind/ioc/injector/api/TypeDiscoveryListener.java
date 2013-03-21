@@ -16,11 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 
 /**
  * @author Mike Brock
  */
 public interface TypeDiscoveryListener {
-  public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint);
+  public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint, MetaClass discoveredType);
 }

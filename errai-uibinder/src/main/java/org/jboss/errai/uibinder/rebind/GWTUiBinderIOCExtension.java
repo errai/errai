@@ -57,8 +57,10 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
 
     context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
       @Override
-      public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
-        final MetaClass type = injectionPoint.getElementTypeOrMethodReturnType();
+      public void onDiscovery(final IOCProcessingContext context,
+                              final InjectionPoint injectionPoint,
+                              final MetaClass type) {
+       // final MetaClass type = injectionPoint.getElementTypeOrMethodReturnType();
         final MetaClass enclosingType = injectionPoint.getEnclosingType();
 
         if (type.isAssignableFrom(UiBinder.class)) {

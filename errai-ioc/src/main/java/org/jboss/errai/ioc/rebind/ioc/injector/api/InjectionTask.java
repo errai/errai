@@ -105,6 +105,7 @@ public class InjectionTask {
 
     switch (taskType) {
       case Type:
+        ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance, type);
         ctx.getQualifiedInjector(type, qualifyingMetadata);
         break;
 
@@ -112,6 +113,7 @@ public class InjectionTask {
         ctx.addExposedField(field, PrivateAccessType.Write);
 
       case Field:
+        ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance, field.getType());
         try {
            val = InjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);
          }
@@ -152,7 +154,8 @@ public class InjectionTask {
       case Method:
         for (final MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
-                  new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
+              InjectableInstance.getParameterInjectedInstance(parm, injector, ctx),
+              parm.getType());
         }
 
         final Statement[] args = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
@@ -174,15 +177,6 @@ public class InjectionTask {
   private InjectableInstance getInjectableInstance(final InjectionContext ctx) {
     final InjectableInstance<? extends Annotation> injectableInstance
             = new InjectableInstance(null, taskType, constructor, method, field, type, parm, injector, ctx);
-
-    switch (taskType) {
-      case Method:
-      case PrivateMethod:
-        break;
-
-      default:
-        ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
-    }
 
     return injectableInstance;
   }

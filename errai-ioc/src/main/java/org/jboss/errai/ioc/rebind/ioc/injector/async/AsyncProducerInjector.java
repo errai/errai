@@ -133,7 +133,9 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     else {
       injectionContext.getProcessingContext().registerTypeDiscoveryListener(new TypeDiscoveryListener() {
         @Override
-        public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
+        public void onDiscovery(final IOCProcessingContext context,
+                                final InjectionPoint injectionPoint,
+                                final MetaClass injectedType) {
           if (injectionPoint.getEnclosingType().equals(enclosingType)) {
             setRendered(true);
           }

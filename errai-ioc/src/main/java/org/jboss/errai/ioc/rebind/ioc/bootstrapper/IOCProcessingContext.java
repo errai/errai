@@ -248,12 +248,12 @@ public class IOCProcessingContext {
     this.typeDiscoveryListeners.add(discoveryListener);
   }
 
-  public void handleDiscoveryOfType(final InjectionPoint injectionPoint) {
+  public void handleDiscoveryOfType(final InjectionPoint injectionPoint, final MetaClass discoveredType) {
     if (discovered.contains(injectionPoint.getElementTypeOrMethodReturnType())) {
       return;
     }
     for (final TypeDiscoveryListener listener : typeDiscoveryListeners) {
-      listener.onDiscovery(this, injectionPoint);
+      listener.onDiscovery(this, injectionPoint, discoveredType);
     }
     discovered.add(injectionPoint.getElementTypeOrMethodReturnType());
   }

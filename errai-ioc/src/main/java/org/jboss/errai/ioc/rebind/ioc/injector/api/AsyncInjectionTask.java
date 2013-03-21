@@ -200,7 +200,7 @@ public class AsyncInjectionTask {
       case Method: {
         for (final MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
-              new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
+              InjectableInstance.getParameterInjectedInstance(parm, injector, ctx), parm.getType());
         }
 
         final AtomicInteger atomicInteger = new AtomicInteger(0);
@@ -247,15 +247,6 @@ public class AsyncInjectionTask {
   private InjectableInstance getInjectableInstance(final InjectionContext ctx) {
     final InjectableInstance<? extends Annotation> injectableInstance
         = new InjectableInstance(null, taskType, constructor, method, field, type, parm, injector, ctx);
-
-    switch (taskType) {
-      case Method:
-      case PrivateMethod:
-        break;
-
-      default:
-        ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
-    }
 
     return injectableInstance;
   }
