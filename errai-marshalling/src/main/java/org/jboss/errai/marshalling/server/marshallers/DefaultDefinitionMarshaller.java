@@ -16,15 +16,6 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
@@ -46,6 +37,15 @@ import org.jboss.errai.marshalling.server.EncodingSession;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.mvel2.DataConversion;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 
 /**
  * @author Mike Brock
@@ -186,7 +186,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
     try {
       marshall(byteArrayOutputStream, o, ctx);
-      return new String(byteArrayOutputStream.toByteArray());
+      return new String(byteArrayOutputStream.toByteArray(), UTF_8);
     }
     catch (Exception e) {
       throw new RuntimeException(e);
