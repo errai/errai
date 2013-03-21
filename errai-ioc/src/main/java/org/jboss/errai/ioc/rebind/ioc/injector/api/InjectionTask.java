@@ -32,8 +32,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
-import java.lang.annotation.Annotation;
-
 public class InjectionTask {
   protected final TaskType taskType;
   protected final Injector injector;
@@ -175,10 +173,7 @@ public class InjectionTask {
   }
 
   private InjectableInstance getInjectableInstance(final InjectionContext ctx) {
-    final InjectableInstance<? extends Annotation> injectableInstance
-            = new InjectableInstance(null, taskType, constructor, method, field, type, parm, injector, ctx);
-
-    return injectableInstance;
+    return new InjectableInstance(null, taskType, constructor, method, field, type, parm, injector, ctx);
   }
 
   public Injector getInjector() {
