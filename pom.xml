@@ -114,6 +114,7 @@
     <module>errai-cdi-async-tests</module>
     <module>errai-cordova</module>
     <module>errai-cordova/demos/shared</module>
+    <module>errai-cordova-maven-plugin</module>
     <module>errai-ioc-bus-support</module>
     <module>errai-location</module>
     <module>errai-bus-jboss7-websocket</module>
