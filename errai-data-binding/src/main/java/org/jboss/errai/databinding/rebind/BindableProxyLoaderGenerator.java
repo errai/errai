@@ -82,7 +82,7 @@ public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
             + bindable.getFullyQualifiedName());
       }
 
-      ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
+      ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable, logger).generate();
       loadProxies.append(new InnerClass(bindableProxy.getClassDefinition()));
       Statement proxyProvider =
           ObjectBuilder.newInstanceOf(BindableProxyProvider.class)

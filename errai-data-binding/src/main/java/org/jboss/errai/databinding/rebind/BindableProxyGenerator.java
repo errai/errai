@@ -37,6 +37,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.If;
@@ -50,6 +52,8 @@ import org.jboss.errai.databinding.client.PropertyType;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 
+import com.google.gwt.core.ext.TreeLogger;
+
 /**
  * Generates a proxy for a {@link Bindable} type. A bindable proxy subclasses the bindable type and
  * overrides all non-final methods to trigger UI updates and fire property change events when
@@ -60,10 +64,12 @@ import org.jboss.errai.databinding.client.api.InitialState;
 public class BindableProxyGenerator {
   private final MetaClass bindable;
   private final String agentField;
+  private final TreeLogger logger;
 
-  public BindableProxyGenerator(MetaClass bindable) {
+  public BindableProxyGenerator(MetaClass bindable, TreeLogger logger) {
     this.bindable = bindable;
     this.agentField = inferSafeAgentFieldName();
+    this.logger = logger;
   }
 
   public ClassStructureBuilder<?> generate() {
@@ -236,14 +242,22 @@ public class BindableProxyGenerator {
         List<Statement> parmVars = new ArrayList<Statement>();
         for (int i = 0; i < parms.length; i++) {
           parmVars.add(Stmt.loadVariable(parms[i].getName()));
+          MetaClass type = getTypeOrFirstUpperBound(method.getGenericParameterTypes()[i], method);
+          if (type == null) return;
+          parms[i] = Parameter.of(type, parms[i].getName());
         }
 
         Statement callOnTarget = null;
         Statement returnValue = null;
         String returnValName = ensureSafeLocalVariableName("returnValue", method);
-        if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
+        
+        MetaClass returnType = getTypeOrFirstUpperBound(method.getGenericReturnType(), method);
+        if (returnType == null) 
+          return;
+        
+        if (!returnType.equals(MetaClassFactory.get(void.class))) {
           callOnTarget = Stmt.declareFinalVariable(returnValName,
-              method.getReturnType(), target().invoke(method, parmVars.toArray()));
+              returnType, target().invoke(method, parmVars.toArray()));
           returnValue = Stmt.nestedCall(Refs.get(returnValName)).returnValue();
         }
         else {
@@ -252,7 +266,7 @@ public class BindableProxyGenerator {
         }
 
         classBuilder
-            .publicMethod(method.getReturnType(), methodName, parms)
+            .publicMethod(returnType, methodName, parms)
               .append(callOnTarget)
               .append(agent().invoke("updateWidgetsAndFireEvents"))
               .append(returnValue)
@@ -262,7 +276,7 @@ public class BindableProxyGenerator {
   }
 
   /**
-   * Generates the code to collect all existing properties and their types.
+   * Generates code to collect all existing properties and their types.
    */
   private Statement generatePropertiesMap() {
     BlockStatement block = new BlockStatement();
@@ -322,5 +336,22 @@ public class BindableProxyGenerator {
         return bindable;
       }
     });
+  }
+  
+  private MetaClass getTypeOrFirstUpperBound(MetaType clazz, MetaMethod method) {
+    if (clazz instanceof MetaTypeVariable) {
+      MetaType[] bounds = ((MetaTypeVariable) clazz).getBounds();
+      if (bounds.length == 1 && bounds[0] instanceof MetaClass) {
+        clazz = ((MetaTypeVariable) clazz).getBounds()[0];  
+      }
+      else {
+        // TODO add full support for generics in errai codegen 
+        logger.log(TreeLogger.WARN, "Ignoring method: " + method + " in class " + bindable + ". Methods using " +
+            "type parameters with multiple bounds are currently not supported in @Bindable types! Invoking this " +
+            "method on a bound model will have unpredictable results.");
+        return null;
+      }
+    }
+    return (MetaClass) clazz;
   }
 }

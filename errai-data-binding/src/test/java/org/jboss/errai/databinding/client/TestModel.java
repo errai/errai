@@ -16,11 +16,12 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.junit.Ignore;
-
-import java.util.Date;
 
 /**
  * Simple bindable model for testing purposes.
@@ -32,23 +33,17 @@ import java.util.Date;
 @Ignore
 public class TestModel {
 
-  // This guard against regressions of https://issues.jboss.org/browse/ERRAI-479
-  public static void staticMethod() {};
-  
-  // This guard against regressions of https://issues.jboss.org/browse/ERRAI-476
-  @Bindable
-  public static class DuplicateNamedBindableType {}
-
   private int id;
+  private boolean active;
+  private Date lastChanged;
+  
   // to test direct field access
   public String value;
+  public TestModel child;
   
   // the _ is used to test proper JavaBean property discovery (based on getters/setters and not on the field name)
   private String _name;
   private Integer _age;
-  
-  private boolean active;
-  public TestModel child;
   
   // test that this variable name does not cause a duplicate local variable in the generated proxy
   private String oldValue;
@@ -56,8 +51,6 @@ public class TestModel {
   // test for the case there's a field name collision in the generated proxy
   @SuppressWarnings("unused")
   private String agent;
-  
-  private Date lastChanged;
   
   public int getId() {
     return id;
@@ -208,5 +201,20 @@ public class TestModel {
     return "Model [id=" + id + ", value=" + value + ", _name=" + _name + ", _age=" + _age + ", active=" + active
         + ", child=" + child + "]";
   }
+  
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-479
+  public static void staticMethod() {};
+  
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-476
+  @Bindable
+  public static class DuplicateNamedBindableType {}
+  
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-512
+  public <M extends Serializable> M genericMethod(M m) {
+    return null;
+  }
 
+  public <M> M simpleGenericMethod(M m) {
+    return null;
+  }
 }
