@@ -27,12 +27,9 @@ import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
-<<<<<<< HEAD
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleSingleton2;
-=======
 import org.jboss.errai.ioc.tests.wiring.client.res.TestProviderDependentBean;
->>>>>>> 3f2ff2adeaf5f6411146d69b60a5dc6f30c40072
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
 import org.junit.runner.RunWith;
