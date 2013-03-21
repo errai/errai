@@ -13,6 +13,7 @@ import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
 import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -34,10 +35,14 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     BindingTemplate template = app.getTemplate();
     assertNotNull("Template instance was not injected!", template);
 
-    Label idLabel = template.getLabel();
+    Label idLabel = template.getIdLabel();
     assertNotNull(idLabel);
     assertEquals("", idLabel.getText());
-
+    
+    DivElement idDiv = template.getIdDiv();
+    assertNotNull(idDiv);
+    assertEquals("", idDiv.getInnerText());
+    
     TextBox nameTextBox = template.getNameTextBox();
     assertNotNull(nameTextBox);
     assertEquals("", nameTextBox.getValue());
@@ -55,6 +60,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     model.getChild().setName("errai");
     model.setLastChanged(new Date());
     model.setPhoneNumber("+1 555");
+    assertEquals("Div (id) was not updated!", Integer.valueOf(model.getId()).toString(), idDiv.getInnerText());
     assertEquals("Label (id) was not updated!", Integer.valueOf(model.getId()).toString(), idLabel.getText());
     assertEquals("TextBox (name) was not updated!", model.getChild().getName(), nameTextBox.getValue());
     assertEquals("TextBox (date) was not updated using custom converter!", "testdate", dateTextBox.getValue());
@@ -65,8 +71,8 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     phoneNumberBox.setValue("+43 555", true);
     
     assertEquals("Model (name) was not updated!", nameTextBox.getValue(), model.getChild().getName());
-    assertEquals("Model (lastUpdate) was not updated using custom converter!", BindingDateConverter.TEST_DATE, model
-        .getLastChanged());
+    assertEquals("Model (lastUpdate) was not updated using custom converter!", 
+        BindingDateConverter.TEST_DATE, model.getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", phoneNumberBox.getValue(), model.getPhoneNumber());
   }
   

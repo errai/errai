@@ -17,7 +17,6 @@ package org.jboss.errai.ui.rebind;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,11 +32,9 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -49,20 +46,18 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.rebind.DataBindingValidator;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.Template;
 import org.jboss.errai.ui.shared.TemplateUtil;
-import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
@@ -89,15 +84,14 @@ import com.google.gwt.user.client.ui.Widget;
  * Generates the code required for {@link Templated} classes.
  *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
- * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
-public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
+public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   private static final String CONSTRUCTED_TEMPLATE_SET_KEY = "constructedTemplate";
 
-  private static final Logger logger = LoggerFactory.getLogger(DecoratorTemplated.class);
+  private static final Logger logger = LoggerFactory.getLogger(TemplatedCodeDecorator.class);
 
-  public DecoratorTemplated(final Class<Templated> decoratesWith) {
+  public TemplatedCodeDecorator(final Class<Templated> decoratesWith) {
     super(decoratesWith);
   }
 
@@ -110,11 +104,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           + "] must extend base class [" + Composite.class.getName() + "].");
     }
 
-    final MetaClass databinderMetaClass = MetaClassFactory.get(DataBinder.class);
-
     for (final MetaField field : declaringClass.getFields()) {
-      if (field.isAnnotationPresent(DataField.class)
-          || field.getType().getErased().equals(databinderMetaClass)) {
+      if (field.isAnnotationPresent(DataField.class)) {
         ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
       }
     }
@@ -130,12 +121,49 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       initStmts.add(Stmt.invokeStatic(RootPanel.class, "get").invoke("add", Refs.get("obj")));
     }
 
+    List<Statement> stmts = new ArrayList<Statement>();
     final Statement initCallback = InjectUtil.createInitializationCallback(declaringClass, "obj", initStmts);
-
-    return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
+    stmts.add(Stmt.loadVariable("context").invoke("addInitializationCallback",
         Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
+    
+    Statement destructionCallback = generateTemplateDestruction(ctx);
+    if (destructionCallback != null) {
+      stmts.add(destructionCallback);
+    }
+    return stmts;
   }
 
+  /**
+   * Generates a {@link DestructionCallback} for the {@link Templated} component.
+   * 
+   * @return statement representing the template destruction logic.
+   */
+  private Statement generateTemplateDestruction(final InjectableInstance<Templated> ctx) {
+    List<Statement> destructionStatements = new ArrayList<Statement>();
+    final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getEnclosingType());
+    final Map<String, MetaClass> dataFieldTypes = 
+      DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
+    
+    for (final String fieldName : dataFields.keySet()) {
+      Statement field = dataFields.get(fieldName);
+      MetaClass fieldType = dataFieldTypes.get(fieldName);
+      
+      if (fieldType.isAssignableTo(Element.class)) {
+        destructionStatements.add(Stmt.invokeStatic(ElementWrapperWidget.class, "removeWidget", field));
+      }
+    }
+    
+    if (destructionStatements.isEmpty())
+      return null;
+    
+    Statement destructionLogic = 
+      Stmt.loadVariable("context").invoke("addDestructionCallback",
+        Refs.get(ctx.getInjector().getInstanceVarName()), 
+        InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj", destructionStatements));
+    
+    return destructionLogic;
+  }
+  
   /**
    * Generate the actual construction logic for our {@link Templated} component
    */
@@ -186,23 +214,22 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Get all of the data-field Elements from the Template
        */
       final String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
-      initStmts.add(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
-      },
-          Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
+      initStmts.add(Stmt.declareVariable(dataFieldElementsVarName,
+          new TypeLiteral<Map<String, Element>>() {},
+          Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement))
+      );
 
       /*
        * Attach Widget field children Elements to the Template DOM
        */
-
       final String fieldsMapVarName = InjectUtil.getUniqueVarName();
 
       /*
        * The Map<String, Widget> to store actual component field references.
        */
-      initStmts.add(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {
-      },
-          Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {
-          })));
+      initStmts.add(Stmt.declareVariable(fieldsMapVarName, new TypeLiteral<Map<String, Widget>>() {},
+          Stmt.newObject(new TypeLiteral<LinkedHashMap<String, Widget>>() {}))
+      );
       final Statement fieldsMap = Stmt.loadVariable(fieldsMapVarName);
 
       generateComponentCompositions(ctx, initStmts, component, rootTemplateElement,
@@ -216,8 +243,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                                                  final List<Statement> initStmts, final Statement component,
                                                  final String dataFieldElementsVarName, final Statement fieldsMap) {
 
-    final Map<String, MetaClass> dataFieldTypes = DecoratorDataField.aggregateDataFieldTypeMap(ctx, ctx.getType());
-    dataFieldTypes.put("this", ctx.getType());
+    final Map<String, MetaClass> dataFieldTypes = DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
+    dataFieldTypes.put("this", ctx.getEnclosingType());
 
     final MetaClass declaringClass = ctx.getEnclosingType();
 
@@ -256,8 +283,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
         final ObjectBuilder listenerInstance = listenerBuiler.finish().finish();
 
-        int eventsToSink = Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS
-            | Event.TOUCHEVENTS;
+        int eventsToSink =
+            Event.FOCUSEVENTS | Event.GESTUREEVENTS | Event.KEYEVENTS | Event.MOUSEEVENTS | Event.TOUCHEVENTS;
         if (method.isAnnotationPresent(SinkNative.class)) {
           eventsToSink = method.getAnnotation(SinkNative.class).value();
         }
@@ -357,7 +384,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
           if (processedNativeHandlers.contains(name)) {
             throw new GenerationException(
-                "Cannot specify more than one @EventHandler method when @SyncNative is used for data-field ["
+                "Cannot specify more than one @EventHandler method when @SinkNative is used for data-field ["
                     + name + "] in class [" + declaringClass.getFullyQualifiedName()
                     + "].");
           }
@@ -467,24 +494,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
                                              final Statement dataFieldElements,
                                              final Statement fieldsMap) {
 
-
-    final DataBindingUtil.DataBinderLookup binderLookup = DataBindingUtil.getDataBinder(ctx);
-
-    /*
-     * Create a reference to the composite's data binder
-     */
-    if (binderLookup != null) {
-      initStmts.add(Stmt.declareVariable("binder", DataBinder.class, binderLookup.getValueAccessor()));
-    }
-
     /*
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
      */
-    final Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+    final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getEnclosingType());
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
-      initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
-          .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
+      initStmts.add(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getEnclosingType()
+          .getFullyQualifiedName(), getTemplateFileName(ctx.getEnclosingType()), Cast.to(Widget.class, field.getValue()),
           dataFieldElements, field.getKey()));
     }
 
@@ -494,43 +511,6 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      */
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
-    }
-
-    /*
-     * Bind each bound data field if data binder is found and has been initialized.
-     */
-    Map<String, BoundDataField> boundDataFields = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType());
-    BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
-    for (Entry<String, BoundDataField> boundDataField : boundDataFields.entrySet()) {
-      Bound bound = boundDataField.getValue().getBound();
-      if (binderLookup != null) {
-        String property = bound.property().equals("") ? boundDataField.getKey() : bound.property();
-        // Check if bound property exists in data model type
-        if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
-          throw new GenerationException("Invalid binding of DataField " + boundDataField.getValue().getName() 
-              + " in class " + ctx.getInjector().getInjectedType() + "! Property " + property 
-              + " not resolvable from class " + binderLookup.getDataModelType() + 
-              ". Hint: All types in a property chain must be @Bindable!");
-        }
-
-        Statement converter =
-            bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
-        binderBlock.append(Stmt.loadVariable("binder")
-            .invoke("bind", boundDataField.getValue().getWidgetStatement(), property, converter));
-      }
-      else {
-        throw new GenerationException("No @AutoBound data binder found for @Bound @DataField " 
-            + boundDataField.getValue().getName() + " in class " + ctx.getInjector().getInjectedType());
-      }
-    }
-
-    if (binderLookup != null) {
-      initStmts.add(binderBlock
-          .finish()
-          .else_()
-          .append(Stmt.invokeStatic(GWT.class, "log", "DataBinder in class "
-              + ctx.getEnclosingType().getFullyQualifiedName()
-              + " has not been initialized - skipping automatic binding!")).finish());
     }
 
     /*

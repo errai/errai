@@ -20,19 +20,45 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.container.RefHolder;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
+  private static final String TRANSIENT_DATA_KEY = "InjectableInstance::TransientData";
+  private static final TransientDataHolder EMPTY_HOLDER = TransientDataHolder.makeEmpty();
+
+  private static class TransientDataHolder {
+    private final Map<String, Map<MetaClass, Statement>> unsatisfiedTransients;
+    private final Map<String, Map<MetaClass, Statement>> transientValues;
+
+    private TransientDataHolder(Map<String, Map<MetaClass, Statement>> unsatisfiedTransients, Map<String, Map<MetaClass, Statement>> transientValues) {
+      this.unsatisfiedTransients = unsatisfiedTransients;
+      this.transientValues = transientValues;
+    }
+
+    static TransientDataHolder makeEmpty() {
+      return new TransientDataHolder(Collections.<String, Map<MetaClass, Statement>>emptyMap(), Collections.<String, Map<MetaClass, Statement>>emptyMap());
+    }
+
+    static TransientDataHolder makeNew() {
+      return new TransientDataHolder(new HashMap<String, Map<MetaClass, Statement>>(), new HashMap<String, Map<MetaClass, Statement>>());
+    }
+  }
 
   public InjectableInstance(final T annotation,
                             final TaskType taskType,
@@ -83,7 +109,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       //noinspection unchecked
       return new InjectableInstance(
           context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
-          parm.getDeclaringMember()),
+              parm.getDeclaringMember()),
           TaskType.Parameter,
           ((MetaConstructor) parm.getDeclaringMember()),
           null,
@@ -97,7 +123,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       //noinspection unchecked
       return new InjectableInstance(
           context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
-          parm.getDeclaringMember()),
+              parm.getDeclaringMember()),
           TaskType.Parameter,
           null,
           ((MetaMethod) parm.getDeclaringMember()),
@@ -115,7 +141,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
     //noinspection unchecked
     return new InjectableInstance(
-        context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,field),
+        context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint, field),
         !field.isPublic() ? TaskType.PrivateField : TaskType.Field,
         null,
         null,
@@ -127,9 +153,135 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   }
 
+  private TransientDataHolder getTransientDataHolder() {
+    if (!getTargetInjector().hasAttribute(TRANSIENT_DATA_KEY)) {
+      return EMPTY_HOLDER;
+    }
+    else {
+      return (TransientDataHolder) getTargetInjector().getAttribute(TRANSIENT_DATA_KEY);
+    }
+  }
+
+  private TransientDataHolder getOrCreateWritableDataHolder() {
+    if (!getTargetInjector().hasAttribute(TRANSIENT_DATA_KEY)) {
+      final TransientDataHolder holder = TransientDataHolder.makeNew();
+      getTargetInjector().setAttribute(TRANSIENT_DATA_KEY, holder);
+      return holder;
+    }
+    else {
+      return (TransientDataHolder) getTargetInjector().getAttribute(TRANSIENT_DATA_KEY);
+    }
+  }
+
+  /**
+   * Record a transient value -- ie. a value we want the IOC container to track and be referenceable
+   * while wiring the code, but not something that is injected.
+   */
+  public void addTransientValue(final String name, final Class type, final Statement valueRef) {
+    addTransientValue(name, MetaClassFactory.get(type), valueRef);
+  }
+
+  public void addTransientValue(final String name, final MetaClass type, final Statement valueRef) {
+    final TransientDataHolder holder = getOrCreateWritableDataHolder();
+
+    Map<MetaClass, Statement> classStatementMap = holder.transientValues.get(name);
+    if (classStatementMap == null) {
+      holder.transientValues.put(name, classStatementMap = new HashMap<MetaClass, Statement>());
+    }
+
+    if (classStatementMap.containsKey(type)) {
+      throw new RuntimeException("transient value already exists: " + name + "::" + type.getFullyQualifiedName());
+    }
+
+    final IOCProcessingContext pCtx = getInjectionContext().getProcessingContext();
+    if (hasUnsatisfiedTransientValue(name, type)) {
+      final Statement unsatisfiedTransientValue = getUnsatisfiedTransientValue(name, type);
+      pCtx.append(Stmt.nestedCall(unsatisfiedTransientValue).invoke("set", valueRef));
+      classStatementMap.put(type, Stmt.nestedCall(unsatisfiedTransientValue).invoke("get"));
+      markSatisfied(name, type);
+    }
+    else {
+      final String varName = InjectUtil.getUniqueVarName();
+      pCtx.append(Stmt.declareFinalVariable(varName, type, valueRef));
+      classStatementMap.put(type, Stmt.loadVariable(varName));
+    }
+  }
+
+  public Statement getTransientValue(final String name, final Class type) {
+    return getTransientValue(name, MetaClassFactory.get(type));
+  }
+
+  public Statement getTransientValue(final String name, final MetaClass type) {
+    final TransientDataHolder holder = getTransientDataHolder();
+    final Map<MetaClass, Statement> metaClassStatementMap = holder.transientValues.get(name);
+    if (metaClassStatementMap != null) {
+      final Statement statement = metaClassStatementMap.get(type);
+      if (statement != null) {
+        return statement;
+      }
+    }
+
+    if (hasUnsatisfiedTransientValue(name, type)) {
+      return Stmt.nestedCall(getUnsatisfiedTransientValue(name, type)).invoke("get");
+    }
+
+    final String holderVar = InjectUtil.getUniqueVarName();
+    final MetaClass holderType = MetaClassFactory.parameterizedAs(RefHolder.class, MetaClassFactory.typeParametersOf(type));
+
+    final IOCProcessingContext pCtx = getInjectionContext().getProcessingContext();
+    pCtx.append(Stmt.declareFinalVariable(holderVar, holderType, Stmt.newObject(holderType)));
+
+    addUnsatisifiedTransientValue(name, type, Stmt.loadVariable(holderVar));
+
+    return Stmt.loadVariable(holderVar).invoke("get");
+  }
+
+
+  private void addUnsatisifiedTransientValue(final String name, final MetaClass type, final Statement holderRef) {
+    final TransientDataHolder holder = getOrCreateWritableDataHolder();
+
+    Map<MetaClass, Statement> metaClassStringMap = holder.unsatisfiedTransients.get(name);
+    if (metaClassStringMap == null) {
+      holder.unsatisfiedTransients.put(name, metaClassStringMap = new HashMap<MetaClass, Statement>());
+    }
+
+    metaClassStringMap.put(type, holderRef);
+  }
+
+
+  private Statement getUnsatisfiedTransientValue(final String name, final MetaClass type) {
+    final TransientDataHolder holder = getTransientDataHolder();
+
+    if (holder.unsatisfiedTransients.containsKey(name) && holder.unsatisfiedTransients.get(name).containsKey(type)) {
+      return holder.unsatisfiedTransients.get(name).get(type);
+    }
+    return null;
+  }
+
+  private void markSatisfied(final String name, final MetaClass type) {
+    final TransientDataHolder holder = getTransientDataHolder();
+
+    if (holder.unsatisfiedTransients.containsKey(name) && holder.unsatisfiedTransients.get(name).containsKey(type)) {
+      final Map<MetaClass, Statement> metaClassStatementMap = holder.unsatisfiedTransients.get(name);
+      metaClassStatementMap.remove(type);
+      if (metaClassStatementMap.isEmpty()) {
+        holder.unsatisfiedTransients.remove(name);
+      }
+    }
+  }
+
+  public boolean hasAnyUnsatified() {
+    return !getTransientDataHolder().unsatisfiedTransients.isEmpty();
+  }
+
+  public boolean hasUnsatisfiedTransientValue(final String name, final MetaClass type) {
+    return getUnsatisfiedTransientValue(name, type) != null;
+  }
+
   /**
    * Returns an instance of a {@link Statement} which represents the value associated for injection at this
-   * InjectionPoint.
+   * InjectionPoint. This statement may represent a raw field access, a method call to a getter method, or an
+   * internalized variable in the bootstrapper which is holding the value.
    *
    * @return a statement representing the value of the injection point.
    */
@@ -194,21 +346,11 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
   public Injector getTargetInjector() {
     final MetaClass targetType = getInjector() == null ? getEnclosingType() : getInjector().getInjectedType();
 
-    Injector targetInjector
-        = isProxy() ? injectionContext.getProxiedInjector(targetType, getQualifyingMetadata())
+    return isProxy()
+        ? injectionContext.getProxiedInjector(targetType, getQualifyingMetadata())
         : injectionContext.getQualifiedInjector(targetType, getQualifyingMetadata());
-
-    if (!isProxy()) {
-      if (!targetInjector.isCreated()) {
-        targetInjector = InjectUtil.getOrCreateProxy(injectionContext, getEnclosingType(), getQualifyingMetadata());
-        if (targetInjector.isEnabled()) {
-          targetInjector.getBeanInstance(this);
-        }
-      }
-    }
-
-    return targetInjector;
   }
+
 
   public Statement callOrBind(final Statement... values) {
     final Injector targetInjector = injector;
@@ -243,4 +385,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         throw new RuntimeException("cannot call tasktype: " + taskType);
     }
   }
+
+
 }

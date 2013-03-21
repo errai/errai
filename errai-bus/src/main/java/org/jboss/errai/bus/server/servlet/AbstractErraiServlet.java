@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.servlet;
 
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -154,16 +154,16 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   protected void sendDisconnectWithReason(OutputStream stream, final String reason) throws IOException {
     writeToOutputStream(stream,
         reason != null ? "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \""
-            + MessageParts.CommandType.name() + "\":\"" + BusCommands.Disconnect + "\"," +
+            + MessageParts.CommandType.name() + "\":\"" + BusCommand.Disconnect + "\"," +
                 "\"Reason\":\"" + reason + "\"}"
-                : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}");
+                : "{\"CommandType\":\"" + BusCommand.Disconnect + "\"}");
   }
 
   protected void sendDisconnectDueToSessionExpiry(final HttpServletResponse response) throws IOException {
     response.setStatus(401);
     writeToOutputStream(response.getOutputStream(),
         "{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name()
-            + "\":\"" + BusCommands.SessionExpired.name() + "\"}");
+            + "\":\"" + BusCommand.SessionExpired.name() + "\"}");
   }
 
   protected static String getClientId(HttpServletRequest request) {

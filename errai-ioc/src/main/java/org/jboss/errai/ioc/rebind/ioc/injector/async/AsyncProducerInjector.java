@@ -278,6 +278,25 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     return null;
   }
 
+//  private static void ensureTargetInjectorAvailable(InjectableInstance inst) {
+//    final MetaClass targetType = inst.getInjector() == null
+//        ? inst.getEnclosingType() : inst.getInjector().getInjectedType();
+//
+//    Injector targetInjector
+//        = inst.isProxy() ?
+//        inst.getInjectionContext().getProxiedInjector(targetType, inst.getQualifyingMetadata())
+//        : inst.getInjectionContext().getQualifiedInjector(targetType, inst.getQualifyingMetadata());
+//
+//    if (!inst.isProxy()) {
+//      if (!targetInjector.isCreated()) {
+//        targetInjector = InjectUtil.getOrCreateProxy(inst.getInjectionContext(), inst.getEnclosingType(), inst.getQualifyingMetadata());
+//        if (targetInjector.isEnabled()) {
+//          targetInjector.getBeanInstance(inst);
+//        }
+//      }
+//    }
+//  }
+
   private void registerDestructorCallback(final InjectableInstance injectableInstance,
                                           final MetaMethod disposerMethod) {
 
@@ -305,6 +324,8 @@ public class AsyncProducerInjector extends AbstractAsyncInjector {
     if (!disposerMethod.isPublic()) {
       injectionContext.addExposedMethod(disposerMethod);
     }
+
+  //  ensureTargetInjectorAvailable(injectableInstance);
 
     final String producerClassCallbackVar = InjectUtil.getUniqueVarName();
     final MetaClass producerClassType = producerInjectableInstance.getTargetInjector().getInjectedType();

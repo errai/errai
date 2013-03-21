@@ -13,7 +13,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
   @NamedQuery(name="currentItems", query="SELECT i FROM TodoItem i WHERE i.archived=false ORDER BY i.text"),
   @NamedQuery(name="allItems", query="SELECT i FROM TodoItem i ORDER BY i.text")
 })
-public class TodoItem {
+public class  TodoItem {
 
   @Id @GeneratedValue
   private long id;

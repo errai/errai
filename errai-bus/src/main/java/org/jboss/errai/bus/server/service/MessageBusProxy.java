@@ -18,15 +18,14 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.messaging.MessageListener;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.BooleanRoutingRule;
 import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
@@ -48,7 +47,7 @@ public class MessageBusProxy implements ServerMessageBus {
   private Map<Message, Boolean> heldMessageFireListener = new LinkedHashMap<Message, Boolean>();
   private Multimap<String, MessageCallback> heldSubscribe = LinkedHashMultimap.create();
   private Multimap<String, MessageCallback> heldLocalSubscribe = LinkedHashMultimap.create();
-  private List<MessageListener> heldGlobalListener = new ArrayList<MessageListener>();
+//  private List<MessageListener> heldGlobalListener = new ArrayList<MessageListener>();
   private List<SubscribeListener> heldSubscribeListener = new ArrayList<SubscribeListener>();
   private List<UnsubscribeListener> heldUnsubscribeListener = new ArrayList<UnsubscribeListener>();
   private BusMonitor heldBusMonitor;
@@ -308,7 +307,7 @@ public class MessageBusProxy implements ServerMessageBus {
     this.heldLocalSubscribe = null;
     this.heldSubscribeListener = null;
     this.heldUnsubscribeListener = null;
-    this.heldGlobalListener = null;
+  //  this.heldGlobalListener = null;
     this.heldMessages = null;
     this.heldGlobalMessages = null;
     this.heldMessageFireListener = null;

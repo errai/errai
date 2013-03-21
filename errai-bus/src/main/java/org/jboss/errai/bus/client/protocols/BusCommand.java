@@ -20,7 +20,7 @@ package org.jboss.errai.bus.client.protocols;
  * Defines the standard protocol commands for interaction between federated {@link org.jboss.errai.bus.client.api.messaging.MessageBus}
  * instances.
  */
-public enum BusCommands {
+public enum BusCommand {
   /**
    * The first command sent from a client bus to a remote bus.  This message indicates the bus would like to
    * establish a connection to the queue.  There is no authentication associated with this command.  Any

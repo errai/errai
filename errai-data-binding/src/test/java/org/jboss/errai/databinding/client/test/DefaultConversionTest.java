@@ -2,6 +2,8 @@ package org.jboss.errai.databinding.client.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 
 import org.jboss.errai.databinding.client.api.Convert;
@@ -100,6 +102,34 @@ public class DefaultConversionTest {
     assertEquals("false", result);
   }
 
+  @Test
+  public void testBigDecimalToString() throws Exception {
+    BigDecimal bd = new BigDecimal(System.currentTimeMillis());
+    Object result = Convert.to(String.class, bd);
+    assertEquals(bd.toString(), result);
+  }
+  
+  @Test
+  public void testStringToBigDecimal() throws Exception {
+    BigDecimal bd = new BigDecimal(System.currentTimeMillis());
+    Object result = Convert.to(BigDecimal.class, bd.toString());
+    assertEquals(bd, result);
+  }
+  
+  @Test
+  public void testBigIntegerToString() throws Exception {
+    BigInteger bn = new BigInteger(String.valueOf(System.currentTimeMillis()));
+    Object result = Convert.to(String.class, bn);
+    assertEquals(bn.toString(), result);
+  }
+  
+  @Test
+  public void testStringToBigInteger() throws Exception {
+    BigInteger bn = new BigInteger(String.valueOf(System.currentTimeMillis()));
+    Object result = Convert.to(BigInteger.class, bn.toString());
+    assertEquals(bn, result);
+  }
+  
   // ignoring this test because converting dates leads to a GWT.create() call and this is not a GWTTestCase.
   @Ignore @Test
   public void testDateRoundTrip() throws Exception {

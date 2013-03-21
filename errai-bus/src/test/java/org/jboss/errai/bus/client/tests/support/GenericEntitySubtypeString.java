@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.metadata;
+package org.jboss.errai.bus.client.tests.support;
 
-/**
- * @author Mike Brock
- */
-abstract class ErraiAppAttribs {
-  static final String JUNIT_PACKAGE_ONLY = "org.junit_test_only";
+import org.jboss.errai.common.client.api.annotations.Portable;
+
+
+@Portable
+public class GenericEntitySubtypeString extends GenericEntity<String> {
+
 }

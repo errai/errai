@@ -19,7 +19,7 @@ import com.google.gwt.event.dom.client.*;
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
+public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
 
   /**
    * When an entry in this list is currently being dragged by the user, this field
@@ -27,11 +27,6 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
    */
   private DepartmentWidget draggingDepartmentWidget;
 
-  /**
-   * Storing the list of items to support drag and drop based reordering.
-   */
-  private List<Department> items;
-  
   @Override
   protected Class<DepartmentWidget> getItemWidgetType() {
     return DepartmentWidget.class;
@@ -57,14 +52,13 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
   @Override
   public void setItems(final List<Department> items) {
     super.setItems(items);
-    this.items = items;
   }
   
   /**
    * Adding drag and drop support to all rendered item widgets.
    */
   @Override
-  protected void onItemsRendered() {
+  protected void onItemsRendered(final List<Department> items) {
     // make all the widgets draggable
     for (int i = 0; i < getPanel().getWidgetCount(); i++) {
       final int widgetIndex = i;
@@ -74,7 +68,6 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
       dw.addDragStartHandler(new DragStartHandler() {
         @Override
         public void onDragStart(DragStartEvent event) {
-          System.out.println("Drag start: " + dw.getModel());
           draggingDepartmentWidget = dw;
           event.setData("text", dw.getModel().getName());
           event.getDataTransfer().setDragImage(dw.getElement(), 10, 10);
@@ -123,9 +116,6 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget>{
             addIndex--;
           }
           items.add(addIndex, draggingDepartmentWidget.getModel());
-
-          // finally, reboot all the widgets in the list
-          setItems(items);
         }
       }, DropEvent.getType());
     }

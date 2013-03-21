@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -116,13 +116,13 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
 
   @Override
   public void handleProtocolExtension(final Message message) {
-    switch (BusCommands.valueOf(message.getCommandType())) {
+    switch (BusCommand.valueOf(message.getCommandType())) {
       case WebsocketChannelVerify:
         LogUtil.log("received verification token for websocket connection");
 
         longPollingTransport
             .transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
-            .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.WebsocketChannelVerify)
+            .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.WebsocketChannelVerify)
             .copy(MessageParts.WebSocketToken, message)));
 
         break;
@@ -176,7 +176,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
   }
 
   private String getWebSocketNegotiationString() {
-    return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.Associate.name() + "\", \""
+    return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommand.Associate.name() + "\", \""
         + MessageParts.ConnectionSessionKey + "\":\"" + messageBus.getSessionId() + "\"" + ",\""
         + MessageParts.WebSocketToken + "\":\"" + webSocketToken + "\"}";
   }

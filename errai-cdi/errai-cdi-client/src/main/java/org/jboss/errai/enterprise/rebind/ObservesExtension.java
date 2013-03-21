@@ -83,7 +83,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       qualifierNames.remove(Any.class.getName());
     }
 
-    MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(parm.getType()));
+    final MetaClass callBackType = parameterizedAs(AbstractCDIEventCallback.class, typeParametersOf(parm.getType()));
 
     AnonymousClassStructureBuilder callBack = Stmt.newObject(callBackType).extend();
 
@@ -91,7 +91,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
     if (!qualifierNames.isEmpty()) {
       callBackBlock = callBack.initialize();
-      for (String qualifierName : qualifierNames) {
+      for (final String qualifierName : qualifierNames) {
         callBackBlock.append(Stmt.loadClassMember("qualifierSet").invoke("add", qualifierName));
       }
       callBack = callBackBlock.finish();
@@ -131,10 +131,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final BlockBuilder<AnonymousClassStructureBuilder> destroyMeth
         = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
         .publicOverridesMethod("destroy", Parameter.finalOf(instance.getEnclosingType(), "obj"))
-        .append(Stmt.loadVariable(subscrVar).invoke("remove"));
+        .append(Stmt.loadVariable(subscrVar).invoke("remove")).append(Stmt.codeComment("WEEEEE!"));
 
-
-    for (Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
+    for (final Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
       final String subscrHandle = InjectUtil.getUniqueVarName();
       statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
           .initializeWith(Stmt.invokeStatic(ErraiBus.class, "get").invoke("subscribe",

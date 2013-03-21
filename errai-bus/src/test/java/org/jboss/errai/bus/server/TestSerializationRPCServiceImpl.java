@@ -417,4 +417,14 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public EntityWithTypesUsingNestedParameterizedTypes testEntityWithTypesUsingNestedParamTypes(EntityWithTypesUsingNestedParameterizedTypes e) {
     return e;
   }
+
+  @Override
+  public GenericEntitySubtypeInteger testGenericEntitySubtypeInteger(GenericEntitySubtypeInteger e) {
+    return e;
+  }
+
+  @Override
+  public GenericEntitySubtypeString testGenericEntitySubtypeString(GenericEntitySubtypeString e) {
+    return e;
+  }
 }

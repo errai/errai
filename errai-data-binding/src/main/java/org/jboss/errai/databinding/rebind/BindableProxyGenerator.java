@@ -51,8 +51,9 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 
 /**
- * Generates a proxy for a {@link Bindable} type. A bindable proxy subclasses the bindable type and overrides all
- * non-final methods to trigger UI updates and fire property change events when required.
+ * Generates a proxy for a {@link Bindable} type. A bindable proxy subclasses the bindable type and
+ * overrides all non-final methods to trigger UI updates and fire property change events when
+ * required.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -116,8 +117,8 @@ public class BindableProxyGenerator {
   }
 
   /**
-   * Generates accessor methods for all Java bean properties plus the corresponding code for the method implementations
-   * of {@link HasProperties}.
+   * Generates accessor methods for all Java bean properties plus the corresponding code for the
+   * method implementations of {@link HasProperties}.
    */
   private void generateAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     BlockBuilder<?> getMethod = classBuilder.publicMethod(Object.class, "get",
@@ -138,8 +139,8 @@ public class BindableProxyGenerator {
   }
 
   /**
-   * Generates a getter method for the provided property plus the corresponding code for the implementation of
-   * {@link HasProperties#get(String)}.
+   * Generates a getter method for the provided property plus the corresponding code for the
+   * implementation of {@link HasProperties#get(String)}.
    */
   private void generateGetter(ClassStructureBuilder<?> classBuilder, String property,
       BlockBuilder<?> getMethod) {
@@ -159,8 +160,8 @@ public class BindableProxyGenerator {
   }
 
   /**
-   * Generates a setter method for the provided property plus the corresponding code for the implementation of
-   * {@link HasProperties#set(String, Object)}.
+   * Generates a setter method for the provided property plus the corresponding code for the
+   * implementation of {@link HasProperties#set(String, Object)}.
    */
   private void generateSetter(ClassStructureBuilder<?> classBuilder, String property, BlockBuilder<?> setMethod) {
     MetaMethod getterMethod = bindable.getBeanDescriptor().getReadMethodForProperty(property);
@@ -179,17 +180,16 @@ public class BindableProxyGenerator {
       MetaClass paramType = setterMethod.getParameters()[0].getType();
 
       // If the set method we are proxying returns a value, capture that value into a local variable
-      Statement callSetterOnTarget = null;
       Statement returnValueOfSetter = null;
       String returnValName = ensureSafeLocalVariableName("returnValueOfSetter", setterMethod);
+      Statement callSetterOnTarget =
+          target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
       if (!setterMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
         callSetterOnTarget =
             Stmt.declareFinalVariable(returnValName, setterMethod.getReturnType(), callSetterOnTarget);
         returnValueOfSetter = Stmt.nestedCall(Refs.get(returnValName)).returnValue();
       }
       else {
-        callSetterOnTarget =
-            target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
         returnValueOfSetter = EmptyStatement.INSTANCE;
       }
 
@@ -220,10 +220,10 @@ public class BindableProxyGenerator {
   }
 
   /**
-   * Generates proxy methods overriding public non-final methods that are not also property accessor methods. The
-   * purpose of this is to allow the proxies to react on model changes that happen outside setters of the bean. These
-   * methods will cause a comparison of all bound properties and trigger the appropriate UI updates and property change
-   * events.
+   * Generates proxy methods overriding public non-final methods that are not also property accessor
+   * methods. The purpose of this is to allow the proxies to react on model changes that happen
+   * outside setters of the bean. These methods will cause a comparison of all bound properties and
+   * trigger the appropriate UI updates and property change events.
    */
   private void generateNonAccessorMethods(ClassStructureBuilder<?> classBuilder) {
     for (MetaMethod method : bindable.getMethods()) {
@@ -242,7 +242,7 @@ public class BindableProxyGenerator {
         Statement returnValue = null;
         String returnValName = ensureSafeLocalVariableName("returnValue", method);
         if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
-          callOnTarget = Stmt.declareFinalVariable(returnValName, 
+          callOnTarget = Stmt.declareFinalVariable(returnValName,
               method.getReturnType(), target().invoke(method, parmVars.toArray()));
           returnValue = Stmt.nestedCall(Refs.get(returnValName)).returnValue();
         }
@@ -288,7 +288,7 @@ public class BindableProxyGenerator {
     }
     return fieldName;
   }
-  
+
   private String ensureSafeLocalVariableName(String name, MetaMethod method) {
     MetaParameter[] params = method.getParameters();
     if (params != null) {

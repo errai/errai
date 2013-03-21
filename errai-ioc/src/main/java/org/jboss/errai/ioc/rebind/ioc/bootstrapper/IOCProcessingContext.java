@@ -33,7 +33,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
-import org.mvel2.ast.AssertNode;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -188,14 +187,6 @@ public class IOCProcessingContext {
     return getBlockBuilder().append(statement);
   }
 
-//  public void globalInsertBefore(final Statement statement) {
-//    blockBuilder.get(0).insertBefore(statement);
-//  }
-//
-//  public BlockBuilder<?> globalAppend(final Statement statement) {
-//    return blockBuilder.get(0).append(statement);
-//  }
-
   public void pushBlockBuilder(final BlockBuilder<?> blockBuilder) {
     this.blockBuilder.push(blockBuilder);
   }
@@ -258,11 +249,13 @@ public class IOCProcessingContext {
   }
 
   public void handleDiscoveryOfType(final InjectionPoint injectionPoint) {
-    if (discovered.contains(injectionPoint.getType())) return;
+    if (discovered.contains(injectionPoint.getElementTypeOrMethodReturnType())) {
+      return;
+    }
     for (final TypeDiscoveryListener listener : typeDiscoveryListeners) {
       listener.onDiscovery(this, injectionPoint);
     }
-    discovered.add(injectionPoint.getType());
+    discovered.add(injectionPoint.getElementTypeOrMethodReturnType());
   }
 
   public Class<? extends BootstrapInjectionContext> getBootstrapContextClass() {

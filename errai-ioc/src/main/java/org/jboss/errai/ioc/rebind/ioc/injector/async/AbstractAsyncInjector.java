@@ -4,7 +4,6 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
@@ -45,7 +44,7 @@ public abstract class AbstractAsyncInjector extends AbstractInjector {
         }
       });
 
-      for (final RegistrationHook hook : registrationHooks) {
+      for (final RegistrationHook hook : getRegistrationHooks()) {
         hook.onRegister(context, valueRef);
       }
     }

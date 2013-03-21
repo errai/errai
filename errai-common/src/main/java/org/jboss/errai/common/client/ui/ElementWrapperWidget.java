@@ -13,33 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ui.shared;
+package org.jboss.errai.common.client.ui;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Used to merge a {@link Template} onto a {@link Composite} component.
+ * A widget that wraps an {@link Element} to support the registration of event listeners and data
+ * binding.
  * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ElementWrapperWidget extends Widget implements HasHTML {
+  private static Map<Element, ElementWrapperWidget> widgetMap = new HashMap<Element, ElementWrapperWidget>();
 
-  private EventListener listener;
-
-  public ElementWrapperWidget(Element wrapped) {
+  private ElementWrapperWidget(Element wrapped) {
     if (wrapped == null) {
       throw new IllegalArgumentException(
-              "Element to be wrapped must not be null - Did you forget to initialize or @Inject a @DataField?");
+              "Element to be wrapped must not be null - Did you forget to initialize or @Inject a UI field?");
     }
     this.setElement(wrapped);
     DOM.setEventListener(this.getElement(), this);
   }
+
+  public static ElementWrapperWidget getWidget(Element element) {
+    ElementWrapperWidget widget = widgetMap.get(element);
+    if (widget == null) {
+      widget = new ElementWrapperWidget(element);
+      widgetMap.put(element, widget);
+    }
+    return widget;
+  }
   
+  public static ElementWrapperWidget removeWidget(Element element) {
+    return widgetMap.remove(element);
+  }
+  
+  public static ElementWrapperWidget removeWidget(ElementWrapperWidget widget) {
+    return widgetMap.remove(widget.getElement());
+  }
+
   @Override
   public String getText() {
     return getElement().getInnerText();
@@ -58,14 +77,6 @@ public class ElementWrapperWidget extends Widget implements HasHTML {
   @Override
   public void setHTML(String html) {
     getElement().setInnerHTML(html);
-  }
-
-  public void setEventListener(EventListener listener) {
-    this.listener = listener;
-  }
-
-  public void setEventsToSink(int eventsToSink) {
-    sinkEvents(eventsToSink);
   }
 
 }

@@ -16,11 +16,6 @@
 
 package org.jboss.errai.databinding.rebind;
 
-import com.google.gwt.core.ext.Generator;
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -34,15 +29,11 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.config.rebind.AsyncCodeGenerator;
-import org.jboss.errai.config.rebind.AsyncGenerationJob;
-import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
-import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
@@ -54,18 +45,9 @@ import org.jboss.errai.databinding.client.api.InitialState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
 
 /**
  * Generates the proxy loader for {@link Bindable}s.
@@ -73,81 +55,24 @@ import java.util.concurrent.Future;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @GenerateAsync(BindableProxyLoader.class)
-public class BindableProxyLoaderGenerator extends Generator implements AsyncCodeGenerator {
+public class BindableProxyLoaderGenerator extends AbstractAsyncGenerator {
   private final Logger log = LoggerFactory.getLogger(BindableProxyLoaderGenerator.class);
+  private final String packageName = BindableProxyLoader.class.getPackage().getName();
+  private final String className = BindableProxyLoader.class.getSimpleName() + "Impl";
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, String typeName)
       throws UnableToCompleteException {
 
-    String packageName = null;
-    String className = null;
-
-    try {
-
-      JClassType classType = context.getTypeOracle().getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
-
-      PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-      // If code has not already been generated.
-      if (printWriter != null) {
-        final Future<String> future = AsyncGenerationJob.createBuilder()
-            .generatorContext(context)
-            .treeLogger(logger)
-            .interfaceType(BindableProxyLoader.class)
-            .runIfStarting(new Runnable() {
-              @Override
-              public void run() {
-                GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-              }
-            })
-            .build().submit();
-
-        printWriter.append(future.get());
-        context.commit(logger, printWriter);
-      }
-    }
-    catch (Throwable e) {
-      logger.log(TreeLogger.ERROR, "Error generating data-binding extensions", e);
-    }
-
-    return packageName + "." + className;
+    return startAsyncGeneratorsAndWaitFor(BindableProxyLoader.class, context, logger, packageName, className);
   }
-
-  private String generate(final GeneratorContext context, final String className) {
-    final File fileCacheDir = RebindUtils.getErraiCacheDir();
-    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-
-    log.info("generating bindable proxy loader class.");
-    final String gen = generate(context);
-    RebindUtils.writeStringToFile(cacheFile, gen);
-
-    return gen;
-  }
-
 
   @Override
-  public Future<String> generateAsync(TreeLogger logger, final GeneratorContext context) {
-    return ThreadUtil.submit(new Callable<String>() {
-      @Override
-      public String call() throws Exception {
-        return generate(context);
-      }
-    });
-  }
-
-  private String generate(final GeneratorContext context) {
+  protected String generate(final TreeLogger logger, final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
 
-    Collection<MetaClass> annotatedBindableTypes =
-        ClassScanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context));
-    
-    Set<MetaClass> bindableTypes = new HashSet<MetaClass>(annotatedBindableTypes);
-    bindableTypes.addAll(getBindableTypesFromErraiAppProperties());
-
-    for (MetaClass bindable : bindableTypes) {
+    for (MetaClass bindable : DataBindingUtil.getAllBindableTypes(context)) {
       if (bindable.isFinal()) {
         throw new RuntimeException("@Bindable type cannot be final: " + bindable.getFullyQualifiedName());
       }
@@ -184,52 +109,8 @@ public class BindableProxyLoaderGenerator extends Generator implements AsyncCode
   }
 
   /**
-   * Reads all bindable types from all ErraiApp.properties files on the classpath.
-   * 
-   * @return a set of meta classes representing the configured bindable types.
+   * Scans for and registers global default converters.
    */
-  private Set<MetaClass> getBindableTypesFromErraiAppProperties() {
-    final Set<MetaClass> bindableTypes = new HashSet<MetaClass>();
-
-    final Collection<URL> erraiAppProperties = EnvUtil.getErraiAppProperties();
-    for (URL url : erraiAppProperties) {
-      InputStream inputStream = null;
-      try {
-        log.debug("Checking " + url.getFile() + " for bindable types...");
-        inputStream = url.openStream();
-
-        final ResourceBundle props = new PropertyResourceBundle(inputStream);
-        for (final String key : props.keySet()) {
-          if (key.equals("errai.ui.bindableTypes")) {
-            for (final String s : props.getString(key).split(" ")) {
-              try {
-                bindableTypes.add(MetaClassFactory.get(s.trim()));
-              }
-              catch (Exception e) {
-                throw new RuntimeException("Could not find class defined in ErraiApp.properties as bindable type: " + s);
-              }
-            }
-            break;
-          }
-        }
-      }
-      catch (IOException e) {
-        throw new RuntimeException("Error reading ErraiApp.properties", e);
-      }
-      finally {
-        if (inputStream != null) {
-          try {
-            inputStream.close();
-          }
-          catch (IOException e) {
-            log.warn("Failed to close input stream", e);
-          }
-        }
-      }
-    }
-    return bindableTypes;
-  }
-
   private void generateDefaultConverterRegistrations(final MethodBlockBuilder<?> loadProxies,
       final GeneratorContext context) {
 

@@ -229,13 +229,21 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
             statusCode = response.getStatusCode();
 
             switch (statusCode) {
-              case 0:
-              case 1:
-              case 400: // happens when JBossAS is going down
               case 401:
                 if (System.currentTimeMillis() - startTime > 2000) {
                   undeliveredMessages.removeAll(toSend);
                 }
+                try {
+                  if (BusToolsCli.decodeToCallback(response.getText(), messageCallback)) {
+                    break;
+                  }
+                }
+                catch (Throwable e) {
+                   // fall through.
+                }
+              case 0:
+              case 1:
+              case 400: // happens when JBossAS is going down
               case 404: // happens after errai app is undeployed
               case 408: // request timeout--probably worth retrying
               case 500: // we expect this may happen during restart of some non-JBoss servers
@@ -624,13 +632,13 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
 
   private void notifyConnected() {
     if (connectedTime == -1) {
-       connectedTime = System.currentTimeMillis();
-     }
+      connectedTime = System.currentTimeMillis();
+    }
 
-     if (messageBus.getState() == BusState.CONNECTION_INTERRUPTED)
-       messageBus.setState(BusState.CONNECTED);
+    if (messageBus.getState() == BusState.CONNECTION_INTERRUPTED)
+      messageBus.setState(BusState.CONNECTED);
 
-     rxRetries = 0;
+    rxRetries = 0;
   }
 
   private void notifyDisconnected() {

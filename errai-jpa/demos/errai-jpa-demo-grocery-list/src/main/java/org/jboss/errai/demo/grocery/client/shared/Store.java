@@ -1,21 +1,14 @@
 package org.jboss.errai.demo.grocery.client.shared;
 
+import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.demo.grocery.client.local.producer.StoreListProducer;
+
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-
-import org.jboss.errai.databinding.client.api.Bindable;
-import org.jboss.errai.demo.grocery.client.local.StoresPage;
-
 @Bindable @Entity
-@EntityListeners(StoresPage.StoreListener.class)
+@EntityListeners(StoreListProducer.StoreListener.class)
 @NamedQuery(name="allStores", query="SELECT s FROM Store s ORDER BY s.name")
 public class Store {
 
@@ -27,6 +20,8 @@ public class Store {
 
   private double latitude;
   private double longitude;
+
+  private double radius;
 
   @OneToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE})
   private List<Department> departments = new ArrayList<Department>();
@@ -63,6 +58,14 @@ public class Store {
     this.longitude = longitude;
   }
 
+  public double getRadius() {
+    return radius;
+  }
+
+  public void setRadius(double radius) {
+    this.radius = radius;
+  }
+
   public List<Department> getDepartments() {
     return departments;
   }
@@ -77,7 +80,14 @@ public class Store {
 
   @Override
   public String toString() {
-    return "Store [id=" + id + ", name=" + name + ", address=" + address + ", latitude=" + latitude + ", longitude="
-            + longitude + ", departments=" + departments + "]";
+    return "Store{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", address='" + address + '\'' +
+        ", latitude=" + latitude +
+        ", longitude=" + longitude +
+        ", radius=" + radius +
+        ", departments=" + departments +
+        '}';
   }
 }

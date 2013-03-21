@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
+import static org.jboss.errai.bus.client.protocols.BusCommand.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.BusCommand.RemoteUnsubscribe;
 import static org.jboss.errai.bus.client.util.BusToolsCli.isRemoteCommunicationEnabled;
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
@@ -50,7 +50,7 @@ import org.jboss.errai.bus.client.framework.transports.HttpPollingHandler;
 import org.jboss.errai.bus.client.framework.transports.SSEHandler;
 import org.jboss.errai.bus.client.framework.transports.TransportHandler;
 import org.jboss.errai.bus.client.framework.transports.WebsocketHandler;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.client.util.BusToolsCli;
 import org.jboss.errai.bus.client.util.ManagementConsole;
 import org.jboss.errai.common.client.api.Assert;
@@ -234,11 +234,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         @Override
         @SuppressWarnings({"unchecked"})
         public void callback(final Message message) {
-          BusCommands busCommands = BusCommands.valueOf(message.getCommandType());
-          if (busCommands == null) {
-            busCommands = BusCommands.Unknown;
+          BusCommand busCommand;
+          if (message.getCommandType() == null) {
+            busCommand = BusCommand.Unknown;
           }
-          switch (busCommands) {
+          else {
+            busCommand = BusCommand.valueOf(message.getCommandType());
+          }
+          if (busCommand == null) {
+            busCommand = BusCommand.Unknown;
+          }
+
+          switch (busCommand) {
             case RemoteSubscribe:
               if (message.hasPart(MessageParts.SubjectsList)) {
                 LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
@@ -257,7 +264,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               break;
 
             case FinishAssociation:
-              LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
+              LogUtil.log("received handshake response from server. preparing to bring up the federation");
 
               loadRpcProxies();
               processCapabilities(message);
@@ -276,7 +283,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 deferredSubscriptions.clear();
 
                 encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                    .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.RemoteSubscribe)
+                    .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.RemoteSubscribe)
                     .set(PriorityProcessing, "1")
                     .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
               }
@@ -292,21 +299,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               break;
 
             case SessionExpired:
-              switch (getState()) {
-                case CONNECTED:
-                case CONNECTING:
-                  LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
+              LogUtil.log("session expired while in state " + getState() + ": attempting to reset ...");
 
-                  // try to reconnect
-                  InitVotes.reset();
-                  stop(false);
-                  init();
-                  break;
-
-                case LOCAL_ONLY:
-                  // do nothing
-                  break;
-              }
+              // try to reconnect
+              InitVotes.reset();
+              stop(false);
+              init();
 
               break;
 
@@ -366,7 +364,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     setState(BusState.CONNECTING);
 
-    LogUtil.log("sending initial handshake to remote bus");
+    LogUtil.log("sending handshake message to remote bus");
 
     for (final Runnable deferredSubscription : deferredSubscriptions) {
       deferredSubscription.run();
@@ -379,13 +377,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       properties.put("wait", "1");
 
       transportHandler.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
-          .command(BusCommands.Associate)
+          .command(BusCommand.Associate)
           .set(ToSubject, "ServerBus")
           .set(PriorityProcessing, "1")
           .set(MessageParts.RemoteServices, getAdvertisableSubjects())
           .setResource(TransportHandler.EXTRA_URI_PARMS_RESOURCE, properties)));
 
-       transportHandler.start();
+      transportHandler.start();
     }
     else {
       final String failOnConnectAfterMs = properties.get(ChaosMonkey.FAIL_ON_CONNECT_AFTER_MS);
@@ -479,7 +477,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     // Optionally tell the server we're going away (this causes two POST requests)
     if (sendDisconnect && isRemoteCommunicationEnabled()) {
       encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-          .toSubject(BuiltInServices.ServerBus.name()).command(BusCommands.Disconnect)
+          .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.Disconnect)
           .set(MessageParts.PriorityProcessing, "1"));
     }
 
@@ -859,7 +857,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         deliveredMessages = false;
         for (final Message message : new ArrayList<Message>(deferredMessages)) {
           if (shadowSubscriptions.containsKey(message.getSubject())) {
-            System.out.println("DELIVER: " + deferredMessages);
             deferredMessages.remove(message);
             deliveredMessages = true;
             deliverToSubscriptions(shadowSubscriptions, message.getSubject(), message);
@@ -1088,8 +1085,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     switch (state) {
       case UNINITIALIZED:
-        break;
-
       case LOCAL_ONLY:
         if (newState == BusState.CONNECTING) {
           events.add(BusEventType.ASSOCIATING);

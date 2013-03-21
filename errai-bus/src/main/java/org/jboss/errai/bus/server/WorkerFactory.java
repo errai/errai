@@ -16,19 +16,19 @@
 
 package org.jboss.errai.bus.server;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
-
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * The <tt>WorkerFactory</tt> maintains a pool of <tt>Worker</tt>s, and takes care of running and terminating them
@@ -50,20 +50,22 @@ public class WorkerFactory {
   private BlockingQueue<Message> messages;
 
   private int poolSize = DEFAULT_THREAD_POOL_SIZE;
-  private int deliveryQueueSize = DEFAULT_DELIVERY_QUEUE_SIZE;
   private long workerTimeout = Boolean.getBoolean("org.jboss.errai.debugmode") ? seconds(360) : seconds(30);
 
   private Logger log = LoggerFactory.getLogger(this.getClass());
+
 
   /**
    * Initializes the worker factory with a new thread group, service, all the properties, messages and workers
    *
    * @param svc - the <tt>ErraiService</tt> that is to be associated to this factory of workers
    */
-  public WorkerFactory(ErraiService svc) {
+  public WorkerFactory(final ErraiService svc) {
     this.svc = svc;
 
     ErraiServiceConfigurator cfg = svc.getConfiguration();
+
+    int deliveryQueueSize = DEFAULT_DELIVERY_QUEUE_SIZE;
 
     if (cfg.hasProperty(CONFIG_ASYNC_DELIVERY_QUEUE_SIZE)) {
       deliveryQueueSize = Integer.parseInt(cfg.getProperty(CONFIG_ASYNC_DELIVERY_QUEUE_SIZE));

@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
@@ -389,9 +390,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     else {
       for (final Annotation a : root.getAnnotations()) {
-         if (_findMetaAnnotation(a.annotationType(), annotation)) {
-           return true;
-         }
+        if (_findMetaAnnotation(a.annotationType(), annotation)) {
+          return true;
+        }
       }
     }
     return false;
@@ -424,6 +425,23 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
             methods.add(m);
           }
         }
+      }
+      scanTarget = scanTarget.getSuperClass();
+    }
+
+    return methods;
+  }
+
+  @Override
+  public List<MetaParameter> getParametersAnnotatedWith(Class<? extends Annotation> annotation) {
+    final List<MetaParameter> methods = new ArrayList<MetaParameter>();
+    MetaClass scanTarget = this;
+    while (scanTarget != null) {
+      for (final MetaConstructor m : scanTarget.getDeclaredConstructors()) {
+        methods.addAll(m.getParametersAnnotatedWith(annotation));
+      }
+      for (final MetaMethod m : scanTarget.getDeclaredMethods()) {
+        methods.addAll(m.getParametersAnnotatedWith(annotation));
       }
       scanTarget = scanTarget.getSuperClass();
     }
@@ -590,7 +608,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return _unboxedCache;
     return _unboxedCache = GenUtil.getUnboxedFromWrapper(this);
   }
-
 
 
   @Override

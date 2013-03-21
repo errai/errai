@@ -78,6 +78,7 @@ public class MappingContextSingleton {
       }
     }
     catch (Throwable t) {
+      t.printStackTrace();
       throw new RuntimeException("critical problem loading the marshallers", t);
     }
 

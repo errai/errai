@@ -29,7 +29,7 @@ import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.Subscription;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.io.OutputStreamWriteAdapter;
@@ -123,7 +123,7 @@ public class BusTestClient implements MessageBus {
   public void connect() {
     remoteBus.sendGlobal(CommandMessage.createWithParts(new HashMap<String, Object>())
         .toSubject("ServerBus")
-        .command(BusCommands.Associate)
+        .command(BusCommand.Associate)
         .set(MessageParts.RemoteServices, getAdvertisableSubjects())
         .set(MessageParts.PriorityProcessing, "1")
         .setResource("Session", serverSession)
@@ -164,7 +164,7 @@ public class BusTestClient implements MessageBus {
 
     final Message message = CommandMessage.createWithParts(new HashMap<String, Object>())
         .toSubject("ServerBus")
-        .command(BusCommands.RemoteSubscribe)
+        .command(BusCommand.RemoteSubscribe)
         .set(MessageParts.PriorityProcessing, "1")
         .set(MessageParts.Subject, subject);
 
@@ -196,7 +196,7 @@ public class BusTestClient implements MessageBus {
 
     final Message message = CommandMessage.createWithParts(new HashMap<String, Object>())
         .toSubject("ServerBus")
-        .command(BusCommands.RemoteUnsubscribe)
+        .command(BusCommand.RemoteUnsubscribe)
         .set(MessageParts.Subject, subject);
 
     sendToRemote(message);
@@ -266,7 +266,7 @@ public class BusTestClient implements MessageBus {
     @Override
     @SuppressWarnings({"unchecked"})
     public void callback(final Message message) {
-      switch (BusCommands.valueOf(message.getCommandType())) {
+      switch (BusCommand.valueOf(message.getCommandType())) {
         case RemoteSubscribe:
           if (message.hasPart(MessageParts.SubjectsList)) {
             for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {

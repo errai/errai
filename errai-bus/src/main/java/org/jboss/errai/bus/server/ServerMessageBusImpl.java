@@ -44,7 +44,7 @@ import org.jboss.errai.bus.client.api.BusMonitor;
 import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
-import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueCloseEvent;
@@ -224,7 +224,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           final QueueSession session = getSession(message);
           MessageQueueImpl queue = (MessageQueueImpl) messageQueues.get(session);
 
-          switch (BusCommands.valueOf(message.getCommandType())) {
+          switch (BusCommand.valueOf(message.getCommandType())) {
             case Heartbeat:
               if (queue != null) {
                 queue.heartBeat();
@@ -306,7 +306,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
               final Message msg = ConversationMessage.create(message)
                   .toSubject(BuiltInServices.ClientBus.name())
-                  .command(BusCommands.FinishAssociation);
+                  .command(BusCommand.FinishAssociation);
 
               final StringBuilder subjects = new StringBuilder();
               for (final String s : new HashSet<String>(globalSubscriptions)) {
@@ -381,7 +381,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
                   createConversation(message)
                       .toSubject(BuiltInServices.ClientBus.name())
-                      .command(BusCommands.WebsocketChannelOpen)
+                      .command(BusCommand.WebsocketChannelOpen)
                       .with(MessageParts.WebSocketToken, reconnectionToken)
                       .done().sendNowWith(ServerMessageBusImpl.this, false);
                 }
@@ -405,7 +405,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         MessageBuilder.createMessage()
             .toSubject(BuiltInServices.ClientBus.name())
-            .command(BusCommands.RemoteSubscribe)
+            .command(BusCommand.RemoteSubscribe)
             .with(MessageParts.Subject, event.getSubject())
             .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
 
@@ -420,7 +420,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         MessageBuilder.createMessage()
             .toSubject(BuiltInServices.ClientBus.name())
-            .command(BusCommands.RemoteUnsubscribe)
+            .command(BusCommand.RemoteUnsubscribe)
             .with(MessageParts.Subject, event.getSubject())
             .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
       }

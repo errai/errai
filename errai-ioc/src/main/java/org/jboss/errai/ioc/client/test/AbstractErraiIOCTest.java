@@ -31,5 +31,10 @@ public abstract class AbstractErraiIOCTest extends GWTTestCase {
     new IOCBeanManagerLifecycle().resetBeanManager();
     new Container().bootstrapContainer();
   }
+
+  protected void $(Runnable runnable) {
+    delayTestFinish(30000);
+    Container.$(runnable);
+  }
 }
 

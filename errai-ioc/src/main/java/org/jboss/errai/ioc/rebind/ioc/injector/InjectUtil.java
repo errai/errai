@@ -23,13 +23,9 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -68,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,9 +111,10 @@ public class InjectUtil {
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          processingContext.append(
-              Stmt.declareFinalVariable(injector.getInstanceVarName(), type, Stmt.newObject(type, parameterStatements))
+          final Statement objectInstantiate = Stmt.newObject(type, parameterStatements);
 
+          processingContext.append(
+              Stmt.declareFinalVariable(injector.getInstanceVarName(), type, objectInstantiate)
           );
           callback.beanConstructed(ConstructionType.CONSTRUCTOR);
 
@@ -141,7 +137,6 @@ public class InjectUtil {
           if (injector.isSingleton() && injector.isCreated()) return;
 
           final IOCProcessingContext processingContext = ctx.getProcessingContext();
-
           processingContext.append(
               Stmt.declareVariable(type)
                   .asFinal()
@@ -160,6 +155,7 @@ public class InjectUtil {
       };
     }
   }
+
 
   private static void handleInjectionTasks(final InjectionContext ctx,
                                            final List<InjectionTask> tasks) {
@@ -468,7 +464,6 @@ public class InjectUtil {
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
-
       /**
        * Special handling for cycles. If two beans directly depend on each other, we shimmy in a call to the
        * binding reference to check the context for the instance to avoid a hanging duplicate reference. It is to
@@ -489,7 +484,6 @@ public class InjectUtil {
       try {
         if (ctx.isInjectorRegistered(clazz, qualifyingMetadata)) {
           final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
-
           if (inj.isProvider()) {
             if (inj.isStatic()) {
               return inj.getBeanInstance(injectableInstance);
@@ -734,7 +728,7 @@ public class InjectUtil {
       case Parameter:
         return getQualifiersFromAnnotations(injectableInstance.getParm().getAnnotations());
       case Type:
-        return getQualifiersFromAnnotations(injectableInstance.getType().getAnnotations());
+        return getQualifiersFromAnnotations(injectableInstance.getEnclosingType().getAnnotations());
       default:
         return Collections.emptyList();
     }

@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.injector.basic;
 import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.load;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.getConstructionStrategy;
@@ -34,7 +33,6 @@ import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 import org.jboss.errai.ioc.client.container.BeanProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
@@ -154,11 +152,19 @@ public class TypeInjector extends AbstractInjector {
       }
     });
 
+
+    callbackBuilder.appendAll(getAddToEndStatements());
+
      /*
      return the instance of the bean from the creational callback.
      */
-    callbackBuilder.append(loadVariable(instanceVarName).returnValue());
-
+    if (isProxied()) {
+      callbackBuilder.appendAll(createProxyDeclaration(injectContext));
+      callbackBuilder.append(loadVariable(getProxyInstanceVarName()).returnValue());
+    }
+    else {
+      callbackBuilder.append(loadVariable(instanceVarName).returnValue());
+    }
      /* pop the block builder of the stack now that we're done wiring. */
     ctx.popBlockBuilder();
 

@@ -16,9 +16,6 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import java.io.File;
-import java.io.PrintWriter;
-
 import javax.ws.rs.Path;
 
 import org.jboss.errai.codegen.InnerClass;
@@ -28,76 +25,43 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
+import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.core.ext.typeinfo.JClassType;
 
 /**
  * Generates the JAX-RS proxy loader.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class JaxrsProxyLoaderGenerator extends Generator {
-  private final Logger log = LoggerFactory.getLogger(JaxrsProxyLoaderGenerator.class);
-  
+@GenerateAsync(JaxrsProxyLoader.class)
+public class JaxrsProxyLoaderGenerator extends AbstractAsyncGenerator {
   private final String packageName = JaxrsProxyLoader.class.getPackage().getName();
   private final String className = JaxrsProxyLoader.class.getSimpleName() + "Impl";
 
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName)
+  public String generate(final TreeLogger logger, final GeneratorContext context, String typeName)
       throws UnableToCompleteException {
-    
-    try {
-      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
-      JClassType classType = context.getTypeOracle().getType(typeName);
 
-      if (classType.isInterface() == null) {
-        logger.log(TreeLogger.ERROR, typeName + " is not an interface.");
-        throw new RuntimeException("invalid type: not an interface");
-      }
-
-      PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-      // If code has not already been generated.
-      if (printWriter != null) {
-        printWriter.append(generate(context, className));
-        context.commit(logger, printWriter);
-      }
-    }
-    catch (Throwable e) {
-      logger.log(TreeLogger.ERROR, "Error generating JAX-RS extensions", e);
-    }
-
-    return packageName + "." + className;
+    return startAsyncGeneratorsAndWaitFor(JaxrsProxyLoader.class, context, logger, packageName, className);
   }
-  
-  private String generate(final GeneratorContext context, final String className) {
-    File fileCacheDir = RebindUtils.getErraiCacheDir();
-    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-    
-    log.info("generating jax-rs proxy loader class.");
-    String gen = generate(context);
-    RebindUtils.writeStringToFile(cacheFile, gen);
-    
-    return gen;
-  }
-  
-  private String generate(final GeneratorContext context) {
+
+  @Override
+  protected String generate(final TreeLogger logger, final GeneratorContext context) {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
-    
-    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Path.class, RebindUtils.findTranslatablePackages(context))) {
+
+    for (MetaClass remote : ClassScanner.getTypesAnnotatedWith(Path.class, RebindUtils
+        .findTranslatablePackages(context))) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
@@ -105,12 +69,12 @@ public class JaxrsProxyLoaderGenerator extends Generator {
 
         // create the proxy provider
         Statement proxyProvider = ObjectBuilder.newInstanceOf(ProxyProvider.class)
-          .extend()
-          .publicOverridesMethod("getProxy")
-          .append(Stmt.nestedCall(Stmt.newObject(remoteProxy.getClassDefinition())).returnValue())
-          .finish()
-          .finish();
-        
+            .extend()
+            .publicOverridesMethod("getProxy")
+            .append(Stmt.nestedCall(Stmt.newObject(remoteProxy.getClassDefinition())).returnValue())
+            .finish()
+            .finish();
+
         // create the call that registers the proxy provided for the generated proxy
         loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", remote, proxyProvider));
       }

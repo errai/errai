@@ -45,10 +45,14 @@ import java.util.Map;
 public class BusToolsCli {
   private static boolean autoDemarshall = true;
 
-  public static void decodeToCallback(final String jsonString, final MessageCallback callback) {
-    for (final Message message : decodePayload(jsonString))  {
+  public static boolean decodeToCallback(final String jsonString, final MessageCallback callback) {
+    final List<Message> messages = decodePayload(jsonString);
+
+    for (final Message message : messages)  {
       callback.callback(message);
     }
+
+    return messages.size() > 0;
   }
 
   public static List<Message> decodePayload(final String jsonString) {

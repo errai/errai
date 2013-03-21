@@ -16,30 +16,18 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JArrayType;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassCache;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.rebind.EnvUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -124,83 +112,5 @@ public class GWTUtil {
           " (which is a " + (t == null ? null : t.getClass()) + ")");
     }
   }
-
-  public static class GWTTypeOracleCacheStore implements CacheStore {
-    volatile GeneratorContext populatedFrom;
-
-    @Override
-    public void clear() {
-      populatedFrom = null;
-    }
-  }
-
-
-  /**
-   * Erases the {@link MetaClassFactory} cache, then populates it with types
-   * discovered via GWT's TypeOracle. The reason for the initial flush of the
-   * MetaClassFactory is to support hot redeploy in Dev Mode. The reason for doing
-   * this operation at all is so that the overridden class definitions
-   * (super-source classes) are used in preference to the Java reflection based
-   * class definitions.
-   *
-   * @param context
-   *     The GeneratorContext supplied by the GWT compiler. Not null.
-   * @param logger
-   *     The TreeLogger supplied by the GWT compiler. Not null.
-   */
-  public synchronized static void populateMetaClassFactoryFromTypeOracle(final GeneratorContext context,
-                                                                         final TreeLogger logger) {
-
-
-    final GWTTypeOracleCacheStore tOCache = CacheUtil.getCache(GWTTypeOracleCacheStore.class);
-
-    // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
-    // changing classes. Therefore, do a NOOP after the first successful call.
-    if (context.equals(tOCache.populatedFrom)) {
-      return;
-    }
-
-    final TypeOracle typeOracle = context.getTypeOracle();
-    final MetaClassCache cache = MetaClassFactory.getMetaClassCache();
-
-    // Clearing the LiteralFactory cache resolved https://issues.jboss.org/browse/ERRAI-456
-    if (typeOracle != null) {
-      final Map<String, MetaClass> classesToPush = new HashMap<String, MetaClass>(typeOracle.getTypes().length);
-      final Set<String> translatable = new HashSet<String>(RebindUtils.findTranslatablePackages(context));
-      translatable.remove("java.lang");
-      translatable.remove("java.lang.annotation");
-
-      for (final JClassType type : typeOracle.getTypes()) {
-        if (!translatable.contains(type.getPackage().getName())) {
- //         logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Skipping non-translatable " + type.getQualifiedSourceName());
-          continue;
-        }
-
-        if (type.isAnnotation() != null || type.getQualifiedSourceName().equals("java.lang.annotation.Annotation")) {
-   //       logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
-
-          if (!MetaClassFactory.canLoadClass(type.getQualifiedBinaryName())) {
-            throw new RuntimeException("a new annotation has been introduced (" + type.getQualifiedSourceName() + "); "
-                + "you cannot currently introduce new annotations in devmode. Please restart.");
-          }
-
-
-          final MetaClass clazz = JavaReflectionClass
-              .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName()));
-
-          classesToPush.put(clazz.getFullyQualifiedName(), clazz);
-        }
-        else {
-          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
-          final MetaClass clazz = GWTClass.newInstance(typeOracle, type);
-          classesToPush.put(clazz.getFullyQualifiedName(), clazz);
-        }
-      }
-
-      cache.pushCacheAll(classesToPush);
-    }
-    tOCache.populatedFrom = context;
-
-    CacheUtil.getCache(EnvUtil.EnvironmentConfigCache.class).clear();
-  }
+  
 }

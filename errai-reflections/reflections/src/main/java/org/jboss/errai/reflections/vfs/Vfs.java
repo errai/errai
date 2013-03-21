@@ -118,15 +118,14 @@ public abstract class Vfs {
           return type.createDir(url);
         }
         catch (Exception e) {
-          throw new ReflectionsException("could not create Dir using " + type.getClass().getName() + " from url " + url.toExternalForm());
+          throw new ReflectionsException("could not create Dir using " + type.getClass().getName() + " from url " + url.toExternalForm(), e);
         }
       }
     }
 
     throw new ReflectionsException("could not create Vfs.Dir from url, no matching UrlType was found [" + url.toExternalForm() + "]\n" +
-            "either use fromURL(final URL url, final List<UrlType> urlTypes) or " +
-            "use the static setDefaultURLTypes(final List<UrlType> urlTypes) or addDefaultURLTypes(UrlType urlType) " +
-            "with your specialized UrlType.");
+            "Available types: " + urlTypes + "\n" +
+            "Do you need to add app server specific support to your deployment? (For example, errai-jboss-as-support for AS7)");
   }
 
   /**

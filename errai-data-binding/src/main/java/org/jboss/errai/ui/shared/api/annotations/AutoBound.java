@@ -23,20 +23,15 @@ import java.lang.annotation.Target;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 
-import com.google.gwt.user.client.ui.Composite;
-
 /**
- * This annotation may only be used in subclasses of {@link Composite} that have been annotated with
- * {@link Templated}, or in a super-class of said {@link Composite} types. It is only meaningful on
- * an injected {@link DataBinder} field or constructor/method parameter.
+ * This annotation is only meaningful on a {@link DataBinder} field or constructor/method parameter.
  * <p>
- * Indicates that the annotated {@link DataBinder} is used to automatically bind all enclosing
- * {@link DataField}s to properties of the corresponding data model (the model instance associated
- * with the data binder instance). The enclosing data fields are all fields annotated with both
- * {@link Bound} and {@link DataField} of the class that defines the {@link DataBinder} and all its
- * super classes.
+ * It indicates that the annotated {@link DataBinder} is used to automatically bind all
+ * corresponding widgets to properties of a data model (the model instance associated with the data
+ * binder instance). The widgets are inferred from all enclosing fields and methods annotated with
+ * {@link Bound} of the class that defines the {@link DataBinder} and all its super classes.
  * <p>
- * There can only be one auto bound {@link DataBinder} per {@link Templated} class.
+ * There can only be one auto bound {@link DataBinder} per class.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

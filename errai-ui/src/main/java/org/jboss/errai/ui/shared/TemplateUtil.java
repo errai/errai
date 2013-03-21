@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
@@ -168,7 +170,7 @@ public final class TemplateUtil {
 
   public static <T extends EventHandler> Widget setupPlainElementEventHandler(Composite component, Element element,
           T handler, com.google.gwt.event.dom.client.DomEvent.Type<T> type) {
-    ElementWrapperWidget widget = new ElementWrapperWidget(element);
+    ElementWrapperWidget widget = ElementWrapperWidget.getWidget(element);
     widget.addDomHandler(handler, type);
     // TODO add to Composite as child.
     return widget;

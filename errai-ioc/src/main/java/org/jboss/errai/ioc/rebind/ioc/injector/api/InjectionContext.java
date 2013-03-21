@@ -102,6 +102,8 @@ public class InjectionContext {
   private final Map<String, Object> attributeMap = new HashMap<String, Object>();
   private final Set<String> exposedMembers = new HashSet<String>();
 
+  private final Set<String> alwaysProxyTypes = new HashSet<String>();
+
   private final Multimap<String, InjectorRegistrationListener> injectionRegistrationListener
       = HashMultimap.create();
 
@@ -610,12 +612,11 @@ public class InjectionContext {
     registerInjector(getInjectorFactory().getTypeInjector(type, this));
   }
 
-  public Injector addPseudoScopeForType(final MetaClass type) {
+  public void addPseudoScopeForType(final MetaClass type) {
     // final TypeInjector inj = new TypeInjector(type, this);
     final AbstractInjector inj = (AbstractInjector) getInjectorFactory().getTypeInjector(type, this);
     inj.setReplaceable(true);
     registerInjector(inj);
-    return inj;
   }
 
   public IOCProcessingContext getProcessingContext() {
@@ -831,6 +832,15 @@ public class InjectionContext {
 
   public boolean hasTopLevelType(final MetaClass clazz) {
     return topLevelTypes.contains(clazz);
+  }
+
+
+  public void addTypeToAlwaysProxy(final String fqcn) {
+    alwaysProxyTypes.add(fqcn);
+  }
+
+  public boolean isAlwaysProxied(final String fqcn) {
+    return alwaysProxyTypes.contains(fqcn);
   }
 
   public GraphBuilder getGraphBuilder() {

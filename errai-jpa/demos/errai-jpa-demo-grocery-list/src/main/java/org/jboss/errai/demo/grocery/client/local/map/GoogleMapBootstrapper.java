@@ -36,10 +36,10 @@ public class GoogleMapBootstrapper {
 
     ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
     loadLibraries.add(LoadLibrary.PLACES);
+    loadLibraries.add(LoadLibrary.GEOMETRY);
     // Other add-ons you may want to check out:
     // loadLibraries.add(LoadLibrary.ADSENSE);
     // loadLibraries.add(LoadLibrary.DRAWING);
-    // loadLibraries.add(LoadLibrary.GEOMETRY);
     // loadLibraries.add(LoadLibrary.PANORAMIO);
     // loadLibraries.add(LoadLibrary.WEATHER);
     // loadLibraries.add(LoadLibrary.VISUALIZATION);

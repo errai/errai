@@ -166,7 +166,7 @@ public class PrivateAccessUtil {
   public static void addPrivateAccessStubs(final String accessorType,
                                            final ClassStructureBuilder<?> classBuilder,
                                            final MetaMethod m,
-                                           Modifier[] modifiers) {
+                                           final Modifier[] modifiers) {
 
 
     final PrivateMemberAccessor privateMemberAccessor
@@ -184,8 +184,9 @@ public class PrivateAccessUtil {
   }
 
   public static String getPrivateFieldInjectorName(final MetaField field) {
-    return condensify(field.getDeclaringClass()
-        .getFullyQualifiedName()) + "_" + field.getName();
+    return condensify(field.getDeclaringClass().getFullyQualifiedName())
+        + "_" + condensify(field.getType().getFullyQualifiedName())
+        + "_" + field.getName();
   }
 
   public static String getPrivateMethodName(final MetaMethod method) {

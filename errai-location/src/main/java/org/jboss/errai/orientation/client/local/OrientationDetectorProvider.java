@@ -26,6 +26,7 @@ public class OrientationDetectorProvider implements Provider<OrientationDetector
   }
 
   @Produces
+  //TODO use deferred binding
   public OrientationDetector get() {
     GWT.log("Creating orientation detector...");
     if (supportsMotionEvents()) {

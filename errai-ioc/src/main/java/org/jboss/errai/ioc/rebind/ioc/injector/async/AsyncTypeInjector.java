@@ -37,12 +37,10 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.jboss.errai.ioc.util.RunAsyncWrapper;
 
 import javax.enterprise.inject.Specializes;
 import javax.inject.Named;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -144,8 +142,8 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     targetBlock.append(
         Stmt.create().declareFinalVariable("beanRef", BeanRef.class,
             loadVariable("context").invoke("getBeanReference", load(type),
-                            load(qualifyingMetadata.getQualifiers()))
-    ));
+                load(qualifyingMetadata.getQualifiers()))
+        ));
 
     targetBlock.append(
         Stmt.create().declareFinalVariable("async", AsyncBeanContext.class,
@@ -167,29 +165,19 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
         );
 
         /* add the bean to SimpleCreationalContext */
-        final Statement finishedCallback;
-        final Statement beanRef;
 
-        if (constructionType == ConstructionType.FIELD) {
-          beanRef = loadVariable(instanceVarName);
+        final ObjectBuilder objectBuilder = Stmt.create().newObject(Runnable.class);
+        final BlockBuilder<AnonymousClassStructureBuilder> blockBuilder = objectBuilder
+            .extend().publicOverridesMethod("run");
 
-          finishedCallback = Stmt.create().newObject(Runnable.class)
-              .extend().publicOverridesMethod("run")
-              .append(loadVariable("callback").invoke("callback", beanRef)).finish().finish();
+        final BlockBuilderUpdater updater
+            = new BlockBuilderUpdater(injectContext, AsyncTypeInjector.this, constructionType, targetBlock, blockBuilder);
 
-        }
-        else {
-          beanRef = Cast.to(type, loadVariable("async").invoke("getConstructedObject"));
-
-          finishedCallback = Stmt.create().newObject(Runnable.class)
-              .extend().publicOverridesMethod("run")
-              .append(loadVariable("callback").invoke("callback", beanRef))
-              .finish().finish();
-        }
+        setAttribute("BlockBuilderUpdater", updater);
+        final Statement beanRef = updater.run();
 
         injectContext.addBeanReference(type, beanRef);
-
-        targetBlock.append(Stmt.loadVariable("async").invoke("runOnFinish", finishedCallback));
+        targetBlock.append(Stmt.loadVariable("async").invoke("runOnFinish", blockBuilder.finish().finish()));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);
@@ -199,6 +187,8 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
     /*
     return the instance of the bean from the creational callback.
     */
+
+    targetBlock.appendAll(getAddToEndStatements());
 
     targetBlock._(Stmt.loadVariable("async").invoke("finish"));
 
@@ -241,6 +231,61 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
         .handleDiscoveryOfType(injectableInstance);
 
     injectContext.markProxyClosedIfNeeded(getInjectedType(), getQualifyingMetadata());
+  }
+
+  static class BlockBuilderUpdater {
+    final AsyncTypeInjector injector;
+    final InjectionContext injectContext;
+    final ConstructionType constructionType;
+    final BlockBuilder targetBlock;
+    final BlockBuilder<AnonymousClassStructureBuilder> initBlock;
+
+
+    BlockBuilderUpdater(final InjectionContext injectContext,
+                        final AsyncTypeInjector injector,
+                        final ConstructionType constructionType,
+                        final BlockBuilder targetBlock,
+                        final BlockBuilder<AnonymousClassStructureBuilder> initBlock) {
+      this.injectContext = injectContext;
+      this.injector = injector;
+      this.constructionType = constructionType;
+      this.targetBlock = targetBlock;
+      this.initBlock = initBlock;
+    }
+
+    public Statement run() {
+      final Statement beanRef;
+      initBlock.clear();
+
+      if (constructionType == ConstructionType.FIELD) {
+        beanRef = loadVariable(injector.getInstanceVarName());
+        final List<Statement> proxyStmts = injector.createProxyDeclaration(injectContext);
+        initBlock
+            .appendAll(proxyStmts)
+            .append(loadVariable("callback")
+                .invoke("callback", injector.isProxied() ? Refs.get(injector.getProxyInstanceVarName()) : beanRef));
+
+      }
+      else {
+        beanRef = Cast.to(injector.type, loadVariable("async").invoke("getConstructedObject"));
+        final List<Statement> proxyStmts = injector.createProxyDeclaration(injectContext, beanRef);
+
+        initBlock
+            .appendAll(proxyStmts)
+            .append(loadVariable("callback")
+                .invoke("callback", injector.isProxied() ? Refs.get(injector.getProxyInstanceVarName()) : beanRef));
+      }
+
+      return beanRef;
+    }
+  }
+
+  @Override
+  public void updateProxies() {
+    final BlockBuilderUpdater updater = (BlockBuilderUpdater) getAttribute("BlockBuilderUpdater");
+    if (updater != null) {
+      updater.run();
+    }
   }
 
   @Override
