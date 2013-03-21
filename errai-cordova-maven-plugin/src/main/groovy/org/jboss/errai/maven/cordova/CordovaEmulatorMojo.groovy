@@ -1,8 +1,5 @@
 package org.jboss.errai.maven.cordova
 
-import org.apache.maven.plugin.MojoExecutionException
-import org.apache.maven.plugin.MojoFailureException
-
 /**
  * @goal emulator
  * @author edewit@redhat.com
@@ -10,7 +7,7 @@ import org.apache.maven.plugin.MojoFailureException
 class CordovaEmulatorMojo extends CordovaMojo {
 
     @Override
-    void execute() throws MojoExecutionException, MojoFailureException {
+    void execute() {
         if (!session.userProperties.containsKey('platform')) {
             throw new IllegalArgumentException('you should specify for which platform to run example (-Dplatform=android)')
         }
