@@ -24,8 +24,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -530,6 +532,34 @@ public abstract class AbstractMetaClassTest {
     assertEquals("Should have no upper bound",
             Arrays.asList(getMetaClass(Object.class)),
             Arrays.asList(typeVar.getBounds()));
+  }
+
+  @Test
+  public void testFieldWithSingleUpperBoundedTypeVarParam() throws Exception {
+    final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
+    MetaMethod field = metaClass.getDeclaredMethod("hasSingleBoundedTypeVarFromSelf", new Class[] {});
+    assertNotNull(field);
+
+    MetaTypeVariable returnType = (MetaTypeVariable) field.getGenericReturnType();
+    assertEquals("B", returnType.getName());
+
+    assertEquals("Should have a single upper bound",
+            Arrays.asList(getMetaClass(Serializable.class)),
+            Arrays.asList(returnType.getBounds()));
+  }
+  
+  @Test
+  public void testFieldWithTwoUpperBoundedTypeVarParam() throws Exception {
+    final MetaClass metaClass = getMetaClass(ClassWithGenericCollections.class);
+    MetaMethod field = metaClass.getDeclaredMethod("hasDoubleBoundedTypeVarFromSelf", new Class[] {});
+    assertNotNull(field);
+
+    MetaTypeVariable returnType = (MetaTypeVariable) field.getGenericReturnType();
+    assertEquals("B", returnType.getName());
+
+    assertEquals("Should have two upper bounds",
+            Arrays.asList(getMetaClass(Collection.class), getMetaClass(Serializable.class)),
+            Arrays.asList(returnType.getBounds()));
   }
 
   @Test
