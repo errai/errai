@@ -18,6 +18,38 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
   <inherits name="org.jboss.errai.ioc.Container"/>
+
+  <define-property name="orientation.detection" values="motionEvents, orientationEvents, none" />
+  <property-provider name="orientation.detection"><![CDATA[
+  	{
+  	  if (window.DeviceMotionEvent !== undefined) {
+  	    return 'motionEvents';
+  	  } else if (window.DeviceOrientationEvent !== undefined) {
+  	    return 'orientationEvents';
+  	  }
+
+	    return 'none';
+  	}
+]]></property-provider>
+
+  <replace-with class="org.jboss.errai.orientation.client.local.NoMotionDetector">
+    <when-type-is class="org.jboss.errai.orientation.client.local.OrientationDetector"/>
+  </replace-with>
+
+  <replace-with class="org.jboss.errai.orientation.client.local.Html5MotionDetector">
+    <when-type-is class="org.jboss.errai.orientation.client.local.OrientationDetector"/>
+    <all>
+      <when-property-is name="orientation.detection" value="motionEvents"/>
+    </all>
+  </replace-with>
+
+  <replace-with class="org.jboss.errai.orientation.client.local.Html5OrientationDetector">
+    <when-type-is class="org.jboss.errai.orientation.client.local.OrientationDetector"/>
+    <all>
+      <when-property-is name="orientation.detection" value="orientationEvents"/>
+    </all>
+  </replace-with>
+
   <source path="client" />
   <source path="shared" />
 </module>

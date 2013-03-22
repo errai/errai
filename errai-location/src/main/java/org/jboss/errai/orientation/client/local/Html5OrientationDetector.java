@@ -2,6 +2,9 @@ package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
+
+import javax.enterprise.event.Event;
 
 /**
  * Detects device orientation through the official HTML 5 API, periodically firing CDI
@@ -9,16 +12,18 @@ import com.google.gwt.core.client.JavaScriptObject;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class Html5OrientationDetector extends OrientationDetector {
+public class Html5OrientationDetector implements OrientationDetector {
 
+  private Event<OrientationEvent> orientationEventSource;
   /**
    * The listener function that's currently registered to receive orientation
    * events. If null, we are not firing orientation events.
    */
   private JavaScriptObject listener;
 
-  private void fire(double x, double y, double z) {
-    fireOrientationEvent(x, y, z);
+  @Override
+  public void fireOrientationEvent(double x, double y, double z) {
+    orientationEventSource.fire(new OrientationEvent(x, y, z));
   }
 
   private native void startEvents() /*-{
@@ -31,7 +36,7 @@ public class Html5OrientationDetector extends OrientationDetector {
 
     var listener = function(e) {
       var alpha = e.alpha ? e.alpha : 0;
-      that.@org.jboss.errai.orientation.client.local.Html5OrientationDetector::fire(DDD)(e.beta, e.gamma, alpha);
+      that.@org.jboss.errai.orientation.client.local.Html5OrientationDetector::fireOrientationEvent(DDD)(e.beta, e.gamma, alpha);
     };
     this.@org.jboss.errai.orientation.client.local.Html5OrientationDetector::listener = listener;
     $wnd.addEventListener('deviceorientation', listener, false);
@@ -46,5 +51,10 @@ public class Html5OrientationDetector extends OrientationDetector {
   public void startFiringOrientationEvents() {
     GWT.log("Starting orientation events!!!");
     startEvents();
+  }
+
+  @Override
+  public void setOrientationEventSource(Event<OrientationEvent> orientationEventSource) {
+    this.orientationEventSource = orientationEventSource;
   }
 }

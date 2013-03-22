@@ -2,22 +2,27 @@ package org.jboss.errai.orientation.client.local;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import org.jboss.errai.orientation.client.shared.OrientationEvent;
+
+import javax.enterprise.event.Event;
 
 /**
  * Handles DeviceMotion events, such as those fired by Gecko-based browsers on laptop computers.
  * 
  * @author jfuerth
  */
-public class Html5MotionDetector extends OrientationDetector {
+public class Html5MotionDetector implements OrientationDetector {
 
+  private Event<OrientationEvent> orientationEventSource;
   /**
    * The listener function that's currently registered to receive orientation
    * events. If null, we are not firing orientation events.
    */
   private JavaScriptObject listener;
 
-  private void fire(double x, double y, double z) {
-    fireOrientationEvent(y * 90.0 + 90.0, x * 90.0, z * 90.0);
+  @Override
+  public void fireOrientationEvent(double x, double y, double z) {
+    orientationEventSource.fire(new OrientationEvent(y * 90.0 + 90.0, x * 90.0, z * 90.0));
   }
 
   private native void startEvents() /*-{
@@ -33,7 +38,7 @@ public class Html5MotionDetector extends OrientationDetector {
       var y = event.accelerationIncludingGravity.y;
       var z = event.accelerationIncludingGravity.z;
    
-      that.@org.jboss.errai.orientation.client.local.Html5MotionDetector::fire(DDD)(x, y, z);
+      that.@org.jboss.errai.orientation.client.local.Html5MotionDetector::fireOrientationEvent(DDD)(x, y, z);
     }
     this.@org.jboss.errai.orientation.client.local.Html5MotionDetector::listener = handleMotionEvent;
     $wnd.addEventListener("devicemotion", handleMotionEvent, true);
@@ -47,5 +52,10 @@ public class Html5MotionDetector extends OrientationDetector {
   public void startFiringOrientationEvents() {
     GWT.log("Starting motion events!!!");
     startEvents();
+  }
+
+  @Override
+  public void setOrientationEventSource(Event<OrientationEvent> orientationEventSource) {
+    this.orientationEventSource = orientationEventSource;
   }
 }

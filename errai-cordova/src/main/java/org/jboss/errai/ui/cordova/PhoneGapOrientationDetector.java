@@ -23,7 +23,7 @@ import com.googlecode.gwtphonegap.client.accelerometer.AccelerometerWatcher;
  */
 @Cordova
 @Singleton
-public class PhoneGapOrientationDetector extends OrientationDetector {
+public class PhoneGapOrientationDetector implements OrientationDetector {
 
   @Inject
   Accelerometer accelerometer;
@@ -32,6 +32,7 @@ public class PhoneGapOrientationDetector extends OrientationDetector {
   Event<OrientationEvent> event;
 
   private AccelerometerWatcher watcher;
+  private Event<OrientationEvent> orientationEventSource;
 
   @AfterInitialization
   public void init() {
@@ -55,12 +56,19 @@ public class PhoneGapOrientationDetector extends OrientationDetector {
     });
   }
 
+  public void fireOrientationEvent(double x, double y, double z) {
+    orientationEventSource.fire(new OrientationEvent(x, y, z));
+  }
+
+  @Override
+  public void setOrientationEventSource(Event<OrientationEvent> orientationEventSource) {
+    this.orientationEventSource = orientationEventSource;
+  }
+
   @Override
   public void stopFiringOrientationEvents() {
     if (watcher != null) {
       accelerometer.clearWatch(watcher);
     }
   }
-
-
 }
