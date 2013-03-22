@@ -84,4 +84,11 @@ public class TestModel {
   public String getPhoneNumber() {
     return phoneNumber;
   }
+
+  @Override
+  public String toString() {
+    return "TestModel [id=" + id + ", name=" + name + ", lastChanged=" + lastChanged + ", phoneNumber=" + phoneNumber
+        + ", child=" + child + "]";
+  }
+  
 }

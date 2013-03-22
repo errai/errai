@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ui.client.widget;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -193,7 +195,6 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     }
   }
 
-  // TODO refactor / make smarter to not update all item widgets whenever the list changes.
   private class ListWrapper implements List<M> {
     private final List<M> list;
 
@@ -204,34 +205,40 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     @Override
     public boolean add(M e) {
       boolean b = list.add(e);
-      setItems(list);
+      addWidget(e);
       return b;
     }
 
     @Override
     public void add(int index, M element) {
       list.add(index, element);
-      setItems(list);
+      for (int i = index; i < list.size(); i++) {
+        addAndReplaceWidget(index, i);
+      }
     }
 
     @Override
     public boolean addAll(Collection<? extends M> c) {
       boolean b = list.addAll(c);
-      setItems(list);
+      for (M m : c) {
+        addWidget(m);
+      }
       return b;
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends M> c) {
       boolean b = list.addAll(index, c);
-      setItems(list);
+      for (int i = index; i < list.size(); i++) {
+        addAndReplaceWidget(index, i);
+      }
       return b;
     }
 
     @Override
     public void clear() {
       list.clear();
-      setItems(list);
+      panel.clear();
     }
 
     @Override
@@ -281,22 +288,38 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
     @Override
     public boolean remove(Object o) {
+      int index = list.indexOf(o);
       boolean b = list.remove(o);
-      setItems(list);
+      if (b) {
+        panel.remove(index);
+      }
       return b;
     }
 
     @Override
     public M remove(int index) {
       M m = list.remove(index);
-      setItems(list);
+      panel.remove(index);
       return m;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
+      List<Integer> indexes = new ArrayList<Integer>();
+      for (Object m : c) {
+        Integer index = list.indexOf(m);
+        if (!indexes.contains(index)) {
+          indexes.add(index);
+        }
+      }
+      Collections.sort(indexes, Collections.reverseOrder());
+
       boolean b = list.removeAll(c);
-      setItems(list);
+      if (b) {
+        for (Integer index : indexes) {
+          panel.remove(index);
+        }
+      }
       return b;
     }
 
@@ -308,7 +331,9 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     @Override
     public M set(int index, M element) {
       M m = list.set(index, element);
-      setItems(list);
+      for (int i = index; i < list.size(); i++) {
+        addAndReplaceWidget(index, i);
+      }
       return m;
     }
 
@@ -330,6 +355,27 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     @Override
     public <T> T[] toArray(T[] a) {
       return list.toArray(a);
+    }
+
+    private void addAndReplaceWidget(final int startIndex, final int index) {
+      if (index < panel.getWidgetCount()) {
+        panel.remove(startIndex);
+      }
+      addWidget(list.get(index));
+    }
+
+    private void addWidget(final M m) {
+      // This call is always synchronous, since the list can only be manipulated after
+      // onItemsRendered was called. At that point the code of a potential split point must have
+      // already been downloaded.
+      AsyncBeanDef<W> itemBeanDef = IOC.getAsyncBeanManager().lookupBean(getItemWidgetType());
+      itemBeanDef.getInstance(new CreationalCallback<W>() {
+        @Override
+        public void callback(W widget) {
+          widget.setModel(m);
+          panel.add(widget);
+        }
+      });
     }
   }
 }

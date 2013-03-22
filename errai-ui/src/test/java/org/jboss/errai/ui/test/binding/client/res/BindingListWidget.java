@@ -28,6 +28,7 @@ import org.jboss.errai.ui.test.common.client.TestModel;
  */
 public class BindingListWidget extends ListWidget<TestModel, BindingItemWidget> {
   
+  private List<TestModel> items;
   private int itemsRenderedCalled = 0;
   
   @Override
@@ -36,12 +37,21 @@ public class BindingListWidget extends ListWidget<TestModel, BindingItemWidget> 
   }
 
   @Override
-  protected void onItemsRendered(List<TestModel> model) {
+  protected void onItemsRendered(List<TestModel> items) {
     itemsRenderedCalled++;
+    this.items = items;
   }
 
   public int getItemsRenderedCalled() {
     return itemsRenderedCalled;
+  }
+  
+  public List<TestModel> getItems() {
+    return items;
+  }
+  
+  public int getWidgetCount() {
+    return getPanel().getWidgetCount();
   }
   
 }
