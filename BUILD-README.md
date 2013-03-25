@@ -6,7 +6,7 @@ This document describes how to set up your environment wrt maven prior to your b
 Repositories
 ------------------
 All you need to be able to donwload artifacts into your local M2 repository is to add following
-repository definition into your ~/.m2.settings.xml file.
+repository definition into your ~/.m2/settings.xml file.
         <repository>
           <id>jboss-public-repository-group</id>
           <name>JBoss Public Maven Repository Group</name>
