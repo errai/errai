@@ -489,6 +489,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     for (final String s : subscriptions.keySet()) {
       if (s.startsWith("local:"))
         continue;
+
       if (!remotes.containsKey(s)) {
         if (subjects.length() != 0) {
           subjects += ",";
