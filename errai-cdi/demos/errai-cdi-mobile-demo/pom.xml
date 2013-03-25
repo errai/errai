@@ -99,7 +99,7 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-location</artifactId>
+      <artifactId>errai-html5</artifactId>
       <version>${project.version}</version>
     </dependency>
 
