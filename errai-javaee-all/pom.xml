@@ -95,31 +95,4 @@
       </dependency>
    </dependencies>
 
-   <repositories>
-      <repository>
-         <releases>
-            <updatePolicy>never</updatePolicy>
-         </releases>
-         <snapshots>
-            <updatePolicy>never</updatePolicy>
-         </snapshots>
-         <id>jboss-public-repository-group</id>
-         <name>JBoss Public Maven Repository Group</name>
-         <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-      </repository>
-   </repositories>
-   <pluginRepositories>
-      <pluginRepository>
-         <releases>
-            <updatePolicy>never</updatePolicy>
-         </releases>
-         <snapshots>
-            <updatePolicy>never</updatePolicy>
-         </snapshots>
-         <id>jboss-public-repository-group</id>
-         <name>JBoss Public Maven Repository Group</name>
-         <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-      </pluginRepository>
-   </pluginRepositories>
-
 </project>
