@@ -286,9 +286,6 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
     if (beanList == null) {
       return Collections.emptyList();
     }
-    else if (beanList.size() == 1) {
-      return Collections.singletonList((IOCBeanDef<T>) beanList.iterator().next());
-    }
 
     final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
 

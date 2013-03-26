@@ -293,9 +293,6 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
     if (beanList == null) {
       return Collections.emptyList();
     }
-    else if (beanList.size() == 1) {
-      return Collections.singletonList((AsyncBeanDef<T>) beanList.iterator().next());
-    }
 
     final List<AsyncBeanDef<T>> matching = new ArrayList<AsyncBeanDef<T>>();
 
