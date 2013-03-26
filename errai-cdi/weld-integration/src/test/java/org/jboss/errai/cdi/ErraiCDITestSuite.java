@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
     CyclicDepsIntegrationTest.class,
     PostConstructOrderTest.class,
     DependentScopeIntegrationTest.class,
+    ProducerIntegrationTest.class,
     EventAdvertisingIntegrationTest.class,
     ExperimentalDependentScopeTest.class,
     SpecializationIntegrationTest.class,
@@ -41,7 +42,6 @@ import org.junit.runners.Suite;
     InjectionIntegrationTest.class,
     InstanceInjectionIntegrationTest.class,
     InvalidProducerIntegrationTest.class,
-    ProducerIntegrationTest.class,
     RpcIntegrationTest.class,
     TimedMethodAPITests.class
 })

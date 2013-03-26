@@ -11,6 +11,8 @@ import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanOranges;
 import org.jboss.errai.cdi.injection.client.Visa;
 import org.jboss.errai.cdi.injection.client.ZFooAmex;
 import org.jboss.errai.cdi.injection.client.ZFooVisa;
+import org.jboss.errai.cdi.injection.client.Zoltron;
+import org.jboss.errai.cdi.injection.client.ZoltronDependentBean;
 import org.jboss.errai.cdi.injection.client.mvp.Contacts;
 import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanApples;
 import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanOranges;
@@ -101,5 +103,30 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
 
     assertNotNull(zFooVisa.getServiceXXX());
     assertSame(zFooVisa.getServiceXXX(), zFooAmex.getServiceXXX());
+  }
+
+  public void testNamedBasedInjectionFromProducedNamedBeans() {
+    final ZoltronDependentBean zoltronDependentBean = getBeanManager().lookupBean(ZoltronDependentBean.class)
+        .getInstance();
+
+    assertNotNull("bean is null", zoltronDependentBean);
+
+    final Zoltron alpha = zoltronDependentBean.getAlpha();
+    assertNotNull("alpha is null", alpha);
+    assertEquals("alpha", alpha.getName());
+
+    final Zoltron beta = zoltronDependentBean.getBeta();
+    assertNotNull("beta is null", beta);
+    assertEquals("beta", beta.getName());
+
+
+    final ZoltronDependentBean zoltronDependentBean2 = getBeanManager().lookupBean(ZoltronDependentBean.class)
+        .getInstance();
+
+    final Zoltron alpha2 = zoltronDependentBean2.getAlpha();
+    final Zoltron beta2 = zoltronDependentBean2.getBeta();
+
+    assertSame(alpha, alpha2);
+    assertSame(beta, beta2);
   }
 }

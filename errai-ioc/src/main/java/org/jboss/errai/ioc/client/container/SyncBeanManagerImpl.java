@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.SimpleInjectionContext;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 
@@ -269,7 +270,7 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
+  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifierInstances) {
     final List<IOCBeanDef> beanList;
 
     if (type.getName().equals("java.lang.Object")) {
@@ -291,15 +292,17 @@ public class SyncBeanManagerImpl implements SyncBeanManager, SyncBeanManagerSetu
 
     final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
 
-    final Set<Annotation> qualifierSet = new HashSet<Annotation>(qualifiers.length * 2);
-    Collections.addAll(qualifierSet, qualifiers);
+    final Annotation[] qualifiers = (qualifierInstances == null) ? new Annotation[0] : qualifierInstances;
+      final Set<Annotation> qualifierSet = new HashSet<Annotation>(qualifiers.length * 2);
+      Collections.addAll(qualifierSet, qualifiers);
 
-    for (final IOCBeanDef iocBean : beanList) {
-      if (iocBean.matches(qualifierSet)) {
-        matching.add(iocBean);
+      final boolean defaultMatch = QualifierUtil.isDefaultAnnotations(qualifierInstances);
+
+      for (final IOCBeanDef iocBean : beanList) {
+        if (defaultMatch || iocBean.matches(qualifierSet)) {
+          matching.add(iocBean);
+        }
       }
-    }
-
     if (matching.size() == 1) {
       return Collections.unmodifiableList(matching);
     }

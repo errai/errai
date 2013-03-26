@@ -1,6 +1,7 @@
 package org.jboss.errai.ioc.client.container.async;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.api.EnabledByProperty;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
@@ -276,7 +277,7 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
+  public <T> Collection<AsyncBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifierInstances) {
     final List<AsyncBeanDef> beanList;
 
     if (type.getName().equals("java.lang.Object")) {
@@ -298,11 +299,14 @@ public class AsyncBeanManagerImpl implements AsyncBeanManager, AsyncBeanManagerS
 
     final List<AsyncBeanDef<T>> matching = new ArrayList<AsyncBeanDef<T>>();
 
+    final Annotation[] qualifiers = (qualifierInstances == null) ? new Annotation[0] : qualifierInstances;
     final Set<Annotation> qualifierSet = new HashSet<Annotation>(qualifiers.length * 2);
     Collections.addAll(qualifierSet, qualifiers);
 
+    final boolean defaultMatch = QualifierUtil.isDefaultAnnotations(qualifierInstances);
+
     for (final AsyncBeanDef iocBean : beanList) {
-      if (iocBean.matches(qualifierSet)) {
+      if (defaultMatch || iocBean.matches(qualifierSet)) {
         matching.add(iocBean);
       }
     }

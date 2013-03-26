@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import org.jboss.errai.codegen.AnnotationEncoder;
@@ -13,7 +29,11 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.client.QualifierUtil;
 
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,8 +42,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
-* @author Mike Brock
-*/
+ * @author Mike Brock
+ */
 public class BootstrapInterningCallback implements InterningCallback {
   private final Map<Set<Annotation>, String> cachedArrays = new HashMap<Set<Annotation>, String>();
   private final MetaClass Annotation_MC = MetaClassFactory.get(Annotation.class);
@@ -45,6 +65,14 @@ public class BootstrapInterningCallback implements InterningCallback {
     if (literalValue.getValue() instanceof Annotation) {
       final Annotation annotation = (Annotation) literalValue.getValue();
 
+      if (annotation.annotationType().equals(Default.class)) {
+        return Stmt.loadStatic(QualifierUtil.class, "DEFAULT_ANNOTATION");
+      }
+      else if (annotation.annotationType().equals(Any.class)) {
+        return Stmt.loadStatic(QualifierUtil.class, "ANY_ANNOTATION");
+      }
+
+
       final Class<? extends Annotation> aClass = annotation.annotationType();
       final String fieldName = PrivateAccessUtil.condensify(aClass.getPackage().getName()) +
           aClass.getSimpleName() + "_" + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
@@ -60,6 +88,10 @@ public class BootstrapInterningCallback implements InterningCallback {
 
       final Set<Annotation> annotationSet
           = new HashSet<Annotation>(Arrays.asList((Annotation[]) literalValue.getValue()));
+
+      if (QualifierUtil.isDefaultAnnotations(annotationSet)) {
+        return Stmt.loadStatic(QualifierUtil.class, "DEFAULT_QUALIFIERS");
+      }
 
       if (cachedArrays.containsKey(annotationSet)) {
         return Refs.get(cachedArrays.get(annotationSet));
