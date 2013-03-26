@@ -26,6 +26,30 @@ import org.jboss.errai.codegen.meta.MetaClass;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class Refs {
+  public static VariableReference get(final String name, final MetaClass type) {
+    return new VariableReference() {
+      @Override
+      public String getName() {
+        return name;
+      }
+
+      @Override
+      public Statement getValue() {
+        return new Statement() {
+          @Override
+          public String generate(Context context) {
+            return name;
+          }
+
+          @Override
+          public MetaClass getType() {
+            return type;
+          }
+        };
+      }
+    };
+  }
+
   public static VariableReference get(final String name) {
     return new VariableReference() {
       private MetaClass type;

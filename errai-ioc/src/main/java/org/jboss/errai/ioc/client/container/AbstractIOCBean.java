@@ -71,8 +71,13 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
    * @return true if matches
    */
   public boolean matches(final Set<Annotation> annotations) {
-    return QualifierUtil.containsAll(annotations, qualifiers);
+    return QualifierUtil.matches(annotations, qualifiers);
   }
-  
+
+  @Override
+  public boolean isDefaultMatching() {
+    return QualifierUtil.isDefaultAnnotations(qualifiers);
+  }
+
   public abstract T getInstance();
 }

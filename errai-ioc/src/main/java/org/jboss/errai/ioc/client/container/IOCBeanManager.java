@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.jboss.errai.ioc.client.container;
+
+import org.jboss.errai.ioc.client.QualifierUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -386,14 +388,14 @@ public class IOCBeanManager {
    *
    * @param type
    *     The type of the bean
-   * @param qualifiers
+   * @param qualifierInstances
    *     qualifiers to match
    *
    * @return An unmodifiable list of all beans which match the specified type and qualifiers. Returns an empty list
    *         if no beans match.
    */
   @SuppressWarnings("unchecked")
-  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifiers) {
+  public <T> Collection<IOCBeanDef<T>> lookupBeans(final Class<T> type, final Annotation... qualifierInstances) {
     final List<IOCBeanDef> beanList;
 
     if (type.getName().equals("java.lang.Object")) {
@@ -409,17 +411,17 @@ public class IOCBeanManager {
     if (beanList == null) {
       return Collections.emptyList();
     }
-    else if (beanList.size() == 1) {
-      return Collections.singletonList((IOCBeanDef<T>) beanList.iterator().next());
-    }
 
     final List<IOCBeanDef<T>> matching = new ArrayList<IOCBeanDef<T>>();
 
+    final Annotation[] qualifiers = (qualifierInstances == null) ? new Annotation[0] : qualifierInstances;
     final Set<Annotation> qualifierSet = new HashSet<Annotation>(qualifiers.length * 2);
     Collections.addAll(qualifierSet, qualifiers);
 
+    final boolean defaultMatch = QualifierUtil.isDefaultAnnotations(qualifierInstances);
+
     for (final IOCBeanDef iocBean : beanList) {
-      if (iocBean.matches(qualifierSet)) {
+      if (defaultMatch || iocBean.matches(qualifierSet)) {
         matching.add(iocBean);
       }
     }
@@ -487,12 +489,12 @@ public class IOCBeanManager {
    * and will be called when the bean is destroyed.
    *
    * @param beanInstance
-   *        the bean instance to associate the callback to.
+   *     the bean instance to associate the callback to.
    * @param destructionCallback
-   *        the instance of the {@link DestructionCallback}.
-   * @return
-   *        <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
-   *        {@link CreationalContext} and <tt>false</tt> if not.
+   *     the instance of the {@link DestructionCallback}.
+   *
+   * @return <tt>true</tt> if the {@link DestructionCallback} is successfully registered against a valid
+   *         {@link CreationalContext} and <tt>false</tt> if not.
    */
   public boolean addDestructionCallback(final Object beanInstance, final DestructionCallback<?> destructionCallback) {
     final CreationalContext creationalContext = creationalContextMap.get(beanInstance);

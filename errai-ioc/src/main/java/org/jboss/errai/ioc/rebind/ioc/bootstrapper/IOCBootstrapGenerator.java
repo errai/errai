@@ -19,29 +19,14 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Stereotype;
-import javax.inject.Inject;
-import javax.inject.Scope;
-import javax.inject.Singleton;
-
 import com.google.common.collect.Multimap;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JPackage;
+import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.codegen.AnnotationEncoder;
 import org.jboss.errai.codegen.Context;
@@ -75,6 +60,7 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.config.util.ThreadUtil;
 import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
+import org.jboss.errai.ioc.client.QualifierUtil;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
@@ -90,13 +76,27 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JPackage;
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.StringSourceWriter;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Stereotype;
+import javax.inject.Inject;
+import javax.inject.Scope;
+import javax.inject.Singleton;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Generator for the Bootstrapper class generated to wire an application at runtime.
@@ -197,6 +197,13 @@ public class IOCBootstrapGenerator {
         if (literalValue.getValue() instanceof Annotation) {
           final Annotation annotation = (Annotation) literalValue.getValue();
 
+          if (annotation.annotationType().equals(Default.class)) {
+            return Stmt.loadStatic(QualifierUtil.class, "DEFAULT_ANNOTATION");
+          }
+          else if (annotation.annotationType().equals(Any.class)) {
+            return Stmt.loadStatic(QualifierUtil.class, "ANY_ANNOTATION");
+          }
+
           final Class<? extends Annotation> aClass = annotation.annotationType();
           final String fieldName = PrivateAccessUtil.condensify(aClass.getPackage().getName()) +
               aClass.getSimpleName() + "_" + String.valueOf(literalValue.getValue().hashCode()).replaceFirst("\\-", "_");
@@ -212,6 +219,10 @@ public class IOCBootstrapGenerator {
 
           final Set<Annotation> annotationSet
               = new HashSet<Annotation>(Arrays.asList((Annotation[]) literalValue.getValue()));
+
+          if (QualifierUtil.isDefaultAnnotations(annotationSet)) {
+            return Stmt.loadStatic(QualifierUtil.class, "DEFAULT_QUALIFIERS");
+          }
 
           if (cachedArrays.containsKey(annotationSet)) {
             return Refs.get(cachedArrays.get(annotationSet));

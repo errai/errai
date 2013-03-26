@@ -493,7 +493,8 @@ public class InjectUtil {
              */
             ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());
 
-            final ProxyInjector proxyInject = getOrCreateProxy(ctx, inj.getEnclosingType(), qualifyingMetadata);
+            final ProxyInjector proxyInject = getOrCreateProxy(ctx, inj.getEnclosingType(),
+                ctx.getInjector(inj.getEnclosingType()).getQualifyingMetadata());
 
             boolean pushedProxy = false;
 

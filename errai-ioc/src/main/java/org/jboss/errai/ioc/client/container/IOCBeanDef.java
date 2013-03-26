@@ -99,4 +99,12 @@ public interface IOCBeanDef<T> {
    * @return true if concrete.
    */
   public boolean isConcrete();
+
+
+  /**
+   * Returns true if the bean has default matching annotation.
+   *
+   * @return true if the bean has default matching annotations.
+   */
+  public boolean isDefaultMatching();
 }
