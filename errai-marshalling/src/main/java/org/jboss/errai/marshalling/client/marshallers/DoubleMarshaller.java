@@ -33,16 +33,34 @@ public class DoubleMarshaller extends AbstractNumberMarshaller<Double> {
   public Class<Double> getTypeHandled() {
     return Double.class;
   }
-  
+
   @Override
   public Double[] getEmptyArray() {
     return new Double[0];
   }
 
   @Override
+  public String doNotNullMarshall(Double o, MarshallingSession ctx) {
+    if (o.isNaN() || o.isInfinite()) {
+      return "\"" + o.toString() + "\"";
+    }
+    else {
+      return o.toString();
+    }
+
+  }
+
+  @Override
   public Double doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
-      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue();
+      EJValue numVal = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      if (numVal.isString() != null) {
+        return Double.parseDouble(numVal.isString().stringValue());
+      }
+      return numVal.isNumber().doubleValue();
+    }
+    else if (o.isString() != null) {
+      return Double.parseDouble(o.isString().stringValue());
     }
     else {
       return o.isNumber().doubleValue();

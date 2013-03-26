@@ -64,7 +64,37 @@ public class MarshallingAPITest {
   public void testNullLong() {
     testEncodeDecode((Long) null);
   }
+  
+  @Test
+  public void testDoubleNan() {
+    testEncodeDecode(Double.NaN);
+  }
+  
+  @Test
+  public void testDoublePosInf() {
+    testEncodeDecode(Double.POSITIVE_INFINITY);
+  }
 
+  @Test
+  public void testDoubleNegInf() {
+    testEncodeDecode(Double.NEGATIVE_INFINITY);
+  }
+
+  @Test
+  public void testFloatNan() {
+    testEncodeDecode(Float.NaN);
+  }
+
+  @Test
+  public void testFloatPosInf() {
+    testEncodeDecode(Float.POSITIVE_INFINITY);
+  }
+
+  @Test
+  public void testFloatNegInf() {
+    testEncodeDecode(Float.NEGATIVE_INFINITY);
+  }
+  
   @Test
   public void testQualifiedShort() {
     testEncodeDecode((short) 123);

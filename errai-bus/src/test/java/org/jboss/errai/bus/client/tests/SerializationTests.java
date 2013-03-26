@@ -156,6 +156,24 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testDoubleNegInf() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final double expected = Double.NEGATIVE_INFINITY;
+
+        MessageBuilder.createCall(new RemoteCallback<Double>() {
+          @Override
+          public void callback(Double response) {
+            assertTrue(response.isInfinite());
+            assertTrue(response < 0);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testDouble(expected);
+      }
+    });
+  }
+  
   public void testFloat() {
     runAfterInit(new Runnable() {
       @Override
@@ -166,6 +184,24 @@ public class SerializationTests extends AbstractErraiTest {
           @Override
           public void callback(Float response) {
             assertEquals(expected, response.floatValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testFloat(expected);
+      }
+    });
+  }
+  
+  public void testFloatNegInf() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final float expected = Float.NEGATIVE_INFINITY;
+
+        MessageBuilder.createCall(new RemoteCallback<Float>() {
+          @Override
+          public void callback(Float response) {
+            assertTrue(response.isInfinite());
+            assertTrue(response < 0);
             finishTest();
           }
         }, TestSerializationRPCService.class).testFloat(expected);
@@ -1818,6 +1854,36 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testEntityWithGoodParts() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithGoodParts entity = new EntityWithGoodParts();
+        entity.setDoubleField(Double.NaN);
+        entity.setBadDoubles(new Double[]{1234d, Double.NEGATIVE_INFINITY, 12345d, null, Double.POSITIVE_INFINITY, Double.NaN});
+        entity.setBadPrimitiveDoubles(new double[]{1234d, Double.NEGATIVE_INFINITY, 12345d, Double.POSITIVE_INFINITY, Double.NaN});
+        
+        entity.setFloatField(Float.NaN);
+        entity.setBadFloats(new Float[]{1234.0f, Float.NEGATIVE_INFINITY, 12345.123f, null, Float.POSITIVE_INFINITY, Float.NaN});
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithGoodParts>() {
+          @Override
+          public void callback(EntityWithGoodParts response) {
+            try {
+              assertEquals(entity.toString(), response.toString());
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithGoodParts(entity);
+      }
+    });
+  }
+  
   public void testGenericEntity() {
     runAfterInit(new Runnable() {
       @Override

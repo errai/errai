@@ -34,7 +34,11 @@ public class NumbersUtils {
       return new Double(value.isNumber().doubleValue()).intValue();
     }
     else if (Double.class.getName().equals(wrapperClassName)) {
+      if (value.isString() != null) {
+        return Double.parseDouble(value.isString().stringValue());
+      }
       return value.isNumber().doubleValue();
+      
     }
     else if (Long.class.getName().equals(wrapperClassName)) {
       return Long.parseLong(value.isString().stringValue());
@@ -43,6 +47,9 @@ public class NumbersUtils {
       return value.isBoolean().booleanValue();
     }
     else if (Float.class.getName().equals(wrapperClassName)) {
+      if (value.isString() != null) {
+        return Float.parseFloat(value.isString().stringValue());
+      }
       return new Double(value.isNumber().doubleValue()).floatValue();
     }
     else if (Short.class.getName().equals(wrapperClassName)) {
@@ -78,6 +85,20 @@ public class NumbersUtils {
             + quote + typeName + quote + ", "
             + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + "-1" + quote + "," +
             quote + SerializationParts.NUMERIC_VALUE + quote + ":"
-            + (o instanceof Long || o instanceof Character ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
+            + getNumericValue(o) + "}";
+  }
+
+  private static String getNumericValue(final Object o) {
+    String val;
+    if (o instanceof Long || o instanceof Character ||
+        (o instanceof Double && (((Double) o).isNaN() || ((Double) o).isInfinite())) ||
+        (o instanceof Float && (((Float) o).isNaN() || ((Float) o).isInfinite()))) {
+      val = quote + String.valueOf(o) + quote;
+    }
+    else {
+      val = String.valueOf(o);
+    }
+
+    return val;
   }
 }

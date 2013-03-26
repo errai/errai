@@ -427,4 +427,9 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public GenericEntitySubtypeString testGenericEntitySubtypeString(GenericEntitySubtypeString e) {
     return e;
   }
+
+  @Override
+  public EntityWithGoodParts testEntityWithGoodParts(EntityWithGoodParts e) {
+    return e;
+  }
 }

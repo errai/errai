@@ -38,11 +38,29 @@ public class FloatMarshaller extends AbstractNumberMarshaller<Float> {
   public Float[] getEmptyArray() {
     return new Float[0];
   }
-  
+
+  @Override
+  public String doNotNullMarshall(Float o, MarshallingSession ctx) {
+    if (o.isNaN() || o.isInfinite()) {
+      return "\"" + o.toString() + "\"";
+    }
+    else {
+      return o.toString();
+    }
+
+  }
+
   @Override
   public Float doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
-      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().floatValue();
+      EJValue numVal = o.isObject().get(SerializationParts.NUMERIC_VALUE);
+      if (numVal.isString() != null) {
+        return Float.parseFloat(numVal.isString().stringValue());
+      }
+      return numVal.isNumber().floatValue();
+    }
+    else if (o.isString() != null) {
+      return Float.parseFloat(o.isString().stringValue());
     }
     else {
       return o.isNumber().floatValue();
