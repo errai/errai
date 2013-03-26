@@ -74,10 +74,5 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
     return QualifierUtil.matches(annotations, qualifiers);
   }
 
-  @Override
-  public boolean isDefaultMatching() {
-    return QualifierUtil.isDefaultAnnotations(qualifiers);
-  }
-
   public abstract T getInstance();
 }
