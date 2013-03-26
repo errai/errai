@@ -239,6 +239,21 @@ public class ServerMarshallingTest {
   public void testDouble0dot9635950160419999() {
     testEncodeDecode(Double.class, 0.9635950160419999d);
   }
+  
+  @Test
+  public void testDoubleNan() {
+    testEncodeDecode(Double.class, Double.NaN);
+  }
+  
+  @Test
+  public void testDoublePosInf() {
+    testEncodeDecode(Double.class, Double.POSITIVE_INFINITY);
+  }
+  
+  @Test
+  public void testDoubleNegInf() {
+    testEncodeDecode(Double.class, Double.NEGATIVE_INFINITY);
+  }
 
   @Test
   public void testFloatMaxValue() {
@@ -254,7 +269,22 @@ public class ServerMarshallingTest {
   public void testFloatRandomValue() {
     testEncodeDecode(Float.class, new Random(System.currentTimeMillis()).nextFloat());
   }
+  
+  @Test
+  public void testFloatNan() {
+    testEncodeDecode(Float.class, Float.NaN);
+  }
 
+  @Test
+  public void testFloatPosInf() {
+    testEncodeDecode(Float.class, Float.POSITIVE_INFINITY);
+  }
+
+  @Test
+  public void testFloatNegInf() {
+    testEncodeDecode(Float.class, Float.NEGATIVE_INFINITY);
+  }
+  
   @Test
   public void testByteMaxValue() {
     testEncodeDecode(Byte.class, Byte.MAX_VALUE);

@@ -160,6 +160,8 @@ public interface TestSerializationRPCService {
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);
+  
+  public EntityWithGoodParts testEntityWithGoodParts(EntityWithGoodParts e);
 
   public GenericEntity testGenericEntity(GenericEntity e);
   
