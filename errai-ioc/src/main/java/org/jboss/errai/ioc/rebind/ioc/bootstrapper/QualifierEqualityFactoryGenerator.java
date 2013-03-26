@@ -37,6 +37,7 @@ import org.jboss.errai.ioc.client.QualifierEqualityFactory;
 import org.jboss.errai.ioc.client.QualifierUtil;
 
 import javax.enterprise.util.Nonbinding;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import java.io.File;
 import java.io.PrintWriter;
@@ -106,6 +107,7 @@ public class QualifierEqualityFactoryGenerator extends Generator {
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Set<Class<?>> typesAnnotatedWith = scanner.getTypesAnnotatedWith(Qualifier.class);
+    typesAnnotatedWith.add(Named.class);
 
     for (final Class<?> aClass : typesAnnotatedWith) {
       try {

@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.framework;
+package org.jboss.errai.cdi.injection.client;
 
-import java.lang.annotation.Annotation;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.inject.Named;
 
-import org.jboss.errai.common.client.api.ErrorCallback;
-import org.jboss.errai.common.client.api.RemoteCallback;
+/**
+ * @author Mike Brock
+ */
+@Dependent
+public class ZoltronDependentBean {
+  @Inject @Named("alpha") private Zoltron alpha;
+  @Inject @Named("beta") private Zoltron beta;
 
-public interface RpcStub {
-  public void setRemoteCallback(RemoteCallback callback);
+  public Zoltron getBeta() {
+    return beta;
+  }
 
-  public void setErrorCallback(ErrorCallback callback);
-
-  public void setQualifiers(Annotation[] annotations);
-  
-  public void setBatch(RpcBatch batch);
+  public Zoltron getAlpha() {
+    return alpha;
+  }
 }
