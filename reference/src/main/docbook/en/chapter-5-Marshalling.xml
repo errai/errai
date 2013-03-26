@@ -101,7 +101,7 @@
 public class Person {
   private String name;
   private int age;
-  
+
   public Person() {
   }
 
@@ -110,12 +110,12 @@ public class Person {
     this.age = age;
   }
 
-  public String getName() { 
+  public String getName() {
     return name;
   }
 
   public int getAge() {
-    return age; 
+    return age;
   }
 }
 </programlisting>
@@ -131,18 +131,18 @@ public class Person {
 public class Person {
   private final String name;
   private final int age;
-  
+
   public Person(@MapsTo("name") String name, @MapsTo("age") int age) {
     this.name = name;
     this.age = age;
   }
 
-  public String getName() { 
+  public String getName() {
     return name;
   }
 
   public int getAge() {
-    return age; 
+    return age;
   }
 }
 </programlisting>
@@ -167,22 +167,22 @@ public class Person {
 public class Person {
   private final String name;
   private final int age;
-  
+
   private Person(String name, int age) {
     this.name = name;
     this.age = age;
   }
-  
+
   public static Person createPerson(@MapsTo("name") String name, @MapsTo("age") int age) {
     return new Person(name, age);
   }
 
-  public String getName() { 
+  public String getName() {
     return name;
   }
 
   public int getAge() {
-    return age; 
+    return age;
   }
 }
 </programlisting>
@@ -202,18 +202,18 @@ public class Person {
 public class Person {
   private final String name;
   private final int age;
-  
+
   private Person(@MapsTo("name") String name, @MapsTo("age") int age) {
     this.name = name;
     this.age = age;
   }
-  
-  public String getName() { 
+
+  public String getName() {
     return name;
   }
 
   public int getAge() {
-    return age; 
+    return age;
   }
 
   @NonPortable
@@ -274,7 +274,8 @@ public class Person {
           <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideCodingBasicsClient.html">Client-Side Code</ulink>
           for information on this.
         </para>
-         <section id="sid-5931328_Marshalling-MappingExistingClientClasses">
+         <para id="sid-5931328_Marshalling-MappingExistingClientClasses"/>
+         <section id="sid-5931328_Marshalling-MappingExistingClientClassesx">
             <title>Mapping Existing Client Classes</title>
             <para>
             If you have client-exposed classes that cannot be annotated with the
@@ -401,7 +402,7 @@ public class MySuperCustomEntity {
 
    public String getMySuperName() {
      return this.mySuperName;
-   } 
+   }
 
    public void setMySuperNickname(String mySuperNickname) {
      this.mySuperNickname = mySuperNickname;
@@ -435,13 +436,13 @@ public MySuperCustomEntityMapping extends MappingDefinition {
   public MySuperCustomEntityMapping() {
     super(MySuperCustomEntity.class);                                                          // (1)
 
-    SimpleConstructorMapping cnsMapping = new SimpleConstructorMapping(); 
+    SimpleConstructorMapping cnsMapping = new SimpleConstructorMapping();
     cnsMapping.mapParmToIndex("mySuperName", 0, String.class);                                 // (2)
 
     setInstantiationMapping(cnsMapping);
 
     addMemberMapping(new WriteMapping("mySuperNickname", String.class, "setMySuperNickname")); // (3)
-    
+
     addMemberMapping(new ReadMapping("mySuperName", String.class, "getMySuperName"));          // (4)
     addMemberMapping(new ReadMapping("mySuperNickname", String.class, "getMySuperNickname"));  // (5)
   }

@@ -141,4 +141,30 @@
          </listitem>
       </itemizedlist>
    </section>
+   <section id="sid-59146804">
+      <title>Upgrading from Errai 2.2.x to 3.0</title>
+      <para>There are some breaking API changes in the update from Errai 2.2.x to Errai 3.0.x.</para>
+      <para>Here are the steps you'll need to take to get your project compiling after you update to Errai 3:</para>
+      <itemizedlist>
+         <listitem>
+            <para>Use your IDE to organize imports at the top level. In eclipse, you'd click in the Project Explorer, press Ctrl-A (select all) and then Ctrl-O (Organize Imports). Other IDEs have similar features.</para>
+         </listitem>
+         <listitem>
+            <para>
+            The
+            <code>ErrorCallback</code>
+            interface has been made more general so the same type can be shared between Errai modules. This allows you reuse your own generic error handler class for, eg, Errai JAX-RS and ErraiBus callbacks. If you want to use a generic error handler throughout your app, change your
+            <code>ErrorCallback</code>
+            implementations to
+            <code>ErrorCallback&lt;?&gt;</code>
+            and change the first argument type of your error() method to Object. Otherwise, if you have use-case-specific error callbacks, implement the interfaces
+            <code>RestErrorCallback</code>
+            or
+            <code>BusErrorCallback</code>
+            as appropriate.
+          </para>
+         </listitem>
+      </itemizedlist>
+      <para>Note: Errai 3 is still changing rapidly, so this section is a work in progress. Please add any additional steps you had to take in upgrading your own codebase from Errai 2.2.</para>
+   </section>
 </chapter>

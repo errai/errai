@@ -34,6 +34,20 @@ public class MyRemoteServiceImpl implements MyRemoteService {
       <code>@Service</code>
       annotation as described in Section 2.4. The presence of the remote interface tips Errai off as to what you want to do with the class.
     </para>
+   <warning>
+      <para>Beginning with Errai 2.0.CR1, the default for automatic service discovery has changed in favour of CDI based applications, meaning RPC must be explicitly turned on. This can be done using an init-param in the servlet config of your web.xml:</para>
+   </warning>
+   <informalexample>
+      <programlisting language="xml">&lt;servlet&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;auto-discover-services&lt;/param-name&gt;
+    &lt;param-value&gt;true&lt;/param-value&gt;
+    &lt;/init-param&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;</programlisting>
+   </informalexample>
    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Makingcalls">
       <title>Making calls</title>
       <para>
@@ -71,7 +85,7 @@ MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
          <informalexample>
             <programlisting language="java">
 @Inject
-private Caller&lt;MyRemoteService&gt; remoteService; 
+private Caller&lt;MyRemoteService&gt; remoteService;
 </programlisting>
          </informalexample>
          <para>
@@ -200,6 +214,7 @@ public class MyCacheInterceptor implements RpcInterceptor {
       <para>
         The result of the remote call can be manipulated by calling
         <code>RemoteCallContext.setResult()</code>
+        .
       </para>
       <para>
         Not calling

@@ -159,11 +159,15 @@ public class WelcomePage extends Composite {
          <section id="sid-54493676_ErraiUINavigation-PageLifecycle">
             <title>Page Lifecycle</title>
             <para>
-            The
+            There are four annotations related to page lifecycle events:
             <code>@PageShowing</code>
-            and
+            ,
+            <code>@PageShown</code>
+            ,
             <code>@PageHiding</code>
-            annotations allow a page widget to be notified when it is about to be displayed or hidden:
+            , and
+            <code>@PageHidden</code>
+            . These annotations designate methods so a page widget can be notified when it is displayed or hidden:
           </para>
             <informalexample>
                <programlisting language="java">
@@ -182,19 +186,68 @@ public class ItemPage extends VerticalPanel {
 }
 </programlisting>
             </informalexample>
+            <para>Page Lifecycle:</para>
+            <orderedlist inheritnum="ignore" continuation="restarts">
+               <listitem>
+                  <para>The fragment identifier in the URL changes</para>
+               </listitem>
+               <listitem>
+                  <para>
+                The
+                <code>@PageHiding</code>
+                method on the current (about-to-be-navigated-away-from) page is invoked
+              </para>
+               </listitem>
+               <listitem>
+                  <para>The current page is removed from the browser's DOM</para>
+               </listitem>
+               <listitem>
+                  <para>
+                The
+                <code>@PageHidden</code>
+                method on the just-removed page is invoked
+              </para>
+               </listitem>
+               <listitem>
+                  <para>
+                The navigation system looks up the corresponding
+                <code>@Page</code>
+                bean in the client-side bean manager (we'll call this bean "the new page")
+              </para>
+               </listitem>
+               <listitem>
+                  <para>
+                The navigation system writes to all
+                <code>@PageState</code>
+                fields in the new page bean (more on this in the next section)
+              </para>
+               </listitem>
+               <listitem>
+                  <para>
+                The
+                <code>@PageShowing</code>
+                method of the new page is invoked
+              </para>
+               </listitem>
+               <listitem>
+                  <para>The new page widget is added to the DOM (as a direct child of the navigation content panel)</para>
+               </listitem>
+               <listitem>
+                  <para>
+                The
+                <code>@PageShown</code>
+                method of the new page is invoked.
+              </para>
+               </listitem>
+            </orderedlist>
             <para>
             The
             <code>@PageShowing</code>
-            method is invoked just before the page widget is inserted into the navigation content panel (thus it is not yet attached to the live DOM tree.) The
-            <code>@PageShowing</code>
-            method is permitted one optional parameter of type
+            and
+            <code>@PageShown</code>
+            methods are permitted one optional parameter of type
             <code>HistoryToken</code>
             —more on this in the next section.
-          </para>
-            <para>
-            The
-            <code>@PageHiding</code>
-            method is invoked just before the page widget is removed from the navigation content panel (thus it is still attached to the live DOM tree.)
           </para>
             <para>The lifespan of a Page instance is governed by CDI scope: Dependent and implict-scoped page beans are instantiated each time the user navigates to them, whereas Singleton and ApplicationScoped beans are created only once over the lifetime of the application. If a particular page is slow to appear because its UI takes a lot of effort to build, try marking it as a singleton.</para>
          </section>
@@ -264,11 +317,11 @@ public class ItemPage extends VerticalPanel {
             <code>@PageState</code>
             fields, you can also receive the whole Multimap in the
             <code>@PageShowing</code>
-            method through a parameter of type
+            and
+            <code>@PageShown</code>
+            methods through a parameter of type
             <code>HistoryToken</code>
-            . Whether or not the
-            <code>@PageShowing</code>
-            method has such a parameter, the
+            . Whether or not a lifecycle method has such a parameter, the
             <code>@PageState</code>
             fields will still be written as usual.
           </para>
