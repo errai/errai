@@ -31,6 +31,15 @@ public interface Caller<T> {
    * Returns an instance of the proxy that can invoke service methods on the
    * service described by {@code T}.
    *
+   * @return an instance of the proxy that can invoke service methods on the
+   *         service described by {@code T}.
+   */
+  public T call();
+
+  /**
+   * Returns an instance of the proxy that can invoke service methods on the
+   * service described by {@code T}.
+   *
    * @param callback
    *          the callback to be invoked when the remote call has completed in
    *          success. In the case of an error, a default error callback will be
