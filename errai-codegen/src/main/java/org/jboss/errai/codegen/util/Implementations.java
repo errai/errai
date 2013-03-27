@@ -125,6 +125,7 @@ public class Implementations {
   }
 
 
+
   public static interface StringBuilderBuilder extends Statement {
     public StringBuilderBuilder append(Object statement);
   }

@@ -16,13 +16,13 @@
 
 package org.jboss.errai.marshalling.client.api;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
+
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * @author Mike Brock
@@ -41,11 +41,6 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   private static final Marshaller<Object> NULL_MARSHALLER = new Marshaller<Object>() {
-    @Override
-    public Class<Object> getTypeHandled() {
-      return Object.class;
-    }
-
     @Override
     public Object demarshall(final EJValue o, final MarshallingSession ctx) {
       return null;
@@ -149,5 +144,11 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   public void setAssumedMapValueType(String assumedMapValueType) {
     this.assumedMapValueType = assumedMapValueType;
   }
-  
+
+  @Override
+  public void resetAssumedTypes() {
+    this.assumedMapKeyType = null;
+    this.assumedMapValueType = null;
+    this.assumedElementType = null;
+  }
 }

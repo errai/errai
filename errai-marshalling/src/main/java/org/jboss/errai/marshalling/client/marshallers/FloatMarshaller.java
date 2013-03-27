@@ -25,15 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Float.class)
+@ServerMarshaller(Float.class)
 public class FloatMarshaller extends AbstractNumberMarshaller<Float> {
-
-  @Override
-  public Class<Float> getTypeHandled() {
-    return Float.class;
-  }
-
   @Override
   public Float[] getEmptyArray() {
     return new Float[0];

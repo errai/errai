@@ -16,27 +16,21 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.Date;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
+import java.util.Date;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Date.class)
+@ServerMarshaller(Date.class)
 public class DateMarshaller extends AbstractNullableMarshaller<Date> {
-
-  @Override
-  public Class<Date> getTypeHandled() {
-    return Date.class;
-  }
-
   @Override
   public Date[] getEmptyArray() {
     return new Date[0];

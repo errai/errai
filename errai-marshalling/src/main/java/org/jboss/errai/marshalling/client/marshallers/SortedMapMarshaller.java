@@ -16,31 +16,24 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
+
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(SortedMap.class)
+@ServerMarshaller(SortedMap.class)
 @AlwaysQualify
 @ImplementationAliases({TreeMap.class})
 public class SortedMapMarshaller extends MapMarshaller<SortedMap<Object, Object>> {
-
-  @Override
-  public Class<SortedMap<Object, Object>> getTypeHandled() {
-    return SimpleTypeLiteral.<SortedMap<Object, Object>>ofRawType(SortedMap.class).get();
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   public SortedMap<Object, Object> demarshall(final EJValue o, final MarshallingSession ctx) {

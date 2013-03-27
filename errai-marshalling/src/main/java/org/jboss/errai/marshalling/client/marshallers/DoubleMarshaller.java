@@ -25,15 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Double.class)
+@ServerMarshaller(Double.class)
 public class DoubleMarshaller extends AbstractNumberMarshaller<Double> {
-
-  @Override
-  public Class<Double> getTypeHandled() {
-    return Double.class;
-  }
-  
   @Override
   public Double[] getEmptyArray() {
     return new Double[0];

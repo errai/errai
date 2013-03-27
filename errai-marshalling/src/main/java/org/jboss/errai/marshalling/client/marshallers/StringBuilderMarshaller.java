@@ -25,16 +25,10 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(StringBuilder.class)
+@ServerMarshaller(StringBuilder.class)
 public class StringBuilderMarshaller extends AbstractNullableMarshaller<StringBuilder> {
-
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
-
-  @Override
-  public Class<StringBuilder> getTypeHandled() {
-    return StringBuilder.class;
-  }
 
   @Override
   public StringBuilder[] getEmptyArray() {

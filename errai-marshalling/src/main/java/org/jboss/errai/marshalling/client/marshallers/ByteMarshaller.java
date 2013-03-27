@@ -25,15 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Byte.class)
+@ServerMarshaller(Byte.class)
 public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
-
-  @Override
-  public Class<Byte> getTypeHandled() {
-    return Byte.class;
-  }
-
   @Override
   public Byte[] getEmptyArray() {
     return new Byte[0];

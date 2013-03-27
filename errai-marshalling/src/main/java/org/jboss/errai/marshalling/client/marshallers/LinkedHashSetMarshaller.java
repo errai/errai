@@ -18,26 +18,17 @@ package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
-import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 
-import java.util.AbstractSet;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(LinkedHashSet.class)
+@ServerMarshaller(LinkedHashSet.class)
 public class LinkedHashSetMarshaller extends AbstractCollectionMarshaller<LinkedHashSet> {
-
-  @Override
-  public Class<LinkedHashSet> getTypeHandled() {
-    return LinkedHashSet.class;
-  }
-
   @Override
   public LinkedHashSet[] getEmptyArray() {
     return new LinkedHashSet[0];

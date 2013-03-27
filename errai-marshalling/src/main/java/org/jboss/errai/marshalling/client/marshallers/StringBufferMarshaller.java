@@ -25,7 +25,8 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(StringBuffer.class)
+@ServerMarshaller(StringBuffer.class)
 public class StringBufferMarshaller extends AbstractNullableMarshaller<StringBuffer> {
 
   public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
@@ -35,11 +36,6 @@ public class StringBufferMarshaller extends AbstractNullableMarshaller<StringBuf
     return new StringBuffer(o.isString().stringValue());
   }
 
-  @Override
-  public Class<StringBuffer> getTypeHandled() {
-    return StringBuffer.class;
-  }
-  
   @Override
   public StringBuffer[] getEmptyArray() {
     return new StringBuffer[0];

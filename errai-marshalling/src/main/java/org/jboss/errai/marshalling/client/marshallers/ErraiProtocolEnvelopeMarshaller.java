@@ -23,7 +23,6 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,11 +33,6 @@ import java.util.Map;
  */
 public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, Object>> {
   public static final ErraiProtocolEnvelopeMarshaller INSTANCE = new ErraiProtocolEnvelopeMarshaller();
-
-  @Override
-  public Class<Map<String, Object>> getTypeHandled() {
-    return SimpleTypeLiteral.<Map<String, Object>> ofRawType(Map.class).get();
-  }
 
   @Override
   public Map<String, Object> demarshall(final EJValue o, final MarshallingSession ctx) {

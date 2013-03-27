@@ -97,4 +97,6 @@ public interface MarshallingSession {
   public String getAssumedMapValueType();
 
   public void setAssumedMapValueType(String assumedMapValueType);
+
+  public void resetAssumedTypes();
 }

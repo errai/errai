@@ -44,9 +44,9 @@ public class MappingDefinition {
 
   private final List<MemberMapping> memberMappings;
 
-  public MappingDefinition(Marshaller<Object> marshaller, boolean cached) {
-    this(marshaller, marshaller.getTypeHandled(), cached);
-  }
+//  public MappingDefinition(Marshaller<Object> marshaller, boolean cached) {
+//    this(marshaller, marshaller.getTypeHandled(), cached);
+//  }
   public MappingDefinition(Marshaller<Object> marshaller, Class<?> toMap, boolean doNotGenerate) {
     this(marshaller, JavaReflectionClass.newUncachedInstance(toMap), doNotGenerate);
   }

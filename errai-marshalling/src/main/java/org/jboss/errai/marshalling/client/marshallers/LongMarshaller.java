@@ -26,15 +26,9 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Long.class)
+@ServerMarshaller(Long.class)
 public class LongMarshaller extends AbstractNumberMarshaller<Long> {
-
-  @Override
-  public Class<Long> getTypeHandled() {
-    return Long.class;
-  }
-
   @Override
   public Long[] getEmptyArray() {
     return new Long[0];

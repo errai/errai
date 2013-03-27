@@ -45,11 +45,6 @@ public class MarshallUtil {
       }
 
       @Override
-      public Class<Object> getTypeHandled() {
-        return type;
-      }
-
-      @Override
       public Object[] getEmptyArray() {
         throw new UnsupportedOperationException("Not implemented!");
       }

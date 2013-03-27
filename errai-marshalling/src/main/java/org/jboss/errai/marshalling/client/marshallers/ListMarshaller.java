@@ -16,32 +16,26 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-import java.util.Vector;
-
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.Vector;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(List.class)
+@ServerMarshaller(List.class)
 @ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
 public class ListMarshaller extends AbstractCollectionMarshaller<List> {
-
   public static final ListMarshaller INSTANCE = new ListMarshaller();
-
-  @Override
-  public Class<List> getTypeHandled() {
-    return List.class;
-  }
 
   @Override
   public List[] getEmptyArray() {

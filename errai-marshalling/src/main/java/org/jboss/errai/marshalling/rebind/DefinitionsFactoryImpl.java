@@ -204,8 +204,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       if (Marshaller_MC.isAssignableFrom(marshallerMetaClass)) {
         final Class<? extends Marshaller> marshallerCls = marshallerMetaClass.asClass().asSubclass(Marshaller.class);
         try {
-          final Class<?> type =
-              (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
+//          final Class<?> type =
+//              (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
+
+          final Class<?> type = marshallerMetaClass.getAnnotation(ClientMarshaller.class).value();
+
           final MappingDefinition marshallMappingDef = new MappingDefinition(type, true);
           marshallMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
           addDefinition(marshallMappingDef);
@@ -238,8 +241,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     for (final Class<?> marshallerCls : serverMarshallers) {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
         try {
-          final Class<?> type =
-              (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
+          final Class<?> type = marshallerCls.getAnnotation(ServerMarshaller.class).value();
           final MappingDefinition definition;
 
           if (hasDefinition(type)) {
