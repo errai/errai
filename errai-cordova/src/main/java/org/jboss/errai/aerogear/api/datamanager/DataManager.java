@@ -14,27 +14,31 @@ import java.util.Map;
 public class DataManager {
   private final Map<String, Store> stores = new HashMap<String, Store>();
 
-  private native void setup(String name) /*-{
-      $wnd.store = $wnd.AeroGear.DataManager( name ).stores[name];
+  private native void setup(String name, String type, String recordId, List<String> settings) /*-{
+      $wnd.store = $wnd.AeroGear.DataManager([{
+          name: name,
+          type: type,
+          recordId: recordId,
+          settings: settings
+      }]).stores[name];
   }-*/;
 
   public Store store(Config config) {
-    setup(config.getName());
+    setup(config.getName(), config.getType().getName(), config.getRecordId(), config.getSettings());
     return new StoreWrapper();
   }
 
   public <T> Store<T> store() {
-    return store(new Config().getName());
+    return store(new Config());
   }
 
   public <T> Store<T> store(String name) {
-    setup(name);
-    return new StoreWrapper<T>();
+    return store(new Config(name));
   }
 
   public static class Config {
     private String name;
-    private String type;
+    private StoreType type;
     private String recordId;
     private List<String> settings;
 
@@ -43,14 +47,14 @@ public class DataManager {
     }
 
     public Config(String name) {
-      this(name, "memory");
+      this(name, StoreType.MEMORY);
     }
 
-    public Config(String name, String type) {
+    public Config(String name, StoreType type) {
       this(name, type, "id");
     }
 
-    public Config(String name, String type, String recordId) {
+    public Config(String name, StoreType type, String recordId) {
       this.name = name;
       this.type = type;
       this.recordId = recordId;
@@ -60,7 +64,7 @@ public class DataManager {
       return name;
     }
 
-    public String getType() {
+    public StoreType getType() {
       return type;
     }
 

@@ -19,8 +19,8 @@ package org.jboss.errai.aerogear.api.datamanager;
 
 public enum StoreType {
 
-  MEMORY("MEMORY"),
-  SQL("SQL");
+  MEMORY("Memory"),
+  SESSION_LOCAL("SessionLocal");
 
   private final String typeDescription;
 
