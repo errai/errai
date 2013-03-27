@@ -618,16 +618,11 @@ public class LoginForm extends Composite {
       <section id="sid-51806600_ErraiUI-Default%2CSimple%2CandChainedPropertyBindings">
          <title>Default, Simple, and Chained Property Bindings</title>
          <para>
-          By default, bindings are determined by matching
-          <code>@DataField</code>
-          names to property names on the model object. In the example above, the
-          <code>@DataField</code>
-            <code>username</code>
+          By default, bindings are determined by matching field names to property names on the model object. In the example above, the field
+          <code>username</code>
           was automatically bound to the JavaBeans property
           <code>username</code>
-          of the model object. If the
-          <code>@DataField</code>
-          name does not match the model property name, you can use the
+          of the model object. If the field name does not match the model property name, you can use the
           <code>property</code>
           attribute of the
           <code>@Bound</code>

@@ -80,11 +80,9 @@
       <section id="sid-5931354_ErraiApp.properties-AsaMarkerFile">
          <title>As a Marker File</title>
          <para>
-            <emphasis role="strong">
-            An
+            <emphasis role="strong">An</emphasis>
             <code>ErraiApp.properties</code>
-            file must appear at the root of each classpath location that contains an Errai module.
-          </emphasis>
+            <emphasis role="strong">file must appear at the root of each classpath location that contains an Errai module.</emphasis>
           The contents of JAR and directory classpath entries that do not contain an
           <code>ErraiApp.properties</code>
           are effectively invisible to Errai's classpath scanner.
@@ -160,6 +158,9 @@
                </listitem>
             </itemizedlist>
          </section>
+      </section>
+      <section id="sid-5931354_ErraiApp.properties-">
+         <title/>
       </section>
    </section>
    <section id="sid-5931338">

@@ -425,6 +425,7 @@ public class MyCacheInterceptor implements RestClientInterceptor {
       <para>
         The result of the remote call can be manipulated by calling
         <code>RestCallContext.setResult()</code>
+        .
       </para>
       <para>
         Not calling
