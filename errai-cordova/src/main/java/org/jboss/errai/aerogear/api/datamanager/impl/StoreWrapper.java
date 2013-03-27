@@ -1,8 +1,12 @@
 package org.jboss.errai.aerogear.api.datamanager.impl;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.json.client.JSONObject;
 import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.datamanager.StoreType;
+import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -12,6 +16,9 @@ import java.util.HashSet;
  * @author edewit@redhat.com
  */
 public class StoreWrapper<T> implements Store<T> {
+  static {
+    MarshallerFramework.initializeDefaultSessionProvider();
+  }
 
   @Override
   public StoreType getType() {
@@ -24,35 +31,50 @@ public class StoreWrapper<T> implements Store<T> {
 
   @Override
   public Collection<T> readAll() {
-    JsArray<T> jsArray = readAll0();
+    JsArray jsArray = readAll0();
     HashSet<T> result = new HashSet<T>(jsArray.length());
 
     for (int i = 0; i < jsArray.length(); i++) {
-       result.add(jsArray.get(i));
+      result.add(fromJSON(toJSON(jsArray.get(i))));
     }
     return result;
   }
 
-  private native JsArray<T> readAll0() /*-{
+  private native JsArray readAll0() /*-{
       return $wnd.store.read();
   }-*/;
 
   @Override
   public T read(Serializable id) {
-    return read0(id).get(0);
+    if (id instanceof Number) {
+      return fromJSON(toJSON(read0((Integer) id)));
+    }
+    return fromJSON(toJSON(read0(id)));
   }
 
-  private native JsArray<T> read0(Serializable id) /*-{
-      return $wnd.store.read(id);
+  private String toJSON(JavaScriptObject object) {
+    return new JSONObject(object).toString();
+  }
+
+  private T fromJSON(String json) {
+    return (T) Marshalling.fromJSON(json);
+  }
+
+  private native JavaScriptObject read0(Integer id) /*-{
+      return $wnd.store.read(Number(id))[0];
+  }-*/;
+
+  private native JavaScriptObject read0(Serializable id) /*-{
+      return $wnd.store.read(id)[0];
   }-*/;
 
   @Override
   public void save(T item) {
-    save0(item);
+    save0(Marshalling.toJSON(item));
   }
 
-  private native void save0(T item) /*-{
-    $wnd.store.save(item);
+  private native void save0(String item) /*-{
+      $wnd.store.save(eval('[' + item + ']'));
   }-*/;
 
   @Override
@@ -67,10 +89,4 @@ public class StoreWrapper<T> implements Store<T> {
   private native void remove0(Serializable id) /*-{
       $wnd.store.remove(id);
   }-*/;
-
-  static class JsArray<T> extends JavaScriptObject {
-    protected JsArray() { }
-    public final native int length() /*-{ return this.length; }-*/;
-    public final native T get(int i) /*-{ return this[i];     }-*/;
-  }
 }

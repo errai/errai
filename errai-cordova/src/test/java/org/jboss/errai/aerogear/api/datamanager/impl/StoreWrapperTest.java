@@ -3,6 +3,8 @@ package org.jboss.errai.aerogear.api.datamanager.impl;
 import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.aerogear.api.datamanager.DataManager;
 import org.jboss.errai.aerogear.api.datamanager.Store;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 import java.util.Collection;
 
@@ -32,11 +34,12 @@ public class StoreWrapperTest extends GWTTestCase {
     assertEquals(4, collection.size());
     assertTrue(collection.contains(new User(3)));
 
-    User user = store.read(1);
+    User user = store.read(2);
     assertNotNull(user);
-    assertEquals(new User(1), user);
+    assertEquals(new User(2), user);
   }
 
+  @Portable
   public static class User {
     private int id;
     private String name;
@@ -45,7 +48,7 @@ public class StoreWrapperTest extends GWTTestCase {
       this(id, null);
     }
 
-    public User(int id, String name) {
+    public User(@MapsTo("id") int id, @MapsTo("name") String name) {
       this.id = id;
       this.name = name;
     }
