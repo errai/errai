@@ -41,7 +41,7 @@ import java.util.Map;
 @ClientMarshaller(Map.class)
 @ServerMarshaller(Map.class)
 @AlwaysQualify
-@ImplementationAliases({ AbstractMap.class, HashMap.class })
+@ImplementationAliases({AbstractMap.class, HashMap.class})
 public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
 
@@ -75,7 +75,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         if (key.equals(SerializationParts.OBJECT_ID)) {
           continue;
         }
-        
+
         if (assumedKeyType != null && assumedValueType != null) {
           demarshalledKey = convertKey(assumedKeyType, key);
 
@@ -93,7 +93,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
           impl.put(demarshalledKey, demarshalledValue);
         }
         else {
-       //   demarshalledKey = key;
+          //   demarshalledKey = key;
           impl.put(key,
               ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
         }
@@ -152,15 +152,16 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
       }
       else if (entry.getKey() != null) {
         if ((entry.getKey() instanceof Number && !(entry.getKey() instanceof BigInteger || entry.getKey() instanceof BigDecimal))
-        		|| entry.getKey() instanceof Boolean || entry.getKey() instanceof Character) {
+            || entry.getKey() instanceof Boolean || entry.getKey() instanceof Character) {
           keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getKey());
         }
         else {
           keyMarshaller = MarshallUtil.getMarshaller(entry.getKey(), ctx);
         }
+
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-                .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(entry.getKey(), ctx)))
-                .append("\"");
+            .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(entry.getKey(), ctx)))
+            .append("\"");
       }
 
       buf.append(":");
@@ -170,7 +171,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
       }
       else {
         if ((entry.getValue() instanceof Number && !(entry.getValue() instanceof BigInteger || entry.getValue() instanceof BigDecimal))
-                || entry.getValue() instanceof Boolean || entry.getValue() instanceof Character) {
+            || entry.getValue() instanceof Boolean || entry.getValue() instanceof Character) {
 
           valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getValue());
         }

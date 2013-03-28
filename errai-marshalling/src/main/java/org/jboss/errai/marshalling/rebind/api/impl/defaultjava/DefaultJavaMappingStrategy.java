@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.TernaryStatement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -111,10 +112,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             .append(Stmt.loadClassMember("EMPTY_ARRAY").returnValue())
             .finish();
 
-//        classStructureBuilder.publicOverridesMethod("getTypeHandled")
-//            .append(Stmt.load(toMap).returnValue())
-//            .finish();
-
         /**
          *
          * DEMARSHALL METHOD
@@ -123,11 +120,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         final BlockBuilder<?> builder =
             classStructureBuilder.publicOverridesMethod("demarshall",
                 Parameter.of(EJValue.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
-
-        //  final BlockBuilder<CatchBlockBuilder> builder = Stmt.try_();
-
-//        builder.append(Stmt.if_(Bool.expr(Stmt.loadVariable("a0").invoke("isNull")))
-//            .append(Stmt.load(null).returnValue()).finish());
 
         builder.append(Stmt.declareVariable(EJObject.class).named("obj")
             .initializeWith(loadVariable("a0").invoke("isObject")));
@@ -239,6 +231,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
           final Statement bindingStatement;
           final Statement val;
+
+          context.getMarshallerGeneratorFactory().addOrMarkMarshallerUnlazy(memberMapping.getType().getOuterComponentType());
+
           if (memberMapping.getType().isArray()) {
             val =
                 context.getArrayMarshallerCallback()
@@ -303,14 +298,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
 
         builder.append(loadVariable("entity").returnValue());
-
-//        builder.finish()
-//                .catch_(Throwable.class, "t")
-//                .append(loadVariable("t").invoke("printStackTrace"))
-//                .append(Stmt.throw_(RuntimeException.class,
-//                        "error demarshalling entity: " + toMap.getFullyQualifiedName(), loadVariable("t")))
-//                .finish();
-
         builder.finish();
 
         /**
@@ -352,15 +339,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       blockBuilder.append(statement);
     }
 
-//    if (elementType != null) {
-//      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", (String) null));
-//    }
-//    else if (assumedMapTypesSet) {
-//      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapKeyType", (String) null));
-//      blockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedMapValueType", (String) null));
-//    }
-
-    blockBuilder.append(Stmt.loadVariable("a1").invoke("resetAssumedTypes"));
+    if (assumedMapTypesSet) {
+      blockBuilder.append(Stmt.loadVariable("a1").invoke("resetAssumedTypes"));
+    }
 
     return (varName != null) ? Stmt.loadVariable(varName) : statement;
   }
@@ -431,39 +412,32 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     final int bufSize = calcBufferSize(new ArrayList<MappingDefinition>(), definition);
 
+    if (toMap.isEnum()) {
+      builder.append(
+          Stmt.declareFinalVariable(
+              "json",
+              StringBuilder.class,
+              Stmt.newObject(StringBuilder.class)
+          )
+      );
+      final ContextualStatementBuilder csb = Stmt.loadVariable("json");
+      marshallEnum(csb, Stmt.loadVariable("a0"), toMap);
+      builder.append(csb.invoke("toString").returnValue());
+      return;
+    }
+
     builder.append(Stmt.declareFinalVariable("ref", boolean.class,
         Stmt.loadVariable("a1").invoke("hasObject", Refs.get("a0"))));
 
-
-
-
-    if (toMap.isEnum()) {
-      builder.append(
-           Stmt.declareFinalVariable(
-               "json",
-               StringBuilder.class,
-               Stmt.newObject(StringBuilder.class)
-           )
-       );
-      marshallEnum(builder, Stmt.loadVariable("a0"), toMap);
-      builder.append(Stmt.loadVariable("json").invoke("toString").returnValue());
-//      builder.append(Stmt.nestedCall(marshallEnum(newStringBuilder(256), Stmt.loadVariable("a0"), toMap))
-//          .invoke("toString").returnValue());
-      return;
-    }
-    else {
-      builder.append(
-           Stmt.declareFinalVariable(
-               "json",
-               StringBuilder.class,
-               Stmt.newObject(StringBuilder.class,
-                   "{" + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName())) + ",\"" +
-                       SerializationParts.OBJECT_ID + "\"")
-           )
-       );
-
-    }
-
+    builder.append(
+        Stmt.declareFinalVariable(
+            "json",
+            StringBuilder.class,
+            Stmt.newObject(StringBuilder.class,
+                "{" + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName())) + ",\"" +
+                    SerializationParts.OBJECT_ID + "\"")
+        )
+    );
 
     builder.append(Stmt.loadVariable("json")
         .invoke("append", ":\"")
@@ -471,18 +445,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         .invoke("append", "\"")
     );
 
-//    final Implementations.StringBuilderBuilder sb = newStringBuilder(bufSize)
-//        .append("{" + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName())) + "," +
-//            string(SerializationParts.OBJECT_ID) + ":\"").append(loadVariable("objId")).append("\"");
-
     builder.append(
         If.cond(loadVariable("ref"))
             .append(Stmt.loadVariable("json").invoke("append", "}").invoke("toString").returnValue())
             .finish());
 
-   // builder.append(declareVariable(String.class).named("objId").initializeWith(loadVariable("a1").invoke("getObject", Stmt.loadVariable("a0"))));
-
     boolean hasEncoded = false;
+
+    ContextualStatementBuilder appendChain = null;
 
     int i = 0;
     for (final MemberMapping mapping : definition.getMemberMappings()) {
@@ -491,16 +461,15 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       }
 
       if (!hasEncoded) {
-        builder.append(Stmt.loadVariable("json").invoke("append", ","));
-        //sb.append(",");
+        appendChain = Stmt.loadVariable("json").invoke("append", ",");
         hasEncoded = true;
       }
       else if (i > 0) {
-        builder.append(Stmt.loadVariable("json").invoke("append", ","));
-        // sb.append(",");
+        appendChain.invoke("append", ",");
       }
 
       final MetaClass targetType = GenUtil.getPrimitiveWrapper(mapping.getType());
+
       final MetaClass compType = targetType.isArray() ? targetType.getOuterComponentType().asBoxed() : targetType.asBoxed();
 
       if (!(compType.isAbstract() || compType.isInterface() || compType.isEnum()) && !context.canMarshal(compType.getFullyQualifiedName())) {
@@ -511,35 +480,30 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       if (targetType.isArray()) {
         valueStatement = context.getArrayMarshallerCallback().marshal(targetType, valueStatement);
       }
-      //  sb.append("\"" + mapping.getKey() + "\" : ");
-      builder.append(Stmt.loadVariable("json").invoke("append", "\"" + mapping.getKey() + "\":"));
+      appendChain.invoke("append", "\"" + mapping.getKey() + "\":");
+
 
       if (targetType.isEnum()) {
-        marshallEnum(builder, valueStatement, targetType);
+        marshallEnum(appendChain, valueStatement, targetType);
       }
       else {
-//        sb.append(loadVariable(MarshallingGenUtil.getVarName(targetType))
-//            .invoke("marshall", valueStatement, loadVariable("a1")));
-        builder.append(Stmt.loadVariable("json").invoke("append",
+        appendChain.invoke("append",
             loadVariable(MarshallingGenUtil.getVarName(targetType))
-                .invoke("marshall", valueStatement, loadVariable("a1")))
-        );
+                .invoke("marshall", valueStatement, loadVariable("a1")));
       }
 
       i++;
     }
 
     if (i == 0) {
-      builder.append(Stmt.loadVariable("json").invoke("append", ",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true"));
+      if (appendChain == null) {
+        appendChain = Stmt.loadVariable("json");
+      }
 
-      // sb.append(",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
+      appendChain.invoke("append", ",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
     }
 
-    builder.append(Stmt.loadVariable("json").invoke("append", "}").invoke("toString").returnValue());
-
-    // sb.append("}");
-
-    //  builder.append(Stmt.nestedCall(sb).invoke("toString").returnValue());
+    builder.append(appendChain.invoke("append", "}").invoke("toString").returnValue());
   }
 
   private static String keyValue(final String key, final String value) {
@@ -600,7 +564,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     return new TernaryStatement(Bool.isNotNull(objStatement), trueStatement, falseStatement);
   }
 
-  public void marshallEnum(final BlockBuilder bb,
+  public void marshallEnum(final ContextualStatementBuilder bb,
                            final Statement valueStatement,
                            final MetaClass toType) {
 
@@ -612,7 +576,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     final TernaryStatement ternaryStatement = new TernaryStatement(
         Bool.isNotNull(valueStatement), internalSBB, Stmt.load("null"));
 
-    bb.append(Stmt.loadVariable("json").invoke("append", ternaryStatement));
+    bb.invoke("append", ternaryStatement);
   }
 
   public Statement unwrapJSON(final Statement valueStatement, final MetaClass toType, final MetaClass targetType) {

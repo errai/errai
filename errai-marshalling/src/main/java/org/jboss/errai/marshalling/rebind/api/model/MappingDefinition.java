@@ -33,6 +33,7 @@ import java.util.List;
 public class MappingDefinition {
   private final MetaClass toMap;
 
+  private boolean lazy;
   private final boolean doNotGenerate;
 
   private Class<? extends Marshaller> clientMarshallerClass;
@@ -44,15 +45,7 @@ public class MappingDefinition {
 
   private final List<MemberMapping> memberMappings;
 
-//  public MappingDefinition(Marshaller<Object> marshaller, boolean cached) {
-//    this(marshaller, marshaller.getTypeHandled(), cached);
-//  }
-  public MappingDefinition(Marshaller<Object> marshaller, Class<?> toMap, boolean doNotGenerate) {
-    this(marshaller, JavaReflectionClass.newUncachedInstance(toMap), doNotGenerate);
-  }
-
-
-  public MappingDefinition(Marshaller<Object> marshaller, MetaClass toMap, boolean doNotGenerate) {
+  public MappingDefinition(final Marshaller<Object> marshaller, final MetaClass toMap, final boolean doNotGenerate) {
     this.toMap = toMap;
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
@@ -60,15 +53,15 @@ public class MappingDefinition {
     this.memberMappings = new ArrayList<MemberMapping>();
   }
 
-  protected MappingDefinition(Class<?> toMap) {
+  protected MappingDefinition(final Class<?> toMap) {
     this(toMap, false);
   }
 
-  public MappingDefinition(Class<?> toMap, boolean doNotGenerate) {
+  public MappingDefinition(final Class<?> toMap, final boolean doNotGenerate) {
     this(JavaReflectionClass.newUncachedInstance(toMap), doNotGenerate);
   }
 
-  public MappingDefinition(MetaClass toMap, boolean doNotGenerate) {
+  public MappingDefinition(final MetaClass toMap, final boolean doNotGenerate) {
     this.toMap = toMap;
     setInstantiationMapping(new SimpleConstructorMapping());
     this.doNotGenerate = doNotGenerate;
@@ -84,7 +77,7 @@ public class MappingDefinition {
     return clientMarshallerClass;
   }
 
-  public void setClientMarshallerClass(Class<? extends Marshaller> clientMarshallerClass) {
+  public void setClientMarshallerClass(final Class<? extends Marshaller> clientMarshallerClass) {
     this.clientMarshallerClass = clientMarshallerClass;
   }
 
@@ -92,7 +85,7 @@ public class MappingDefinition {
     return serverMarshallerClass;
   }
 
-  public void setServerMarshallerClass(Class<? extends Marshaller> serverMarshallerClass) {
+  public void setServerMarshallerClass(final Class<? extends Marshaller> serverMarshallerClass) {
     this.serverMarshallerClass = serverMarshallerClass;
   }
 
@@ -100,21 +93,21 @@ public class MappingDefinition {
     return doNotGenerate;
   }
 
-  public void setInstantiationMapping(InstantiationMapping mapping) {
+  public void setInstantiationMapping(final InstantiationMapping mapping) {
     mapping.setMappingClass(toMap);
     instantiationMapping = mapping;
   }
 
-  public void setInheritedInstantiationMapping(InstantiationMapping mapping) {
+  public void setInheritedInstantiationMapping(final InstantiationMapping mapping) {
     instantiationMapping = mapping;
   }
 
-  public void addMemberMapping(MemberMapping mapping) {
+  public void addMemberMapping(final MemberMapping mapping) {
     mapping.setMappingClass(toMap);
     memberMappings.add(mapping);
   }
 
-  public void addInheritedMapping(MemberMapping mapping) {
+  public void addInheritedMapping(final MemberMapping mapping) {
     memberMappings.add(mapping);
   }
 
@@ -133,8 +126,8 @@ public class MappingDefinition {
       return _readableMemberMappingsCache;
     }
 
-    List<MemberMapping> readableMemberMappings = new ArrayList<MemberMapping>();
-    for (MemberMapping memberMapping : memberMappings) {
+    final List<MemberMapping> readableMemberMappings = new ArrayList<MemberMapping>();
+    for (final MemberMapping memberMapping : memberMappings) {
       if (memberMapping.canRead()) {
         readableMemberMappings.add(memberMapping);
       }
@@ -149,8 +142,8 @@ public class MappingDefinition {
       return _writableMemberMappingsCache;
     }
 
-    List<MemberMapping> writableMemberMappings = new ArrayList<MemberMapping>();
-    for (MemberMapping memberMapping : memberMappings) {
+    final List<MemberMapping> writableMemberMappings = new ArrayList<MemberMapping>();
+    for (final MemberMapping memberMapping : memberMappings) {
       if (memberMapping.canWrite()) {
         writableMemberMappings.add(memberMapping);
       }
@@ -162,7 +155,7 @@ public class MappingDefinition {
     return marshallerInstance;
   }
 
-  public void setMarshallerInstance(Marshaller marshallerInstance) {
+  public void setMarshallerInstance(final Marshaller marshallerInstance) {
     this.marshallerInstance = marshallerInstance;
   }
 
@@ -174,6 +167,14 @@ public class MappingDefinition {
     mappingList.addAll(getMemberMappings());
 
     return Collections.unmodifiableList(mappingList);
+  }
+
+  public boolean isLazy() {
+    return lazy;
+  }
+
+  public void setLazy(boolean lazy) {
+    this.lazy = lazy;
   }
 
   @Override

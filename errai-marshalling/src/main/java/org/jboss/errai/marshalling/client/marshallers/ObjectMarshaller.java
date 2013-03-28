@@ -116,5 +116,4 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
 
     return MarshallUtil.getMarshaller(o, ctx).marshall(o, ctx);
   }
-
 }
