@@ -191,7 +191,7 @@
     <!-- GAE -->
     <dependency>
       <groupId>com.google.appengine</groupId>
-      <artifactId>appengine-api</artifactId>
+      <artifactId>appengine-api-1.0-sdk</artifactId>
       <scope>provided</scope>
     </dependency>
 

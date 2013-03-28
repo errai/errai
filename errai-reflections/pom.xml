@@ -39,7 +39,6 @@
 
   <modules>
     <module>reflections</module>
-    <module>reflections-maven</module>
   </modules>
 
   <scm>

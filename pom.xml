@@ -81,7 +81,7 @@
     <guice.version>3.0</guice.version>
     <guava.version>12.0</guava.version>
     <mvel.version>2.1.Beta8</mvel.version>
-    <appengine.version>1.3.5</appengine.version>
+    <appengine.version>1.7.6</appengine.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <slf4j.version>1.6.1</slf4j.version>
     <argLine></argLine>
@@ -268,7 +268,7 @@
 
       <dependency>
         <groupId>com.google.appengine</groupId>
-        <artifactId>appengine-api</artifactId>
+        <artifactId>appengine-api-1.0-sdk</artifactId>
         <version>${appengine.version}</version>
         <scope>provided</scope>
       </dependency>

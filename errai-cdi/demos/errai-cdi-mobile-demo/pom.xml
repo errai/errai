@@ -21,13 +21,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.ejb3</groupId>
-      <artifactId>jboss-ejb3-api</artifactId>
-      <scope>provided</scope>
-      <version>3.1.0</version>
-    </dependency>
-
-    <dependency>
       <groupId>javax.enterprise</groupId>
       <artifactId>cdi-api</artifactId>
       <scope>provided</scope>
