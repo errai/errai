@@ -11,7 +11,7 @@
   <properties>
 	<skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gwt.version>2.5.0</gwt.version>
+    <gwt.version>2.5.1</gwt.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <junit.version>4.10</junit.version>
     <slf4j.version>1.6.1</slf4j.version>
