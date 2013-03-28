@@ -152,11 +152,6 @@ public class MappingContextSingleton {
 
   private static final Marshaller<Object> NULL_MARSHALLER = new Marshaller<Object>() {
     @Override
-    public Class<Object> getTypeHandled() {
-      return Object.class;
-    }
-
-    @Override
     public Object demarshall(EJValue o, MarshallingSession ctx) {
       return null;
     }
@@ -211,7 +206,8 @@ public class MappingContextSingleton {
                   def.getServerMarshallerClass().asSubclass(Marshaller.class).newInstance();
 
               if (def.getServerMarshallerClass().isAnnotationPresent(AlwaysQualify.class)) {
-                def.setMarshallerInstance(new QualifyingMarshallerWrapper<Object>(marshallerInstance));
+                def.setMarshallerInstance(new QualifyingMarshallerWrapper<Object>(marshallerInstance,
+                    (Class<Object>) def.getMappingClass().asClass()));
               }
               else {
                 def.setMarshallerInstance(marshallerInstance);
@@ -259,8 +255,11 @@ public class MappingContextSingleton {
             return;
           }
 
-          MappingDefinition newDef = new MappingDefinition(EncDecUtil.qualifyMarshaller(
-              new DefaultArrayMarshaller(type, marshaller)), true);
+          MappingDefinition newDef = new MappingDefinition(
+              EncDecUtil.qualifyMarshaller(
+                  new DefaultArrayMarshaller(type, marshaller),
+                  (Class<Object>) type.asClass()
+              ), type, true);
 
           if (outerDef != null) {
             newDef.setClientMarshallerClass(outerDef.getClientMarshallerClass());

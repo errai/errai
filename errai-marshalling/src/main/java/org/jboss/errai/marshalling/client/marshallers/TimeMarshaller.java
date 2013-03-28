@@ -16,19 +16,20 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.sql.Time;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
+import java.sql.Time;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(Time.class)
+@ServerMarshaller(Time.class)
 public class TimeMarshaller extends AbstractNullableMarshaller<Time> {
 
   @Override
@@ -50,11 +51,6 @@ public class TimeMarshaller extends AbstractNullableMarshaller<Time> {
     return null;
   }
 
-  @Override
-  public Class<Time> getTypeHandled() {
-    return Time.class;
-  }
-  
   @Override
   public Time[] getEmptyArray() {
     return new Time[0];

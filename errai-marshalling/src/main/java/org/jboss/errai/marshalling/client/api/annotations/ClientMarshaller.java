@@ -28,4 +28,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface ClientMarshaller {
   boolean multiReferenceable() default false;
+  Class<?> value();
 }

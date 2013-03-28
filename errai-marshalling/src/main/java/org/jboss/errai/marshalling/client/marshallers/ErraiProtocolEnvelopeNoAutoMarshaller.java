@@ -16,17 +16,16 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Mike Brock
@@ -34,11 +33,6 @@ import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
  */
 public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<String, Object>> {
   public static final ErraiProtocolEnvelopeNoAutoMarshaller INSTANCE = new ErraiProtocolEnvelopeNoAutoMarshaller();
-
-  @Override
-  public Class<Map<String, Object>> getTypeHandled() {
-    return SimpleTypeLiteral.<Map<String, Object>> ofRawType(Map.class).get();
-  }
 
   @Override
   public Map<String, Object> demarshall(final EJValue o, final MarshallingSession ctx) {

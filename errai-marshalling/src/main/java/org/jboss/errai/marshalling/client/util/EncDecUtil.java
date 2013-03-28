@@ -16,13 +16,13 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author Mike Brock
@@ -66,7 +66,7 @@ public class EncDecUtil {
    * @param <T>
    * @return
    */
-  public static <T> Marshaller<T> qualifyMarshaller(final Marshaller<T> marshaller) {
-    return new QualifyingMarshallerWrapper<T>(marshaller);
+  public static <T> Marshaller<T> qualifyMarshaller(final Marshaller<T> marshaller, Class<T> type) {
+    return new QualifyingMarshallerWrapper<T>(marshaller, type);
   }
 }

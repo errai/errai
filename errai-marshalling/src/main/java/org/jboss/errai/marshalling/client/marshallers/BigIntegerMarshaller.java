@@ -16,25 +16,20 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.math.BigInteger;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
+import java.math.BigInteger;
+
 /**
  * @author Mike Brock
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(BigInteger.class)
+@ServerMarshaller(BigInteger.class)
 public class BigIntegerMarshaller extends AbstractNullableMarshaller<BigInteger> {
-
-  @Override
-  public Class<BigInteger> getTypeHandled() {
-    return BigInteger.class;
-  }
-  
   @Override
   public BigInteger[] getEmptyArray() {
     return new BigInteger[0];

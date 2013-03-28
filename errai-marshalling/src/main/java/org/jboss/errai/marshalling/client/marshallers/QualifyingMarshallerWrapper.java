@@ -31,14 +31,11 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  */
 public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T> {
   private final Marshaller<T> delegate;
+  private final Class<T> type;
 
-  public QualifyingMarshallerWrapper(final Marshaller<T> delegate) {
+  public QualifyingMarshallerWrapper(final Marshaller<T> delegate, Class<T> type) {
     this.delegate = delegate;
-  }
-
-  @Override
-  public Class<T> getTypeHandled() {
-    return delegate.getTypeHandled();
+    this.type = type;
   }
 
   @Override
@@ -66,7 +63,7 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
     else {
       // This is to support one-dimensional Jackson char and byte array representations which cannot be wrapped in
       // an JSON object by the transfomer because they are indistinguishable from plain Strings.
-      Class<?> componentType = getTypeHandled().getComponentType();
+      Class<?> componentType = type.getComponentType();
       if (o.isString() != null && componentType != null) {
         if (componentType.equals(byte.class)) {
           return (T) Base64Util.decode(o.isString().stringValue());

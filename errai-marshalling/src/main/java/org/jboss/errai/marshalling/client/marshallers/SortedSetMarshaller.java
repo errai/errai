@@ -16,27 +16,22 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(SortedSet.class)
+@ServerMarshaller(SortedSet.class)
 @ImplementationAliases({TreeSet.class})
 public class SortedSetMarshaller extends AbstractCollectionMarshaller<SortedSet> {
-
-  @Override
-  public Class<SortedSet> getTypeHandled() {
-    return SortedSet.class;
-  }
-
   @Override
   public SortedSet[] getEmptyArray() {
     return new TreeSet[0];

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2013 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.api.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.jboss.errai.common.client.api;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface ServerMarshaller {
-  boolean multiReferenceable() default false;
-  Class<?> value();
+public class VoidCallback implements RemoteCallback<Void> {
+  @Override
+  public void callback(final Void response) {
+  }
 }

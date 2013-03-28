@@ -16,13 +16,6 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.AbstractMap;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -33,23 +26,24 @@ import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Map.class)
+@ServerMarshaller(Map.class)
 @AlwaysQualify
-@ImplementationAliases({ AbstractMap.class, HashMap.class })
+@ImplementationAliases({AbstractMap.class, HashMap.class})
 public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
-
-  @Override
-  public Class<T> getTypeHandled() {
-    return SimpleTypeLiteral.<T> ofRawType(Map.class).get();
-  }
 
   @Override
   public T[] getEmptyArray() {
@@ -81,7 +75,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         if (key.equals(SerializationParts.OBJECT_ID)) {
           continue;
         }
-        
+
         if (assumedKeyType != null && assumedValueType != null) {
           demarshalledKey = convertKey(assumedKeyType, key);
 
@@ -99,7 +93,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
           impl.put(demarshalledKey, demarshalledValue);
         }
         else {
-       //   demarshalledKey = key;
+          //   demarshalledKey = key;
           impl.put(key,
               ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
         }
@@ -158,15 +152,16 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
       }
       else if (entry.getKey() != null) {
         if ((entry.getKey() instanceof Number && !(entry.getKey() instanceof BigInteger || entry.getKey() instanceof BigDecimal))
-        		|| entry.getKey() instanceof Boolean || entry.getKey() instanceof Character) {
+            || entry.getKey() instanceof Boolean || entry.getKey() instanceof Character) {
           keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getKey());
         }
         else {
           keyMarshaller = MarshallUtil.getMarshaller(entry.getKey(), ctx);
         }
+
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-                .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(entry.getKey(), ctx)))
-                .append("\"");
+            .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(entry.getKey(), ctx)))
+            .append("\"");
       }
 
       buf.append(":");
@@ -176,7 +171,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
       }
       else {
         if ((entry.getValue() instanceof Number && !(entry.getValue() instanceof BigInteger || entry.getValue() instanceof BigDecimal))
-                || entry.getValue() instanceof Boolean || entry.getValue() instanceof Character) {
+            || entry.getValue() instanceof Boolean || entry.getValue() instanceof Character) {
 
           valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(entry.getValue());
         }

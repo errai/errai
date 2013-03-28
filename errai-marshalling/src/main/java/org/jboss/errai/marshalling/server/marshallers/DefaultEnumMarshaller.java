@@ -16,12 +16,12 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
-import java.lang.reflect.Array;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+
+import java.lang.reflect.Array;
 
 /**
  * @author Mike Brock
@@ -31,11 +31,6 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
 
   public DefaultEnumMarshaller(final Class enumType) {
     this.enumType = enumType;
-  }
-
-  @Override
-  public Class<Enum> getTypeHandled() {
-    return Enum.class;
   }
 
   public Enum demarshall(final EJValue a0, final MarshallingSession a1) {

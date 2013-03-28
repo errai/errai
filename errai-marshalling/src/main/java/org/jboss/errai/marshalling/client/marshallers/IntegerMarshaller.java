@@ -25,15 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Integer.class)
+@ServerMarshaller(Integer.class)
 public class IntegerMarshaller extends AbstractNumberMarshaller<Integer> {
-
-  @Override
-  public Class<Integer> getTypeHandled() {
-    return Integer.class;
-  }
-
   @Override
   public Integer[] getEmptyArray() {
     return new Integer[0];

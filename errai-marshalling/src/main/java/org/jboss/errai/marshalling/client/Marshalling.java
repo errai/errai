@@ -16,10 +16,6 @@
 
 package org.jboss.errai.marshalling.client;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -29,6 +25,10 @@ import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A collection of static methods for accomplishing common tasks with the Errai marshalling API.
@@ -148,6 +148,10 @@ public abstract class Marshalling {
    */
   @SuppressWarnings("unchecked")
   public static <T> T fromJSON(final String json, final Class<T> type, final Class<?> assumedElementType) {
+    if (json == null || "null".equals(json)) {
+      return null;
+    }
+
     final EJValue parsedValue = ParserFactory.get().parse(json);
     final MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
     if (assumedElementType != null) {
@@ -157,6 +161,7 @@ public abstract class Marshalling {
     if (marshallerInstance == null) {
         throw new RuntimeException("No marshaller for type: " + type.getName());
     }
+
     return (T) marshallerInstance.demarshall(parsedValue, session);
   }
 

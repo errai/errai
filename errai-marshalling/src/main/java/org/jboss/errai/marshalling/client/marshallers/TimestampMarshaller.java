@@ -16,26 +16,21 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.sql.Timestamp;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
+import java.sql.Timestamp;
+
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(Timestamp.class)
+@ServerMarshaller(Timestamp.class)
 public class TimestampMarshaller extends AbstractNullableMarshaller<Timestamp> {
-
-  @Override
-  public Class<Timestamp> getTypeHandled() {
-    return Timestamp.class;
-  }
-  
   @Override
   public Timestamp[] getEmptyArray() {
     return new Timestamp[0];

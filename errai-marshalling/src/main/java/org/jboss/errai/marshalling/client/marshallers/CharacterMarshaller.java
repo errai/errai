@@ -26,14 +26,9 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(Character.class)
+@ServerMarshaller(Character.class)
 public class CharacterMarshaller extends AbstractNullableMarshaller<Character> {
-
-  @Override
-  public Class<Character> getTypeHandled() {
-    return Character.class;
-  }
-
   @Override
   public Character[] getEmptyArray() {
     return new Character[0];

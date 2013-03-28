@@ -25,15 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Boolean.class)
+@ServerMarshaller(Boolean.class)
 public class BooleanMarshaller extends AbstractNullableMarshaller<Boolean> {
-
-  @Override
-  public Class<Boolean> getTypeHandled() {
-    return Boolean.class;
-  }
-
   @Override
   public Boolean[] getEmptyArray() {
     return new Boolean[0];
