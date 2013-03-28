@@ -271,6 +271,10 @@ public class MarshallerGeneratorFactory {
       }
     }
 
+    for (final MetaClass metaClass : mappingContext.getDefinitionsFactory().getArraySignatures()) {
+      addArrayMarshaller(metaClass);
+    }
+
     return classStructureBuilder.toJavaString();
   }
 
@@ -283,15 +287,17 @@ public class MarshallerGeneratorFactory {
 
     boolean lazyEnabled = CommonConfigAttribs.LAZY_LOAD_BUILTIN_MARSHALLERS.getBoolean();
 
-    for (final MetaClass clazz : exposed) {
-      final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clazz);
+    for (final MetaClass cls : exposed) {
+      final MetaClass compType = cls.getOuterComponentType();
 
-      if (definition.getClientMarshallerClass() != null || definition.alreadyGenerated() || !reachable(clazz)) {
+      final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(compType);
+
+      if (definition.getClientMarshallerClass() != null || definition.alreadyGenerated() || !reachable(compType)) {
         continue;
       }
 
       if (lazyEnabled && definition.isLazy()) {
-        if (unlazyMarshallers.contains(clazz.getFullyQualifiedName())) {
+        if (unlazyMarshallers.contains(compType.getFullyQualifiedName())) {
           definition.setLazy(false);
         }
         else {
@@ -299,7 +305,7 @@ public class MarshallerGeneratorFactory {
         }
       }
 
-      addMarshaller(clazz);
+      addMarshaller(compType);
     }
 
     constructor.finish();

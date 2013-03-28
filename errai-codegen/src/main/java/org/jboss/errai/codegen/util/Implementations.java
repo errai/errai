@@ -47,7 +47,7 @@ public class Implementations {
             .body();
   }
 
-  public static ClassStructureBuilder<?> implement(final Class<?> clazz,
+  public static ClassStructureBuilder<?>  implement(final Class<?> clazz,
                                                    final String implPackageName,
                                                    final String implClassName) {
     return ClassBuilder.define(implPackageName + "." + implClassName)

@@ -16,9 +16,6 @@
 
 package org.jboss.errai.bus.rebind;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
@@ -40,6 +37,9 @@ import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.config.rebind.ProxyUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Generates an Errai RPC remote proxy.

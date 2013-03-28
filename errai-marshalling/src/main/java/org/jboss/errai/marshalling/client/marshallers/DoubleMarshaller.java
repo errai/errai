@@ -41,7 +41,6 @@ public class DoubleMarshaller extends AbstractNumberMarshaller<Double> {
     else {
       return o.toString();
     }
-
   }
 
   @Override

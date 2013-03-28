@@ -16,7 +16,6 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.GeneratorContext;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -143,9 +142,31 @@ public abstract class EnvUtil {
 
     exposedClasses.addAll(exposedFromScanner);
 
+    ClassScanner.setReflectionsScanning(true);
+    final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class);
+    for (final MetaClass cls : exts) {
+      try {
+        Class<? extends ExposedTypesProvider> providerClass = cls.asClass().asSubclass(ExposedTypesProvider.class);
+        for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
+          final MetaClass toAdd;
+          if (exposedType.isPrimitive()) {
+            toAdd = exposedType.asBoxed();
+          }
+          else {
+            toAdd = exposedType;
+          }
+          exposedClasses.add(toAdd);
+        }
+      }
+      catch (Throwable e) {
+        throw new RuntimeException("unable to load environment extension: " + cls.getFullyQualifiedName(), e);
+      }
+    }
+    ClassScanner.setReflectionsScanning(false);
+
     final Collection<URL> erraiAppProperties = getErraiAppProperties();
 
-    for (URL url : erraiAppProperties) {
+    for (final URL url : erraiAppProperties) {
       InputStream inputStream = null;
       try {
 
@@ -238,8 +259,6 @@ public abstract class EnvUtil {
   }
 
   public static Collection<URL> getErraiAppProperties() {
-    final Multimap<String,String> erraiProperties = ScannerSingleton.getOrCreateInstance().getErraiProperties();
-
     try {
       final Set<URL> urlList = new HashSet<URL>();
       Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("ErraiApp.properties");

@@ -16,12 +16,6 @@
 
 package org.jboss.errai.codegen.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Modifier;
@@ -46,6 +40,12 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.mvel2.DataConversion;
 import org.mvel2.util.NullType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -572,7 +572,7 @@ public class GenUtil {
                                                             final MetaClass decl,
                                                             MetaConstructor[] constructors,
                                                             final boolean classTarget) {
-    if (constructors.length == 0) {
+    if (constructors == null || constructors.length == 0) {
       return null;
     }
 

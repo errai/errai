@@ -48,6 +48,7 @@ import java.util.TreeSet;
  */
 public class Context {
 
+  private final Throwable createdBy = new Throwable();
   private final Thread BLESSED_THREAD = Thread.currentThread();
 
   private void checkThread() {

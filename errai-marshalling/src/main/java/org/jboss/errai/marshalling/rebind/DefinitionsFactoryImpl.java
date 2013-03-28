@@ -73,6 +73,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Map<String, String> mappingAliases
       = new HashMap<String, String>();
 
+  private final Set<MetaClass> arraySignatures
+      = new HashSet<MetaClass>();
+
   private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
       = new HashMap<String, MappingDefinition>();
 
@@ -154,6 +157,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private void loadCustomMappings() {
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
+    EnvUtil.clearCache();
+    final EnvironmentConfig environmentConfig = getEnvironmentConfig();
+    final Set<MetaClass> envExposedClasses = environmentConfig.getExposedClasses();
+
     for (final Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
         throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit "
@@ -164,7 +171,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         final MappingDefinition definition = (MappingDefinition) cls.newInstance();
         definition.setMarshallerInstance(new DefaultDefinitionMarshaller(definition));
         addDefinition(definition);
-        definition.setLazy(true);
+
+        if (!envExposedClasses.contains(definition.getMappingClass())) {
+          definition.setLazy(true);
+        }
 
         exposedClasses.add(definition.getMappingClass());
 
@@ -181,7 +191,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             aliasMappingDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasMappingDef));
             addDefinition(aliasMappingDef);
 
-            aliasMappingDef.setLazy(true);
+            if (!envExposedClasses.contains(metaClass)) {
+              aliasMappingDef.setLazy(true);
+            }
 
             exposedClasses.add(metaClass);
 
@@ -284,10 +296,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     exposedClasses.add(MetaClassFactory.get(Object.class));
 
 
-    EnvUtil.clearCache();
-    final EnvironmentConfig environmentConfig = getEnvironmentConfig();
 
-    exposedClasses.addAll(environmentConfig.getExposedClasses());
+
+    exposedClasses.addAll(envExposedClasses);
 
     final Map<String, String> configuredMappingAliases = new HashMap<String, String>();
     configuredMappingAliases.putAll(environmentConfig.getMappingAliases());
@@ -299,7 +310,16 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     final List<MetaClass> enums = new ArrayList<MetaClass>();
 
-    for (final MetaClass mappedClass : exposedClasses) {
+    for (final MetaClass cls : exposedClasses) {
+      MetaClass mappedClass;
+      if (cls.isArray()) {
+        arraySignatures.add(cls);
+        mappedClass = cls.getOuterComponentType();
+      }
+      else {
+        mappedClass = cls;
+      }
+
       if (mappedClass.isSynthetic())
         continue;
 
@@ -496,6 +516,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   @Override
   public Set<MetaClass> getExposedClasses() {
     return Collections.unmodifiableSet(exposedClasses);
+  }
+
+  @Override
+  public Set<MetaClass> getArraySignatures() {
+    return arraySignatures;
   }
 
   @Override
