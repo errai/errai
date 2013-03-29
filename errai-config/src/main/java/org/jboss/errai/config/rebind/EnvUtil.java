@@ -142,8 +142,7 @@ public abstract class EnvUtil {
 
     exposedClasses.addAll(exposedFromScanner);
 
-    ClassScanner.setReflectionsScanning(true);
-    final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class);
+    final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class, true);
     for (final MetaClass cls : exts) {
       try {
         Class<? extends ExposedTypesProvider> providerClass = cls.asClass().asSubclass(ExposedTypesProvider.class);
@@ -162,7 +161,6 @@ public abstract class EnvUtil {
         throw new RuntimeException("unable to load environment extension: " + cls.getFullyQualifiedName(), e);
       }
     }
-    ClassScanner.setReflectionsScanning(false);
 
     final Collection<URL> erraiAppProperties = getErraiAppProperties();
 

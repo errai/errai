@@ -1,5 +1,16 @@
 package org.jboss.errai.config.util;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.config.rebind.EnvUtil;
+import org.mvel2.util.NullType;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,17 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.config.rebind.EnvUtil;
-import org.mvel2.util.NullType;
 
 
 /**
@@ -38,7 +38,14 @@ public final class ClassScanner {
     }
   }
 
-  private static boolean reflectionsScanning = false;
+  private static final ThreadLocal<Boolean> reflectionScanLocal = new ThreadLocal<Boolean>() {
+    @Override
+    protected Boolean initialValue() {
+      return Boolean.FALSE;
+    }
+  };
+
+  //private static boolean reflectionsScanning = false;
   private static AtomicLong totalClassScanTime = new AtomicLong(0);
 
   private ClassScanner() {
@@ -68,8 +75,15 @@ public final class ClassScanner {
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
+                                                              final Set<String> packages,
+                                                              final String excludeRegEx) {
+    return getTypesAnnotatedWith(annotation, packages, excludeRegEx, false);
+  }
+
+  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
                                                             final Set<String> packages,
-                                                            final String excludeRegEx) {
+                                                            final String excludeRegEx,
+                                                            final boolean reflections) {
     final Collection<MetaClass> result = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
 
     for (final MetaClass metaClass : MetaClassFactory.getAllCachedClasses()) {
@@ -79,7 +93,7 @@ public final class ClassScanner {
     }
 
     try {
-      if (reflectionsScanning) {
+      if (reflections || reflectionScanLocal.get()) {
         for (final Class<?> cls : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(annotation)) {
           final MetaClass e = MetaClassFactory.get(cls);
           result.add(e);
@@ -96,6 +110,10 @@ public final class ClassScanner {
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation) {
     return getTypesAnnotatedWith(annotation, null, null);
+  }
+
+  public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation, boolean useReflectionsScanning) {
+    return getTypesAnnotatedWith(annotation, null, null, useReflectionsScanning);
   }
 
   public static Collection<MetaClass> getTypesAnnotatedWith(final Class<? extends Annotation> annotation,
@@ -285,8 +303,12 @@ public final class ClassScanner {
     }
   }
 
+
+
   public static void setReflectionsScanning(final boolean bool) {
-    reflectionsScanning = bool;
+    reflectionScanLocal.set(bool);
+
+  //  reflectionsScanning = bool;
   }
 
   public static AtomicLong getTotalClassScanTime() {

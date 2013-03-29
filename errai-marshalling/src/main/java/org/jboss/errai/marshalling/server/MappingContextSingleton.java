@@ -75,6 +75,9 @@ public class MappingContextSingleton {
 
           sContext = loadDynamicMarshallers();
         }
+        finally {
+          ClassScanner.setReflectionsScanning(false);
+        }
       }
     }
     catch (Throwable t) {

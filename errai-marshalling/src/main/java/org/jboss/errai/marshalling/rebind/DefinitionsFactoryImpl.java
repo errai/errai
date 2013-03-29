@@ -161,7 +161,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     final EnvironmentConfig environmentConfig = getEnvironmentConfig();
     final Set<MetaClass> envExposedClasses = environmentConfig.getExposedClasses();
 
-    for (final Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class)) {
+    for (final Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class, true)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
         throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit "
             + MappingDefinition.class.getName());
@@ -211,7 +211,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       mergeDefinition(def);
     }
 
-    final Collection<MetaClass> cliMarshallers = ClassScanner.getTypesAnnotatedWith(ClientMarshaller.class);
+    final Collection<MetaClass> cliMarshallers = ClassScanner.getTypesAnnotatedWith(ClientMarshaller.class, true);
     final MetaClass Marshaller_MC = MetaClassFactory.get(Marshaller.class);
 
     for (final MetaClass marshallerMetaClass : cliMarshallers) {
@@ -247,7 +247,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    final Set<Class<?>> serverMarshallers = scanner.getTypesAnnotatedWith(ServerMarshaller.class);
+    final Set<Class<?>> serverMarshallers = scanner.getTypesAnnotatedWith(ServerMarshaller.class, true);
 
     for (final Class<?> marshallerCls : serverMarshallers) {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
