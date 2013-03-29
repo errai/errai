@@ -13,7 +13,7 @@ import java.util.Collection;
 /**
  * @author edewit@redhat.com
  */
-public class StoreWrapper<T> extends AbstractAdapter<T> implements Store<T> {
+public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
   @Override
   public StoreType getType() {
     return StoreType.valueOf(getType0());

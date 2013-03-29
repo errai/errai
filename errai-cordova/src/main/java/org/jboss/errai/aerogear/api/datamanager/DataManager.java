@@ -1,6 +1,6 @@
 package org.jboss.errai.aerogear.api.datamanager;
 
-import org.jboss.errai.aerogear.api.datamanager.impl.StoreWrapper;
+import org.jboss.errai.aerogear.api.datamanager.impl.StoreAdapter;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class DataManager {
 
   public Store store(Config config) {
     setup(config.getName(), config.getType().getName(), config.getRecordId(), config.getSettings());
-    return new StoreWrapper();
+    return new StoreAdapter();
   }
 
   public <T> Store<T> store() {

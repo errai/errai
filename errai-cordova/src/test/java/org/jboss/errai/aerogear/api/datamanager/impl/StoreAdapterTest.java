@@ -11,7 +11,7 @@ import java.util.Collection;
 /**
  * @author edewit@redhat.com
  */
-public class StoreWrapperTest extends GWTTestCase {
+public class StoreAdapterTest extends GWTTestCase {
   @Override
   public String getModuleName() {
     return "org.jboss.errai.aerogear.api.AerogearTests";
@@ -37,6 +37,7 @@ public class StoreWrapperTest extends GWTTestCase {
     User user = store.read(2);
     assertNotNull(user);
     assertEquals(new User(2), user);
+    assertEquals("test2", user.name);
   }
 
   @Portable
@@ -51,14 +52,6 @@ public class StoreWrapperTest extends GWTTestCase {
     public User(@MapsTo("id") int id, @MapsTo("name") String name) {
       this.id = id;
       this.name = name;
-    }
-
-    public int getId() {
-      return id;
-    }
-
-    public String getName() {
-      return name;
     }
 
     @Override
