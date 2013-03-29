@@ -14,7 +14,7 @@ import java.util.Collection;
 public class StoreWrapperTest extends GWTTestCase {
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.aerogear.api.datamanager.DataManager";
+    return "org.jboss.errai.aerogear.api.AerogearTests";
   }
 
   public void testStoreAndRetrieve() {
@@ -73,12 +73,7 @@ public class StoreWrapperTest extends GWTTestCase {
     public boolean equals(Object o) {
       if (this == o) return true;
       if (!(o instanceof User)) return false;
-
-      User user = (User) o;
-
-      if (id != user.id) return false;
-
-      return true;
+      return id == ((User) o).id;
     }
 
     @Override
