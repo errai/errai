@@ -1,5 +1,14 @@
 package org.jboss.errai.bus.server;
 
+import junit.framework.TestCase;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,16 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import junit.framework.TestCase;
-
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 /**
  * @author Mike Brock
@@ -32,7 +31,8 @@ public class ClusteringTests extends TestCase {
     return newService;
   }
 
-  static {
+  @Override
+  protected void setUp() throws Exception {
     MappingContextSingleton.get();
   }
 

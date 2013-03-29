@@ -16,26 +16,21 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.sql.Date;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
+import java.sql.Date;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller(Date.class)
+@ServerMarshaller(Date.class)
 public class SQLDateMarshaller extends AbstractNullableMarshaller<Date> {
-
-  @Override
-   public Class<Date> getTypeHandled() {
-     return Date.class;
-   }
-  
   @Override
   public Date[] getEmptyArray() {
     return new Date[0];
@@ -63,7 +58,7 @@ public class SQLDateMarshaller extends AbstractNullableMarshaller<Date> {
   @Override
   public String doNotNullMarshall(final Date o, final MarshallingSession ctx) {
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
-            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
+        "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
+        "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
   }
 }

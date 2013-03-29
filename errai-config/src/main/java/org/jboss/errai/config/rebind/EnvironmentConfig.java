@@ -1,7 +1,6 @@
 package org.jboss.errai.config.rebind;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.common.rebind.CacheStore;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,7 +15,6 @@ public class EnvironmentConfig {
   private final Set<MetaClass> exposedClasses;
   private final Set<MetaClass> portableSuperTypes;
   private final Map<String, String> frameworkProperties;
-
   private final Set<String> explicitTypes;
 
   EnvironmentConfig(final Map<String, String> mappingAliases,

@@ -25,15 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Short.class)
+@ServerMarshaller(Short.class)
 public class ShortMarshaller extends AbstractNumberMarshaller<Short> {
-
-  @Override
-  public Class<Short> getTypeHandled() {
-    return Short.class;
-  }
-
   @Override
   public Short[] getEmptyArray() {
     return new Short[0];

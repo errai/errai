@@ -261,7 +261,7 @@ public class DefaultJavaDefinitionMapper {
 
           @Override
           public MetaClass getType() {
-            return type;
+            return type.asBoxed();
           }
 
           @Override
@@ -271,7 +271,7 @@ public class DefaultJavaDefinitionMapper {
 
           @Override
           public MetaClass getTargetType() {
-            return targetType;
+            return targetType.asBoxed();
           }
 
           @Override

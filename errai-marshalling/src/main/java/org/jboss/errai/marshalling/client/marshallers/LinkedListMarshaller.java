@@ -16,25 +16,19 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.LinkedList;
-
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 
+import java.util.LinkedList;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(LinkedList.class)
+@ServerMarshaller(LinkedList.class)
 public class LinkedListMarshaller extends AbstractCollectionMarshaller<LinkedList> {
-
-  @Override
-  public Class<LinkedList> getTypeHandled() {
-    return LinkedList.class;
-  }
-  
   @Override
   public LinkedList[] getEmptyArray() {
     return new LinkedList[0];

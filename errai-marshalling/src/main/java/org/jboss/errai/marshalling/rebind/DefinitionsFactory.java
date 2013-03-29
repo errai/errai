@@ -127,4 +127,6 @@ public interface DefinitionsFactory {
   Collection<MappingDefinition> getMappingDefinitions();
 
   void resetDefinitionsAndReload();
+
+  Set<MetaClass> getArraySignatures();
 }

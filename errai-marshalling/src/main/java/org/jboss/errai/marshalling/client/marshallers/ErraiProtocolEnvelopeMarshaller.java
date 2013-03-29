@@ -23,7 +23,6 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,11 +33,6 @@ import java.util.Map;
  */
 public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, Object>> {
   public static final ErraiProtocolEnvelopeMarshaller INSTANCE = new ErraiProtocolEnvelopeMarshaller();
-
-  @Override
-  public Class<Map<String, Object>> getTypeHandled() {
-    return SimpleTypeLiteral.<Map<String, Object>> ofRawType(Map.class).get();
-  }
 
   @Override
   public Map<String, Object> demarshall(final EJValue o, final MarshallingSession ctx) {
@@ -56,6 +50,15 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
       final EJValue v = jsonObject.get(key);
       if (!v.isNull()) {
         final Marshaller<Object> marshallerInstance = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v));
+        if (marshallerInstance == null) {
+          if (MessageParts.Throwable.name().equals(key)) {
+            impl.put(key, new Throwable(v.isObject().get("message").isString().stringValue()));
+            continue;
+          }
+          else {
+            throw new RuntimeException("no marshaller for: " + ctx.determineTypeFor(null, v));
+          }
+        }
         impl.put(key, marshallerInstance.demarshall(v, ctx));
       }
       else {

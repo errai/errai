@@ -34,6 +34,16 @@ public class HappyServiceMockedCallerProvider implements ContextualTypeProvider<
   public Caller<HappyService> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     return new Caller<HappyService>() {
       @Override
+      public HappyService call() {
+        return new HappyService() {
+          @Override
+          public boolean isHappy() {
+            return true;
+          }
+        };
+      }
+
+      @Override
       public HappyService call(final RemoteCallback callback) {
         return new HappyService() {
           @Override

@@ -16,8 +16,6 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.List;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
@@ -27,20 +25,17 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
+import java.util.List;
+
 /**
  * This class is used to handle untyped Objects on the wire.
  *
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ClientMarshaller
-@ServerMarshaller
+@ClientMarshaller(Object.class)
+@ServerMarshaller(Object.class)
 public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
-  @Override
-  public Class<Object> getTypeHandled() {
-    return Object.class;
-  }
-
   @Override
   public Object[] getEmptyArray() {
     return new Object[0];
@@ -121,5 +116,4 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
 
     return MarshallUtil.getMarshaller(o, ctx).marshall(o, ctx);
   }
-
 }
