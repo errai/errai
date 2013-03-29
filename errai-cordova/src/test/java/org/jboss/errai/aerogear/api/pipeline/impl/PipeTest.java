@@ -53,12 +53,13 @@ public class PipeTest extends GWTTestCase {
 
     pipe.remove("123", new AsyncCallback<Void>() {
       @Override
-      public void onFailure(Throwable caught) {
+      public void onSuccess(Void result) {
+        finishTest();
       }
 
       @Override
-      public void onSuccess(Void result) {
-        finishTest();
+      public void onFailure(Throwable caught) {
+        fail("exception thrown " + caught.getMessage());
       }
     });
 
