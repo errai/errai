@@ -164,13 +164,13 @@ public class MarshallerGeneratorFactory {
 
       @Override
       public Statement demarshall(final MetaClass type, final Statement value) {
-        final String variable = createDemarshallerIfNeeded(type);
+        final String variable = createDemarshallerIfNeeded(type.asBoxed());
 
         return Stmt.loadVariable(variable).invoke("demarshall", value, Stmt.loadVariable("a1"));
       }
 
       private String createDemarshallerIfNeeded(final MetaClass type) {
-        return addArrayMarshaller(type);
+        return addArrayMarshaller(type.asBoxed());
       }
     });
 
@@ -382,10 +382,7 @@ public class MarshallerGeneratorFactory {
   }
 
   private Statement generateArrayMarshaller(final MetaClass arrayType) {
-    MetaClass toMap = arrayType;
-    while (toMap.isArray()) {
-      toMap = toMap.getComponentType();
-    }
+    MetaClass toMap = arrayType.getOuterComponentType();
 
     final int dimensions = GenUtil.getArrayDimensions(arrayType);
 
@@ -433,7 +430,7 @@ public class MarshallerGeneratorFactory {
     return classStructureBuilder.finish();
   }
 
-  private void arrayDemarshallCode(final MetaClass toMap,
+  private void arrayDemarshallCode(MetaClass toMap,
                                    final int dim,
                                    final AnonymousClassStructureBuilder anonBuilder) {
 
@@ -442,10 +439,10 @@ public class MarshallerGeneratorFactory {
 
     final MetaClass arrayType = toMap.asArrayOf(dim);
 
-    MetaClass outerType = toMap.getOuterComponentType();
-    if (!outerType.isArray() && outerType.isPrimitive()) {
-      outerType = outerType.asBoxed();
-    }
+//    MetaClass outerType = toMap.getOuterComponentType();
+//    if (!outerType.isArray() && outerType.isPrimitive()) {
+//      toMap = outerType.asBoxed();
+//    }
 
     String marshallerVarName;
     if (DefinitionsFactorySingleton.get().shouldUseObjectMarshaller(toMap)) {

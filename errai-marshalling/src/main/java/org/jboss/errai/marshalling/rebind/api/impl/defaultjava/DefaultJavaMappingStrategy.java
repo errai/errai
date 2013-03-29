@@ -124,6 +124,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         builder.append(Stmt.declareVariable(EJObject.class).named("obj")
             .initializeWith(loadVariable("a0").invoke("isObject")));
 
+        builder.append(If.cond(Bool.isNull(Refs.get("obj"))).append(Stmt.load(null).returnValue()).finish());
+
         if (toMap.isEnum()) {
           builder.append(Stmt.declareVariable(toMap).named("entity")
               .initializeWith(demarshallEnum(loadVariable("obj"), loadVariable("a0"), toMap)));

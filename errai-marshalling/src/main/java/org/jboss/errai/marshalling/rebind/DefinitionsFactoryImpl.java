@@ -76,7 +76,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Set<MetaClass> arraySignatures
       = new HashSet<MetaClass>();
 
-  private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
+  private final Map<String, MappingDefinition> mappingDefinitions
       = new HashMap<String, MappingDefinition>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
@@ -91,12 +91,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public boolean hasDefinition(final String clazz) {
-    return MAPPING_DEFINITIONS.containsKey(clazz);
+    return mappingDefinitions.containsKey(clazz);
   }
 
   @Override
   public MappingDefinition getDefinition(final String clazz) {
-    return MAPPING_DEFINITIONS.get(clazz);
+    return mappingDefinitions.get(clazz);
   }
 
   @Override
@@ -131,13 +131,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   private void putDefinitionIfAbsent(final String key, final MappingDefinition value) {
-    if (MAPPING_DEFINITIONS.containsKey(key)) {
+    if (mappingDefinitions.containsKey(key)) {
       throw new IllegalStateException(
           "Mapping definition collision for " + key +
-              "\nAlready have: " + MAPPING_DEFINITIONS.get(key) +
+              "\nAlready have: " + mappingDefinitions.get(key) +
               "\nAttempted to add: " + value);
     }
-    MAPPING_DEFINITIONS.put(key, value);
+    mappingDefinitions.put(key, value);
   }
 
   @Override
@@ -207,7 +207,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    for (final MappingDefinition def : MAPPING_DEFINITIONS.values()) {
+    for (final MappingDefinition def : mappingDefinitions.values()) {
       mergeDefinition(def);
     }
 
@@ -221,10 +221,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           final Class<?> type = marshallerMetaClass.getAnnotation(ClientMarshaller.class).value();
 
           final MappingDefinition marshallMappingDef = new MappingDefinition(type, true);
-          marshallMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+          marshallMappingDef.setClientMarshallerClass(marshallerCls);
           addDefinition(marshallMappingDef);
 
-          exposedClasses.add(MetaClassFactory.get(type));
+          exposedClasses.add(MetaClassFactory.get(type).asBoxed());
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
             for (final Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
@@ -232,7 +232,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
               addDefinition(aliasMappingDef);
 
-              exposedClasses.add(MetaClassFactory.get(aliasCls));
+              exposedClasses.add(MetaClassFactory.get(aliasCls).asBoxed());
               mappingAliases.put(aliasCls.getName(), type.getName());
             }
           }
@@ -264,7 +264,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
             addDefinition(definition);
 
-            exposedClasses.add(MetaClassFactory.get(marshallerCls));
+            exposedClasses.add(MetaClassFactory.get(type).asBoxed());
           }
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
@@ -274,7 +274,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               }
               else {
                 final MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls, true);
-                aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+                aliasMappingDef.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
                 addDefinition(aliasMappingDef);
 
                 exposedClasses.add(MetaClassFactory.get(aliasCls));
@@ -294,9 +294,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     exposedClasses.add(MetaClassFactory.get(Object.class));
-
-
-
 
     exposedClasses.addAll(envExposedClasses);
 
@@ -381,13 +378,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       addDefinition(aliasDef);
     }
 
-    for (final Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
+    for (final Map.Entry<String, MappingDefinition> entry : mappingDefinitions.entrySet()) {
       fillInheritanceMap(entry.getValue().getMappingClass());
     }
 
     final MetaClass javaLangObjectRef = MetaClassFactory.get(Object.class);
 
-    for (final Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
+    for (final Map.Entry<String, MappingDefinition> entry : mappingDefinitions.entrySet()) {
       final MappingDefinition def = entry.getValue();
 
       final InstantiationMapping instantiationMapping = def.getInstantiationMapping();
@@ -530,7 +527,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public Collection<MappingDefinition> getMappingDefinitions() {
-    return Collections.unmodifiableCollection(new ArrayList<MappingDefinition>(MAPPING_DEFINITIONS.values()));
+    return Collections.unmodifiableCollection(new ArrayList<MappingDefinition>(mappingDefinitions.values()));
   }
 
   private static Map<String, String> defaultMappingAliases() {
@@ -561,7 +558,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   public void resetDefinitionsAndReload() {
     this.exposedClasses.clear();
     this.mappingAliases.clear();
-    this.MAPPING_DEFINITIONS.clear();
+    this.mappingDefinitions.clear();
     loadCustomMappings();
   }
 }

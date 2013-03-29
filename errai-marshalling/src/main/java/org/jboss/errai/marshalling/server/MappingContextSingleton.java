@@ -236,7 +236,7 @@ public class MappingContextSingleton {
       }
 
       private void addArrayMarshaller(final MetaClass type) {
-        final MetaClass compType = type.getOuterComponentType();
+        final MetaClass compType = type.getOuterComponentType().asBoxed();
 
         if (!factory.hasDefinition(type.getFullyQualifiedName())
             && !factory.hasDefinition(type.getInternalName())) {
