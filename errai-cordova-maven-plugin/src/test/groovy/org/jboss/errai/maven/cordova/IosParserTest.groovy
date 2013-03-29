@@ -65,16 +65,7 @@ class IosParserTest extends GroovyTestCase {
         parser.updateBundleId(new ConfigParser(configFile))
 
         //then
-        assertXmlEqual(
-                '''<?xml version="1.0"?>
-                   <!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
-                   <plist version="1.0">
-                       <dict>
-                           <key>CFBundleIdentifier</key>
-                           <string>org.jboss.test</string>
-                       </dict>
-                   </plist>
-                ''', plist.text)
+        assertTrue(plist.text.contains('<string>org.jboss.test</string>'))
     }
 
     void testShouldUpdateAccess() {
