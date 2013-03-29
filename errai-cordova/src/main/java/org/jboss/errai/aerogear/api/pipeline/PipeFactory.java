@@ -1,27 +1,30 @@
 package org.jboss.errai.aerogear.api.pipeline;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author edewit@redhat.com
  */
 public class PipeFactory {
 
-  private native void setup(String name, String type, String recordId, List<String> settings) /*-{
+  private native void setup(String name, String type, String recordId) /*-{
       $wnd.pipe = $wnd.AeroGear.Pipeline([{
           name: name,
           type: type,
-          recordId: recordId,
-          settings: settings
+          recordId: recordId
       }]).pipes[name];
   }-*/;
 
 
   public <T> Pipe<T> createPipe(Config config) {
-    setup(config.getName(), config.getType().getName(), config.getRecordId(), config.getSettings());
+    setup(config.getName(), config.getType().getName(), config.getRecordId());
     return new PipeAdapter<T>();
   }
 
@@ -33,7 +36,6 @@ public class PipeFactory {
     private String name;
     private PipeType type;
     private String recordId;
-    private List<String> settings = new ArrayList<String>();
 
     public Config() {
       this("pipes");
@@ -63,10 +65,6 @@ public class PipeFactory {
 
     public String getRecordId() {
       return recordId;
-    }
-
-    public List<String> getSettings() {
-      return settings;
     }
   }
 }

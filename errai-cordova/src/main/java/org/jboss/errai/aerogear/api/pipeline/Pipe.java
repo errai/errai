@@ -2,6 +2,7 @@ package org.jboss.errai.aerogear.api.pipeline;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  *
  * @param <T> The data type of the {@link Pipe} operation
  */
-public interface Pipe<T> {
+public interface Pipe<T> extends Serializable {
 
   /**
    * Returns the connection type of this {@link Pipe} object (e.g. <code>REST</code>).
@@ -26,6 +27,15 @@ public interface Pipe<T> {
    * @param callback The callback for consuming the result from the {@link Pipe} invocation.
    */
   void read(AsyncCallback<List<T>> callback);
+
+
+  /**
+   * Reads all the data from the underlying server connection.
+   *
+   * @param callback The callback for consuming the result from the {@link Pipe} invocation.
+   * @param filter a {@link ReadFilter} for performing pagination and querying.
+   */
+  void readWithFilter(ReadFilter filter, AsyncCallback<List<T>> callback);
 
   /**
    * Saves or updates a given object on the server.

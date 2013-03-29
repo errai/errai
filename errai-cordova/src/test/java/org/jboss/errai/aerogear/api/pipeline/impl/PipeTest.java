@@ -2,13 +2,11 @@ package org.jboss.errai.aerogear.api.pipeline.impl;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jboss.errai.aerogear.api.pipeline.Pipe;
-import org.jboss.errai.aerogear.api.pipeline.PipeFactory;
+import org.jboss.errai.aerogear.api.pipeline.*;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author edewit@redhat.com
@@ -25,41 +23,46 @@ public class PipeTest extends GWTTestCase {
     Pipe<Task> pipe = new PipeFactory().createPipe("tasks");
 
     //when
-    pipe.read(new AsyncCallback<List<Task>>() {
+    pipe.read(new FailingAsyncCallback<List<Task>>() {
       @Override
       public void onSuccess(List<Task> tasks) {
         assertNotNull(tasks);
         assertEquals(2, tasks.size());
         assertTrue(tasks.contains(new Task(12345)));
       }
-
-      @Override
-      public void onFailure(Throwable throwable) {
-        fail("exception thrown " + throwable.getMessage());
-      }
     });
 
-    pipe.save(new Task(123, "new", "2012-01-01"), new AsyncCallback<Task>() {
+    pipe.save(new Task(123, "new", "2012-01-01"), new FailingAsyncCallback<Task>() {
       @Override
       public void onSuccess(Task result) {
         assertEquals("Updated Task", result.title);
       }
-
-      @Override
-      public void onFailure(Throwable caught) {
-        fail("exception thrown " + caught.getMessage());
-      }
     });
 
-    pipe.remove("123", new AsyncCallback<Void>() {
+    pipe.remove("123", new FailingAsyncCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
         finishTest();
       }
+    });
 
+    delayTestFinish(3000);
+  }
+
+  public void testPaging() {
+    //given
+    Pipe<Task> pipe = new PipeFactory().createPipe(new PipeFactory.Config("pageTestWebLink"));
+
+    ReadFilter filter = new ReadFilter();
+    filter.setOffset(1);
+    filter.setLimit(2);
+
+    pipe.readWithFilter(filter, new FailingAsyncCallback<List<Task>>() {
       @Override
-      public void onFailure(Throwable caught) {
-        fail("exception thrown " + caught.getMessage());
+      public void onSuccess(List<Task> result) {
+        assertNotNull(result);
+        assertTrue(result instanceof PagedList);
+        finishTest();
       }
     });
 
@@ -101,6 +104,14 @@ public class PipeTest extends GWTTestCase {
     @Override
     public int hashCode() {
       return id;
+    }
+  }
+
+  private abstract class FailingAsyncCallback<E> implements AsyncCallback<E> {
+    @Override
+    public void onFailure(Throwable caught) {
+      fail("exception thrown " + caught.getMessage());
+      finishTest();
     }
   }
 }
