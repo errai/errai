@@ -18,11 +18,11 @@ package org.jboss.errai.ui.shared;
 import com.google.gwt.dom.client.Element;
 
 /**
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  *
  * @param <T>
  */
 public interface Visitor<T> {
-  void visit(VisitContextMutable<T> context, Element element);
+  boolean visit(VisitContextMutable<T> context, Element element);
 }

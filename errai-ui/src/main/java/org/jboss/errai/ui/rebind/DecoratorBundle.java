@@ -100,23 +100,25 @@ public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
     if (!resources.contains(bundlePath)) {
       throw new GenerationException("Missing i18n bundle (specified in @Bundle): " + bundlePath);
     }
-    System.out.println("******* RESOURCES: " + resources);
 
-    // Get the map of already-constructed bundles
-    final Map<String, BuildMetaClass> constructedBundles = getConstructedBundleTypes(ctx);
-    // Create a bundle resource interface if one does not yet exist
-    if (!constructedBundles.containsKey(bundlePath)) {
-      // Generate this component's ClientBundle resource
-      BuildMetaClass messageBundleResourceInterface = generateMessageBundleResourceInterface(ctx);
-      constructedBundles.put(bundlePath, messageBundleResourceInterface);
-      // Instantiate the ClientBundle MessageBundle resource
-      final String msgBundleVarName = InjectUtil.getUniqueVarName();
-      initStmts.add(Stmt.declareVariable(messageBundleResourceInterface).named(msgBundleVarName)
-              .initializeWith(Stmt.invokeStatic(GWT.class, "create", messageBundleResourceInterface)));
+    // Load up each resource.
+    for (String resource : resources) {
+      // Get the map of already-constructed bundles
+      final Map<String, BuildMetaClass> constructedBundles = getConstructedBundleTypes(ctx);
+      // Create a bundle resource interface if one does not yet exist
+      if (!constructedBundles.containsKey(resource)) {
+        // Generate this component's ClientBundle resource
+        BuildMetaClass messageBundleResourceInterface = generateMessageBundleResourceInterface(ctx, resource);
+        constructedBundles.put(resource, messageBundleResourceInterface);
+        // Instantiate the ClientBundle MessageBundle resource
+        final String msgBundleVarName = InjectUtil.getUniqueVarName();
+        initStmts.add(Stmt.declareVariable(messageBundleResourceInterface).named(msgBundleVarName)
+                .initializeWith(Stmt.invokeStatic(GWT.class, "create", messageBundleResourceInterface)));
 
-      // Create a dictionary from the message bundle and register it.
-      initStmts.add(Stmt.invokeStatic(MessageBundleUtil.class, "registerDictionary", Stmt
-                  .loadVariable(msgBundleVarName).invoke("getContents").invoke("getText")));
+        // Create a dictionary from the message bundle and register it.
+        initStmts.add(Stmt.invokeStatic(MessageBundleUtil.class, "registerDictionary", resource, Stmt
+                    .loadVariable(msgBundleVarName).invoke("getContents").invoke("getText")));
+      }
     }
   }
 
@@ -124,10 +126,12 @@ public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
    * Create an inner interface for the given {@link MessageBundle} class and its
    * corresponding JSON resource.
    * @param ctx
+   * @param bundlePath
    */
-  private BuildMetaClass generateMessageBundleResourceInterface(final InjectableInstance<Bundle> ctx) {
+  private BuildMetaClass generateMessageBundleResourceInterface(final InjectableInstance<Bundle> ctx,
+          final String bundlePath) {
     final ClassStructureBuilder<?> componentMessageBundleResource = ClassBuilder
-            .define(getMessageBundleTypeName(ctx)).publicScope()
+            .define(getMessageBundleTypeName(bundlePath)).publicScope()
             .interfaceDefinition().implementsInterface(MessageBundle.class)
             .implementsInterface(ClientBundle.class).body()
             .publicMethod(TextResource.class, "getContents")
@@ -138,7 +142,7 @@ public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
               }
               @Override
               public String[] value() {
-                return new String[] { getMessageBundlePath(ctx) };
+                return new String[] { bundlePath };
               }
             }).finish();
     BuildMetaClass classDef = componentMessageBundleResource.getClassDefinition();
@@ -190,10 +194,9 @@ public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
 
   /**
    * Gets the name of the {@link MessageBundle} class.
-   * @param ctx
+   * @param bundlePath
    */
-  private String getMessageBundleTypeName(final InjectableInstance<Bundle> ctx) {
-    String bundlePath = getMessageBundlePath(ctx);
+  private String getMessageBundleTypeName(final String bundlePath) {
     String typeName = bundlePath.replace(".json", "MessageBundleResource").replace('/', '.').replace('-', '_').replace('.', '_');
     return typeName;
   }

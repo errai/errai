@@ -22,7 +22,6 @@ public class I18nTemplateTestApp {
   @PostConstruct
   public void setup() {
     root.add(component);
-    System.out.println(root.getElement().getInnerHTML());
   }
 
   public I18nComponent getComponent() {
