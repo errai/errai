@@ -1,20 +1,18 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import org.jboss.errai.demo.grocery.client.local.producer.StoreListProducer;
 import org.jboss.errai.demo.grocery.client.shared.Store;
+import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.client.widget.OrderedList;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import static org.jboss.errai.demo.grocery.client.local.GroceryListWidget.SortBy.*;
@@ -43,33 +41,21 @@ public class SortWidget extends Composite {
   @Inject @DataField
   Anchor storeAnchor;
 
-  @DataField
-  Element stores = Document.get().createElement("ul");
+  @Inject @DataField @OrderedList
+  ListWidget<Store, StoreListItem> stores;
 
   @PostConstruct
   public void buildStoreFilter() {
-    for (final Store store : storeListProducer.getStoresSortedOnDistance()) {
-      final AnchorElement anchor = Document.get().createAnchorElement();
-      anchor.setInnerText(store.getName());
-      Element li = Document.get().createElement("li");
-      li.appendChild(anchor);
-      stores.appendChild(li);
-      Anchor anchorWidget = new Anchor(anchor) {
-        @Override
-        public HandlerRegistration addClickHandler(ClickHandler handler) {
-          onAttach();
-          return super.addClickHandler(handler);
-        }
-      };
-      anchorWidget.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          groceryListWidget.filterOn(store);
-        }
-      });
-    }
+    refresh();
   }
 
+  public void storeListChanged(@Observes StoreListProducer.StoreChangedEvent event) {
+    refresh();
+  }
+
+  private void refresh() {
+    stores.setItems(storeListProducer.getStoresSortedOnDistance());
+  }
   @EventHandler("name")
   public void onNameItemClick(ClickEvent e) {
     changeSortOrder(NAME);
