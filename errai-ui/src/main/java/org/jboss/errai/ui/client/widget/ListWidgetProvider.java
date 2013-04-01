@@ -28,6 +28,11 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
       this.itemWidgetType = itemWidgetType;
     }
 
+    public GenericListWidget(Class<W> itemWidgetType, OrderedListPanel panel) {
+      super(panel);
+      this.itemWidgetType = itemWidgetType;
+    }
+
     @Override
     protected Class<W> getItemWidgetType() {
       return itemWidgetType;
@@ -38,6 +43,9 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public ListWidget provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     Class<?> itemWidgetType = typeargs[1];
+    if (qualifiers[0].annotationType().equals(OrderedList.class)) {
+      return new GenericListWidget(itemWidgetType, new OrderedListPanel());
+    }
     return new GenericListWidget(itemWidgetType);
   }
 }
