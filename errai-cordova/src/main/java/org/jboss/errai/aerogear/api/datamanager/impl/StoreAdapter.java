@@ -14,13 +14,17 @@ import java.util.Collection;
  * @author edewit@redhat.com
  */
 public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
+  public StoreAdapter(JavaScriptObject store) {
+    this.object = store;
+  }
+
   @Override
   public StoreType getType() {
     return StoreType.valueOf(getType0());
   }
 
   private native String getType0() /*-{
-      return $wnd.store.type;
+      return this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.type;
   }-*/;
 
   @Override
@@ -29,7 +33,7 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
   }
 
   private native JsArray readAll0() /*-{
-      return $wnd.store.read();
+      return this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.read();
   }-*/;
 
   @Override
@@ -41,11 +45,11 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
   }
 
   private native JavaScriptObject read0(Integer id) /*-{
-      return $wnd.store.read(Number(id))[0];
+      return this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.read(Number(id))[0];
   }-*/;
 
   private native JavaScriptObject read0(Serializable id) /*-{
-      return $wnd.store.read(id)[0];
+      return this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.read(id)[0];
   }-*/;
 
   @Override
@@ -54,7 +58,7 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
   }
 
   private native void save0(String item) /*-{
-      $wnd.store.save(eval('[' + item + ']'));
+      this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.save(eval('[' + item + ']'));
   }-*/;
 
   @Override
@@ -67,6 +71,6 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
   }
 
   private native void remove0(Serializable id) /*-{
-      $wnd.store.remove(id);
+      this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.remove(id);
   }-*/;
 }

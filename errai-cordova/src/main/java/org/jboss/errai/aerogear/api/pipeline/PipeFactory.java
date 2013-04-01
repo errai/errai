@@ -1,5 +1,6 @@
 package org.jboss.errai.aerogear.api.pipeline;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter;
@@ -14,8 +15,8 @@ import java.util.Map;
  */
 public class PipeFactory {
 
-  private native void setup(String name, String type, String recordId) /*-{
-      $wnd.pipe = $wnd.AeroGear.Pipeline([{
+  private native JavaScriptObject setup(String name, String type, String recordId) /*-{
+      return $wnd.AeroGear.Pipeline([{
           name: name,
           type: type,
           recordId: recordId
@@ -24,8 +25,8 @@ public class PipeFactory {
 
 
   public <T> Pipe<T> createPipe(Config config) {
-    setup(config.getName(), config.getType().getName(), config.getRecordId());
-    return new PipeAdapter<T>();
+    JavaScriptObject object = setup(config.getName(), config.getType().getName(), config.getRecordId());
+    return new PipeAdapter<T>(object);
   }
 
   public <T> Pipe<T> createPipe(String name) {

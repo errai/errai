@@ -1,5 +1,6 @@
 package org.jboss.errai.aerogear.api.datamanager;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import org.jboss.errai.aerogear.api.datamanager.impl.StoreAdapter;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,8 +15,8 @@ import java.util.Map;
 public class DataManager {
   private final Map<String, Store> stores = new HashMap<String, Store>();
 
-  private native void setup(String name, String type, String recordId, List<String> settings) /*-{
-      $wnd.store = $wnd.AeroGear.DataManager([{
+  private native JavaScriptObject setup(String name, String type, String recordId, List<String> settings) /*-{
+      return $wnd.AeroGear.DataManager([{
           name: name,
           type: type,
           recordId: recordId,
@@ -24,8 +25,8 @@ public class DataManager {
   }-*/;
 
   public Store store(Config config) {
-    setup(config.getName(), config.getType().getName(), config.getRecordId(), config.getSettings());
-    return new StoreAdapter();
+    JavaScriptObject object = setup(config.getName(), config.getType().getName(), config.getRecordId(), config.getSettings());
+    return new StoreAdapter(object);
   }
 
   public <T> Store<T> store() {

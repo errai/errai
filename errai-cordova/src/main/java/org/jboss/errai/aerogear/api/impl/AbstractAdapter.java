@@ -16,6 +16,8 @@ public abstract class AbstractAdapter<T> {
     MarshallerFramework.initializeDefaultSessionProvider();
   }
 
+  protected JavaScriptObject object;
+
   private String toJSON(JavaScriptObject object) {
     return new JSONObject(object).toString();
   }
