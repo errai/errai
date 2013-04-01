@@ -81,4 +81,38 @@ $.mockjax({
     responseText: defaultResponseText
 });
 
+$.mockjax({
+    url: "auth/enroll",
+    type: "POST",
+    response: function( event ) {
+        var data = JSON.parse( event.data );
+
+        this.responseText = {
+            username: data.username,
+            logged: true
+        },
+            this.headers = {
+                "Auth-Token": "123456789"
+            };
+    }
+});
+
+$.mockjax({
+    url: "auth",
+    type: "GET",
+    response: function( event ) {
+        var authToken = event.headers["Auth-Token"];
+        if( authToken && authToken == "1234567" ) {
+            this.responseText = {
+                value1: "value1",
+                value2: "value2"
+            };
+        } else {
+            this.status = 401,
+                this.statusText = "UnAuthorized",
+                this.headers = "";
+        }
+    }
+});
+
 })( jQuery );

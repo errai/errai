@@ -3,6 +3,8 @@ package org.jboss.errai.aerogear.api.pipeline.impl;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.errai.aerogear.api.pipeline.*;
+import org.jboss.errai.aerogear.api.pipeline.auth.AuthenticationFactory;
+import org.jboss.errai.aerogear.api.pipeline.auth.Authenticator;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
@@ -68,6 +70,46 @@ public class PipeTest extends GWTTestCase {
 
     delayTestFinish(3000);
   }
+
+  public void testSecurity() {
+    Authenticator auth = new AuthenticationFactory().createAuthenticator("auth");
+    Pipe<Task> securePipe = new PipeFactory().createPipe("auth", auth);
+    cleanToken();
+
+    securePipe.read(new AsyncCallback<List<Task>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        assertEquals("UnAuthorized", caught.getMessage());
+        finishTest();
+      }
+
+      @Override
+      public void onSuccess(List<Task> result) {
+        fail("should have failed with security error");
+      }
+    });
+
+    delayTestFinish(3000);
+  }
+
+  public void testSecurityRegister() {
+    Authenticator auth = new AuthenticationFactory().createAuthenticator("auth");
+    cleanToken();
+
+    auth.enroll("john", "1234", new FailingAsyncCallback<String>() {
+      @Override
+      public void onSuccess(String result) {
+        assertEquals("john", result);
+        finishTest();
+      }
+    });
+
+    delayTestFinish(3000);
+  }
+
+  private native void cleanToken() /*-{
+      sessionStorage.removeItem( "ag-auth-auth" );
+  }-*/;
 
   @Portable
   public static class Task {
