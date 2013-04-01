@@ -15,6 +15,7 @@
  */
 package org.errai.samples.i18ndemo.client.local;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -29,6 +30,11 @@ public class TemplatedWidget extends Composite {
    * Constructor.
    */
   public TemplatedWidget() {
+  }
+
+  @PostConstruct
+  protected void onPostConstruct() {
+    System.out.println("Post c'tor: " + this);
   }
 
 }

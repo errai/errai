@@ -1,7 +1,7 @@
 {
-    "welcome": "Welcome to the errai-ui i18n demo.",
-    "Label_1_": "Label 1:",
-    "value_one": "value one",
-    "Label_2_": "Label 2:",
-    "value_two": "value two"
+    "TemplatedWidget.welcome": "Welcome to the errai-ui i18n demo.",
+    "TemplatedWidget.Label_1_": "Label 1:",
+    "TemplatedWidget.value_one": "value one",
+    "TemplatedWidget.Label_2_": "Label 2:",
+    "TemplatedWidget.value_two": "value two"
 }

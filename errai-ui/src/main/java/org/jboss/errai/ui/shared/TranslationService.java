@@ -117,7 +117,6 @@ public class TranslationService {
       if (localeParam == null || localeParam.trim().length() == 0) {
         localeParam = getBrowserLocale();
         if (localeParam != null) {
-          localeParam = localeParam.toLowerCase();
           if (localeParam.indexOf('-') != -1) {
             localeParam = localeParam.replace('-', '_');
           }
@@ -126,7 +125,7 @@ public class TranslationService {
       if (localeParam == null) {
         localeParam = "default";
       }
-      currentLocale = localeParam;
+      currentLocale = localeParam.toLowerCase();
     }
     return currentLocale;
   }
