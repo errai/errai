@@ -18,7 +18,6 @@ package org.jboss.errai.ui.rebind;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
@@ -75,10 +73,11 @@ public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
   public List<? extends Statement> generateDecorator(final InjectableInstance<Bundle> instance) {
     final List<Statement> bundleInitStatements = new ArrayList<Statement>();
     generateBundleInitialization(instance, bundleInitStatements);
-    final Statement initCallback = InjectUtil.createInitializationCallback(instance.getEnclosingType(),
-            "obj", bundleInitStatements);
-    return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
-            Refs.get(instance.getInjector().getInstanceVarName()), initCallback));
+    return bundleInitStatements;
+//    final Statement initCallback = InjectUtil.createInitializationCallback(instance.getEnclosingType(),
+//            "obj", bundleInitStatements);
+//    return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
+//            Refs.get(instance.getInjector().getInstanceVarName()), initCallback));
   }
 
   /**

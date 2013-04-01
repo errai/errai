@@ -19,9 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-
-import com.google.gwt.i18n.client.LocaleInfo;
 
 /**
  *
@@ -31,6 +30,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 public class TranslationService {
 
   public static TranslationService instance = null;
+  private static String currentLocale = null;
 
   private Map<String, Map<String, String>> translations = new HashMap<String, Map<String, String>>();
 
@@ -39,6 +39,11 @@ public class TranslationService {
    */
   public TranslationService() {
     instance = this;
+  }
+
+  @PostConstruct
+  public void postConstruct() {
+    System.out.println("Post Construct: " + this);
   }
 
   /**
@@ -61,8 +66,12 @@ public class TranslationService {
    * @param localeInfo
    */
   public void register(JSONMap data, MessageBundleLocaleInfo localeInfo) {
-    System.out.println("Registering translation data: " + localeInfo.toString());
-    Map<String, String> translation = get(localeInfo.toString());
+    String localeLookup = localeInfo.toString();
+    if (localeLookup != null) {
+      localeLookup = localeLookup.toLowerCase();
+    }
+    System.out.println("Registering translation data: " + localeLookup);
+    Map<String, String> translation = get(localeLookup);
     Set<String> keys = data.keys();
     for (String key : keys) {
       translation.put(key, data.get(key));
@@ -75,15 +84,14 @@ public class TranslationService {
    * @param translationKey
    */
   public String getTranslation(String translationKey) {
-    LocaleInfo locale = LocaleInfo.getCurrentLocale();
-    String localeName = locale.getLocaleName();
+    String localeName = currentLocale();
     System.out.println("Translating key: " + translationKey + "  into locale: " + localeName);
     Map<String, String> translationData = get(localeName);
     // Try the most specific version first (e.g. en_US)
     if (translationData.containsKey(translationKey)) {
       return translationData.get(translationKey);
     }
-    // Now try the lang-only versoin (e.g. en)
+    // Now try the lang-only version (e.g. en)
     if (localeName != null && localeName.contains("_")) {
       localeName = localeName.substring(0, localeName.indexOf('_'));
       translationData = get(localeName);
@@ -98,6 +106,56 @@ public class TranslationService {
     }
     // Nothing?  Then return null.
     return null;
+  }
+
+  /**
+   * @return the currently configured locale
+   */
+  public static String currentLocale() {
+    if (currentLocale == null) {
+      String localeParam = com.google.gwt.user.client.Window.Location.getParameter("locale");
+      if (localeParam == null || localeParam.trim().length() == 0) {
+        localeParam = getBrowserLocale();
+        if (localeParam != null) {
+          localeParam = localeParam.toLowerCase();
+          if (localeParam.indexOf('-') != -1) {
+            localeParam = localeParam.replace('-', '_');
+          }
+        }
+      }
+      if (localeParam == null) {
+        localeParam = "default";
+      }
+      currentLocale = localeParam;
+    }
+    return currentLocale;
+  }
+
+  /**
+   * Gets the browser's configured locale.
+   */
+  public final static native String getBrowserLocale() /*-{
+    if ($wnd.navigator.language) {
+      return $wnd.navigator.language;
+    }
+    if ($wnd.navigator.userLanguage) {
+      return $wnd.navigator.userLanguage;
+    }
+    if ($wnd.navigator.browserLanguage) {
+      return $wnd.navigator.browserLanguage;
+    }
+    if ($wnd.navigator.systemLanguage) {
+      return $wnd.navigator.systemLanguage;
+    }
+    return null;
+  }-*/;
+
+  /**
+   * Forcibly set the current locale.  Mostly useful for testing.
+   * @param locale
+   */
+  public final static void setCurrentLocale(String locale) {
+    currentLocale = locale;
   }
 
 }

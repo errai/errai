@@ -146,7 +146,6 @@ public final class TemplateUtil {
   public static void translateTemplate(String templateFile, Element templateRoot) {
     logger.fine("Translating template: " + templateFile);
     final String i18nKeyPrefix = getI18nPrefix(templateFile);
-    System.out.println("I18n Prefix: " + i18nKeyPrefix);
     Visit.depthFirst(templateRoot, new Visitor<Object>() {
       @Override
       public boolean visit(VisitContextMutable<Object> context, Element element) {
@@ -206,7 +205,7 @@ public final class TemplateUtil {
         if (element.hasAttribute("data-i18n-key")) {
           translationKey = element.getAttribute("data-i18n-key");
         } else {
-          translationKey = currentText.replace(' ', '_');
+          translationKey = currentText.replaceAll("[:\\s'\"]", "_");
           if (translationKey.length() > 128) {
             translationKey = translationKey.substring(0, 128) + translationKey.hashCode();
           }
