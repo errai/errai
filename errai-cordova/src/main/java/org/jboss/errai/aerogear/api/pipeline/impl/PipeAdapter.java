@@ -44,7 +44,7 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
                   that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Lcom/google/gwt/core/client/JsArray;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(data, callback);
               },
               error: function (jqXHR, textStatus, errorThrown) {
-                  that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(textStatus, callback);
+                  that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(errorThrown, callback);
               }
           });
   }-*/;
@@ -62,7 +62,7 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
                   that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(data, callback);
               },
               error: function (jqXHR, textStatus, errorThrown) {
-                  that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(textStatus, callback);
+                  that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(errorThrown, callback);
               }
           });
   }-*/;
@@ -79,7 +79,7 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
               callback.@com.google.gwt.user.client.rpc.AsyncCallback::onSuccess(Ljava/lang/Object;)(null);
           },
           error: function (jqXHR, textStatus, errorThrown) {
-              that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(textStatus, callback);
+              that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(errorThrown, callback);
           }
       })
   }-*/;
@@ -103,7 +103,7 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
               that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callbackFilter(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(data, callback);
           },
           error: function (jqXHR, textStatus, errorThrown) {
-              that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(textStatus, callback);
+              that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(errorThrown, callback);
           }
       })
   }-*/;
@@ -143,7 +143,7 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
         var that = this;
         this.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter.PagedListAdapter::pagedResultSet.next({
             success: function (morePagedResults) {
-                that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callbackFilter(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(data, callback);
+                that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callbackFilter(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(morePagedResults, callback);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(textStatus, callback);
@@ -160,7 +160,7 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
         var that = this;
         this.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter.PagedListAdapter::pagedResultSet.previous({
             success: function (morePagedResults) {
-                that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callbackFilter(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(data, callback);
+                that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callbackFilter(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(morePagedResults, callback);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Ljava/lang/String;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(textStatus, callback);
