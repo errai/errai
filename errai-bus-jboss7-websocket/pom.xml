@@ -34,12 +34,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.jboss.web</groupId>
-      <artifactId>jbossweb</artifactId>
-      <scope>provided</scope>
-      <version>7.0.14.Final</version>
-    </dependency>
 
     <dependency>
       <groupId>org.jboss.as</groupId>
@@ -55,4 +49,18 @@
        <scope>provided</scope>
      </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+        <excludes>
+          <exclude>org/jboss/servlet/**</exclude>
+        </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

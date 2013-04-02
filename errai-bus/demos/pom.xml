@@ -3,16 +3,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <name>Errai::Bus::Demos</name>
+  <groupId>org.jboss.errai</groupId>
   <artifactId>errai-bus-demos</artifactId>
+  <version>3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <!-- Parent -->
-  <parent>
-    <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-parent</artifactId>
-    <version>3.0-SNAPSHOT</version>
-    <relativePath>../../pom.xml</relativePath>
-  </parent>
+  
+  <properties>
+	<skipTests>true</skipTests>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <gwt.version>2.5.1</gwt.version>
+    <validation.api.version>1.0.0.GA</validation.api.version>
+    <junit.version>4.10</junit.version>
+    <slf4j.version>1.6.1</slf4j.version>
+    <webDescriptor>jboss7</webDescriptor>
+    <!-- maven plugins versions -->
+    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
+    <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
+    <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
+    <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+    <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+   	<version.org.jboss.as.plugins.maven.plugin>7.3.Final</version.org.jboss.as.plugins.maven.plugin>
+  </properties>  
 
   <modules>
     <module>asyncdemo</module>
@@ -50,6 +61,19 @@
         <artifactId>errai-tools</artifactId>
         <version>${project.version}</version>
       </dependency>
+      
+	  <dependency>
+	    <groupId>com.google.gwt</groupId>
+	    <artifactId>gwt-user</artifactId>
+        <version>${gwt.version}</version>
+	  </dependency>
+	    
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
+        <scope>provided</scope>
+      </dependency>	      
     </dependencies>
   </dependencyManagement>
 
@@ -89,15 +113,17 @@
 
   <build>
     <outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
+    <finalName>${project.artifactId}</finalName>
 
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
+        <version>${gwt.version}</version>
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>App.html</runTarget>
-          <extraJvmArgs>${argLine} -Xmx1g</extraJvmArgs>
+          <extraJvmArgs>-Xmx1g</extraJvmArgs>
           <jvm></jvm>
           <style>DETAILED</style>
           <soyc>false</soyc>
@@ -118,8 +144,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>        
         <configuration>
-          <warName>${project.artifactId}</warName>
-          <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
           <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
 
           <webResources>
@@ -134,14 +158,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin.version}</version>
         <configuration>
-          <skipTests>true</skipTests>
+          <skipTests>${skipTests}</skipTests>
         </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
+        <version>${maven.clean.plugin.version}</version>
         <configuration>
           <filesets>
             <fileset>
@@ -176,7 +202,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
+                    <versionRange>[2.3.0,2.4.0,2.5.0]</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>

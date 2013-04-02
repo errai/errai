@@ -39,7 +39,6 @@
 
   <modules>
     <module>reflections</module>
-    <module>reflections-maven</module>
   </modules>
 
   <scm>
@@ -48,20 +47,6 @@
     <url>scm:git:git@github.com:errai/Reflections.git</url>
   </scm>
 
-
-  <distributionManagement>
-    <repository>
-      <id>jboss-releases-repository</id>
-      <name>JBoss Releases Repository</name>
-      <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
-    </repository>
-
-    <snapshotRepository>
-      <id>jboss-snapshots-repository</id>
-      <name>JBoss Snapshots Repository</name>
-      <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <build>
     <extensions>
@@ -132,11 +117,4 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>java.net-repo</id>
-      <name>java.net-repo</name>
-      <url>http://download.java.net/maven/2/</url>
-    </repository>
-  </repositories>
 </project>
