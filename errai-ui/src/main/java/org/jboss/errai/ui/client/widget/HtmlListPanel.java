@@ -7,9 +7,13 @@ import com.google.gwt.user.client.ui.Widget;
 /**
 * @author edewit@redhat.com
 */
-public class OrderedListPanel extends ComplexPanel {
-  public OrderedListPanel() {
-    setElement(DOM.createElement("ul"));
+public class HtmlListPanel extends ComplexPanel {
+  public HtmlListPanel(boolean ordered) {
+    if (ordered) {
+      setElement(DOM.createElement("ol"));
+    } else {
+      setElement(DOM.createElement("ul"));
+    }
   }
 
   @Override

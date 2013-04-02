@@ -28,7 +28,7 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
       this.itemWidgetType = itemWidgetType;
     }
 
-    public GenericListWidget(Class<W> itemWidgetType, OrderedListPanel panel) {
+    public GenericListWidget(Class<W> itemWidgetType, HtmlListPanel panel) {
       super(panel);
       this.itemWidgetType = itemWidgetType;
     }
@@ -43,9 +43,14 @@ public class ListWidgetProvider implements ContextualTypeProvider<ListWidget<?, 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public ListWidget provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     Class<?> itemWidgetType = typeargs[1];
-    if (qualifiers[0].annotationType().equals(OrderedList.class)) {
-      return new GenericListWidget(itemWidgetType, new OrderedListPanel());
+    if (qualifiers != null) {
+      if (qualifiers[0].annotationType().equals(OrderedList.class)) {
+        return new GenericListWidget(itemWidgetType, new HtmlListPanel(true));
+      } else if (qualifiers[0].annotationType().equals(UnOrderedList.class)) {
+        return new GenericListWidget(itemWidgetType, new HtmlListPanel(false));
+      }
     }
+
     return new GenericListWidget(itemWidgetType);
   }
 }
