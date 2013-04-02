@@ -71,9 +71,7 @@ public class TranslationService {
     Map<String, String> translation = get(localeLookup);
     Set<String> keys = data.keys();
     for (String key : keys) {
-      logger.fine("  Key: " + key);
       String value = data.get(key);
-      logger.fine("  Value: " + key);
       translation.put(key, value);
     }
     logger.fine("Registered " + keys.size() + " translation keys.");

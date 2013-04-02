@@ -26,6 +26,12 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
     assertEquals("value one", app.getComponent().getVal1().getText());
     assertEquals("Label 2:", app.getComponent().getLabel2().getText());
     assertEquals("value two", app.getComponent().getVal2().getText());
+
+    assertEquals("Email:", app.getComponent().getEmailLabel().getText());
+    assertEquals("Enter your email address...", app.getComponent().getEmail().getElement().getAttribute("placeholder"));
+    assertEquals("Password:", app.getComponent().getPasswordLabel().getText());
+    assertEquals("Your password goes here.", app.getComponent().getPassword().getElement().getAttribute("title"));
+
   }
 
 }

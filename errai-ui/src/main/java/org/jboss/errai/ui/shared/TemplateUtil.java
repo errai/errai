@@ -188,7 +188,21 @@ public final class TemplateUtil {
        * @param attributeName
        */
       private void translateAttribute(String i18nKeyPrefix, Element element, String attributeName) {
-        String translationKey = i18nKeyPrefix + getTranslationKey(element);
+        String elementKey = null;
+        if (element.hasAttribute("data-field")) {
+          elementKey = element.getAttribute("data-field");
+        } else if (element.hasAttribute("id")) {
+          elementKey = element.getAttribute("id");
+        } else if (element.hasAttribute("name")) {
+          elementKey = element.getAttribute("name");
+        } else {
+          elementKey = getTranslationKey(element);
+        }
+        // If we couldn't figure out a key for this thing, then just bail.
+        if (elementKey == null || elementKey.trim().length() == 0) {
+          return;
+        }
+        String translationKey = i18nKeyPrefix + elementKey;
         translationKey += "-" + attributeName;
         String translationValue = getI18nValue(translationKey);
         if (translationValue != null)
