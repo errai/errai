@@ -15,6 +15,10 @@
  */
 package org.jboss.errai.ui.rebind;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +30,7 @@ import org.junit.Test;
 public class TranslationServiceGeneratorTest {
 
   /**
-   * Test method for {@link org.jboss.errai.ui.shared.TranslationService#getLocaleFromBundlePath(java.lang.String)}.
+   * Test method for {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#getLocaleFromBundlePath(java.lang.String)}.
    */
   @Test
   public void testGetLocaleFromBundleFilename() {
@@ -44,6 +48,37 @@ public class TranslationServiceGeneratorTest {
     Assert.assertEquals("en_US", TranslationServiceGenerator.getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en_US.json"));
     Assert.assertEquals("en_GB", TranslationServiceGenerator.getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en_GB.json"));
     Assert.assertEquals("en", TranslationServiceGenerator.getLocaleFromBundlePath("org/example/ui/client/local/myBundle_en.json"));
+  }
+
+  /**
+   * Test method for {@link org.jboss.errai.ui.rebind.TranslationServiceGenerator#recordBundleKeys(java.util.Map, String, String)}.
+   */
+  @Test
+  public void testRecordBundleKeys() {
+    String jsonResourcePath = "org/jboss/errai/ui/test/i18n/client/I18nTemplateTest.json";
+    Map<String, Set<String>> result = new HashMap<String, Set<String>>();
+    TranslationServiceGenerator.recordBundleKeys(result, null, jsonResourcePath);
+    Assert.assertEquals(1, result.keySet().size());
+    Set<String> defaultKeys = result.get(null);
+    Assert.assertEquals(9, defaultKeys.size());
+
+    jsonResourcePath = "org/jboss/errai/ui/test/i18n/client/I18nTemplateTest_fr_FR.json";
+    TranslationServiceGenerator.recordBundleKeys(result, "fr_FR", jsonResourcePath);
+    Assert.assertEquals(2, result.keySet().size());
+    defaultKeys = result.get(null);
+    Assert.assertEquals(9, defaultKeys.size());
+    Set<String> fr_FR_Keys = result.get("fr_FR");
+    Assert.assertEquals(9, fr_FR_Keys.size());
+
+    jsonResourcePath = "org/jboss/errai/ui/test/i18n/client/I18nTemplateTest_da.json";
+    TranslationServiceGenerator.recordBundleKeys(result, "da", jsonResourcePath);
+    Assert.assertEquals(3, result.keySet().size());
+    defaultKeys = result.get(null);
+    Assert.assertEquals(9, defaultKeys.size());
+    fr_FR_Keys = result.get("fr_FR");
+    Assert.assertEquals(9, fr_FR_Keys.size());
+    Set<String> da_Keys = result.get("da");
+    Assert.assertEquals(9, da_Keys.size());
   }
 
 }

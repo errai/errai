@@ -15,13 +15,20 @@
  */
 package org.jboss.errai.ui.rebind;
 
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
@@ -87,7 +94,6 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    */
   @Override
   protected String generate(TreeLogger logger, GeneratorContext context) {
-    System.out.println("Generating class: " + GENERATED_CLASS_NAME);
     // The class we will be building is GeneratedTranslationService
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(
             TranslationService.class, GENERATED_CLASS_NAME);
@@ -95,6 +101,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
 
     // The bundles we've already done - do avoid dupes
     Set<String> processedBundles = new HashSet<String>();
+    // The i18n keys found (per locale) while processing the bundles.
+    Map<String, Set<String>> discoveredI18nMap = new HashMap<String, Set<String>>();
 
     // Scan for all @Bundle annotations.
     final Collection<MetaClass> bundleAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Bundle.class);
@@ -139,6 +147,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
         ctor.append(Stmt.loadVariable("this").invoke("registerBundle",
                 Stmt.loadVariable(msgBundleVarName).invoke("getContents").invoke("getText"),
                 locale));
+
+        recordBundleKeys(discoveredI18nMap, locale, resource);
       }
 
       processedBundles.add(bundlePath);
@@ -153,6 +163,38 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       System.out.println("<--TranslationService---");
     }
     return out;
+  }
+
+  /**
+   * Records all of the i18n keys found in the given bundle.
+   * @param discoveredI18nMap
+   * @param locale
+   * @param bundlePath
+   */
+  protected static void recordBundleKeys(Map<String, Set<String>> discoveredI18nMap, String locale, String bundlePath) {
+    InputStream is = null;
+    try {
+      Set<String> keys = discoveredI18nMap.get(locale);
+      if (keys == null) {
+        keys = new HashSet<String>();
+        discoveredI18nMap.put(locale, keys);
+      }
+      is = TranslationServiceGenerator.class.getClassLoader().getResourceAsStream(bundlePath);
+      JsonFactory jsonFactory = new JsonFactory();
+      JsonParser jp = jsonFactory.createJsonParser(is);
+      JsonToken token = jp.nextToken();
+      while (token != null) {
+        token = jp.nextToken();
+        if (token == JsonToken.FIELD_NAME) {
+          String name = jp.getCurrentName();
+          keys.add(name);
+        }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
   }
 
   /**

@@ -91,6 +91,13 @@
          <version>${project.version}</version>
          <scope>provided</scope>
       </dependency>
+      
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.12</version>
+        <scope>provided</scope>
+      </dependency>
    </dependencies>
 
 
