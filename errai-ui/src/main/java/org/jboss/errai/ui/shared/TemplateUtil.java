@@ -146,7 +146,6 @@ public final class TemplateUtil {
   public static void translateTemplate(String templateFile, Element templateRoot) {
     logger.fine("Translating template: " + templateFile);
     final String i18nKeyPrefix = getI18nPrefix(templateFile);
-    long start = System.currentTimeMillis();
     Visit.depthFirst(templateRoot, new Visitor<Object>() {
       @Override
       public boolean visit(VisitContextMutable<Object> context, Element element) {
@@ -233,8 +232,6 @@ public final class TemplateUtil {
       }
 
     });
-    long end = System.currentTimeMillis();
-    System.out.println("Translation took: " + (end-start) + "ms");
   }
 
   /**

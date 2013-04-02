@@ -18,8 +18,8 @@ package org.jboss.errai.ui.shared;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
 /**
@@ -28,6 +28,8 @@ import javax.enterprise.context.ApplicationScoped;
  */
 @ApplicationScoped
 public class TranslationService {
+
+  private static final Logger logger = Logger.getLogger(TranslationService.class.getName());
 
   public static TranslationService instance = null;
   private static String currentLocale = null;
@@ -39,11 +41,6 @@ public class TranslationService {
    */
   public TranslationService() {
     instance = this;
-  }
-
-  @PostConstruct
-  public void postConstruct() {
-    System.out.println("Post Construct: " + this);
   }
 
   /**
@@ -70,13 +67,16 @@ public class TranslationService {
     if (localeLookup != null) {
       localeLookup = localeLookup.toLowerCase();
     }
-    System.out.println("Registering translation data: " + localeLookup);
+    logger.fine("Registering translation data for locale: " + localeLookup);
     Map<String, String> translation = get(localeLookup);
     Set<String> keys = data.keys();
     for (String key : keys) {
-      translation.put(key, data.get(key));
-      System.out.println("   KEY: " + key + "  VALUE: " + data.get(key));
+      logger.fine("  Key: " + key);
+      String value = data.get(key);
+      logger.fine("  Value: " + key);
+      translation.put(key, value);
     }
+    logger.fine("Registered " + keys.size() + " translation keys.");
   }
 
   /**
@@ -85,10 +85,11 @@ public class TranslationService {
    */
   public String getTranslation(String translationKey) {
     String localeName = currentLocale();
-    System.out.println("Translating key: " + translationKey + "  into locale: " + localeName);
+    logger.fine("Translating key: " + translationKey + "  into locale: " + localeName);
     Map<String, String> translationData = get(localeName);
     // Try the most specific version first (e.g. en_US)
     if (translationData.containsKey(translationKey)) {
+      logger.fine("Translation found in locale map: " + localeName);
       return translationData.get(translationKey);
     }
     // Now try the lang-only version (e.g. en)
@@ -96,15 +97,18 @@ public class TranslationService {
       localeName = localeName.substring(0, localeName.indexOf('_'));
       translationData = get(localeName);
       if (translationData.containsKey(translationKey)) {
+        logger.fine("Translation found in locale map: " + localeName);
         return translationData.get(translationKey);
       }
     }
     translationData = get(null);
     // Fall back to the root
     if (translationData.containsKey(translationKey)) {
+      logger.fine("Translation found in *default* locale mapl.");
       return translationData.get(translationKey);
     }
     // Nothing?  Then return null.
+    logger.fine("Translation not found in any locale map, leaving unchanged.");
     return null;
   }
 
@@ -113,19 +117,20 @@ public class TranslationService {
    */
   public static String currentLocale() {
     if (currentLocale == null) {
-      String localeParam = com.google.gwt.user.client.Window.Location.getParameter("locale");
-      if (localeParam == null || localeParam.trim().length() == 0) {
-        localeParam = getBrowserLocale();
-        if (localeParam != null) {
-          if (localeParam.indexOf('-') != -1) {
-            localeParam = localeParam.replace('-', '_');
+      String locale = com.google.gwt.user.client.Window.Location.getParameter("locale");
+      if (locale == null || locale.trim().length() == 0) {
+        locale = getBrowserLocale();
+        if (locale != null) {
+          if (locale.indexOf('-') != -1) {
+            locale = locale.replace('-', '_');
           }
         }
       }
-      if (localeParam == null) {
-        localeParam = "default";
+      if (locale == null) {
+        locale = "default";
       }
-      currentLocale = localeParam.toLowerCase();
+      currentLocale = locale.toLowerCase();
+      logger.fine("Discovered the current locale (either via query string or navigator) of: " + currentLocale);
     }
     return currentLocale;
   }

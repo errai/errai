@@ -41,7 +41,7 @@ public final class JSONMap extends JavaScriptObject {
    * @param key
    */
   public final native String get(String key) /*-{
-    return this[key];
+    return String(this[key]);
   }-*/;
 
   /**
