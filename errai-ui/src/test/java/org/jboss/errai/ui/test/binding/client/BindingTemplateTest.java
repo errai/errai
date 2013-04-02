@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.client.widget.HtmlListPanel;
+import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingDateConverter;
 import org.jboss.errai.ui.test.binding.client.res.BindingItemWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
@@ -103,6 +108,24 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     itemWidget1.getTextBox().setValue("1-updated", true);
     assertEquals("First model object was not updated!", "0-updated", itemWidget0.getModel().getName());
     assertEquals("Second model object was not updated!", "1-updated", itemWidget1.getModel().getName());
+  }
+
+  @Test
+  public void shouldCreateULorOL() {
+    List<TestModel> modelList = new ArrayList<TestModel>();
+    modelList.add(new TestModel());
+
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    ListWidget listWidget = app.getUlListWidget();
+
+    listWidget.setItems(modelList);
+
+    assertNotNull(listWidget);
+    Widget item = (Widget) listWidget.getWidget(0);
+    assertNotNull(item);
+    Widget panel = item.getParent();
+    assertTrue(panel instanceof HtmlListPanel);
+    assertEquals(panel.getElement(), DOM.createElement("ul"));
   }
 
   @Test
