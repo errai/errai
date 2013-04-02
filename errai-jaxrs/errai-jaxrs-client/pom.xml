@@ -26,7 +26,7 @@
         <directory>src/main/java</directory>
       </testResource>
       <testResource>
-        <directory>src/main/resources</directory>
+        <directory>src/test/resources</directory>
       </testResource>
     </testResources>
     <plugins>

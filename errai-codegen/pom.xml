@@ -88,11 +88,4 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
      </plugin>
     </plugins>
   </build>
-  <repositories>
-    <repository>
-       <id>thirdparty-releases</id>
-       <name>JBoss Thirdparty Releases</name>
-       <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
-     </repository>
-  </repositories>
 </project>
