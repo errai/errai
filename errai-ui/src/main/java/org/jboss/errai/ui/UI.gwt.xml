@@ -23,9 +23,13 @@
   <inherits name='org.jboss.errai.enterprise.CDI'/>
   <inherits name="org.jboss.errai.databinding.DataBinding" />
 
-   <!--the GWT logging framework breaks Mobile Safari in iOS 6.1 -->
+  <!--the GWT logging framework breaks Mobile Safari in iOS 6.1 -->
   <!--<inherits name="com.google.gwt.logging.Logging"/>-->
   <!--<set-property name="gwt.logging.popupHandler" value="DISABLED"/>-->
+
+  <generate-with class="org.jboss.errai.ui.rebind.TranslationServiceGenerator">
+    <when-type-is class="org.jboss.errai.ui.client.local.spi.TranslationService"/>
+  </generate-with>
 
   <source path="client" />
   <source path="shared" />

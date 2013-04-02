@@ -9,61 +9,41 @@ import java.lang.annotation.Target;
 /**
  * <p>
  * An annotation that provides a mechanism for the developer to specify the name
- * of an i18n bundle to use when doing i18n replacements within the annotated
- * element. Errai UI's internationalization support includes the 'i18n'
- * attribute that can be used in Templates as well as the @I18N annotation that
- * can be used on fields and parameters.
- * </p>
- *
- * <p>
- * If this annotation is present on an element, then the i18n bundle indicated by
- * the annotation will be used as the source of the i18n data. If this
- * annotation is not present on an element, then the default bundle is used (the
- * default bundle name is <b>erraiBundle</b>).
- * </p>
- *
- * <p>
- * Note that a bundle must be present as a JSON map assigned to a javascript
- * variable. This variable can be included in the host page or downloaded
- * separately via a javascript include.
+ * of an i18n bundle to use when doing i18n replacements within an Errai UI Template.
+ * Note that multiple bundles can be used, but all bundles are ultimately aggregated
+ * together prior to translating any of the Errai UI Templates.  In other words,
+ * developers are free to break up their bundles in whatever way makes sense, but
+ * at the end of the day all bundles will be merged and indexed by locale.
  * </p>
  *
  * <pre>
  * package org.example;
  *
- * &#064;Bundle("loginBundle")
- * public class CustomComponent extends FlowPanel
+ * &#064;Dependent
+ * &#064;Templated
+ * &#064;Bundle("loginBundle.json")
+ * public class CustomComponent extends Composite
  * {
- *    &#064;Inject &#064;I18N("username.label")
+ *    &#064;Inject &#064;DataField("username.label")
  *    private InlineLabel usernameLabel;
  *    &#064;Inject
  *    private TextBox username;
  *
- *    &#064;Inject &#064;I18N("password.label")
+ *    &#064;Inject &#064;DataField("password.label")
  *    private InlineLabel passwordLabel;
  *    &#064;Inject
  *    private TextBox password;
  *
- *    &#064;Inject &#064;I18N("login")
+ *    &#064;Inject &#064;DataField("login")
  *    private Button login;
  *
- *    &#064;Inject &#064;I18N("cancel")
+ *    &#064;Inject &#064;DataField("cancel")
  *    private Button cancel;
  *
  *    &#064;EventHandler(&quot;login&quot;)
  *    private void doLogin(ClickEvent event)
  *    {
  *       // log in
- *    }
- *
- *    &#064;PostConstruct
- *    private void init() {
- *       add(usernameLabel);
- *       add(username);
- *       add(passwordLabel);
- *       add(password);
- *       add(login);
- *       add(cancel);
  *    }
  * }
  * </pre>

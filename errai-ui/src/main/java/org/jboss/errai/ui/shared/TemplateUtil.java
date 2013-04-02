@@ -21,8 +21,10 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.shared.EventHandler;
@@ -40,6 +42,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public final class TemplateUtil {
   private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
+  public static TranslationService translationService = GWT.create(TranslationService.class);
 
   private TemplateUtil() {
   }
@@ -242,7 +245,7 @@ public final class TemplateUtil {
        * @param translationKey
        */
       private String getI18nValue(String translationKey) {
-        return TranslationService.instance.getTranslation(translationKey);
+        return translationService.getTranslation(translationKey);
       }
 
     });

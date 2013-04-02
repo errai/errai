@@ -13,35 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.ui.shared;
+package org.jboss.errai.ui.client.local.spi;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
+import org.jboss.errai.ui.shared.JSONMap;
 
 /**
+ * A base class for a generated translation service that includes all
+ * of the translation visible at compile time.
  *
  * @author eric.wittmann@redhat.com
  */
-@ApplicationScoped
-public class TranslationService {
+public abstract class TranslationService {
 
   private static final Logger logger = Logger.getLogger(TranslationService.class.getName());
-
-  public static TranslationService instance = null;
   private static String currentLocale = null;
 
   private Map<String, Map<String, String>> translations = new HashMap<String, Map<String, String>>();
-
-  /**
-   * Constructor.
-   */
-  public TranslationService() {
-    instance = this;
-  }
 
   /**
    * Gets a translation map for the given locale name (e.g. en_US).
@@ -57,18 +49,26 @@ public class TranslationService {
   }
 
   /**
+   * Registers the bundle with the translation service.
+   * @param jsonData
+   */
+  protected void registerBundle(String jsonData, String locale) {
+    JSONMap data = JSONMap.create(jsonData);
+    register(data, locale);
+  }
+
+  /**
    * Registers some i18n data with the translation service.  This is called
    * for each discovered bundle file.
    * @param data
-   * @param localeInfo
+   * @param locale
    */
-  public void register(JSONMap data, MessageBundleLocaleInfo localeInfo) {
-    String localeLookup = localeInfo.toString();
-    if (localeLookup != null) {
-      localeLookup = localeLookup.toLowerCase();
+  protected void register(JSONMap data, String locale) {
+    if (locale != null) {
+      locale = locale.toLowerCase();
     }
-    logger.fine("Registering translation data for locale: " + localeLookup);
-    Map<String, String> translation = get(localeLookup);
+    logger.fine("Registering translation data for locale: " + locale);
+    Map<String, String> translation = get(locale);
     Set<String> keys = data.keys();
     for (String key : keys) {
       String value = data.get(key);

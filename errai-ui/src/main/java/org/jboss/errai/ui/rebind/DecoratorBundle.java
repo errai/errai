@@ -30,7 +30,6 @@ import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -41,7 +40,6 @@ import org.jboss.errai.reflections.util.ClasspathHelper;
 import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
 import org.jboss.errai.ui.shared.MessageBundle;
-import org.jboss.errai.ui.shared.MessageBundleUtil;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 
 import com.google.gwt.core.client.GWT;
@@ -53,7 +51,6 @@ import com.google.gwt.resources.client.TextResource;
  * Generates the code required for i18n message bundles.
  * @author eric.wittmann@redhat.com
  */
-@CodeDecorator
 public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
 
   private static final String CONSTRUCTED_BUNDLES_KEY = "constructedBundles";
@@ -74,10 +71,6 @@ public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
     final List<Statement> bundleInitStatements = new ArrayList<Statement>();
     generateBundleInitialization(instance, bundleInitStatements);
     return bundleInitStatements;
-//    final Statement initCallback = InjectUtil.createInitializationCallback(instance.getEnclosingType(),
-//            "obj", bundleInitStatements);
-//    return Collections.singletonList(Stmt.loadVariable("context").invoke("addInitializationCallback",
-//            Refs.get(instance.getInjector().getInstanceVarName()), initCallback));
   }
 
   /**
@@ -115,8 +108,8 @@ public class DecoratorBundle extends IOCDecoratorExtension<Bundle> {
                 .initializeWith(Stmt.invokeStatic(GWT.class, "create", messageBundleResourceInterface)));
 
         // Create a dictionary from the message bundle and register it.
-        initStmts.add(Stmt.invokeStatic(MessageBundleUtil.class, "registerDictionary", resource, Stmt
-                    .loadVariable(msgBundleVarName).invoke("getContents").invoke("getText")));
+//        initStmts.add(Stmt.invokeStatic(InternationalizationUtil.class, "registerDictionary", resource, Stmt
+//                    .loadVariable(msgBundleVarName).invoke("getContents").invoke("getText")));
       }
     }
   }

@@ -2,7 +2,7 @@ package org.jboss.errai.ui.test.i18n.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ui.shared.TranslationService;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Test;
 
 public class I18nTemplateTest_da_DA extends AbstractErraiCDITest {
