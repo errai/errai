@@ -123,7 +123,7 @@
         <configuration>
           <logLevel>INFO</logLevel>
           <runTarget>App.html</runTarget>
-          <extraJvmArgs>${argLine} -Xmx1g</extraJvmArgs>
+          <extraJvmArgs>-Xmx1g</extraJvmArgs>
           <jvm></jvm>
           <style>DETAILED</style>
           <soyc>false</soyc>
@@ -158,6 +158,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin.version}</version>
         <configuration>
           <skipTests>${skipTests}</skipTests>
         </configuration>
