@@ -10,19 +10,21 @@ import org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter;
  */
 public class PipeFactory {
 
-  private native JavaScriptObject setup(String name, String type, String recordId, JavaScriptObject auth) /*-{
+  private native JavaScriptObject setup(String name, String type, String recordId, String baseUrl, JavaScriptObject auth) /*-{
       return $wnd.AeroGear.Pipeline([{
           name: name,
           type: type,
           recordId: recordId,
           settings: {
+              baseURL: baseUrl,
               authenticator: auth
           }
       }]).pipes[name];
   }-*/;
 
   public <T> Pipe<T> createPipe(Config config) {
-    JavaScriptObject object = setup(config.getName(), config.getType().getName(), config.getRecordId(), null);
+    JavaScriptObject object =
+            setup(config.name, config.type.getName(), config.recordId, config.baseUrl, null);
     return new PipeAdapter<T>(object);
   }
 
@@ -33,7 +35,8 @@ public class PipeFactory {
   public <T> Pipe<T> createPipe(String name, Authenticator authenticator) {
     Config config = new Config(name);
     AuthenticatorAdapter adapter = (AuthenticatorAdapter) authenticator;
-    JavaScriptObject object = setup(config.getName(), config.getType().getName(), config.getRecordId(), adapter.unwrap());
+    JavaScriptObject object =
+            setup(config.name, config.type.getName(), config.recordId, config.baseUrl, adapter.unwrap());
     return new PipeAdapter<T>(object);
   }
 
@@ -41,6 +44,7 @@ public class PipeFactory {
     private String name;
     private PipeType type;
     private String recordId;
+    private String baseUrl;
 
     public Config() {
       this("pipes");
@@ -60,6 +64,12 @@ public class PipeFactory {
       this.recordId = recordId;
     }
 
+    public Config(String name, String recordId, String baseUrl) {
+      this(name);
+      this.recordId = recordId;
+      this.baseUrl = baseUrl;
+    }
+
     public String getName() {
       return name;
     }
@@ -70,6 +80,10 @@ public class PipeFactory {
 
     public String getRecordId() {
       return recordId;
+    }
+
+    public String getBaseUrl() {
+      return baseUrl;
     }
   }
 }
