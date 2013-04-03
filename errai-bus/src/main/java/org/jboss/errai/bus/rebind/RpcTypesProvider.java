@@ -16,24 +16,23 @@
 
 package org.jboss.errai.bus.rebind;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.config.rebind.ExposedTypesProvider;
 import org.jboss.errai.config.util.ClassScanner;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
  */
-@EnvironmentConfigExtension
+//@EnvironmentConfigExtension TODO reconsider if we actually want this behaviour
 public class RpcTypesProvider implements ExposedTypesProvider {
   @Override
   public Collection<MetaClass> provideTypesToExpose() {

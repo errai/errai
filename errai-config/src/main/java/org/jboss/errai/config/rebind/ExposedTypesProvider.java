@@ -16,9 +16,9 @@
 
 package org.jboss.errai.config.rebind;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-
 import java.util.Collection;
+
+import org.jboss.errai.codegen.meta.MetaClass;
 
 /**
  * An <tt>ExposedTypesProvider</tt> is an environment extension component that can be automatically discovered
@@ -28,5 +28,9 @@ import java.util.Collection;
  * @author Mike Brock
  */
 public interface ExposedTypesProvider {
+
+  /**
+   * TODO document whether or not the returned list should include interfaces and abstract classes.
+   */
   public Collection<MetaClass> provideTypesToExpose();
 }

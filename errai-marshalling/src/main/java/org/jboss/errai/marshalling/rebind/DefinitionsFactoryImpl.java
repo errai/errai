@@ -18,7 +18,17 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -56,8 +66,7 @@ import com.google.common.collect.Multimap;
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
-  private final Set<MetaClass> exposedClasses
-      = Collections.newSetFromMap(new LinkedHashMap<MetaClass, Boolean>());
+  private final Set<MetaClass> exposedClasses = Collections.newSetFromMap(new LinkedHashMap<MetaClass, Boolean>());
 
   /**
    * Map of aliases to the mapped marshalling type.
@@ -148,7 +157,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   private void loadCustomMappings() {
     exposedClasses.add(MetaClassFactory.get(Object.class));
-    
+
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     EnvUtil.clearCache();
@@ -327,6 +336,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             enums.add(mapping.getType());
           }
         }
+      }
+      else {
+        // TODO remove this when ERRAI-533 is resolved
+        System.out.println("Skipping " + mappedClass + " because it's not @Portable and we already have a definition for it");
       }
     }
 

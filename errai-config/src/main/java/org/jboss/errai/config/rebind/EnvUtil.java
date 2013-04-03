@@ -16,7 +16,26 @@
 
 package org.jboss.errai.config.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.SoftReference;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.QuickDeps;
@@ -31,24 +50,7 @@ import org.jboss.errai.config.util.ClassScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.SoftReference;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import com.google.gwt.core.ext.GeneratorContext;
 
 /**
  * @author Mike Brock
@@ -122,7 +124,94 @@ public abstract class EnvUtil {
   private static EnvironmentConfig newEnvironmentConfig() {
     final Map<String, String> frameworkProps = new HashMap<String, String>();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
-    final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
+    // final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
+    // TODO remove this; uncomment line above
+    final Set<MetaClass> exposedClasses = new Set<MetaClass>() {
+      private final Set<MetaClass> delegate = new HashSet<MetaClass>();
+
+      @Override
+      public boolean add(MetaClass e) {
+        if (e.isInterface()) {
+          new Exception("ADDING INTERFACE " + e.getFullyQualifiedName() + " to exposedClasses: ").printStackTrace(System.out);
+        }
+        return delegate.add(e);
+      }
+
+      @Override
+      public boolean addAll(Collection<? extends MetaClass> c) {
+        boolean result = true;
+        for (MetaClass cc : c) {
+          result &= add(cc);
+        }
+        return result;
+      }
+
+      @Override
+      public void clear() {
+        delegate.clear();
+      }
+
+      @Override
+      public boolean contains(Object o) {
+        return delegate.contains(o);
+      }
+
+      @Override
+      public boolean containsAll(Collection<?> c) {
+        return delegate.containsAll(c);
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        return delegate.equals(o);
+      }
+
+      @Override
+      public int hashCode() {
+        return delegate.hashCode();
+      }
+
+      @Override
+      public boolean isEmpty() {
+        return delegate.isEmpty();
+      }
+
+      @Override
+      public Iterator<MetaClass> iterator() {
+        return delegate.iterator();
+      }
+
+      @Override
+      public boolean remove(Object o) {
+        return delegate.remove(o);
+      }
+
+      @Override
+      public boolean removeAll(Collection<?> c) {
+        return delegate.removeAll(c);
+      }
+
+      @Override
+      public boolean retainAll(Collection<?> c) {
+        return delegate.retainAll(c);
+      }
+
+      @Override
+      public int size() {
+        return delegate.size();
+      }
+
+      @Override
+      public Object[] toArray() {
+        return delegate.toArray();
+      }
+
+      @Override
+      public <T> T[] toArray(T[] a) {
+        return delegate.toArray(a);
+      }
+
+    };
     final Set<MetaClass> nonportableClasses = new HashSet<MetaClass>();
     final Set<String> explicitTypes = new HashSet<String>();
     final Set<MetaClass> portableNonExposed = new HashSet<MetaClass>();
