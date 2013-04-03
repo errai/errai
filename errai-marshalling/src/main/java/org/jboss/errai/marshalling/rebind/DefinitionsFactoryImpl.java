@@ -18,8 +18,8 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.*;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -46,16 +46,8 @@ import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshalle
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and mapping of
@@ -65,19 +57,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Set<MetaClass> exposedClasses
-      = Collections.newSetFromMap(new ConcurrentHashMap<MetaClass, Boolean>());
+      = Collections.newSetFromMap(new LinkedHashMap<MetaClass, Boolean>());
 
   /**
    * Map of aliases to the mapped marshalling type.
    */
   private final Map<String, String> mappingAliases
-      = new HashMap<String, String>();
+      = new LinkedHashMap<String, String>();
 
   private final Set<MetaClass> arraySignatures
-      = new HashSet<MetaClass>();
+      = new LinkedHashSet<MetaClass>();
 
   private final Map<String, MappingDefinition> mappingDefinitions
-      = new HashMap<String, MappingDefinition>();
+      = new LinkedHashMap<String, MappingDefinition>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
@@ -155,6 +147,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   private void loadCustomMappings() {
+    exposedClasses.add(MetaClassFactory.get(Object.class));
+    
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     EnvUtil.clearCache();
@@ -293,7 +287,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    exposedClasses.add(MetaClassFactory.get(Object.class));
 
     exposedClasses.addAll(envExposedClasses);
 
