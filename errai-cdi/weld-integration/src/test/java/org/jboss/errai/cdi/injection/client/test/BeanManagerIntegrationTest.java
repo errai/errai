@@ -1,23 +1,14 @@
 package org.jboss.errai.cdi.injection.client.test;
 
-import org.jboss.errai.cdi.injection.client.FoobieScopedBean;
-import org.jboss.errai.cdi.injection.client.FoobieScopedOverriddenBean;
-import org.jboss.errai.cdi.injection.client.AbstractBean;
-import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
-import org.jboss.errai.cdi.injection.client.CommonInterface;
-import org.jboss.errai.cdi.injection.client.CommonInterfaceB;
-import org.jboss.errai.cdi.injection.client.Cow;
-import org.jboss.errai.cdi.injection.client.DependentScopedBean;
-import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
-import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
-import org.jboss.errai.cdi.injection.client.InheritedFromAbstractBean;
-import org.jboss.errai.cdi.injection.client.InterfaceA;
-import org.jboss.errai.cdi.injection.client.InterfaceB;
-import org.jboss.errai.cdi.injection.client.InterfaceC;
-import org.jboss.errai.cdi.injection.client.InterfaceD;
-import org.jboss.errai.cdi.injection.client.InterfaceRoot;
-import org.jboss.errai.cdi.injection.client.OuterBeanInterface;
-import org.jboss.errai.cdi.injection.client.Pig;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+
+import org.jboss.errai.cdi.injection.client.*;
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 import org.jboss.errai.cdi.injection.client.qualifier.QualA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanA;
@@ -33,13 +24,6 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.IOCResolutionException;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -132,6 +116,15 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     // This should find only ApplicationScopedBeanB
     final Collection<IOCBeanDef<InterfaceB>> beansC = IOC.getBeanManager().lookupBeans(InterfaceB.class);
     assertEquals("did not find exactly one managed implementation of " + InterfaceB.class.getName(), 1, beansC.size());
+  }
+
+  @SuppressWarnings("rawtypes")
+  public void testBeanManagerLookupForGenericType() {
+    final IOCBeanDef<HistoryStack> bean = IOC.getBeanManager().lookupBean(HistoryStack.class);
+    assertNotNull("did not find managed bean of generic type " + HistoryStack.class.getName(), bean.getInstance());
+    
+    HistoryStack beanInst = bean.getInstance();
+    assertNotNull("did not find injected generic bean", beanInst.getHistoryList());
   }
 
   public void testBeanManagerAPIs() {
