@@ -304,9 +304,9 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     Map<String, String> allI18nValues = new HashMap<String, String>();
     Map<String, Map<String, String>> indexedI18nValues = new HashMap<String, Map<String, String>>();
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
-      String templateFileName = DecoratorTemplated.getTemplateFileName(templatedAnnotatedClass);
+      String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
       String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
-      String templateFragment = DecoratorTemplated.getTemplateFragmentName(templatedAnnotatedClass);
+      String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
       Document templateNode = parseTemplate(templateFileName);
       if (templateNode == null) // TODO log that the template failed to parse

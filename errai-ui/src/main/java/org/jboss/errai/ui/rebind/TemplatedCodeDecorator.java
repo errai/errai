@@ -17,7 +17,6 @@ package org.jboss.errai.ui.rebind;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -506,7 +505,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
             Stmt.invokeStatic(
                     TemplateUtil.class,
                     "translateTemplate",
-                    getTemplateFileName(ctx.getType()),
+                    getTemplateFileName(ctx.getEnclosingType()),
                     rootTemplateElement
                     ));
   }
@@ -535,43 +534,6 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
      */
     for (final Entry<String, Statement> field : dataFields.entrySet()) {
       initStmts.add(Stmt.nestedCall(fieldsMap).invoke("put", field.getKey(), field.getValue()));
-    }
-
-    /*
-     * Bind each bound data field if data binder is found and has been initialized.
-     */
-    Map<String, BoundDataField> boundDataFields = DecoratorDataField.aggregateDataFieldBoundMap(ctx, ctx.getType());
-    BlockBuilder<ElseBlockBuilder> binderBlock = If.isNotNull(Variable.get("binder"));
-    for (Entry<String, BoundDataField> boundDataField : boundDataFields.entrySet()) {
-      Bound bound = boundDataField.getValue().getBound();
-      if (binderLookup != null) {
-        String property = bound.property().equals("") ? boundDataField.getKey() : bound.property();
-        // Check if bound property exists in data model type
-        if (!DataBindingValidator.isValidPropertyChain(binderLookup.getDataModelType(), property)) {
-          throw new GenerationException("Invalid binding of DataField " + boundDataField.getValue().getName()
-              + " in class " + ctx.getInjector().getInjectedType() + "! Property " + property
-              + " not resolvable from class " + binderLookup.getDataModelType() +
-              ". Hint: All types in a property chain must be @Bindable!");
-        }
-
-        Statement converter =
-            bound.converter().equals(Bound.NO_CONVERTER.class) ? null : Stmt.newObject(bound.converter());
-        binderBlock.append(Stmt.loadVariable("binder")
-            .invoke("bind", boundDataField.getValue().getWidgetStatement(), property, converter));
-      }
-      else {
-        throw new GenerationException("No @AutoBound data binder found for @Bound @DataField "
-            + boundDataField.getValue().getName() + " in class " + ctx.getInjector().getInjectedType());
-      }
-    }
-
-    if (binderLookup != null) {
-      initStmts.add(binderBlock
-          .finish()
-          .else_()
-          .append(Stmt.invokeStatic(GWT.class, "log", "DataBinder in class "
-              + ctx.getEnclosingType().getFullyQualifiedName()
-              + " has not been initialized - skipping automatic binding!")).finish());
     }
 
     /*
