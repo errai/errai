@@ -72,8 +72,8 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
       @Override
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
           GenUtil.assertIsIterable(statement);
-          Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType, context);
-          String collection = writer.getCallString();
+          final Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType, context);
+          final String collection = writer.getCallString();
           writer.reset();
           writer.append(new ForeachLoop(loopVar, collection, body).generate(Context.create(context)));
       }

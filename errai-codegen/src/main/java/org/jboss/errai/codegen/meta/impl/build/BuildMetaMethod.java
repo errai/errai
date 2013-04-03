@@ -72,7 +72,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
                          final DefModifiers modifiers,
                          final String name,
                          final MetaClass returnType,
-                         final MetaType genericReturnType,
                          final DefParameters defParameters,
                          final ThrowsDeclaration throwsDeclaration
   ) {

@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
-import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
@@ -50,11 +49,6 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
 
   public MethodBlockBuilderImpl(final MethodBuildCallback<T> callback) {
     super(null);
-    this.callback = callback;
-  }
-
-  public MethodBlockBuilderImpl(final BlockStatement blockStatement, final MethodBuildCallback<T> callback) {
-    super(blockStatement, null);
     this.callback = callback;
   }
 

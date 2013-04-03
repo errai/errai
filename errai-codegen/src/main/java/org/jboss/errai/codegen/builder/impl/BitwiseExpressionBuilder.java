@@ -29,14 +29,6 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BitwiseExpressionBuilder extends ExpressionBuilder<BitwiseOperator> {
-
-  public BitwiseExpressionBuilder() {
-  }
-
-  public BitwiseExpressionBuilder(final Statement rhs, final BitwiseOperator operator) {
-    super(rhs, operator);
-  }
-
   public BitwiseExpressionBuilder(final Statement lhs, final Statement rhs, final BitwiseOperator operator) {
     super(lhs, rhs, operator);
   }

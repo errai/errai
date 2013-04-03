@@ -373,7 +373,6 @@ public final class MetaClassFactory {
 
       final BuildMetaMethod newMethod = new ShadowBuildMetaMethod(buildMetaClass, BlockStatement.EMPTY_BLOCK,
           GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
-          method.getGenericReturnType(),
           DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()), method);
 
       newMethod.setReifiedFormOf(method);

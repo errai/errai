@@ -51,11 +51,6 @@ public abstract class ExpressionBuilder<T extends Operator> implements Statement
     this.lhs = lhs;
   }
 
-  public ExpressionBuilder(String lhsExpr, Statement rhs, T operator) {
-    this(rhs, operator);
-    this.lhsExpr = lhsExpr;
-  }
-
   public ExpressionBuilder(Object lhs, Object rhs, T operator) {
     this.lhs = (!(lhs instanceof Statement)) ? LiteralFactory.getLiteral(lhs) : (Statement) lhs;
     this.rhs = (!(rhs instanceof Statement)) ? LiteralFactory.getLiteral(rhs) : (Statement) rhs;

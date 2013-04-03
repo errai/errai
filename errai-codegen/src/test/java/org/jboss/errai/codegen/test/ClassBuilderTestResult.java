@@ -96,6 +96,28 @@ public interface ClassBuilderTestResult {
           "   }" +
           " }";
 
+  public static final String ABSTRACT_CLASS_WITH_ABSTRACT_METHODS_2 =
+      "package org.foo;\n" +
+          "\n" +
+          "import java.util.Map;\n" +
+          "\n" +
+          "public abstract class Foo {\n" +
+          "  public Foo() {\n" +
+          "\n" +
+          "  }\n" +
+          "\n" +
+          "  public abstract String someString();\n" +
+          "  public abstract Integer someInteger(final long aLong);\n" +
+          "  public abstract void foo(String a0, Integer a1) throws Throwable;\n" +
+          "  protected abstract void bar(Long a0, Double a1) throws UnsupportedOperationException;\n" +
+          "  protected abstract Long funTimes(final String str);\n" +
+          "  abstract void foobaz(Map a0) throws ClassNotFoundException;\n" +
+          "  abstract Float boringTimes(byte[] byteArr);\n" +
+          "  public void baz() {\n" +
+          "\n" +
+          "  }\n" +
+          "}";
+
   public static final String CLASS_WITH_CONSTRUCTOR_CALLING_SUPER =
       "     package org.foo;\n" +
           "\n" +

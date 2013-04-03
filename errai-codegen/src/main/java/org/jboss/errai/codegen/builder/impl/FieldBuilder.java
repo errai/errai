@@ -51,15 +51,6 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
   private Statement initializer;
   private List<Annotation> annotations = new ArrayList<Annotation>();
 
-  public FieldBuilder(BuildCallback<T> callback) {
-    this.callback = callback;
-  }
-
-  public FieldBuilder(BuildCallback<T> callback, Scope scope) {
-    this.callback = callback;
-    this.scope = scope;
-  }
-
   public FieldBuilder(BuildCallback<T> callback, Scope scope, MetaClass type, String name) {
     this.callback = callback;
     this.scope = scope;

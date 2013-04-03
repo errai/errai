@@ -205,6 +205,7 @@ public class MappingContextSingleton {
         // ensure object marshaller is available before processing all mapping definitions, so we
         // can fall back to it when discovering array types with non-concrete component types.
         factory.getDefinition(Object.class).setMarshallerInstance(new ObjectMarshaller());
+
         for (final MappingDefinition def : factory.getMappingDefinitions()) {
           if (def.getMarshallerInstance() != null) {
           }
