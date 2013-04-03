@@ -18,15 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.config.rebind.EnvUtil.getEnvironmentConfig;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -61,14 +53,14 @@ import com.google.common.collect.Multimap;
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
-  private final Set<MetaClass> exposedClasses = new HashSet<MetaClass>();
+  private final Set<MetaClass> exposedClasses = new LinkedHashSet<MetaClass>();
 
   /**
    * Map of aliases to the mapped marshalling type.
    */
-  private final Map<String, String> mappingAliases = new HashMap<String, String>();
+  private final Map<String, String> mappingAliases = new LinkedHashMap<String, String>();
 
-  private final Map<String, MappingDefinition> MAPPING_DEFINITIONS = new HashMap<String, MappingDefinition>();
+  private final Map<String, MappingDefinition> MAPPING_DEFINITIONS = new LinkedHashMap<String, MappingDefinition>();
 
   private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
@@ -145,6 +137,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   private void loadCustomMappings() {
+    exposedClasses.add(MetaClassFactory.get(Object.class));
+    
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     for (final Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class)) {
@@ -269,7 +263,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    exposedClasses.add(MetaClassFactory.get(Object.class));
     exposedClasses.addAll(getEnvironmentConfig().getExposedClasses());
     mappingAliases.putAll(getEnvironmentConfig().getMappingAliases());
 

@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.server;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
@@ -28,6 +29,7 @@ import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
 import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 import org.jboss.errai.marshalling.client.util.EncDecUtil;
@@ -198,6 +200,9 @@ public class MappingContextSingleton {
           }
         });
 
+        // ensure object marshaller is available before processing all mapping definitions, so we
+        // can fall back to it when discovering array types with non-concrete component types.
+        factory.getDefinition(Object.class).setMarshallerInstance(new ObjectMarshaller());
         for (final MappingDefinition def : factory.getMappingDefinitions()) {
           if (def.getMarshallerInstance() != null) {
           }
@@ -221,13 +226,15 @@ public class MappingContextSingleton {
             }
           }
 
+          addArrayMarshaller(def.getMappingClass().asArrayOf(1));
+        }
+        
+        for (final MappingDefinition def : factory.getMappingDefinitions()) {
           for (final MemberMapping mapping : def.getMemberMappings()) {
             if (mapping.getType().isArray()) {
               addArrayMarshaller(mapping.getType());
             }
           }
-
-          addArrayMarshaller(def.getMappingClass().asArrayOf(1));
         }
 
         for (final MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
@@ -236,7 +243,7 @@ public class MappingContextSingleton {
       }
 
       private void addArrayMarshaller(final MetaClass type) {
-        final MetaClass compType = type.getOuterComponentType();
+        MetaClass compType = type.getOuterComponentType();
 
         if (!factory.hasDefinition(type.getFullyQualifiedName())
             && !factory.hasDefinition(type.getInternalName())) {
@@ -248,11 +255,13 @@ public class MappingContextSingleton {
             marshaller = outerDef.getMarshallerInstance();
           }
           else {
+            compType = MetaClassFactory.get(Object.class);
             marshaller = factory.getDefinition(Object.class).getMarshallerInstance();
           }
-
+          
           if (marshaller == null) {
-            return;
+            throw new MarshallingException("Failed to generate array marshaller for " + type.getCanonicalName() + 
+                " because marshaller for " + compType + " could not be found.");
           }
 
           MappingDefinition newDef = new MappingDefinition(EncDecUtil.qualifyMarshaller(
