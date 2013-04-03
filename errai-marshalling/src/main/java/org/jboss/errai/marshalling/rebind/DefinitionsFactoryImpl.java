@@ -337,10 +337,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           }
         }
       }
-      else {
-        // TODO remove this when ERRAI-533 is resolved
-        System.out.println("Skipping " + mappedClass + " because it's not @Portable and we already have a definition for it");
-      }
     }
 
     for (final MetaClass enumType : enums) {

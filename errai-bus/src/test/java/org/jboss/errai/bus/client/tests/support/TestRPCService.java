@@ -16,27 +16,43 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
+import java.util.List;
+
 import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 @Remote
 public interface TestRPCService {
   // This guard against regressions of https://issues.jboss.org/browse/ERRAI-476
   @Remote
   public interface DuplicateRemoteInterface {};
-  
+
   public boolean isGreaterThan(int a, int b);
   public void exception() throws TestException;
   public void returnVoid();
   public Person returnNull();
 
+  public void rpcMethodAcceptingInterface(SuperInterface arg);
+  public void rpcMethodAcceptingAbstractClass(AbstractClassA arg);
+
+  public <T> void rpcMethodAcceptingTypeVariable(T arg);
+
+  public <T extends SuperInterface> void rpcMethodAcceptingUpperBoundedParameterizedList(List<T> arg);
+  public <T> void rpcMethodAcceptingUnboundedParameterizedList(List<T> arg);
+  public void rpcMethodAcceptingParameterizedList(List<SuperInterface> arg);
+
+  public void rpcMethodAcceptingUnoundedWildcardList(List<?> arg);
+  public void rpcMethodAcceptingLowerBoundedWildcardList(List<? super SubInterface> arg);
+  public void rpcMethodAcceptingUpperBoundedWildcardList(List<? extends SubInterface> arg);
+
   @InterceptedCall(RpcBypassingInterceptor.class)
   public String interceptedRpcWithEndpointBypassing();
-  
+
   @InterceptedCall(RpcResultManipulatingInterceptor.class)
   public String interceptedRpcWithResultManipulation();
 

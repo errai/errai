@@ -16,10 +16,15 @@
 
 package org.jboss.errai.bus.server;
 
+import java.util.List;
+
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.tests.support.AbstractClassA;
 import org.jboss.errai.bus.client.tests.support.Person;
+import org.jboss.errai.bus.client.tests.support.SubInterface;
+import org.jboss.errai.bus.client.tests.support.SuperInterface;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -49,6 +54,42 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
   @Override
   public Person returnNull() {
     return null;
+  }
+
+  @Override
+  public void rpcMethodAcceptingInterface(SuperInterface arg) {
+  }
+
+  @Override
+  public void rpcMethodAcceptingAbstractClass(AbstractClassA arg) {
+  }
+
+  @Override
+  public <T> void rpcMethodAcceptingTypeVariable(T arg) {
+  }
+
+  @Override
+  public <T extends SuperInterface> void rpcMethodAcceptingUpperBoundedParameterizedList(List<T> arg) {
+  }
+
+  @Override
+  public <T> void rpcMethodAcceptingUnboundedParameterizedList(List<T> arg) {
+  }
+
+  @Override
+  public void rpcMethodAcceptingParameterizedList(List<SuperInterface> arg) {
+  }
+
+  @Override
+  public void rpcMethodAcceptingUnoundedWildcardList(List<?> arg) {
+  }
+
+  @Override
+  public void rpcMethodAcceptingLowerBoundedWildcardList(List<? super SubInterface> arg) {
+  }
+
+  @Override
+  public void rpcMethodAcceptingUpperBoundedWildcardList(List<? extends SubInterface> arg) {
   }
 
   @Override

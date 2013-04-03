@@ -26,13 +26,14 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.config.rebind.EnvironmentConfigExtension;
 import org.jboss.errai.config.rebind.ExposedTypesProvider;
 import org.jboss.errai.config.util.ClassScanner;
 
 /**
  * @author Mike Brock
  */
-//@EnvironmentConfigExtension TODO reconsider if we actually want this behaviour
+@EnvironmentConfigExtension
 public class RpcTypesProvider implements ExposedTypesProvider {
   @Override
   public Collection<MetaClass> provideTypesToExpose() {

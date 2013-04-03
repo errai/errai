@@ -30,7 +30,12 @@ import org.jboss.errai.codegen.meta.MetaClass;
 public interface ExposedTypesProvider {
 
   /**
-   * TODO document whether or not the returned list should include interfaces and abstract classes.
+   * Returns the list of types that should be exposed as portable. The returned
+   * list may include any kind of MetaClass: primitive types, interfaces,
+   * abstract and concrete classes, enums, annotation types, and so on.
+   *
+   * @return a collection of types that will need to be marshallable, based on
+   *         the type of inspection performed by the underlying implementation.
    */
   public Collection<MetaClass> provideTypesToExpose();
 }
