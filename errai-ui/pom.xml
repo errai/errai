@@ -98,6 +98,12 @@
         <version>1.9.12</version>
         <scope>provided</scope>
       </dependency>
+      
+      <dependency>
+        <groupId>net.sf.jtidy</groupId>
+        <artifactId>jtidy</artifactId>
+        <version>r938</version>
+      </dependency>
    </dependencies>
 
 

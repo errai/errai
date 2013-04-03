@@ -15,18 +15,28 @@
  */
 package org.jboss.errai.ui.rebind;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.io.IOUtils;
+import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 import org.jboss.errai.codegen.InnerClass;
@@ -38,6 +48,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
@@ -50,7 +61,14 @@ import org.jboss.errai.reflections.util.ConfigurationBuilder;
 import org.jboss.errai.reflections.util.FilterBuilder;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.MessageBundle;
+import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.tidy.Tidy;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -154,6 +172,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       processedBundles.add(bundlePath);
     }
     ctor.finish();
+
+    generateI18nHelperFilesInto(discoveredI18nMap, RebindUtils.getErraiCacheDir());
 
     // Possibly output the translation service generated code
     String out = classBuilder.toJavaString();
@@ -272,6 +292,313 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     }
   }
 
+  /**
+   * Generates all helper files that developers can use to assist with i18n
+   * work.  This includes the "missing i18n keys" report(s) as well as a set of
+   * JSON files that can be used as a starting-point for translations.
+   * @param discoveredI18nMap
+   * @param destDir
+   */
+  protected static void generateI18nHelperFilesInto(Map<String, Set<String>> discoveredI18nMap, File destDir) {
+    final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
+    Map<String, String> allI18nValues = new HashMap<String, String>();
+    Map<String, Map<String, String>> indexedI18nValues = new HashMap<String, Map<String, String>>();
+    for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
+      String templateFileName = DecoratorTemplated.getTemplateFileName(templatedAnnotatedClass);
+      String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
+      String templateFragment = DecoratorTemplated.getTemplateFragmentName(templatedAnnotatedClass);
+      String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
+      Document templateNode = parseTemplate(templateFileName);
+      if (templateNode == null) // TODO log that the template failed to parse
+        continue;
+      Element templateRoot = getTemplateRootNode(templateNode, templateFragment);
+      if (templateRoot == null) // TODO log that the template root couldn't be found
+        continue;
+      Map<String, String> i18nValues = getTemplateI18nValues(templateRoot, i18nPrefix);
+      allI18nValues.putAll(i18nValues);
+      Map<String, String> templateI18nValues = indexedI18nValues.get(templateBundleName);
+      if (templateI18nValues == null) {
+        indexedI18nValues.put(templateBundleName, i18nValues);
+      } else {
+        templateI18nValues.putAll(i18nValues);
+      }
+    }
+
+    // Output a JSON file containing *all* of the keys that need translation.
+    File allI18nValuesFile = new File(destDir, "errai-bundle-all.json");
+    if (allI18nValuesFile.isFile())
+      allI18nValuesFile.delete();
+    outputBundleFile(allI18nValues, allI18nValuesFile, null);
+
+    // Only bother with the missing/extra files if we discovered *something*
+    // while processing.  If zero bundles were found, then they aren't currently
+    // using i18n in any way.
+    if (!discoveredI18nMap.isEmpty()) {
+      // Output a JSON file containing only the keys that were found in existing JSON
+      // bundle files but that are *not* needed (not found in a template).
+      Set<String> discoveredDefaultI18nKeys = discoveredI18nMap.get(null);
+      if (discoveredDefaultI18nKeys == null)
+        discoveredDefaultI18nKeys = Collections.emptySet();
+      Set<String> extraI18nKeys = new HashSet<String>(discoveredDefaultI18nKeys);
+      extraI18nKeys.removeAll(allI18nValues.keySet());
+      Map<String, String> m = new HashMap<String, String>();
+      for (String extraKey : extraI18nKeys)
+        m.put(extraKey, "");
+      File extraI18nValuesFile = new File(destDir, "errai-bundle-extra.json");
+      if (extraI18nValuesFile.isFile())
+        extraI18nValuesFile.delete();
+      outputBundleFile(m, extraI18nValuesFile, extraI18nKeys);
+
+      // Ouput a JSON file containing just the i18n keys that are missing from the
+      // existing i18n bundles (found in a template but missing from the bundles).
+      Set<String> missingI18nKeys = new HashSet<String>(allI18nValues.keySet());
+      missingI18nKeys.removeAll(discoveredDefaultI18nKeys);
+      File missingI18nValuesFile = new File(destDir, "errai-bundle-missing.json");
+      if (missingI18nValuesFile.isFile())
+        missingI18nValuesFile.delete();
+      outputBundleFile(allI18nValues, missingI18nValuesFile, missingI18nKeys);
+
+      // TODO output -missing bundle files for each locale
+    }
+  }
+
+  /**
+   * Parses the template into a jtidy node.
+   * @param templateFileName
+   */
+  protected static Document parseTemplate(String templateFileName) {
+    InputStream inputStream = TranslationServiceGenerator.class.getClassLoader().getResourceAsStream(templateFileName);
+    try {
+      if (inputStream != null) {
+        Tidy tidy = new Tidy();
+        return tidy.parseDOM(inputStream, System.out);
+      } else {
+        return null;
+      }
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+  }
+
+  /**
+   * Gets the root node of the template (within a potentially larger template HTML file).
+   * @param templateNode
+   * @param templateFragment
+   */
+  private static Element getTemplateRootNode(Document templateNode, String templateFragment) {
+    try {
+      XPath xpath = XPathFactory.newInstance().newXPath();
+      Element documentElement = templateNode.getDocumentElement();
+      if (templateFragment == null || templateFragment.trim().length() == 0) {
+        return (Element) xpath.evaluate("//body", documentElement, XPathConstants.NODE);
+      } else {
+        return (Element) xpath.evaluate("//*[@data-field='"+templateFragment+"']", documentElement, XPathConstants.NODE);
+      }
+    } catch (XPathExpressionException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Gets all of the i18n key/value pairs from the given template root.  In
+   * other words, returns everything that needs to be translated.
+   * @param templateRoot
+   * @param i18nPrefix
+   */
+  private static Map<String, String> getTemplateI18nValues(Element templateRoot, final String i18nPrefix) {
+    final Map<String, String> i18nValues = new HashMap<String, String>();
+    travisit(templateRoot, new DomVisitor() {
+      @Override
+      public boolean visit(Element element) {
+        // Developers can mark entire sections of the template as "do not translate"
+        if ("true".equals(element.getAttribute("data-i18n-skip"))) {
+          System.out.println("Skipping...");
+          return false;
+        }
+        // If the element either explicitly enables i18n (via an i18n key) or is a text-only
+        // node, record it.
+        if (hasAttribute(element, "data-i18n-key") || isTextOnly(element)) {
+          recordElement(i18nPrefix, element, i18nValues);
+          return false;
+        }
+
+        if (hasAttribute(element, "title")) {
+          recordAttribute(i18nPrefix, element, "title", i18nValues);
+        }
+        if (hasAttribute(element, "placeholder")) {
+          recordAttribute(i18nPrefix, element, "placeholder", i18nValues);
+        }
+        return true;
+      }
+
+      /**
+       * Records the translation key/value for an element.
+       * @param i18nKeyPrefix
+       * @param element
+       * @param i18nValues
+       */
+      private void recordElement(String i18nKeyPrefix, Element element, Map<String, String> i18nValues) {
+        String translationKey = i18nKeyPrefix + getTranslationKey(element);
+        String translationValue = getTextContent(element);
+        i18nValues.put(translationKey, translationValue);
+      }
+
+      /**
+       * Records the translation key/value for an attribute.
+       * @param i18nKeyPrefix
+       * @param element
+       * @param attributeName
+       * @param i18nValues
+       */
+      private void recordAttribute(String i18nKeyPrefix, Element element, String attributeName,
+              Map<String, String> i18nValues) {
+        String elementKey = null;
+        if (hasAttribute(element, "data-field")) {
+          elementKey = element.getAttribute("data-field");
+        } else if (hasAttribute(element, "id")) {
+          elementKey = element.getAttribute("id");
+        } else if (hasAttribute(element, "name")) {
+          elementKey = element.getAttribute("name");
+        } else {
+          elementKey = getTranslationKey(element);
+        }
+        // If we couldn't figure out a key for this thing, then just bail.
+        if (elementKey == null || elementKey.trim().length() == 0) {
+          return;
+        }
+        String translationKey = i18nKeyPrefix + elementKey;
+        translationKey += "-" + attributeName;
+        String translationValue = element.getAttribute(attributeName);
+        i18nValues.put(translationKey, translationValue);
+      }
+
+      /**
+       * Gets a translation key associated with the given element.
+       * @param element
+       */
+      protected String getTranslationKey(Element element) {
+        String translationKey = null;
+        String currentText = getTextContent(element);
+        if (hasAttribute(element, "data-i18n-key")) {
+          translationKey = element.getAttribute("data-i18n-key");
+        } else {
+          translationKey = currentText.replaceAll("[:\\s'\"]", "_");
+          if (translationKey.length() > 128) {
+            translationKey = translationKey.substring(0, 128) + translationKey.hashCode();
+          }
+        }
+        return translationKey;
+      }
+
+      /**
+       * Returns true if the given element has some text and no element children.
+       * @param element
+       */
+      private boolean isTextOnly(Element element) {
+        NodeList childNodes = element.getChildNodes();
+        for (int idx = 0; idx < childNodes.getLength(); idx++) {
+          Node item = childNodes.item(idx);
+          // As soon as we hit an element, we can return false
+          if (item.getNodeType() == Node.ELEMENT_NODE) {
+            return false;
+          }
+        }
+        String textContent = getTextContent(element);
+        return (textContent != null) && (textContent.trim().length() > 0);
+      }
+
+      /**
+       * Called to determine if an element has an attribute defined.
+       * @param element
+       * @param attributeName
+       */
+      private boolean hasAttribute(Element element, String attributeName) {
+        String attribute = element.getAttribute(attributeName);
+        return (attribute != null && attribute.trim().length() > 0);
+      }
+
+      /**
+       * Gets the text content for the given element.
+       * @param element
+       */
+      private String getTextContent(Element element) {
+        StringBuilder text = new StringBuilder();
+        NodeList childNodes = element.getChildNodes();
+        boolean first = true;
+        for (int idx = 0; idx < childNodes.getLength(); idx++) {
+          Node item = childNodes.item(idx);
+          if (item.getNodeType() == Node.TEXT_NODE) {
+            if (first) {
+              first = false;
+            } else {
+              text.append(" ");
+            }
+            text.append(item.getNodeValue());
+          }
+        }
+        return text.toString();
+      }
+
+    });
+    return i18nValues;
+  }
+
+  /**
+   * Writes out a bundle (JSON) file to the given location.
+   * @param i18nValues
+   * @param bundleFile
+   * @param onlyTheseKeys
+   */
+  private static void outputBundleFile(Map<String, String> i18nValues, File bundleFile, Set<String> onlyTheseKeys) {
+    if (onlyTheseKeys != null && onlyTheseKeys.isEmpty())
+      return;
+
+    try {
+      JsonFactory f = new JsonFactory();
+      JsonGenerator g = f.createJsonGenerator(bundleFile, JsonEncoding.UTF8);
+      g.useDefaultPrettyPrinter();
+      g.writeStartObject();
+      Set<String> orderedKeys = new TreeSet<String>(i18nValues.keySet());
+      for (String key : orderedKeys) {
+        String value = i18nValues.get(key);
+        if (onlyTheseKeys == null || onlyTheseKeys.contains(key))
+          g.writeStringField(key, value);
+      }
+      g.writeEndObject();
+      g.close();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Called to traverse and visit the tree of {@link Element}s.
+   * @param element
+   * @param visitor
+   */
+  private static void travisit(Element element, DomVisitor visitor) {
+    if (!visitor.visit(element))
+      return;
+    NodeList childNodes = element.getChildNodes();
+    for (int idx = 0; idx < childNodes.getLength(); idx++) {
+      Node childNode = childNodes.item(idx);
+      if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+        travisit((Element) childNode, visitor);
+      }
+    }
+  }
+
+  /**
+   * A simple dom visitor interface.
+   */
+  private static interface DomVisitor {
+    /**
+     * Visits an element in the dom, returns true if the visitor should
+     * continue visiting down the dom.
+     * @param element
+     */
+    boolean visit(Element element);
+  }
 
   /**
    * A scanner that finds i18n message bundles.

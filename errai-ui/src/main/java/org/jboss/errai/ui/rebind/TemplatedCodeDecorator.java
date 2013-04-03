@@ -640,7 +640,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   /**
    * Get the name of the {@link Template} HTML file of the given {@link MetaClass} component type
    */
-  private String getTemplateFileName(final MetaClass type) {
+  public static String getTemplateFileName(final MetaClass type) {
     String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
 
     if (type.isAnnotationPresent(Templated.class)) {
@@ -666,7 +666,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * Get the name of the {@link Template} HTML fragment (Element subtree) to be used as the template root of the given
    * {@link MetaClass} component type
    */
-  private String getTemplateFragmentName(final MetaClass type) {
+  protected static String getTemplateFragmentName(final MetaClass type) {
     String fragment = "";
 
     if (type.isAnnotationPresent(Templated.class)) {
@@ -683,7 +683,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   /**
    * Throw an exception if the template source syntax is invalid
    */
-  private String canonicalizeTemplateSourceSyntax(final MetaClass component, final String source) {
+  private static String canonicalizeTemplateSourceSyntax(final MetaClass component, final String source) {
     final String result = Strings.nullToEmpty(source).trim();
 
     if (result.matches(".*#.*#.*")) {

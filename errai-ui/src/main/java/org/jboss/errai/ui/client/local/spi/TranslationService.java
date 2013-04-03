@@ -36,6 +36,13 @@ public abstract class TranslationService {
   private Map<String, Map<String, String>> translations = new HashMap<String, Map<String, String>>();
 
   /**
+   * @return true if the translation service is enabled/should be used
+   */
+  public boolean isEnabled() {
+    return translations.size() > 0;
+  }
+
+  /**
    * Gets a translation map for the given locale name (e.g. en_US).
    * @param localeName
    */

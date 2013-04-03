@@ -42,7 +42,13 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public final class TemplateUtil {
   private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
-  public static TranslationService translationService = GWT.create(TranslationService.class);
+  private static TranslationService translationService = null;
+  public static TranslationService getTranslationService() {
+    if (translationService == null) {
+      translationService = GWT.create(TranslationService.class);
+    }
+    return translationService;
+  }
 
   private TemplateUtil() {
   }
@@ -147,6 +153,9 @@ public final class TemplateUtil {
    * @param templateRoot
    */
   public static void translateTemplate(String templateFile, Element templateRoot) {
+    if (!getTranslationService().isEnabled())
+      return;
+
     logger.fine("Translating template: " + templateFile);
     final String i18nKeyPrefix = getI18nPrefix(templateFile);
     Visit.depthFirst(templateRoot, new Visitor<Object>() {
@@ -245,7 +254,7 @@ public final class TemplateUtil {
        * @param translationKey
        */
       private String getI18nValue(String translationKey) {
-        return translationService.getTranslation(translationKey);
+        return getTranslationService().getTranslation(translationKey);
       }
 
     });
@@ -255,7 +264,7 @@ public final class TemplateUtil {
    * Generate an i18n key prefix from the given template filename.
    * @param templateFile
    */
-  private static String getI18nPrefix(String templateFile) {
+  public static String getI18nPrefix(String templateFile) {
     int idx1 = templateFile.lastIndexOf('/');
     int idx2 = templateFile.lastIndexOf('.');
     return templateFile.substring(idx1 + 1, idx2 + 1);
