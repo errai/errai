@@ -360,7 +360,8 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
     //noinspection ResultOfMethodCallIgnored
     outputDir.mkdirs();
 
-    final File sourceFile = new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".java");
+    final File sourceFile
+        = new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".java");
 
     RebindUtils.writeStringToFile(sourceFile, serverSideClass);
 
@@ -369,6 +370,7 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
         SERVER_MARSHALLER_CLASS_NAME,
         classOutputPath.getAbsolutePath());
 
-    return new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".class").getAbsolutePath();
+    return new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".class")
+        .getAbsolutePath();
   }
 }
