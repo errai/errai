@@ -18,8 +18,6 @@
     <weld.version>1.1.6.Final</weld.version>
     <mvel.version>2.1.Beta8</mvel.version>
     <jetty.version>6.1.25</jetty.version>
-    <slf4j.version>1.6.1</slf4j.version>
-    <uel.impl.version>2.1.2-b04</uel.impl.version>
   </properties>
 
   <dependencies>
@@ -62,14 +60,9 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
+      <groupId>org.jboss.spec.javax.servlet</groupId>
+      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
     </dependency>
 
     <dependency>
@@ -253,12 +246,6 @@
 
         <dependency>
           <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-jboss-as-support</artifactId>
-          <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
           <artifactId>errai-bus</artifactId>
           <exclusions>
             <exclusion>
@@ -355,14 +342,12 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>1.6.1</version>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
-          <version>1.6.1</version>
           <scope>provided</scope>
         </dependency>
 
@@ -509,21 +494,14 @@
 
       <dependencies>
         <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-          <version>2.5</version>
+          <groupId>org.jboss.spec.javax.servlet</groupId>
+          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
           <version>1.2.16</version>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.ejb3</groupId>
-          <artifactId>jboss-ejb3-api</artifactId>
-          <scope>provided</scope>
-          <version>3.1.0</version>
         </dependency>
 
         <!-- Errai Core -->
@@ -645,12 +623,6 @@
 
         <!-- Runtime / Container dependencies -->
         <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-          <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
           <groupId>org.jboss</groupId>
           <artifactId>jboss-common-core</artifactId>
           <version>2.2.14.GA</version>
@@ -673,7 +645,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
         <executions>
           <execution>
             <id>css-resources</id>
@@ -725,7 +696,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
