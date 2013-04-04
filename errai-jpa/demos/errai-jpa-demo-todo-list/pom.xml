@@ -65,7 +65,6 @@
 
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
           <warName>${project.artifactId}</warName>
@@ -117,7 +116,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
         <executions>
           <execution>
             <id>css-resources</id>
@@ -228,7 +226,7 @@
       <dependency><groupId>xml-apis</groupId><artifactId>xml-apis</artifactId><version>1.0.b2</version></dependency>
       <dependency><groupId>org.hibernate.common</groupId><artifactId>hibernate-commons-annotations</artifactId><version>4.0.1.Final</version></dependency>
       <dependency><groupId>org.hibernate.javax.persistence</groupId><artifactId>hibernate-jpa-2.0-api</artifactId><version>1.0.1.Final</version></dependency>
-      <dependency><groupId>com.google.gwt</groupId><artifactId>gwt-user</artifactId><version>2.5.1-rc1</version></dependency>
+      <dependency><groupId>com.google.gwt</groupId><artifactId>gwt-user</artifactId><version>${gwt.version}</version></dependency>
       <dependency><groupId>org.json</groupId><artifactId>json</artifactId><version>20090211</version></dependency>
       <dependency><groupId>com.google.guava</groupId><artifactId>guava-gwt</artifactId><version>12.0</version></dependency>
       <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-jaxrs-client</artifactId><version>${project.version}</version></dependency>
@@ -288,6 +286,10 @@
 <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-navigation</artifactId><scope>provided</scope></dependency>
 <dependency><groupId>org.jboss.errai</groupId><artifactId>errai-data-binding</artifactId><scope>provided</scope></dependency>
 <dependency><groupId>junit</groupId><artifactId>junit</artifactId><scope>provided</scope></dependency>
+
+<!-- These are pulled in transitively through errai-bus, but will be removed when we address ERRAI-534 -->
+<dependency><groupId>org.jboss.netty</groupId><artifactId>netty</artifactId><scope>provided</scope></dependency>
+<dependency><groupId>org.jboss.errai.io.netty</groupId><artifactId>netty</artifactId><scope>provided</scope></dependency>
 
         <!-- And finally, add this -->
         <dependency>
