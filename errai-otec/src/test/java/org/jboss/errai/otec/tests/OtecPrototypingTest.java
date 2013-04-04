@@ -35,8 +35,8 @@ public class OtecPrototypingTest {
     StringState stateA = new StringState(INITIAL);
     StringState stateB = new StringState(INITIAL);
 
-    final StringOperation clientA = new StringOperation(OperationType.Insert, new OneDimensionalPosition(4), new CharacterData('!'));
-    final StringOperation clientB = new StringOperation(OperationType.Delete, new OneDimensionalPosition(4), null);
+    final StringOperation clientA = new StringOperation(1, OperationType.Insert, new OneDimensionalPosition(4), new CharacterData('!'));
+    final StringOperation clientB = new StringOperation(2, OperationType.Delete, new OneDimensionalPosition(4), null);
 
     clientA.apply(stateA); // local
     clientB.apply(stateB); // local
