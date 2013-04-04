@@ -17,20 +17,8 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
-  <inherits name='com.google.gwt.user.User'/>
-  <inherits name="com.google.gwt.resources.Resources" />
-  <inherits name='org.jboss.errai.ioc.Container'/>
-  <inherits name='org.jboss.errai.enterprise.CDI'/>
-  <inherits name="org.jboss.errai.databinding.DataBinding" />
-
-  <!--the GWT logging framework breaks Mobile Safari in iOS 6.1 -->
-  <!--<inherits name="com.google.gwt.logging.Logging"/>-->
-  <!--<set-property name="gwt.logging.popupHandler" value="DISABLED"/>-->
-
-  <generate-with class="org.jboss.errai.ui.rebind.TranslationServiceGenerator">
-    <when-type-is class="org.jboss.errai.ui.client.local.spi.TranslationService"/>
-  </generate-with>
-
-  <source path="client" />
-  <source path="shared" />
+    <inherits name='org.jboss.errai.ui.UI'/>
+    <inherits name="org.jboss.errai.databinding.DataBinding"/>
+    <inherits name="org.jboss.errai.enterprise.CDI" />
+    <inherits name="org.jboss.errai.ui.test.common.UITestCommon"/>
 </module>

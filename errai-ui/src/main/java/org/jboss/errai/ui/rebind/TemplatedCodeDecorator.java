@@ -15,20 +15,19 @@
  */
 package org.jboss.errai.ui.rebind;
 
-import com.google.common.base.Strings;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.DomEvent.Type;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ClientBundle.Source;
-import com.google.gwt.resources.client.TextResource;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -66,17 +65,20 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.util.TypeLiteral;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.DomEvent.Type;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Generates the code required for {@link Templated} classes.
@@ -123,7 +125,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     final Statement initCallback = InjectUtil.createInitializationCallback(declaringClass, "obj", initStmts);
     stmts.add(Stmt.loadVariable("context").invoke("addInitializationCallback",
         Refs.get(ctx.getInjector().getInstanceVarName()), initCallback));
-    
+
     Statement destructionCallback = generateTemplateDestruction(ctx);
     if (destructionCallback != null) {
       stmts.add(destructionCallback);
@@ -133,35 +135,35 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
 
   /**
    * Generates a {@link DestructionCallback} for the {@link Templated} component.
-   * 
+   *
    * @return statement representing the template destruction logic.
    */
   private Statement generateTemplateDestruction(final InjectableInstance<Templated> ctx) {
     List<Statement> destructionStatements = new ArrayList<Statement>();
     final Map<String, Statement> dataFields = DataFieldCodeDecorator.aggregateDataFieldMap(ctx, ctx.getEnclosingType());
-    final Map<String, MetaClass> dataFieldTypes = 
+    final Map<String, MetaClass> dataFieldTypes =
       DataFieldCodeDecorator.aggregateDataFieldTypeMap(ctx, ctx.getEnclosingType());
-    
+
     for (final String fieldName : dataFields.keySet()) {
       Statement field = dataFields.get(fieldName);
       MetaClass fieldType = dataFieldTypes.get(fieldName);
-      
+
       if (fieldType.isAssignableTo(Element.class)) {
         destructionStatements.add(Stmt.invokeStatic(ElementWrapperWidget.class, "removeWidget", field));
       }
     }
-    
+
     if (destructionStatements.isEmpty())
       return null;
-    
-    Statement destructionLogic = 
+
+    Statement destructionLogic =
       Stmt.loadVariable("context").invoke("addDestructionCallback",
-        Refs.get(ctx.getInjector().getInstanceVarName()), 
+        Refs.get(ctx.getInjector().getInstanceVarName()),
         InjectUtil.createDestructionCallback(ctx.getEnclosingType(), "obj", destructionStatements));
-    
+
     return destructionLogic;
   }
-  
+
   /**
    * Generate the actual construction logic for our {@link Templated} component
    */
@@ -202,6 +204,11 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
                   getTemplateFragmentName(declaringClass))));
 
       final Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
+
+      /*
+       * If i18n is enabled for this module, translate the root template element here
+       */
+      translateTemplate(ctx, initStmts, rootTemplateElement);
 
       /*
        * Get a reference to the actual Composite component being created
@@ -485,6 +492,24 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
     return (MetaClass) argTypes[0];
   }
 
+  /**
+   * Translates the template using the module's i18n message bundle (only if
+   * i18n is enabled for the module).
+   * @param ctx
+   * @param initStmts
+   * @param rootTemplateElement
+   */
+  private void translateTemplate(InjectableInstance<Templated> ctx, List<Statement> initStmts,
+          Statement rootTemplateElement) {
+    initStmts.add(
+            Stmt.invokeStatic(
+                    TemplateUtil.class,
+                    "translateTemplate",
+                    getTemplateFileName(ctx.getEnclosingType()),
+                    rootTemplateElement
+                    ));
+  }
+
   private void generateComponentCompositions(final InjectableInstance<Templated> ctx,
                                              final List<Statement> initStmts,
                                              final Statement component,
@@ -577,7 +602,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   /**
    * Get the name of the {@link Template} HTML file of the given {@link MetaClass} component type
    */
-  private String getTemplateFileName(final MetaClass type) {
+  public static String getTemplateFileName(final MetaClass type) {
     String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
 
     if (type.isAnnotationPresent(Templated.class)) {
@@ -603,7 +628,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * Get the name of the {@link Template} HTML fragment (Element subtree) to be used as the template root of the given
    * {@link MetaClass} component type
    */
-  private String getTemplateFragmentName(final MetaClass type) {
+  protected static String getTemplateFragmentName(final MetaClass type) {
     String fragment = "";
 
     if (type.isAnnotationPresent(Templated.class)) {
@@ -620,7 +645,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
   /**
    * Throw an exception if the template source syntax is invalid
    */
-  private String canonicalizeTemplateSourceSyntax(final MetaClass component, final String source) {
+  private static String canonicalizeTemplateSourceSyntax(final MetaClass component, final String source) {
     final String result = Strings.nullToEmpty(source).trim();
 
     if (result.matches(".*#.*#.*")) {

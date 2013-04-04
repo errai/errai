@@ -1,0 +1,11 @@
+{
+    "I18nComponent.welcome": "Welcome to the errai-ui i18n demo.",
+    "I18nComponent.Label_1_": "Label 1:",
+    "I18nComponent.value_one": "value one",
+    "I18nComponent.Label_2_": "Label 2:",
+    "I18nComponent.value_two": "value two",
+    "I18nComponent.Email_": "Email:",
+    "I18nComponent.email-placeholder": "Enter your email address...",
+    "I18nComponent.Password_": "Password:",
+    "I18nComponent.password-title": "Your password goes here."
+}
