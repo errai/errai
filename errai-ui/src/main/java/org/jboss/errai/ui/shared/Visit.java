@@ -19,18 +19,18 @@ import com.google.gwt.dom.client.Element;
 
 /**
  * Visit the DOM
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
- * 
+ *
  */
 public class Visit
 {
-   public static <T> VisitContext<T> breadthFirst(Element root, Visitor<T> visitor)
+   public static <T> VisitContext<T> depthFirst(Element root, Visitor<T> visitor)
    {
-      return breadthFirst(new VisitContextImpl<T>(), root, visitor);
+      return depthFirst(new VisitContextImpl<T>(), root, visitor);
    }
 
-   private static <T> VisitContext<T> breadthFirst(VisitContextImpl<T> context, Element root, Visitor<T> visitor)
+   private static <T> VisitContext<T> depthFirst(VisitContextImpl<T> context, Element root, Visitor<T> visitor)
    {
       if (root == null)
          throw new IllegalArgumentException("Root Element to visit must not be null.");
@@ -39,12 +39,13 @@ public class Visit
          context = new VisitContextImpl<T>();
 
       Element current = root;
-      visitor.visit(context, current);
-      current = current.getFirstChildElement();
-
-      while (current != null && !context.isVisitComplete()) {
-         breadthFirst(context, current, visitor);
-         current = current.getNextSiblingElement();
+      // If visit returns false, stop visiting down (but keep visiting)
+      if (visitor.visit(context, current)) {
+        current = current.getFirstChildElement();
+        while (current != null && !context.isVisitComplete()) {
+           depthFirst(context, current, visitor);
+           current = current.getNextSiblingElement();
+        }
       }
 
       return context;

@@ -21,8 +21,10 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.jboss.errai.common.client.ui.ElementWrapperWidget;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.shared.EventHandler;
@@ -35,11 +37,18 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
- * 
+ *
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public final class TemplateUtil {
   private static final Logger logger = Logger.getLogger(TemplateUtil.class.getName());
+  private static TranslationService translationService = null;
+  public static TranslationService getTranslationService() {
+    if (translationService == null) {
+      translationService = GWT.create(TranslationService.class);
+    }
+    return translationService;
+  }
 
   private TemplateUtil() {
   }
@@ -111,15 +120,17 @@ public final class TemplateUtil {
 
     if (rootField != null && !rootField.trim().isEmpty()) {
       logger.fine("Locating root element: " + rootField);
-      VisitContext<Element> context = Visit.breadthFirst(parserDiv, new Visitor<Element>() {
+      VisitContext<Element> context = Visit.depthFirst(parserDiv, new Visitor<Element>() {
         @Override
-        public void visit(VisitContextMutable<Element> context, Element element) {
+        public boolean visit(VisitContextMutable<Element> context, Element element) {
           if (element.hasAttribute("data-field") && element.getAttribute("data-field").equals(rootField)) {
             Element result = DOM.createDiv();
             result.appendChild(element);
             context.setResult(result);
             context.setVisitComplete();
+            return false;
           }
+          return true;
         }
       });
 
@@ -137,6 +148,128 @@ public final class TemplateUtil {
     return parserDiv.getFirstChildElement();
   }
 
+  /**
+   * Called to perform i18n translation on the given template.
+   * @param templateRoot
+   */
+  public static void translateTemplate(String templateFile, Element templateRoot) {
+    if (!getTranslationService().isEnabled())
+      return;
+
+    logger.fine("Translating template: " + templateFile);
+    final String i18nKeyPrefix = getI18nPrefix(templateFile);
+    Visit.depthFirst(templateRoot, new Visitor<Object>() {
+      @Override
+      public boolean visit(VisitContextMutable<Object> context, Element element) {
+        // Developers can mark entire sections of the template as "do not translate"
+        if ("true".equals(element.getAttribute("data-i18n-skip"))) {
+          return false;
+        }
+        // If the element either explicitly enables i18n (via an i18n key) or is a text-only
+        // node, translate it.
+        if (element.hasAttribute("data-i18n-key") || isTextOnly(element)) {
+          translateElement(i18nKeyPrefix, element);
+          return false;
+        }
+
+        if (element.hasAttribute("title")) {
+          translateAttribute(i18nKeyPrefix, element, "title");
+        }
+        if (element.hasAttribute("placeholder")) {
+          translateAttribute(i18nKeyPrefix, element, "placeholder");
+        }
+        return true;
+      }
+
+      /**
+       * Translates the given element.
+       * @param i18nKeyPrefix
+       * @param element
+       */
+      private void translateElement(String i18nKeyPrefix, Element element) {
+        String translationKey = i18nKeyPrefix + getTranslationKey(element);
+        String translationValue = getI18nValue(translationKey);
+        if (translationValue != null)
+          element.setInnerHTML(translationValue);
+      }
+
+      /**
+       * Translates an attribute of the given element.
+       * @param i18nKeyPrefix
+       * @param element
+       * @param attributeName
+       */
+      private void translateAttribute(String i18nKeyPrefix, Element element, String attributeName) {
+        String elementKey = null;
+        if (element.hasAttribute("data-field")) {
+          elementKey = element.getAttribute("data-field");
+        } else if (element.hasAttribute("id")) {
+          elementKey = element.getAttribute("id");
+        } else if (element.hasAttribute("name")) {
+          elementKey = element.getAttribute("name");
+        } else {
+          elementKey = getTranslationKey(element);
+        }
+        // If we couldn't figure out a key for this thing, then just bail.
+        if (elementKey == null || elementKey.trim().length() == 0) {
+          return;
+        }
+        String translationKey = i18nKeyPrefix + elementKey;
+        translationKey += "-" + attributeName;
+        String translationValue = getI18nValue(translationKey);
+        if (translationValue != null)
+          element.setAttribute(attributeName, translationValue);
+      }
+
+      /**
+       * Gets a translation key associated with the given element.
+       * @param element
+       */
+      protected String getTranslationKey(Element element) {
+        String translationKey = null;
+        String currentText = element.getInnerText();
+        if (element.hasAttribute("data-i18n-key")) {
+          translationKey = element.getAttribute("data-i18n-key");
+        } else {
+          translationKey = currentText.replaceAll("[:\\s'\"]", "_");
+          if (translationKey.length() > 128) {
+            translationKey = translationKey.substring(0, 128) + translationKey.hashCode();
+          }
+        }
+        return translationKey;
+      }
+
+      /**
+       * Returns true if the given element has some text and no element children.
+       * @param element
+       */
+      private boolean isTextOnly(Element element) {
+        String text = element.getInnerText();
+        return (element.getFirstChildElement() == null) && text != null && text.trim().length() > 0;
+      }
+
+      /**
+       * Looks up the proper value for the given translation key.  Uses the
+       * TranslationService to lookup the proper value for the current locale.
+       * @param translationKey
+       */
+      private String getI18nValue(String translationKey) {
+        return getTranslationService().getTranslation(translationKey);
+      }
+
+    });
+  }
+
+  /**
+   * Generate an i18n key prefix from the given template filename.
+   * @param templateFile
+   */
+  public static String getI18nPrefix(String templateFile) {
+    int idx1 = templateFile.lastIndexOf('/');
+    int idx2 = templateFile.lastIndexOf('.');
+    return templateFile.substring(idx1 + 1, idx2 + 1);
+  }
+
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
     final Map<String, Element> childTemplateElements = new LinkedHashMap<String, Element>();
 
@@ -144,13 +277,14 @@ public final class TemplateUtil {
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
-    Visit.breadthFirst(templateRoot, new Visitor<Object>() {
+    Visit.depthFirst(templateRoot, new Visitor<Object>() {
       @Override
-      public void visit(VisitContextMutable<Object> context, Element element) {
+      public boolean visit(VisitContextMutable<Object> context, Element element) {
         if (element.hasAttribute("data-field")) {
           logger.fine("Located field: " + element.getAttribute("data-field"));
           childTemplateElements.put(element.getAttribute("data-field"), element);
         }
+        return true;
       }
     });
 
