@@ -408,10 +408,13 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   private static Map<String, String> getTemplateI18nValues(Element templateRoot, final String i18nPrefix) {
     final Map<String, String> i18nValues = new HashMap<String, String>();
     travisit(templateRoot, new DomVisitor() {
+
+      // MAINTAINER WARNING: there is parallel logic in TranslateUtil.translateTemplate() that must be kept in sync with this
+
       @Override
       public boolean visit(Element element) {
         // Developers can mark entire sections of the template as "do not translate"
-        if ("true".equals(element.getAttribute("data-i18n-skip"))) {
+        if ("dummy".equals(element.getAttribute("data-role"))) {
           System.out.println("Skipping...");
           return false;
         }

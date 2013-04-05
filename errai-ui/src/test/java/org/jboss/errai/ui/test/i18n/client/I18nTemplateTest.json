@@ -7,5 +7,7 @@
     "I18nComponent.Email_": "Email:",
     "I18nComponent.email-placeholder": "Enter your email address...",
     "I18nComponent.Password_": "Password:",
-    "I18nComponent.password-title": "Your password goes here."
+    "I18nComponent.password-title": "Your password goes here.",
+    "I18nComponent.Example_Item_1": "This should not appear in the template",
+    "I18nComponent.Second_Example_Item": "This should not appear in the template"
 }

@@ -4,6 +4,8 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.junit.Test;
 
+import com.google.gwt.dom.client.UListElement;
+
 public class I18nTemplateTest extends AbstractErraiCDITest {
 
   /**
@@ -34,4 +36,17 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
 
   }
 
+  @Test
+  public void testChildrenOfDummyElementAreIgnored() {
+    I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(org.jboss.errai.ui.test.i18n.client.I18nTemplateTestApp.class).getInstance();
+    assertNotNull(app.getComponent());
+
+    UListElement variableLengthList = app.getComponent().getVariableLengthList();
+    assertNotNull(variableLengthList);
+
+    // NOTE: if ErraiUI is enhanced in the future to completely snip out the children of data-role=dummy elements,
+    //       then the following code will fail with NPEs. In that case, this whole test method can be deleted.
+    assertEquals("Example Item 1", variableLengthList.getFirstChildElement().getInnerText());
+    assertEquals("Second Example Item", variableLengthList.getFirstChildElement().getNextSiblingElement().getInnerText());
+  }
 }

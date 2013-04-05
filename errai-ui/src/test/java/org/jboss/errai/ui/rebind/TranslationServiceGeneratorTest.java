@@ -66,13 +66,13 @@ public class TranslationServiceGeneratorTest {
     TranslationServiceGenerator.recordBundleKeys(result, null, jsonResourcePath);
     Assert.assertEquals(1, result.keySet().size());
     Set<String> defaultKeys = result.get(null);
-    Assert.assertEquals(9, defaultKeys.size());
+    Assert.assertEquals(11, defaultKeys.size());
 
     jsonResourcePath = "org/jboss/errai/ui/test/i18n/client/I18nTemplateTest_fr_FR.json";
     TranslationServiceGenerator.recordBundleKeys(result, "fr_FR", jsonResourcePath);
     Assert.assertEquals(2, result.keySet().size());
     defaultKeys = result.get(null);
-    Assert.assertEquals(9, defaultKeys.size());
+    Assert.assertEquals(11, defaultKeys.size());
     Set<String> fr_FR_Keys = result.get("fr_FR");
     Assert.assertEquals(9, fr_FR_Keys.size());
 
@@ -80,7 +80,7 @@ public class TranslationServiceGeneratorTest {
     TranslationServiceGenerator.recordBundleKeys(result, "da", jsonResourcePath);
     Assert.assertEquals(3, result.keySet().size());
     defaultKeys = result.get(null);
-    Assert.assertEquals(9, defaultKeys.size());
+    Assert.assertEquals(11, defaultKeys.size());
     fr_FR_Keys = result.get("fr_FR");
     Assert.assertEquals(9, fr_FR_Keys.size());
     Set<String> da_Keys = result.get("da");

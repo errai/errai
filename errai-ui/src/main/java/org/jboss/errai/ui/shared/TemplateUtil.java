@@ -159,10 +159,13 @@ public final class TemplateUtil {
     logger.fine("Translating template: " + templateFile);
     final String i18nKeyPrefix = getI18nPrefix(templateFile);
     Visit.depthFirst(templateRoot, new Visitor<Object>() {
+
+      // MAINTAINER WARNING: there is parallel logic in TranslationServiceGenerator.getTemplateI18nValues() that must be kept in sync with this
+
       @Override
       public boolean visit(VisitContextMutable<Object> context, Element element) {
         // Developers can mark entire sections of the template as "do not translate"
-        if ("true".equals(element.getAttribute("data-i18n-skip"))) {
+        if ("dummy".equals(element.getAttribute("data-role"))) {
           return false;
         }
         // If the element either explicitly enables i18n (via an i18n key) or is a text-only

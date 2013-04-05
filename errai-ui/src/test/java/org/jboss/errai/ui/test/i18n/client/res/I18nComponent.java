@@ -8,6 +8,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.dom.client.UListElement;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -35,6 +36,9 @@ public class I18nComponent extends Composite {
   private InlineLabel passwordLabel;
   @Inject @DataField
   private TextBox password;
+
+  @DataField
+  private UListElement variableLengthList = Document.get().createULElement();
 
   /**
    * Constructor.
@@ -103,6 +107,10 @@ public class I18nComponent extends Composite {
    */
   public TextBox getPassword() {
     return password;
+  }
+
+  public UListElement getVariableLengthList() {
+    return variableLengthList;
   }
 
 }
