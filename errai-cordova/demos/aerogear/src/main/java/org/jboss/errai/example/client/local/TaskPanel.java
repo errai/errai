@@ -5,8 +5,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.TaskAddedEvent;
+import org.jboss.errai.example.client.local.pipe.TaskPipe;
 import org.jboss.errai.example.shared.Task;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.client.widget.ListWidget;
@@ -20,12 +23,18 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
+import static org.jboss.errai.example.client.local.Animator.show;
+
 /**
  * @author edewit@redhat.com
  */
 @Dependent
 @Templated("App.html#task-container")
-public class TaskPanel extends AbstractModelPanel {
+public class TaskPanel extends Composite {
+
+  @Inject
+  @TaskPipe
+  protected Pipe<Task> taskPipe;
 
   @DataField("task-loader")
   private Element taskStatusBar = DOM.createElement("div");
@@ -46,16 +55,11 @@ public class TaskPanel extends AbstractModelPanel {
   }
 
   private void refreshTaskList() {
-    taskPipe.read(new AsyncCallback<List<Task>>() {
+    taskPipe.read(new DefaultCallback<List<Task>>() {
       @Override
       public void onSuccess(List<Task> result) {
         taskList.setItems(result);
         taskStatusBar.getStyle().setDisplay(Style.Display.NONE);
-      }
-
-      @Override
-      public void onFailure(Throwable caught) {
-        throw new RuntimeException(caught);
       }
     });
   }
