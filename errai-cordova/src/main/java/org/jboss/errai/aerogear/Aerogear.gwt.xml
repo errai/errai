@@ -18,7 +18,7 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
   <inherits name="org.jboss.errai.common.ErraiCommon" />
-  <inherits name="org.jboss.errai.marshalling.ErraiMarshalling"/>
+  <inherits name="org.jboss.errai.enterprise.Jaxrs"/>
   <script src="jquery-1.8.2.min.js"/>
   <script src="aerogear.min.js"/>
 

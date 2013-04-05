@@ -11,10 +11,13 @@ import org.jboss.errai.aerogear.api.pipeline.PagedList;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.aerogear.api.pipeline.PipeType;
 import org.jboss.errai.aerogear.api.pipeline.ReadFilter;
+import org.jboss.errai.marshalling.client.Marshalling;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 
 /**
  * @author edewit@redhat.com
@@ -22,8 +25,24 @@ import java.util.Map;
 @SuppressWarnings("ALL")
 public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
 
-  public PipeAdapter(JavaScriptObject pipe) {
+  static {
+      enableJacksonMarchalling();
+  }  
+
+  private native static void enableJacksonMarchalling() /*-{
+    $wnd.erraiJaxRsJacksonMarshallingActive = true;
+  }-*/;
+  
+  private final Class<T> type;
+
+  public PipeAdapter(Class<T> type, JavaScriptObject pipe) {
     this.object = pipe;
+    this.type = type;
+  }
+
+  @Override
+  protected T fromJSON(String json) {
+    return (T) MarshallingWrapper.fromJSON(json, type);
   }
 
   @Override
@@ -51,12 +70,20 @@ public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
 
   @Override
   public void save(T item, AsyncCallback<T> callback) {
-    save0(item, callback);
+    String json;
+    if (!(item instanceof Map)) {
+      json = MarshallingWrapper.toJSON(item);
+    } else {
+      Map map = new HashMap();
+      map.putAll((Map) item);
+      json = Marshalling.toJSON(map);
+    }
+    save0(json, callback);
   }
 
-  private native void save0(T item, AsyncCallback<T> callback) /*-{
+  private native void save0(String item, AsyncCallback<T> callback) /*-{
       var that = this;
-      this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.save(item,
+      this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.save(eval('[' + item + '][0]'),
           {
               success: function (data, textStatus, jqXHR) {
                   that.@org.jboss.errai.aerogear.api.pipeline.impl.PipeAdapter::callback(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/user/client/rpc/AsyncCallback;)(data, callback);

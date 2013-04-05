@@ -22,7 +22,7 @@ public class PipeTest extends GWTTestCase {
 
   public void testReadTasks() {
     //given
-    Pipe<Task> pipe = new PipeFactory().createPipe("tasks");
+    Pipe<Task> pipe = new PipeFactory().createPipe(Task.class, "tasks");
 
     //when
     pipe.read(new FailingAsyncCallback<List<Task>>() {
@@ -51,9 +51,51 @@ public class PipeTest extends GWTTestCase {
     delayTestFinish(3000);
   }
 
+  public void testReadStandardJson() {
+    //given
+    Pipe<Task> pipe = new PipeFactory().createPipe(Task.class, "json");
+
+    //when
+    pipe.read(new FailingAsyncCallback<List<Task>>() {
+      @Override
+      public void onSuccess(List<Task> result) {
+        assertNotNull(result);
+        finishTest();
+      }
+    });
+
+    delayTestFinish(3000);
+  }
+
+  public void testSaveMapOfString() {
+    //given
+    Pipe<Map> pipe = new PipeFactory().createPipe(Map.class, "tasks");
+
+    //when
+    pipe.read(new FailingAsyncCallback<List<Map>>() {
+      @Override
+      public void onSuccess(List<Map> result) {
+        assertNotNull(result);
+      }
+    });
+
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("id", "123");
+    map.put("title", "new");
+
+    pipe.save(map, new FailingAsyncCallback<Map>() {
+      @Override
+      public void onSuccess(Map result) {
+        finishTest();
+      }
+    });
+
+    delayTestFinish(3000);
+  }
+
   public void testPaging() {
     //given
-    Pipe<Task> pipe = new PipeFactory().createPipe(new PipeFactory.Config("pageTestWebLink"));
+    Pipe<Task> pipe = new PipeFactory().createPipe(Task.class, new PipeFactory.Config("pageTestWebLink"));
 
     ReadFilter filter = new ReadFilter();
     filter.setOffset(1);
@@ -73,7 +115,7 @@ public class PipeTest extends GWTTestCase {
 
   public void testSecurity() {
     Authenticator auth = new AuthenticationFactory().createAuthenticator("auth");
-    Pipe<Task> securePipe = new PipeFactory().createPipe("auth", auth);
+    Pipe<Task> securePipe = new PipeFactory().createPipe(Task.class, "auth", auth);
     cleanToken();
 
     securePipe.read(new AsyncCallback<List<Task>>() {

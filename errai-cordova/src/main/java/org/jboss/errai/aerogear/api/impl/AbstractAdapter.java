@@ -3,10 +3,11 @@ package org.jboss.errai.aerogear.api.impl;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.json.client.JSONObject;
-import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author edewit@redhat.com
@@ -18,12 +19,12 @@ public abstract class AbstractAdapter<T> {
 
   protected JavaScriptObject object;
 
-  private String toJSON(JavaScriptObject object) {
+  protected String toJSON(JavaScriptObject object) {
     return new JSONObject(object).toString();
   }
 
-  private T fromJSON(String json) {
-    return (T) Marshalling.fromJSON(json);
+  protected T fromJSON(String json) {
+    return (T) MarshallingWrapper.fromJSON(json);
   }
 
   protected T convertToType(JavaScriptObject object) {

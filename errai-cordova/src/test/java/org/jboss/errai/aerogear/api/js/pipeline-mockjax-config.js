@@ -30,6 +30,22 @@ $.mockjax({
     responseText: defaultResponseText
 });
 
+
+$.mockjax({
+    url: "json",
+    type: "GET",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    responseText: [
+        {
+            id: 12345,
+            title: "Do Something",
+            date: "2012-08-01"
+        }
+    ]
+});
+
 // save mock
 $.mockjax({
     url: "tasks/*",

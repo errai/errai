@@ -31,6 +31,12 @@
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jaxrs-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-html5</artifactId>
       <version>${project.version}</version>
     </dependency>
