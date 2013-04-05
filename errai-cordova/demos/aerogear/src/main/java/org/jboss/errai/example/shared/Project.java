@@ -17,12 +17,14 @@
 package org.jboss.errai.example.shared;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.databinding.client.api.Bindable;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 @Portable
+@Bindable
 public class Project implements Serializable {
   private Long id;
   private String title;

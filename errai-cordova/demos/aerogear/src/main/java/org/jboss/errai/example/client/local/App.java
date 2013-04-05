@@ -13,4 +13,9 @@ public class App extends Composite {
   @Inject
   @DataField("task-container")
   TaskPanel taskPanel;
+
+  @Inject
+  @DataField("project-list")
+  ProjectPanel projectPanel;
+
 }
