@@ -126,34 +126,36 @@ public class TranslationServiceGeneratorTest {
     }
   }
 
+  private static final String NEWLINE = System.getProperty("line.separator");
+
   private static final String EXPECTED_ALL_BUNDLE =
-        "{\r\n" +
-  		"  \"TranslatableComponent1.Email_\" : \"Email:\",\r\n" +
-  		"  \"TranslatableComponent1.Label_1_\" : \"Label 1:\",\r\n" +
-  		"  \"TranslatableComponent1.Label_2_\" : \"Label 2:\",\r\n" +
-  		"  \"TranslatableComponent1.Password_\" : \"Password:\",\r\n" +
-  		"  \"TranslatableComponent1.email-placeholder\" : \"Enter your email address...\",\r\n" +
-  		"  \"TranslatableComponent1.password-title\" : \"Your password goes here.\",\r\n" +
-  		"  \"TranslatableComponent1.value_one\" : \"value one\",\r\n" +
-  		"  \"TranslatableComponent1.value_two\" : \"value two\",\r\n" +
-  		"  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\",\r\n" +
-  		"  \"component2.Cancel\" : \"Cancel\",\r\n" +
-  		"  \"component2.Log_in\" : \"Log in\",\r\n" +
-  		"  \"component2.Log_in_to_your_account\" : \"Log in to your account\",\r\n" +
-  		"  \"component2.Password\" : \"Password\",\r\n" +
-  		"  \"component2.Remember_me\" : \"Remember me\",\r\n" +
-  		"  \"component2.Username\" : \"Username\",\r\n" +
-  		"  \"component2.password-placeholder\" : \"Password\",\r\n" +
-  		"  \"component2.username-placeholder\" : \"Username\"\r\n" +
-  		"}";
+        "{" + NEWLINE +
+        "  \"TranslatableComponent1.Email_\" : \"Email:\"," + NEWLINE +
+        "  \"TranslatableComponent1.Label_1_\" : \"Label 1:\"," + NEWLINE +
+        "  \"TranslatableComponent1.Label_2_\" : \"Label 2:\"," + NEWLINE +
+        "  \"TranslatableComponent1.Password_\" : \"Password:\"," + NEWLINE +
+        "  \"TranslatableComponent1.email-placeholder\" : \"Enter your email address...\"," + NEWLINE +
+        "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\"," + NEWLINE +
+        "  \"TranslatableComponent1.value_one\" : \"value one\"," + NEWLINE +
+        "  \"TranslatableComponent1.value_two\" : \"value two\"," + NEWLINE +
+        "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
+        "  \"component2.Cancel\" : \"Cancel\"," + NEWLINE +
+        "  \"component2.Log_in\" : \"Log in\"," + NEWLINE +
+        "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"," + NEWLINE +
+        "  \"component2.Password\" : \"Password\"," + NEWLINE +
+        "  \"component2.Remember_me\" : \"Remember me\"," + NEWLINE +
+        "  \"component2.Username\" : \"Username\"," + NEWLINE +
+        "  \"component2.password-placeholder\" : \"Password\"," + NEWLINE +
+        "  \"component2.username-placeholder\" : \"Username\"" + NEWLINE +
+        "}";
   private static final String EXPECTED_EXTRA_BUNDLE =
-        "{\r\n" +
-        "  \"component2.extra-key\" : \"\"\r\n" +
+        "{" + NEWLINE +
+        "  \"component2.extra-key\" : \"\"" + NEWLINE +
         "}";
   private static final String EXPECTED_MISSING_BUNDLE =
-        "{\r\n" +
-        "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\",\r\n" +
-        "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\",\r\n" +
-        "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"\r\n" +
+        "{" + NEWLINE +
+        "  \"TranslatableComponent1.password-title\" : \"Your password goes here.\"," + NEWLINE +
+        "  \"TranslatableComponent1.welcome\" : \"Welcome to the errai-ui i18n demo.\"," + NEWLINE +
+        "  \"component2.Log_in_to_your_account\" : \"Log in to your account\"" + NEWLINE +
         "}";
 }
