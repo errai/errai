@@ -16,37 +16,21 @@
 
 package org.jboss.errai.otec.mutation;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
  * @author Mike Brock
  */
-public class Transformer {
+public class ReceiveHandlerImpl implements ReceiveHandler {
   private final OTEntity entity;
   private final OTPeer peer;
-  private final List<Operation> operations;
 
-  public Transformer(OTEntity entity, OTPeer peer, List<Operation> operations) {
+  public ReceiveHandlerImpl(final OTEntity entity, final OTPeer peer) {
     this.entity = entity;
     this.peer = peer;
-    this.operations = operations;
   }
 
-  public void transform() {
-    final TransactionLog transactionLog = entity.getTransactionLog();
-    final int firstRevision = operations.get(0).getRevision();
-    final Collection<Operation> loggedOps = transactionLog.getLogFromId(firstRevision);
-
-    // if no operation was carried out we can just apply the new operations
-    if (loggedOps.isEmpty()) {
-      for (Operation op : operations) {
-        op.apply(entity.getState());
-        entity.setRevision(op.getRevision());
-      }
-    }
-    else {
-      // transform operations and re-apply
-    }
+  @Override
+  public void receive(List<Operation> operations) {
   }
 }

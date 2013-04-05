@@ -16,11 +16,18 @@
 
 package org.jboss.errai.otec.tests;
 
+import static junit.framework.Assert.assertEquals;
+
 import org.jboss.errai.otec.mutation.CharacterData;
+import org.jboss.errai.otec.mutation.OTEngine;
+import org.jboss.errai.otec.mutation.OTEngineImpl;
+import org.jboss.errai.otec.mutation.OTEntity;
+import org.jboss.errai.otec.mutation.OTOperationList;
+import org.jboss.errai.otec.mutation.OTOperationsFactory;
 import org.jboss.errai.otec.mutation.OneDimensionalPosition;
 import org.jboss.errai.otec.mutation.OperationType;
-import org.jboss.errai.otec.mutation.StringOperation;
 import org.jboss.errai.otec.mutation.StringState;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -28,23 +35,51 @@ import org.junit.Test;
  */
 
 public class OtecPrototypingTest {
-  @Test
-  public void testPrototype1() {
-    final String INITIAL = "I love freedom!";
+  OTEngine clientEngine;
+  OTEngine serverEngine;
+  OTEntity clientOtEntity;
 
-    StringState stateA = new StringState(INITIAL);
-    StringState stateB = new StringState(INITIAL);
 
-    final StringOperation clientA = new StringOperation(1, OperationType.Insert, new OneDimensionalPosition(4), new CharacterData('!'));
-    final StringOperation clientB = new StringOperation(2, OperationType.Delete, new OneDimensionalPosition(4), null);
+  @Before
+  public void setUp() throws Exception {
+    clientEngine = new OTEngineImpl();
+    serverEngine = new OTEngineImpl();
 
-    clientA.apply(stateA); // local
-    clientB.apply(stateB); // local
+    clientEngine.registerPeer(new MockPeerImpl(serverEngine));
+    serverEngine.registerPeer(new MockPeerImpl(clientEngine));
 
-    clientA.apply(stateB);
-    clientB.apply(stateA);
+    final String myEntityOfStringFun = "Hello, World?";
+    final StringState state = new StringState(myEntityOfStringFun);
+    clientOtEntity = serverEngine.getEntityStateSpace().addEntity(state);
 
-    System.out.println(stateA.get() + ":" + stateB.get());
+    clientEngine.syncRemoteEntity(serverEngine.getId(), clientOtEntity.getId(), new MockEntitySyncCompletionCallback());
   }
+
+  @Test
+  public void testApplyOperationsLocally() {
+    final OTOperationsFactory operationsFactory = clientEngine.getOperationsFactory();
+    final OTOperationList list = operationsFactory.createFor(clientOtEntity)
+        .addOperation(OperationType.Delete, new OneDimensionalPosition(12))
+        .addOperation(OperationType.Insert, new OneDimensionalPosition(12), new CharacterData('!'))
+        .build();
+
+    clientEngine.applyOperationsLocally(list);
+    assertEquals("Hello, World!", clientOtEntity.getState().get());
+  }
+
+  @Test
+  public void testNotifyOperations() {
+    final OTOperationsFactory operationsFactory = clientEngine.getOperationsFactory();
+    final OTOperationList list = operationsFactory.createFor(clientOtEntity)
+        .addOperation(OperationType.Delete, new OneDimensionalPosition(12))
+        .addOperation(OperationType.Insert, new OneDimensionalPosition(12), new CharacterData('!'))
+        .build();
+
+    clientEngine.notifyOperations(list);
+
+    final OTEntity entity = serverEngine.getEntityStateSpace().getEntity(clientOtEntity.getId());
+    assertEquals("Hello, World!", entity.getState().get());
+  }
+
 
 }
