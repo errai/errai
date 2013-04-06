@@ -22,6 +22,7 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.marshallers.FallbackExceptionMarshaller;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -124,8 +125,11 @@ public class MarshallUtil {
 
     Marshaller<Object> m = session.getMarshallerInstance(className);
     if (m == null && obj instanceof WrappedPortable) {
-      className = ((WrappedPortable) obj).unwrap().getClass().getName(); 
+      className = ((WrappedPortable) obj).unwrap().getClass().getName();
       m = session.getMarshallerInstance(className);
+    }
+    if (m == null && obj instanceof Throwable) {
+      m = new FallbackExceptionMarshaller();
     }
     if (m == null) {
       throw new RuntimeException("no marshalling definition available for type:" + className);
@@ -143,7 +147,7 @@ public class MarshallUtil {
 
   /**
    * Returns the canonical class name of the component type of the given array type.
-   * 
+   *
    * @param fqcn
    *          An array type of any number of dimensions, such as {@code [[Ljava.lang.String;}.
    * @return A class name, such as {@code java.lang.String}.
