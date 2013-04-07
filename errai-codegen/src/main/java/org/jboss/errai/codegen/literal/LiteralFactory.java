@@ -147,7 +147,6 @@ public class LiteralFactory {
   private static LiteralValue<?> _getLiteral(final Context context,
                                              final Object o,
                                              final boolean throwIfNotLiteralizable) {
-
     if (o == null) {
       return NullLiteral.INSTANCE;
     }

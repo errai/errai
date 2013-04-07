@@ -12,7 +12,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DecodingSession extends AbstractMarshallingSession {
-  
+
   public DecodingSession(final ServerMappingContext context) {
     super(context);
   }

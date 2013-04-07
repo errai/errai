@@ -58,7 +58,6 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
                     "}";
 
     assertEquals(expectedValue, generated);
-
   }
 
   @Test
