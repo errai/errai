@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jboss.errai.otec.mutation;
 
 /**
@@ -14,42 +30,59 @@ public final class GUIDUtil {
   private static final char[] chars =
       {'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
-  private static volatile int seedCounter = -((int) System.currentTimeMillis() >> 10);
 
-  public synchronized static String createGUID() {
-    int x = 938203, y = 138301, z = Integer.MAX_VALUE;
-    double[] arr = new double[1000];
-    long time = System.currentTimeMillis();
-    seedCounter += time >> 8;
+  private static final Object seedLock = new Object();
+  private static final int MAX = Short.MAX_VALUE;
+  private static volatile double rSeed = System.currentTimeMillis() % Short.MAX_VALUE;
+  private static volatile int _a = 1;
+  private static volatile int _b = 1000;
 
-    arr[0] = System.currentTimeMillis() + seedCounter;
+  public static String createGUID() {
 
-    for (int i = 1; i < arr.length; i++) {
-      arr[i] = (x * arr[i - 1] + y) % z;
-      x += time << 16 % z;
-      y += time << 10 % z;
+    final double seed;
+
+    final int q, p;
+    synchronized (seedLock) {
+      seed = ++rSeed;
+      if (++_a == 100000) {
+       _a = 1;
+      }
+      if (--_b == 0) {
+        _b = (int) System.currentTimeMillis() % Short.MAX_VALUE;
+      }
+      q = _a;
+      p = _b;
     }
 
+    final long time = System.currentTimeMillis() + q;
+    int a = (int) ((time & 0xFFFF) * 73278) + q, x, b = ((int) (time & 0xFFFF) * 33187) + p;
+
+    if (b < 0) {
+      b = -b;
+    }
+    else if (b == 0) {
+      b = 2;
+    }
+
+    x = (int) seed * a / b;
+
     final char[] charArray = new char[35];
-    for (int i = 1; i < charArray.length; i++) {
+
+    for (int i = 0; i < 35; i++) {
       if (i != (charArray.length - 1) && i % 5 == 0) {
         charArray[i] = ':';
         continue;
       }
 
-      int i1 = (x + ++seedCounter) % arr.length;
+      x = (a * x + b) % MAX;
+      a += time << 16 % MAX;
+      b += time << 10 % MAX;
 
-      if (i1 < 0) {
-        i1 = -i1;
-      }
+      int idx = x;
+      if (idx < 0)
+        idx = -idx;
 
-      double rand = arr[i1];
-
-      if (rand < 0) {
-        rand = -rand;
-      }
-
-      charArray[i] = chars[(int) rand % chars.length];
+      charArray[i] = chars[idx % chars.length];
     }
 
     return new String(charArray, 1, charArray.length - 1);
