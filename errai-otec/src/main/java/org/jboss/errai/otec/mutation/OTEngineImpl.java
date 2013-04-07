@@ -29,27 +29,8 @@ public class OTEngineImpl implements OTEngine {
   private final PeerState peerState = new SinglePeerState();
   private final OTEntityState entityState = new OTEntityStateImpl();
 
-  private static int counter = 0;
-
   public OTEngineImpl() {
-    // engineId = UUID.randomUUID().toString();
-
-
-    final char[] chars = {'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
-    final char[] randomId = new char[12];
-    long seed = System.currentTimeMillis();
-    for (int i = 0; i < randomId.length; i++) {
-      int rand = (int) (seed = (seed + System.currentTimeMillis() << 16));
-      rand += ++counter;
-
-      if (rand < 0) {
-        rand = -rand;
-      }
-
-      randomId[i] = chars[rand % chars.length];
-    }
-
-    engineId = new String(randomId);
+    engineId = GUIDUtil.createGUID();
   }
 
   @Override
@@ -61,7 +42,6 @@ public class OTEngineImpl implements OTEngine {
     }
 
     final OTPeer peer = peerState.getPeer(peerId);
-
 
     return new ReceiveHandler() {
       @Override
@@ -77,6 +57,7 @@ public class OTEngineImpl implements OTEngine {
     assertPeerNotNull(peer);
 
     return new InitialStateReceiveHandler() {
+      @SuppressWarnings("unchecked")
       @Override
       public void receive(State obj) {
         final OTEntity newEntity = new OTEntityImpl(entityId, obj);
@@ -86,6 +67,7 @@ public class OTEngineImpl implements OTEngine {
     };
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void syncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback callback) {
     final OTPeer peer = getPeerState().getPeer(peerId);
@@ -94,6 +76,7 @@ public class OTEngineImpl implements OTEngine {
     peer.beginSyncRemoteEntity(peerId, entityId, callback);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void applyOperationsLocally(OTOperationList operationList) {
     final OTEntity entity = operationList.getEntity();
@@ -118,13 +101,13 @@ public class OTEngineImpl implements OTEngine {
   public OTOperationsFactory getOperationsFactory() {
     return new OTOperationsFactory() {
       @Override
-      public OTOperationsListBuilder createFor(final OTEntity entity) {
+      public OTOperationsListBuilder createOperationsList(final OTEntity entity) {
         return new OTOperationsListBuilder() {
           List<Operation> operationList = new ArrayList<Operation>();
 
           @Override
-          public OTOperationsListBuilder addOperation(OperationType type, Position position, Data data) {
-            operationList.add(new StringOperation(entity.getNewRevisionNumber(), type, (OneDimensionalPosition) position, (CharacterData) data));
+          public OTOperationsListBuilder add(OperationType type, Position position, Data data) {
+            operationList.add(new StringOperation(entity.getNewRevisionNumber(), type, (IndexPosition) position, (CharacterData) data));
             return this;
           }
 
@@ -134,8 +117,8 @@ public class OTEngineImpl implements OTEngine {
           }
 
           @Override
-          public OTOperationsListBuilder addOperation(OperationType type, Position position) {
-            operationList.add(new StringOperation(entity.getNewRevisionNumber(), type, (OneDimensionalPosition) position, null));
+          public OTOperationsListBuilder add(OperationType type, Position position) {
+            operationList.add(new StringOperation(entity.getNewRevisionNumber(), type, (IndexPosition) position, null));
             return this;
           }
         };

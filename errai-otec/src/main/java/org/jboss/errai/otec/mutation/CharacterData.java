@@ -22,8 +22,12 @@ package org.jboss.errai.otec.mutation;
 public class CharacterData implements Data<Character> {
   private final char data;
 
-  public CharacterData(char data) {
+  private CharacterData(char data) {
     this.data = data;
+  }
+
+  public static CharacterData of(char data) {
+    return new CharacterData(data);
   }
 
   public Character get() {

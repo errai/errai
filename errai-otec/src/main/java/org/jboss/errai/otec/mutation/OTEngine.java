@@ -16,13 +16,14 @@
 
 package org.jboss.errai.otec.mutation;
 
-/**
- * @author Mike Brock
- */
+
 public interface OTEngine {
   public String getId();
+
   public ReceiveHandler getReceiveHandler(String peerId, Integer entityId);
+
   public InitialStateReceiveHandler getInitialStateReceiveHandler(String peerId, Integer entityId);
+
   public void syncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback callback);
 
   public void applyOperationsLocally(OTOperationList operationList);

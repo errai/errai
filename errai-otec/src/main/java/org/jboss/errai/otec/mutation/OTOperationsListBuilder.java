@@ -20,9 +20,9 @@ package org.jboss.errai.otec.mutation;
  * @author Mike Brock
  */
 public interface OTOperationsListBuilder {
-  public OTOperationsListBuilder addOperation(OperationType type, Position position);
+  public OTOperationsListBuilder add(OperationType type, Position position);
 
-  public OTOperationsListBuilder addOperation(OperationType type, Position position, Data data);
+  public OTOperationsListBuilder add(OperationType type, Position position, Data data);
 
   public OTOperationList build();
 }

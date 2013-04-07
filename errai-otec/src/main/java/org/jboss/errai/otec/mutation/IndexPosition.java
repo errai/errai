@@ -19,11 +19,15 @@ package org.jboss.errai.otec.mutation;
 /**
  * @author Mike Brock
  */
-public class OneDimensionalPosition implements Position {
+public class IndexPosition implements Position {
   private final int position;
 
-  public OneDimensionalPosition(int position) {
+  private IndexPosition(int position) {
     this.position = position;
+  }
+
+  public static IndexPosition of(int position) {
+    return new IndexPosition(position);
   }
 
   public int getPosition() {

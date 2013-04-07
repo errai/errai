@@ -22,5 +22,5 @@ package org.jboss.errai.otec.mutation;
 public interface OTOperationsFactory {
 
 
-  public OTOperationsListBuilder createFor(OTEntity entity);
+  public OTOperationsListBuilder createOperationsList(OTEntity entity);
 }

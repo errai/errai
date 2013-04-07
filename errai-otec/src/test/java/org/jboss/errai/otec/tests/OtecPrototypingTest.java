@@ -18,15 +18,8 @@ package org.jboss.errai.otec.tests;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jboss.errai.otec.mutation.CharacterData;
-import org.jboss.errai.otec.mutation.OTEngine;
-import org.jboss.errai.otec.mutation.OTEngineImpl;
-import org.jboss.errai.otec.mutation.OTEntity;
-import org.jboss.errai.otec.mutation.OTOperationList;
-import org.jboss.errai.otec.mutation.OTOperationsFactory;
-import org.jboss.errai.otec.mutation.OneDimensionalPosition;
-import org.jboss.errai.otec.mutation.OperationType;
-import org.jboss.errai.otec.mutation.StringState;
+import org.jboss.errai.otec.mutation.*;
+import org.jboss.errai.otec.mutation.IndexPosition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +31,6 @@ public class OtecPrototypingTest {
   OTEngine clientEngine;
   OTEngine serverEngine;
   OTEntity clientOtEntity;
-
 
   @Before
   public void setUp() throws Exception {
@@ -58,21 +50,22 @@ public class OtecPrototypingTest {
   @Test
   public void testApplyOperationsLocally() {
     final OTOperationsFactory operationsFactory = clientEngine.getOperationsFactory();
-    final OTOperationList list = operationsFactory.createFor(clientOtEntity)
-        .addOperation(OperationType.Delete, new OneDimensionalPosition(12))
-        .addOperation(OperationType.Insert, new OneDimensionalPosition(12), new CharacterData('!'))
+    final OTOperationList list = operationsFactory.createOperationsList(clientOtEntity)
+        .add(OperationType.Delete, IndexPosition.of(12))
+        .add(OperationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
         .build();
 
     clientEngine.applyOperationsLocally(list);
+
     assertEquals("Hello, World!", clientOtEntity.getState().get());
   }
 
   @Test
   public void testNotifyOperations() {
     final OTOperationsFactory operationsFactory = clientEngine.getOperationsFactory();
-    final OTOperationList list = operationsFactory.createFor(clientOtEntity)
-        .addOperation(OperationType.Delete, new OneDimensionalPosition(12))
-        .addOperation(OperationType.Insert, new OneDimensionalPosition(12), new CharacterData('!'))
+    final OTOperationList list = operationsFactory.createOperationsList(clientOtEntity)
+        .add(OperationType.Delete, IndexPosition.of(12))
+        .add(OperationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
         .build();
 
     clientEngine.notifyOperations(list);
@@ -80,6 +73,4 @@ public class OtecPrototypingTest {
     final OTEntity entity = serverEngine.getEntityStateSpace().getEntity(clientOtEntity.getId());
     assertEquals("Hello, World!", entity.getState().get());
   }
-
-
 }
