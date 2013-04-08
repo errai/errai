@@ -1,0 +1,60 @@
+/* Syntax highlighting stylesheet for HTML created by the Ostermiller syntax package. */
+/* This version is modified from the original to more closely resemble Eclipse JDT defaults. */
+
+body {
+	background:white;
+}
+.tag{
+	font-weight:bold;
+	color:blue;
+}
+.endtag{
+	color:blue;	
+}
+.reference{
+	color:black;
+}
+.name{
+	font-weight:bold;
+	color:maroon;
+}
+.value{
+	font-style: italic;
+	color:maroon;
+}
+.text{
+	font-weight:bold;
+	color:black;
+}
+.reservedWord{
+	color: #910f68;
+}
+.identifier{
+	color:black;
+}
+.literal{
+	color: #910f68;
+}
+.separator{
+	color:navy;
+}
+.operator{
+    font-weight:bold;
+    color:navy;
+}
+.comment{
+	color: #5773c9;
+}
+.preprocessor{
+	color:purple;
+}
+.whitespace{
+}
+
+/* Hack: the syntax highlighter doesn't know about generics or annotations; we'll colour errors as if */
+.error{
+	color: #777777;
+}
+.unknown{
+	color:orange;
+}

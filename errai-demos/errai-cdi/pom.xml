@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>Errai::CDI</name>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-cdi-demos</artifactId>
+    <version>3.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <weld.version>1.1.6.Final</weld.version>
+	    <gwt.version>2.5.1</gwt.version>
+	    <gwt.maven.version>2.5.1</gwt.maven.version>
+        <jetty.version>6.1.25</jetty.version>
+        <slf4j.version>1.6.1</slf4j.version>
+        <log4j.version>1.2.16</log4j.version>
+        <cdiapi.version>1.0-SP4</cdiapi.version>
+        <validation.api.version>1.0.0.GA</validation.api.version>
+        <mvel.version>2.1.Beta8</mvel.version>
+        <argLine></argLine>
+    </properties>
+
+    <modules>
+        <module>errai-cdi-mobile-demo</module>
+        <module>errai-cdi-mvp-demo</module>
+        <module>errai-cdi-tagcloud-demo</module>
+    </modules>
+    
+    <dependencies>
+	    <dependency>
+	      <groupId>log4j</groupId>
+	      <artifactId>log4j</artifactId>
+	      <version>${log4j.version}</version>
+	    </dependency>
+	    
+      <dependency>
+        <groupId>javax.enterprise</groupId>
+        <artifactId>cdi-api</artifactId>
+        <version>${cdiapi.version}</version>
+      </dependency>
+      
+	    <!-- Errai Core -->
+	    <dependency>
+	      <groupId>org.jboss.errai</groupId>
+	      <artifactId>errai-ioc</artifactId>
+          <version>${project.version}</version>
+	      <exclusions>
+	        <exclusion>
+	          <groupId>javax.inject</groupId>
+	          <artifactId>javax.inject</artifactId>
+	        </exclusion>
+	        <exclusion>
+	          <groupId>javax.annotation</groupId>
+	          <artifactId>jsr250-api</artifactId>
+	        </exclusion>
+	      </exclusions>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.jboss.errai</groupId>
+	      <artifactId>errai-tools</artifactId>
+          <version>${project.version}</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.mvel</groupId>
+	      <artifactId>mvel2</artifactId>
+	      <version>${mvel.version}</version>
+	    </dependency>
+	    
+	    <!-- CDI Integration Modules -->
+	    <dependency>
+	      <groupId>org.jboss.errai</groupId>
+	      <artifactId>errai-cdi-client</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
+	
+	    <dependency>
+	      <groupId>org.jboss.errai</groupId>
+	      <artifactId>errai-javax-enterprise</artifactId>
+	      <version>${project.version}</version>
+	      <scope>provided</scope>
+	    </dependency>
+	
+	    <dependency>
+	      <groupId>org.jboss.errai</groupId>
+	      <artifactId>errai-weld-integration</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
+	
+	    <dependency>
+	      <groupId>org.jboss.errai</groupId>
+	      <artifactId>errai-cdi-jetty</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
+	    
+	    <!-- Weld Modules -->
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-core</artifactId>
+            <version>${weld.version}</version>
+            <scope>provided</scope>
+        </dependency>
+         
+	    <!-- GWT and GWT Extensions -->
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+	    
+	    <!-- Runtime / Container dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+	
+	    <dependency>
+	      <groupId>org.slf4j</groupId>
+	      <artifactId>slf4j-log4j12</artifactId>
+	      <version>${slf4j.version}</version>
+	    </dependency>
+	    
+	    
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+		    <!-- Errai Core -->
+		    <dependency>
+		      <groupId>org.jboss.errai</groupId>
+		      <artifactId>errai-bus</artifactId>
+	          <version>${project.version}</version>
+		      <exclusions>
+		        <exclusion>
+		          <groupId>javax.inject</groupId>
+		          <artifactId>javax.inject</artifactId>
+		        </exclusion>
+		        <exclusion>
+		          <groupId>javax.annotation</groupId>
+		          <artifactId>jsr250-api</artifactId>
+		        </exclusion>
+		      </exclusions>
+		    </dependency>
+            <!-- Custom Jetty Version -->
+            <dependency>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-plus</artifactId>
+                <version>${jetty.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-naming</artifactId>
+                <version>${jetty.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!--
+               GWT
+            -->
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${validation.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${validation.api.version}</version>
+                <classifier>sources</classifier>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                    <failIfNoTests>false</failIfNoTests>
+                    <trimStackTrace>false</trimStackTrace>
+                     <!-- DO NOT REMOVE THE errai.ioc.experimental.infer_dependent_by_reachability flag or the testsuite WILL fail.-->
+                     <argLine>-Xmx1500m ${argLine} -Dgwt.args='-testBeginTimeout 5' -Derrai.hosted_mode_testing=true -Derrai.ioc.experimental.infer_dependent_by_reachability=true</argLine>
+                    <systemProperties>
+                        <property>
+                            <name>log4j.output.dir</name>
+                            <value>${project.build.directory}</value>
+                        </property>
+
+                        <!--
+                        Do not accidently package server test marshallers when building Errai
+                        -->
+                        <property>
+                            <name>errai.marshalling.server.classOutput.enabled</name>
+                            <value>false</value>
+                        </property>
+
+                    </systemProperties>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <outputDirectory>target/classes</outputDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+        
+        
+        
+     </build>
+
+</project>
