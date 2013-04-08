@@ -107,7 +107,9 @@ public class OTEngineImpl implements OTEngine {
 
           @Override
           public OTOperationsListBuilder add(OperationType type, Position position, Data data) {
-            operationList.add(new StringOperation(entity.getNewRevisionNumber(), type, (IndexPosition) position, (CharacterData) data));
+            operationList.add(
+                new StringOperation(entity.getNewRevisionNumber(), type, (IndexPosition) position, (CharacterData) data)
+            );
             return this;
           }
 
