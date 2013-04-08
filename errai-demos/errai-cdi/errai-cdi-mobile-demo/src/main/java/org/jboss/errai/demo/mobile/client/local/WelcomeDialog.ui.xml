@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    .important {
+    	font-weight: bold;
+    }
+    .greeting {
+       font-size: 36pt;
+    }
+    .dialogText {
+       font-size: 16pt;
+    }
+    .greetingTextBox {
+       font-size: 16pt;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+  <g:DecoratorPanel styleName="loginPanel">
+  	<g:VerticalPanel horizontalAlignment="ALIGN_CENTER">
+  		<g:Label text="Hi There!" horizontalAlignment="ALIGN_CENTER" styleName="{style.greeting}"/>
+  		<g:Label text="To get started, just tell us your name and then press Go" horizontalAlignment="ALIGN_CENTER"/>
+  		<g:TextBox maxLength="20" alignment="CENTER" ui:field="nameBox" textAlignment="ALIGN_CENTER" styleName="{style.greetingTextBox}"/>
+  		<g:Button text="Go" ui:field="goButton"/>
+  	</g:VerticalPanel>
+  </g:DecoratorPanel>
+  
+  </g:HTMLPanel>
+</ui:UiBinder> 
