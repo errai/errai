@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<link href="css/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/GroceryList.css" rel="stylesheet">
+</head>
+<body>
+  <div data-field=root>
+    <div class=row>
+      <div class=span6>
+        <h1>Stores!</h1>
+        <div data-field=storeList  style="width: 100%">
+          <div data-field=store class=store>
+            <span data-field=name class=name>Example Store 1</span>
+          </div>
+          <div class=store data-role=dummy>
+            <span class=name>Example Store 2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class=row>
+      <div class=span6>
+        <button class=btn data-field=addStoreButton style="margin-top: 10px">New Store</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

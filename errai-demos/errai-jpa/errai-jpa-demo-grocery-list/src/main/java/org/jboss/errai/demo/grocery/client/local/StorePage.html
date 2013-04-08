@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<link href="css/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="css/GroceryList.css" rel="stylesheet">
+
+<div class=container>
+  <div data-field=main class=row>
+    <div class=span6>
+      <form class="form-search">
+        <input id=locationSearchBox type=text class="span5 search-query"
+            data-field=locationSearchBox placeholder="Search Business Name or Address">
+      </form>
+
+      <hr>
+
+      <label for=storeName>Store Name:</label>
+      <input id=storeName class=span5 type=text data-field=name><br>
+
+      <label for=storeAddress>Address:</label>
+      <input id=storeAddress class=span5 type=text data-field=address><br>
+
+      <label for=radius>Notification radius</label>
+      <div id=radius data-field=radius>this is the slider</div>
+      <br/>
+
+      <label for=storeDepartments><span>Departments:</span> <i class=muted>(drag to rearrange)</i></label>
+      <div id=storeDepartments class=span5 data-field=departmentList></div><br>
+      <input class=span5 type=text placeholder="Add a department" data-field=addDepartment>
+
+      <br>
+      <br>
+      <button class=btn data-field=saveButton>Save</button>
+    </div>
+    <div class=span6>
+      <div class=map data-field=mapContainer>This is a map of the store location</div>
+    </div>
+  </div>
+</div>
