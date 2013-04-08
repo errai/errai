@@ -266,6 +266,12 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>net.auroris</groupId>
+      <artifactId>color-picker</artifactId>
+      <version>2.1</version>
+    </dependency>
+
     <!-- Runtime / Container dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>

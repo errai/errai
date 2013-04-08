@@ -25,6 +25,8 @@
   <inherits name="org.jboss.errai.enterprise.CDI"/>
   <inherits name="org.jboss.errai.aerogear.Aerogear"/>
 
+  <inherits name="net.auroris.ColorPicker.client"/>
+
   <source path="client"/>
   <source path="shared"/>
 </module>

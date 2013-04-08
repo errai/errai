@@ -61,14 +61,15 @@
                 <div class="nav-collapse" id="project-list" data-field="project-list">
                     <div class="add-project" data-field="addProject"><i class="icon-plus-sign"></i> Add Project</div>
                     <div class="add-project-form">
-                        <form id="add-project" name="project">
+                        <form id="add-project" name="project" data-field="project-form">
                             <input type="hidden" name="id" id="project-id" value=""/>
                             <label for="project-title">Title:</label>
-                            <input type="text" name="title" id="project-title"/>
-                            <label for="project-color" class="color-picker-label">Color:</label>
-                            <input type="hidden" name="style" id="project-color" class="color-picker" value="#ffffff"/>
-                            <a class="btn submit-btn"><i class="icon-plus-sign"></i> Add Project</a>
-                            <a class="btn form-close"><i class="icon-remove"></i> Cancel</a>
+                            <input type="text" name="title" id="project-title" data-field="project-title"/>
+                            <label class="color-picker-label">Color:</label>
+                            <a class="miniColors-trigger" style="background-color: #fff" data-field="colorPickerAnchor"></a>
+                            <div data-field="colorPicker"></div>
+                            <a class="btn submit-btn" data-field="submit"><i class="icon-plus-sign"></i> Add Project</a>
+                            <a class="btn form-close" data-field="cancel"><i class="icon-remove"></i> Cancel</a>
                         </form>
                     </div>
                     <div id="project-loader" class="loader" data-field="project-loader">

@@ -589,3 +589,7 @@ td.datePickerMonth {
     padding: 0px 4px;
     outline: none;
 }
+
+.dialogMiddleCenter td:nth-child(3) {
+    display:none;
+}

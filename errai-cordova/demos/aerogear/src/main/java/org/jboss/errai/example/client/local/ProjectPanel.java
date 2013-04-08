@@ -5,15 +5,18 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.pipe.ProjectPipe;
 import org.jboss.errai.example.shared.Project;
+import org.jboss.errai.example.shared.Task;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.List;
 
@@ -38,8 +41,11 @@ public class ProjectPanel extends Composite {
   private Anchor addProject;
 
   @Inject
+  @DataField("project-form")
+  private ProjectForm form;
+
   @DataField("project-container")
-  ListWidget<Project, ProjectItem> listWidget;
+  private ListWidget<Project, ProjectItem> listWidget = new ProjectList();
 
   @AfterInitialization
   public void loadTasks() {
@@ -59,5 +65,16 @@ public class ProjectPanel extends Composite {
   @EventHandler("addProject")
   public void onAddProjectClicked(ClickEvent event) {
     show(event.getRelativeElement());
+  }
+
+  private class ProjectList extends ListWidget<Project, ProjectItem> {
+    private ProjectList() {
+      super(new FlowPanel());
+    }
+
+    @Override
+    protected Class<ProjectItem> getItemWidgetType() {
+      return ProjectItem.class;
+    }
   }
 }
