@@ -34,6 +34,7 @@ public interface TestRPCService {
 
   public boolean isGreaterThan(int a, int b);
   public void exception() throws TestException;
+  public void nonPortableException() throws NonPortableException;
   public void returnVoid();
   public Person returnNull();
 

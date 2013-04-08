@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.tests.support.AbstractClassA;
+import org.jboss.errai.bus.client.tests.support.NonPortableException;
 import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.SubInterface;
 import org.jboss.errai.bus.client.tests.support.SuperInterface;
@@ -44,6 +45,11 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
   @Override
   public void exception() throws TestException {
     throw new TestException();
+  }
+  
+  @Override
+  public void nonPortableException() throws NonPortableException {
+    throw new NonPortableException("message");
   }
 
   @Override
