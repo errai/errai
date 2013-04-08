@@ -1,14 +1,21 @@
 <div>
-    <div class="project <%= project.style %>" data-field="root">
-        <div class="option-overlay" data-id="<%= project.id %>" data-type="project">
+    <div class="project" data-field="root">
+        <div class="option-overlay" data-field="overlay">
+            <input type="hidden" data-field="id">
             <div class="col">
-                <a class="btn sort" title="Filter"><i class="icon-filter"></i><span class="btn-txt">Filter</span></a>
+                <a class="btn sort" title="Filter">
+                    <i class="icon-filter"></i><span class="btn-txt">Filter</span>
+                </a>
             </div>
             <div class="col">
-                <a class="btn edit" title="Edit"><i class="icon-edit"></i><span class="btn-txt">Edit</span></a>
+                <a class="btn edit" title="Edit" data-field="edit">
+                    <i class="icon-edit"></i><span class="btn-txt">Edit</span>
+                </a>
             </div>
             <div class="col">
-                <a class="btn delete" title="Delete"><i class="icon-remove"></i><span class="btn-txt">Delete</span></a>
+                <a class="btn delete" title="Delete" data-field="delete">
+                    <i class="icon-remove"></i><span class="btn-txt">Delete</span>
+                </a>
             </div>
         </div>
         <div data-field="name">Project Name</div>
