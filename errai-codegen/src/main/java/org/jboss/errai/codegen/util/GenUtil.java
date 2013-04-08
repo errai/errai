@@ -155,6 +155,12 @@ public class GenUtil {
 
   public static void assertAssignableTypes(final Context context, final MetaClass from, final MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
+      if (to.isArray() && from.isArray()
+          && GenUtil.getArrayDimensions(to) == GenUtil.getArrayDimensions(from)
+          && to.getOuterComponentType().isAssignableFrom(from.getOuterComponentType())) {
+        return;
+      }
+
       if (!context.isPermissiveMode()) {
         if (classAliases.contains(from.getFullyQualifiedName()) && classAliases.contains(to.getFullyQualifiedName())) {
           // handle convertibility between MetaClass API and java Class reference.
@@ -463,7 +469,7 @@ public class GenUtil {
                                             final MetaClass decl,
                                             MetaMethod[] methods,
                                             final boolean classTarget) {
-    if (methods.length == 0) {
+    if (methods == null || methods.length == 0) {
       return null;
     }
 
@@ -552,8 +558,20 @@ public class GenUtil {
         score += 3 + scoreInterface(actualParamType, arguments[i]);
       }
       else if (canConvert(actualParamType, arguments[i])) {
-        if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
-        else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
+        if (actualParamType.isArray() && arguments[i].isArray()) {
+          final MetaClass outerComponentTypeActual = actualParamType.getOuterComponentType();
+          final MetaClass outerComponentTypeArg = arguments[i].getOuterComponentType();
+
+          if (canConvert(outerComponentTypeActual, outerComponentTypeArg)) {
+            score += 1;
+          }
+          else {
+            continue;
+          }
+        }
+        else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) {
+          score += 1;
+        }
 
         score += 1;
       }
