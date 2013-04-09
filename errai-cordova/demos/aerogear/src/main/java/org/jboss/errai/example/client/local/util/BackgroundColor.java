@@ -1,4 +1,4 @@
-package org.jboss.errai.example.client.local;
+package org.jboss.errai.example.client.local.util;
 
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 

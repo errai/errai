@@ -1,4 +1,4 @@
-package org.jboss.errai.example.client.local;
+package org.jboss.errai.example.client.local.util;
 
 import net.auroris.ColorPicker.client.Color;
 import org.jboss.errai.databinding.client.api.Converter;

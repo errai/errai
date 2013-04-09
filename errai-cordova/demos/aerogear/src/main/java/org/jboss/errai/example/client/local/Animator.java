@@ -3,6 +3,7 @@ package org.jboss.errai.example.client.local;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.dom.client.Element;
+import org.jboss.errai.example.client.local.util.DefaultCallback;
 
 /**
  * @author edewit@redhat.com

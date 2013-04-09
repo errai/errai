@@ -4,12 +4,12 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.TaskAddedEvent;
 import org.jboss.errai.example.client.local.pipe.TaskPipe;
+import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Task;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.client.widget.ListWidget;
@@ -21,7 +21,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Map;
 
 import static org.jboss.errai.example.client.local.Animator.show;
 

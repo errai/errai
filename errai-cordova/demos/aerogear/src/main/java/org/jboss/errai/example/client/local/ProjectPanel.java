@@ -9,15 +9,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.pipe.ProjectPipe;
+import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
-import org.jboss.errai.example.shared.Task;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
