@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.TaskRefreshEvent;
+import org.jboss.errai.example.client.local.item.TaskItem;
 import org.jboss.errai.example.client.local.pipe.TaskPipe;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Task;

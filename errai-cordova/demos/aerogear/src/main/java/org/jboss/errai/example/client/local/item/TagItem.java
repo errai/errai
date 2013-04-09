@@ -1,4 +1,4 @@
-package org.jboss.errai.example.client.local;
+package org.jboss.errai.example.client.local.item;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -11,11 +11,12 @@ import com.google.gwt.user.client.ui.Label;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.example.client.local.events.TaskRefreshEvent;
-import org.jboss.errai.example.client.local.events.TaskUpdateEvent;
-import org.jboss.errai.example.client.local.pipe.TaskPipe;
+import org.jboss.errai.example.client.local.events.TagRefreshEvent;
+import org.jboss.errai.example.client.local.events.TagUpdateEvent;
+import org.jboss.errai.example.client.local.pipe.TagPipe;
+import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
-import org.jboss.errai.example.shared.Task;
+import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.ui.client.widget.HasModel;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
@@ -25,50 +26,40 @@ import javax.inject.Inject;
 import static com.google.gwt.dom.client.Style.Display.INLINE;
 import static com.google.gwt.dom.client.Style.Display.NONE;
 
-/**
- * @author edewit@redhat.com
- */
-@Templated
-public class TaskItem extends Composite implements HasModel<Task> {
+@Templated("#root")
+public class TagItem extends Composite implements HasModel<Tag> {
   @Inject
-  private Event<TaskUpdateEvent> taskUpdateEventSource;
+  private Event<TagUpdateEvent> tagUpdateEventSource;
 
   @Inject
-  private Event<TaskRefreshEvent> taskRefreshEventSource;
+  private Event<TagRefreshEvent> tagRefreshEventSource;
 
   @Inject
-  @TaskPipe
-  private Pipe<Task> pipe;
+  @TagPipe
+  private Pipe<Tag> pipe;
 
-  @Inject
-  @AutoBound
-  private DataBinder<Task> taskBinder;
+  @Inject @AutoBound
+  private DataBinder<Tag> tagDataBinder;
 
   @Inject
   @Bound
-  @DataField("task-title")
+  @DataField
   private Label title;
 
   @Inject
-  @Bound
-  @DataField("task-date")
-  private Label date;
-
-  @Inject
-  @Bound
-  @DataField("task-desc")
-  private Label description;
+  @DataField
+  private Label swatch;
 
   @DataField
   private Element overlay = DOM.createDiv();
 
   @Inject
   @DataField
-  private Anchor delete;
+  private Anchor edit;
 
   @Inject
   @DataField
-  private Anchor edit;
+  private Anchor delete;
 
   @EventHandler
   public void onMouseOut(MouseOutEvent event) {
@@ -80,29 +71,35 @@ public class TaskItem extends Composite implements HasModel<Task> {
     overlay.getStyle().setDisplay(INLINE);
   }
 
-  @EventHandler("delete")
-  public void onDeleteClicked(ClickEvent event) {
-    String id = String.valueOf(taskBinder.getModel().getId());
-    pipe.remove(id, new DefaultCallback<Void>() {
-      @Override
-      public void onSuccess(Void result) {
-        taskRefreshEventSource.fire(new TaskRefreshEvent());
-      }
-    });
+  @Override
+  public Tag getModel() {
+    return tagDataBinder.getModel();
+  }
+
+  @Override
+  public void setModel(Tag model) {
+    tagDataBinder.setModel(model, InitialState.FROM_MODEL);
+    swatch.getElement().getStyle().setBackgroundColor(getBackgroundColor(model.getStyle()));
+  }
+
+  private String getBackgroundColor(String style) {
+    return new ColorConverter().toWidgetValue(style);
   }
 
   @EventHandler("edit")
   public void onEditClicked(ClickEvent event) {
-    taskUpdateEventSource.fire(new TaskUpdateEvent(taskBinder.getModel()));
+    tagUpdateEventSource.fire(new TagUpdateEvent(tagDataBinder.getModel()));
   }
 
-  @Override
-  public Task getModel() {
-    return taskBinder.getModel();
+  @EventHandler("delete")
+  public void onDeleteClicked(ClickEvent event) {
+    String id = String.valueOf(tagDataBinder.getModel().getId());
+    pipe.remove(id, new DefaultCallback<Void>() {
+      @Override
+      public void onSuccess(Void result) {
+        tagRefreshEventSource.fire(new TagRefreshEvent());
+      }
+    });
   }
 
-  @Override
-  public void setModel(Task model) {
-    taskBinder.setModel(model, InitialState.FROM_MODEL);
-  }
 }

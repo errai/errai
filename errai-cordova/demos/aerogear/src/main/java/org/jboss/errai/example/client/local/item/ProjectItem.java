@@ -1,4 +1,4 @@
-package org.jboss.errai.example.client.local;
+package org.jboss.errai.example.client.local.item;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -7,16 +7,18 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Label;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
+import org.jboss.errai.example.client.local.events.ProjectUpdateEvent;
 import org.jboss.errai.example.client.local.events.TagRefreshEvent;
-import org.jboss.errai.example.client.local.events.TagUpdateEvent;
-import org.jboss.errai.example.client.local.pipe.TagPipe;
+import org.jboss.errai.example.client.local.pipe.ProjectPipe;
 import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
-import org.jboss.errai.example.shared.Tag;
+import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.ui.client.widget.HasModel;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
@@ -27,31 +29,24 @@ import static com.google.gwt.dom.client.Style.Display.INLINE;
 import static com.google.gwt.dom.client.Style.Display.NONE;
 
 @Templated("#root")
-public class TagItem extends Composite implements HasModel<Tag> {
+public class ProjectItem extends Composite implements HasModel<Project> {
   @Inject
-  private Event<TagUpdateEvent> tagUpdateEventSource;
+  private Event<ProjectUpdateEvent> projectUpdateEventSource;
 
   @Inject
-  private Event<TagRefreshEvent> tagRefreshEventSource;
+  private Event<ProjectRefreshEvent> projectRefreshEventSource;
 
   @Inject
-  @TagPipe
-  private Pipe<Tag> pipe;
+  @ProjectPipe
+  Pipe<Project> projectPipe;
 
   @Inject @AutoBound
-  private DataBinder<Tag> tagDataBinder;
+  private DataBinder<Project> projectDataBinder;
 
   @Inject
   @Bound
-  @DataField
+  @DataField("name")
   private Label title;
-
-  @Inject
-  @DataField
-  private Label swatch;
-
-  @DataField
-  private Element overlay = DOM.createDiv();
 
   @Inject
   @DataField
@@ -60,6 +55,24 @@ public class TagItem extends Composite implements HasModel<Tag> {
   @Inject
   @DataField
   private Anchor delete;
+
+  @DataField
+  private Element overlay = DOM.createDiv();
+
+  @Override
+  public Project getModel() {
+    return projectDataBinder.getModel();
+  }
+
+  @Override
+  public void setModel(Project model) {
+    projectDataBinder.setModel(model, InitialState.FROM_MODEL);
+    asWidget().getElement().getStyle().setBackgroundColor(getBackgroundColor(model.getStyle()));
+  }
+
+  private String getBackgroundColor(String style) {
+    return new ColorConverter().toWidgetValue(style);
+  }
 
   @EventHandler
   public void onMouseOut(MouseOutEvent event) {
@@ -71,35 +84,19 @@ public class TagItem extends Composite implements HasModel<Tag> {
     overlay.getStyle().setDisplay(INLINE);
   }
 
-  @Override
-  public Tag getModel() {
-    return tagDataBinder.getModel();
-  }
-
-  @Override
-  public void setModel(Tag model) {
-    tagDataBinder.setModel(model, InitialState.FROM_MODEL);
-    swatch.getElement().getStyle().setBackgroundColor(getBackgroundColor(model.getStyle()));
-  }
-
-  private String getBackgroundColor(String style) {
-    return new ColorConverter().toWidgetValue(style);
-  }
-
   @EventHandler("edit")
   public void onEditClicked(ClickEvent event) {
-    tagUpdateEventSource.fire(new TagUpdateEvent(tagDataBinder.getModel()));
+    projectUpdateEventSource.fire(new ProjectUpdateEvent(projectDataBinder.getModel()));
   }
 
   @EventHandler("delete")
   public void onDeleteClicked(ClickEvent event) {
-    String id = String.valueOf(tagDataBinder.getModel().getId());
-    pipe.remove(id, new DefaultCallback<Void>() {
+    String id = String.valueOf(projectDataBinder.getModel().getId());
+    projectPipe.remove(id, new DefaultCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
-        tagRefreshEventSource.fire(new TagRefreshEvent());
+        projectRefreshEventSource.fire(new ProjectRefreshEvent());
       }
     });
   }
-
 }
