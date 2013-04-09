@@ -3,6 +3,7 @@ package org.jboss.errai.example.client.local.pipe;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.aerogear.api.pipeline.PipeFactory;
 import org.jboss.errai.example.shared.Project;
+import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.example.shared.Task;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,6 +27,12 @@ public class PipeProducer {
   @ProjectPipe
   private Pipe<Project> createProjectPipe() {
     return createPipe(Project.class, new Config("projects"));
+  }
+
+  @Produces
+  @TagPipe
+  private Pipe<Tag> createTagPipe() {
+    return createPipe(Tag.class, new Config("tags"));
   }
 
   private <T> Pipe<T> createPipe(Class<T> type, Config config) {

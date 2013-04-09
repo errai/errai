@@ -18,4 +18,7 @@ public class App extends Composite {
   @DataField("project-list")
   ProjectPanel projectPanel;
 
+  @Inject
+  @DataField("tag-container")
+  TagsPanel tagsPanel;
 }

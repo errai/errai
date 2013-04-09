@@ -16,10 +16,15 @@
  */
 package org.jboss.errai.example.shared;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.databinding.client.api.Bindable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Portable
+@Bindable
 public class Tag implements Serializable {
 
   private Long id;

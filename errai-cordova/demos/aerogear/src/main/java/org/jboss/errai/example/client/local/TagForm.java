@@ -7,11 +7,11 @@ import net.auroris.ColorPicker.client.Color;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
-import org.jboss.errai.example.client.local.events.ProjectUpdateEvent;
-import org.jboss.errai.example.client.local.pipe.ProjectPipe;
+import org.jboss.errai.example.client.local.events.TagRefreshEvent;
+import org.jboss.errai.example.client.local.events.TagUpdateEvent;
+import org.jboss.errai.example.client.local.pipe.TagPipe;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
-import org.jboss.errai.example.shared.Project;
+import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.ui.shared.api.annotations.*;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
@@ -25,21 +25,22 @@ import static org.jboss.errai.example.client.local.Animator.show;
 /**
  * @author edewit@redhat.com
  */
-@Templated("App.html#project-form")
-public class ProjectForm extends ColorPickerForm {
+@Templated("App.html#tag-form")
+public class TagForm extends ColorPickerForm {
   @Inject
-  private Event<ProjectRefreshEvent> projectRefreshEventSource;
-
-  @Inject @AutoBound
-  private DataBinder<Project> projectDataBinder;
+  private Event<TagRefreshEvent> tagRefreshEventSource;
 
   @Inject
-  @ProjectPipe
-  private Pipe<Project> projectPipe;
+  @AutoBound
+  private DataBinder<Tag> tagDataBinder;
+
+  @Inject
+  @TagPipe
+  private Pipe<Tag> pipe;
 
   @Inject
   @Bound
-  @DataField("project-title")
+  @DataField("tag-title")
   private TextBox title;
 
   @Inject
@@ -50,30 +51,31 @@ public class ProjectForm extends ColorPickerForm {
   @DataField
   private Anchor cancel;
 
-  private void updateProject(@Observes ProjectUpdateEvent event) {
-    Project project = event.getProject();
-    projectDataBinder.setModel(project, InitialState.FROM_MODEL);
-    submit.setText("Update Project");
-    show(asWidget().getElement().getParentElement().getPreviousSiblingElement());
-    StyleBindingsRegistry.get().updateStyles();
+  @Override
+  protected void updateModel(Color color) {
+    tagDataBinder.getModel().setStyle("tag-" + color.getRed() + "-" + color.getGreen() + "-" + color.getBlue());
   }
 
-  protected void updateModel(Color color) {
-    projectDataBinder.getModel().setStyle("project-" + color.getRed() + "-" + color.getGreen() + "-" + color.getBlue());
+  private void updateProject(@Observes TagUpdateEvent event) {
+    Tag tag = event.getTag();
+    tagDataBinder.setModel(tag, InitialState.FROM_MODEL);
+    submit.setText("Update Tag");
+    show(asWidget().getElement().getParentElement().getPreviousSiblingElement());
+    StyleBindingsRegistry.get().updateStyles();
   }
 
   @EventHandler("submit")
   public void onSubmitClicked(ClickEvent event) {
     final com.google.gwt.dom.client.Element div = getContainer(event);
-    Project project = projectDataBinder.getModel();
-    projectPipe.save(project, new DefaultCallback<Project>() {
+    Tag tag = tagDataBinder.getModel();
+    pipe.save(tag, new DefaultCallback<Tag>() {
       @Override
-      public void onSuccess(final Project newProject) {
+      public void onSuccess(final Tag newTag) {
         hide(div, new DefaultCallback<Void>() {
 
           @Override
           public void onSuccess(Void result) {
-            projectRefreshEventSource.fire(new ProjectRefreshEvent());
+            tagRefreshEventSource.fire(new TagRefreshEvent());
           }
         });
       }
@@ -87,10 +89,5 @@ public class ProjectForm extends ColorPickerForm {
 
   private com.google.gwt.dom.client.Element getContainer(ClickEvent event) {
     return event.getRelativeElement().getParentElement().getParentElement();
-  }
-
-  public void reset() {
-    projectDataBinder.setModel(new Project(), InitialState.FROM_MODEL);
-    submit.setText("Add Project");
   }
 }
