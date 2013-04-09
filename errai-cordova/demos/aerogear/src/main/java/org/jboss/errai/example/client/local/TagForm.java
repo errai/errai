@@ -61,7 +61,6 @@ public class TagForm extends ColorPickerForm {
     tagDataBinder.setModel(tag, InitialState.FROM_MODEL);
     submit.setText("Update Tag");
     show(asWidget().getElement().getParentElement().getPreviousSiblingElement());
-    StyleBindingsRegistry.get().updateStyles();
   }
 
   @EventHandler("submit")
