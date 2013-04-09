@@ -6,18 +6,24 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
-import org.jboss.errai.example.client.local.events.TaskAddedEvent;
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.example.client.local.events.TaskRefreshEvent;
+import org.jboss.errai.example.client.local.events.TaskUpdateEvent;
 import org.jboss.errai.example.client.local.pipe.TaskPipe;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
+import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.example.shared.Task;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import static org.jboss.errai.example.client.local.Animator.hide;
+import static org.jboss.errai.example.client.local.Animator.show;
 
 /**
  * @author edewit@redhat.com
@@ -26,11 +32,11 @@ import static org.jboss.errai.example.client.local.Animator.hide;
 @Templated("App.html#task-form")
 public class TaskForm extends Composite {
   @Inject
-  Event<TaskAddedEvent> taskAddedEventSource;
+  Event<TaskRefreshEvent> taskAddedEventSource;
 
   @Inject
-  @Model
-  private Task task;
+  @AutoBound
+  private DataBinder<Task> taskBinder;
 
   @Inject
   @TaskPipe
@@ -71,6 +77,7 @@ public class TaskForm extends Composite {
   @EventHandler("submit")
   public void onSubmit(ClickEvent event) {
     final Element div = getContainer(event);
+    Task task = taskBinder.getModel();
     task.setDate(date.getTextBox().getValue());
     taskPipe.save(task, new DefaultCallback<Task>() {
       @Override
@@ -79,11 +86,18 @@ public class TaskForm extends Composite {
 
           @Override
           public void onSuccess(Void result) {
-            taskAddedEventSource.fire(new TaskAddedEvent(newTask));
+            taskAddedEventSource.fire(new TaskRefreshEvent());
           }
         });
       }
     });
+  }
+
+  private void onUpdateTaks(@Observes TaskUpdateEvent event) {
+    Task task = event.getTask();
+    taskBinder.setModel(task, InitialState.FROM_MODEL);
+    submit.setText("Update Task");
+    show(asWidget().getElement().getParentElement().getPreviousSiblingElement());
   }
 
   @EventHandler("cancel")
