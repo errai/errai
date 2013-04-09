@@ -1,9 +1,7 @@
 package org.jboss.errai.example.client.local;
 
-import com.google.gwt.dom.client.Style;
 import net.auroris.ColorPicker.client.Color;
 import org.jboss.errai.databinding.client.api.Converter;
-import org.jboss.errai.example.shared.Project;
 
 /**
  * @author edewit@redhat.com
@@ -23,6 +21,10 @@ public class ColorConverter implements Converter<String, String> {
 
   @Override
   public String toWidgetValue(String modelValue) {
+    if (modelValue == null) {
+      return "fff";
+    }
+
     String[] colors = modelValue.split("-");
     Color color = new Color();
     try {
@@ -33,9 +35,4 @@ public class ColorConverter implements Converter<String, String> {
 
     return color.getHex();
   }
-
-//  @BackgroundColor
-//  public void applyBackgroundColorStyling(Style style) {
-//    style.setBackgroundColor(toWidgetValue(project.getStyle()));
-//  }
 }
