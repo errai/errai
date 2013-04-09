@@ -7,12 +7,12 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.*;
 import net.auroris.ColorPicker.client.Color;
 import net.auroris.ColorPicker.client.ColorPicker;
-import org.jboss.errai.example.client.local.util.BackgroundColor;
 import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 /**
@@ -23,7 +23,6 @@ public abstract class ColorPickerForm extends Composite {
   @Inject
   @DataField
   @Bound(property = "style", converter = ColorConverter.class)
-  @BackgroundColor
   Anchor colorPickerAnchor;
 
   ColorPickerDialog colorPicker = new ColorPickerDialog();
@@ -32,6 +31,11 @@ public abstract class ColorPickerForm extends Composite {
   public void onPickerClicked(ClickEvent event) {
     colorPicker.show();
     colorPicker.setPopupPosition(event.getClientX() + 10, event.getClientY());
+  }
+
+  @PostConstruct
+  private void init() {
+    updateColorPickerAnchor();
   }
 
   private class ColorPickerDialog extends DialogBox {
@@ -59,6 +63,7 @@ public abstract class ColorPickerForm extends Composite {
             throw new RuntimeException("could not parse colors", e);
           }
           updateModel(color);
+          updateColorPickerAnchor();
           ColorPickerDialog.this.hide();
         }
       });
@@ -81,12 +86,11 @@ public abstract class ColorPickerForm extends Composite {
     }
   }
 
-  protected abstract void updateModel(Color color);
-
-  @BackgroundColor
-  public void applyBackgroundColorStyling(Style style) {
+  protected void updateColorPickerAnchor() {
+    Style style = colorPickerAnchor.getElement().getStyle();
     style.setBackgroundColor(colorPickerAnchor.getText());
     style.setTextIndent(-99999, Style.Unit.PX);
   }
 
+  protected abstract void updateModel(Color color);
 }
