@@ -47,6 +47,10 @@ public class ProjectItem extends Composite implements HasModel<Project> {
   private Label title;
 
   @Inject
+  @Bound(converter = ColorConverter.class)
+  private Label style;
+
+  @Inject
   @DataField
   private Anchor edit;
 
@@ -64,9 +68,8 @@ public class ProjectItem extends Composite implements HasModel<Project> {
 
   @Override
   public void setModel(Project model) {
-    String style = convertColorToHex(model.getStyle());
-    asWidget().getElement().getStyle().setBackgroundColor(style);
     projectDataBinder.setModel(model, InitialState.FROM_MODEL);
+    asWidget().getElement().getStyle().setBackgroundColor(style.getText());
   }
 
   @EventHandler
@@ -91,17 +94,5 @@ public class ProjectItem extends Composite implements HasModel<Project> {
       public void onSuccess(Void result) {
       }
     });
-  }
-
-  private String convertColorToHex(String style) {
-    String[] colors = style.split("-");
-    Color color = new Color();
-    try {
-      color.setRGB(Integer.parseInt(colors[1]), Integer.parseInt(colors[2]), Integer.parseInt(colors[3]));
-    } catch (Exception e) {
-      throw new RuntimeException("invalid color numbers");
-    }
-
-    return color.getHex();
   }
 }

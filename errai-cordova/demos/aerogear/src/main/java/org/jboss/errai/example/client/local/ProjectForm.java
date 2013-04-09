@@ -1,5 +1,6 @@
 package org.jboss.errai.example.client.local;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Element;
@@ -13,6 +14,7 @@ import org.jboss.errai.example.client.local.events.ProjectUpdateEvent;
 import org.jboss.errai.example.client.local.pipe.ProjectPipe;
 import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.ui.shared.api.annotations.*;
+import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -40,6 +42,8 @@ public class ProjectForm extends Composite {
 
   @Inject
   @DataField
+  @Bound(property = "style", converter = ColorConverter.class)
+  @BackgroundColor
   private Anchor colorPickerAnchor;
 
   private ColorPickerDialog colorPicker = new ColorPickerDialog();
@@ -51,20 +55,13 @@ public class ProjectForm extends Composite {
   @Inject
   @DataField
   private Anchor cancel;
-  private String style;
 
   private void updateProject(@Observes ProjectUpdateEvent event) {
     Project project = event.getProject();
     projectDataBinder.setModel(project, InitialState.FROM_MODEL);
     submit.setText("Update Project");
-    show(getAddProjectElement());
-    String[] color = project.getStyle().split("-");
-    try {
-      colorPicker.picker.setRGB(Integer.parseInt(color[1]), Integer.parseInt(color[2]), Integer.parseInt(color[3]));
-      colorPickerAnchor.getElement().getStyle().setBackgroundColor(colorPicker.picker.getHexColor());
-    } catch (Exception e) {
-      throw new RuntimeException("could not parse color");
-    }
+    show(asWidget().getElement().getParentElement().getPreviousSiblingElement());
+    StyleBindingsRegistry.get().updateStyles();
   }
 
   @EventHandler("colorPickerAnchor")
@@ -75,9 +72,8 @@ public class ProjectForm extends Composite {
 
   @EventHandler("submit")
   public void onSubmitClicked(ClickEvent event) {
-    final com.google.gwt.dom.client.Element div = getAddProjectElement();
+    final com.google.gwt.dom.client.Element div = getContainer(event);
     Project project = projectDataBinder.getModel();
-    project.setStyle(style);
     projectPipe.save(project, new DefaultCallback<Project>() {
       @Override
       public void onSuccess(final Project newProject) {
@@ -94,11 +90,16 @@ public class ProjectForm extends Composite {
 
   @EventHandler("cancel")
   public void onCancelClicked(ClickEvent event) {
-    hide(getAddProjectElement());
+    hide(getContainer(event));
   }
 
-  private com.google.gwt.dom.client.Element getAddProjectElement() {
-    return asWidget().getElement().getParentElement().getPreviousSiblingElement();
+  private com.google.gwt.dom.client.Element getContainer(ClickEvent event) {
+    return event.getRelativeElement().getParentElement().getParentElement();
+  }
+
+  public void reset() {
+    projectDataBinder.setModel(new Project(), InitialState.FROM_MODEL);
+    submit.setText("Add Project");
   }
 
   private class ColorPickerDialog extends DialogBox {
@@ -125,7 +126,7 @@ public class ProjectForm extends Composite {
           } catch (Exception e) {
             throw new RuntimeException("could not parse colors", e);
           }
-          style = "project-" + color.getRed() + "-" + color.getGreen() + "-" + color.getBlue();
+          projectDataBinder.getModel().setStyle("project-" + color.getRed() + "-" + color.getGreen() + "-" + color.getBlue());
           ColorPickerDialog.this.hide();
         }
       });
@@ -146,5 +147,11 @@ public class ProjectForm extends Composite {
 
       setWidget(panel);
     }
+  }
+
+  @BackgroundColor
+  public void applyBackgroundColorStyling(Style style) {
+    style.setBackgroundColor(colorPickerAnchor.getText());
+    style.setTextIndent(-99999, Style.Unit.PX);
   }
 }

@@ -65,6 +65,7 @@ public class ProjectPanel extends Composite {
   @EventHandler("addProject")
   public void onAddProjectClicked(ClickEvent event) {
     show(event.getRelativeElement());
+    form.reset();
   }
 
   private class ProjectList extends ListWidget<Project, ProjectItem> {
