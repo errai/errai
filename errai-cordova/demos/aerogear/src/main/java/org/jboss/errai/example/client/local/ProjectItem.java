@@ -12,7 +12,9 @@ import com.google.gwt.user.client.ui.Label;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.events.ProjectUpdateEvent;
+import org.jboss.errai.example.client.local.events.TagRefreshEvent;
 import org.jboss.errai.example.client.local.pipe.ProjectPipe;
 import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
@@ -32,6 +34,9 @@ public class ProjectItem extends Composite implements HasModel<Project> {
   private Event<ProjectUpdateEvent> projectUpdateEventSource;
 
   @Inject
+  private Event<ProjectRefreshEvent> projectRefreshEventSource;
+
+  @Inject
   @ProjectPipe
   Pipe<Project> projectPipe;
 
@@ -40,16 +45,8 @@ public class ProjectItem extends Composite implements HasModel<Project> {
 
   @Inject
   @Bound
-  private Hidden id;
-
-  @Inject
-  @Bound
   @DataField("name")
   private Label title;
-
-  @Inject
-  @Bound(converter = ColorConverter.class)
-  private Label style;
 
   @Inject
   @DataField
@@ -70,7 +67,11 @@ public class ProjectItem extends Composite implements HasModel<Project> {
   @Override
   public void setModel(Project model) {
     projectDataBinder.setModel(model, InitialState.FROM_MODEL);
-    asWidget().getElement().getStyle().setBackgroundColor(style.getText());
+    asWidget().getElement().getStyle().setBackgroundColor(getBackgroundColor(model.getStyle()));
+  }
+
+  private String getBackgroundColor(String style) {
+    return new ColorConverter().toWidgetValue(style);
   }
 
   @EventHandler
@@ -90,9 +91,11 @@ public class ProjectItem extends Composite implements HasModel<Project> {
 
   @EventHandler("delete")
   public void onDeleteClicked(ClickEvent event) {
-    projectPipe.remove(id.getValue(), new DefaultCallback<Void>() {
+    String id = String.valueOf(projectDataBinder.getModel().getId());
+    projectPipe.remove(id, new DefaultCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
+        projectRefreshEventSource.fire(new ProjectRefreshEvent());
       }
     });
   }
