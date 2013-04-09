@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
+import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.pipe.ProjectPipe;
 import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.example.shared.Task;
@@ -17,6 +18,7 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
 
@@ -49,6 +51,10 @@ public class ProjectPanel extends Composite {
 
   @AfterInitialization
   public void loadTasks() {
+    refreshProjectList();
+  }
+
+  private void onProjectListChanged(@Observes ProjectRefreshEvent event) {
     refreshProjectList();
   }
 

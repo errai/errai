@@ -10,12 +10,14 @@ import net.auroris.ColorPicker.client.ColorPicker;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
+import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.events.ProjectUpdateEvent;
 import org.jboss.errai.example.client.local.pipe.ProjectPipe;
 import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.ui.shared.api.annotations.*;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -27,6 +29,8 @@ import static org.jboss.errai.example.client.local.Animator.show;
  */
 @Templated("App.html#project-form")
 public class ProjectForm extends Composite {
+  @Inject
+  private Event<ProjectRefreshEvent> projectRefreshEventSource;
 
   @Inject @AutoBound
   private DataBinder<Project> projectDataBinder;
@@ -81,7 +85,7 @@ public class ProjectForm extends Composite {
 
           @Override
           public void onSuccess(Void result) {
-            //taskAddedEventSource.fire(new TaskAddedEvent(newTask));
+            projectRefreshEventSource.fire(new ProjectRefreshEvent());
           }
         });
       }
