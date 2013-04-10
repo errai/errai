@@ -25,25 +25,30 @@ import java.util.List;
 public class Transformer {
   private final OTEntity entity;
   private final OTPeer peer;
-  private final List<Operation> operations;
+  private final OTOperation operation;
 
-  public Transformer(OTEntity entity, OTPeer peer, List<Operation> operations) {
+  private Transformer(final OTEntity entity, final OTPeer peer, final OTOperation operation) {
     this.entity = entity;
     this.peer = peer;
-    this.operations = operations;
+    this.operation = operation;
+  }
+
+  public static Transformer createTransformer(final OTEntity entity, final OTPeer peer, final OTOperation operation) {
+    return new Transformer(entity, peer, operation);
   }
 
   public void transform() {
     final TransactionLog transactionLog = entity.getTransactionLog();
-    final int firstRevision = operations.get(0).getRevision();
-    final Collection<Operation> loggedOps = transactionLog.getLogFromId(firstRevision);
+    final List<Mutation> mutations = operation.getMutations();
+    final Collection<OTOperation> loggedOps = transactionLog.getLogFromId(operation.getRevision());
 
     // if no operation was carried out we can just apply the new operations
     if (loggedOps.isEmpty()) {
-      for (Operation op : operations) {
-        op.apply(entity.getState());
-        entity.setRevision(op.getRevision());
+      for (final Mutation mutation : mutations) {
+        mutation.apply(entity.getState());
       }
+      transactionLog.appendLog(operation);
+      entity.setRevision(operation.getRevision());
     }
     else {
       // transform operations and re-apply

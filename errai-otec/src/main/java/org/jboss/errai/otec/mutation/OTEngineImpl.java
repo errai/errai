@@ -19,6 +19,7 @@ package org.jboss.errai.otec.mutation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -26,11 +27,20 @@ import java.util.List;
 public class OTEngineImpl implements OTEngine {
   private final String engineId;
 
-  private final PeerState peerState = new SinglePeerState();
+  private final PeerState peerState;
   private final OTEntityState entityState = new OTEntityStateImpl();
 
-  public OTEngineImpl() {
+  private OTEngineImpl(PeerState peerState) {
     engineId = GUIDUtil.createGUID();
+    this.peerState = peerState;
+  }
+
+  public static OTEngine createEngineWithSinglePeer() {
+    return new OTEngineImpl(new SinglePeerState());
+  }
+
+  public static OTEngine createEngineWithMultiplePeers() {
+    return new OTEngineImpl(new MultiplePeerState());
   }
 
   @Override
@@ -45,8 +55,16 @@ public class OTEngineImpl implements OTEngine {
 
     return new ReceiveHandler() {
       @Override
-      public void receive(final List<Operation> operations) {
-        new Transformer(entity, peer, operations).transform();
+      public void receive(final OTOperation operation) {
+        Transformer.createTransformer(entity, peer, operation).transform();
+
+        // broadcast to all other peers subscribed to this entity
+        final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
+        for (OTPeer otPeer : peers) {
+          if (otPeer != peer) {
+            otPeer.send(entityId, operation);
+          }
+        }
       }
     };
   }
@@ -59,17 +77,17 @@ public class OTEngineImpl implements OTEngine {
     return new InitialStateReceiveHandler() {
       @SuppressWarnings("unchecked")
       @Override
-      public void receive(State obj) {
+      public void receive(final State obj) {
         final OTEntity newEntity = new OTEntityImpl(entityId, obj);
         entityState.addEntity(newEntity);
-        getPeerState().addPeerMonitor(peer, newEntity);
+        getPeerState().associateEntity(peer, newEntity);
       }
     };
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public void syncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback callback) {
+  public void syncRemoteEntity(final String peerId, final Integer entityId, final EntitySyncCompletionCallback callback) {
     final OTPeer peer = getPeerState().getPeer(peerId);
     assertPeerNotNull(peer);
 
@@ -78,22 +96,22 @@ public class OTEngineImpl implements OTEngine {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void applyOperationsLocally(OTOperationList operationList) {
-    final OTEntity entity = operationList.getEntity();
+  public void applyOperationLocally(final OTOperationImpl otOperation) {
+    final OTEntity entity = otOperation.getEntity();
     final State state = entity.getState();
-    for (Operation operation : operationList.getOperations()) {
-      operation.apply(state);
-      entity.setRevision(operation.getRevision());
+    for (final Mutation mutation : otOperation.getMutations()) {
+      mutation.apply(state);
     }
+    entity.getTransactionLog().appendLog(otOperation);
   }
 
   @Override
-  public void notifyOperations(OTOperationList operationList) {
-    final OTEntity entity = operationList.getEntity();
+  public void notifyOperation(final OTOperationImpl operation) {
+    final OTEntity entity = operation.getEntity();
     final Collection<OTPeer> peersFor = getPeerState().getPeersFor(entity);
 
     for (final OTPeer peer : peersFor) {
-      peer.send(entity.getId(), operationList.getOperations());
+      peer.send(entity.getId(), operation);
     }
   }
 
@@ -101,26 +119,26 @@ public class OTEngineImpl implements OTEngine {
   public OTOperationsFactory getOperationsFactory() {
     return new OTOperationsFactory() {
       @Override
-      public OTOperationsListBuilder createOperationsList(final OTEntity entity) {
+      public OTOperationsListBuilder createOperation(final OTEntity entity) {
         return new OTOperationsListBuilder() {
-          List<Operation> operationList = new ArrayList<Operation>();
+          List<Mutation> operationList = new ArrayList<Mutation>();
 
           @Override
-          public OTOperationsListBuilder add(OperationType type, Position position, Data data) {
+          public OTOperationsListBuilder add(final MutationType type, final Position position, final Data data) {
             operationList.add(
-                new StringOperation(entity.getNewRevisionNumber(), type, (IndexPosition) position, (CharacterData) data)
+                new StringMutation(entity.getNewRevisionNumber(), type, (IndexPosition) position, (CharacterData) data)
             );
             return this;
           }
 
           @Override
-          public OTOperationList build() {
-            return new OTOperationList(operationList, entity);
+          public OTOperationImpl build() {
+            return new OTOperationImpl(operationList, entity);
           }
 
           @Override
-          public OTOperationsListBuilder add(OperationType type, Position position) {
-            operationList.add(new StringOperation(entity.getNewRevisionNumber(), type, (IndexPosition) position, null));
+          public OTOperationsListBuilder add(final MutationType type, final Position position) {
+            operationList.add(new StringMutation(entity.getNewRevisionNumber(), type, (IndexPosition) position, null));
             return this;
           }
         };
@@ -128,7 +146,7 @@ public class OTEngineImpl implements OTEngine {
     };
   }
 
-  private static void assertPeerNotNull(OTPeer peer) {
+  private static void assertPeerNotNull(final OTPeer peer) {
     if (peer == null) {
       throw new OTException("could not find peer for id: " + peer);
     }
@@ -141,6 +159,38 @@ public class OTEngineImpl implements OTEngine {
 
   private PeerState getPeerState() {
     return peerState;
+  }
+
+  @Override
+  public void associateEntity(String peerId, Integer entityId) {
+    final OTPeer peer = getPeerState().getPeer(peerId);
+    if (peer == null) {
+      throw new OTException("no peer for id: " + peerId);
+    }
+
+    final OTEntity entity = getEntityStateSpace().getEntity(entityId);
+    if (entity == null) {
+      throw new OTException("not entity for id: " + entityId);
+    }
+
+
+    getPeerState().associateEntity(peer, entity);
+  }
+
+  @Override
+  public void disassociateEntity(String peerId, Integer entityId) {
+    final OTPeer peer = getPeerState().getPeer(peerId);
+    if (peer == null) {
+      throw new OTException("no peer for id: " + peerId);
+    }
+
+    final OTEntity entity = getEntityStateSpace().getEntity(entityId);
+    if (entity == null) {
+      throw new OTException("not entity for id: " + entityId);
+    }
+
+
+    getPeerState().disassociateEntity(peer, entity);
   }
 
   @Override

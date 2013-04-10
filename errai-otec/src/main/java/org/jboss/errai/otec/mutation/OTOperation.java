@@ -21,16 +21,10 @@ import java.util.List;
 /**
  * @author Mike Brock
  */
-public class ReceiveHandlerImpl implements ReceiveHandler {
-  private final OTEntity entity;
-  private final OTPeer peer;
+public interface OTOperation {
+  List<Mutation> getMutations();
 
-  public ReceiveHandlerImpl(final OTEntity entity, final OTPeer peer) {
-    this.entity = entity;
-    this.peer = peer;
-  }
+  OTEntity getEntity();
 
-  @Override
-  public void receive(List<Operation> operations) {
-  }
+  int getRevision();
 }

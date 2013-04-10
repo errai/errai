@@ -191,7 +191,6 @@ public class GenUtil {
 
       if (input != null && MetaClassFactory.get(input.getClass())
           .getOuterComponentType().getFullyQualifiedName().equals(MetaClass.class.getName())) {
-//      if (input instanceof MetaClass) {
         return generate(context, input);
       }
 

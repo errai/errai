@@ -16,14 +16,12 @@
 
 package org.jboss.errai.otec.mutation;
 
-import java.util.List;
-
 /**
  * @author Mike Brock
  */
 public interface OTPeer {
-  public String getPeerId();
-  public void send(Integer entityId, List<Operation> operations);
+  public String getId();
+  public void send(Integer entityId, OTOperation operation);
   public void beginSyncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback<State> callback);
   public int getLastKnownRemoteSequence(OTEntity entity);
 }

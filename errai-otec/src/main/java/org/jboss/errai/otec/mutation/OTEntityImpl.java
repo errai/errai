@@ -19,7 +19,7 @@ package org.jboss.errai.otec.mutation;
 /**
  * @author Mike Brock
  */
-public class OTEntityImpl<T extends State> implements OTEntity<T> {
+public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   private final Integer entityId;
   private final T entity;
 

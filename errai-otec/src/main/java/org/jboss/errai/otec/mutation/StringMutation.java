@@ -19,13 +19,13 @@ package org.jboss.errai.otec.mutation;
 /**
  * @author Mike Brock
  */
-public class StringOperation implements Operation<StringState, IndexPosition, CharacterData> {
+public class StringMutation implements Mutation<StringState, IndexPosition, CharacterData> {
   private final int revision;
-  private final OperationType type;
+  private final MutationType type;
   private final IndexPosition position;
   private final CharacterData data;
 
-  public StringOperation(int revision, OperationType type, IndexPosition position, CharacterData data) {
+  public StringMutation(int revision, MutationType type, IndexPosition position, CharacterData data) {
     this.revision = revision;
     this.type = type;
     this.position = position;
@@ -33,12 +33,7 @@ public class StringOperation implements Operation<StringState, IndexPosition, Ch
   }
 
   @Override
-  public int getRevision() {
-    return revision;
-  }
-
-  @Override
-  public OperationType getType() {
+  public MutationType getType() {
     return type;
   }
 

@@ -22,5 +22,5 @@ import java.util.Collection;
  * @author Mike Brock
  */
 public interface RemotePeerReceiveHandler {
-   public void onReceive(Collection<Operation> operations);
+   public void onReceive(Collection<Mutation> operations);
 }

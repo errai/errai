@@ -17,6 +17,7 @@
 package org.jboss.errai.otec.tests;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 import org.jboss.errai.otec.mutation.*;
 import org.jboss.errai.otec.mutation.IndexPosition;
@@ -28,49 +29,67 @@ import org.junit.Test;
  */
 
 public class OtecPrototypingTest {
-  OTEngine clientEngine;
+  OTEngine clientEngineA;
+  OTEngine clientEngineB;
   OTEngine serverEngine;
-  OTEntity clientOtEntity;
+
+  OTEntity serverEntity;
 
   @Before
   public void setUp() throws Exception {
-    clientEngine = new OTEngineImpl();
-    serverEngine = new OTEngineImpl();
+    clientEngineA = OTEngineImpl.createEngineWithSinglePeer();
+    clientEngineB = OTEngineImpl.createEngineWithSinglePeer();
+    serverEngine = OTEngineImpl.createEngineWithMultiplePeers();
 
-    clientEngine.registerPeer(new MockPeerImpl(serverEngine));
-    serverEngine.registerPeer(new MockPeerImpl(clientEngine));
+    clientEngineA.registerPeer(new MockPeerImpl(clientEngineA, serverEngine));
+    clientEngineB.registerPeer(new MockPeerImpl(clientEngineB, serverEngine));
+    serverEngine.registerPeer(new MockPeerImpl(serverEngine, clientEngineA));
+    serverEngine.registerPeer(new MockPeerImpl(serverEngine, clientEngineB));
 
     final String myEntityOfStringFun = "Hello, World?";
     final StringState state = new StringState(myEntityOfStringFun);
-    clientOtEntity = serverEngine.getEntityStateSpace().addEntity(state);
+    serverEntity = serverEngine.getEntityStateSpace().addEntity(state);
 
-    clientEngine.syncRemoteEntity(serverEngine.getId(), clientOtEntity.getId(), new MockEntitySyncCompletionCallback());
+    clientEngineA.syncRemoteEntity(serverEngine.getId(), serverEntity.getId(), new MockEntitySyncCompletionCallback());
+    clientEngineB.syncRemoteEntity(serverEngine.getId(), serverEntity.getId(), new MockEntitySyncCompletionCallback());
   }
 
   @Test
-  public void testApplyOperationsLocally() {
-    final OTOperationsFactory operationsFactory = clientEngine.getOperationsFactory();
-    final OTOperationList list = operationsFactory.createOperationsList(clientOtEntity)
-        .add(OperationType.Delete, IndexPosition.of(12))
-        .add(OperationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
+  public void testApplyOperationLocally() {
+    final OTOperationsFactory operationsFactory = serverEngine.getOperationsFactory();
+    final OTOperationImpl op = operationsFactory.createOperation(serverEntity)
+        .add(MutationType.Delete, IndexPosition.of(12))
+        .add(MutationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
         .build();
 
-    clientEngine.applyOperationsLocally(list);
+    assertTrue(serverEntity.getTransactionLog().getLog().isEmpty());
 
-    assertEquals("Hello, World!", clientOtEntity.getState().get());
+    serverEngine.applyOperationLocally(op);
+
+    assertEquals(1, serverEntity.getTransactionLog().getLog().size());
+    assertTrue(serverEntity.getTransactionLog().getLog().contains(op));
+    assertEquals("Hello, World!", serverEntity.getState().get());
   }
 
   @Test
-  public void testNotifyOperations() {
-    final OTOperationsFactory operationsFactory = clientEngine.getOperationsFactory();
-    final OTOperationList list = operationsFactory.createOperationsList(clientOtEntity)
-        .add(OperationType.Delete, IndexPosition.of(12))
-        .add(OperationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
+  public void testNotifyOperation() {
+    final OTOperationsFactory operationsFactory = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperationImpl op = operationsFactory.createOperation(clientAEntity)
+        .add(MutationType.Delete, IndexPosition.of(12))
+        .add(MutationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
         .build();
 
-    clientEngine.notifyOperations(list);
+    clientEngineA.notifyOperation(op);
 
-    final OTEntity entity = serverEngine.getEntityStateSpace().getEntity(clientOtEntity.getId());
-    assertEquals("Hello, World!", entity.getState().get());
+    assertEquals(1, serverEntity.getTransactionLog().getLog().size());
+    assertTrue(serverEntity.getTransactionLog().getLog().contains(op));
+    assertEquals("Hello, World!", serverEntity.getState().get());
+
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+    assertEquals(1, clientBEntity.getTransactionLog().getLog().size());
+    assertTrue(clientBEntity.getTransactionLog().getLog().contains(op));
+    assertEquals("Hello, World!", clientBEntity.getState().get());
+
   }
 }

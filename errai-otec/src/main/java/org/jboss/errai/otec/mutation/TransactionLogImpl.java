@@ -27,33 +27,33 @@ import java.util.ListIterator;
  * @author Mike Brock
  */
 public class TransactionLogImpl implements TransactionLog {
-  private final List<Operation> transactionLog = new LinkedList<Operation>();
+  private final List<OTOperation> transactionLog = new LinkedList<OTOperation>();
 
   @Override
-  public Collection<Operation> getLog() {
+  public List<OTOperation> getLog() {
     synchronized (transactionLog) {
-      return new ArrayList<Operation>(transactionLog);
+      return new ArrayList<OTOperation>(transactionLog);
     }
   }
 
   @Override
-  public Collection<Operation> getLogLatestEntries(int numberOfEntries) {
+  public Collection<OTOperation> getLogLatestEntries(int numberOfEntries) {
     synchronized (transactionLog) {
       return transactionLog.subList(transactionLog.size() - numberOfEntries - 1, transactionLog.size() - 1);
     }
   }
 
   @Override
-  public Collection<Operation> getLogFromId(int revision) {
+  public Collection<OTOperation> getLogFromId(int revision) {
     if (transactionLog.isEmpty()) {
       return Collections.emptyList();
     }
 
-    final ListIterator<Operation> operationListIterator = transactionLog.listIterator(transactionLog.size() - 1);
-    final List<Operation> operationList = new ArrayList<Operation>();
+    final ListIterator<OTOperation> operationListIterator = transactionLog.listIterator(transactionLog.size() - 1);
+    final List<OTOperation> operationList = new ArrayList<OTOperation>();
 
     while (operationListIterator.hasPrevious()) {
-      final Operation previous = operationListIterator.previous();
+      final OTOperation previous = operationListIterator.previous();
       operationList.add(previous);
       if (previous.getRevision() == revision) {
         Collections.reverse(operationList);
@@ -65,7 +65,7 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public void appendLog(Operation operation) {
+  public void appendLog(OTOperation operation) {
     synchronized (transactionLog) {
       transactionLog.add(operation);
     }

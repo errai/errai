@@ -26,13 +26,17 @@ public interface OTEngine {
 
   public void syncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback callback);
 
-  public void applyOperationsLocally(OTOperationList operationList);
+  public void applyOperationLocally(OTOperationImpl operationList);
 
-  public void notifyOperations(OTOperationList operationList);
+  public void notifyOperation(OTOperationImpl operationList);
 
   public OTEntityState getEntityStateSpace();
 
   public OTOperationsFactory getOperationsFactory();
+
+  public void associateEntity(String peerId, Integer entityId);
+
+  public void disassociateEntity(String peerId, Integer entityId);
 
   public void registerPeer(OTPeer peer);
 }

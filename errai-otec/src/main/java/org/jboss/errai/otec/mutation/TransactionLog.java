@@ -17,15 +17,16 @@
 package org.jboss.errai.otec.mutation;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Mike Brock
  */
 public interface TransactionLog {
-  public Collection<Operation> getLog();
-  public Collection<Operation> getLogLatestEntries(int numberOfEntries);
+  public List<OTOperation> getLog();
+  public Collection<OTOperation> getLogLatestEntries(int numberOfEntries);
 
-  public Collection<Operation> getLogFromId(int revision);
+  public Collection<OTOperation> getLogFromId(int revision);
 
-  public void appendLog(Operation operation);
+  public void appendLog(OTOperation operation);
 }

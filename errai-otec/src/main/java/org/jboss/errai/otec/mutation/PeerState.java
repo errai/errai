@@ -16,7 +16,7 @@
 
 package org.jboss.errai.otec.mutation;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -25,8 +25,8 @@ public interface PeerState {
   public void registerPeer(OTPeer peer);
 
   public OTPeer getPeer(String peerId);
-  public Collection<OTPeer> getPeersFor(OTEntity entity);
+  public Set<OTPeer> getPeersFor(OTEntity entity);
 
-  public void addPeerMonitor(OTPeer peer, OTEntity entity);
-  public void stopPeerMonitor(OTPeer peer, OTEntity entity);
+  public void associateEntity(OTPeer peer, OTEntity entity);
+  public void disassociateEntity(OTPeer peer, OTEntity entity);
 }

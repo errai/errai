@@ -16,9 +16,32 @@
 
 package org.jboss.errai.otec.mutation;
 
+import java.util.List;
+
 /**
  * @author Mike Brock
  */
-public enum OperationType {
-  Cursor, Insert, Retain, Delete
+public class OTOperationImpl implements OTOperation {
+  private final List<Mutation> mutationList;
+  private final OTEntity entity;
+
+  public OTOperationImpl(List<Mutation> mutationList, OTEntity entity) {
+    this.mutationList = mutationList;
+    this.entity = entity;
+  }
+
+  @Override
+  public List<Mutation> getMutations() {
+    return mutationList;
+  }
+
+  @Override
+  public OTEntity getEntity() {
+    return entity;
+  }
+
+  @Override
+  public int getRevision() {
+    return entity.getRevision();
+  }
 }

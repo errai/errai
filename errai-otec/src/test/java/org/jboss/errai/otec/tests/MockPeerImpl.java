@@ -19,38 +19,39 @@ package org.jboss.errai.otec.tests;
 import org.jboss.errai.otec.mutation.EntitySyncCompletionCallback;
 import org.jboss.errai.otec.mutation.OTEngine;
 import org.jboss.errai.otec.mutation.OTEntity;
+import org.jboss.errai.otec.mutation.OTOperation;
 import org.jboss.errai.otec.mutation.OTPeer;
-import org.jboss.errai.otec.mutation.Operation;
 import org.jboss.errai.otec.mutation.State;
-
-import java.util.List;
 
 /**
  * @author Mike Brock
  */
 public class MockPeerImpl implements OTPeer {
-  private OTEngine engine;
+  private OTEngine localEngine;
+  private OTEngine remoteEngine;
 
-  public MockPeerImpl(OTEngine engine) {
-    this.engine = engine;
+  public MockPeerImpl(OTEngine localEngine, OTEngine engine) {
+    this.localEngine = localEngine;
+    this.remoteEngine = engine;
   }
 
   @Override
-  public String getPeerId() {
-    return engine.getId();
+  public String getId() {
+    return remoteEngine.getId();
   }
 
   @Override
-  public void send(Integer entityId, List<Operation> operations) {
+  public void send(Integer entityId, OTOperation operation) {
     //note: this is simulating sending these operations over the wire.
-     engine.getReceiveHandler(getPeerId(), entityId)
-         .receive(operations);
+    remoteEngine.getReceiveHandler(getId(), entityId)
+        .receive(operation);
   }
 
   public void beginSyncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback<State> callback) {
-    final OTEntity entity = engine.getEntityStateSpace().getEntity(entityId);
+    final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
+    remoteEngine.associateEntity(localEngine.getId(), entityId);
 
-    engine.getEntityStateSpace().addEntity(entity);
+    localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
 
     callback.syncComplete(entity);
   }

@@ -16,11 +16,9 @@
 
 package org.jboss.errai.otec.mutation;
 
-import java.util.List;
-
 /**
  * @author Mike Brock
  */
 public interface ReceiveHandler {
-  public void receive(List<Operation> operations);
+  public void receive(OTOperation operations);
 }

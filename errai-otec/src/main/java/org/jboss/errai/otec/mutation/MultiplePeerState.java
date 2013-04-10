@@ -17,42 +17,53 @@
 package org.jboss.errai.otec.mutation;
 
 import java.util.Collections;
-import java.util.IdentityHashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ *
+ * @author Christian Sadilek
  * @author Mike Brock
  */
-public class SinglePeerState implements PeerState {
-  OTPeer remotePeer;
-  final Set<OTEntity> associatedEntities = Collections.newSetFromMap(new IdentityHashMap<OTEntity, Boolean>());
+public class MultiplePeerState implements PeerState {
 
-  @Override
-  public OTPeer getPeer(String peerId) {
-    return remotePeer;
-  }
+  private final Map<String, OTPeer> peers = new ConcurrentHashMap<String, OTPeer>();
+  private final Map<OTEntity, Set<OTPeer>> associatedEntities = new ConcurrentHashMap<OTEntity, Set<OTPeer>>();
 
   @Override
   public void registerPeer(OTPeer peer) {
-    if (remotePeer != null) {
-      throw new OTException("peer already registered for SinglePeerState!");
-    }
+    peers.put(peer.getId(), peer);
+  }
 
-    remotePeer = peer;
+  @Override
+  public OTPeer getPeer(String peerId) {
+    return peers.get(peerId);
   }
 
   @Override
   public Set<OTPeer> getPeersFor(OTEntity entity) {
-    return Collections.singleton(remotePeer);
+    final Set<OTPeer> otPeers = associatedEntities.get(entity);
+    return otPeers == null ? Collections.<OTPeer>emptySet() : otPeers;
   }
 
   @Override
   public void associateEntity(OTPeer peer, OTEntity entity) {
-    associatedEntities.add(entity);
+     Set<OTPeer> peers = associatedEntities.get(entity);
+
+    if (peers == null) {
+      peers = new HashSet<OTPeer>();
+      associatedEntities.put(entity, peers);
+    }
+    peers.add(peer);
   }
 
   @Override
   public void disassociateEntity(OTPeer peer, OTEntity entity) {
-    associatedEntities.remove(entity);
+    final Set<OTPeer> peers = associatedEntities.get(entity);
+    if (peer != null) {
+      peers.remove(peer);
+    }
   }
 }
