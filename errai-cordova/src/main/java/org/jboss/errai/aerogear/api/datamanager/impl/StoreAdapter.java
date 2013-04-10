@@ -41,12 +41,12 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
   @Override
   public T read(Serializable id) {
     if (id instanceof Number) {
-      return convertToType(read0((Integer) id));
+      return convertToType(read0((Number) id));
     }
     return convertToType(read0(id));
   }
 
-  private native JavaScriptObject read0(Integer id) /*-{
+  private native JavaScriptObject read0(Number id) /*-{
       return this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.read(Number(id))[0];
   }-*/;
 
