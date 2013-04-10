@@ -45,6 +45,15 @@ public class SyncRequestOperation<X> {
     this.expectedState = expectedState;
   }
 
+  public static <X> SyncRequestOperation<X> created(X newState) {
+    // XXX would be better to use a type hierarchy of SyncRequestOperations than to say knownState is null
+    return new SyncRequestOperation<X>(Type.NEW, newState, null);
+  }
+
+  public static <X> SyncRequestOperation<X> updated(X newState, X expectedState) {
+    return new SyncRequestOperation<X>(Type.UPDATED, newState, expectedState);
+  }
+
   public static <X> SyncRequestOperation<X> unchanged(X knownState) {
     // XXX would be better to use a type hierarchy of SyncRequestOperations than to say newState is null
     return new SyncRequestOperation<X>(Type.UNCHANGED, null, knownState);

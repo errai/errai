@@ -1,6 +1,7 @@
 package org.jboss.errai.jpa.sync.client.shared;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
@@ -12,6 +13,7 @@ import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
  * @param <X>
  *          the entity type
  */
+@Portable
 public class UpdateResponse<X> extends SyncResponse<X> {
 
   private final X entity;
@@ -27,5 +29,10 @@ public class UpdateResponse<X> extends SyncResponse<X> {
    */
   public X getEntity() {
     return entity;
+  }
+
+  @Override
+  public String toString() {
+    return "Updated: " + entity;
   }
 }

@@ -1,8 +1,10 @@
 package org.jboss.errai.jpa.sync.client.shared;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
+@Portable
 public class IdChangeResponse<X> extends SyncResponse<X> {
 
   private X entity;
@@ -21,5 +23,10 @@ public class IdChangeResponse<X> extends SyncResponse<X> {
 
   public Object getOldId() {
     return oldId;
+  }
+
+  @Override
+  public String toString() {
+    return "ID Changed: oldId=" + oldId + " entity=" + entity;
   }
 }
