@@ -593,3 +593,18 @@ td.datePickerMonth {
 .dialogMiddleCenter td:nth-child(3) {
     display:none;
 }
+
+#task-tag-column .gwt-CheckBox {
+    float: left;
+    margin-right: 10px;
+}
+
+#task-tag-column .gwt-CheckBox input {
+    float: left;
+    margin: 2px 5px 2px 5px;
+}
+
+#task-tag-column .gwt-CheckBox label {
+    display: inline;
+    margin-right: 10px;
+}

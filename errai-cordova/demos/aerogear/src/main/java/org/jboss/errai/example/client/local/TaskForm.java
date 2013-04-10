@@ -1,20 +1,26 @@
 package org.jboss.errai.example.client.local;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
+import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
+import org.jboss.errai.example.client.local.events.TagRefreshEvent;
 import org.jboss.errai.example.client.local.events.TaskRefreshEvent;
 import org.jboss.errai.example.client.local.events.TaskUpdateEvent;
-import org.jboss.errai.example.client.local.pipe.ProjectPipe;
-import org.jboss.errai.example.client.local.pipe.TagPipe;
+import org.jboss.errai.example.client.local.pipe.TagStore;
 import org.jboss.errai.example.client.local.pipe.TaskPipe;
+import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.example.shared.Tag;
@@ -22,11 +28,14 @@ import org.jboss.errai.example.shared.Task;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
+import javax.annotation.Nullable;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.jboss.errai.example.client.local.Animator.hide;
@@ -50,12 +59,10 @@ public class TaskForm extends Composite {
   private Pipe<Task> taskPipe;
 
   @Inject
-  @ProjectPipe
-  private Pipe<Project> projectPipe;
+  private Store<Project> projectStore;
 
   @Inject
-  @TagPipe
-  private Pipe<Tag> tagPipe;
+  private TagStore tagStore;
 
   @Inject
   @Bound
@@ -88,6 +95,10 @@ public class TaskForm extends Composite {
   });
 
   @Inject
+  @DataField("task-tag-column")
+  private FlowPanel tags;
+
+  @Inject
   @DataField
   private Anchor submit;
 
@@ -100,27 +111,44 @@ public class TaskForm extends Composite {
     DateTimeFormat dateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
     date.setFormat(new DateBox.DefaultFormat(dateFormat));
     refreshProjectList();
+    refreshTagList();
   }
 
   private void updatedProjectList(@Observes ProjectRefreshEvent event) {
     refreshProjectList();
   }
 
+  private void updateTagList(@Observes TagRefreshEvent event) {
+    refreshTagList();
+  }
+
   private void refreshProjectList() {
-    projectPipe.read(new DefaultCallback<List<Project>>() {
-      @Override
-      public void onSuccess(List<Project> result) {
-        result.add(0, null);
-        projectListBox.setAcceptableValues(result);
-      }
-    });
+    Collection<Project> projects = projectStore.readAll();
+    List<Project> result = new ArrayList<Project>(projects);
+    result.add(0, null);
+    projectListBox.setAcceptableValues(result);
+  }
+
+  private void refreshTagList() {
+    tags.clear();
+    Collection<Tag> tagCollection = tagStore.readAll();
+    for (Tag tag : tagCollection) {
+      CheckBox box = new CheckBox(tag.getTitle());
+      box.getElement().getStyle().setBackgroundColor(new ColorConverter().toWidgetValue(tag.getStyle()));
+      tags.add(box);
+    }
   }
 
   @EventHandler("submit")
   public void onSubmit(ClickEvent event) {
     final Element div = getContainer(event);
     Task task = taskBinder.getModel();
-    task.setProject(projectListBox.getValue());
+    Project project = projectListBox.getValue();
+    if (project != null) {
+      task.setProject(project.getId());
+    }
+
+    task.setTags(getTagIds());
     task.setDate(date.getTextBox().getValue());
     taskPipe.save(task, new DefaultCallback<Task>() {
       @Override
@@ -134,6 +162,30 @@ public class TaskForm extends Composite {
         });
       }
     });
+  }
+
+  private List<Long> getTagIds() {
+    final List<String> tagNames = new ArrayList<String>();
+    for (Widget tag : tags) {
+      if (tag instanceof CheckBox && ((CheckBox) tag).getValue()) {
+        tagNames.add(((CheckBox) tag).getText());
+      }
+    }
+
+    return Lists.newArrayList(
+        FluentIterable.from(tagStore.readAll()).filter(new Predicate<Tag>() {
+          @Override
+          public boolean apply(@Nullable Tag tag) {
+            return tag != null && tagNames.contains(tag.getTitle());
+          }
+        }).transform(new Function<Tag, Long>() {
+
+          @Nullable
+          @Override
+          public Long apply(@Nullable Tag tag) {
+            return tag.getId();
+          }
+        }));
   }
 
   private void onUpdateTaks(@Observes TaskUpdateEvent event) {

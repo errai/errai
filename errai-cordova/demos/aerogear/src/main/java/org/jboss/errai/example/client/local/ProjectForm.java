@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.TextBox;
 import net.auroris.ColorPicker.client.Color;
+import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -39,6 +40,9 @@ public class ProjectForm extends ColorPickerForm {
   private Pipe<Project> projectPipe;
 
   @Inject
+  private Store<Project> projectStore;
+
+  @Inject
   @Bound
   @DataField("project-title")
   private TextBox title;
@@ -67,6 +71,7 @@ public class ProjectForm extends ColorPickerForm {
   public void onSubmitClicked(ClickEvent event) {
     final com.google.gwt.dom.client.Element div = getContainer(event);
     Project project = projectDataBinder.getModel();
+    projectStore.save(project);
     projectPipe.save(project, new DefaultCallback<Project>() {
       @Override
       public void onSuccess(final Project newProject) {

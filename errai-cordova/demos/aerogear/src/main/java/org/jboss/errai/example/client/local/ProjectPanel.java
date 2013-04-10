@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.item.ProjectItem;
@@ -13,11 +14,13 @@ import org.jboss.errai.example.client.local.pipe.ProjectPipe;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.ioc.client.api.InitBallot;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
@@ -32,8 +35,14 @@ import static org.jboss.errai.example.client.local.Animator.show;
 public class ProjectPanel extends Composite {
 
   @Inject
+  InitBallot<Store<Project>> ballot;
+
+  @Inject
   @ProjectPipe
   private Pipe<Project> pipe;
+
+  @Inject
+  private Store<Project> projectStore;
 
   @DataField("project-loader")
   private Element projectStatusBar = DOM.createElement("div");
@@ -49,9 +58,10 @@ public class ProjectPanel extends Composite {
   @DataField("project-container")
   private ListWidget<Project, ProjectItem> listWidget = new ProjectList();
 
-  @AfterInitialization
+  @PostConstruct
   public void loadTasks() {
     refreshProjectList();
+    projectStatusBar.getStyle().setDisplay(NONE);
   }
 
   private void onProjectListChanged(@Observes ProjectRefreshEvent event) {
@@ -63,7 +73,10 @@ public class ProjectPanel extends Composite {
       @Override
       public void onSuccess(List<Project> result) {
         listWidget.setItems(result);
-        projectStatusBar.getStyle().setDisplay(NONE);
+        for (Project project : result) {
+          projectStore.save(project);
+        }
+        ballot.voteForInit();
       }
     });
   }

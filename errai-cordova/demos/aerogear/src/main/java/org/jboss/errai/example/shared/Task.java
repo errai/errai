@@ -21,7 +21,6 @@ import org.jboss.errai.databinding.client.api.Bindable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Portable
@@ -33,8 +32,8 @@ public class Task implements Serializable {
   private String description;
   private String date;
 
-  private List<Tag> tags = new ArrayList<Tag>();
-  private Project project;
+  private List<Long> tags = new ArrayList<Long>();
+  private Long project;
 
   public Task() {
   }
@@ -75,19 +74,19 @@ public class Task implements Serializable {
     this.date = date;
   }
 
-  public List<Tag> getTags() {
-    return this.tags;
+  public List<Long> getTags() {
+    return tags;
   }
 
-  public void setTags(final List<Tag> tags) {
+  public void setTags(List<Long> tags) {
     this.tags = tags;
   }
 
-  public Project getProject() {
-    return this.project;
+  public Long getProject() {
+    return project;
   }
 
-  public void setProject(final Project project) {
+  public void setProject(Long project) {
     this.project = project;
   }
 

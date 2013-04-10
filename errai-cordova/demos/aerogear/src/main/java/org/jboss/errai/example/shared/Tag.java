@@ -70,4 +70,14 @@ public class Tag implements Serializable {
   public void setTasks(List<Task> task) {
     this.tasks = task;
   }
+
+  @Override
+  public String toString() {
+    return "Tag{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", style='" + style + '\'' +
+        ", tasks=" + tasks +
+        '}';
+  }
 }

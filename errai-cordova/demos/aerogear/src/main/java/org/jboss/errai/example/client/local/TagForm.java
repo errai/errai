@@ -10,6 +10,7 @@ import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.example.client.local.events.TagRefreshEvent;
 import org.jboss.errai.example.client.local.events.TagUpdateEvent;
 import org.jboss.errai.example.client.local.pipe.TagPipe;
+import org.jboss.errai.example.client.local.pipe.TagStore;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.ui.shared.api.annotations.*;
@@ -37,6 +38,9 @@ public class TagForm extends ColorPickerForm {
   @Inject
   @TagPipe
   private Pipe<Tag> pipe;
+
+  @Inject
+  private TagStore tagStore;
 
   @Inject
   @Bound
@@ -67,6 +71,7 @@ public class TagForm extends ColorPickerForm {
   public void onSubmitClicked(ClickEvent event) {
     final com.google.gwt.dom.client.Element div = getContainer(event);
     Tag tag = tagDataBinder.getModel();
+    tagStore.save(tag);
     pipe.save(tag, new DefaultCallback<Tag>() {
       @Override
       public void onSuccess(final Tag newTag) {

@@ -10,14 +10,15 @@ import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.TagRefreshEvent;
 import org.jboss.errai.example.client.local.item.TagItem;
 import org.jboss.errai.example.client.local.pipe.TagPipe;
+import org.jboss.errai.example.client.local.pipe.TagStore;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Tag;
-import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
@@ -35,6 +36,9 @@ public class TagsPanel extends Composite {
   @TagPipe
   private Pipe<Tag> pipe;
 
+  @Inject
+  private TagStore tagStore;
+
   @DataField("tag-loader")
   private Element tagStatusBar = DOM.createElement("div");
 
@@ -49,7 +53,7 @@ public class TagsPanel extends Composite {
   @DataField("taglist-container")
   private ListWidget<Tag, TagItem> listWidget = new TagList();
 
-  @AfterInitialization
+  @PostConstruct
   public void loadTags() {
     refreshTagList();
   }
@@ -63,7 +67,9 @@ public class TagsPanel extends Composite {
       @Override
       public void onSuccess(List<Tag> result) {
         listWidget.setItems(result);
+        tagStore.saveAllTags(result);
         tagStatusBar.getStyle().setDisplay(NONE);
+
       }
     });
   }

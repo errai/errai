@@ -7,20 +7,27 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.example.client.local.events.TaskRefreshEvent;
 import org.jboss.errai.example.client.local.events.TaskUpdateEvent;
+import org.jboss.errai.example.client.local.pipe.TagStore;
 import org.jboss.errai.example.client.local.pipe.TaskPipe;
+import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
+import org.jboss.errai.example.shared.Project;
+import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.example.shared.Task;
 import org.jboss.errai.ui.client.widget.HasModel;
 import org.jboss.errai.ui.shared.api.annotations.*;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.util.List;
 
 import static com.google.gwt.dom.client.Style.Display.INLINE;
 import static com.google.gwt.dom.client.Style.Display.NONE;
@@ -39,6 +46,12 @@ public class TaskItem extends Composite implements HasModel<Task> {
   @Inject
   @TaskPipe
   private Pipe<Task> pipe;
+
+  @Inject
+  private TagStore tagStore;
+
+  @Inject
+  private Store<Project> projectStore;
 
   @Inject
   @AutoBound
@@ -61,6 +74,10 @@ public class TaskItem extends Composite implements HasModel<Task> {
 
   @DataField
   private Element overlay = DOM.createDiv();
+
+  @Inject
+  @DataField("task-tags")
+  private FlowPanel tags;
 
   @Inject
   @DataField
@@ -103,6 +120,29 @@ public class TaskItem extends Composite implements HasModel<Task> {
 
   @Override
   public void setModel(Task model) {
+    List ids = model.getTags();
+    List<Tag> tagsList = tagStore.readAll(ids);
     taskBinder.setModel(model, InitialState.FROM_MODEL);
+    Project project = projectStore.read(model.getProject());
+    String color = convertToBackgroundColor(project.getStyle());
+    asWidget().getElement().getStyle().setBackgroundColor(color);
+
+    createTags(tagsList);
+  }
+
+  private String convertToBackgroundColor(String style) {
+    return new ColorConverter().toWidgetValue(style);
+  }
+
+  private void createTags(List<Tag> tagsList) {
+    for (Tag tag : tagsList) {
+      Label label = new Label();
+      Element labelElement = label.getElement();
+      labelElement.setTitle(tag.getTitle());
+      labelElement.getStyle().setBackgroundColor(convertToBackgroundColor(tag.getStyle()));
+      labelElement.setAttribute("rel", "tooltip");
+      labelElement.setClassName("swatch");
+      tags.add(label);
+    }
   }
 }

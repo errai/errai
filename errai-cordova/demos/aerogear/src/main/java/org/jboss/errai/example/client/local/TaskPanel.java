@@ -52,6 +52,7 @@ public class TaskPanel extends Composite {
   @AfterInitialization
   public void loadTasks() {
     refreshTaskList();
+    taskStatusBar.getStyle().setDisplay(Style.Display.NONE);
   }
 
   private void refreshTaskList() {
@@ -59,10 +60,15 @@ public class TaskPanel extends Composite {
       @Override
       public void onSuccess(List<Task> result) {
         taskList.setItems(result);
-        taskStatusBar.getStyle().setDisplay(Style.Display.NONE);
+        enableToolTips();
       }
     });
   }
+
+  private native void enableToolTips() /*-{
+      $wnd.$( "#task-list-container .swatch" ).tooltip();
+  }-*/;
+
 
   public void addedTask(@Observes TaskRefreshEvent taskRefreshEvent) {
     refreshTaskList();
