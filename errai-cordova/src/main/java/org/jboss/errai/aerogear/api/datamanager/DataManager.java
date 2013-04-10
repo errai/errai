@@ -24,17 +24,17 @@ public class DataManager {
       }]).stores[name];
   }-*/;
 
-  public Store store(Config config) {
+  public <T> Store<T> store(Class<T> type, Config config) {
     JavaScriptObject object = setup(config.getName(), config.getType().getName(), config.getRecordId(), config.getSettings());
-    return new StoreAdapter(object);
+    return new StoreAdapter(type, object);
   }
 
-  public <T> Store<T> store() {
-    return store(new Config());
+  public <T> Store<T> store(Class<T> type) {
+    return store(type, new Config());
   }
 
-  public <T> Store<T> store(String name) {
-    return store(new Config(name));
+  public <T> Store<T> store(Class<T> type, String name) {
+    return store(type, new Config(name));
   }
 
   public static class Config {

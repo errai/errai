@@ -5,6 +5,7 @@ import com.google.gwt.core.client.JsArray;
 import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.datamanager.StoreType;
 import org.jboss.errai.aerogear.api.impl.AbstractAdapter;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.marshalling.client.Marshalling;
 
 import java.io.Serializable;
@@ -14,7 +15,8 @@ import java.util.Collection;
  * @author edewit@redhat.com
  */
 public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
-  public StoreAdapter(JavaScriptObject store) {
+  public StoreAdapter(Class<T> type, JavaScriptObject store) {
+    super(type);
     this.object = store;
   }
 
@@ -54,7 +56,7 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
 
   @Override
   public void save(T item) {
-    save0(Marshalling.toJSON(item));
+    save0(MarshallingWrapper.toJSON(item));
   }
 
   private native void save0(String item) /*-{

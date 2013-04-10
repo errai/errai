@@ -20,7 +20,7 @@ public class StoreAdapterTest extends GWTTestCase {
   public void testStoreAndRetrieve() {
     //given
     DataManager dataManager = new DataManager();
-    Store<User> store = dataManager.store();
+    Store<User> store = dataManager.store(User.class);
 
     //when
     store.save(new User(1, "test"));

@@ -15,16 +15,26 @@ import java.util.List;
 public abstract class AbstractAdapter<T> {
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
+    enableJacksonMarchalling();
   }
 
+  private native static void enableJacksonMarchalling() /*-{
+      $wnd.erraiJaxRsJacksonMarshallingActive = true;
+  }-*/;
+
   protected JavaScriptObject object;
+  private final Class<T> type;
+
+  protected AbstractAdapter(Class<T> type) {
+    this.type = type;
+  }
 
   protected String toJSON(JavaScriptObject object) {
     return new JSONObject(object).toString();
   }
 
   protected T fromJSON(String json) {
-    return (T) MarshallingWrapper.fromJSON(json);
+    return MarshallingWrapper.fromJSON(json, type);
   }
 
   protected T convertToType(JavaScriptObject object) {

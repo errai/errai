@@ -25,24 +25,9 @@ import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 @SuppressWarnings("ALL")
 public class PipeAdapter<T> extends AbstractAdapter<T> implements Pipe<T> {
 
-  static {
-      enableJacksonMarchalling();
-  }  
-
-  private native static void enableJacksonMarchalling() /*-{
-    $wnd.erraiJaxRsJacksonMarshallingActive = true;
-  }-*/;
-  
-  private final Class<T> type;
-
   public PipeAdapter(Class<T> type, JavaScriptObject pipe) {
+    super(type);
     this.object = pipe;
-    this.type = type;
-  }
-
-  @Override
-  protected T fromJSON(String json) {
-    return (T) MarshallingWrapper.fromJSON(json, type);
   }
 
   @Override
