@@ -6,9 +6,10 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
-@Bindable @Entity
+@Portable @Bindable @Entity
 @NamedQueries({
   @NamedQuery(name="currentItems", query="SELECT i FROM TodoItem i WHERE i.archived=false ORDER BY i.text"),
   @NamedQuery(name="allItems", query="SELECT i FROM TodoItem i ORDER BY i.text")
@@ -16,16 +17,16 @@ import org.jboss.errai.databinding.client.api.Bindable;
 public class  TodoItem {
 
   @Id @GeneratedValue
-  private long id;
+  private Long id;
 
   private String text;
-  private boolean done;
-  private boolean archived;
+  private boolean done = Boolean.FALSE;
+  private boolean archived = Boolean.FALSE;
 
-  public long getId() {
+  public Long getId() {
     return id;
   }
-  public void setId(long id) {
+  public void setId(Long id) {
     this.id = id;
   }
   public String getText() {

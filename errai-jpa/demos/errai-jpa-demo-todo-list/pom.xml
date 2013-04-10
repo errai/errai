@@ -17,6 +17,12 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-javaee-all</artifactId>
     </dependency>
+    
+    <!-- TODO this should be a compile-scoped dep of errai-javaee-all! -->
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -27,6 +33,19 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.jboss.spec.javax.servlet</groupId>
+      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.spec.javax.ejb</groupId>
+      <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
   
   <build>

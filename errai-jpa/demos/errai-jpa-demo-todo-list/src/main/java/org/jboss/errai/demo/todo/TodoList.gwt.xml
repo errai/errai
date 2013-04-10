@@ -3,8 +3,9 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.5/distro-source/core/src/gwt-module.dtd">
 <module rename-to="TodoList">
     <inherits name="org.jboss.errai.enterprise.All"/>
-    
+    <inherits name="org.jboss.errai.jpa.sync.DataSync"/>
+
     <source path="client"/>
     <source path="shared"/>
-    
+
 </module>
