@@ -74,12 +74,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
 
     <dependency>
       <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-navigation</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cordova</artifactId>
       <version>${project.version}</version>
     </dependency>
