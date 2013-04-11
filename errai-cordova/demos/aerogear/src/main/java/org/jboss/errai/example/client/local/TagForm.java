@@ -14,14 +14,13 @@ import org.jboss.errai.example.client.local.pipe.TagStore;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.ui.shared.api.annotations.*;
-import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import static org.jboss.errai.example.client.local.Animator.hide;
-import static org.jboss.errai.example.client.local.Animator.show;
+import static org.jboss.errai.example.client.local.util.Animator.hide;
+import static org.jboss.errai.example.client.local.util.Animator.show;
 
 /**
  * @author edewit@redhat.com

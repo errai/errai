@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import java.util.List;
 
 import static com.google.gwt.dom.client.Style.Display.NONE;
-import static org.jboss.errai.example.client.local.Animator.show;
+import static org.jboss.errai.example.client.local.util.Animator.show;
 
 /**
  * @author edewit@redhat.com

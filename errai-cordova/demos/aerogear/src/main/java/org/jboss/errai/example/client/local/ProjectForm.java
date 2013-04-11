@@ -1,6 +1,5 @@
 package org.jboss.errai.example.client.local;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.TextBox;
@@ -21,8 +20,8 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import static org.jboss.errai.example.client.local.Animator.hide;
-import static org.jboss.errai.example.client.local.Animator.show;
+import static org.jboss.errai.example.client.local.util.Animator.hide;
+import static org.jboss.errai.example.client.local.util.Animator.show;
 
 /**
  * @author edewit@redhat.com
