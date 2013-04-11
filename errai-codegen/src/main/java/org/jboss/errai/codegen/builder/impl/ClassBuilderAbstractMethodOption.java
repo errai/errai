@@ -163,8 +163,9 @@ public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructur
                                                                 final ThrowsDeclaration throwsDeclaration,
                                                                 final List<Annotation> annotations,
                                                                 final String comment) {
-        BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, modifiers, name,
-            returnType, null, defParameters, throwsDeclaration);
+
+        final BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, modifiers, name,
+            returnType, defParameters, throwsDeclaration);
 
         if (annotations != null) {
           buildMetaMethod.addAnnotations(annotations);

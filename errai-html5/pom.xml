@@ -35,8 +35,8 @@
       <artifactId>reflections</artifactId>
       <exclusions>
         <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
+          <groupId>org.jboss.spec.javax.servlet</groupId>
+          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
         </exclusion>
         <exclusion>
           <groupId>com.google.code.gson</groupId>
@@ -71,13 +71,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -138,15 +136,8 @@
 
       <dependencies>
         <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-          <version>2.5</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>jsp-api</artifactId>
-          <version>2.0</version>
+          <groupId>org.jboss.spec.javax.servlet</groupId>
+          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -159,12 +150,6 @@
           <artifactId>junit</artifactId>
           <version>4.8.1</version>
           <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.ejb3</groupId>
-          <artifactId>jboss-ejb3-api</artifactId>
-          <scope>provided</scope>
-          <version>3.1.0</version>
         </dependency>
 
         <!-- Errai Core -->

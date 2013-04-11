@@ -112,17 +112,19 @@ public class ProxyMaker {
   }
 
 
+  private final static Override OVERRIDE_ANNOTATION = new Override() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Override.class;
+    }
+  };
+
   BuildMetaClass make(final String proxyClassName,
                       final MetaClass toProxy,
                       final String privateAccessorType) {
     final ClassStructureBuilder builder;
 
-    final Override override = new Override() {
-      @Override
-      public Class<? extends Annotation> annotationType() {
-        return Override.class;
-      }
-    };
+
 
     final boolean renderEqualsAndHash;
     if (!toProxy.isInterface()) {
@@ -191,7 +193,7 @@ public class ProxyMaker {
 
       final DefParameters defParameters = DefParameters.fromParameters(methodParms);
       final BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
-          .annotatedWith(override)
+          .annotatedWith(OVERRIDE_ANNOTATION)
           .parameters(defParameters)
           .throws_(method.getCheckedExceptions());
 
@@ -237,7 +239,7 @@ public class ProxyMaker {
     if (renderEqualsAndHash) {
       // implement hashCode()
       builder.publicMethod(int.class, "hashCode")
-          .annotatedWith(override)
+          .annotatedWith(OVERRIDE_ANNOTATION)
           .body()
           ._(
               If.isNull(loadVariable(proxyVar))
@@ -251,7 +253,7 @@ public class ProxyMaker {
 
       // implements equals()
       builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o"))
-          .annotatedWith(override)
+          .annotatedWith(OVERRIDE_ANNOTATION)
           .body()
           ._(
               If.isNull(loadVariable(proxyVar))

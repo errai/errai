@@ -111,14 +111,4 @@ public class MockIOCGenerator {
       ClassScanner.setReflectionsScanning(false);
     }
   }
-
-  private static class BootstrapClassloader extends ClassLoader {
-    private BootstrapClassloader(final ClassLoader classLoader) {
-      super(classLoader);
-    }
-
-    public Class<?> defineClassX(final String className, final byte[] b, final int off, final int len) {
-      return super.defineClass(className, b, off, len);
-    }
-  }
 }

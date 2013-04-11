@@ -22,8 +22,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface Marshaller<T> {
-  //Class<T> getTypeHandled();
-
   T demarshall(EJValue o, MarshallingSession ctx);
 
   String marshall(final T o, MarshallingSession ctx);

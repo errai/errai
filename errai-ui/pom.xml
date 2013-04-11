@@ -91,6 +91,24 @@
          <version>${project.version}</version>
          <scope>provided</scope>
       </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.12</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.sf.jtidy</groupId>
+        <artifactId>jtidy</artifactId>
+        <version>r938</version>
+      </dependency>
    </dependencies>
 
 

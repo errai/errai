@@ -118,6 +118,7 @@
     <module>errai-ioc-bus-support</module>
     <module>errai-bus-jboss7-websocket</module>
     <module>errai-jboss-as-support</module>
+    <module>errai-otec</module>
   </modules>
 
   <dependencies>
@@ -329,9 +330,9 @@
       </dependency>
 
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
+        <groupId>org.jboss.spec.javax.servlet</groupId>
+        <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+        <version>1.0.0.Final</version>
       </dependency>
 
       <dependency>
@@ -600,6 +601,22 @@
                     <ignore />
                   </action>
                 </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>gmaven-plugin</artifactId>
+                    <versionRange>[1.5,)</versionRange>
+                    <goals>
+                      <goal>testCompile</goal>
+                      <goal>generateStubs</goal>
+                      <goal>compile</goal>
+                      <goal>generateTestStubs</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
@@ -677,6 +694,28 @@
       </properties>
     </profile>
 
+    <profile>
+      <id>community-release</id>
+      <activation>
+        <property>
+          <name>!wfk</name>
+        </property>
+      </activation>
+      <distributionManagement>
+        <repository>
+          <id>jboss-releases-repository</id>
+          <name>JBoss Releases Repository</name>
+          <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
+        </repository>
+
+        <snapshotRepository>
+          <id>jboss-snapshots-repository</id>
+          <name>JBoss Snapshots Repository</name>
+          <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+    
     <profile>
       <id>distro</id>
       <modules>

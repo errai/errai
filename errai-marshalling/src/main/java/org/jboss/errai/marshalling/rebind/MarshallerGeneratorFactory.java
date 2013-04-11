@@ -439,11 +439,6 @@ public class MarshallerGeneratorFactory {
 
     final MetaClass arrayType = toMap.asArrayOf(dim);
 
-//    MetaClass outerType = toMap.getOuterComponentType();
-//    if (!outerType.isArray() && outerType.isPrimitive()) {
-//      toMap = outerType.asBoxed();
-//    }
-
     String marshallerVarName;
     if (DefinitionsFactorySingleton.get().shouldUseObjectMarshaller(toMap)) {
       marshallerVarName = getVarName(MetaClassFactory.get(Object.class));

@@ -1,0 +1,12 @@
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
+
+<module rename-to="App">
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name="com.google.gwt.uibinder.UiBinder"/>
+    <inherits name="org.jboss.errai.bus.ErraiBus"/>
+
+    <entry-point class="org.errai.samples.stockdemo.client.local.StockClient"/>
+
+    <source path="client"/>
+</module>

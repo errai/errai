@@ -827,6 +827,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
+   *
    * Checks if subject is already listed in the subscriptions map
    *
    * @param subject

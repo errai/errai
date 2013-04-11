@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -206,6 +207,16 @@ public class QualifierEqualityFactoryGenerator extends Generator {
             If.notEquals(Stmt.loadVariable("a1").invoke(method), Stmt.loadVariable("a2").invoke(method))
                 ._(Stmt.load(false).returnValue())
                 .finish()
+        );
+      }
+      else if (method.getReturnType().isArray()) {
+        isEqualBuilder._(
+            If.not(Stmt.invokeStatic(Arrays.class, "equals",
+                Stmt.loadVariable("a1").invoke(method),
+                Stmt.loadVariable("a2").invoke(method))
+            )
+            ._(Stmt.load(false).returnValue())
+            .finish()
         );
       }
       else {

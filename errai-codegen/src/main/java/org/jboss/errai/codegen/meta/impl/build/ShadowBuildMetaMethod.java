@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.ThrowsDeclaration;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaType;
 
 import java.lang.reflect.Method;
 
@@ -34,9 +33,9 @@ public class ShadowBuildMetaMethod extends BuildMetaMethod {
   private MetaMethod shadow;
 
   public ShadowBuildMetaMethod(BuildMetaClass declaringClass, BlockStatement body, Scope scope, DefModifiers modifiers, String name,
-                               MetaClass returnType, MetaType genericReturnType, DefParameters defParameters, 
+                               MetaClass returnType, DefParameters defParameters,
                                ThrowsDeclaration throwsDeclaration, MetaMethod shadow) {
-    super(declaringClass, body, scope, modifiers, name, returnType, genericReturnType, defParameters, throwsDeclaration);
+    super(declaringClass, body, scope, modifiers, name, returnType, defParameters, throwsDeclaration);
     this.shadow = shadow;
   }
 

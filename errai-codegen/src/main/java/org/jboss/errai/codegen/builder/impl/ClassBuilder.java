@@ -413,7 +413,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         }
 
         final BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
-                modifiers, name, returnType, null, dParameters, throwsDeclaration);
+                modifiers, name, returnType, dParameters, throwsDeclaration);
 
         if (annotations != null) {
           buildMetaMethod.addAnnotations(annotations);

@@ -36,7 +36,7 @@
       repository. -->
     <!-- <version.org.jboss.spec.jboss.javaee6>3.0.0.Final-redhat-1</version.org.jboss.spec.jboss.javaee6> -->
     <version.org.jboss.errai>3.0-SNAPSHOT</version.org.jboss.errai>
-    <version.com.google.gwt>2.4.0</version.com.google.gwt>
+    <version.com.google.gwt>2.5.1</version.com.google.gwt>
     <version.org.codehaus.mojo.gwt.maven.plugin>${version.com.google.gwt}</version.org.codehaus.mojo.gwt.maven.plugin>
   </properties>
 

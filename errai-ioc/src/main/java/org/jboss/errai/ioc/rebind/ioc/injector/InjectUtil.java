@@ -19,6 +19,22 @@ package org.jboss.errai.ioc.rebind.ioc.injector;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Qualifier;
+
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -54,20 +70,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.basic.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Qualifier;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class InjectUtil {
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
@@ -673,11 +675,11 @@ public class InjectUtil {
   private static Statement recordInlineReference(final Statement beanCreationStmt,
                                                  final InjectionContext ctx,
                                                  final MetaParameter parm) {
-
+    
     final String varName = InjectUtil.getUniqueVarName();
 
     ctx.getProcessingContext()
-        .append(Stmt.declareFinalVariable(varName, parm.getType(), beanCreationStmt));
+        .append(Stmt.declareFinalVariable(varName, parm.getType().getErased(), beanCreationStmt));
 
     final Statement stmt = Refs.get(varName);
 

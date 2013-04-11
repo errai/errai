@@ -51,8 +51,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <weld.version>1.1.6.Final</weld.version>
     <jetty.version>6.1.25</jetty.version>
-    <slf4j.version>1.6.1</slf4j.version>
-    <validation.api.version>1.0.0.GA</validation.api.version>
   </properties>
 
   <profiles>
@@ -118,26 +116,17 @@
 
       <dependencies>
         <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-          <version>2.5</version>
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>jsp-api</artifactId>
-          <version>2.0</version>
+          <groupId>org.jboss.spec.javax.servlet</groupId>
+          <artifactId>jboss-servlet-api_3.0_spec</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
-          <version>1.2.16</version>
         </dependency>
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
-          <version>4.8.1</version>
           <scope>compile</scope>
         </dependency>
 
@@ -191,7 +180,6 @@
         <dependency>
           <groupId>org.mvel</groupId>
           <artifactId>mvel2</artifactId>
-          <version>${mvel.version}</version>
         </dependency>
 
         <dependency>
@@ -246,14 +234,12 @@
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-user</artifactId>
-          <version>${gwt.version}</version>
           <scope>compile</scope>
         </dependency>
 
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-dev</artifactId>
-          <version>${gwt.version}</version>
           <scope>compile</scope>
         </dependency>
 
@@ -274,7 +260,6 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>

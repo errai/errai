@@ -142,25 +142,6 @@ public abstract class EnvUtil {
 
     exposedClasses.addAll(exposedFromScanner);
 
-    final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class, true);
-    for (final MetaClass cls : exts) {
-      try {
-        Class<? extends ExposedTypesProvider> providerClass = cls.asClass().asSubclass(ExposedTypesProvider.class);
-        for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
-          final MetaClass toAdd;
-          if (exposedType.isPrimitive()) {
-            toAdd = exposedType.asBoxed();
-          }
-          else {
-            toAdd = exposedType;
-          }
-          exposedClasses.add(toAdd);
-        }
-      }
-      catch (Throwable e) {
-        throw new RuntimeException("unable to load environment extension: " + cls.getFullyQualifiedName(), e);
-      }
-    }
 
     final Collection<URL> erraiAppProperties = getErraiAppProperties();
 
@@ -243,6 +224,25 @@ public abstract class EnvUtil {
             //
           }
         }
+      }
+    }
+
+
+    final Collection<MetaClass> exts = ClassScanner.getTypesAnnotatedWith(EnvironmentConfigExtension.class, true);
+    for (final MetaClass cls : exts) {
+      try {
+        Class<? extends ExposedTypesProvider> providerClass = cls.asClass().asSubclass(ExposedTypesProvider.class);
+        for (final MetaClass exposedType : providerClass.newInstance().provideTypesToExpose()) {
+          if (exposedType.isPrimitive()) {
+            exposedClasses.add(exposedType.asBoxed());
+          }
+          else if (exposedType.isConcrete()) {
+            exposedClasses.add(exposedType);
+          }
+        }
+      }
+      catch (Throwable e) {
+        throw new RuntimeException("unable to load environment extension: " + cls.getFullyQualifiedName(), e);
       }
     }
 

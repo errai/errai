@@ -60,7 +60,7 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
     final List<String> elements = new ArrayList<String>();
 
     String lastMethodRendered = "";
-    String lastValueRendered = "";
+    String lastValueRendered;
 
     for (final Method method : sortedMethods) {
       if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)

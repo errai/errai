@@ -17,7 +17,6 @@
 package org.jboss.errai.codegen.builder.impl;
 
 import org.jboss.errai.codegen.AbstractStatement;
-import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.CallParameters;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.StringStatement;
@@ -31,10 +30,6 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class ConstructorBlockBuilderImpl<T extends ClassStructureBuilder<T>> extends BlockBuilderImpl<T> implements ConstructorBlockBuilder<T> {
-  public ConstructorBlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T> tBuildCallback) {
-    super(blockStatement, tBuildCallback);
-  }
-
   public ConstructorBlockBuilderImpl(BuildCallback<T> tBuildCallback) {
     super(tBuildCallback);
   }

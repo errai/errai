@@ -18,23 +18,15 @@ package org.jboss.errai.bus.client.tests;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.BusErrorCallback;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.Subscription;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.client.tests.support.GenericServiceB;
-import org.jboss.errai.bus.client.tests.support.Person;
-import org.jboss.errai.bus.client.tests.support.RandomProvider;
-import org.jboss.errai.bus.client.tests.support.SType;
-import org.jboss.errai.bus.client.tests.support.SpecificEntity;
-import org.jboss.errai.bus.client.tests.support.SubService;
-import org.jboss.errai.bus.client.tests.support.TestException;
-import org.jboss.errai.bus.client.tests.support.TestRPCService;
-import org.jboss.errai.bus.client.tests.support.User;
+import org.jboss.errai.bus.client.tests.support.*;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -302,6 +294,37 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
+  public void testRpcThrowingNonPortableException() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(
+            new RemoteCallback<Object>() {
+              @Override
+              public void callback(final Object response) {
+              }
+            },
+            new BusErrorCallback() {
+              @Override
+              public boolean error(final Message message, final Throwable caught) {
+                assertNotNull("Message is null.", message);
+                assertNotNull("Throwable is null.", caught);
+
+                try {
+                  throw caught;
+                }
+                catch (Throwable throwable) {
+                  assertEquals(NonPortableException.class.getName() + ":" + "message", throwable.getMessage());     
+                  finishTest();
+                }
+                return false;
+              }
+            },
+            TestRPCService.class
+        ).nonPortableException();
+      }
+    });
+  }
   public void testRpcReturningVoid() {
     runAfterInit(new Runnable() {
       @Override

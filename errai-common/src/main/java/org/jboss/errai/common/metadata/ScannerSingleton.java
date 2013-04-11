@@ -31,7 +31,8 @@ public class ScannerSingleton {
       new Callable<MetaDataScanner>() {
         @Override
         public MetaDataScanner call() throws Exception {
-          if (Boolean.getBoolean("errai.reflections.cache") && RebindUtils.cacheFileExists(RebindUtils.getClasspathHash() + ".cache.xml")) {
+          if (Boolean.getBoolean("errai.reflections.cache")
+              && RebindUtils.cacheFileExists(RebindUtils.getClasspathHash() + ".cache.xml")) {
               return MetaDataScanner.createInstanceFromCache();
           }
 
