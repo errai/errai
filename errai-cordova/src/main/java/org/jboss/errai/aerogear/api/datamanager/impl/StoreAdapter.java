@@ -69,10 +69,19 @@ public class StoreAdapter<T> extends AbstractAdapter<T> implements Store<T> {
 
   @Override
   public void remove(Serializable id) {
-    remove0(id);
+    if (id instanceof Number) {
+      remove0((Number) id);
+    } else {
+      remove0(id);
+    }
   }
+
+  private native void remove0(Number id) /*-{
+      this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.remove(Number(id));
+  }-*/;
 
   private native void remove0(Serializable id) /*-{
       this.@org.jboss.errai.aerogear.api.impl.AbstractAdapter::object.remove(id);
   }-*/;
+
 }

@@ -38,6 +38,10 @@ public class StoreAdapterTest extends GWTTestCase {
     assertNotNull(user);
     assertEquals(new User(2), user);
     assertEquals("test2", user.name);
+
+    store.remove(3);
+    collection = store.readAll();
+    assertEquals(3, collection.size());
   }
 
   @Portable
