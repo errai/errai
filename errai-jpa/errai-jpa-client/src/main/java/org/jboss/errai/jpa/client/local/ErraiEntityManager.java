@@ -165,18 +165,21 @@ public class ErraiEntityManager implements EntityManager {
 
   /**
    * As they say in television, "this is where the magic happens." This method
-   * attempts to resolve the given object as an entity and put that entity into
-   * the given state, taking into account its existing state and performing the
+   * attempts to resolve the given object as an entity and apply the operation
+   * to the entity, taking into account its existing state and performing the
    * required side effects during the state transition.
    */
-  private <X> void changeEntityState(X entity, EntityState newState) {
+  private <X> X applyCascadingOperation(X entity, CascadeType newState) {
     ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
 
     final Key<X, ?> key = keyFor(entityType, entity);
-    final EntityState oldState = getState(key);
+    final EntityState oldState = getState(key, entity);
+
+    System.out.println("+++ Performing " + newState + " operation on " + oldState + " entity: " + entity);
+    X entityToReturn = entity;
 
     switch (newState) {
-    case MANAGED:
+    case PERSIST:
       switch (oldState) {
       case NEW:
       case REMOVED:
@@ -184,7 +187,7 @@ public class ErraiEntityManager implements EntityManager {
         persistenceContext.put(key, entity);
         backend.put(key, entity);
         entityType.deliverPostPersist(entity);
-        // FALLTHROUGH
+        break;
       case MANAGED:
         // no-op, but cascade to relatives
         break;
@@ -192,7 +195,31 @@ public class ErraiEntityManager implements EntityManager {
         throw new EntityExistsException();
       }
       break;
-    case DETACHED:
+    case MERGE:
+      switch (oldState) {
+      case NEW:
+      case DETACHED:
+        X mergeTarget = find(key, Collections.<String,Object>emptyMap());
+        if (mergeTarget == null) {
+          mergeTarget = entityType.newInstance();
+        }
+        entityType.mergeNonAssociationState(mergeTarget, entity);
+
+        entityToReturn = mergeTarget;
+
+        entityType.deliverPrePersist(mergeTarget);
+        persistenceContext.put(key, mergeTarget);
+        backend.put(key, mergeTarget);
+        entityType.deliverPostPersist(mergeTarget);
+        break;
+      case MANAGED:
+        // no-op, but cascade to relatives
+        break;
+      case REMOVED:
+        throw new IllegalArgumentException("Cannot merge removed entity " + entity);
+      }
+      break;
+    case DETACH:
       switch (oldState) {
       case NEW:
       case DETACHED:
@@ -204,7 +231,7 @@ public class ErraiEntityManager implements EntityManager {
         break;
       }
       break;
-    case REMOVED:
+    case REMOVE:
       switch (oldState) {
       case NEW:
       case MANAGED:
@@ -220,8 +247,8 @@ public class ErraiEntityManager implements EntityManager {
         break;
       }
       break;
-    case NEW:
-      throw new IllegalArgumentException("Entities can't transition from " + oldState + " to " + newState);
+    default:
+      throw new IllegalArgumentException("Operation not implemented yet: " + newState);
     }
 
     // Tell the BindableProxy that we changed the entity
@@ -241,6 +268,7 @@ public class ErraiEntityManager implements EntityManager {
       cascadeStateChange(attrib, entity, newState);
     }
 
+    return entityToReturn;
   }
 
   /**
@@ -299,13 +327,20 @@ public class ErraiEntityManager implements EntityManager {
    *
    * @param key
    *          The entity key
+   * @param instance
+   *          The entity instance whose state to check
    * @return The current state of the given entity according to this entity
    *         manager.
    */
-  private <T> EntityState getState(Key<T, ?> key) {
+  private <T> EntityState getState(Key<T, ?> key, T instance) {
     final EntityState oldState;
-    if (persistenceContext.get(key) != null) {
+    final Object inPersistenceContext = persistenceContext.get(key);
+    if (inPersistenceContext == instance) {
       oldState = EntityState.MANAGED;
+    }
+    else if (inPersistenceContext != null) {
+      // we already have a different instance of this type of entity with the same ID
+      oldState = EntityState.DETACHED;
     }
     else if (backend.contains(key)) {
       oldState = EntityState.DETACHED;
@@ -318,25 +353,21 @@ public class ErraiEntityManager implements EntityManager {
   }
 
   /**
-   * Subroutine of {@link #changeEntityState(Object, EntityState)}. Cascades the
+   * Subroutine of {@link #applyCascadingOperation(Object, CascadeType)}. Cascades the
    * given change of state onto all of the related entities whose cascade rules
-   * are appropriate to the new state. It is assumed that the given entity is
-   * already in the given state.
+   * are appropriate to the new state. It is assumed that the cascading operation has
+   * already been applied to the owning entity.
    *
    * @param <X> the type of the owning entity we are cascading from
    * @param <R> the type of the related entity we are cascading to
    */
-  private <X, R> void cascadeStateChange(ErraiAttribute<X, R> cascadeAcross, X owningEntity, EntityState newState) {
+  private <X, R> void cascadeStateChange(ErraiAttribute<X, R> cascadeAcross, X owningEntity, CascadeType cascadeType) {
     if (!cascadeAcross.isAssociation()) return;
 
-    CascadeType cascadeType;
-    switch (newState) {
-    case DETACHED: cascadeType = CascadeType.DETACH; break;
-    case MANAGED: cascadeType = CascadeType.PERSIST; break; // XXX could be a MERGE once that's implemented
-    case REMOVED: cascadeType = CascadeType.REMOVE; break;
-    case NEW: throw new IllegalArgumentException();
-    default: throw new AssertionError("Unknown entity state " + newState);
+    if (cascadeType == CascadeType.REFRESH) {
+      throw new IllegalArgumentException("Refresh not yet supported");
     }
+
     R relatedEntity = cascadeAcross.get(owningEntity);
     System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + relatedEntity + "?");
     if (relatedEntity == null) {
@@ -346,20 +377,25 @@ public class ErraiEntityManager implements EntityManager {
       System.out.println("    Yes");
       if (cascadeAcross.isCollection()) {
         for (Object element : (Iterable<?>) relatedEntity) {
-          changeEntityState(element, newState);
+          applyCascadingOperation(element, cascadeType);
         }
       }
       else {
-        changeEntityState(relatedEntity, newState);
+        applyCascadingOperation(relatedEntity, cascadeType);
       }
+    }
+    else if (cascadeType == CascadeType.MERGE && cascadeAcross.cascades(CascadeType.PERSIST) && !cascadeAcross.isCollection() && getState(keyFor(relatedEntity), relatedEntity) == EntityState.NEW) {
+      System.out.println("    Yes (special case for merging new related entity)");
+      // this is what hibernate does in this case
+      applyCascadingOperation(relatedEntity, cascadeType);
     }
     else {
       System.out.println("    No");
-      if (cascadeType == CascadeType.PERSIST && !contains(relatedEntity)) {
+      if ((cascadeType == CascadeType.PERSIST || cascadeType == CascadeType.MERGE) && !contains(relatedEntity)) {
         throw new IllegalStateException(
                 "Entity " + owningEntity + " references an unsaved entity via relationship attribute [" +
                 cascadeAcross.getName() + "]. Save related attribute before flushing or change" +
-                " cascade rule to include PERSIST.");
+                " cascade rule to include " + cascadeType);
       }
     }
   }
@@ -456,7 +492,7 @@ public class ErraiEntityManager implements EntityManager {
 
   @Override
   public void persist(Object entity) {
-    changeEntityState(entity, EntityState.MANAGED);
+    applyCascadingOperation(entity, CascadeType.PERSIST);
   }
 
   @Override
@@ -472,7 +508,7 @@ public class ErraiEntityManager implements EntityManager {
 
   @Override
   public void detach(Object entity) {
-    changeEntityState(entity, EntityState.DETACHED);
+    applyCascadingOperation(entity, CascadeType.DETACH);
   }
 
   @Override
@@ -517,7 +553,7 @@ public class ErraiEntityManager implements EntityManager {
 
   @Override
   public void remove(Object entity) {
-    changeEntityState(entity, EntityState.REMOVED);
+    applyCascadingOperation(entity, CascadeType.REMOVE);
   }
 
   /**
@@ -542,7 +578,7 @@ public class ErraiEntityManager implements EntityManager {
 
   @Override
   public <T> T merge(T entity) {
-    throw new UnsupportedOperationException("Not implemented");
+    return applyCascadingOperation(entity, CascadeType.MERGE);
   }
 
   @Override
@@ -606,7 +642,8 @@ public class ErraiEntityManager implements EntityManager {
 
   @Override
   public boolean contains(Object entity) {
-    return persistenceContext.containsValue(entity);
+    Object found = persistenceContext.get(keyFor(entity));
+    return found == entity;
   }
 
   @Override

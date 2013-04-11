@@ -197,18 +197,17 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     }
   }
 
-  public JSONValue toJson(EntityManager em, X targetEntity) {
+  public JSONValue toJson(EntityManager em, X sourceEntity) {
     final ErraiEntityManager eem = (ErraiEntityManager) em;
     JSONObject jsonValue = new JSONObject();
 
-    // TODO get all attributes, not just singular ones
     for (Attribute<? super X, ?> a : getAttributes()) {
       ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
       switch (attr.getPersistentAttributeType()) {
       case ELEMENT_COLLECTION:
       case EMBEDDED:
       case BASIC:
-        jsonValue.put(attr.getName(), makeInlineJson(targetEntity, attr, eem));
+        jsonValue.put(attr.getName(), makeInlineJson(sourceEntity, attr, eem));
       break;
 
       case MANY_TO_MANY:
@@ -217,10 +216,10 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       case ONE_TO_ONE:
         JSONValue attributeValue;
         if (attr instanceof ErraiSingularAttribute) {
-          attributeValue = makeJsonReference(targetEntity, (ErraiSingularAttribute<? super X, ?>) attr, eem);
+          attributeValue = makeJsonReference(sourceEntity, (ErraiSingularAttribute<? super X, ?>) attr, eem);
         }
         else if (attr instanceof ErraiPluralAttribute) {
-          attributeValue = makeJsonReference(targetEntity, (ErraiPluralAttribute<? super X, ?, ?>) attr, eem);
+          attributeValue = makeJsonReference(sourceEntity, (ErraiPluralAttribute<? super X, ?, ?>) attr, eem);
         }
         else {
           throw new PersistenceException("Unknown attribute type " + attr);
@@ -230,6 +229,46 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     }
 
     return jsonValue;
+  }
+
+  /**
+   * Copies the state of basic, embedded, and element collection attributes in
+   * sourceEntity into targetEntity.
+   * <p>
+   * Relations are NOT followed; these are handled by the cascading merge logic
+   * of ErraiEntityManager.
+   *
+   * @param em
+   *          The entity manager that sourceEntity and targetEntity exist in.
+   * @param targetEntity
+   *          The entity whose attributes' state will be written to. Not null.
+   * @param sourceEntity
+   *          The entity whose attributes' state will be read from. Not null.
+   */
+  public void mergeNonAssociationState(X targetEntity, X sourceEntity) {
+    for (Attribute<? super X, ?> a : getAttributes()) {
+      ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
+      switch (attr.getPersistentAttributeType()) {
+      case ELEMENT_COLLECTION:
+      case EMBEDDED:
+      case BASIC:
+        copyAttribute(attr, targetEntity, sourceEntity);
+      break;
+
+      case MANY_TO_MANY:
+      case MANY_TO_ONE:
+      case ONE_TO_MANY:
+      case ONE_TO_ONE:
+        // leave these alone. they are handled by recursive merge
+        break;
+      default:
+        throw new IllegalArgumentException("Attribute has unknown type: " + attr);
+      }
+    }
+  }
+
+  private static <X, Y> void copyAttribute(ErraiAttribute<X, Y> attr, X targetEntity, X sourceEntity) {
+    attr.set(targetEntity, attr.get(sourceEntity));
   }
 
   /**

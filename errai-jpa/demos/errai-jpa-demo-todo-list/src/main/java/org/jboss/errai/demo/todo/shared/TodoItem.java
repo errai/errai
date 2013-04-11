@@ -20,8 +20,8 @@ public class  TodoItem {
   private Long id;
 
   private String text;
-  private boolean done = Boolean.FALSE;
-  private boolean archived = Boolean.FALSE;
+  private Boolean done = Boolean.FALSE;
+  private Boolean archived = Boolean.FALSE;
 
   public Long getId() {
     return id;
@@ -35,16 +35,16 @@ public class  TodoItem {
   public void setText(String text) {
     this.text = text;
   }
-  public boolean isDone() {
+  public Boolean isDone() {
     return done;
   }
-  public void setDone(boolean done) {
+  public void setDone(Boolean done) {
     this.done = done;
   }
-  public boolean isArchived() {
+  public Boolean isArchived() {
     return archived;
   }
-  public void setArchived(boolean archived) {
+  public void setArchived(Boolean archived) {
     this.archived = archived;
   }
 }
