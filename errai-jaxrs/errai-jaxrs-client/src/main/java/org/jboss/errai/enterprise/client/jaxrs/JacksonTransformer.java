@@ -64,17 +64,20 @@ public class JacksonTransformer {
   /**
    * The transformation from Errai JSON to Jackson's JSON contains the following steps:
    * <ul>
-   * <li>For all JSON objects, recursively remove the Errai specific OBJECT_ID and ENCODED_TYPE values</li>
+   * <li>For all JSON objects, recursively remove the Errai specific OBJECT_ID and ENCODED_TYPE
+   * values</li>
    * <li>Keep a reference to the removed OBJECT_IDs, so back-references can be resolved</li>
-   * <li>If an array is encountered, process all its elements, then remove the Errai specific QUALIFIED_VALUE key, by
-   * associating its actual value with the object's key directly: "list": {"^Value": ["e1","e2"]} becomes "list":
-   * ["e1","e2"]</li>
-   * <li>If an enum is encountered, remove the Errai specific ENUM_STRING_VALUE key, by associating its actual value
-   * with the object's key directly: "gender": {"^EnumStringValue": "MALE"} becomes "gender": "MALE"</li>
-   * <li>If a number is encountered, remove the Errai specific NUMERIC_VALUE key, by associating its actual value with
-   * the object's key directly and turning it into a JSON number, if required: "id": {"^NumValue": "1"} becomes "id": 1</li>
-   * <li>If a date is encountered, remove the Errai specific QUALIFIED_VALUE key, by associating its actual value with
-   * the object's key directly and turning it into a JSON number</li>
+   * <li>If an array is encountered, process all its elements, then remove the Errai specific
+   * QUALIFIED_VALUE key, by associating its actual value with the object's key directly: "list":
+   * {"^Value": ["e1","e2"]} becomes "list": ["e1","e2"]</li>
+   * <li>If an enum is encountered, remove the Errai specific ENUM_STRING_VALUE key, by associating
+   * its actual value with the object's key directly: "gender": {"^EnumStringValue": "MALE"} becomes
+   * "gender": "MALE"</li>
+   * <li>If a number is encountered, remove the Errai specific NUMERIC_VALUE key, by associating its
+   * actual value with the object's key directly and turning it into a JSON number, if required:
+   * "id": {"^NumValue": "1"} becomes "id": 1</li>
+   * <li>If a date is encountered, remove the Errai specific QUALIFIED_VALUE key, by associating its
+   * actual value with the object's key directly and turning it into a JSON number</li>
    * <li>If EMBEDDED_JSON is encountered, turn in into standard json</li>
    * </ul>
    * 
@@ -133,7 +136,7 @@ public class JacksonTransformer {
             else {
               return arr;
             }
-          } 
+          }
         }
         else if (k.equals(ENUM_STRING_VALUE)) {
           if (parent != null) {
@@ -170,7 +173,16 @@ public class JacksonTransformer {
           JSONValue value = obj.get(k);
           JSONObject tmpObject = new JSONObject();
           toJackson(newKey, QUALIFIED_VALUE, tmpObject, objectCache);
-          obj.put(tmpObject.get(QUALIFIED_VALUE).toString(), value);
+
+          String embeddedKey = null;
+          JSONValue qualVal = tmpObject.get(QUALIFIED_VALUE);
+          if (qualVal.isString() != null) {
+            embeddedKey = qualVal.isString().stringValue();
+          }
+          else {
+            embeddedKey = qualVal.toString();
+          }
+          obj.put(embeddedKey, value);
         }
 
         toJackson(obj.get(k), k, obj, objectCache);
@@ -209,8 +221,10 @@ public class JacksonTransformer {
    * The transformation from Jackson's JSON to Errai JSON contains the following steps:
    * <ul>
    * <li>Recursively add an incremented OBJECT_ID to every JSON object</li>
-   * <li>If a number is encountered, wrap it in a new JSON object with an OBJECT_ID and NUMERIC_VALUE property</li>
-   * <li>If an array is encountered, wrap it in a new JSON object with an OBJECT_ID and QUALIFIED_VALUE property</li>
+   * <li>If a number is encountered, wrap it in a new JSON object with an OBJECT_ID and
+   * NUMERIC_VALUE property</li>
+   * <li>If an array is encountered, wrap it in a new JSON object with an OBJECT_ID and
+   * QUALIFIED_VALUE property</li>
    * </ul>
    * 
    * @param val
