@@ -23,6 +23,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.BigNumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 
 /**
@@ -105,6 +106,19 @@ public class JacksonTestServiceImpl implements JacksonTestService {
     ObjectMapper mapper = new ObjectMapper();
     try {
       BigNumberEntity entity = mapper.readValue(jackson, BigNumberEntity.class);
+      return mapper.writeValueAsString(entity);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  @Override
+  public String postJacksonPortableWithEnumMapEntity(String jackson) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      EnumMapEntity entity = mapper.readValue(jackson, EnumMapEntity.class);
       return mapper.writeValueAsString(entity);
     }
     catch (Exception e) {

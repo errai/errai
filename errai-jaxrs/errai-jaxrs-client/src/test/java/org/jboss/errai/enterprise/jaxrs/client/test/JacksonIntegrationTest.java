@@ -31,6 +31,8 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.BigNumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity.SomeEnum;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ImmutableEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
@@ -97,9 +99,6 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     });
 
     String jackson = MarshallingWrapper.toJSON(user);
-
-    System.out.println(jackson);
-    
     call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
@@ -213,6 +212,30 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
           }
         }).postJacksonMap(jackson);
   }
+  
+  @Test
+  public void testJacksonMarshallingOfEntityWithEnumMap() {
+    delayTestFinish(5000);
+
+    final EnumMapEntity e = new EnumMapEntity();
+    Map<EnumMapEntity.SomeEnum, String> map = new HashMap<EnumMapEntity.SomeEnum, String>();
+    map.put(SomeEnum.ENUM_VALUE, "test");
+    e.setMap(map);
+    
+    String jackson = MarshallingWrapper.toJSON(e);
+
+    call(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            EnumMapEntity result = MarshallingWrapper.fromJSON(jackson, EnumMapEntity.class);
+            assertEquals(e, result);
+            finishTest();
+          }
+        }).postJacksonPortableWithEnumMapEntity(jackson);
+  }
+
 
   /**
    * Guards against regressions of: https://issues.jboss.org/browse/ERRAI-466

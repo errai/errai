@@ -32,8 +32,11 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSONValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
+
+import com.google.gwt.json.client.JSONString;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -83,7 +86,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         }
         
         if (assumedKeyType != null && assumedValueType != null) {
-          demarshalledKey = convertKey(assumedKeyType, key);
+          demarshalledKey = convertKey(assumedKeyType, key, ctx);
 
           String valueType = null;
           if (ejValue.isObject() != null && ejValue.isObject().containsKey(SerializationParts.ENCODED_TYPE)) {
@@ -110,9 +113,10 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
 
   // This only exists to support demarshalling of maps using Jackson. The Jackson payload doesn't contain our
   // EMBEDDED_JSON or any type information, so we have to convert the key (which is always a String) to it's actual
-  // type. We only support primitive wrapper types as key types. Other types require a custom
+  // type. We only neet to support primitive wrapper types and enums as key types. Other types require a custom
   // Key(De)Serializer in Jackson anyway which would be unknown to Errai.
-  private Object convertKey(final String toType, final String key) {
+  private Object convertKey(final String toType, final String key, final MarshallingSession ctx) {
+    Marshaller<?> keyMarshaller = ctx.getMarshallerInstance(toType);
     if (toType.equals(Integer.class.getName())) {
       return Integer.parseInt(key);
     }
@@ -137,10 +141,15 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
     else if (toType.equals(Character.class.getName())) {
       return new Character(key.charAt(0));
     }
+    else if (toType.equals(String.class.getName())) {
+      return key;
+    }
+    else if (keyMarshaller != null) {
+      return keyMarshaller.demarshall(new GWTJSONValue(new JSONString(key)), ctx);
+    }
     return key;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public String marshall(final T o, final MarshallingSession ctx) {
     final StringBuilder buf = new StringBuilder();
