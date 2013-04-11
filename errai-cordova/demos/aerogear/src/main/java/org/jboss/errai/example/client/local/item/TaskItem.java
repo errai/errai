@@ -16,7 +16,7 @@ import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.example.client.local.events.TaskRefreshEvent;
 import org.jboss.errai.example.client.local.events.TaskUpdateEvent;
 import org.jboss.errai.example.client.local.pipe.TagStore;
-import org.jboss.errai.example.client.local.pipe.TaskPipe;
+import org.jboss.errai.example.client.local.pipe.Tasks;
 import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
@@ -44,7 +44,7 @@ public class TaskItem extends Composite implements HasModel<Task> {
   private Event<TaskRefreshEvent> taskRefreshEventSource;
 
   @Inject
-  @TaskPipe
+  @Tasks
   private Pipe<Task> pipe;
 
   @Inject

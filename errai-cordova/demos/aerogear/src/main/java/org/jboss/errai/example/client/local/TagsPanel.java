@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.TagRefreshEvent;
 import org.jboss.errai.example.client.local.item.TagItem;
-import org.jboss.errai.example.client.local.pipe.TagPipe;
+import org.jboss.errai.example.client.local.pipe.Tags;
 import org.jboss.errai.example.client.local.pipe.TagStore;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Tag;
@@ -19,6 +19,7 @@ import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
@@ -32,8 +33,11 @@ import static org.jboss.errai.example.client.local.util.Animator.show;
 @Templated("App.html#tag-container")
 public class TagsPanel extends Composite {
 
+  @Inject @Tags
+  private Event<List<Tag>> tagListEventSource;
+
   @Inject
-  @TagPipe
+  @Tags
   private Pipe<Tag> pipe;
 
   @Inject
@@ -56,6 +60,7 @@ public class TagsPanel extends Composite {
   @PostConstruct
   public void loadTags() {
     refreshTagList();
+    tagStatusBar.getStyle().setDisplay(NONE);
   }
 
   private void onTagRefresh(@Observes TagRefreshEvent event) {
@@ -68,8 +73,7 @@ public class TagsPanel extends Composite {
       public void onSuccess(List<Tag> result) {
         listWidget.setItems(result);
         tagStore.saveAllTags(result);
-        tagStatusBar.getStyle().setDisplay(NONE);
-
+        tagListEventSource.fire(result);
       }
     });
   }
@@ -77,7 +81,6 @@ public class TagsPanel extends Composite {
   @EventHandler("addTag")
   public void onAddTagClicked(ClickEvent event) {
     show(event.getRelativeElement());
-    //form.reset();
   }
 
   private class TagList extends ListWidget<Tag, TagItem> {

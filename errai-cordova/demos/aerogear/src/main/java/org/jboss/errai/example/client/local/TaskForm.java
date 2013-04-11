@@ -14,12 +14,12 @@ import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
-import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
-import org.jboss.errai.example.client.local.events.TagRefreshEvent;
 import org.jboss.errai.example.client.local.events.TaskRefreshEvent;
 import org.jboss.errai.example.client.local.events.TaskUpdateEvent;
+import org.jboss.errai.example.client.local.pipe.Projects;
+import org.jboss.errai.example.client.local.pipe.Tags;
 import org.jboss.errai.example.client.local.pipe.TagStore;
-import org.jboss.errai.example.client.local.pipe.TaskPipe;
+import org.jboss.errai.example.client.local.pipe.Tasks;
 import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
@@ -55,7 +55,7 @@ public class TaskForm extends Composite {
   private DataBinder<Task> taskBinder;
 
   @Inject
-  @TaskPipe
+  @Tasks
   private Pipe<Task> taskPipe;
 
   @Inject
@@ -110,29 +110,16 @@ public class TaskForm extends Composite {
   private void settings() {
     DateTimeFormat dateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
     date.setFormat(new DateBox.DefaultFormat(dateFormat));
-    refreshProjectList();
-    refreshTagList();
   }
 
-  private void updatedProjectList(@Observes ProjectRefreshEvent event) {
-    refreshProjectList();
+  private void updatedProjectList(@Observes @Projects List<Project> projects) {
+    projects.add(0, null);
+    projectListBox.setAcceptableValues(projects);
   }
 
-  private void updateTagList(@Observes TagRefreshEvent event) {
-    refreshTagList();
-  }
-
-  private void refreshProjectList() {
-    Collection<Project> projects = projectStore.readAll();
-    List<Project> result = new ArrayList<Project>(projects);
-    result.add(0, null);
-    projectListBox.setAcceptableValues(result);
-  }
-
-  private void refreshTagList() {
+  private void updateTagList(@Observes @Tags List<Tag> tagList) {
     tags.clear();
-    Collection<Tag> tagCollection = tagStore.readAll();
-    for (Tag tag : tagCollection) {
+    for (Tag tag : tagList) {
       CheckBox box = new CheckBox(tag.getTitle());
       box.getElement().getStyle().setBackgroundColor(new ColorConverter().toWidgetValue(tag.getStyle()));
       tags.add(box);

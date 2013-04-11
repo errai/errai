@@ -7,15 +7,13 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Label;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.events.ProjectUpdateEvent;
-import org.jboss.errai.example.client.local.events.TagRefreshEvent;
-import org.jboss.errai.example.client.local.pipe.ProjectPipe;
+import org.jboss.errai.example.client.local.pipe.Projects;
 import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
@@ -37,7 +35,7 @@ public class ProjectItem extends Composite implements HasModel<Project> {
   private Event<ProjectRefreshEvent> projectRefreshEventSource;
 
   @Inject
-  @ProjectPipe
+  @Projects
   Pipe<Project> projectPipe;
 
   @Inject @AutoBound

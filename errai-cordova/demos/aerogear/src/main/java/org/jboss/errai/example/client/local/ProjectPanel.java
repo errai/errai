@@ -10,16 +10,16 @@ import org.jboss.errai.aerogear.api.datamanager.Store;
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.item.ProjectItem;
-import org.jboss.errai.example.client.local.pipe.ProjectPipe;
+import org.jboss.errai.example.client.local.pipe.Projects;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
-import org.jboss.errai.ioc.client.api.InitBallot;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
@@ -33,11 +33,11 @@ import static org.jboss.errai.example.client.local.util.Animator.show;
 @Templated("App.html#project-list")
 public class ProjectPanel extends Composite {
 
-  @Inject
-  InitBallot<Store<Project>> ballot;
+  @Inject @Projects
+  private Event<List<Project>> projectListEventSource;
 
   @Inject
-  @ProjectPipe
+  @Projects
   private Pipe<Project> pipe;
 
   @Inject
@@ -75,7 +75,7 @@ public class ProjectPanel extends Composite {
         for (Project project : result) {
           projectStore.save(project);
         }
-        ballot.voteForInit();
+        projectListEventSource.fire(result);
       }
     });
   }

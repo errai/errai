@@ -18,19 +18,19 @@ import static org.jboss.errai.aerogear.api.pipeline.PipeFactory.Config;
 public class PipeProducer {
 
   @Produces
-  @TaskPipe
+  @Tasks
   private Pipe<Task> createTaskPipe() {
     return createPipe(Task.class, new Config("tasks"));
   }
 
   @Produces
-  @ProjectPipe
+  @Projects
   private Pipe<Project> createProjectPipe() {
     return createPipe(Project.class, new Config("projects"));
   }
 
   @Produces
-  @TagPipe
+  @Tags
   private Pipe<Tag> createTagPipe() {
     return createPipe(Tag.class, new Config("tags"));
   }

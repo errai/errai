@@ -13,7 +13,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.example.client.local.events.TagRefreshEvent;
 import org.jboss.errai.example.client.local.events.TagUpdateEvent;
-import org.jboss.errai.example.client.local.pipe.TagPipe;
+import org.jboss.errai.example.client.local.pipe.Tags;
 import org.jboss.errai.example.client.local.util.ColorConverter;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Tag;
@@ -35,7 +35,7 @@ public class TagItem extends Composite implements HasModel<Tag> {
   private Event<TagRefreshEvent> tagRefreshEventSource;
 
   @Inject
-  @TagPipe
+  @Tags
   private Pipe<Tag> pipe;
 
   @Inject @AutoBound

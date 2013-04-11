@@ -10,7 +10,7 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.example.client.local.events.ProjectRefreshEvent;
 import org.jboss.errai.example.client.local.events.ProjectUpdateEvent;
-import org.jboss.errai.example.client.local.pipe.ProjectPipe;
+import org.jboss.errai.example.client.local.pipe.Projects;
 import org.jboss.errai.example.client.local.util.DefaultCallback;
 import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.ui.shared.api.annotations.*;
@@ -35,7 +35,7 @@ public class ProjectForm extends ColorPickerForm {
   private DataBinder<Project> projectDataBinder;
 
   @Inject
-  @ProjectPipe
+  @Projects
   private Pipe<Project> projectPipe;
 
   @Inject
