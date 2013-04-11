@@ -65,11 +65,7 @@ public class ProjectItem extends Composite implements HasModel<Project> {
   @Override
   public void setModel(Project model) {
     projectDataBinder.setModel(model, InitialState.FROM_MODEL);
-    asWidget().getElement().getStyle().setBackgroundColor(getBackgroundColor(model.getStyle()));
-  }
-
-  private String getBackgroundColor(String style) {
-    return new ColorConverter().toWidgetValue(style);
+    new ColorConverter().applyStyles(asWidget().getElement().getStyle(), model.getStyle());
   }
 
   @EventHandler

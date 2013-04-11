@@ -121,7 +121,7 @@ public class TaskForm extends Composite {
     tags.clear();
     for (Tag tag : tagList) {
       CheckBox box = new CheckBox(tag.getTitle());
-      box.getElement().getStyle().setBackgroundColor(new ColorConverter().toWidgetValue(tag.getStyle()));
+      new ColorConverter().applyStyles(box.getElement().getStyle(), tag.getStyle());
       tags.add(box);
     }
   }

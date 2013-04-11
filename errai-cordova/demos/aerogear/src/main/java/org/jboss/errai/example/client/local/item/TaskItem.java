@@ -126,15 +126,10 @@ public class TaskItem extends Composite implements HasModel<Task> {
     Long projectId = model.getProject();
     if (projectId != null) {
       Project project = projectStore.read(projectId);
-      String color = convertToBackgroundColor(project.getStyle());
-      asWidget().getElement().getStyle().setBackgroundColor(color);
+      new ColorConverter().applyStyles(asWidget().getElement().getStyle(), project.getStyle());
     }
 
     createTags(tagsList);
-  }
-
-  private String convertToBackgroundColor(String style) {
-    return new ColorConverter().toWidgetValue(style);
   }
 
   private void createTags(List<Tag> tagsList) {
@@ -142,7 +137,7 @@ public class TaskItem extends Composite implements HasModel<Task> {
       Label label = new Label();
       Element labelElement = label.getElement();
       labelElement.setTitle(tag.getTitle());
-      labelElement.getStyle().setBackgroundColor(convertToBackgroundColor(tag.getStyle()));
+      labelElement.getStyle().setBackgroundColor(new ColorConverter().toWidgetValue(tag.getStyle()));
       labelElement.setAttribute("rel", "tooltip");
       labelElement.setClassName("swatch");
       tags.add(label);
