@@ -123,9 +123,12 @@ public class TaskItem extends Composite implements HasModel<Task> {
     List ids = model.getTags();
     List<Tag> tagsList = tagStore.readAll(ids);
     taskBinder.setModel(model, InitialState.FROM_MODEL);
-    Project project = projectStore.read(model.getProject());
-    String color = convertToBackgroundColor(project.getStyle());
-    asWidget().getElement().getStyle().setBackgroundColor(color);
+    Long projectId = model.getProject();
+    if (projectId != null) {
+      Project project = projectStore.read(projectId);
+      String color = convertToBackgroundColor(project.getStyle());
+      asWidget().getElement().getStyle().setBackgroundColor(color);
+    }
 
     createTags(tagsList);
   }
