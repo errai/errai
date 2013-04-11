@@ -50,9 +50,8 @@ public class TagsPanel extends Composite {
   @DataField("tag-form")
   private TagForm form;
 
-  @Inject
   @DataField
-  private Anchor addTag;
+  private Element addTag = DOM.createDiv();
 
   @DataField("taglist-container")
   private ListWidget<Tag, TagItem> listWidget = new TagList();

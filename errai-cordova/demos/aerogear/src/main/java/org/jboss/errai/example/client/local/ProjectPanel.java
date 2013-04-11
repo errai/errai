@@ -46,9 +46,8 @@ public class ProjectPanel extends Composite {
   @DataField("project-loader")
   private Element projectStatusBar = DOM.createElement("div");
 
-  @Inject
   @DataField
-  private Anchor addProject;
+  private Element addProject = DOM.createDiv();
 
   @Inject
   @DataField("project-form")
