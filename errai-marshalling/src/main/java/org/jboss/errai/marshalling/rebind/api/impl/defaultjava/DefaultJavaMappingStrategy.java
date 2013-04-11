@@ -20,6 +20,9 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -59,9 +62,6 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -124,13 +124,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         builder.append(Stmt.declareVariable(EJObject.class).named("obj")
             .initializeWith(loadVariable("a0").invoke("isObject")));
 
-        builder.append(If.cond(Bool.isNull(Refs.get("obj"))).append(Stmt.load(null).returnValue()).finish());
-
         if (toMap.isEnum()) {
           builder.append(Stmt.declareVariable(toMap).named("entity")
               .initializeWith(demarshallEnum(loadVariable("obj"), loadVariable("a0"), toMap)));
         }
         else {
+          builder.append(If.cond(Bool.isNull(Refs.get("obj"))).append(Stmt.load(null).returnValue()).finish());
+          
           builder.append(Stmt.declareVariable(String.class).named("objId")
               .initializeWith(loadVariable("obj")
                   .invoke("get", SerializationParts.OBJECT_ID)
