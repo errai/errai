@@ -36,13 +36,7 @@ import static com.google.gwt.dom.client.Style.Display.NONE;
  * @author edewit@redhat.com
  */
 @Templated
-public class TaskItem extends Composite implements HasModel<Task> {
-  @Inject
-  private Event<TaskUpdateEvent> taskUpdateEventSource;
-
-  @Inject
-  private Event<TaskRefreshEvent> taskRefreshEventSource;
-
+public class TaskItem extends AbstractItem<Task, TaskRefreshEvent, TaskUpdateEvent> {
   @Inject
   @Tasks
   private Pipe<Task> pipe;
@@ -54,15 +48,6 @@ public class TaskItem extends Composite implements HasModel<Task> {
   private Store<Project> projectStore;
 
   @Inject
-  @AutoBound
-  private DataBinder<Task> taskBinder;
-
-  @Inject
-  @Bound
-  @DataField("task-title")
-  private Label title;
-
-  @Inject
   @Bound
   @DataField("task-date")
   private Label date;
@@ -72,57 +57,30 @@ public class TaskItem extends Composite implements HasModel<Task> {
   @DataField("task-desc")
   private Label description;
 
-  @DataField
-  private Element overlay = DOM.createDiv();
-
   @Inject
   @DataField("task-tags")
   private FlowPanel tags;
 
-  @Inject
-  @DataField
-  private Anchor delete;
-
-  @Inject
-  @DataField
-  private Anchor edit;
-
-  @EventHandler
-  public void onMouseOut(MouseOutEvent event) {
-    overlay.getStyle().setDisplay(NONE);
-  }
-
-  @EventHandler
-  public void onMouseOver(MouseOverEvent event) {
-    overlay.getStyle().setDisplay(INLINE);
-  }
-
   @EventHandler("delete")
   public void onDeleteClicked(ClickEvent event) {
-    String id = String.valueOf(taskBinder.getModel().getId());
+    String id = String.valueOf(dataBinder.getModel().getId());
     pipe.remove(id, new DefaultCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
-        taskRefreshEventSource.fire(new TaskRefreshEvent());
+        refreshEventSource.fire(new TaskRefreshEvent());
       }
     });
   }
 
   @EventHandler("edit")
   public void onEditClicked(ClickEvent event) {
-    taskUpdateEventSource.fire(new TaskUpdateEvent(taskBinder.getModel()));
+    updateEventSource.fire(new TaskUpdateEvent(dataBinder.getModel()));
   }
 
   @Override
-  public Task getModel() {
-    return taskBinder.getModel();
-  }
-
-  @Override
-  public void setModel(Task model) {
+  protected void afterModelSet(Task model) {
     List ids = model.getTags();
     List<Tag> tagsList = tagStore.readAll(ids);
-    taskBinder.setModel(model, InitialState.FROM_MODEL);
     Long projectId = model.getProject();
     if (projectId != null) {
       Project project = projectStore.read(projectId);

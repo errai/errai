@@ -27,58 +27,17 @@ import static com.google.gwt.dom.client.Style.Display.INLINE;
 import static com.google.gwt.dom.client.Style.Display.NONE;
 
 @Templated("#root")
-public class TagItem extends Composite implements HasModel<Tag> {
-  @Inject
-  private Event<TagUpdateEvent> tagUpdateEventSource;
-
-  @Inject
-  private Event<TagRefreshEvent> tagRefreshEventSource;
-
+public class TagItem extends AbstractItem<Tag, TagRefreshEvent, TagUpdateEvent> {
   @Inject
   @Tags
   private Pipe<Tag> pipe;
-
-  @Inject @AutoBound
-  private DataBinder<Tag> tagDataBinder;
-
-  @Inject
-  @Bound
-  @DataField
-  private Label title;
 
   @Inject
   @DataField
   private Label swatch;
 
-  @DataField
-  private Element overlay = DOM.createDiv();
-
-  @Inject
-  @DataField
-  private Anchor edit;
-
-  @Inject
-  @DataField
-  private Anchor delete;
-
-  @EventHandler
-  public void onMouseOut(MouseOutEvent event) {
-    overlay.getStyle().setDisplay(NONE);
-  }
-
-  @EventHandler
-  public void onMouseOver(MouseOverEvent event) {
-    overlay.getStyle().setDisplay(INLINE);
-  }
-
   @Override
-  public Tag getModel() {
-    return tagDataBinder.getModel();
-  }
-
-  @Override
-  public void setModel(Tag model) {
-    tagDataBinder.setModel(model, InitialState.FROM_MODEL);
+  protected void afterModelSet(Tag model) {
     swatch.getElement().getStyle().setBackgroundColor(getBackgroundColor(model.getStyle()));
   }
 
@@ -88,16 +47,16 @@ public class TagItem extends Composite implements HasModel<Tag> {
 
   @EventHandler("edit")
   public void onEditClicked(ClickEvent event) {
-    tagUpdateEventSource.fire(new TagUpdateEvent(tagDataBinder.getModel()));
+    updateEventSource.fire(new TagUpdateEvent(dataBinder.getModel()));
   }
 
   @EventHandler("delete")
   public void onDeleteClicked(ClickEvent event) {
-    String id = String.valueOf(tagDataBinder.getModel().getId());
+    String id = String.valueOf(dataBinder.getModel().getId());
     pipe.remove(id, new DefaultCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
-        tagRefreshEventSource.fire(new TagRefreshEvent());
+        refreshEventSource.fire(new TagRefreshEvent());
       }
     });
   }
