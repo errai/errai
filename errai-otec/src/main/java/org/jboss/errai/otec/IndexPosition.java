@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.tests;
-
-import org.jboss.errai.otec.EntitySyncCompletionCallback;
-import org.jboss.errai.otec.OTEntity;
-import org.jboss.errai.otec.StringState;
+package org.jboss.errai.otec;
 
 /**
-* @author Mike Brock
-*/
-class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
-  @Override
-  public void syncComplete(OTEntity<StringState> entity) {
-    System.out.println("SYNCED STATE: " + entity.getState().get());
+ * @author Mike Brock
+ */
+public class IndexPosition implements Position {
+  private final int position;
+
+  private IndexPosition(int position) {
+    this.position = position;
+  }
+
+  public static IndexPosition of(int position) {
+    return new IndexPosition(position);
+  }
+
+  public int getPosition() {
+    return this.position;
   }
 }

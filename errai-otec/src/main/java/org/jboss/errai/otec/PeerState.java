@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.tests;
+package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.EntitySyncCompletionCallback;
-import org.jboss.errai.otec.OTEntity;
-import org.jboss.errai.otec.StringState;
+import java.util.Map;
+import java.util.Set;
 
 /**
-* @author Mike Brock
-*/
-class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
-  @Override
-  public void syncComplete(OTEntity<StringState> entity) {
-    System.out.println("SYNCED STATE: " + entity.getState().get());
-  }
+ * @author Mike Brock
+ */
+public interface PeerState {
+  public void registerPeer(OTPeer peer);
+
+  public OTPeer getPeer(String peerId);
+  public Set<OTPeer> getPeersFor(OTEntity entity);
+  public Map<OTEntity, Set<OTPeer>> getEntityPeerRelationshipMap();
+
+  public void associateEntity(OTPeer peer, OTEntity entity);
+  public void disassociateEntity(OTPeer peer, OTEntity entity);
 }

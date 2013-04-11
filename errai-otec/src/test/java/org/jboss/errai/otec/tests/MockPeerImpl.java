@@ -16,12 +16,15 @@
 
 package org.jboss.errai.otec.tests;
 
-import org.jboss.errai.otec.mutation.EntitySyncCompletionCallback;
-import org.jboss.errai.otec.mutation.OTEngine;
-import org.jboss.errai.otec.mutation.OTEntity;
-import org.jboss.errai.otec.mutation.OTOperation;
-import org.jboss.errai.otec.mutation.OTPeer;
-import org.jboss.errai.otec.mutation.State;
+import org.jboss.errai.otec.EntitySyncCompletionCallback;
+import org.jboss.errai.otec.OTEngine;
+import org.jboss.errai.otec.OTEntity;
+import org.jboss.errai.otec.OTOperation;
+import org.jboss.errai.otec.OTPeer;
+import org.jboss.errai.otec.State;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Mike Brock
@@ -29,6 +32,8 @@ import org.jboss.errai.otec.mutation.State;
 public class MockPeerImpl implements OTPeer {
   private OTEngine localEngine;
   private OTEngine remoteEngine;
+
+  private final Map<Integer, Integer> lastTransmittedSequencees = new HashMap<Integer, Integer>();
 
   public MockPeerImpl(OTEngine localEngine, OTEngine engine) {
     this.localEngine = localEngine;
@@ -43,15 +48,18 @@ public class MockPeerImpl implements OTPeer {
   @Override
   public void send(Integer entityId, OTOperation operation) {
     //note: this is simulating sending these operations over the wire.
-    remoteEngine.getReceiveHandler(getId(), entityId)
+    remoteEngine.getReceiveHandler(localEngine.getId(), entityId)
         .receive(operation);
+
+    lastTransmittedSequencees.put(entityId, operation.getRevision());
   }
 
   public void beginSyncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback<State> callback) {
     final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
-    remoteEngine.associateEntity(localEngine.getId(), entityId);
-
     localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
+
+    localEngine.associateEntity(remoteEngine.getId(), entityId);
+    remoteEngine.associateEntity(localEngine.getId(), entityId);
 
     callback.syncComplete(entity);
   }
@@ -61,4 +69,11 @@ public class MockPeerImpl implements OTPeer {
   public int getLastKnownRemoteSequence(OTEntity entity) {
     return 0;
   }
+
+  @Override
+  public int getLastTransmittedSequence(OTEntity entity) {
+    final Integer integer = lastTransmittedSequencees.get(entity.getId());
+    return integer == null ? 0 : integer;
+  }
+
 }
