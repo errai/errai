@@ -74,8 +74,7 @@ public class JacksonTransformer {
    * its actual value with the object's key directly: "gender": {"^EnumStringValue": "MALE"} becomes
    * "gender": "MALE"</li>
    * <li>If a number is encountered, remove the Errai specific NUMERIC_VALUE key, by associating its
-   * actual value with the object's key directly and turning it into a JSON number, if required:
-   * "id": {"^NumValue": "1"} becomes "id": 1</li>
+   * actual value with the object's key directly: "id": {"^NumValue": "1"} becomes "id": "1"</li>
    * <li>If a date is encountered, remove the Errai specific QUALIFIED_VALUE key, by associating its
    * actual value with the object's key directly and turning it into a JSON number</li>
    * <li>If EMBEDDED_JSON is encountered, turn in into standard json</li>
@@ -138,23 +137,9 @@ public class JacksonTransformer {
             }
           }
         }
-        else if (k.equals(ENUM_STRING_VALUE)) {
+        else if (k.equals(ENUM_STRING_VALUE) || k.equals(NUMERIC_VALUE)) {
           if (parent != null) {
             parent.put(key, obj.get(k));
-          }
-          else {
-            return val;
-          }
-        }
-        else if (k.equals(NUMERIC_VALUE)) {
-          if (parent != null) {
-            if (obj.get(k).isString() != null) {
-              String numValue = obj.get(k).isString().stringValue();
-              parent.put(key, new JSONNumber(Double.parseDouble(numValue)));
-            }
-            else {
-              parent.put(key, obj.get(k));
-            }
           }
         }
         else if (k.equals(QUALIFIED_VALUE)) {

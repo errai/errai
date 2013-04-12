@@ -31,12 +31,10 @@ import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSONValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
-
-import com.google.gwt.json.client.JSONString;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -113,7 +111,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
 
   // This only exists to support demarshalling of maps using Jackson. The Jackson payload doesn't contain our
   // EMBEDDED_JSON or any type information, so we have to convert the key (which is always a String) to it's actual
-  // type. We only neet to support primitive wrapper types and enums as key types. Other types require a custom
+  // type. We only need to support primitive wrapper types and enums as key types. Other types require a custom
   // Key(De)Serializer in Jackson anyway which would be unknown to Errai.
   private Object convertKey(final String toType, final String key, final MarshallingSession ctx) {
     Marshaller<?> keyMarshaller = ctx.getMarshallerInstance(toType);
@@ -145,7 +143,10 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
       return key;
     }
     else if (keyMarshaller != null) {
-      return keyMarshaller.demarshall(new GWTJSONValue(new JSONString(key)), ctx);
+      EJArray eja = ParserFactory.get().parse("[\"" + key + "\"]").isArray();
+      if (eja != null && eja.size() == 1) {
+        return keyMarshaller.demarshall(eja.get(0), ctx);
+      }
     }
     return key;
   }

@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.ser.std.ToStringSerializer;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
@@ -36,6 +38,7 @@ public class User {
     MALE, FEMALE
   }
 
+  @JsonSerialize(using=ToStringSerializer.class)
   private Long id;
   private String firstName;
   private String lastName;
