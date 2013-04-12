@@ -14,11 +14,29 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.mutation;
+
+import org.jboss.errai.otec.Position;
 
 /**
  * @author Mike Brock
  */
-public enum MutationType {
-  Cursor, Insert, Retain, Delete
+public class IndexPosition implements Position {
+  private final int position;
+
+  private IndexPosition(int position) {
+    this.position = position;
+  }
+
+  public static IndexPosition of(int position) {
+    return new IndexPosition(position);
+  }
+
+  public int getPosition() {
+    return this.position;
+  }
+
+  public String toString() {
+    return String.valueOf(position);
+  }
 }

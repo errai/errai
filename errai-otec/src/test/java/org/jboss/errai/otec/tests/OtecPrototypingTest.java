@@ -19,20 +19,21 @@ package org.jboss.errai.otec.tests;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-import org.jboss.errai.otec.CharacterData;
-import org.jboss.errai.otec.IndexPosition;
-import org.jboss.errai.otec.MutationType;
+import org.jboss.errai.otec.mutation.CharacterData;
+import org.jboss.errai.otec.mutation.IndexPosition;
+import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEngineImpl;
 import org.jboss.errai.otec.OTEngineMode;
 import org.jboss.errai.otec.OTEntity;
-import org.jboss.errai.otec.OTOperation;
-import org.jboss.errai.otec.OTOperationsFactory;
+import org.jboss.errai.otec.operation.OTOperation;
+import org.jboss.errai.otec.operation.OTOperationsFactory;
 import org.jboss.errai.otec.StringState;
 import org.junit.Test;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 
 public class OtecPrototypingTest {
@@ -97,7 +98,6 @@ public class OtecPrototypingTest {
   }
 
   /**
-   * javadoc!
    * http://en.wikipedia.org/wiki/File:Basicot.png
    */
   @Test

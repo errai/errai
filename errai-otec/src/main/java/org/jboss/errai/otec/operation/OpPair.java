@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.operation;
 
 /**
+ * @author Christian Sadilek
  * @author Mike Brock
  */
-public class IndexPosition implements Position {
-  private final int position;
+public class OpPair {
 
-  private IndexPosition(int position) {
-    this.position = position;
+  private final OTOperation remoteOp;
+  private final OTOperation localOp;
+
+  private OpPair(OTOperation remoteOp, OTOperation localOp) {
+    this.remoteOp = remoteOp;
+    this.localOp = localOp;
   }
 
-  public static IndexPosition of(int position) {
-    return new IndexPosition(position);
+  public static OpPair of(OTOperation remoteOp, OTOperation localOp) {
+    return new OpPair(remoteOp, localOp);
   }
 
-  public int getPosition() {
-    return this.position;
+  public OTOperation getRemoteOp() {
+    return remoteOp;
   }
 
-  public String toString() {
-    return String.valueOf(position);
+  public OTOperation getLocalOp() {
+    return localOp;
   }
 }

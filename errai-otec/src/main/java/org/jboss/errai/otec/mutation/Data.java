@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.mutation;
 
 /**
  * @author Mike Brock
  */
-public interface OTOperationsFactory {
-
-
-  public OTOperationsListBuilder createOperation(OTEntity entity);
+public interface Data<T> {
+  public T get();
 }

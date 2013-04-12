@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.mutation;
+
+import org.jboss.errai.otec.StringState;
+import org.jboss.errai.otec.mutation.CharacterData;
+import org.jboss.errai.otec.mutation.IndexPosition;
+import org.jboss.errai.otec.mutation.Mutation;
+import org.jboss.errai.otec.mutation.MutationType;
 
 /**
  * @author Mike Brock

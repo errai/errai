@@ -14,31 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.mutation;
 
 /**
- * @author Christian Sadilek
  * @author Mike Brock
  */
-public class OpPair {
-
-  private final OTOperation remoteOp;
-  private final OTOperation localOp;
-
-  private OpPair(OTOperation remoteOp, OTOperation localOp) {
-    this.remoteOp = remoteOp;
-    this.localOp = localOp;
-  }
-
-  public static OpPair of(OTOperation remoteOp, OTOperation localOp) {
-    return new OpPair(remoteOp, localOp);
-  }
-
-  public OTOperation getRemoteOp() {
-    return remoteOp;
-  }
-
-  public OTOperation getLocalOp() {
-    return localOp;
-  }
+public enum MutationType {
+  Cursor, Insert, Retain, Delete
 }

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.operation.OTOperation;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;

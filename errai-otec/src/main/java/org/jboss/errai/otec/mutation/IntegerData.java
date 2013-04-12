@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.mutation;
 
 /**
  * @author Mike Brock

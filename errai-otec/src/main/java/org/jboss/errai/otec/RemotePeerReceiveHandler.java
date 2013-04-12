@@ -16,6 +16,8 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.mutation.Mutation;
+
 import java.util.Collection;
 
 /**

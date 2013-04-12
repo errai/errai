@@ -16,6 +16,14 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.mutation.CharacterData;
+import org.jboss.errai.otec.mutation.IndexPosition;
+import org.jboss.errai.otec.mutation.Mutation;
+import org.jboss.errai.otec.mutation.StringMutation;
+import org.jboss.errai.otec.operation.OTOperation;
+import org.jboss.errai.otec.operation.OTOperationImpl;
+import org.jboss.errai.otec.operation.OpPair;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -23,6 +31,7 @@ import java.util.List;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Transformer {
   private final OTEntity entity;

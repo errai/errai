@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.operation;
+
+import org.jboss.errai.otec.OTEntity;
+import org.jboss.errai.otec.mutation.Mutation;
 
 import java.util.Arrays;
 import java.util.List;
@@ -76,6 +79,28 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public boolean shouldPropagate() {
     return propagate;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof OTOperationImpl)) return false;
+
+    OTOperationImpl that = (OTOperationImpl) o;
+
+    if (entityId != null ? !entityId.equals(that.entityId) : that.entityId != null) return false;
+    if (mutations != null ? !mutations.equals(that.mutations) : that.mutations != null) return false;
+    if (revision != null ? !revision.equals(that.revision) : that.revision != null) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = mutations != null ? mutations.hashCode() : 0;
+    result = 31 * result + (entityId != null ? entityId.hashCode() : 0);
+    result = 31 * result + (revision != null ? revision.hashCode() : 0);
+    return result;
   }
 
   public String toString() {

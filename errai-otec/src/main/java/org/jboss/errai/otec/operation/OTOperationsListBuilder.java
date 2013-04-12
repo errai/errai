@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.operation;
+
+import org.jboss.errai.otec.Position;
+import org.jboss.errai.otec.mutation.Data;
+import org.jboss.errai.otec.mutation.MutationType;
 
 /**
  * @author Mike Brock
  */
-public interface Data<T> {
-  public T get();
+public interface OTOperationsListBuilder {
+  public OTOperationsListBuilder add(MutationType type, Position position);
+
+  public OTOperationsListBuilder add(MutationType type, Position position, Data data);
+
+  public OTOperation build();
 }

@@ -19,8 +19,8 @@ package org.jboss.errai.otec.tests;
 import org.jboss.errai.otec.EntitySyncCompletionCallback;
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
-import org.jboss.errai.otec.OTOperation;
-import org.jboss.errai.otec.OTOperationImpl;
+import org.jboss.errai.otec.operation.OTOperation;
+import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.OTPeer;
 import org.jboss.errai.otec.State;
 

@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.operation;
+
+import org.jboss.errai.otec.OTEntity;
+import org.jboss.errai.otec.mutation.Mutation;
+
+import java.util.List;
 
 /**
  * @author Mike Brock
  */
-public interface OTOperationsListBuilder {
-  public OTOperationsListBuilder add(MutationType type, Position position);
+public interface OTOperation {
+  List<Mutation> getMutations();
 
-  public OTOperationsListBuilder add(MutationType type, Position position, Data data);
+  Integer getEntityId();
 
-  public OTOperation build();
+  Integer getRevision();
+
+  boolean shouldPropagate();
+
+  boolean apply(OTEntity entity);
 }

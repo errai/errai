@@ -17,6 +17,9 @@
 package org.jboss.errai.otec;
 
 
+import org.jboss.errai.otec.operation.OTOperation;
+import org.jboss.errai.otec.operation.OTOperationsFactory;
+
 public interface OTEngine {
   public String getId();
 

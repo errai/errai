@@ -1,4 +1,7 @@
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.mutation;
+
+import org.jboss.errai.otec.Position;
+import org.jboss.errai.otec.State;
 
 /**
  * @author Mike Brock
