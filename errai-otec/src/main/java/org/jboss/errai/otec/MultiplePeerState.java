@@ -71,4 +71,9 @@ public class MultiplePeerState implements PeerState {
       peers.remove(peer);
     }
   }
+
+  @Override
+  public boolean shouldForwardOperation(OTOperation operation) {
+    return true;
+  }
 }

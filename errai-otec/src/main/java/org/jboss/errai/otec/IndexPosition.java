@@ -33,4 +33,8 @@ public class IndexPosition implements Position {
   public int getPosition() {
     return this.position;
   }
+
+  public String toString() {
+    return String.valueOf(position);
+  }
 }

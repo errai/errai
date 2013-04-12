@@ -33,6 +33,7 @@ public class OTEntityStateImpl implements OTEntityState {
   @Override
   public OTEntity addEntity(final State objectReference) {
     final OTEntityImpl entity = new OTEntityImpl(nextEntityId(), objectReference);
+  // entity.setRevision(entity.getNewRevisionNumber());
     addEntity(entity);
     return entity;
   }
@@ -40,6 +41,7 @@ public class OTEntityStateImpl implements OTEntityState {
   public void addEntity(final OTEntity entity) {
     entityMap.put(entity.getState(), entity);
     entityMap.put(entity.getId(), entity);
+    entity.incrementRevision();
   }
 
   @Override

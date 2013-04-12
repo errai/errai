@@ -28,5 +28,7 @@ public interface OTOperation {
 
   Integer getRevision();
 
-  void apply(OTEntity entity);
+  boolean shouldPropagate();
+
+  boolean apply(OTEntity entity);
 }

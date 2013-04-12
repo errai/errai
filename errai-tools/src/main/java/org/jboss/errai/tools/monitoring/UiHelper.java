@@ -16,8 +16,8 @@
 
 package org.jboss.errai.tools.monitoring;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
 import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.JSONDecoder;
@@ -26,7 +26,6 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 public class UiHelper {
@@ -60,7 +59,7 @@ public class UiHelper {
   public static Message decodeAndDemarshall(String json) {
     Map<String, Object> parts = ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
             new DecodingSession(MappingContextSingleton.get()));
-    if (parts == null) return CommandMessage.createWithParts(new HashMap());
+    if (parts == null) return CommandMessage.create();
     return CommandMessage.createWithParts(parts);
   }
 }

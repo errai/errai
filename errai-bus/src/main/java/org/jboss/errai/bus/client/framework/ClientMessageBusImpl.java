@@ -282,7 +282,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
                 deferredSubscriptions.clear();
 
-                encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+                encodeAndTransmit(CommandMessage.create()
                     .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.RemoteSubscribe)
                     .set(PriorityProcessing, "1")
                     .set(MessageParts.RemoteServices, getAdvertisableSubjects()));
@@ -376,7 +376,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       properties.put("phase", "connection");
       properties.put("wait", "1");
 
-      transportHandler.transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
+      transportHandler.transmit(Collections.singletonList(CommandMessage.create()
           .command(BusCommand.Associate)
           .set(ToSubject, "ServerBus")
           .set(PriorityProcessing, "1")
@@ -424,7 +424,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           return;
         }
 
-        encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+        encodeAndTransmit(CommandMessage.create()
             .toSubject(BuiltInServices.ServerBus.name()).command(RemoteUnsubscribe)
             .set(Subject, subject).set(PriorityProcessing, "1"));
       }
@@ -444,7 +444,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         if (event.isNew()) {
-          encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+          encodeAndTransmit(CommandMessage.create()
               .toSubject(BuiltInServices.ServerBus.name()).command(RemoteSubscribe)
               .set(Subject, subject).set(PriorityProcessing, "1"));
         }
@@ -476,7 +476,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     // Optionally tell the server we're going away (this causes two POST requests)
     if (sendDisconnect && isRemoteCommunicationEnabled()) {
-      encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
+      encodeAndTransmit(CommandMessage.create()
           .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.Disconnect)
           .set(MessageParts.PriorityProcessing, "1"));
     }

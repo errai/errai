@@ -18,6 +18,7 @@ package org.jboss.errai.otec;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -45,8 +46,8 @@ public class Transformer {
 
     // if no operation was carried out we can just apply the new operations
     if (localOps.isEmpty()) {
-     remoteOp.apply(entity);
-     transactionLog.appendLog(remoteOp);
+      remoteOp.apply(entity);
+      transactionLog.appendLog(remoteOp);
     }
     else {
       for (OTOperation localOp : localOps) {
@@ -64,9 +65,51 @@ public class Transformer {
   }
 
   private OpPair transform(OTOperation remoteOp, OTOperation localOp) {
+    OTOperation remoteOpPrime;
+    OTOperation localOpPrime = null;
+
+    List<Mutation> localMutations = new ArrayList<Mutation>();
+    List<Mutation> remoteMutations = new ArrayList<Mutation>();
+
+    Iterator<Mutation> remoteOpMutations = remoteOp.getMutations().iterator();
+    Iterator<Mutation> localOpMutations = localOp.getMutations().iterator();
 
 
-    return OpPair.of(remoteOp, localOp);
+    int offset = 0;
+
+    while (remoteOpMutations.hasNext()) {
+      Mutation rm = remoteOpMutations.next();
+      Mutation lm = localOpMutations.next();
+
+      IndexPosition rmIdx = (IndexPosition) rm.getPosition();
+      IndexPosition lmIdx = (IndexPosition) lm.getPosition();
+
+
+      int diff = rmIdx.getPosition() - lmIdx.getPosition();
+
+      if (diff < 0) {
+        localMutations.add(rm);
+      }
+      else if (diff == 0) {
+        System.out.println();
+      }
+      else {
+        switch (rm.getType()) {
+          case Insert:
+            offset--;
+            break;
+          case Delete:
+            offset++;
+            break;
+        }
+        localMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset), (CharacterData) rm.getData()));
+      }
+
+      localOpPrime = OTOperationImpl.createLocalOnlyOperation(localMutations, entity.getId(), entity.getRevision());
+    }
+
+
+    return OpPair.of(remoteOp, localOpPrime);
   }
 
 }

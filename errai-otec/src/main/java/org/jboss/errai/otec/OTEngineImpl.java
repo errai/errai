@@ -31,19 +31,36 @@ public class OTEngineImpl implements OTEngine {
   private final PeerState peerState;
   private final OTEntityState entityState = new OTEntityStateImpl();
   private OTEngineMode mode = OTEngineMode.Online;
+  private String name;
 
-  private OTEngineImpl(PeerState peerState) {
+  private OTEngineImpl(PeerState peerState, String name) {
     engineId = GUIDUtil.createGUID();
+    if (name == null) {
+      this.name = engineId;
+    }
+    else {
+      this.name = name;
+    }
+
     this.peerState = peerState;
   }
 
   public static OTEngine createEngineWithSinglePeer() {
-    return new OTEngineImpl(new SinglePeerState());
+    return createEngineWithSinglePeer(null);
   }
 
   public static OTEngine createEngineWithMultiplePeers() {
-    return new OTEngineImpl(new MultiplePeerState());
+    return createEngineWithMultiplePeers(null);
   }
+
+  public static OTEngine createEngineWithSinglePeer(String name) {
+    return new OTEngineImpl(new SinglePeerState(), name);
+  }
+
+  public static OTEngine createEngineWithMultiplePeers(String name) {
+    return new OTEngineImpl(new MultiplePeerState(), name);
+  }
+
 
   @Override
   public ReceiveHandler getReceiveHandler(final String peerId, final Integer entityId) {
@@ -63,8 +80,11 @@ public class OTEngineImpl implements OTEngine {
         // broadcast to all other peers subscribed to this entity
         final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
         for (OTPeer otPeer : peers) {
-          if (otPeer != peer) {
+          if (otPeer != peer && getPeerState().shouldForwardOperation(operation)) {
             otPeer.send(entityId, operation);
+          }
+          else {
+            System.out.println(getEngineName() + " DID NOT PROPAGATE:" + operation);
           }
         }
       }
@@ -99,10 +119,10 @@ public class OTEngineImpl implements OTEngine {
   @Override
   public void notifyOperation(final OTOperation operation) {
     OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
-    operation.apply(entity);
+    final boolean propagate = operation.apply(entity);
     entity.getTransactionLog().appendLog(operation);
 
-    if (mode == OTEngineMode.Online) {
+    if (propagate && mode == OTEngineMode.Online) {
       final Collection<OTPeer> peersFor = getPeerState().getPeersFor(entity);
       for (final OTPeer peer : peersFor) {
         peer.send(entity.getId(), operation);
@@ -121,19 +141,19 @@ public class OTEngineImpl implements OTEngine {
           @Override
           public OTOperationsListBuilder add(final MutationType type, final Position position, final Data data) {
             operationList.add(
-                new StringMutation(entity.getNewRevisionNumber(), type, (IndexPosition) position, (CharacterData) data)
+                new StringMutation(type, (IndexPosition) position, (CharacterData) data)
             );
             return this;
           }
 
           @Override
-          public OTOperationImpl build() {
-            return new OTOperationImpl(operationList, entity.getId(), entity.getRevision());
+          public OTOperation build() {
+            return OTOperationImpl.createOperation(operationList, entity.getId(), entity.getRevision());
           }
 
           @Override
           public OTOperationsListBuilder add(final MutationType type, final Position position) {
-            operationList.add(new StringMutation(entity.getNewRevisionNumber(), type, (IndexPosition) position, null));
+            operationList.add(new StringMutation(type, (IndexPosition) position, null));
             return this;
           }
         };
@@ -201,7 +221,7 @@ public class OTEngineImpl implements OTEngine {
   }
 
   private void transmitDeferredTransactions() {
-    final Map<OTEntity,Set<OTPeer>> entityPeerRelationshipMap = getPeerState().getEntityPeerRelationshipMap();
+    final Map<OTEntity, Set<OTPeer>> entityPeerRelationshipMap = getPeerState().getEntityPeerRelationshipMap();
     for (Map.Entry<OTEntity, Set<OTPeer>> entry : entityPeerRelationshipMap.entrySet()) {
 
       for (OTPeer peer : entry.getValue()) {
@@ -209,7 +229,9 @@ public class OTEngineImpl implements OTEngine {
             = entry.getKey().getTransactionLog().getLogFromId(peer.getLastTransmittedSequence(entry.getKey()));
 
         for (OTOperation op : log) {
-          peer.send(entry.getKey().getId(), op);
+          if (getPeerState().shouldForwardOperation(op)) {
+            peer.send(entry.getKey().getId(), op);
+          }
         }
       }
     }
@@ -218,5 +240,14 @@ public class OTEngineImpl implements OTEngine {
   @Override
   public String getId() {
     return engineId;
+  }
+
+  public String toString() {
+    return getEngineName();
+  }
+
+  @Override
+  public String getEngineName() {
+    return name;
   }
 }

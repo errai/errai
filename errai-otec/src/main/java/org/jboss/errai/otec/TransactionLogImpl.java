@@ -17,6 +17,7 @@
 package org.jboss.errai.otec;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,7 +67,19 @@ public class TransactionLogImpl implements TransactionLog {
   @Override
   public void appendLog(OTOperation operation) {
     synchronized (transactionLog) {
+
+      for (OTOperation op : transactionLog) {
+        if (op.getRevision() == operation.getRevision()) {
+          throw new AssertionError("duplicate revision!");
+        }
+      }
+
       transactionLog.add(operation);
     }
   }
+
+  public String toString() {
+    return Arrays.toString(transactionLog.toArray());
+  }
+
 }

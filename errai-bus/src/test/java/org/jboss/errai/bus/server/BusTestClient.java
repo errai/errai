@@ -18,17 +18,17 @@ package org.jboss.errai.bus.server;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.BusMonitor;
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.BusMonitor;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.bus.client.api.RoutingFlag;
-import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.MessageFactory;
@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -121,7 +120,7 @@ public class BusTestClient implements MessageBus {
   }
 
   public void connect() {
-    remoteBus.sendGlobal(CommandMessage.createWithParts(new HashMap<String, Object>())
+    remoteBus.sendGlobal(CommandMessage.create()
         .toSubject("ServerBus")
         .command(BusCommand.Associate)
         .set(MessageParts.RemoteServices, getAdvertisableSubjects())
@@ -162,7 +161,7 @@ public class BusTestClient implements MessageBus {
   public Subscription subscribe(final String subject, final MessageCallback receiver) {
     services.put(subject, receiver);
 
-    final Message message = CommandMessage.createWithParts(new HashMap<String, Object>())
+    final Message message = CommandMessage.create()
         .toSubject("ServerBus")
         .command(BusCommand.RemoteSubscribe)
         .set(MessageParts.PriorityProcessing, "1")
@@ -194,7 +193,7 @@ public class BusTestClient implements MessageBus {
   public void unsubscribeAll(final String subject) {
     services.removeAll(subject);
 
-    final Message message = CommandMessage.createWithParts(new HashMap<String, Object>())
+    final Message message = CommandMessage.create()
         .toSubject("ServerBus")
         .command(BusCommand.RemoteUnsubscribe)
         .set(MessageParts.Subject, subject);

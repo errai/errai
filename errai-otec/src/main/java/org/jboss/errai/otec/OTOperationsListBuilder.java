@@ -24,5 +24,5 @@ public interface OTOperationsListBuilder {
 
   public OTOperationsListBuilder add(MutationType type, Position position, Data data);
 
-  public OTOperationImpl build();
+  public OTOperation build();
 }

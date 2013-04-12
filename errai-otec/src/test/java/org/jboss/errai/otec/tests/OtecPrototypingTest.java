@@ -26,7 +26,7 @@ import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEngineImpl;
 import org.jboss.errai.otec.OTEngineMode;
 import org.jboss.errai.otec.OTEntity;
-import org.jboss.errai.otec.OTOperationImpl;
+import org.jboss.errai.otec.OTOperation;
 import org.jboss.errai.otec.OTOperationsFactory;
 import org.jboss.errai.otec.StringState;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class OtecPrototypingTest {
     setupEngines("Hello, World?");
 
     final OTOperationsFactory operationsFactory = serverEngine.getOperationsFactory();
-    final OTOperationImpl op = operationsFactory.createOperation(serverEntity)
+    final OTOperation op = operationsFactory.createOperation(serverEntity)
         .add(MutationType.Delete, IndexPosition.of(12))
         .add(MutationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
         .build();
@@ -61,13 +61,25 @@ public class OtecPrototypingTest {
     assertEquals("Hello, World!", serverEntity.getState().get());
   }
 
+  private void suspendEngines() {
+    clientEngineA.setEngineMode(OTEngineMode.Offline);
+    clientEngineB.setEngineMode(OTEngineMode.Offline);
+    serverEngine.setEngineMode(OTEngineMode.Offline);
+  }
+
+  private void resumeEngines() {
+    serverEngine.setEngineMode(OTEngineMode.Online);
+    clientEngineA.setEngineMode(OTEngineMode.Online);
+    clientEngineB.setEngineMode(OTEngineMode.Online);
+  }
+
   @Test
   public void testNotifyRemoteOperation() {
     setupEngines("Hello, World?");
 
     final OTOperationsFactory operationsFactory = clientEngineA.getOperationsFactory();
     final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
-    final OTOperationImpl op = operationsFactory.createOperation(clientAEntity)
+    final OTOperation op = operationsFactory.createOperation(clientAEntity)
         .add(MutationType.Delete, IndexPosition.of(12))
         .add(MutationType.Insert, IndexPosition.of(12), CharacterData.of('!'))
         .build();
@@ -94,35 +106,37 @@ public class OtecPrototypingTest {
 
     final OTOperationsFactory operationsFactory = clientEngineA.getOperationsFactory();
     final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
-    final OTOperationImpl insX = operationsFactory.createOperation(clientAEntity)
-           .add(MutationType.Insert, IndexPosition.of(0), CharacterData.of('x'))
-           .build();
+    final OTOperation insX = operationsFactory.createOperation(clientAEntity)
+        .add(MutationType.Insert, IndexPosition.of(0), CharacterData.of('x'))
+        .build();
 
     final OTOperationsFactory serverOperationsFactory = serverEngine.getOperationsFactory();
-    final OTOperationImpl delC = serverOperationsFactory.createOperation(serverEntity)
-               .add(MutationType.Delete, IndexPosition.of(2), CharacterData.of('c'))
-               .build();
+    final OTOperation delC = serverOperationsFactory.createOperation(serverEntity)
+        .add(MutationType.Delete, IndexPosition.of(2), CharacterData.of('c'))
+        .build();
 
-    clientEngineA.setEngineMode(OTEngineMode.Offline);
-    serverEngine.setEngineMode(OTEngineMode.Offline);
+    suspendEngines();
 
     clientEngineA.notifyOperation(insX);
     serverEngine.notifyOperation(delC);
 
-    clientEngineA.setEngineMode(OTEngineMode.Online);
-    serverEngine.setEngineMode(OTEngineMode.Online);
+    resumeEngines();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     assertEquals("xab", serverEntity.getState().get());
 
     assertEquals(2, clientAEntity.getTransactionLog().getLog().size());
     assertEquals("xab", clientAEntity.getState().get());
+
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+    assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
+    assertEquals("xab", clientBEntity.getState().get());
   }
 
   private void setupEngines(String initialState) {
-    clientEngineA = OTEngineImpl.createEngineWithSinglePeer();
-    clientEngineB = OTEngineImpl.createEngineWithSinglePeer();
-    serverEngine = OTEngineImpl.createEngineWithMultiplePeers();
+    clientEngineA = OTEngineImpl.createEngineWithSinglePeer("ClientA");
+    clientEngineB = OTEngineImpl.createEngineWithSinglePeer("ClientB");
+    serverEngine = OTEngineImpl.createEngineWithMultiplePeers("Server");
 
     clientEngineA.registerPeer(new MockPeerImpl(clientEngineA, serverEngine));
     clientEngineB.registerPeer(new MockPeerImpl(clientEngineB, serverEngine));

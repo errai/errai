@@ -20,6 +20,7 @@ import org.jboss.errai.otec.EntitySyncCompletionCallback;
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.OTOperation;
+import org.jboss.errai.otec.OTOperationImpl;
 import org.jboss.errai.otec.OTPeer;
 import org.jboss.errai.otec.State;
 
@@ -49,7 +50,7 @@ public class MockPeerImpl implements OTPeer {
   public void send(Integer entityId, OTOperation operation) {
     //note: this is simulating sending these operations over the wire.
     remoteEngine.getReceiveHandler(localEngine.getId(), entityId)
-        .receive(operation);
+        .receive(OTOperationImpl.createLocalOnlyOperation(operation));
 
     lastTransmittedSequencees.put(entityId, operation.getRevision());
   }

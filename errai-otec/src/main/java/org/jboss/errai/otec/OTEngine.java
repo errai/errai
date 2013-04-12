@@ -39,4 +39,6 @@ public interface OTEngine {
   public void registerPeer(OTPeer peer);
 
   public void setEngineMode(OTEngineMode mode);
+
+  public String getEngineName();
 }

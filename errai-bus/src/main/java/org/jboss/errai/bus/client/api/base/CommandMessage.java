@@ -50,7 +50,7 @@ public class CommandMessage implements Message {
    *
    * @return a new instance of CommandMessage.
    */
-  static CommandMessage create() {
+  public static CommandMessage create() {
     return new CommandMessage();
   }
 

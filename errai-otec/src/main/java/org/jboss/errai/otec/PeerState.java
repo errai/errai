@@ -31,4 +31,6 @@ public interface PeerState {
 
   public void associateEntity(OTPeer peer, OTEntity entity);
   public void disassociateEntity(OTPeer peer, OTEntity entity);
+
+  public boolean shouldForwardOperation(OTOperation operation);
 }

@@ -17,9 +17,9 @@
 package org.jboss.errai.bus.client.framework.transports;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
@@ -31,7 +31,6 @@ import org.jboss.errai.common.client.util.LogUtil;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -121,7 +120,7 @@ public class WebsocketHandler implements TransportHandler, TransportStatistics {
         LogUtil.log("received verification token for websocket connection");
 
         longPollingTransport
-            .transmit(Collections.singletonList(CommandMessage.createWithParts(new HashMap<String, Object>())
+            .transmit(Collections.singletonList(CommandMessage.create()
             .toSubject(BuiltInServices.ServerBus.name()).command(BusCommand.WebsocketChannelVerify)
             .copy(MessageParts.WebSocketToken, message)));
 

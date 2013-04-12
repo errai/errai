@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,12 +27,27 @@ public class OTOperationImpl implements OTOperation {
   private final List<Mutation> mutations;
   private final Integer entityId;
   private final Integer revision;
+  private final boolean propagate;
 
-  public OTOperationImpl(List<Mutation> mutationList, Integer entityId, Integer revision) {
+  private OTOperationImpl(final List<Mutation> mutationList, final Integer entityId, final Integer revision, final boolean propagate) {
     this.mutations = mutationList;
     this.entityId = entityId;
     this.revision = revision;
+    this.propagate = propagate;
   }
+
+  public static OTOperation createOperation(final List<Mutation> mutationList, final Integer entityId, final Integer revision) {
+    return new OTOperationImpl(mutationList, entityId, revision, true);
+  }
+
+  public static OTOperation createLocalOnlyOperation(final List<Mutation> mutationList, final Integer entityId, final Integer revision) {
+    return new OTOperationImpl(mutationList, entityId, revision, false);
+  }
+
+  public static OTOperation createLocalOnlyOperation(final OTOperation operation) {
+    return new OTOperationImpl(operation.getMutations(), operation.getEntityId(), operation.getRevision(), false);
+  }
+
 
   @Override
   public List<Mutation> getMutations() {
@@ -49,12 +65,20 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public void apply(OTEntity entity) {
+  public boolean apply(final OTEntity entity) {
     for (final Mutation mutation : mutations) {
       mutation.apply(entity.getState());
     }
-    entity.setRevision(getRevision());
+    entity.incrementRevision();
+    return shouldPropagate();
   }
 
+  @Override
+  public boolean shouldPropagate() {
+    return propagate;
+  }
 
+  public String toString() {
+    return Arrays.toString(mutations.toArray());
+  }
 }

@@ -28,11 +28,11 @@ import static org.jboss.errai.common.client.protocols.MessageParts.ToSubject;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.RoutingFlag;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
@@ -52,8 +52,6 @@ import org.jgroups.JChannel;
 import org.jgroups.ReceiverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
 
 /**
  *
@@ -152,7 +150,7 @@ public class JGroupsClusteringProvider extends ReceiverAdapter implements Cluste
 
           final org.jgroups.Message jgroupsMessage = message.getResource(org.jgroups.Message.class, JGROUPS_MESSAGE_RESOURCE);
 
-          final Message replyMsg = CommandMessage.createWithParts(new HashMap<String, Object>())
+          final Message replyMsg = CommandMessage.create()
               .set(ToSubject, CLUSTER_SERVICE)
               .set(CommandType, ClusterCommands.NotifyOwner.name())
               .set(BusId, busId)
@@ -276,7 +274,7 @@ public class JGroupsClusteringProvider extends ReceiverAdapter implements Cluste
   }
 
   private Message createForwardMessageFor(final Message message, final String messageId) {
-    final Message forward = CommandMessage.createWithParts(new HashMap<String, Object>())
+    final Message forward = CommandMessage.create()
         .set(ToSubject, CLUSTER_SERVICE)
         .set(CommandType, ClusterCommands.MessageForward.name())
         .set(Payload, ErraiProtocol.encodePayload(message.getParts()))
@@ -297,7 +295,7 @@ public class JGroupsClusteringProvider extends ReceiverAdapter implements Cluste
   }
 
   private Message createInvalidRouteMessage(final String sessionId, final String subject, final String messageId) {
-    return CommandMessage.createWithParts(new HashMap<String, Object>())
+    return CommandMessage.create()
         .set(ToSubject, CLUSTER_SERVICE)
         .set(CommandType, ClusterCommands.InvalidRoute.name())
         .set(SessId, sessionId)
@@ -307,7 +305,7 @@ public class JGroupsClusteringProvider extends ReceiverAdapter implements Cluste
   }
 
   private Message createWhoHandlesMessage(final String sessionId, final String subject, final String messageId) {
-    return CommandMessage.createWithParts(new HashMap<String, Object>())
+    return CommandMessage.create()
         .set(ToSubject, CLUSTER_SERVICE)
         .set(CommandType, ClusterCommands.WhoHandles.name())
         .set(ClusterParts.SessId, sessionId)

@@ -66,4 +66,9 @@ public class SinglePeerState implements PeerState {
   public void disassociateEntity(OTPeer peer, OTEntity entity) {
     associatedEntities.remove(entity);
   }
+
+  @Override
+  public boolean shouldForwardOperation(OTOperation operation) {
+    return operation.shouldPropagate();
+  }
 }

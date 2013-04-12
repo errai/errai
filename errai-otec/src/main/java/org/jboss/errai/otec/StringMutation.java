@@ -20,13 +20,11 @@ package org.jboss.errai.otec;
  * @author Mike Brock
  */
 public class StringMutation implements Mutation<StringState, IndexPosition, CharacterData> {
-  private final int revision;
   private final MutationType type;
   private final IndexPosition position;
   private final CharacterData data;
 
-  public StringMutation(int revision, MutationType type, IndexPosition position, CharacterData data) {
-    this.revision = revision;
+  public StringMutation(MutationType type, IndexPosition position, CharacterData data) {
     this.type = type;
     this.position = position;
     this.data = data;
@@ -56,6 +54,14 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Char
       case Delete:
         state.delete(position.getPosition());
         break;
+      case Retain:
+        break;
     }
   }
+
+  @Override
+  public String toString() {
+    return type + "[" + getPosition() + ", \"" + getData() + "\"]";
+  }
 }
+

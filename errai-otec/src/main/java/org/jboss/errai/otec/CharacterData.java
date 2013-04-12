@@ -33,4 +33,8 @@ public class CharacterData implements Data<Character> {
   public Character get() {
     return data;
   }
+
+  public String toString() {
+    return String.valueOf(data);
+  }
 }

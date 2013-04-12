@@ -44,7 +44,11 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   }
 
   @Override
-  public int getNewRevisionNumber() {
+  public void incrementRevision() {
+    setRevision(getNewRevisionNumber());
+  }
+
+  private int getNewRevisionNumber() {
     return revisionCounter++;
   }
 
@@ -59,5 +63,9 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   @Override
   public T getState() {
     return entity;
+  }
+
+  public String toString() {
+    return entity.getClass().getName() + "[revision=" + getRevision() +"; id=" + entityId + "]";
   }
 }
