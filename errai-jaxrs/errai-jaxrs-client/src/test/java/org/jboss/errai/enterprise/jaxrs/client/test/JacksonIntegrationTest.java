@@ -64,7 +64,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     final User user =
         new User(11l, "first", "last", 20, Gender.MALE, new User(12l, "first2", "last2", 40, Gender.FEMALE, null));
     final User friend1 =
-        new User(13l, "friend1-first", "friend1-last", 1, Gender.MALE, null);
+        new User(10000000000000001L, "friend1-first", "friend1-last", 1, Gender.MALE, null);
     final User friend2 =
         new User(14l, "friend2-first", "friend2-last", 2, Gender.FEMALE, null);
 
@@ -118,8 +118,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     users.add(new User(11l, "first", "last", 20, Gender.MALE, null));
     users.add(new User(12l, "first2", "last2", 40, Gender.MALE, null));
 
-    String jackson = MarshallingWrapper.toJSON(users);
-    System.out.println(jackson);
+    String jackson = MarshallingWrapper.toJSON(users);    
     call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
