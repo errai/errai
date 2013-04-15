@@ -1,6 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -376,12 +377,13 @@ public class ErraiEntityManager implements EntityManager {
     else if (cascadeAcross.cascades(cascadeType)) {
       System.out.println("    Yes");
       if (cascadeAcross.isCollection()) {
-        if (cascadeType == CascadeType.MERGE) {
-          throw new UnsupportedOperationException("Cascading merge across plural attributes not implemented yet");
-        }
-//        R collectionOfMergeTargets = ...;
+        R collectionOfMergeTargets = ((ErraiPluralAttribute<X, R, ?>) cascadeAcross).createEmptyCollection();
         for (Object element : (Iterable<?>) sourceRelatedEntity) {
-          Object resolvedTargetElement = applyCascadingOperation(element, cascadeType);
+          ((Collection) collectionOfMergeTargets).add(applyCascadingOperation(element, cascadeType));
+        }
+
+        if (cascadeType == CascadeType.MERGE) {
+          cascadeAcross.set(targetEntity, collectionOfMergeTargets);
         }
       }
       else {
@@ -397,7 +399,17 @@ public class ErraiEntityManager implements EntityManager {
     else {
       System.out.println("    No");
       R resolvedTargetRelatedEntity = cascadeAcross.get(targetEntity);
-      if ((cascadeType == CascadeType.PERSIST || cascadeType == CascadeType.MERGE) && !contains(resolvedTargetRelatedEntity)) {
+      boolean relatedEntitiesAreManaged = true;
+      if (cascadeAcross.isCollection()) {
+        Collection<?> children = (Collection<?>) resolvedTargetRelatedEntity;
+        for (Object child : children) {
+          relatedEntitiesAreManaged &= contains(child);
+        }
+      }
+      else {
+        relatedEntitiesAreManaged = contains(resolvedTargetRelatedEntity);
+      }
+      if ((cascadeType == CascadeType.PERSIST || cascadeType == CascadeType.MERGE) && !relatedEntitiesAreManaged) {
         throw new IllegalStateException(
                 "Entity " + targetEntity + " references an unsaved entity via relationship attribute [" +
                 cascadeAcross.getName() + "]. Save related attribute before flushing or change" +
