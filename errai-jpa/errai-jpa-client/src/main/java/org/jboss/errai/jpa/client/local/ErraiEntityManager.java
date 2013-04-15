@@ -203,8 +203,7 @@ public class ErraiEntityManager implements EntityManager {
         if (mergeTarget == null) {
           mergeTarget = entityType.newInstance();
         }
-        entityType.mergeNonAssociationState(mergeTarget, entity);
-
+        entityType.mergeState(this, mergeTarget, entity);
         entityToReturn = mergeTarget;
 
         entityType.deliverPrePersist(mergeTarget);
@@ -254,18 +253,18 @@ public class ErraiEntityManager implements EntityManager {
     // Tell the BindableProxy that we changed the entity
     // (we haven't _necessarily_ changed anything.. if this becomes a performance problem,
     // we can set a flag in the above state change logic make this call depend on that flag)
-    if (entity instanceof BindableProxy) {
-      ((BindableProxy<?>) entity).updateWidgets();
+    if (entityToReturn instanceof BindableProxy) {
+      ((BindableProxy<?>) entityToReturn).updateWidgets();
     }
 
     // now cascade the operation
     for (SingularAttribute<? super X, ?> a : entityType.getSingularAttributes()) {
       ErraiSingularAttribute<? super X, ?> attrib = (ErraiSingularAttribute<? super X, ?>) a;
-      cascadeStateChange(attrib, entity, newState);
+      cascadeStateChange(attrib, entityToReturn, entity, newState);
     }
     for (PluralAttribute<? super X, ?, ?> a : entityType.getPluralAttributes()) {
       ErraiPluralAttribute<? super X, ?, ?> attrib = (ErraiPluralAttribute<? super X, ?, ?>) a;
-      cascadeStateChange(attrib, entity, newState);
+      cascadeStateChange(attrib, entityToReturn, entity, newState);
     }
 
     return entityToReturn;
@@ -361,39 +360,46 @@ public class ErraiEntityManager implements EntityManager {
    * @param <X> the type of the owning entity we are cascading from
    * @param <R> the type of the related entity we are cascading to
    */
-  private <X, R> void cascadeStateChange(ErraiAttribute<X, R> cascadeAcross, X owningEntity, CascadeType cascadeType) {
+  private <X, R> void cascadeStateChange(ErraiAttribute<X, R> cascadeAcross, X targetEntity, X sourceEntity, CascadeType cascadeType) {
     if (!cascadeAcross.isAssociation()) return;
 
     if (cascadeType == CascadeType.REFRESH) {
       throw new IllegalArgumentException("Refresh not yet supported");
     }
 
-    R relatedEntity = cascadeAcross.get(owningEntity);
-    System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + relatedEntity + "?");
-    if (relatedEntity == null) {
+    R sourceRelatedEntity = cascadeAcross.get(sourceEntity);
+    System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + sourceRelatedEntity + "?");
+
+    if (sourceRelatedEntity == null) {
       System.out.println("    No (because it's null)");
     }
     else if (cascadeAcross.cascades(cascadeType)) {
       System.out.println("    Yes");
       if (cascadeAcross.isCollection()) {
-        for (Object element : (Iterable<?>) relatedEntity) {
-          applyCascadingOperation(element, cascadeType);
+        if (cascadeType == CascadeType.MERGE) {
+          throw new UnsupportedOperationException("Cascading merge across plural attributes not implemented yet");
+        }
+//        R collectionOfMergeTargets = ...;
+        for (Object element : (Iterable<?>) sourceRelatedEntity) {
+          Object resolvedTargetElement = applyCascadingOperation(element, cascadeType);
         }
       }
       else {
-        applyCascadingOperation(relatedEntity, cascadeType);
+        R resolvedTarget = applyCascadingOperation(sourceRelatedEntity, cascadeType);
+
+        // check if we need to reference the newly merged thing (only matters when cascadeType == MERGE)
+        R originalTargetRelatedEntity = cascadeAcross.get(targetEntity);
+        if (resolvedTarget != originalTargetRelatedEntity) {
+          cascadeAcross.set(targetEntity, resolvedTarget);
+        }
       }
-    }
-    else if (cascadeType == CascadeType.MERGE && cascadeAcross.cascades(CascadeType.PERSIST) && !cascadeAcross.isCollection() && getState(keyFor(relatedEntity), relatedEntity) == EntityState.NEW) {
-      System.out.println("    Yes (special case for merging new related entity)");
-      // this is what hibernate does in this case
-      applyCascadingOperation(relatedEntity, cascadeType);
     }
     else {
       System.out.println("    No");
-      if ((cascadeType == CascadeType.PERSIST || cascadeType == CascadeType.MERGE) && !contains(relatedEntity)) {
+      R resolvedTargetRelatedEntity = cascadeAcross.get(targetEntity);
+      if ((cascadeType == CascadeType.PERSIST || cascadeType == CascadeType.MERGE) && !contains(resolvedTargetRelatedEntity)) {
         throw new IllegalStateException(
-                "Entity " + owningEntity + " references an unsaved entity via relationship attribute [" +
+                "Entity " + targetEntity + " references an unsaved entity via relationship attribute [" +
                 cascadeAcross.getName() + "]. Save related attribute before flushing or change" +
                 " cascade rule to include " + cascadeType);
       }

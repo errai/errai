@@ -1,19 +1,14 @@
 package org.jboss.errai.jpa.test.entity;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 
 @Entity
-public class CascadeTo {
+public class CascadeThirdGeneration {
 
   @Id @GeneratedValue
   private long id;
-
-  @OneToOne(cascade=CascadeType.MERGE)
-  private CascadeThirdGeneration cascadeAgain;
 
   private String string;
 
@@ -23,14 +18,6 @@ public class CascadeTo {
 
   public void setId(long id) {
     this.id = id;
-  }
-
-  public void setCascadeAgain(CascadeThirdGeneration cascadeAgain) {
-    this.cascadeAgain = cascadeAgain;
-  }
-
-  public CascadeThirdGeneration getCascadeAgain() {
-    return cascadeAgain;
   }
 
   public String getString() {
@@ -58,7 +45,7 @@ public class CascadeTo {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    CascadeTo other = (CascadeTo) obj;
+    CascadeThirdGeneration other = (CascadeThirdGeneration) obj;
     if (id != other.id)
       return false;
     if (string == null) {
@@ -72,6 +59,6 @@ public class CascadeTo {
 
   @Override
   public String toString() {
-    return "CascadeTo [id=" + id + ", string=" + string + "]";
+    return "CascadeThirdGeneration [id=" + id + ", string=" + string + "]";
   }
 }

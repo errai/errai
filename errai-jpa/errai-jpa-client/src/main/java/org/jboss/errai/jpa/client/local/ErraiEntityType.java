@@ -232,11 +232,9 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
   }
 
   /**
-   * Copies the state of basic, embedded, and element collection attributes in
-   * sourceEntity into targetEntity.
-   * <p>
-   * Relations are NOT followed; these are handled by the cascading merge logic
-   * of ErraiEntityManager.
+   * Copies the state of the attributes in sourceEntity into targetEntity.
+   * Related entities are resolved from the given entity manager before the
+   * state is copied.
    *
    * @param em
    *          The entity manager that sourceEntity and targetEntity exist in.
@@ -245,7 +243,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
    * @param sourceEntity
    *          The entity whose attributes' state will be read from. Not null.
    */
-  public void mergeNonAssociationState(X targetEntity, X sourceEntity) {
+  public void mergeState(ErraiEntityManager em, X targetEntity, X sourceEntity) {
     for (Attribute<? super X, ?> a : getAttributes()) {
       ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
       switch (attr.getPersistentAttributeType()) {
@@ -253,13 +251,16 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       case EMBEDDED:
       case BASIC:
         copyAttribute(attr, targetEntity, sourceEntity);
-      break;
+        break;
 
       case MANY_TO_MANY:
       case MANY_TO_ONE:
+        copyPluralAssociation(em, ((ErraiPluralAttribute<X, ?, ?>) attr), targetEntity, sourceEntity);
+        break;
+
       case ONE_TO_MANY:
       case ONE_TO_ONE:
-        // leave these alone. they are handled by recursive merge
+        copySingularAssociation(em, attr, targetEntity, sourceEntity);
         break;
       default:
         throw new IllegalArgumentException("Attribute has unknown type: " + attr);
@@ -269,6 +270,48 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
 
   private static <X, Y> void copyAttribute(ErraiAttribute<X, Y> attr, X targetEntity, X sourceEntity) {
     attr.set(targetEntity, attr.get(sourceEntity));
+  }
+
+  private static <X, Y> void copySingularAssociation(
+          ErraiEntityManager em,
+          ErraiAttribute<X, Y> attr,
+          X targetEntity,
+          X sourceEntity) {
+    ErraiEntityType<Y> relatedEntityType = em.getMetamodel().entity(attr.getJavaType());
+    Y oldRelatedEntity = attr.get(sourceEntity);
+    Y resolvedEntity;
+    if (oldRelatedEntity == null) {
+      resolvedEntity = null;
+    }
+    else {
+      Key<Y, ?> key = em.keyFor(oldRelatedEntity);
+      resolvedEntity = em.find(key, Collections.<String,Object>emptyMap());
+      if (resolvedEntity == null) {
+        resolvedEntity = relatedEntityType.newInstance();
+      }
+    }
+    attr.set(targetEntity, resolvedEntity);
+  }
+
+  private static <X, C, E> void copyPluralAssociation(
+          ErraiEntityManager em,
+          ErraiPluralAttribute<X, C, E> attr,
+          X targetEntity,
+          X sourceEntity) {
+    C oldCollection = attr.get(sourceEntity);
+    C newCollection = attr.createEmptyCollection();
+    ErraiEntityType<E> elemType = em.getMetamodel().entity(attr.getElementType().getJavaType());
+
+    // TODO support map-valued plural attributes
+    for (Object oldEntry : (Collection<?>) oldCollection) {
+      Key<Object, ?> key = em.keyFor(oldEntry);
+      Object resolvedEntry = em.find(key, Collections.<String,Object>emptyMap());
+      if (resolvedEntry == null) {
+        resolvedEntry = elemType.newInstance();
+      }
+      ((Collection) newCollection).add(resolvedEntry);
+    }
+    attr.set(targetEntity, newCollection);
   }
 
   /**

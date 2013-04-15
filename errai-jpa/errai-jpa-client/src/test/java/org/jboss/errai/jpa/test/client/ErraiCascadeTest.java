@@ -8,6 +8,7 @@ import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.CascadeFrom;
+import org.jboss.errai.jpa.test.entity.CascadeThirdGeneration;
 import org.jboss.errai.jpa.test.entity.CascadeTo;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -287,6 +288,7 @@ public class ErraiCascadeTest extends GWTTestCase {
     em.persist(x.getNone());
     em.persist(x.getRefresh());
     em.persist(x.getRemove());
+    em.persist(x.getPersist());
 
     CascadeFrom xPrime = em.merge(x);
     em.flush();
@@ -344,6 +346,7 @@ public class ErraiCascadeTest extends GWTTestCase {
     em.persist(x.getNone());
     em.persist(x.getRefresh());
     em.persist(x.getRemove());
+    em.persist(x.getPersist());
 
     CascadeFrom xPrime = em.merge(x);
     em.flush();
@@ -377,6 +380,9 @@ public class ErraiCascadeTest extends GWTTestCase {
 
     x.getAll().setString("updated string");
     x.getMerge().setString("updated merge");
+    CascadeThirdGeneration cascadeAgain = new CascadeThirdGeneration();
+    cascadeAgain.setString("3rd gen");
+    x.getMerge().setCascadeAgain(cascadeAgain);
     x.getPersist().setString("updated persist");
     CascadeFrom xPrime = em.merge(x);
     em.flush();
@@ -388,6 +394,9 @@ public class ErraiCascadeTest extends GWTTestCase {
 
     assertNotSame(x.getMerge(), xPrime.getMerge());
     assertEquals("updated merge", xPrime.getMerge().getString());
+
+    assertNotSame(x.getMerge().getCascadeAgain(), xPrime.getMerge().getCascadeAgain());
+    assertEquals("3rd gen", xPrime.getMerge().getCascadeAgain().getString());
 
     // this one should not have the new state because the cascade rule doesn't include merge
     assertNotSame(x.getPersist(), xPrime.getPersist());
