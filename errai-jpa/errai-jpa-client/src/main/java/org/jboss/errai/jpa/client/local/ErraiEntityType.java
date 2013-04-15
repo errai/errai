@@ -254,11 +254,11 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
         break;
 
       case MANY_TO_MANY:
-      case MANY_TO_ONE:
+      case ONE_TO_MANY:
         copyPluralAssociation(em, ((ErraiPluralAttribute<X, ?, ?>) attr), targetEntity, sourceEntity);
         break;
 
-      case ONE_TO_MANY:
+      case MANY_TO_ONE:
       case ONE_TO_ONE:
         copySingularAssociation(em, attr, targetEntity, sourceEntity);
         break;
@@ -299,17 +299,24 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
           X targetEntity,
           X sourceEntity) {
     C oldCollection = attr.get(sourceEntity);
-    C newCollection = attr.createEmptyCollection();
-    ErraiEntityType<E> elemType = em.getMetamodel().entity(attr.getElementType().getJavaType());
 
-    // TODO support map-valued plural attributes
-    for (Object oldEntry : (Collection<?>) oldCollection) {
-      Key<Object, ?> key = em.keyFor(oldEntry);
-      Object resolvedEntry = em.find(key, Collections.<String,Object>emptyMap());
-      if (resolvedEntry == null) {
-        resolvedEntry = elemType.newInstance();
+    C newCollection;
+    if (oldCollection == null) {
+      newCollection = null;
+    }
+    else {
+      newCollection = attr.createEmptyCollection();
+      ErraiEntityType<E> elemType = em.getMetamodel().entity(attr.getElementType().getJavaType());
+
+      // TODO support map-valued plural attributes
+      for (Object oldEntry : (Collection<?>) oldCollection) {
+        Key<Object, ?> key = em.keyFor(oldEntry);
+        Object resolvedEntry = em.find(key, Collections.<String,Object>emptyMap());
+        if (resolvedEntry == null) {
+          resolvedEntry = elemType.newInstance();
+        }
+        ((Collection) newCollection).add(resolvedEntry);
       }
-      ((Collection) newCollection).add(resolvedEntry);
     }
     attr.set(targetEntity, newCollection);
   }
