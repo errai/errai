@@ -16,14 +16,12 @@
 
 package org.jboss.errai.databinding.client;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HasValue;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.databinding.client.api.Convert;
 import org.jboss.errai.databinding.client.api.Converter;
@@ -32,11 +30,14 @@ import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the target model and bound widgets in sync.
@@ -189,6 +190,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         }
       });
     }
+    else if (!(widget instanceof HasText)) {
+      throw new RuntimeException("Widget must implement " + HasValue.class.getName() + " or " + HasText.class.getName() + "!");
+    }
+    
     bindings.put(property, new Binding(property, widget, converter, handlerRegistration));
     syncState(widget, property, initialState);
   }

@@ -31,8 +31,14 @@ import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,7 +57,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite {
+public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite implements HasValue<List<M>> {
 
   private final ComplexPanel panel;
   private List<M> items;
@@ -59,6 +65,8 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   private final List<WidgetCreationalCallback> callbacks = new LinkedList<WidgetCreationalCallback>();
   private int pendingCallbacks;
 
+  private boolean valueChangeHandlerInitialized;
+  
   protected ListWidget() {
     this(new VerticalPanel());
   }
@@ -165,6 +173,40 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     return (W) panel.getWidget(index);
   }
 
+  
+  @Override
+  public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<M>> handler) {
+    if (!valueChangeHandlerInitialized) {
+      valueChangeHandlerInitialized = true;
+      addDomHandler(new ChangeHandler() {
+        @Override
+        public void onChange(ChangeEvent event) {
+          ValueChangeEvent.fire(ListWidget.this, getValue());
+        }
+      }, ChangeEvent.getType());
+    }
+    return addHandler(handler, ValueChangeEvent.getType());
+  }
+
+  @Override
+  public List<M> getValue() {
+   return items;
+  }
+
+  @Override
+  public void setValue(List<M> value) {
+    setValue(value, false);
+  }
+
+  @Override
+  public void setValue(List<M> value, boolean fireEvents) {
+    List<M> oldValue = getValue();
+    setItems(value);
+    if (fireEvents) {
+      ValueChangeEvent.fireIfNotEqual(this, oldValue, value);
+    }
+  }
+  
   /**
    * A callback invoked by the {@link AsyncBeanManager} or {@link SyncToAsyncBeanManagerAdpater}
    * when the widget instance was created. It will associate the corresponding model instance with

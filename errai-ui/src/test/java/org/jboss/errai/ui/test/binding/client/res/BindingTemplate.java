@@ -39,12 +39,16 @@ public class BindingTemplate extends Composite {
   @DataField("dateField")
   private TextBox date;
 
-  // This guards against regressions of ERRAI-489
   @Inject
   @Bound
   @DataField("phone")
   private TextBox phoneNumber;
 
+  @Inject
+  @Bound
+  @DataField
+  private BindingListWidget children;
+  
   private final TestModel model;
 
   @Inject
@@ -70,6 +74,10 @@ public class BindingTemplate extends Composite {
 
   public TextBox getPhoneNumberBox() {
     return phoneNumber;
+  }
+  
+  public BindingListWidget getListWidget() {
+    return children;
   }
 
   public TestModel getModel() {

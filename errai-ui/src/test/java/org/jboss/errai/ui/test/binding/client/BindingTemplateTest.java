@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ui.client.widget.HtmlListPanel;
@@ -19,8 +16,10 @@ import org.jboss.errai.ui.test.common.client.TestModel;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Tests for the Errai UI/DataBinding integration.
@@ -35,7 +34,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testBinding() {
+  public void testAutomaticBinding() {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
     BindingTemplate template = app.getTemplate();
     assertNotNull("Template instance was not injected!", template);
@@ -80,9 +79,26 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
         BindingDateConverter.TEST_DATE, model.getLastChanged());
     assertEquals("Model (phoneNumber) was not updated!", phoneNumberBox.getValue(), model.getPhoneNumber());
   }
+  
+  @Test
+  public void testAutomaticListBinding() {
+    BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
+    BindingTemplate template = app.getTemplate();
+    assertNotNull("Template instance was not injected!", template);
+    
+    List<TestModel> children = new ArrayList<TestModel>();
+    children.add(new TestModel(1, "c1"));
+    children.add(new TestModel(2, "c2"));
+    
+    TestModel model = template.getModel();
+    assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
+    
+    model.setChildren(children);
+    assertEquals("Expected two widgets", 2, template.getListWidget().getWidgetCount());
+  }
 
   @Test
-  public void testListBinding() {
+  public void testManualListBinding() {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel());
     modelList.add(new TestModel());
@@ -90,7 +106,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
     BindingListWidget listWidget = app.getListWidget();
     // binding a list of model objects
-    listWidget.setItems(modelList);
+    listWidget.setValue(modelList);
 
     assertEquals("Expected two widgets", 2, listWidget.getWidgetCount());
     assertEquals("", listWidget.getWidget(0).getTextBox().getText());
@@ -109,19 +125,18 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
     assertEquals("First model object was not updated!", "0-updated", itemWidget0.getModel().getName());
     assertEquals("Second model object was not updated!", "1-updated", itemWidget1.getModel().getName());
   }
-
+  
   @Test
   public void shouldCreateULorOL() {
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(new TestModel());
 
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
-    ListWidget listWidget = app.getUlListWidget();
-
+    ListWidget<TestModel, BindingItemWidget> listWidget = app.getUlListWidget();
     listWidget.setItems(modelList);
 
     assertNotNull(listWidget);
-    Widget item = (Widget) listWidget.getWidget(0);
+    Widget item = listWidget.getWidget(0);
     assertNotNull(item);
     Widget panel = item.getParent();
     assertTrue(panel instanceof HtmlListPanel);
@@ -373,7 +388,7 @@ public class BindingTemplateTest extends AbstractErraiCDITest {
   }
   
   private void assertItemsRendered(BindingListWidget listWidget) {
-    assertEquals("Expected exactly three widgets", 4, listWidget.getWidgetCount());
+    assertEquals("Expected exactly four widgets", 4, listWidget.getWidgetCount());
 
     BindingItemWidget itemWidget0 = listWidget.getWidget(0);
     BindingItemWidget itemWidget1 = listWidget.getWidget(1);

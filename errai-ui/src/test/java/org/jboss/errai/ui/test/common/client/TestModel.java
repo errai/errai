@@ -17,6 +17,7 @@
 package org.jboss.errai.ui.test.common.client;
 
 import java.util.Date;
+import java.util.List;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -34,6 +35,7 @@ public class TestModel {
   private String name;
   private Date lastChanged;
   private String phoneNumber;
+  private List<TestModel> children;
   
   private TestModel child;
 
@@ -84,6 +86,14 @@ public class TestModel {
   public String getPhoneNumber() {
     return phoneNumber;
   }
+  
+  public List<TestModel> getChildren() {
+    return children;
+  }
+
+  public void setChildren(List<TestModel> children) {
+    this.children = children;
+  }  
 
   @Override
   public String toString() {
