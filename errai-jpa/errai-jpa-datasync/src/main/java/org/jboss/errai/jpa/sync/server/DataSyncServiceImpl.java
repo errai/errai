@@ -43,7 +43,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     return response;
   }
 
-  private <E> List<SyncResponse<E>> coldSyncImpl(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> remoteResults) {
+  private <E> List<SyncResponse<E>> coldSyncImpl(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> syncRequestOps) {
     TypedQuery<E> query = dataSet.createQuery(em);
     Map<Object, E> localResults = new HashMap<Object, E>();
     for (E localEntity : query.getResultList()) {
@@ -56,7 +56,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     // the response we will return
     List<SyncResponse<E>> syncResponse = new ArrayList<SyncResponse<E>>();
 
-    for (SyncRequestOperation<E> syncReq : remoteResults) {
+    for (SyncRequestOperation<E> syncReq : syncRequestOps) {
 
       // the new state (updated since last sync) after mutation by the client
       final E remoteNewState;
@@ -101,7 +101,7 @@ public class DataSyncServiceImpl implements DataSyncService {
       switch (syncReq.getType()) {
       case UPDATED:
         localResults.remove(remoteId);
-        E expectedLocalState = syncReq.getExpectedState();
+        E expectedLocalState = syncReq.getExpectedState(); // XXX should reuse remoteExpectedState
         if (entityComparator.isDifferent(localState, expectedLocalState)) {
           syncResponse.add(new ConflictResponse<E>(expectedLocalState, localState, remoteNewState));
         }
@@ -132,6 +132,7 @@ public class DataSyncServiceImpl implements DataSyncService {
       case DELETED:
         // have to check for null in case someone else already deleted this entity
         if (localState != null) {
+          // FIXME need to compare expected state with actual; issue conflict if they differ
           localResults.remove(remoteId);
           em.remove(localState);
         }

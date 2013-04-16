@@ -70,7 +70,7 @@ public class ClientSyncManager {
     entityComparator = new EntityComparator(desiredStateEm.getMetamodel(), attributeAccessor);
   }
 
-  public <E> void startSyncing(String queryName, Class<E> queryResultType, Map<String, Object> queryParams) {
+  public <E> void coldSync(String queryName, Class<E> queryResultType, Map<String, Object> queryParams) {
     final TypedQuery<E> query = desiredStateEm.createNamedQuery(queryName, queryResultType);
     for (Map.Entry<String, Object> param : queryParams.entrySet()) {
       query.setParameter(param.getKey(), param.getValue());

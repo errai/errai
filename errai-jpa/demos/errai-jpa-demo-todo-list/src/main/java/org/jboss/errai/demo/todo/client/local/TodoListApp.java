@@ -79,6 +79,8 @@ public class TodoListApp extends Composite {
   @Inject ClientSyncManager syncManager;
   @EventHandler("syncButton")
   void sync(ClickEvent event) {
-    syncManager.startSyncing("allItems", TodoItem.class, Collections.<String,Object>emptyMap());
+    syncManager.coldSync("allItems", TodoItem.class, Collections.<String,Object>emptyMap());
+    em.flush();
+    refreshItems();
   }
 }
