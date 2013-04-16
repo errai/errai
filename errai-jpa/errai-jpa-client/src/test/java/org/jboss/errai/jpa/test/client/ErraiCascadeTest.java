@@ -170,9 +170,10 @@ public class ErraiCascadeTest extends GWTTestCase {
       fail("Expected IllegalStateException");
     }
     catch (IllegalStateException ex) {
-      // check for name of offending relationship
+      // this is what Errai throws. We check for the name of the offending relationship
+      // with Hibernate, we're not picky about the exact message :)
       assertTrue("Exception message doesn't mention bad relationship: " + ex.getMessage(),
-              ex.getMessage().contains("noneCollection"));
+              ex.getMessage().contains("noneCollection") || ex.getMessage().contains("org.hibernate.TransientObjectException"));
     }
   }
 
@@ -212,9 +213,10 @@ public class ErraiCascadeTest extends GWTTestCase {
       fail("Expected IllegalStateException");
     }
     catch (IllegalStateException ex) {
-      // check for name of offending relationship
+      // this is what Errai throws. We check for the name of the offending relationship
+      // with hibernate, we're not picky about the exact message :)
       assertTrue("Exception message doesn't mention bad relationship: " + ex.getMessage(),
-              ex.getMessage().contains("noneCollection"));
+              ex.getMessage().contains("noneCollection") || ex.getMessage().contains("org.hibernate.TransientObjectException"));
     }
   }
 
@@ -399,20 +401,12 @@ public class ErraiCascadeTest extends GWTTestCase {
     x.setRemoveCollection(listOfCascadeTo(3));
 
     // have to persist the ones that won't cascade automatically
-    for (CascadeTo child : x.getDetachCollection()) {
-      em.persist(child);
-    }
-    for (CascadeTo child : x.getNoneCollection()) {
-      em.persist(child);
-    }
-    for (CascadeTo child : x.getRefreshCollection()) {
-      em.persist(child);
-    }
-    for (CascadeTo child : x.getRemoveCollection()) {
-      em.persist(child);
-    }
-    for (CascadeTo child : x.getPersistCollection()) {
-      em.persist(child);
+    for (int i = 0; i < 3; i++) {
+      em.persist(x.getDetachCollection().get(i));
+      em.persist(x.getNoneCollection().get(i));
+      em.persist(x.getRefreshCollection().get(i));
+      em.persist(x.getRemoveCollection().get(i));
+      em.persist(x.getPersistCollection().get(i));
     }
 
     CascadeFrom xPrime = em.merge(x);
@@ -448,7 +442,7 @@ public class ErraiCascadeTest extends GWTTestCase {
    * <blockquote>
    * For all entities Y referenced by relationships from X having the cascade
    * element value cascade=MERGE or cascade=ALL, Y is merged recursively as
-   * Y'. For all such Y refer- enced by X, X' is set to reference Y'. (Note
+   * Y'. For all such Y referenced by X, X' is set to reference Y'. (Note
    * that if X is managed then X is the same object as X'.)
    * </blockquote>
    *
@@ -486,8 +480,22 @@ public class ErraiCascadeTest extends GWTTestCase {
     CascadeFrom xPrime = em.merge(x);
     em.flush();
 
+    // x, x.all, and x.merge were not in managed state (they were new) so the merged copies should be different instances
     assertNotSame(x, xPrime);
+    assertNotSame(x.getAll(), xPrime.getAll());
+    assertNotSame(x.getMerge(), xPrime.getMerge());
+    assertEquals(x.getAll().getString(), xPrime.getAll().getString());
+    assertEquals(x.getMerge().getString(), xPrime.getMerge().getString());
 
+    // the previously managed instances should have been adopted by the merge
+    // ("Note that if X is managed then X is the same object as X'")
+    assertSame(x.getDetach(), xPrime.getDetach());
+    assertSame(x.getNone(), xPrime.getNone());
+    assertSame(x.getRefresh(), xPrime.getRefresh());
+    assertSame(x.getRemove(), xPrime.getRemove());
+    assertSame(x.getPersist(), xPrime.getPersist());
+
+    // ensure they were actually saved to the database
     em.clear();
     CascadeFrom xFetched = em.find(CascadeFrom.class, xPrime.getId());
     assertNotSame(x.getAll(), xFetched.getAll());
@@ -497,6 +505,72 @@ public class ErraiCascadeTest extends GWTTestCase {
     assertNotSame(x.getPersist(), xFetched.getPersist());
     assertNotSame(x.getRefresh(), xFetched.getRefresh());
     assertNotSame(x.getRemove(), xFetched.getRemove());
+  }
+
+  /**
+   * Tests these rules from the JPA spec 3.2.7.1 Merging Detached Entity State:
+   * <p>
+   * Rule 5:
+   * <blockquote>
+   * For all entities Y referenced by relationships from X having the cascade
+   * element value cascade=MERGE or cascade=ALL, Y is merged recursively as
+   * Y'. For all such Y referenced by X, X' is set to reference Y'. (Note
+   * that if X is managed then X is the same object as X'.)
+   * </blockquote>
+   *
+   * And Rule 6:
+   * <blockquote>
+   * If X is an entity merged to X', with a reference to another entity Y,
+   * where cascade=MERGE or cascade=ALL is not specified, then navigation of
+   * the same association from X' yields a reference to a managed object Y'
+   * with the same persistent identity as Y.
+   * </blockquote>
+   * <p>
+   * Note that we're not entirely clear on what this means, or how it differs
+   * from rule 5. We're going with "do what Hibernate does."
+   */
+  public void testCascadeMergeRules5And6WithCollections() throws Exception {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    CascadeFrom x = new CascadeFrom();
+
+    x.setAllCollection(listOfCascadeTo(3));
+    x.setDetachCollection(listOfCascadeTo(3));
+    x.setMergeCollection(listOfCascadeTo(3));
+    x.setNoneCollection(listOfCascadeTo(3));
+    x.setPersistCollection(listOfCascadeTo(3));
+    x.setRefreshCollection(listOfCascadeTo(3));
+    x.setRemoveCollection(listOfCascadeTo(3));
+
+    // have to persist the ones that won't cascade automatically
+    for (int i = 0; i < 3; i++) {
+      em.persist(x.getDetachCollection().get(i));
+      em.persist(x.getNoneCollection().get(i));
+      em.persist(x.getRefreshCollection().get(i));
+      em.persist(x.getRemoveCollection().get(i));
+      em.persist(x.getPersistCollection().get(i));
+    }
+
+    CascadeFrom xPrime = em.merge(x);
+    em.flush();
+
+    assertNotSame(x, xPrime);
+
+    for (int i = 0; i < 3; i++) {
+      // these ones were not already managed, so merge should have made new copies
+      assertNotSame(x.getAllCollection().get(i), xPrime.getAllCollection().get(i));
+      assertNotSame(x.getMergeCollection().get(i), xPrime.getMergeCollection().get(i));
+      assertEquals(x.getAllCollection().get(i).getString(), xPrime.getAllCollection().get(i).getString());
+      assertEquals(x.getMergeCollection().get(i).getString(), xPrime.getMergeCollection().get(i).getString());
+
+      // the previously managed instances should have been adopted by the merge
+      // ("Note that if X is managed then X is the same object as X'")
+      assertSame(x.getDetachCollection().get(i), xPrime.getDetachCollection().get(i));
+      assertSame(x.getNoneCollection().get(i), xPrime.getNoneCollection().get(i));
+      assertSame(x.getPersistCollection().get(i), xPrime.getPersistCollection().get(i));
+      assertSame(x.getRefreshCollection().get(i), xPrime.getRefreshCollection().get(i));
+      assertSame(x.getRemoveCollection().get(i), xPrime.getRemoveCollection().get(i));
+    }
   }
 
   public void testCascadedMergeCopiesEntityState() {
@@ -536,6 +610,51 @@ public class ErraiCascadeTest extends GWTTestCase {
     // this one should not have the new state because the cascade rule doesn't include merge
     assertNotSame(x.getPersist(), xPrime.getPersist());
     assertNull(xPrime.getPersist().getString());
+  }
+
+  public void testCascadedMergeCopiesEntityStateInCollections() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    CascadeFrom x = new CascadeFrom();
+
+    x.setAllCollection(listOfCascadeTo(3));
+    x.setMergeCollection(listOfCascadeTo(3));
+    x.setPersistCollection(listOfCascadeTo(3));
+
+    for (CascadeTo child : x.getMergeCollection()) {
+      em.persist(child);
+    }
+    em.persist(x);
+    em.flush();
+    em.clear();
+
+    for (int i = 0; i < 3; i++) {
+      x.getAllCollection().get(i).setString("updated string " + i);
+      x.getMergeCollection().get(i).setString("updated merge " + i);
+      CascadeThirdGeneration cascadeAgain = new CascadeThirdGeneration();
+      cascadeAgain.setString("3rd gen " + i);
+      x.getMergeCollection().get(i).setCascadeAgain(cascadeAgain);
+      x.getPersistCollection().get(i).setString("updated persist " + i);
+    }
+    CascadeFrom xPrime = em.merge(x);
+    em.flush();
+
+    assertNotSame(x, xPrime);
+
+    for (int i = 0; i < 3; i++) {
+      assertNotSame(x.getAllCollection().get(i), xPrime.getAllCollection().get(i));
+      assertEquals("updated string " + i, xPrime.getAllCollection().get(i).getString());
+
+      assertNotSame(x.getMergeCollection().get(i), xPrime.getMergeCollection().get(i));
+      assertEquals("updated merge " + i, xPrime.getMergeCollection().get(i).getString());
+
+      assertNotSame(x.getMergeCollection().get(i).getCascadeAgain(), xPrime.getMergeCollection().get(i).getCascadeAgain());
+      assertEquals("3rd gen " + i, xPrime.getMergeCollection().get(i).getCascadeAgain().getString());
+
+      // this one should not have the new state because the cascade rule doesn't include merge
+      assertNotSame(x.getPersistCollection().get(i), xPrime.getPersistCollection().get(i));
+      assertEquals("string " + i, xPrime.getPersistCollection().get(i).getString());
+    }
   }
 
   public void testCascadeRemove() throws Exception {
@@ -580,7 +699,9 @@ public class ErraiCascadeTest extends GWTTestCase {
   private static List<CascadeTo> listOfCascadeTo(int size) {
     List<CascadeTo> l = new ArrayList<CascadeTo>(size);
     for (int i = 0; i < size; i++) {
-      l.add(new CascadeTo());
+      CascadeTo cascadeTo = new CascadeTo();
+      cascadeTo.setString("string " + i);
+      l.add(cascadeTo);
     }
     return l;
   }

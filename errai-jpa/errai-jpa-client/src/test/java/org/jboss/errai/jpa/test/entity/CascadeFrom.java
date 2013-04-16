@@ -1,11 +1,13 @@
 package org.jboss.errai.jpa.test.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
@@ -43,25 +45,32 @@ public class CascadeFrom {
   private CascadeTo none;
 
   @OneToMany(cascade=CascadeType.ALL)
-  private List<CascadeTo> allCollection;
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> allCollection = new ArrayList<CascadeTo>();
 
   @OneToMany(cascade=CascadeType.DETACH)
-  private List<CascadeTo> detachCollection;
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> detachCollection = new ArrayList<CascadeTo>();
 
   @OneToMany(cascade=CascadeType.MERGE)
-  private List<CascadeTo> mergeCollection;
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> mergeCollection = new ArrayList<CascadeTo>();
 
   @OneToMany(cascade=CascadeType.PERSIST)
-  private List<CascadeTo> persistCollection;
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> persistCollection = new ArrayList<CascadeTo>();
 
   @OneToMany(cascade=CascadeType.REFRESH)
-  private List<CascadeTo> refreshCollection;
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> refreshCollection = new ArrayList<CascadeTo>();
 
   @OneToMany(cascade=CascadeType.REMOVE)
-  private List<CascadeTo> removeCollection;
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> removeCollection = new ArrayList<CascadeTo>();
 
   @OneToMany
-  private List<CascadeTo> noneCollection;
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> noneCollection = new ArrayList<CascadeTo>();
 
   public long getId() {
     return id;
