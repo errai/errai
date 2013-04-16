@@ -21,10 +21,7 @@ public class BindingTemplateTestApp {
 
   @Inject
   private BindingTemplate template;
-  
-  @Inject
-  private BindingListWidget listWidget;
-
+   
   @Inject
   @UnOrderedList
   private ListWidget<TestModel, BindingItemWidget> ulListWidget;
@@ -39,7 +36,7 @@ public class BindingTemplateTestApp {
   }
   
   public BindingListWidget getListWidget() {
-    return listWidget;
+    return template.getListWidget();
   }
 
   public ListWidget<TestModel, BindingItemWidget> getUlListWidget() {
