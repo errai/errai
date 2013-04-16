@@ -19,8 +19,8 @@ import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: May 3, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @date May 3, 2010
  */
 class DispatcherProvider implements ResourceProvider<RequestDispatcher> {
   private final RequestDispatcher dispatcher;

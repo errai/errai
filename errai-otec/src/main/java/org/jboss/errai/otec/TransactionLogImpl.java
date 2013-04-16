@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class TransactionLogImpl implements TransactionLog {
@@ -39,14 +40,14 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public List<OTOperation> getLogLatestEntries(int numberOfEntries) {
+  public List<OTOperation> getLogLatestEntries(final int numberOfEntries) {
     synchronized (transactionLog) {
       return transactionLog.subList(transactionLog.size() - numberOfEntries - 1, transactionLog.size() - 1);
     }
   }
 
   @Override
-  public List<OTOperation> getLogFromId(int revision) {
+  public List<OTOperation> getLogFromId(final int revision) {
     if (transactionLog.isEmpty()) {
       return Collections.emptyList();
     }
@@ -67,10 +68,10 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public void appendLog(OTOperation operation) {
+  public void appendLog(final OTOperation operation) {
     synchronized (transactionLog) {
 
-      for (OTOperation op : transactionLog) {
+      for (final OTOperation op : transactionLog) {
         if (op.getRevision() == operation.getRevision()) {
           throw new AssertionError("duplicate revision!");
         }

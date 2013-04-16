@@ -25,12 +25,12 @@ public class OpPair {
   private final OTOperation remoteOp;
   private final OTOperation localOp;
 
-  private OpPair(OTOperation remoteOp, OTOperation localOp) {
+  private OpPair(final OTOperation remoteOp, final OTOperation localOp) {
     this.remoteOp = remoteOp;
     this.localOp = localOp;
   }
 
-  public static OpPair of(OTOperation remoteOp, OTOperation localOp) {
+  public static OpPair of(final OTOperation remoteOp, final OTOperation localOp) {
     return new OpPair(remoteOp, localOp);
   }
 

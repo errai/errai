@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class OTEntityStateImpl implements OTEntityState {
   private volatile int entityIdCounter = 0;
@@ -30,10 +31,10 @@ public class OTEntityStateImpl implements OTEntityState {
      return entityMap.get(id);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public OTEntity addEntity(final State objectReference) {
     final OTEntityImpl entity = new OTEntityImpl(nextEntityId(), objectReference);
-  // entity.setRevision(entity.getNewRevisionNumber());
     addEntity(entity);
     return entity;
   }

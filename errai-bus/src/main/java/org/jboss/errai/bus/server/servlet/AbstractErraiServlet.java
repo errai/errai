@@ -40,6 +40,8 @@ import java.nio.charset.Charset;
  */
 public abstract class AbstractErraiServlet extends HttpServlet {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
+  protected final byte[] SSE_TERMINATION_BYTES = "\n\n".getBytes();
+
 
   /* New and configured errai service */
   protected ErraiService service;

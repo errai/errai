@@ -20,6 +20,7 @@ import org.jboss.errai.otec.operation.OTOperation;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ReceiveHandler {
   public void receive(OTOperation operations);

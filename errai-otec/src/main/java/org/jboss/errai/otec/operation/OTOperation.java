@@ -22,6 +22,7 @@ import org.jboss.errai.otec.mutation.Mutation;
 import java.util.List;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public interface OTOperation {

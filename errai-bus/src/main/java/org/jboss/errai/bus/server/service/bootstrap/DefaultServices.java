@@ -15,11 +15,12 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
@@ -27,8 +28,7 @@ import org.jboss.errai.bus.server.security.auth.AuthSubject;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
 import org.jboss.errai.bus.server.service.ErraiService;
-
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * Setup the default services.
@@ -42,8 +42,6 @@ class DefaultServices implements BootstrapExecution {
     final ServerMessageBus bus = context.getBus();
     final boolean authenticationConfigured =
         context.getConfig().getResource(AuthenticationAdapter.class) != null;
-
-
 
     bus.subscribe(ErraiService.AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
       public void callback(Message message) {

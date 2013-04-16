@@ -20,15 +20,16 @@ import org.jboss.errai.otec.Position;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IndexPosition implements Position {
   private final int position;
 
-  private IndexPosition(int position) {
+  private IndexPosition(final int position) {
     this.position = position;
   }
 
-  public static IndexPosition of(int position) {
+  public static IndexPosition of(final int position) {
     return new IndexPosition(position);
   }
 

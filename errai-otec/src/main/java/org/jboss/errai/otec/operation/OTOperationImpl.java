@@ -32,18 +32,28 @@ public class OTOperationImpl implements OTOperation {
   private final Integer revision;
   private final boolean propagate;
 
-  private OTOperationImpl(final List<Mutation> mutationList, final Integer entityId, final Integer revision, final boolean propagate) {
+  private OTOperationImpl(final List<Mutation> mutationList,
+                          final Integer entityId,
+                          final Integer revision,
+                          final boolean propagate) {
+
     this.mutations = mutationList;
     this.entityId = entityId;
     this.revision = revision;
     this.propagate = propagate;
   }
 
-  public static OTOperation createOperation(final List<Mutation> mutationList, final Integer entityId, final Integer revision) {
+  public static OTOperation createOperation(final List<Mutation> mutationList,
+                                            final Integer entityId,
+                                            final Integer revision) {
+
     return new OTOperationImpl(mutationList, entityId, revision, true);
   }
 
-  public static OTOperation createLocalOnlyOperation(final List<Mutation> mutationList, final Integer entityId, final Integer revision) {
+  public static OTOperation createLocalOnlyOperation(final List<Mutation> mutationList,
+                                                     final Integer entityId,
+                                                     final Integer revision) {
+
     return new OTOperationImpl(mutationList, entityId, revision, false);
   }
 
@@ -67,6 +77,7 @@ public class OTOperationImpl implements OTOperation {
     return revision;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean apply(final OTEntity entity) {
     for (final Mutation mutation : mutations) {
@@ -82,17 +93,15 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof OTOperationImpl)) return false;
 
-    OTOperationImpl that = (OTOperationImpl) o;
+    final OTOperationImpl that = (OTOperationImpl) o;
 
-    if (entityId != null ? !entityId.equals(that.entityId) : that.entityId != null) return false;
-    if (mutations != null ? !mutations.equals(that.mutations) : that.mutations != null) return false;
-    if (revision != null ? !revision.equals(that.revision) : that.revision != null) return false;
-
-    return true;
+    return !(entityId != null ? !entityId.equals(that.entityId) : that.entityId != null)
+        && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null)
+        && !(revision != null ? !revision.equals(that.revision) : that.revision != null);
   }
 
   @Override

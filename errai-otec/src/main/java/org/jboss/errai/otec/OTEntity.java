@@ -18,14 +18,13 @@ package org.jboss.errai.otec;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface OTEntity<T extends State> {
   public int getRevision();
   public void setRevision(int revision);
 
   public void incrementRevision();
-
- // public int getNewRevisionNumber();
 
   public Integer getId();
   public TransactionLog getTransactionLog();

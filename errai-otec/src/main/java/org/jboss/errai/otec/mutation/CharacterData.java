@@ -18,15 +18,16 @@ package org.jboss.errai.otec.mutation;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CharacterData implements Data<Character> {
   private final char data;
 
-  private CharacterData(char data) {
+  private CharacterData(final char data) {
     this.data = data;
   }
 
-  public static CharacterData of(char data) {
+  public static CharacterData of(final char data) {
     return new CharacterData(data);
   }
 

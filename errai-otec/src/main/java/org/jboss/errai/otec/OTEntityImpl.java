@@ -18,6 +18,7 @@ package org.jboss.errai.otec;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   private final Integer entityId;
@@ -39,7 +40,7 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   }
 
   @Override
-  public void setRevision(int revision) {
+  public void setRevision(final int revision) {
     this.revision = revision;
   }
 

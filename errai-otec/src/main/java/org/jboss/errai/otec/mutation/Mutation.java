@@ -4,6 +4,7 @@ import org.jboss.errai.otec.Position;
 import org.jboss.errai.otec.State;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public interface Mutation<T extends State, P extends Position, D extends Data> {

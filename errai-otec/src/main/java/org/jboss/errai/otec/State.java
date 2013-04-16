@@ -17,6 +17,7 @@
 package org.jboss.errai.otec;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public interface State<T> {

@@ -178,7 +178,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
           prepareSSEContinue(httpServletResponse);
           outputStream.flush();
           queue.poll(TimeUnit.MILLISECONDS, getSSETimeout(), new OutputStreamWriteAdapter(outputStream));
-          outputStream.write("\n\n".getBytes());
+          outputStream.write(SSE_TERMINATION_BYTES);
           queue.heartBeat();
         }
       }

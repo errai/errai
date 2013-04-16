@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public interface PeerState {

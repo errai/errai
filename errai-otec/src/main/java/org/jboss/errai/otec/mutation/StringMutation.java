@@ -17,12 +17,9 @@
 package org.jboss.errai.otec.mutation;
 
 import org.jboss.errai.otec.StringState;
-import org.jboss.errai.otec.mutation.CharacterData;
-import org.jboss.errai.otec.mutation.IndexPosition;
-import org.jboss.errai.otec.mutation.Mutation;
-import org.jboss.errai.otec.mutation.MutationType;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class StringMutation implements Mutation<StringState, IndexPosition, CharacterData> {
@@ -30,7 +27,7 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Char
   private final IndexPosition position;
   private final CharacterData data;
 
-  public StringMutation(MutationType type, IndexPosition position, CharacterData data) {
+  public StringMutation(final MutationType type, final IndexPosition position, final CharacterData data) {
     this.type = type;
     this.position = position;
     this.data = data;
@@ -52,7 +49,7 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Char
   }
 
   @Override
-  public void apply(StringState state) {
+  public void apply(final StringState state) {
     switch (type) {
       case Insert:
         state.insert(position.getPosition(), data.get());

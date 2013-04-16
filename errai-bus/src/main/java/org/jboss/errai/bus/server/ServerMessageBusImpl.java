@@ -29,20 +29,20 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.BooleanRoutingRule;
+import org.jboss.errai.bus.client.api.BusMonitor;
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.RoutingFlag;
 import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.ConversationMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.BooleanRoutingRule;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.BuiltInServices;
-import org.jboss.errai.bus.client.api.BusMonitor;
-import org.jboss.errai.bus.client.api.RoutingFlag;
-import org.jboss.errai.bus.client.api.Subscription;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 import org.jboss.errai.bus.client.protocols.BusCommand;
 import org.jboss.errai.bus.client.util.BusTools;
@@ -146,7 +146,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final int webSocketPort;
     final String webSocketPath;
 
-
     webSocketServlet = ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.getBoolean(config);
 
     if (webSocketServlet) {
@@ -194,7 +193,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       directAlloc = false;
     }
 
-
     TransmissionBuffer buffer;
     if (directAlloc) {
       try {
@@ -216,308 +214,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     /**
      * Define the default ServerBus service used for intrabus communication.
      */
-    subscribe(BuiltInServices.ServerBus.name(), new MessageCallback() {
-      @Override
-      @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
-      public void callback(final Message message) {
-        try {
-          final QueueSession session = getSession(message);
-          MessageQueueImpl queue = (MessageQueueImpl) messageQueues.get(session);
+    subscribe(BuiltInServices.ServerBus.name(), new ServerBusMessageCallback(webSocketPath, webSocketPort));
 
-          switch (BusCommand.valueOf(message.getCommandType())) {
-            case Heartbeat:
-              if (queue != null) {
-                queue.heartBeat();
-              }
-              break;
+    addSubscribeListener(new DefaultSubscribeListener());
+    addUnsubscribeListener(new DefaultUnsubscribeListener());
 
-            case RemoteSubscribe:
-              if (queue == null) return;
-
-              if (message.hasPart(MessageParts.SubjectsList)) {
-                for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
-                  remoteSubscribe(session, queue, subject);
-                }
-              }
-              else if (message.hasPart(MessageParts.RemoteServices)) {
-                for (final String subject : message.get(String.class, MessageParts.RemoteServices).split(",")) {
-                  remoteSubscribe(session, queue, subject);
-                }
-              }
-              else {
-                remoteSubscribe(session, messageQueues.get(session),
-                    message.get(String.class, MessageParts.Subject));
-              }
-
-              break;
-
-            case RemoteUnsubscribe:
-              if (queue == null) return;
-
-              remoteUnsubscribe(session, queue,
-                  message.get(String.class, MessageParts.Subject));
-              break;
-
-            case Disconnect:
-              if (queue == null) return;
-
-              synchronized (messageQueues) {
-                queue.stopQueue();
-                closeQueue(queue);
-                session.endSession();
-              }
-              break;
-
-            case Resend:
-              if (queue == null) return;
-
-            case Associate: {
-              List<Message> deferred = null;
-              synchronized (messageQueues) {
-                if (messageQueues.containsKey(session)) {
-                  final MessageQueue q = messageQueues.get(session);
-                  synchronized (q) {
-                    if (deferredQueue.containsKey(q)) {
-                      deferred = deferredQueue.remove(q);
-                    }
-                  }
-
-                  messageQueues.get(session).stopQueue();
-                }
-
-                queue = new MessageQueueImpl(transmissionbuffer, session, messageQueueTimeoutSecs);
-
-                addQueue(session, queue);
-
-                if (deferred != null) {
-                  deferredQueue.put(queue, deferred);
-                }
-
-                remoteSubscribe(session, queue, BuiltInServices.ClientBus.name());
-              }
-
-              for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
-                remoteSubscribe(session, queue, svc);
-              }
-
-              if (isMonitor()) {
-                busMonitor.notifyQueueAttached(session.getSessionId(), queue);
-              }
-
-              final Message msg = ConversationMessage.create(message)
-                  .toSubject(BuiltInServices.ClientBus.name())
-                  .command(BusCommand.FinishAssociation);
-
-              final StringBuilder subjects = new StringBuilder();
-              for (final String s : new HashSet<String>(globalSubscriptions)) {
-                if (subjects.length() != 0) {
-                  subjects.append(',');
-                }
-                subjects.append(s);
-              }
-
-              msg.set(RemoteServices, subjects.toString());
-
-              final StringBuilder capabilitiesBuffer = new StringBuilder(25);
-
-              final boolean first;
-              if (doLongPolling) {
-                capabilitiesBuffer.append(Capabilities.LongPolling.name());
-                first = false;
-              }
-              else {
-                capabilitiesBuffer.append(Capabilities.ShortPolling.name());
-                first = false;
-                msg.set(MessageParts.PollFrequency, hostedModeTesting ? 50 : 250);
-              }
-
-              if (webSocketServer || webSocketServlet) {
-                if (!first) {
-                  capabilitiesBuffer.append(',');
-                }
-                capabilitiesBuffer.append(Capabilities.WebSockets.name());
-                /**
-                 * Advertise where the client can find a websocket.
-                 */
-
-                final String webSocketURL;
-
-                final HttpServletRequest request
-                    = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
-
-                if (webSocketServlet) {
-                  webSocketURL = "ws://" + request.getHeader("Host") + webSocketPath;
-                }
-                else {
-                  webSocketURL = "ws://" + request.getServerName() + ":" + webSocketPort + webSocketPath;
-                }
-                msg.set(MessageParts.WebSocketURL, webSocketURL);
-                msg.set(MessageParts.WebSocketToken, WebSocketTokenManager.getNewOneTimeToken(session));
-              }
-
-              if (sseEnabled && !session.hasAttribute("NoSSE")) {
-                capabilitiesBuffer.append(",").append(Capabilities.SSE.name());
-              }
-
-              msg.set(MessageParts.CapabilitiesFlags, capabilitiesBuffer.toString());
-
-              msg.set(ConnectionSessionKey, queue.getSession().getSessionId());
-              send(msg, false);
-
-              queue.finishInit();
-              drainDeferredDeliveryQueue(queue);
-              break;
-            }
-
-            case WebsocketChannelVerify:
-              if (message.hasPart(MessageParts.WebSocketToken)) {
-                if (verifyOneTimeToken(session, message.get(String.class, MessageParts.WebSocketToken))) {
-                  final String reconnectionToken = getNewOneTimeToken(session);
-
-                  final LocalContext localContext = LocalContext.get(session);
-
-                  localContext.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS,
-                      WebSocketServerHandler.WEBSOCKET_ACTIVE);
-
-                  createConversation(message)
-                      .toSubject(BuiltInServices.ClientBus.name())
-                      .command(BusCommand.WebsocketChannelOpen)
-                      .with(MessageParts.WebSocketToken, reconnectionToken)
-                      .done().sendNowWith(ServerMessageBusImpl.this, false);
-                }
-                else {
-                }
-              }
-              break;
-          }
-        }
-        catch (Throwable t) {
-          t.printStackTrace();
-        }
-      }
-    });
-
-
-    addSubscribeListener(new SubscribeListener() {
-      @Override
-      public void onSubscribe(final SubscriptionEvent event) {
-        if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
-
-        MessageBuilder.createMessage()
-            .toSubject(BuiltInServices.ClientBus.name())
-            .command(BusCommand.RemoteSubscribe)
-            .with(MessageParts.Subject, event.getSubject())
-            .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
-
-      }
-    });
-
-    addUnsubscribeListener(new UnsubscribeListener() {
-      @Override
-      public void onUnsubscribe(final SubscriptionEvent event) {
-        if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
-        if (messageQueues.isEmpty()) return;
-
-        MessageBuilder.createMessage()
-            .toSubject(BuiltInServices.ClientBus.name())
-            .command(BusCommand.RemoteUnsubscribe)
-            .with(MessageParts.Subject, event.getSubject())
-            .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
-      }
-    });
-
-    scheduler.scheduleAtFixedRate(new Runnable() {
-      int runCount = 0;
-      boolean lastWasEmpty = false;
-
-      @Override
-      public void run() {
-        runCount++;
-        boolean houseKeepingPerformed = false;
-        final List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
-
-        int paged = 0, killed = 0;
-
-        while (!houseKeepingPerformed) {
-          try {
-            final Iterator<MessageQueue> iter = ServerMessageBusImpl.this.messageQueues.values().iterator();
-            MessageQueue q;
-            while (iter.hasNext()) {
-              if ((q = iter.next()).isStale()) {
-                iter.remove();
-                endSessions.add(q);
-                killed++;
-              }
-
-              if (PageUtil.pageIfStraddling(q)) {
-                paged++;
-              }
-            }
-
-            houseKeepingPerformed = true;
-          }
-          catch (ConcurrentModificationException cme) {
-            // fall-through and try again.
-          }
-        }
-
-        if (paged > 0 || killed > 0) {
-          log.debug("[bus] killed " + killed + " sessions and paged out " + paged + " queues");
-        }
-
-        for (final MessageQueue ref : endSessions) {
-          for (final String subject : new HashSet<String>(ServerMessageBusImpl.this.remoteSubscriptions.keySet())) {
-            ServerMessageBusImpl.this.remoteUnsubscribe(ref.getSession(), ref, subject);
-          }
-
-          ServerMessageBusImpl.this.closeQueue(ref);
-          ref.getSession().endSession();
-          deferredQueue.remove(ref);
-          ref.discard();
-        }
-
-        final Iterator<ClusterWaitEntry> entryIterator = deadLetter.values().iterator();
-
-        while (entryIterator.hasNext()) {
-          final ClusterWaitEntry entry = entryIterator.next();
-          if (entry.isStale()) {
-            entryIterator.remove();
-            try {
-              entry.notifyTimeout();
-            }
-            catch (Exception e) {
-              log.warn("exception occurred expunging from dead letter queue", e);
-            }
-          }
-        }
-
-        final BufferStatus stat = bufferStatus();
-        if (stat.getFree() == 1.0f) {
-          if (lastWasEmpty) {
-            return;
-          }
-          else {
-            lastWasEmpty = true;
-          }
-        }
-        else {
-          lastWasEmpty = false;
-        }
-
-        log.debug("[bus] buffer status [freebytes: " + stat.getFreeBytes()
-            + " (" + (stat.getFree() * 100) + "%) tail rng: " + stat.getTailRange() + "; actv tails: "
-            + stat.getActiveTails() + "]");
-
-        if (stat.getFree() < 0.50f) {
-          log.debug("[bus] high load condition detected!");
-        }
-      }
-
-      @Override
-      public String toString() {
-        return "Bus Housekeeper";
-      }
-    }, 8, 8, TimeUnit.SECONDS);
+    scheduler.scheduleAtFixedRate(new HousekeeeperRunnable(), 8, 8, TimeUnit.SECONDS);
 
     try {
       clustering = ErraiConfigAttribs.ENABLE_CLUSTERING.getBoolean(config);
@@ -535,82 +237,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     catch (Exception e) {
       throw new RuntimeException("could not initialize clustering provider", e);
     }
-  }
-
-  private static class BufferStatus {
-    private final int freeBytes;
-    private final int tailRange;
-    private final int activeTails;
-    private final float free;
-
-    private BufferStatus(final int freeBytes, final int tailRange, final int activeTails, final float free) {
-      this.freeBytes = freeBytes;
-      this.tailRange = tailRange;
-      this.activeTails = activeTails;
-      this.free = free;
-    }
-
-    public int getFreeBytes() {
-      return freeBytes;
-    }
-
-    public int getTailRange() {
-      return tailRange;
-    }
-
-    public int getActiveTails() {
-      return activeTails;
-    }
-
-    public float getFree() {
-      return free;
-    }
-  }
-
-  private BufferStatus bufferStatus() {
-    final int headBytes = transmissionbuffer.getHeadPositionBytes();
-    final int bufSize = transmissionbuffer.getBufferSize();
-
-    long lowTail = -1;
-    long highTail = -1;
-    int activeTails = 0;
-
-    final int free;
-    long lowSegBytes = 0;
-    long highSegBytes = 0;
-
-
-    for (final MessageQueue q : messageQueues.values()) {
-      activeTails++;
-      final long seq = q.getCurrentBufferSequenceNumber();
-      if (lowTail == -1) {
-        lowTail = highTail = seq;
-      }
-      else {
-        if (seq > highTail) highTail = seq;
-        if (seq < lowTail) lowTail = seq;
-      }
-    }
-
-    if (activeTails > 0) {
-      lowSegBytes = (lowTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
-      highSegBytes = (highTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
-
-      if (lowSegBytes < headBytes) {
-        free = (int) ((bufSize - headBytes) + lowSegBytes);
-      }
-      else if (lowSegBytes > headBytes) {
-        free = (int) (lowSegBytes - bufSize);
-      }
-      else {
-        free = bufSize;
-      }
-    }
-    else {
-      free = bufSize;
-    }
-
-    return new BufferStatus(free, (int) (highSegBytes - lowSegBytes), activeTails, ((float) free) / bufSize);
   }
 
   private void addQueue(final QueueSession session, final MessageQueue queue) {
@@ -935,28 +561,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     fireSubscribeListeners(new SubscriptionEvent(false, null, plan.getTotalReceivers(), true, subject));
 
-    return new Subscription() {
-      @Override
-      public void remove() {
-        if (removeFromDeliveryPlan(subject, receiver).getTotalReceivers() == 0) {
-          globalSubscriptions.remove(subject);
-          subscriptions.remove(subject);
-        }
-        else {
-          boolean nonRemote = true;
-          for (final MessageCallback callback : plan.getDeliverTo()) {
-            if (!(callback instanceof RemoteMessageCallback)) {
-              nonRemote = false;
-              break;
-            }
-          }
-          if (nonRemote) {
-            globalSubscriptions.remove(subject);
-            subscriptions.remove(subject);
-          }
-        }
-      }
-    };
+    return new SubscriptionHandle(subject, receiver, plan);
   }
 
   @Override
@@ -972,12 +577,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", toSubscribe)
     );
 
-    return new Subscription() {
-      @Override
-      public void remove() {
-        removeFromDeliveryPlan(toSubscribe, receiver);
-      }
-    };
+    return new LocalSubscriptionHandle(toSubscribe, receiver);
   }
 
   private DeliveryPlan createOrAddDeliveryPlan(final String subject, final MessageCallback receiver) {
@@ -991,11 +591,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       subscriptions.put(subject, plan = DeliveryPlan.newDeliveryPlan(receiver));
     }
     else {
-      final DeliveryPlan newPlan = plan.newDeliveryPlanWith(receiver);
-
-//      if (newPlan != plan) {
-        subscriptions.put(subject, newPlan);
-//      }
+      subscriptions.put(subject, plan.newDeliveryPlanWith(receiver));
     }
 
     return plan;
@@ -1005,12 +601,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final DeliveryPlan plan = subscriptions.get(subject);
 
     if (plan != null) {
-      final DeliveryPlan newPlan = plan.newDeliveryPlanWithOut(receiver);
-
- //     if (newPlan != plan) {
-        subscriptions.put(subject, newPlan);
- //     }
-
+      subscriptions.put(subject, plan.newDeliveryPlanWithOut(receiver));
       fireUnsubscribeListeners(
           new SubscriptionEvent(false, "InBus", plan.getTotalReceivers(), false, subject));
     }
@@ -1062,41 +653,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     );
   }
 
-  public static class ClusterWaitEntry {
-    final long time;
-    final Message message;
-    final Runnable timeoutCallback;
-
-    public ClusterWaitEntry(final long time, final Message message, final Runnable timeoutCallback) {
-      this.timeoutCallback = timeoutCallback;
-      this.message = message;
-      this.time = time;
-    }
-
-    public long getTime() {
-      return time;
-    }
-
-    public Message getMessage() {
-      return message;
-    }
-
-    public boolean isStale() {
-      return (System.currentTimeMillis() - time) > (10 * 1000);
-    }
-
-    public void notifyTimeout() {
-      if (timeoutCallback != null) {
-        timeoutCallback.run();
-      }
-    }
-  }
-
   public class RemoteMessageCallback implements MessageCallback {
+
     private final String svc;
     private final Set<MessageQueue> queues = Collections.newSetFromMap(new ConcurrentHashMap<MessageQueue, Boolean>());
-
     private final boolean broadcastable;
+
     private final AtomicInteger totalBroadcasted = new AtomicInteger();
 
     public RemoteMessageCallback(final boolean broadcastable, final String svc) {
@@ -1107,7 +669,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     @Override
     public void callback(final Message message) {
       // do not pipeline if this message is addressed to a specified session.
-      if (broadcastable && !message.isFlagSet(RoutingFlag.NonGlobalRouting)) {
+      if (broadcastable && !message.isFlagSet(RoutingFlag.NonGlobalRouting) && queues.size() == messageQueues.size()) {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
 
@@ -1162,8 +724,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public boolean contains(final MessageQueue queue) {
       return queues.contains(queue);
     }
-  }
 
+  }
   /**
    * Unsubscribes a remote subscription and fires the appropriate listeners
    *
@@ -1446,5 +1008,409 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   public void finishInit() {
     reservedNames.addAll(subscriptions.keySet());
+  }
+
+  private class ServerBusMessageCallback implements MessageCallback {
+
+    private final String webSocketPath;
+    private final int webSocketPort;
+    public ServerBusMessageCallback(String webSocketPath, int webSocketPort) {
+      this.webSocketPath = webSocketPath;
+      this.webSocketPort = webSocketPort;
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
+    public void callback(final Message message) {
+      try {
+        final QueueSession session = getSession(message);
+        MessageQueueImpl queue = (MessageQueueImpl) messageQueues.get(session);
+
+        switch (BusCommand.valueOf(message.getCommandType())) {
+          case Heartbeat:
+            if (queue != null) {
+              queue.heartBeat();
+            }
+            break;
+
+          case RemoteSubscribe:
+            if (queue == null) return;
+
+            if (message.hasPart(MessageParts.SubjectsList)) {
+              for (final String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
+                remoteSubscribe(session, queue, subject);
+              }
+            }
+            else if (message.hasPart(MessageParts.RemoteServices)) {
+              for (final String subject : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+                remoteSubscribe(session, queue, subject);
+              }
+            }
+            else {
+              remoteSubscribe(session, messageQueues.get(session),
+                  message.get(String.class, MessageParts.Subject));
+            }
+
+            break;
+
+          case RemoteUnsubscribe:
+            if (queue == null) return;
+
+            remoteUnsubscribe(session, queue,
+                message.get(String.class, MessageParts.Subject));
+            break;
+
+          case Disconnect:
+            if (queue == null) return;
+
+            synchronized (messageQueues) {
+              queue.stopQueue();
+              closeQueue(queue);
+              session.endSession();
+            }
+            break;
+
+          case Resend:
+            if (queue == null) return;
+
+          case Associate: {
+            List<Message> deferred = null;
+            synchronized (messageQueues) {
+              if (messageQueues.containsKey(session)) {
+                final MessageQueue q = messageQueues.get(session);
+                synchronized (q) {
+                  if (deferredQueue.containsKey(q)) {
+                    deferred = deferredQueue.remove(q);
+                  }
+                }
+
+                messageQueues.get(session).stopQueue();
+              }
+
+              queue = new MessageQueueImpl(transmissionbuffer, session, messageQueueTimeoutSecs);
+
+              addQueue(session, queue);
+
+              if (deferred != null) {
+                deferredQueue.put(queue, deferred);
+              }
+
+              remoteSubscribe(session, queue, BuiltInServices.ClientBus.name());
+            }
+
+            for (final String svc : message.get(String.class, MessageParts.RemoteServices).split(",")) {
+              remoteSubscribe(session, queue, svc);
+            }
+
+            if (isMonitor()) {
+              busMonitor.notifyQueueAttached(session.getSessionId(), queue);
+            }
+
+            final Message msg = ConversationMessage.create(message)
+                .toSubject(BuiltInServices.ClientBus.name())
+                .command(BusCommand.FinishAssociation);
+
+            final StringBuilder subjects = new StringBuilder();
+            for (final String s : new HashSet<String>(globalSubscriptions)) {
+              if (subjects.length() != 0) {
+                subjects.append(',');
+              }
+              subjects.append(s);
+            }
+
+            msg.set(RemoteServices, subjects.toString());
+
+            final StringBuilder capabilitiesBuffer = new StringBuilder(25);
+
+            final boolean first;
+            if (doLongPolling) {
+              capabilitiesBuffer.append(Capabilities.LongPolling.name());
+              first = false;
+            }
+            else {
+              capabilitiesBuffer.append(Capabilities.ShortPolling.name());
+              first = false;
+              msg.set(MessageParts.PollFrequency, hostedModeTesting ? 50 : 250);
+            }
+
+            if (webSocketServer || webSocketServlet) {
+              if (!first) {
+                capabilitiesBuffer.append(',');
+              }
+              capabilitiesBuffer.append(Capabilities.WebSockets.name());
+              /**
+               * Advertise where the client can find a websocket.
+               */
+
+              final String webSocketURL;
+
+              final HttpServletRequest request
+                  = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
+
+              if (webSocketServlet) {
+                webSocketURL = "ws://" + request.getHeader("Host") + webSocketPath;
+              }
+              else {
+                webSocketURL = "ws://" + request.getServerName() + ":" + webSocketPort + webSocketPath;
+              }
+              msg.set(MessageParts.WebSocketURL, webSocketURL);
+              msg.set(MessageParts.WebSocketToken, WebSocketTokenManager.getNewOneTimeToken(session));
+            }
+
+            if (sseEnabled && !session.hasAttribute("NoSSE")) {
+              capabilitiesBuffer.append(",").append(Capabilities.SSE.name());
+            }
+
+            msg.set(MessageParts.CapabilitiesFlags, capabilitiesBuffer.toString());
+
+            msg.set(ConnectionSessionKey, queue.getSession().getSessionId());
+            send(msg, false);
+
+            queue.finishInit();
+            drainDeferredDeliveryQueue(queue);
+            break;
+          }
+
+          case WebsocketChannelVerify:
+            if (message.hasPart(MessageParts.WebSocketToken)) {
+              if (verifyOneTimeToken(session, message.get(String.class, MessageParts.WebSocketToken))) {
+                final String reconnectionToken = getNewOneTimeToken(session);
+
+                final LocalContext localContext = LocalContext.get(session);
+
+                localContext.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS,
+                    WebSocketServerHandler.WEBSOCKET_ACTIVE);
+
+                createConversation(message)
+                    .toSubject(BuiltInServices.ClientBus.name())
+                    .command(BusCommand.WebsocketChannelOpen)
+                    .with(MessageParts.WebSocketToken, reconnectionToken)
+                    .done().sendNowWith(ServerMessageBusImpl.this, false);
+              }
+              else {
+              }
+            }
+            break;
+        }
+      }
+      catch (Throwable t) {
+        t.printStackTrace();
+      }
+    }
+  }
+
+  private BufferStatus bufferStatus() {
+    final int headBytes = transmissionbuffer.getHeadPositionBytes();
+    final int bufSize = transmissionbuffer.getBufferSize();
+
+    long lowTail = -1;
+    long highTail = -1;
+    int activeTails = 0;
+
+    final int free;
+    long lowSegBytes = 0;
+    long highSegBytes = 0;
+
+
+    for (final MessageQueue q : messageQueues.values()) {
+      activeTails++;
+      final long seq = q.getCurrentBufferSequenceNumber();
+      if (lowTail == -1) {
+        lowTail = highTail = seq;
+      }
+      else {
+        if (seq > highTail) highTail = seq;
+        if (seq < lowTail) lowTail = seq;
+      }
+    }
+
+    if (activeTails > 0) {
+      lowSegBytes = (lowTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
+      highSegBytes = (highTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
+
+      if (lowSegBytes < headBytes) {
+        free = (int) ((bufSize - headBytes) + lowSegBytes);
+      }
+      else if (lowSegBytes > headBytes) {
+        free = (int) (lowSegBytes - bufSize);
+      }
+      else {
+        free = bufSize;
+      }
+    }
+    else {
+      free = bufSize;
+    }
+
+    return new BufferStatus(free, (int) (highSegBytes - lowSegBytes), activeTails, ((float) free) / bufSize);
+  }
+
+  private class DefaultSubscribeListener implements SubscribeListener {
+    @Override
+    public void onSubscribe(final SubscriptionEvent event) {
+      if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
+
+      MessageBuilder.createMessage()
+          .toSubject(BuiltInServices.ClientBus.name())
+          .command(BusCommand.RemoteSubscribe)
+          .with(MessageParts.Subject, event.getSubject())
+          .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
+
+    }
+  }
+
+  private class DefaultUnsubscribeListener implements UnsubscribeListener {
+    @Override
+    public void onUnsubscribe(final SubscriptionEvent event) {
+      if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
+      if (messageQueues.isEmpty()) return;
+
+      MessageBuilder.createMessage()
+          .toSubject(BuiltInServices.ClientBus.name())
+          .command(BusCommand.RemoteUnsubscribe)
+          .with(MessageParts.Subject, event.getSubject())
+          .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
+    }
+  }
+
+  private class HousekeeeperRunnable implements Runnable {
+    int runCount = 0;
+    boolean lastWasEmpty = false;
+
+    @Override
+    public void run() {
+      runCount++;
+      boolean houseKeepingPerformed = false;
+      final List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
+
+      int paged = 0, killed = 0;
+
+      while (!houseKeepingPerformed) {
+        try {
+          final Iterator<MessageQueue> iter = ServerMessageBusImpl.this.messageQueues.values().iterator();
+          MessageQueue q;
+          while (iter.hasNext()) {
+            if ((q = iter.next()).isStale()) {
+              iter.remove();
+              endSessions.add(q);
+              killed++;
+            }
+
+            if (PageUtil.pageIfStraddling(q)) {
+              paged++;
+            }
+          }
+
+          houseKeepingPerformed = true;
+        }
+        catch (ConcurrentModificationException cme) {
+          // fall-through and try again.
+        }
+      }
+
+      if (paged > 0 || killed > 0) {
+        log.debug("[bus] killed " + killed + " sessions and paged out " + paged + " queues");
+      }
+
+      for (final MessageQueue ref : endSessions) {
+        for (final String subject : new HashSet<String>(ServerMessageBusImpl.this.remoteSubscriptions.keySet())) {
+          ServerMessageBusImpl.this.remoteUnsubscribe(ref.getSession(), ref, subject);
+        }
+
+        ServerMessageBusImpl.this.closeQueue(ref);
+        ref.getSession().endSession();
+        deferredQueue.remove(ref);
+        ref.discard();
+      }
+
+      final Iterator<ClusterWaitEntry> entryIterator = deadLetter.values().iterator();
+
+      while (entryIterator.hasNext()) {
+        final ClusterWaitEntry entry = entryIterator.next();
+        if (entry.isStale()) {
+          entryIterator.remove();
+          try {
+            entry.notifyTimeout();
+          }
+          catch (Exception e) {
+            log.warn("exception occurred expunging from dead letter queue", e);
+          }
+        }
+      }
+
+      final BufferStatus stat = bufferStatus();
+      if (stat.getFree() == 1.0f) {
+        if (lastWasEmpty) {
+          return;
+        }
+        else {
+          lastWasEmpty = true;
+        }
+      }
+      else {
+        lastWasEmpty = false;
+      }
+
+      log.debug("[bus] buffer status [freebytes: " + stat.getFreeBytes()
+          + " (" + (stat.getFree() * 100) + "%) tail rng: " + stat.getTailRange() + "; actv tails: "
+          + stat.getActiveTails() + "]");
+
+      if (stat.getFree() < 0.50f) {
+        log.debug("[bus] high load condition detected!");
+      }
+    }
+
+    @Override
+    public String toString() {
+      return "Bus Housekeeper";
+    }
+  }
+
+  private class LocalSubscriptionHandle implements Subscription {
+    private final String toSubscribe;
+    private final MessageCallback receiver;
+
+    public LocalSubscriptionHandle(String toSubscribe, MessageCallback receiver) {
+      this.toSubscribe = toSubscribe;
+      this.receiver = receiver;
+    }
+
+    @Override
+    public void remove() {
+      removeFromDeliveryPlan(toSubscribe, receiver);
+    }
+  }
+
+  private class SubscriptionHandle implements Subscription {
+    private final String subject;
+    private final MessageCallback receiver;
+    private final DeliveryPlan plan;
+
+    public SubscriptionHandle(String subject, MessageCallback receiver, DeliveryPlan plan) {
+      this.subject = subject;
+      this.receiver = receiver;
+      this.plan = plan;
+    }
+
+    @Override
+    public void remove() {
+      if (removeFromDeliveryPlan(subject, receiver).getTotalReceivers() == 0) {
+        globalSubscriptions.remove(subject);
+        subscriptions.remove(subject);
+      }
+      else {
+        boolean nonRemote = true;
+        for (final MessageCallback callback : plan.getDeliverTo()) {
+          if (!(callback instanceof RemoteMessageCallback)) {
+            nonRemote = false;
+            break;
+          }
+        }
+        if (nonRemote) {
+          globalSubscriptions.remove(subject);
+          subscriptions.remove(subject);
+        }
+      }
+    }
   }
 }

@@ -18,19 +18,20 @@ package org.jboss.errai.otec;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StringState implements State<String> {
   public StringBuilder buffer = new StringBuilder();
 
-  public StringState(String buffer) {
+  public StringState(final String buffer) {
     this.buffer = new StringBuilder(buffer);
   }
 
-  public void replace(int pos, char data) {
+  public void replace(final int pos, final char data) {
     buffer.replace(pos, 0, String.valueOf(data));
   }
 
-  public void insert(int pos, char data) {
+  public void insert(final int pos, final char data) {
     if (pos == buffer.length()) {
       buffer.append(String.valueOf(data));
     }
@@ -39,7 +40,7 @@ public class StringState implements State<String> {
     }
   }
 
-  public void delete(int pos) {
+  public void delete(final int pos) {
     buffer.delete(pos, pos + 1);
   }
 

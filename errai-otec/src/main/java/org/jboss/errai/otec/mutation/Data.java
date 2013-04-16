@@ -17,6 +17,7 @@
 package org.jboss.errai.otec.mutation;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public interface Data<T> {

@@ -20,6 +20,7 @@ import org.jboss.errai.otec.OTEntity;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface OTOperationsFactory {
 

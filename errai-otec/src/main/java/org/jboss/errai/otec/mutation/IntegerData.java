@@ -18,6 +18,7 @@ package org.jboss.errai.otec.mutation;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IntegerData implements Data<Integer> {
   public final int data;

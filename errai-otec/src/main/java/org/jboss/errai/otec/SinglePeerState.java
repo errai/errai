@@ -32,12 +32,12 @@ public class SinglePeerState implements PeerState {
   final Set<OTEntity> associatedEntities = Collections.newSetFromMap(new IdentityHashMap<OTEntity, Boolean>());
 
   @Override
-  public OTPeer getPeer(String peerId) {
+  public OTPeer getPeer(final String peerId) {
     return remotePeer;
   }
 
   @Override
-  public void registerPeer(OTPeer peer) {
+  public void registerPeer(final OTPeer peer) {
     if (remotePeer != null) {
       throw new OTException("peer already registered for SinglePeerState!");
     }
@@ -47,30 +47,30 @@ public class SinglePeerState implements PeerState {
 
   @Override
   public Map<OTEntity, Set<OTPeer>> getEntityPeerRelationshipMap() {
-    Map<OTEntity, Set<OTPeer>> entityPeerMap = new HashMap<OTEntity, Set<OTPeer>>();
-    for (OTEntity associatedEntity : associatedEntities) {
+    final Map<OTEntity, Set<OTPeer>> entityPeerMap = new HashMap<OTEntity, Set<OTPeer>>();
+    for (final OTEntity associatedEntity : associatedEntities) {
       entityPeerMap.put(associatedEntity, Collections.singleton(remotePeer));
     }
     return Collections.unmodifiableMap(entityPeerMap);
   }
 
   @Override
-  public Set<OTPeer> getPeersFor(OTEntity entity) {
+  public Set<OTPeer> getPeersFor(final OTEntity entity) {
     return Collections.singleton(remotePeer);
   }
 
   @Override
-  public void associateEntity(OTPeer peer, OTEntity entity) {
+  public void associateEntity(final OTPeer peer, final OTEntity entity) {
     associatedEntities.add(entity);
   }
 
   @Override
-  public void disassociateEntity(OTPeer peer, OTEntity entity) {
+  public void disassociateEntity(final OTPeer peer, final OTEntity entity) {
     associatedEntities.remove(entity);
   }
 
   @Override
-  public boolean shouldForwardOperation(OTOperation operation) {
+  public boolean shouldForwardOperation(final OTOperation operation) {
     return operation.shouldPropagate();
   }
 }

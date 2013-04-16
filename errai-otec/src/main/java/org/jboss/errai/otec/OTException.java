@@ -17,10 +17,11 @@
 package org.jboss.errai.otec;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class OTException extends RuntimeException {
-  public OTException(String message) {
+  public OTException(final String message) {
     super(message);
   }
 }

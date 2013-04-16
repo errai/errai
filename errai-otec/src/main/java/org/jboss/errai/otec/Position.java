@@ -18,6 +18,7 @@ package org.jboss.errai.otec;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface Position {
 }

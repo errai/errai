@@ -29,8 +29,8 @@ import java.util.HashSet;
 class AuthenticationRules implements BootstrapExecution {
   private Logger log = LoggerFactory.getLogger(AuthenticationRules.class);
 
-  public void execute(BootstrapContext context) {
-    String requireAuthenticationForAll = "errai.require_authentication_for_all";
+  public void execute(final BootstrapContext context) {
+    final String requireAuthenticationForAll = "errai.require_authentication_for_all";
 
     final ErraiServiceConfigurator config = context.getConfig();
 

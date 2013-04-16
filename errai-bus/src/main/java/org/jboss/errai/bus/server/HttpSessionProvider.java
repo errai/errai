@@ -150,19 +150,19 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       ((ServerLaundryList) LaundryListProviderFactory.get().getLaundryList(this)).cleanAll();
 
       if (sessionEndListeners == null) return;
-      SessionEndEvent event = new SessionEndEvent(this);
+      final SessionEndEvent event = new SessionEndEvent(this);
 
-      for (SessionEndListener sessionEndListener : sessionEndListeners) {
+      for (final SessionEndListener sessionEndListener : sessionEndListeners) {
         sessionEndListener.onSessionEnd(event);
       }
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
       if (this == o) return true;
       if (!(o instanceof HttpSessionWrapper)) return false;
 
-      HttpSessionWrapper that = (HttpSessionWrapper) o;
+      final HttpSessionWrapper that = (HttpSessionWrapper) o;
 
       if (remoteQueueID != null ? !remoteQueueID.equals(that.remoteQueueID) : that.remoteQueueID != null) return false;
       if (sessionId != null ? !sessionId.equals(that.sessionId) : that.sessionId != null) return false;

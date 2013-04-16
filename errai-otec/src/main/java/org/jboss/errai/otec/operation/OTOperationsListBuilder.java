@@ -21,6 +21,7 @@ import org.jboss.errai.otec.mutation.Data;
 import org.jboss.errai.otec.mutation.MutationType;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public interface OTOperationsListBuilder {

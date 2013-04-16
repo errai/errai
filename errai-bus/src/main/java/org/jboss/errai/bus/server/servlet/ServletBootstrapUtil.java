@@ -41,7 +41,7 @@ public final class ServletBootstrapUtil {
   public static ErraiService getService(final FilterConfig config) {
     return initService(new AbstractInitConfig() {
       @Override
-      public String getInitParameter(String parameter) {
+      public String getInitParameter(final String parameter) {
         return config.getInitParameter(parameter);
       }
 
@@ -51,7 +51,7 @@ public final class ServletBootstrapUtil {
       }
 
       @Override
-      public String getContextParameter(String paramater) {
+      public String getContextParameter(final String paramater) {
         return getServletContext().getInitParameter(paramater);
       }
     });
@@ -60,7 +60,7 @@ public final class ServletBootstrapUtil {
   public static ErraiService getService(final ServletConfig config) {
     return initService(new AbstractInitConfig() {
       @Override
-      public String getInitParameter(String parameter) {
+      public String getInitParameter(final String parameter) {
         return config.getInitParameter(parameter);
       }
 
@@ -70,7 +70,7 @@ public final class ServletBootstrapUtil {
       }
 
       @Override
-      public String getContextParameter(String paramater) {
+      public String getContextParameter(final String paramater) {
         return getServletContext().getInitParameter(paramater);
       }
     });
@@ -95,11 +95,10 @@ public final class ServletBootstrapUtil {
         ErraiConfigAttribs.AUTO_DISCOVER_SERVICES.set(configurator, autoDiscoverServices);
       }
 
-      String pathElement = ServletInitAttribs.WEBSOCKETS_PATH_ELEMENT
+      final String pathElement = ServletInitAttribs.WEBSOCKETS_PATH_ELEMENT
               .getInitOrContextValue(config, "in.erraiBusWebSocket");
 
-      String webSocketsEnabled = ServletInitAttribs.WEBSOCKETS_ENABLED.getInitOrContextValue(config);
-
+      final String webSocketsEnabled = ServletInitAttribs.WEBSOCKETS_ENABLED.getInitOrContextValue(config);
 
       if (webSocketsEnabled != null) {
         ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.set(configurator, webSocketsEnabled);

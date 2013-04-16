@@ -59,8 +59,8 @@ public class Transformer {
       transactionLog.appendLog(remoteOp);
     }
     else {
-      for (OTOperation localOp : localOps) {
-        OpPair opPair = transform(remoteOp, localOp);
+      for (final OTOperation localOp : localOps) {
+        final OpPair opPair = transform(remoteOp, localOp);
 
         final OTOperation localOpPrime = opPair.getLocalOp();
         localOpPrime.apply(entity);
@@ -73,28 +73,28 @@ public class Transformer {
     return remoteOps;
   }
 
-  private OpPair transform(OTOperation remoteOp, OTOperation localOp) {
+  private OpPair transform(final OTOperation remoteOp, final OTOperation localOp) {
     OTOperation remoteOpPrime;
     OTOperation localOpPrime = null;
 
-    List<Mutation> localMutations = new ArrayList<Mutation>();
-    List<Mutation> remoteMutations = new ArrayList<Mutation>();
+    final List<Mutation> localMutations = new ArrayList<Mutation>();
+    final List<Mutation> remoteMutations = new ArrayList<Mutation>();
 
-    Iterator<Mutation> remoteOpMutations = remoteOp.getMutations().iterator();
-    Iterator<Mutation> localOpMutations = localOp.getMutations().iterator();
+    final Iterator<Mutation> remoteOpMutations = remoteOp.getMutations().iterator();
+    final Iterator<Mutation> localOpMutations = localOp.getMutations().iterator();
 
 
     int offset = 0;
 
     while (remoteOpMutations.hasNext()) {
-      Mutation rm = remoteOpMutations.next();
-      Mutation lm = localOpMutations.next();
+      final Mutation rm = remoteOpMutations.next();
+      final Mutation lm = localOpMutations.next();
 
-      IndexPosition rmIdx = (IndexPosition) rm.getPosition();
-      IndexPosition lmIdx = (IndexPosition) lm.getPosition();
+      final IndexPosition rmIdx = (IndexPosition) rm.getPosition();
+      final IndexPosition lmIdx = (IndexPosition) lm.getPosition();
 
 
-      int diff = rmIdx.getPosition() - lmIdx.getPosition();
+      final int diff = rmIdx.getPosition() - lmIdx.getPosition();
 
       if (diff < 0) {
         localMutations.add(rm);

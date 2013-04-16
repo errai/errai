@@ -21,6 +21,7 @@ import org.jboss.errai.otec.operation.OTOperation;
 import java.util.List;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public interface TransactionLog {

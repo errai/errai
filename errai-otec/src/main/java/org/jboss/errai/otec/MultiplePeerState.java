@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
  * @author Christian Sadilek
  * @author Mike Brock
  */
@@ -35,17 +34,17 @@ public class MultiplePeerState implements PeerState {
   private final Map<OTEntity, Set<OTPeer>> associatedEntities = new ConcurrentHashMap<OTEntity, Set<OTPeer>>();
 
   @Override
-  public void registerPeer(OTPeer peer) {
+  public void registerPeer(final OTPeer peer) {
     peers.put(peer.getId(), peer);
   }
 
   @Override
-  public OTPeer getPeer(String peerId) {
+  public OTPeer getPeer(final String peerId) {
     return peers.get(peerId);
   }
 
   @Override
-  public Set<OTPeer> getPeersFor(OTEntity entity) {
+  public Set<OTPeer> getPeersFor(final OTEntity entity) {
     final Set<OTPeer> otPeers = associatedEntities.get(entity);
     return otPeers == null ? Collections.<OTPeer>emptySet() : otPeers;
   }
@@ -56,7 +55,7 @@ public class MultiplePeerState implements PeerState {
   }
 
   @Override
-  public void associateEntity(OTPeer peer, OTEntity entity) {
+  public void associateEntity(final OTPeer peer, final OTEntity entity) {
      Set<OTPeer> peers = associatedEntities.get(entity);
 
     if (peers == null) {
@@ -67,7 +66,7 @@ public class MultiplePeerState implements PeerState {
   }
 
   @Override
-  public void disassociateEntity(OTPeer peer, OTEntity entity) {
+  public void disassociateEntity(final OTPeer peer, final OTEntity entity) {
     final Set<OTPeer> peers = associatedEntities.get(entity);
     if (peer != null) {
       peers.remove(peer);
@@ -75,7 +74,7 @@ public class MultiplePeerState implements PeerState {
   }
 
   @Override
-  public boolean shouldForwardOperation(OTOperation operation) {
+  public boolean shouldForwardOperation(final OTOperation operation) {
     return true;
   }
 }
