@@ -77,4 +77,9 @@ public class MultiplePeerState implements PeerState {
   public boolean shouldForwardOperation(final OTOperation operation) {
     return true;
   }
+
+  @Override
+  public boolean hasConflictResolutionPrecedence() {
+    return true;
+  }
 }

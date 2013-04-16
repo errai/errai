@@ -22,7 +22,6 @@ import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.StringMutation;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
-import org.jboss.errai.otec.operation.OpPair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,18 +33,26 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Transformer {
+  private final OTEngine engine;
+  private final boolean remoteWins;
   private final OTEntity entity;
   private final OTPeer peer;
   private final OTOperation remoteOp;
 
-  private Transformer(final OTEntity entity, final OTPeer peer, final OTOperation remoteOp) {
+  private Transformer(final OTEngine engine, final boolean remoteWins, final OTEntity entity, final OTPeer peer, final OTOperation remoteOp) {
+    this.engine = engine;
+    this.remoteWins = remoteWins;
     this.entity = entity;
     this.peer = peer;
     this.remoteOp = remoteOp;
   }
 
-  public static Transformer createTransformer(final OTEntity entity, final OTPeer peer, final OTOperation operation) {
-    return new Transformer(entity, peer, operation);
+  public static Transformer createTransformerLocalPrecedence(final OTEngine engine, final OTEntity entity, final OTPeer peer, final OTOperation operation) {
+    return new Transformer(engine, false, entity, peer, operation);
+  }
+
+  public static Transformer createTransformerRemotePrecedence(final OTEngine engine, final OTEntity entity, final OTPeer peer, final OTOperation operation) {
+    return new Transformer(engine, true, entity, peer, operation);
   }
 
   public List<OTOperation> transform() {
@@ -57,28 +64,23 @@ public class Transformer {
     if (localOps.isEmpty()) {
       remoteOp.apply(entity);
       transactionLog.appendLog(remoteOp);
+      remoteOps.add(remoteOp);
     }
     else {
       for (final OTOperation localOp : localOps) {
-        final OpPair opPair = transform(remoteOp, localOp);
-
-        final OTOperation localOpPrime = opPair.getLocalOp();
+        final OTOperation localOpPrime = transform(remoteOp, localOp);
         localOpPrime.apply(entity);
         transactionLog.appendLog(localOpPrime);
-
-        remoteOps.add(opPair.getRemoteOp());
+        remoteOps.add(localOpPrime);
       }
     }
 
     return remoteOps;
   }
 
-  private OpPair transform(final OTOperation remoteOp, final OTOperation localOp) {
-    OTOperation remoteOpPrime;
-    OTOperation localOpPrime = null;
-
-    final List<Mutation> localMutations = new ArrayList<Mutation>();
-    final List<Mutation> remoteMutations = new ArrayList<Mutation>();
+  private OTOperation transform(final OTOperation remoteOp, final OTOperation localOp) {
+    OTOperation transformedOp = null;
+    final List<Mutation> transformedMutations = new ArrayList<Mutation>();
 
     final Iterator<Mutation> remoteOpMutations = remoteOp.getMutations().iterator();
     final Iterator<Mutation> localOpMutations = localOp.getMutations().iterator();
@@ -93,16 +95,28 @@ public class Transformer {
       final IndexPosition rmIdx = (IndexPosition) rm.getPosition();
       final IndexPosition lmIdx = (IndexPosition) lm.getPosition();
 
-
       final int diff = rmIdx.getPosition() - lmIdx.getPosition();
 
       if (diff < 0) {
-        localMutations.add(rm);
+        transformedMutations.add(rm);
       }
       else if (diff == 0) {
-        System.out.println();
+        switch (rm.getType()) {
+          case Insert:
+            if (!remoteWins) {
+              offset++;
+            }
+            break;
+          case Delete:
+            if (!remoteWins) {
+              offset--;
+            }
+            break;
+        }
+        transformedMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset), (CharacterData) rm.getData()));
       }
-      else {
+      else if (diff >= 0) {
+
         switch (rm.getType()) {
           case Insert:
             offset--;
@@ -111,14 +125,13 @@ public class Transformer {
             offset++;
             break;
         }
-        localMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset), (CharacterData) rm.getData()));
+        transformedMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset), (CharacterData) rm.getData()));
       }
 
-      localOpPrime = OTOperationImpl.createLocalOnlyOperation(localMutations, entity.getId(), entity.getRevision());
+      transformedOp = OTOperationImpl.createLocalOnlyOperation(engine, transformedMutations, entity.getId(), entity.getRevision());
     }
 
-
-    return OpPair.of(remoteOp, localOpPrime);
+    return transformedOp;
   }
 
 }

@@ -73,4 +73,9 @@ public class SinglePeerState implements PeerState {
   public boolean shouldForwardOperation(final OTOperation operation) {
     return operation.shouldPropagate();
   }
+
+  @Override
+  public boolean hasConflictResolutionPrecedence() {
+    return false;
+  }
 }

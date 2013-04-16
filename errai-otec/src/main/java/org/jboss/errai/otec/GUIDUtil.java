@@ -27,9 +27,7 @@ public final class GUIDUtil {
   private GUIDUtil() {
   }
 
-  private static final char[] chars =
-      {'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
-
+  private static final char[] chars = "abcdef1234567890".toCharArray();
 
   private static final Object seedLock = new Object();
   private static final int MAX = Short.MAX_VALUE;

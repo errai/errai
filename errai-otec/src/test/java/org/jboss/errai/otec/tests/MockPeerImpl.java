@@ -48,9 +48,11 @@ public class MockPeerImpl implements OTPeer {
 
   @Override
   public void send(Integer entityId, OTOperation operation) {
+    System.out.println("TX: " + operation + "; from=" + localEngine + "; to=" + remoteEngine);
+
     //note: this is simulating sending these operations over the wire.
     remoteEngine.getReceiveHandler(localEngine.getId(), entityId)
-        .receive(OTOperationImpl.createLocalOnlyOperation(operation));
+        .receive(OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
 
     lastTransmittedSequencees.put(entityId, operation.getRevision());
   }
@@ -75,6 +77,10 @@ public class MockPeerImpl implements OTPeer {
   public int getLastTransmittedSequence(OTEntity entity) {
     final Integer integer = lastTransmittedSequencees.get(entity.getId());
     return integer == null ? 0 : integer;
+  }
+
+  public String toString() {
+    return remoteEngine.getEngineName();
   }
 
 }

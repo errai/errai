@@ -21,7 +21,6 @@ package org.jboss.errai.otec.operation;
  * @author Mike Brock
  */
 public class OpPair {
-
   private final OTOperation remoteOp;
   private final OTOperation localOp;
 

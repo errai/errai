@@ -55,16 +55,22 @@ public class TransactionLogImpl implements TransactionLog {
     final ListIterator<OTOperation> operationListIterator = transactionLog.listIterator(transactionLog.size());
     final List<OTOperation> operationList = new ArrayList<OTOperation>();
 
+    int lastRev = -1;
     while (operationListIterator.hasPrevious()) {
       final OTOperation previous = operationListIterator.previous();
       operationList.add(previous);
-      if (previous.getRevision() == revision) {
+      if ((lastRev = previous.getRevision()) == revision) {
         Collections.reverse(operationList);
         return operationList;
       }
     }
 
-    throw new OTException("unable to find revision in log: " + revision);
+    if ((revision - 1) == lastRev) {
+      return Collections.emptyList();
+    }
+    else {
+      throw new OTException("unable to find revision in log: " + revision);
+    }
   }
 
   @Override

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.operation;
 
+import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
 
@@ -27,15 +28,17 @@ import java.util.List;
  * @author Mike Brock
  */
 public class OTOperationImpl implements OTOperation {
+  private final OTEngine engine;
   private final List<Mutation> mutations;
   private final Integer entityId;
   private final Integer revision;
   private final boolean propagate;
 
-  private OTOperationImpl(final List<Mutation> mutationList,
+  private OTOperationImpl(OTEngine engine, final List<Mutation> mutationList,
                           final Integer entityId,
                           final Integer revision,
                           final boolean propagate) {
+    this.engine = engine;
 
     this.mutations = mutationList;
     this.entityId = entityId;
@@ -43,22 +46,24 @@ public class OTOperationImpl implements OTOperation {
     this.propagate = propagate;
   }
 
-  public static OTOperation createOperation(final List<Mutation> mutationList,
+  public static OTOperation createOperation(final OTEngine engine,
+                                            final List<Mutation> mutationList,
                                             final Integer entityId,
                                             final Integer revision) {
 
-    return new OTOperationImpl(mutationList, entityId, revision, true);
+    return new OTOperationImpl(engine, mutationList, entityId, revision, true);
   }
 
-  public static OTOperation createLocalOnlyOperation(final List<Mutation> mutationList,
+  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
+                                                     final List<Mutation> mutationList,
                                                      final Integer entityId,
                                                      final Integer revision) {
 
-    return new OTOperationImpl(mutationList, entityId, revision, false);
+    return new OTOperationImpl(engine, mutationList, entityId, revision, false);
   }
 
-  public static OTOperation createLocalOnlyOperation(final OTOperation operation) {
-    return new OTOperationImpl(operation.getMutations(), operation.getEntityId(), operation.getRevision(), false);
+  public static OTOperation createLocalOnlyOperation(final OTEngine engine, final OTOperation operation) {
+    return new OTOperationImpl(engine, operation.getMutations(), operation.getEntityId(), operation.getRevision(), false);
   }
 
 
@@ -83,6 +88,9 @@ public class OTOperationImpl implements OTOperation {
     for (final Mutation mutation : mutations) {
       mutation.apply(entity.getState());
     }
+
+    System.out.println("APPLY: " + toString() + "; on=" + engine);
+
     entity.incrementRevision();
     return shouldPropagate();
   }
@@ -90,6 +98,11 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public boolean shouldPropagate() {
     return propagate;
+  }
+
+  @Override
+  public OTEngine getEngine() {
+    return engine;
   }
 
   @Override

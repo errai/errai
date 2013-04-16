@@ -1,18 +1,18 @@
 /*
- * Copyright 2013 JBoss, by Red Hat, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2013 JBoss, by Red Hat, Inc
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package org.jboss.errai.otec;
 
@@ -89,16 +89,25 @@ public class OTEngineImpl implements OTEngine {
     return new ReceiveHandler() {
       @Override
       public void receive(final OTOperation operation) {
-        Transformer.createTransformer(entity, peer, operation).transform();
+        final List<OTOperation> transformedOps;
+
+        if (peerState.hasConflictResolutionPrecedence()) {
+          transformedOps = Transformer.createTransformerLocalPrecedence(OTEngineImpl.this, entity, peer, operation).transform();
+        }
+        else {
+          transformedOps = Transformer.createTransformerRemotePrecedence(OTEngineImpl.this, entity, peer, operation).transform();
+        }
 
         // broadcast to all other peers subscribed to this entity
         final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
         for (final OTPeer otPeer : peers) {
-          if (otPeer != peer && getPeerState().shouldForwardOperation(operation)) {
-            otPeer.send(entityId, operation);
-          }
-          else {
-            System.out.println(getEngineName() + " DID NOT PROPAGATE:" + operation);
+          for (OTOperation op : transformedOps) {
+            if (otPeer != peer) {
+              otPeer.send(entityId, op);
+            }
+//            else {
+//              System.out.println(getEngineName() + " DID NOT PROPAGATE:" + op + "; to peer: " + otPeer);
+//            }
           }
         }
       }
@@ -134,6 +143,7 @@ public class OTEngineImpl implements OTEngine {
   public void notifyOperation(final OTOperation operation) {
     final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
     final boolean propagate = operation.apply(entity);
+    // System.out.println("APPLY " + operation + "; on=" + getEngineName());
     entity.getTransactionLog().appendLog(operation);
 
     if (propagate && mode == OTEngineMode.Online) {
@@ -162,7 +172,7 @@ public class OTEngineImpl implements OTEngine {
 
           @Override
           public OTOperation build() {
-            return OTOperationImpl.createOperation(operationList, entity.getId(), entity.getRevision());
+            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId(), entity.getRevision());
           }
 
           @Override

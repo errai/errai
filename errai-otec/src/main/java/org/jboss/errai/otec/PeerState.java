@@ -36,4 +36,6 @@ public interface PeerState {
   public void disassociateEntity(OTPeer peer, OTEntity entity);
 
   public boolean shouldForwardOperation(OTOperation operation);
+
+  public boolean hasConflictResolutionPrecedence();
 }

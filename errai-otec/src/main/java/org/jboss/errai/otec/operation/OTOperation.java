@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.operation;
 
+import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
 
@@ -35,4 +36,6 @@ public interface OTOperation {
   boolean shouldPropagate();
 
   boolean apply(OTEntity entity);
+
+  OTEngine getEngine();
 }

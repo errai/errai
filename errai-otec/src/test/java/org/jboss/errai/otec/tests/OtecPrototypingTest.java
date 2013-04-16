@@ -133,6 +133,44 @@ public class OtecPrototypingTest {
     assertEquals("xab", clientBEntity.getState().get());
   }
 
+  @Test
+  public void testGoat() {
+    setupEngines("go");
+
+    final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation insA = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, IndexPosition.of(2), CharacterData.of('a'))
+        .build();
+
+    final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation insT = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, IndexPosition.of(2), CharacterData.of('t'))
+        .build();
+
+    suspendEngines();
+
+    clientEngineA.notifyOperation(insA);
+    clientEngineB.notifyOperation(insT);
+
+    resumeEngines();
+
+    assertEquals(2, serverEntity.getTransactionLog().getLog().size());
+    assertEquals("goat", serverEntity.getState().get());
+
+    assertEquals(2, clientAEntity.getTransactionLog().getLog().size());
+    assertEquals("goat", clientAEntity.getState().get());
+
+    assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
+    assertEquals("goat", clientBEntity.getState().get());
+
+    System.out.println("ClientA: " + clientAEntity.getTransactionLog());
+    System.out.println("ClientB: " + clientBEntity.getTransactionLog());
+    System.out.println("Server : " + serverEntity.getTransactionLog());
+  }
+
+
   private void setupEngines(String initialState) {
     clientEngineA = OTEngineImpl.createEngineWithSinglePeer("ClientA");
     clientEngineB = OTEngineImpl.createEngineWithSinglePeer("ClientB");
