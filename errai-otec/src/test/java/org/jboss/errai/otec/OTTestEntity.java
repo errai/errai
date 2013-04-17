@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.tests;
+package org.jboss.errai.otec;
 
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.OTEntityImpl;

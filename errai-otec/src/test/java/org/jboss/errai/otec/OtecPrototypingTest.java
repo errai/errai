@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.tests;
+package org.jboss.errai.otec;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -22,13 +22,8 @@ import static junit.framework.Assert.assertTrue;
 import org.jboss.errai.otec.mutation.CharacterData;
 import org.jboss.errai.otec.mutation.IndexPosition;
 import org.jboss.errai.otec.mutation.MutationType;
-import org.jboss.errai.otec.OTEngine;
-import org.jboss.errai.otec.OTEngineImpl;
-import org.jboss.errai.otec.OTEngineMode;
-import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
-import org.jboss.errai.otec.StringState;
 import org.junit.Test;
 
 /**
@@ -134,7 +129,7 @@ public class OtecPrototypingTest {
   }
 
   @Test
-  public void testGoat() {
+  public void testConflictingInserts() {
     setupEngines("go");
 
     final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
@@ -164,12 +159,40 @@ public class OtecPrototypingTest {
 
     assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
     assertEquals("goat", clientBEntity.getState().get());
-
-    System.out.println("ClientA: " + clientAEntity.getTransactionLog());
-    System.out.println("ClientB: " + clientBEntity.getTransactionLog());
-    System.out.println("Server : " + serverEntity.getTransactionLog());
   }
 
+  @Test
+  public void testConflictingInsertAndDelete() {
+    setupEngines("goa");
+
+    final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation delA = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Delete, IndexPosition.of(2))
+        .build();
+
+    final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation insT = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, IndexPosition.of(2), CharacterData.of('t'))
+        .build();
+
+    suspendEngines();
+
+    clientEngineA.notifyOperation(delA);
+    clientEngineB.notifyOperation(insT);
+
+    resumeEngines();
+
+    assertEquals(2, serverEntity.getTransactionLog().getLog().size());
+    assertEquals("got", serverEntity.getState().get());
+
+    assertEquals(2, clientAEntity.getTransactionLog().getLog().size());
+    assertEquals("got", clientAEntity.getState().get());
+
+    assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
+    assertEquals("got", clientBEntity.getState().get());
+  }
 
   private void setupEngines(String initialState) {
     clientEngineA = OTEngineImpl.createEngineWithSinglePeer("ClientA");
