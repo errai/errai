@@ -677,8 +677,21 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       }
       else if (getJavaMember(attr) instanceof Method) {
 
+        String memberName = getJavaMember(attr).getName();
+
         // hack "getFoo" to "setFoo" by replacing first letter with s
-        String setterMethodName = "s" + getJavaMember(attr).getName().substring(1);
+        String setterMethodName;
+        if (memberName.startsWith("get")) {
+          setterMethodName = "set" + memberName.substring(3);
+        }
+        else if (memberName.startsWith("is")) {
+          setterMethodName = "set" + memberName.substring(2);
+        }
+        else {
+          throw new RuntimeException(
+                  "I don't know how to convert method " + getJavaMember(attr) + " on entity type " +
+                          attr.getDeclaringType().getJavaType().getName() + " into a setter");
+        }
 
         return Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam))
             .invoke(setterMethodName,

@@ -132,7 +132,7 @@ public class MethodAccessedZentity {
     this.primitiveBool = primitiveBool;
   }
 
-  public Boolean getBoxedBool() {
+  public Boolean isBoxedBool() {
     return boxedBool;
   }
 
