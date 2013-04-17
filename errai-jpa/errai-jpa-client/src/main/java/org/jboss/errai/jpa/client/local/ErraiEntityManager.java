@@ -200,17 +200,31 @@ public class ErraiEntityManager implements EntityManager {
       switch (oldState) {
       case NEW:
       case DETACHED:
+        boolean sendUpdateEvent = true; // if false, send persist event
         X mergeTarget = find(key, Collections.<String,Object>emptyMap());
         if (mergeTarget == null) {
+          sendUpdateEvent = false;
           mergeTarget = entityType.newInstance();
         }
         entityType.mergeState(this, mergeTarget, entity);
         entityToReturn = mergeTarget;
 
-        entityType.deliverPrePersist(mergeTarget);
+        if (sendUpdateEvent) {
+          entityType.deliverPreUpdate(mergeTarget);
+        }
+        else {
+          entityType.deliverPrePersist(mergeTarget);
+        }
+
         persistenceContext.put(key, mergeTarget);
         backend.put(key, mergeTarget);
-        entityType.deliverPostPersist(mergeTarget);
+
+        if (sendUpdateEvent) {
+          entityType.deliverPostUpdate(mergeTarget);
+        }
+        else {
+          entityType.deliverPostPersist(mergeTarget);
+        }
         break;
       case MANAGED:
         // no-op, but cascade to relatives
