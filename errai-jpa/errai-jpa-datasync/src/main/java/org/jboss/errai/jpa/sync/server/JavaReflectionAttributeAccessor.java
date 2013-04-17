@@ -71,8 +71,19 @@ public class JavaReflectionAttributeAccessor implements JpaAttributeAccessor {
       }
       else if (member instanceof Method) {
         Method m = (Method) member;
+        if (m.getName().startsWith("get")) {
+          m = m.getDeclaringClass().getMethod("set" + m.getName().substring(3), attr.getJavaType());
+        }
+        else if (m.getName().startsWith("is")) {
+          m = m.getDeclaringClass().getMethod("set" + m.getName().substring(2), attr.getJavaType());
+        }
         m.setAccessible(true);
-        m.invoke(entity, value);
+        try {
+          m.invoke(entity, value);
+        }
+        catch (IllegalArgumentException e) {
+          throw new RuntimeException("Failed to invoke method " + m, e);
+        }
       }
       else {
         throw new RuntimeException("Java member " + member + " isn't a field or a method! Eek!");
@@ -82,6 +93,12 @@ public class JavaReflectionAttributeAccessor implements JpaAttributeAccessor {
       throw new RuntimeException(e);
     }
     catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+    catch (SecurityException e) {
+      throw new RuntimeException(e);
+    }
+    catch (NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
   }
