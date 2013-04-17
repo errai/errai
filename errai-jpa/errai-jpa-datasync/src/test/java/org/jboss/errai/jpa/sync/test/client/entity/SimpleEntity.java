@@ -1,4 +1,4 @@
-package org.jboss.errai.jpa.sync.test.entity;
+package org.jboss.errai.jpa.sync.test.client.entity;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;

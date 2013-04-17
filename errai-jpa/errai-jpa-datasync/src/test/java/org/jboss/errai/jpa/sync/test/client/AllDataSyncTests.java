@@ -28,7 +28,9 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-  SyncableDataSetUnitTest.class})
+  SyncableDataSetUnitTest.class,
+  ErraiJpaAttributeAccessorTest.class,
+  JavaReflectionAttributeAccessorTest.class})
 public class AllDataSyncTests {
 
 }

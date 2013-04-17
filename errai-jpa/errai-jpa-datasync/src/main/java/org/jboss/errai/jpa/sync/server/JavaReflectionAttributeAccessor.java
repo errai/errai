@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 
 import javax.persistence.metamodel.Attribute;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.jpa.sync.client.shared.JpaAttributeAccessor;
 
 /**
@@ -17,16 +19,22 @@ import org.jboss.errai.jpa.sync.client.shared.JpaAttributeAccessor;
  */
 public class JavaReflectionAttributeAccessor implements JpaAttributeAccessor {
 
+  @SuppressWarnings("unchecked")
   @Override
   public <X, Y> Y get(Attribute<X, Y> attr, X entity) {
 
     Member member = attr.getJavaMember();
+    Class<Y> attrType = attr.getJavaType();
     try {
       if (member instanceof Field) {
         Field f = (Field) member;
         f.setAccessible(true);
         try {
-          return attr.getJavaType().cast(f.get(entity));
+          if (attrType.isPrimitive()) {
+            MetaClass mc = MetaClassFactory.get(attrType);
+            attrType = (Class<Y>) mc.asBoxed().asClass();
+          }
+          return attrType.cast(f.get(entity));
         } catch (ClassCastException e) {
           throw new ClassCastException("Attribute = " + f + " value = " + f.get(entity));
         }
@@ -34,7 +42,11 @@ public class JavaReflectionAttributeAccessor implements JpaAttributeAccessor {
       else if (member instanceof Method) {
         Method m = (Method) member;
         m.setAccessible(true);
-        return attr.getJavaType().cast(m.invoke(entity));
+        if (attrType.isPrimitive()) {
+          MetaClass mc = MetaClassFactory.get(attrType);
+          attrType = (Class<Y>) mc.asBoxed().asClass();
+        }
+        return attrType.cast(m.invoke(entity));
       }
       else {
         throw new RuntimeException("Java member " + member + " isn't a field or a method! Eek!");
@@ -55,12 +67,12 @@ public class JavaReflectionAttributeAccessor implements JpaAttributeAccessor {
       if (member instanceof Field) {
         Field f = (Field) member;
         f.setAccessible(true);
-        f.set(entity, null); // TODO handle primitive values
+        f.set(entity, value);
       }
       else if (member instanceof Method) {
         Method m = (Method) member;
         m.setAccessible(true);
-        m.invoke(entity, (Object) null); // TODO handle primitive values
+        m.invoke(entity, value);
       }
       else {
         throw new RuntimeException("Java member " + member + " isn't a field or a method! Eek!");

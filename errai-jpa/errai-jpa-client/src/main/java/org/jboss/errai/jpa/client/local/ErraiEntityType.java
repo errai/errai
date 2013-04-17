@@ -563,11 +563,20 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <Y> ErraiSingularAttribute<? super X, Y> getSingularAttribute(String name,
       Class<Y> type) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+    for (Attribute<? super X, ?> attr : singularAttributes) {
+      if (attr.getName().equals(name)) {
+        if (attr.getJavaType() != type) {
+          throw new ClassCastException("Attribute \"" + name + "\" of entity " + getJavaType() +
+                  " is not of the requested type " + type);
+        }
+        return (ErraiSingularAttribute<? super X, Y>) attr;
+      }
+    }
+    return null;
   }
 
   @Override
