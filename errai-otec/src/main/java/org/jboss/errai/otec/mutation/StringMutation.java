@@ -33,6 +33,10 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Char
     this.data = data;
   }
 
+  public static StringMutation noop(IndexPosition position) {
+    return new StringMutation(MutationType.Noop, position, null);
+  }
+
   @Override
   public MutationType getType() {
     return type;
@@ -64,7 +68,12 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Char
 
   @Override
   public String toString() {
-    return type + "[" + getPosition() + ", \"" + getData() + "\"]";
+    if (getData() == null) {
+      return type + "[" + getPosition() + "]";
+    }
+    else {
+      return type + "[" + getPosition() + ", \"" + getData() + "\"]";
+    }
   }
 }
 

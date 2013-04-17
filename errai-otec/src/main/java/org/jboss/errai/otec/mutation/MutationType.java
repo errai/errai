@@ -21,5 +21,5 @@ package org.jboss.errai.otec.mutation;
  * @author Mike Brock
  */
 public enum MutationType {
-  Cursor, Insert, Retain, Delete
+  Cursor, Insert, Retain, Delete, Noop
 }

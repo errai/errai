@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.operation.OTOperation;
 
 import java.util.ArrayList;
@@ -30,12 +31,30 @@ import java.util.ListIterator;
  * @author Mike Brock
  */
 public class TransactionLogImpl implements TransactionLog {
+  private final List<StateSnapshot> stateSnapshots = new ArrayList<StateSnapshot>();
   private final List<OTOperation> transactionLog = new LinkedList<OTOperation>();
+
+  private TransactionLogImpl(final OTEntity entity) {
+    stateSnapshots.add(new StateSnapshot(entity.getRevision(), entity.getState().snapshot()));
+  }
+
+  public static TransactionLog createTransactionLog(final OTEntity entity) {
+    return new TransactionLogImpl(entity);
+  }
 
   @Override
   public List<OTOperation> getLog() {
     synchronized (transactionLog) {
-      return new ArrayList<OTOperation>(transactionLog);
+      return transactionLog;
+    }
+  }
+
+  @Override
+  public void pruneFromOperation(final OTOperation operation) {
+    final ListIterator<OTOperation> delIter = transactionLog.listIterator(transactionLog.indexOf(operation));
+    while (delIter.hasNext()) {
+      delIter.next().removeFromCanonHistory();
+      //   delIter.remove();
     }
   }
 
@@ -55,17 +74,16 @@ public class TransactionLogImpl implements TransactionLog {
     final ListIterator<OTOperation> operationListIterator = transactionLog.listIterator(transactionLog.size());
     final List<OTOperation> operationList = new ArrayList<OTOperation>();
 
-    int lastRev = -1;
     while (operationListIterator.hasPrevious()) {
       final OTOperation previous = operationListIterator.previous();
       operationList.add(previous);
-      if ((lastRev = previous.getRevision()) == revision) {
+      if (previous.getRevision() == revision) {
         Collections.reverse(operationList);
         return operationList;
       }
     }
 
-    if ((revision - 1) == lastRev) {
+    if ((revision - 1) == transactionLog.get(transactionLog.size() - 1).getRevision()) {
       return Collections.emptyList();
     }
     else {
@@ -74,12 +92,66 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
+  public List<OTOperation> getCanonLog() {
+    final List<OTOperation> canonLog = new ArrayList<OTOperation>();
+    for (final OTOperation operation : transactionLog) {
+      if (operation.isCanon()) {
+        canonLog.add(operation);
+      }
+    }
+    return canonLog;
+  }
+
+  @Override
+  public State getEffectiveStateForRevision(final int revision) {
+    final StateSnapshot latestSnapshotState = getLatestParentSnapshot(revision);
+    final State stateToTranslate = latestSnapshotState.getState().snapshot();
+    final ListIterator<OTOperation> operationListIterator = transactionLog.listIterator(transactionLog.size());
+
+    while (operationListIterator.hasPrevious()) {
+      final OTOperation previous = operationListIterator.previous();
+
+      if (previous.getRevision().equals(latestSnapshotState.getRevision())) {
+        break;
+      }
+    }
+
+    while (operationListIterator.hasNext()) {
+      final OTOperation op = operationListIterator.next();
+
+      if (op.getRevision() < revision) {
+        for (final Mutation mutation : op.getMutations()) {
+          mutation.apply(stateToTranslate);
+        }
+      }
+    }
+
+    return stateToTranslate;
+  }
+
+  private StateSnapshot getLatestParentSnapshot(final int revision) {
+    final ListIterator<StateSnapshot> snapshotListIterator = stateSnapshots.listIterator(stateSnapshots.size());
+
+    while (snapshotListIterator.hasPrevious()) {
+      final StateSnapshot stateSnapshot = snapshotListIterator.previous();
+      if (stateSnapshot.getRevision() <= revision) {
+        return stateSnapshot;
+      }
+    }
+
+    throw new RuntimeException("no parent state for: " + revision);
+  }
+
+  @Override
   public void appendLog(final OTOperation operation) {
     synchronized (transactionLog) {
+      if (operation.isNoop()) {
+        return;
+      }
 
       for (final OTOperation op : transactionLog) {
-        if (op.getRevision() == operation.getRevision()) {
-          throw new AssertionError("duplicate revision!");
+        if (op.getRevision().equals(operation.getRevision())) {
+          throw new RuntimeException("duplicate revision!");
         }
       }
 
@@ -88,7 +160,25 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   public String toString() {
-    return Arrays.toString(transactionLog.toArray());
+    return Arrays.toString(getCanonLog().toArray());
+  }
+
+  private static class StateSnapshot {
+    private final Integer revision;
+    private final State state;
+
+    private StateSnapshot(final Integer revision, final State state) {
+      this.revision = revision;
+      this.state = state;
+    }
+
+    private Integer getRevision() {
+      return revision;
+    }
+
+    private State getState() {
+      return state;
+    }
   }
 
 }

@@ -22,4 +22,6 @@ package org.jboss.errai.otec;
  */
 public interface State<T> {
   public T get();
+  public State<T> snapshot();
+  public void syncStateFrom(State<T> fromState);
 }

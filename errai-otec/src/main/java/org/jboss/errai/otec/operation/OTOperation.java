@@ -38,4 +38,12 @@ public interface OTOperation {
   boolean apply(OTEntity entity);
 
   OTEngine getEngine();
+
+  boolean isNoop();
+
+  OTOperation getBasedOn(Integer revision);
+
+  boolean isCanon();
+
+  void removeFromCanonHistory();
 }

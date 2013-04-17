@@ -27,11 +27,12 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   private int revisionCounter = 0;
   private int revision = 0;
 
-  private TransactionLog transactionLog = new TransactionLogImpl();
+  private TransactionLog transactionLog;
 
   public OTEntityImpl(final Integer entityId, final T entity) {
     this.entityId = entityId;
     this.entity = entity;
+    this.transactionLog = TransactionLogImpl.createTransactionLog(this);
   }
 
   @Override

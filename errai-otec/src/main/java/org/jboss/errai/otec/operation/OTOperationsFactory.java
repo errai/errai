@@ -23,7 +23,5 @@ import org.jboss.errai.otec.OTEntity;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface OTOperationsFactory {
-
-
   public OTOperationsListBuilder createOperation(OTEntity entity);
 }

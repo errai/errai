@@ -30,5 +30,11 @@ public interface TransactionLog {
 
   public List<OTOperation> getLogFromId(int revision);
 
+  public List<OTOperation> getCanonLog();
+
   public void appendLog(OTOperation operation);
+
+  State getEffectiveStateForRevision(int revision);
+
+  void pruneFromOperation(OTOperation operation);
 }

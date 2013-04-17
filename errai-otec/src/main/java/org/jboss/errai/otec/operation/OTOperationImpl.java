@@ -34,12 +34,13 @@ public class OTOperationImpl implements OTOperation {
   private final Integer revision;
   private final boolean propagate;
 
+  private boolean nonCanon;
+
   private OTOperationImpl(OTEngine engine, final List<Mutation> mutationList,
                           final Integer entityId,
                           final Integer revision,
                           final boolean propagate) {
     this.engine = engine;
-
     this.mutations = mutationList;
     this.entityId = entityId;
     this.revision = revision;
@@ -66,7 +67,6 @@ public class OTOperationImpl implements OTOperation {
     return new OTOperationImpl(engine, operation.getMutations(), operation.getEntityId(), operation.getRevision(), false);
   }
 
-
   @Override
   public List<Mutation> getMutations() {
     return mutations;
@@ -85,14 +85,27 @@ public class OTOperationImpl implements OTOperation {
   @SuppressWarnings("unchecked")
   @Override
   public boolean apply(final OTEntity entity) {
+    if (nonCanon)
+      return shouldPropagate();
+
     for (final Mutation mutation : mutations) {
       mutation.apply(entity.getState());
     }
 
-    System.out.println("APPLY: " + toString() + "; on=" + engine);
-
+    System.out.println("APPLY: " + toString() + "; on=" + engine + "; stateResult=[\"" + entity.getState().get() + "\"]");
     entity.incrementRevision();
+
     return shouldPropagate();
+  }
+
+  @Override
+  public void removeFromCanonHistory() {
+    nonCanon = true;
+  }
+
+  @Override
+  public boolean isCanon() {
+    return !nonCanon;
   }
 
   @Override
@@ -106,6 +119,16 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
+  public boolean isNoop() {
+    return mutations.isEmpty();
+  }
+
+  @Override
+  public OTOperation getBasedOn(final Integer revision) {
+    return new OTOperationImpl(engine, mutations, entityId, revision, propagate);
+  }
+
+  @Override
   public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof OTOperationImpl)) return false;
@@ -113,15 +136,15 @@ public class OTOperationImpl implements OTOperation {
     final OTOperationImpl that = (OTOperationImpl) o;
 
     return !(entityId != null ? !entityId.equals(that.entityId) : that.entityId != null)
-        && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null)
-        && !(revision != null ? !revision.equals(that.revision) : that.revision != null);
+        && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null);
+    //&& !(revision != null ? !revision.equals(that.revision) : that.revision != null);
   }
 
   @Override
   public int hashCode() {
     int result = mutations != null ? mutations.hashCode() : 0;
     result = 31 * result + (entityId != null ? entityId.hashCode() : 0);
-    result = 31 * result + (revision != null ? revision.hashCode() : 0);
+    //  result = 31 * result + (revision != null ? revision.hashCode() : 0);
     return result;
   }
 

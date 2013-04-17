@@ -19,12 +19,12 @@ package org.jboss.errai.otec;
 import org.jboss.errai.otec.mutation.CharacterData;
 import org.jboss.errai.otec.mutation.IndexPosition;
 import org.jboss.errai.otec.mutation.Mutation;
+import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.mutation.StringMutation;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class Transformer {
   public List<OTOperation> transform() {
     final List<OTOperation> remoteOps = new ArrayList<OTOperation>();
     final TransactionLog transactionLog = entity.getTransactionLog();
-    final Collection<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision());
+    final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision());
 
     // if no operation was carried out we can just apply the new operations
     if (localOps.isEmpty()) {
@@ -67,11 +67,30 @@ public class Transformer {
       remoteOps.add(remoteOp);
     }
     else {
+      if (localOps.size() > 1) {
+        State revState = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
+        entity.getState().syncStateFrom(revState);
+
+        System.out.println("REWIND_STATE: on=" + engine.getEngineName() + "; newRevision="
+            + remoteOp.getRevision() + "; stateResult=[\"" + entity.getState().get() + "\"]");
+
+        transactionLog.pruneFromOperation(localOps.get(1));
+      }
+
+      OTOperation applyOver = remoteOp;
+      boolean first = true;
       for (final OTOperation localOp : localOps) {
-        final OTOperation localOpPrime = transform(remoteOp, localOp);
-        localOpPrime.apply(entity);
-        transactionLog.appendLog(localOpPrime);
-        remoteOps.add(localOpPrime);
+        if (first) {
+          applyOver = transform(applyOver, localOp);
+          remoteOps.add(applyOver);
+          first = false;
+        }
+        else {
+          applyOver = transform(localOp, applyOver);
+        }
+
+        applyOver.apply(entity);
+        transactionLog.appendLog(applyOver);
       }
     }
 
@@ -82,12 +101,20 @@ public class Transformer {
     OTOperation transformedOp = null;
     final List<Mutation> transformedMutations = new ArrayList<Mutation>();
 
-    final Iterator<Mutation> remoteOpMutations = remoteOp.getMutations().iterator();
-    final Iterator<Mutation> localOpMutations = localOp.getMutations().iterator();
+    List<Mutation> remoteMutations = remoteOp.getMutations();
+    List<Mutation> localMutations = localOp.getMutations();
 
+    if (remoteMutations.size() > localMutations.size()) {
+      localMutations = createPadded(localMutations, remoteMutations.size());
+    }
+    else if (remoteMutations.size() < localMutations.size()) {
+      remoteMutations = createPadded(remoteMutations, localMutations.size());
+    }
+
+    final Iterator<Mutation> remoteOpMutations = remoteMutations.iterator();
+    final Iterator<Mutation> localOpMutations = localMutations.iterator();
 
     int offset = 0;
-
     while (remoteOpMutations.hasNext()) {
       final Mutation rm = remoteOpMutations.next();
       final Mutation lm = localOpMutations.next();
@@ -101,30 +128,38 @@ public class Transformer {
         transformedMutations.add(rm);
       }
       else if (diff == 0) {
+        boolean doTransform = true;
         switch (rm.getType()) {
           case Insert:
-            if (!remoteWins) {
+            if (!remoteWins && lm.getType() == MutationType.Insert) {
               offset++;
             }
             break;
           case Delete:
-            if (!remoteWins) {
-              offset--;
+            if (lm.getType() == MutationType.Insert) {
+              offset++;
+            }
+            else if (lm.getType() == MutationType.Delete) {
+              doTransform = false;
             }
             break;
         }
-        transformedMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset), (CharacterData) rm.getData()));
+        if (doTransform) {
+          transformedMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset), (CharacterData) rm.getData()));
+        }
       }
       else if (diff >= 0) {
-
-        switch (rm.getType()) {
-          case Insert:
-            offset--;
-            break;
-          case Delete:
-            offset++;
-            break;
+        if (lm.getType() != MutationType.Noop) {
+          switch (rm.getType()) {
+            case Insert:
+              offset--;
+              break;
+            case Delete:
+              offset++;
+              break;
+          }
         }
+
         transformedMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset), (CharacterData) rm.getData()));
       }
 
@@ -132,6 +167,18 @@ public class Transformer {
     }
 
     return transformedOp;
+  }
+
+  private static List<Mutation> createPadded(final List<Mutation> mutationList, final int largerSize) {
+    int paddingSize = largerSize - mutationList.size();
+
+    final List<Mutation> mutations = new ArrayList<Mutation>(mutationList);
+    final IndexPosition lastPosition = (IndexPosition) mutationList.get(mutationList.size() - 1).getPosition();
+    for (int i = 0; i < paddingSize; i++) {
+      mutations.add(StringMutation.noop(lastPosition));
+    }
+
+    return mutations;
   }
 
 }

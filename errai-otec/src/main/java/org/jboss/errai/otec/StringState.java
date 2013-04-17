@@ -48,4 +48,20 @@ public class StringState implements State<String> {
   public String get() {
     return buffer.toString();
   }
+
+  @Override
+  public State<String> snapshot() {
+    return new StringState(buffer.toString());
+  }
+
+  @Override
+  public void syncStateFrom(State<String> fromState) {
+    if (fromState instanceof StringState) {
+      buffer.delete(0, buffer.length());
+      buffer.append(fromState.get().toString());
+    }
+    else {
+      throw new RuntimeException("cannot sync state with non-StringState");
+    }
+  }
 }

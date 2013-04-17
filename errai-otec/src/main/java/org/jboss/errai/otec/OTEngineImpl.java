@@ -102,12 +102,9 @@ public class OTEngineImpl implements OTEngine {
         final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
         for (final OTPeer otPeer : peers) {
           for (OTOperation op : transformedOps) {
-            if (otPeer != peer) {
+            if (otPeer != peer && !op.getMutations().isEmpty()) {
               otPeer.send(entityId, op);
             }
-//            else {
-//              System.out.println(getEngineName() + " DID NOT PROPAGATE:" + op + "; to peer: " + otPeer);
-//            }
           }
         }
       }
@@ -140,10 +137,14 @@ public class OTEngineImpl implements OTEngine {
   }
 
   @Override
-  public void notifyOperation(final OTOperation operation) {
+  public void notifyOperation(OTOperation operation) {
     final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
+
+    if (operation.getRevision() == null) {
+      operation = operation.getBasedOn(entity.getRevision());
+    }
+
     final boolean propagate = operation.apply(entity);
-    // System.out.println("APPLY " + operation + "; on=" + getEngineName());
     entity.getTransactionLog().appendLog(operation);
 
     if (propagate && mode == OTEngineMode.Online) {
@@ -172,7 +173,7 @@ public class OTEngineImpl implements OTEngine {
 
           @Override
           public OTOperation build() {
-            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId(), entity.getRevision());
+            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId(), null);
           }
 
           @Override
