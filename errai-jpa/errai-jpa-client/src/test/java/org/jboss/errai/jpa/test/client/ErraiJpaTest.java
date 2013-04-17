@@ -265,9 +265,6 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNotSame(artist, fetchedArtist);
   }
 
-  /**
-   * Tests the persistence of two unrelated entities of different types.
-   */
   public void testRemoveOneEntity() {
 
     // make Album
@@ -289,6 +286,7 @@ public class ErraiJpaTest extends GWTTestCase {
 
     // make sure it's gone
     assertNotNull(album.getId());
+    assertFalse(em.contains(album));
     assertNull(em.find(Album.class, album.getId()));
   }
 

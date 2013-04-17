@@ -60,6 +60,11 @@ public class ErraiEntityManager implements EntityManager {
   final Map<Key<?, ?>, Object> persistenceContext = new HashMap<Key<?, ?>, Object>();
 
   /**
+   * All removed instances known to this entity manager.
+   */
+  final Map<Key<?, ?>, Object> removedEntities = new HashMap<Key<?, ?>, Object>();
+
+  /**
    * All of the entities that are partly constructed but are still getting their
    * references connected up. This is required in order to prevent infinite
    * recursion when demarshalling cyclic object graphs.
@@ -182,8 +187,10 @@ public class ErraiEntityManager implements EntityManager {
     switch (newState) {
     case PERSIST:
       switch (oldState) {
-      case NEW:
       case REMOVED:
+        removedEntities.remove(key);
+        // FALLTHROUGH
+      case NEW:
         entityType.deliverPrePersist(entity);
         persistenceContext.put(key, entity);
         backend.put(key, entity);
@@ -240,8 +247,10 @@ public class ErraiEntityManager implements EntityManager {
         // ignore
         break;
       case MANAGED:
-      case REMOVED:
         persistenceContext.remove(key);
+        break;
+      case REMOVED:
+        removedEntities.remove(key);
         break;
       }
       break;
@@ -251,6 +260,7 @@ public class ErraiEntityManager implements EntityManager {
       case MANAGED:
         entityType.deliverPreRemove(entity);
         persistenceContext.remove(key);
+        removedEntities.put(key, entity);
         backend.remove(key);
         entityType.deliverPostRemove(entity);
         break;
@@ -356,13 +366,15 @@ public class ErraiEntityManager implements EntityManager {
       // we already have a different instance of this type of entity with the same ID
       oldState = EntityState.DETACHED;
     }
+    else if (removedEntities.containsKey(key)) {
+      oldState = EntityState.REMOVED;
+    }
     else if (backend.contains(key)) {
       oldState = EntityState.DETACHED;
     }
     else {
       oldState = EntityState.NEW;
     }
-    // TODO handle REMOVED state
     return oldState;
   }
 
@@ -545,6 +557,7 @@ public class ErraiEntityManager implements EntityManager {
 
   @Override
   public void clear() {
+    removedEntities.clear();
     List<?> entities = new ArrayList<Object>(persistenceContext.values());
     for (Object entity : entities) {
       detach(entity);
