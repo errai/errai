@@ -19,9 +19,12 @@ public class SyncableDataSet<E> {
   /** Stored as a string so to keep SyncableDataSet marshallable. */
   private final String resultTypeFqcn;
 
-
   // FIXME need to allow app to specify TemporalType for date params
-  public SyncableDataSet(String queryName, Class<E> resultType, Map<String, Object> params) {
+  public static <E> SyncableDataSet<E> from(String queryName, Class<E> resultType, Map<String, Object> params) {
+    return new SyncableDataSet<E>(queryName, resultType, params);
+  }
+
+  private SyncableDataSet(String queryName, Class<E> resultType, Map<String, Object> params) {
     this(queryName, resultType.getName(), params);
   }
 

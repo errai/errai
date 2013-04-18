@@ -94,8 +94,8 @@ public class ClientSyncManager {
 
     // TODO find locally deleted entities!
 
-    //final SyncableDataSet<E> syncSet = new SyncableDataSet<E>(queryName, queryResultType, queryParams);
-    final SyncableDataSet syncSet = new SyncableDataSet(queryName, queryResultType, queryParams);
+    //final SyncableDataSet<E> syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
+    final SyncableDataSet syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
     final List rawLocalResults = localResults;
     dataSyncService.call(new RemoteCallback<List<SyncResponse>>() {
       @Override

@@ -43,7 +43,8 @@ public class DataSyncServiceImpl implements DataSyncService {
     return response;
   }
 
-  private <E> List<SyncResponse<E>> coldSyncImpl(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> syncRequestOps) {
+  // this is public so the test can use it (it's impossible to call the interface method with properly typed args!)
+  public <E> List<SyncResponse<E>> coldSyncImpl(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> syncRequestOps) {
     TypedQuery<E> query = dataSet.createQuery(em);
     Map<Object, E> localResults = new HashMap<Object, E>();
     for (E localEntity : query.getResultList()) {
