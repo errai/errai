@@ -27,19 +27,21 @@ public class OTEntityStateImpl implements OTEntityState {
   private volatile int entityIdCounter = 0;
   private final Map<Object, OTEntity> entityMap = new ConcurrentHashMap<Object, OTEntity>();
 
+  @Override
   public OTEntity getEntity(final Integer id) {
      return entityMap.get(id);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public OTEntity addEntity(final State objectReference) {
+  public OTEntity addEntity(final State<?> objectReference) {
     final OTEntityImpl entity = new OTEntityImpl(nextEntityId(), objectReference);
     addEntity(entity);
     return entity;
   }
 
-  public void addEntity(final OTEntity entity) {
+  @Override
+  public void addEntity(final OTEntity<?> entity) {
     entityMap.put(entity.getState(), entity);
     entityMap.put(entity.getId(), entity);
     entity.incrementRevision();

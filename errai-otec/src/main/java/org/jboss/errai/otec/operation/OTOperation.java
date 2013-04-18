@@ -16,11 +16,11 @@
 
 package org.jboss.errai.otec.operation;
 
+import java.util.List;
+
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
-
-import java.util.List;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -33,6 +33,8 @@ public interface OTOperation {
 
   Integer getRevision();
 
+  String getRevisionHash();
+  
   boolean shouldPropagate();
 
   boolean apply(OTEntity entity);
@@ -46,4 +48,7 @@ public interface OTOperation {
   boolean isCanon();
 
   void removeFromCanonHistory();
+  
+  OpPair getTransformedFrom();
+  
 }

@@ -16,6 +16,12 @@
 
 package org.jboss.errai.otec;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.otec.mutation.CharacterData;
 import org.jboss.errai.otec.mutation.Data;
 import org.jboss.errai.otec.mutation.IndexPosition;
@@ -26,12 +32,6 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
 import org.jboss.errai.otec.operation.OTOperationsListBuilder;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -173,7 +173,7 @@ public class OTEngineImpl implements OTEngine {
 
           @Override
           public OTOperation build() {
-            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId(), null);
+            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId(), null, null, null);
           }
 
           @Override
@@ -267,6 +267,7 @@ public class OTEngineImpl implements OTEngine {
     return engineId;
   }
 
+  @Override
   public String toString() {
     return getEngineName();
   }

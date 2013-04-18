@@ -16,12 +16,8 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.OTEntity;
-import org.jboss.errai.otec.OTEntityImpl;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
-import org.jboss.errai.otec.StringState;
-import org.jboss.errai.otec.TransactionLog;
 
 /**
  * @author Christian Sadilek
@@ -34,7 +30,9 @@ public class OTTestEntity extends OTEntityImpl {
 
     final TransactionLog transactionLog = entity.getTransactionLog();
     for (final OTOperation operation : transactionLog.getLog()) {
-      getTransactionLog().appendLog(OTOperationImpl.createOperation(operation.getEngine(), operation.getMutations(), operation.getEntityId(), operation.getRevision()));
+      getTransactionLog().appendLog(
+          OTOperationImpl.createOperation(operation.getEngine(), operation.getMutations(), operation.getEntityId(),
+              operation.getRevision(), operation.getRevisionHash(), operation.getTransformedFrom()));
     }
 
     setRevision(entity.getRevision());

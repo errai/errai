@@ -16,12 +16,12 @@
 
 package org.jboss.errai.otec.operation;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Christian Sadilek
@@ -34,37 +34,49 @@ public class OTOperationImpl implements OTOperation {
   private final Integer revision;
   private final boolean propagate;
 
+  private String revisionHash;
   private boolean nonCanon;
+
+  private final OpPair transformedFrom;
 
   private OTOperationImpl(OTEngine engine, final List<Mutation> mutationList,
                           final Integer entityId,
                           final Integer revision,
+                          final String revisionHash,
+                          final OpPair transformedFrom,
                           final boolean propagate) {
     this.engine = engine;
     this.mutations = mutationList;
     this.entityId = entityId;
     this.revision = revision;
+    this.revisionHash = revisionHash;
+    this.transformedFrom = transformedFrom;
     this.propagate = propagate;
   }
 
   public static OTOperation createOperation(final OTEngine engine,
                                             final List<Mutation> mutationList,
                                             final Integer entityId,
-                                            final Integer revision) {
+                                            final Integer revision,
+                                            final String revisionHash,
+                                            final OpPair transformedFrom) {
 
-    return new OTOperationImpl(engine, mutationList, entityId, revision, true);
+    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, true);
   }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
                                                      final List<Mutation> mutationList,
                                                      final Integer entityId,
-                                                     final Integer revision) {
+                                                     final Integer revision,
+                                                     final String revisionHash,
+                                                     final OpPair transformedFrom) {
 
-    return new OTOperationImpl(engine, mutationList, entityId, revision, false);
+    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, false);
   }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine, final OTOperation operation) {
-    return new OTOperationImpl(engine, operation.getMutations(), operation.getEntityId(), operation.getRevision(), false);
+    return new OTOperationImpl(engine, operation.getMutations(), operation.getEntityId(), operation.getRevision(),
+        operation.getRevisionHash(), operation.getTransformedFrom(), false);
   }
 
   @Override
@@ -85,6 +97,8 @@ public class OTOperationImpl implements OTOperation {
   @SuppressWarnings("unchecked")
   @Override
   public boolean apply(final OTEntity entity) {
+    revisionHash = entity.getState().hash();
+
     if (nonCanon)
       return shouldPropagate();
 
@@ -92,7 +106,8 @@ public class OTOperationImpl implements OTOperation {
       mutation.apply(entity.getState());
     }
 
-    System.out.println("APPLY: " + toString() + "; on=" + engine + "; stateResult=[\"" + entity.getState().get() + "\"]");
+    System.out.println("APPLY: " + toString() + "; on=" + engine + "; stateResult=[\"" + entity.getState().get()
+        + "\"]");
     entity.incrementRevision();
 
     return shouldPropagate();
@@ -125,30 +140,41 @@ public class OTOperationImpl implements OTOperation {
 
   @Override
   public OTOperation getBasedOn(final Integer revision) {
-    return new OTOperationImpl(engine, mutations, entityId, revision, propagate);
+    return new OTOperationImpl(engine, mutations, entityId, revision, revisionHash, transformedFrom, propagate);
+  }
+
+  @Override
+  public OpPair getTransformedFrom() {
+    return transformedFrom;
   }
 
   @Override
   public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (!(o instanceof OTOperationImpl)) return false;
+    if (this == o)
+      return true;
+    if (!(o instanceof OTOperationImpl))
+      return false;
 
     final OTOperationImpl that = (OTOperationImpl) o;
 
     return !(entityId != null ? !entityId.equals(that.entityId) : that.entityId != null)
         && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null);
-    //&& !(revision != null ? !revision.equals(that.revision) : that.revision != null);
   }
 
   @Override
   public int hashCode() {
     int result = mutations != null ? mutations.hashCode() : 0;
     result = 31 * result + (entityId != null ? entityId.hashCode() : 0);
-    //  result = 31 * result + (revision != null ? revision.hashCode() : 0);
     return result;
   }
 
+  @Override
   public String toString() {
     return Arrays.toString(mutations.toArray());
+  }
+
+  @Override
+  public String getRevisionHash() {
+    return revisionHash;
   }
 }

@@ -64,4 +64,10 @@ public class StringState implements State<String> {
       throw new RuntimeException("cannot sync state with non-StringState");
     }
   }
+
+  @Override
+  public String hash() {
+    // TODO return an actual hash of the state
+    return buffer.toString();
+  }
 }
