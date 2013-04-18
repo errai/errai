@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.ui.test.integration.client.res;
+
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
+
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTEntity<T extends State> {
-  public int getRevision();
-  public void setRevision(int revision);
-
-  public void incrementRevision();
-
-  public int getId();
-  public TransactionLog getTransactionLog();
-  public T getState();
+@ApplicationScoped
+public class SomeDependency {
+  public Widget makeWidget() {
+    return new Label();
+  }
 }
-

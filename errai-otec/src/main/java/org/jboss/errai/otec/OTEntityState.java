@@ -21,9 +21,9 @@ package org.jboss.errai.otec;
  * @author Mike Brock
  */
 public interface OTEntityState {
-  public OTEntity<?> getEntity(Integer id);
-  public OTEntity<?> addEntity(State<?> objectReference);
-  public void addEntity(OTEntity<?> entity);
+  public OTEntity getEntity(int id);
+  public OTEntity addEntity(State objectReference);
+  public void addEntity(OTEntity entity);
 
-  public void removeEntity(Integer objectReference);
+  public void removeEntity(int objectReference);
 }

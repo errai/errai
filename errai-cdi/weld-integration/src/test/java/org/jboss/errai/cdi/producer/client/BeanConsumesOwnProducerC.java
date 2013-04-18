@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.cdi.producer.client;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTEntity<T extends State> {
-  public int getRevision();
-  public void setRevision(int revision);
+@ApplicationScoped
+public class BeanConsumesOwnProducerC {
+  @Inject @Elephant Kite magic;
 
-  public void incrementRevision();
+  @Produces @Elephant
+  public Kite produceMagic(DummySingleton singleton) {
+    return singleton.createKite();
+  }
 
-  public int getId();
-  public TransactionLog getTransactionLog();
-  public T getState();
+  public Kite getKite() {
+    return magic;
+  }
 }
-

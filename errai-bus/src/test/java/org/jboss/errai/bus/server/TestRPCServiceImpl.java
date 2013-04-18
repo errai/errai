@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.tests.support.AbstractClassA;
+import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.NonPortableException;
 import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.SubInterface;
@@ -46,7 +47,7 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
   public void exception() throws TestException {
     throw new TestException();
   }
-  
+
   @Override
   public void nonPortableException() throws NonPortableException {
     throw new NonPortableException("message");
@@ -96,6 +97,12 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
 
   @Override
   public void rpcMethodAcceptingUpperBoundedWildcardList(List<? extends SubInterface> arg) {
+  }
+
+  @Override
+  public <X> List<GenericEntity<X>> rpcMethodWithTypeVariableNestedInGenericArgTypes(
+          GenericEntity<X> arg0, List<GenericEntity<X>> arg1) {
+    return null;
   }
 
   @Override

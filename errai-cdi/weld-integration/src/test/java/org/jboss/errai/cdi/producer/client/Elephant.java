@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.cdi.producer.client;
+
+import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTEntity<T extends State> {
-  public int getRevision();
-  public void setRevision(int revision);
-
-  public void incrementRevision();
-
-  public int getId();
-  public TransactionLog getTransactionLog();
-  public T getState();
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Elephant {
 }
-

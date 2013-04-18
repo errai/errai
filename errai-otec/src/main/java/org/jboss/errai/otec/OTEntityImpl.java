@@ -21,7 +21,7 @@ package org.jboss.errai.otec;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
-  private final Integer entityId;
+  private final int entityId;
   private final T entity;
 
   private int revisionCounter = 0;
@@ -29,7 +29,7 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
 
   private final TransactionLog transactionLog;
 
-  public OTEntityImpl(final Integer entityId, final T entity) {
+  public OTEntityImpl(final int entityId, final T entity) {
     this.entityId = entityId;
     this.entity = entity;
     this.transactionLog = TransactionLogImpl.createTransactionLog(this);
@@ -55,7 +55,7 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   }
 
   @Override
-  public Integer getId() {
+  public int getId() {
     return entityId;
   }
 

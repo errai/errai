@@ -30,8 +30,8 @@ import org.jboss.errai.otec.mutation.Mutation;
 public class OTOperationImpl implements OTOperation {
   private final OTEngine engine;
   private final List<Mutation> mutations;
-  private final Integer entityId;
-  private final Integer revision;
+  private final int entityId;
+  private final int revision;
   private final boolean propagate;
 
   private String revisionHash;
@@ -40,12 +40,13 @@ public class OTOperationImpl implements OTOperation {
   private final OpPair transformedFrom;
 
   private OTOperationImpl(OTEngine engine, final List<Mutation> mutationList,
-                          final Integer entityId,
-                          final Integer revision,
-                          final String revisionHash,
-                          final OpPair transformedFrom,
-                          final boolean propagate) {
+      final int entityId,
+      final int revision,
+      final String revisionHash,
+      final OpPair transformedFrom,
+      final boolean propagate) {
     this.engine = engine;
+    
     this.mutations = mutationList;
     this.entityId = entityId;
     this.revision = revision;
@@ -54,10 +55,21 @@ public class OTOperationImpl implements OTOperation {
     this.propagate = propagate;
   }
 
+
   public static OTOperation createOperation(final OTEngine engine,
                                             final List<Mutation> mutationList,
-                                            final Integer entityId,
-                                            final Integer revision,
+                                            final int entityId,
+                                            final String revisionHash,
+                                            final OpPair transformedFrom) {
+
+
+    return createOperation(engine, mutationList, entityId, -1, revisionHash, transformedFrom);
+  }
+
+  public static OTOperation createOperation(final OTEngine engine,
+                                            final List<Mutation> mutationList,
+                                            final int entityId,
+                                            final int revision,
                                             final String revisionHash,
                                             final OpPair transformedFrom) {
 
@@ -66,8 +78,8 @@ public class OTOperationImpl implements OTOperation {
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
                                                      final List<Mutation> mutationList,
-                                                     final Integer entityId,
-                                                     final Integer revision,
+                                                     final int entityId,
+                                                     final int revision,
                                                      final String revisionHash,
                                                      final OpPair transformedFrom) {
 
@@ -85,12 +97,12 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public Integer getEntityId() {
+  public int getEntityId() {
     return entityId;
   }
 
   @Override
-  public Integer getRevision() {
+  public int getRevision() {
     return revision;
   }
 
@@ -139,7 +151,7 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public OTOperation getBasedOn(final Integer revision) {
+  public OTOperation getBasedOn(final int revision) {
     return new OTOperationImpl(engine, mutations, entityId, revision, revisionHash, transformedFrom, propagate);
   }
 
@@ -157,14 +169,14 @@ public class OTOperationImpl implements OTOperation {
 
     final OTOperationImpl that = (OTOperationImpl) o;
 
-    return !(entityId != null ? !entityId.equals(that.entityId) : that.entityId != null)
+    return entityId == that.entityId
         && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null);
   }
 
   @Override
   public int hashCode() {
     int result = mutations != null ? mutations.hashCode() : 0;
-    result = 31 * result + (entityId != null ? entityId.hashCode() : 0);
+    result = 31 * result + entityId;
     return result;
   }
 

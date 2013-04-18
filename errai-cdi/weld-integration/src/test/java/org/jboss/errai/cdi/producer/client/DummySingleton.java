@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.cdi.producer.client;
+
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTEntity<T extends State> {
-  public int getRevision();
-  public void setRevision(int revision);
-
-  public void incrementRevision();
-
-  public int getId();
-  public TransactionLog getTransactionLog();
-  public T getState();
+@ApplicationScoped
+public class DummySingleton {
+  public Kite createKite() {
+    return new Kite() {
+    };
+  }
 }
-

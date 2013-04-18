@@ -16,13 +16,8 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.EntitySyncCompletionCallback;
-import org.jboss.errai.otec.OTEngine;
-import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
-import org.jboss.errai.otec.OTPeer;
-import org.jboss.errai.otec.State;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +42,7 @@ public class MockPeerImpl implements OTPeer {
   }
 
   @Override
-  public void send(Integer entityId, OTOperation operation) {
+  public void send(int entityId, OTOperation operation) {
     System.out.println("TX: " + operation + "; from=" + localEngine + "; to=" + remoteEngine);
 
     //note: this is simulating sending these operations over the wire.
@@ -57,7 +52,7 @@ public class MockPeerImpl implements OTPeer {
     lastTransmittedSequencees.put(entityId, operation.getRevision());
   }
 
-  public void beginSyncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback<State> callback) {
+  public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback) {
     final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
     localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
 

@@ -28,11 +28,11 @@ import org.jboss.errai.otec.operation.OTOperationsFactory;
 public interface OTEngine {
   public String getId();
 
-  public ReceiveHandler getReceiveHandler(String peerId, Integer entityId);
+  public ReceiveHandler getReceiveHandler(String peerId, int entityId);
 
-  public InitialStateReceiveHandler getInitialStateReceiveHandler(String peerId, Integer entityId);
+  public InitialStateReceiveHandler getInitialStateReceiveHandler(String peerId, int entityId);
 
-  public void syncRemoteEntity(String peerId, Integer entityId, EntitySyncCompletionCallback callback);
+  public void syncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback callback);
 
   public void notifyOperation(OTOperation operation);
 
@@ -40,9 +40,9 @@ public interface OTEngine {
 
   public OTOperationsFactory getOperationsFactory();
 
-  public void associateEntity(String peerId, Integer entityId);
+  public void associateEntity(String peerId, int entityId);
 
-  public void disassociateEntity(String peerId, Integer entityId);
+  public void disassociateEntity(String peerId, int entityId);
 
   public void registerPeer(OTPeer peer);
 

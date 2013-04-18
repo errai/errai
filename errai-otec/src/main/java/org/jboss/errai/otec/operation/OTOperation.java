@@ -29,9 +29,9 @@ import org.jboss.errai.otec.mutation.Mutation;
 public interface OTOperation {
   List<Mutation> getMutations();
 
-  Integer getEntityId();
+  int getEntityId();
 
-  Integer getRevision();
+  int getRevision();
 
   String getRevisionHash();
   
@@ -43,7 +43,7 @@ public interface OTOperation {
 
   boolean isNoop();
 
-  OTOperation getBasedOn(Integer revision);
+  OTOperation getBasedOn(int revision);
 
   boolean isCanon();
 
