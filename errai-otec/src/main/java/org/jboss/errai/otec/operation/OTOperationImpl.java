@@ -30,15 +30,15 @@ import java.util.List;
 public class OTOperationImpl implements OTOperation {
   private final OTEngine engine;
   private final List<Mutation> mutations;
-  private final Integer entityId;
-  private final Integer revision;
+  private final int entityId;
+  private final int revision;
   private final boolean propagate;
 
   private boolean nonCanon;
 
   private OTOperationImpl(OTEngine engine, final List<Mutation> mutationList,
-                          final Integer entityId,
-                          final Integer revision,
+                          final int entityId,
+                          final int revision,
                           final boolean propagate) {
     this.engine = engine;
     this.mutations = mutationList;
@@ -47,18 +47,27 @@ public class OTOperationImpl implements OTOperation {
     this.propagate = propagate;
   }
 
+
   public static OTOperation createOperation(final OTEngine engine,
                                             final List<Mutation> mutationList,
-                                            final Integer entityId,
-                                            final Integer revision) {
+                                            final int entityId) {
+
+
+    return createOperation(engine, mutationList, entityId, -1);
+  }
+
+  public static OTOperation createOperation(final OTEngine engine,
+                                            final List<Mutation> mutationList,
+                                            final int entityId,
+                                            final int revision) {
 
     return new OTOperationImpl(engine, mutationList, entityId, revision, true);
   }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
                                                      final List<Mutation> mutationList,
-                                                     final Integer entityId,
-                                                     final Integer revision) {
+                                                     final int entityId,
+                                                     final int revision) {
 
     return new OTOperationImpl(engine, mutationList, entityId, revision, false);
   }
@@ -73,12 +82,12 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public Integer getEntityId() {
+  public int getEntityId() {
     return entityId;
   }
 
   @Override
-  public Integer getRevision() {
+  public int getRevision() {
     return revision;
   }
 
@@ -124,27 +133,27 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public OTOperation getBasedOn(final Integer revision) {
+  public OTOperation getBasedOn(final int revision) {
     return new OTOperationImpl(engine, mutations, entityId, revision, propagate);
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof OTOperationImpl)) return false;
 
-    final OTOperationImpl that = (OTOperationImpl) o;
+    OTOperationImpl that = (OTOperationImpl) o;
 
-    return !(entityId != null ? !entityId.equals(that.entityId) : that.entityId != null)
-        && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null);
-    //&& !(revision != null ? !revision.equals(that.revision) : that.revision != null);
+    if (entityId != that.entityId) return false;
+    if (mutations != null ? !mutations.equals(that.mutations) : that.mutations != null) return false;
+
+    return true;
   }
 
   @Override
   public int hashCode() {
     int result = mutations != null ? mutations.hashCode() : 0;
-    result = 31 * result + (entityId != null ? entityId.hashCode() : 0);
-    //  result = 31 * result + (revision != null ? revision.hashCode() : 0);
+    result = 31 * result + entityId;
     return result;
   }
 

@@ -27,10 +27,6 @@ public class StringState implements State<String> {
     this.buffer = new StringBuilder(buffer);
   }
 
-  public void replace(final int pos, final char data) {
-    buffer.replace(pos, 0, String.valueOf(data));
-  }
-
   public void insert(final int pos, final char data) {
     if (pos == buffer.length()) {
       buffer.append(String.valueOf(data));
@@ -54,8 +50,9 @@ public class StringState implements State<String> {
     return new StringState(buffer.toString());
   }
 
+  @SuppressWarnings("RedundantStringToString")
   @Override
-  public void syncStateFrom(State<String> fromState) {
+  public void syncStateFrom(final State<String> fromState) {
     if (fromState instanceof StringState) {
       buffer.delete(0, buffer.length());
       buffer.append(fromState.get().toString());

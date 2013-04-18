@@ -16,12 +16,8 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.OTEntity;
-import org.jboss.errai.otec.OTEntityImpl;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
-import org.jboss.errai.otec.StringState;
-import org.jboss.errai.otec.TransactionLog;
 
 /**
  * @author Christian Sadilek

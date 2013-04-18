@@ -77,7 +77,7 @@ public class OTEngineImpl implements OTEngine {
 
 
   @Override
-  public ReceiveHandler getReceiveHandler(final String peerId, final Integer entityId) {
+  public ReceiveHandler getReceiveHandler(final String peerId, final int entityId) {
     final OTEntity entity = entityState.getEntity(entityId);
 
     if (entity == null) {
@@ -101,7 +101,7 @@ public class OTEngineImpl implements OTEngine {
         // broadcast to all other peers subscribed to this entity
         final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
         for (final OTPeer otPeer : peers) {
-          for (OTOperation op : transformedOps) {
+          for (final OTOperation op : transformedOps) {
             if (otPeer != peer && !op.getMutations().isEmpty()) {
               otPeer.send(entityId, op);
             }
@@ -112,7 +112,7 @@ public class OTEngineImpl implements OTEngine {
   }
 
   @Override
-  public InitialStateReceiveHandler getInitialStateReceiveHandler(final String peerId, final Integer entityId) {
+  public InitialStateReceiveHandler getInitialStateReceiveHandler(final String peerId, final int entityId) {
     final OTPeer peer = getPeerState().getPeer(peerId);
     assertPeerNotNull(peer);
 
@@ -129,7 +129,7 @@ public class OTEngineImpl implements OTEngine {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void syncRemoteEntity(final String peerId, final Integer entityId, final EntitySyncCompletionCallback callback) {
+  public void syncRemoteEntity(final String peerId, final int entityId, final EntitySyncCompletionCallback callback) {
     final OTPeer peer = getPeerState().getPeer(peerId);
     assertPeerNotNull(peer);
 
@@ -140,7 +140,7 @@ public class OTEngineImpl implements OTEngine {
   public void notifyOperation(OTOperation operation) {
     final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
 
-    if (operation.getRevision() == null) {
+    if (operation.getRevision() == -1) {
       operation = operation.getBasedOn(entity.getRevision());
     }
 
@@ -173,7 +173,7 @@ public class OTEngineImpl implements OTEngine {
 
           @Override
           public OTOperation build() {
-            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId(), null);
+            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId());
           }
 
           @Override
@@ -202,7 +202,7 @@ public class OTEngineImpl implements OTEngine {
   }
 
   @Override
-  public void associateEntity(final String peerId, final Integer entityId) {
+  public void associateEntity(final String peerId, final int entityId) {
     final OTPeer peer = getPeerState().getPeer(peerId);
     if (peer == null) {
       throw new OTException("no peer for id: " + peerId);
@@ -217,7 +217,7 @@ public class OTEngineImpl implements OTEngine {
   }
 
   @Override
-  public void disassociateEntity(final String peerId, final Integer entityId) {
+  public void disassociateEntity(final String peerId, final int entityId) {
     final OTPeer peer = getPeerState().getPeer(peerId);
     if (peer == null) {
       throw new OTException("no peer for id: " + peerId);

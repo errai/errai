@@ -55,6 +55,7 @@ public class Transformer {
     return new Transformer(engine, true, entity, peer, operation);
   }
 
+  @SuppressWarnings("unchecked")
   public List<OTOperation> transform() {
     final List<OTOperation> remoteOps = new ArrayList<OTOperation>();
     final TransactionLog transactionLog = entity.getTransactionLog();
@@ -68,7 +69,7 @@ public class Transformer {
     }
     else {
       if (localOps.size() > 1) {
-        State revState = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
+        final State revState = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
         entity.getState().syncStateFrom(revState);
 
         System.out.println("REWIND_STATE: on=" + engine.getEngineName() + "; newRevision="

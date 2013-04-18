@@ -29,9 +29,9 @@ import java.util.List;
 public interface OTOperation {
   List<Mutation> getMutations();
 
-  Integer getEntityId();
+  int getEntityId();
 
-  Integer getRevision();
+  int getRevision();
 
   boolean shouldPropagate();
 
@@ -41,7 +41,7 @@ public interface OTOperation {
 
   boolean isNoop();
 
-  OTOperation getBasedOn(Integer revision);
+  OTOperation getBasedOn(int revision);
 
   boolean isCanon();
 

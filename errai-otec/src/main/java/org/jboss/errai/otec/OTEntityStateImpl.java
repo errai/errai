@@ -25,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class OTEntityStateImpl implements OTEntityState {
   private volatile int entityIdCounter = 0;
-  private final Map<Object, OTEntity> entityMap = new ConcurrentHashMap<Object, OTEntity>();
+  private final Map<Integer, OTEntity> entityMap = new ConcurrentHashMap<Integer, OTEntity>();
 
-  public OTEntity getEntity(final Integer id) {
-     return entityMap.get(id);
+  public OTEntity getEntity(final int id) {
+    return entityMap.get(id);
   }
 
   @SuppressWarnings("unchecked")
@@ -40,13 +40,13 @@ public class OTEntityStateImpl implements OTEntityState {
   }
 
   public void addEntity(final OTEntity entity) {
-    entityMap.put(entity.getState(), entity);
     entityMap.put(entity.getId(), entity);
     entity.incrementRevision();
   }
 
   @Override
-  public void removeEntity(final Integer objectReference) {
+  public void removeEntity(final int entityId) {
+    entityMap.remove(entityId);
   }
 
   private synchronized int nextEntityId() {
