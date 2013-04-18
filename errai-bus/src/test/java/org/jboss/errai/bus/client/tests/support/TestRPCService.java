@@ -51,6 +51,15 @@ public interface TestRPCService {
   public void rpcMethodAcceptingLowerBoundedWildcardList(List<? super SubInterface> arg);
   public void rpcMethodAcceptingUpperBoundedWildcardList(List<? extends SubInterface> arg);
 
+  // this tests a case similar to a method on the Errai DataSyncService interface
+  public <X> List<GenericEntity<X>> rpcMethodWithTypeVariableNestedInGenericArgTypes(
+          GenericEntity<X> arg0, List<GenericEntity<X>> arg1);
+
+  // this is a specific request from forum thread https://community.jboss.org/thread/172772
+  // Commented out because GWT's compiler rejects RpcProxyGenerator's correctly erased version of the method
+  // This should magically start working under some future revision of GWT. See ERRAI-148 for details.
+  //public <A extends GenericEntity<R>, R extends Person> R incrediblyGenericRpcMethod(A arg);
+
   @InterceptedCall(RpcBypassingInterceptor.class)
   public String interceptedRpcWithEndpointBypassing();
 

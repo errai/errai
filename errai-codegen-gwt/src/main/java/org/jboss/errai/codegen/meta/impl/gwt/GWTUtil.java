@@ -80,7 +80,8 @@ public class GWTUtil {
       }
     }
     if (t.isTypeParameter() != null) {
-      return MetaClassFactory.get(Object.class);
+      JTypeParameter tp = t.isTypeParameter();
+      return MetaClassFactory.get(tp.getErasedType().getQualifiedBinaryName());
     }
     return GWTClass.newInstance(oracle, t);
   }
@@ -112,5 +113,5 @@ public class GWTUtil {
           " (which is a " + (t == null ? null : t.getClass()) + ")");
     }
   }
-  
+
 }
