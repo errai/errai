@@ -17,8 +17,7 @@ public class DataSyncServiceImpl implements DataSyncService {
   @Inject private DataSyncEjb dataSyncEjb;
 
   @Override
-  //public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> remoteResults) {
-  public List<SyncResponse> coldSync(SyncableDataSet dataSet, List<SyncRequestOperation> remoteResults) {
+  public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> remoteResults) {
     return dataSyncEjb.coldSync(dataSet, remoteResults);
   }
 }

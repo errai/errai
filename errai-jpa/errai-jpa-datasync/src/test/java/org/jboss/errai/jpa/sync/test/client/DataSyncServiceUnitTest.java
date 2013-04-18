@@ -77,7 +77,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.created(localSimpleEntity.clone()));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected
     assertEquals(1, syncResponse.size());
@@ -107,7 +107,7 @@ public class DataSyncServiceUnitTest {
     List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
 
     // now do the actual sync (we're starting from empty on the local (requesting) side)
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected
     assertEquals(1, syncResponse.size());
@@ -133,7 +133,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.unchanged(localSimpleEntity));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected (nothing to do)
     assertEquals("Got unexpected response: " + syncResponse, 0, syncResponse.size());
@@ -161,7 +161,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.updated(localEntityNewState, localEntityExpectedState));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected
     assertEquals(1, syncResponse.size());
@@ -192,7 +192,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.unchanged(localSimpleEntity));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected (nothing to do)
     assertEquals("Got unexpected response: " + syncResponse, 1, syncResponse.size());
@@ -221,7 +221,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.updated(localEntityNewState, localEntityExpectedState));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected
     assertEquals("Non-empty response: " + syncResponse, 0, syncResponse.size());
@@ -241,7 +241,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.unchanged(localSimpleEntity));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected (the server doesn't have the entity anymore)
     assertEquals("Got unexpected response: " + syncResponse, 1, syncResponse.size());
@@ -266,7 +266,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.deleted(remoteSimpleEntity));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is empty, as expected
     assertEquals("Got unexpected response: " + syncResponse, 0, syncResponse.size());
@@ -298,7 +298,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.deleted(remoteSimpleEntity));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is empty, as expected
     assertEquals("Got unexpected response: " + syncResponse, 0, syncResponse.size());
@@ -329,7 +329,7 @@ public class DataSyncServiceUnitTest {
     syncRequest.add(SyncRequestOperation.created(localSimpleEntity.clone()));
 
     // now do the actual sync
-    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSyncImpl(sds, syncRequest);
+    List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is as expected
     assertEquals(2, syncResponse.size());

@@ -35,16 +35,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     this.entityComparator = new EntityComparator(em.getMetamodel(), attributeAccessor);
   }
 
-  // ridiculous wrapper that invents type information to call the API that we'd really like to use
-  @Override @SuppressWarnings("rawtypes")
-  public List<SyncResponse> coldSync(SyncableDataSet dataSet, List<SyncRequestOperation> remoteResults) {
-    List rawRemoteResults = remoteResults;
-    List response = coldSyncImpl((SyncableDataSet<Object>) dataSet, (List<SyncRequestOperation<Object>>) rawRemoteResults);
-    return response;
-  }
-
-  // this is public so the test can use it (it's impossible to call the interface method with properly typed args!)
-  public <E> List<SyncResponse<E>> coldSyncImpl(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> syncRequestOps) {
+  public <E> List<SyncResponse<E>> coldSync(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> syncRequestOps) {
     TypedQuery<E> query = dataSet.createQuery(em);
     Map<Object, E> localResults = new HashMap<Object, E>();
     for (E localEntity : query.getResultList()) {
