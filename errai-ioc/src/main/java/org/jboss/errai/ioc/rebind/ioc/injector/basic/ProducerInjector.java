@@ -28,7 +28,6 @@ import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.AsyncInjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -321,7 +320,7 @@ public class ProducerInjector extends AbstractInjector {
       return InjectUtil.invokePublicOrPrivateMethod(injectionContext,
           beanRef,
           producerMethod,
-          AsyncInjectUtil.resolveInjectionDependencies(
+          InjectUtil.resolveInjectionDependencies(
               producerMethod.getParameters(),
               injectionContext,
               producerMethod,

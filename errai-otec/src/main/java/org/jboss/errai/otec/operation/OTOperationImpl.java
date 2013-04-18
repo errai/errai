@@ -138,16 +138,14 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof OTOperationImpl)) return false;
 
-    OTOperationImpl that = (OTOperationImpl) o;
+    final OTOperationImpl that = (OTOperationImpl) o;
 
-    if (entityId != that.entityId) return false;
-    if (mutations != null ? !mutations.equals(that.mutations) : that.mutations != null) return false;
-
-    return true;
+    return entityId == that.entityId
+        && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null);
   }
 
   @Override
