@@ -1,12 +1,14 @@
 package org.jboss.errai.jpa.sync.client.local;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
@@ -35,6 +37,8 @@ import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 public class ClientSyncManager {
 
   @Inject Caller<DataSyncService> dataSyncService;
+
+  @Inject Event<DataSyncCompleteEvent<?>> completeEvent;
 
   /**
    * This is the entity manager that client code interacts with. From a data
@@ -94,16 +98,14 @@ public class ClientSyncManager {
 
     // TODO find locally deleted entities!
 
-    //final SyncableDataSet<E> syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
-    final SyncableDataSet syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
-    final List rawLocalResults = localResults;
-    dataSyncService.call(new RemoteCallback<List<SyncResponse>>() {
+    final SyncableDataSet<E> syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
+    dataSyncService.call(new RemoteCallback<List<SyncResponse<E>>>() {
       @Override
-      public void callback(List<SyncResponse> syncResponse) {
-        List rawSyncResponse = syncResponse;
-        applyResults(rawSyncResponse);
+      public void callback(List<SyncResponse<E>> syncResponse) {
+        applyResults(syncResponse);
+        completeEvent.fire(new DataSyncCompleteEvent<E>(true, syncResponse));
       }
-    }).coldSync(syncSet, rawLocalResults);
+    }).coldSync(syncSet, localResults);
   }
 
   private <E> void applyResults(List<SyncResponse<E>> syncResponses) {
@@ -111,14 +113,36 @@ public class ClientSyncManager {
     for (SyncResponse<E> response : syncResponses) {
       if (response instanceof ConflictResponse) {
         ConflictResponse<E> cr = (ConflictResponse<E>) response;
-        desiredStateEm.getTransaction().setRollbackOnly();
-        expectedStateEm.merge(cr.getActualNew());
-        throw new RuntimeException("TODO: notify conflict listeners");
+        E actualNew = cr.getActualNew();
+        E requestedNew = cr.getRequestedNew();
+        System.out.println("Got a conflict for " + actualNew);
+        System.out.println("              was: " + cr.getExpected());
+        System.out.println("           wanted: " + requestedNew);
+        System.out.println(" ... accepting server's version of reality for now");
+
+        if (actualNew == null) {
+          E resolved = expectedStateEm.find(expectedStateEm.keyFor(requestedNew), Collections.<String,Object>emptyMap());
+          expectedStateEm.remove(resolved);
+
+          resolved = desiredStateEm.find(desiredStateEm.keyFor(requestedNew), Collections.<String,Object>emptyMap());
+          desiredStateEm.remove(resolved);
+        }
+        else {
+          expectedStateEm.merge(actualNew);
+          desiredStateEm.merge(actualNew);
+        }
+        // TODO (need transaction support in client)
+//        desiredStateEm.getTransaction().setRollbackOnly();
+//        expectedStateEm.merge(cr.getActualNew());
+//        throw new RuntimeException("TODO: notify conflict listeners");
       }
       else if (response instanceof DeleteResponse) {
         DeleteResponse<E> dr = (DeleteResponse<E>) response;
-        expectedStateEm.remove(dr.getEntity());
-        desiredStateEm.remove(dr.getEntity());
+        E resolved = expectedStateEm.find(expectedStateEm.keyFor(dr.getEntity()), Collections.<String,Object>emptyMap());
+        expectedStateEm.remove(resolved);
+
+        resolved = desiredStateEm.find(desiredStateEm.keyFor(dr.getEntity()), Collections.<String,Object>emptyMap());
+        desiredStateEm.remove(resolved);
       }
       else if (response instanceof IdChangeResponse) {
         IdChangeResponse<E> icr = (IdChangeResponse<E>) response;
@@ -147,7 +171,7 @@ public class ClientSyncManager {
       else if (response instanceof UpdateResponse) {
         UpdateResponse<E> ur = (UpdateResponse<E>) response;
         expectedStateEm.merge(ur.getEntity());
-        expectedStateEm.merge(ur.getEntity());
+        desiredStateEm.merge(ur.getEntity());
       }
       else {
         throw new RuntimeException("Unexpected kind of sync response: " + response);

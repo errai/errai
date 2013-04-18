@@ -12,6 +12,7 @@ import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
+import org.jboss.errai.jpa.sync.client.local.DataSyncCompleteEvent;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -80,7 +81,11 @@ public class TodoListApp extends Composite {
   @EventHandler("syncButton")
   void sync(ClickEvent event) {
     syncManager.coldSync("allItems", TodoItem.class, Collections.<String,Object>emptyMap());
-    em.flush();
+    System.out.println("Initiated cold sync");
+  }
+
+  void onSyncComplete(@Observes DataSyncCompleteEvent<?> event) {
+    System.out.println("Got data sync complete event!");
     refreshItems();
   }
 }

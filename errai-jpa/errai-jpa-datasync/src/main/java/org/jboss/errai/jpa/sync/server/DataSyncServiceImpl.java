@@ -35,6 +35,7 @@ public class DataSyncServiceImpl implements DataSyncService {
     this.entityComparator = new EntityComparator(em.getMetamodel(), attributeAccessor);
   }
 
+  @Override
   public <E> List<SyncResponse<E>> coldSync(SyncableDataSet<E> dataSet, List<SyncRequestOperation<E>> syncRequestOps) {
     TypedQuery<E> query = dataSet.createQuery(em);
     Map<Object, E> localResults = new HashMap<Object, E>();
@@ -99,7 +100,7 @@ public class DataSyncServiceImpl implements DataSyncService {
         }
         else {
           em.merge(remoteNewState);
-          // don't need to generate a response here; we've accepted the merge
+          syncResponse.add(new UpdateResponse<E>(remoteNewState));
         }
         break;
 

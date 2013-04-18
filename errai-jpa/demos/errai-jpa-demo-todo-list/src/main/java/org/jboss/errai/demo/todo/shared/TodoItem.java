@@ -47,4 +47,8 @@ public class  TodoItem {
   public void setArchived(Boolean archived) {
     this.archived = archived;
   }
+  @Override
+  public String toString() {
+    return "TodoItem [id=" + id + ", done=" + done + ", archived=" + archived + ", text=" + text + "]";
+  }
 }

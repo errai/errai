@@ -223,8 +223,10 @@ public class DataSyncServiceUnitTest {
     // now do the actual sync
     List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
-    // ensure the response is as expected
-    assertEquals("Non-empty response: " + syncResponse, 0, syncResponse.size());
+    // ensure the response is as expected (ack of the update)
+    assertEquals("Got unexpected response: " + syncResponse, 1, syncResponse.size());
+    UpdateResponse<SimpleEntity> updateResponse = (UpdateResponse<SimpleEntity>) syncResponse.get(0);
+    assertEquals(localEntityNewState.toString(), updateResponse.getEntity().toString());
   }
 
   @Test
