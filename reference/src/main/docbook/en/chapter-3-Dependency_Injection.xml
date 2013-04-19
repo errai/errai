@@ -521,8 +521,8 @@ public class MyClientBean {
          <programlisting language="java">
 public MyManagedBean {
   @Inject IOCBeanManager manager;
-   
-  // class body 
+
+  // class body
 }
 </programlisting>
       </example>
@@ -544,11 +544,11 @@ public MyManagedBean {
             <programlisting language="java">
 public MyManagedBean {
   @Inject IOCBeanManager manager;
-   
-  public void lookupBean() {
-    IOCBean&lt;SimpleBean&gt; bean = manager.lookupBean(SimpleBean.class);
 
-    // check to see if the bean exists 
+  public void lookupBean() {
+    IOCBeanDef&lt;SimpleBean&gt; bean = manager.lookupBean(SimpleBean.class);
+
+    // check to see if the bean exists
     if (bean != null) {
       // get the instance of the bean
       SimpleBean inst = bean.getInstance();

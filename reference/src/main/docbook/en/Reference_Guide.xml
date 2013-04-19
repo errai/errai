@@ -33,5 +33,7 @@
                href="chapter-18-Reporting_problems.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
                href="chapter-19-Errai_License.xml"/>
+   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+               href="chapter-20-Errai_Cordova.xml"/>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="Revision_History.xml"/>
 </book>
