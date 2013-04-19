@@ -19,10 +19,8 @@ package org.jboss.errai.otec.operation;
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
-import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.util.OTLogFormat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -181,19 +179,19 @@ public class OTOperationImpl implements OTOperation {
 
     final OTOperationImpl that = (OTOperationImpl) o;
 
-    return entityId == that.entityId && withoutNoops(mutations).equals(withoutNoops(that.mutations));
+    return entityId == that.entityId && mutations.equals(that.mutations);
   }
 
   @Override
   public int hashCode() {
-    int result = withoutNoops(mutations).hashCode();
+    int result = mutations.hashCode();
     result = 31 * result + entityId;
     return result;
   }
 
   @Override
   public String toString() {
-    return Arrays.toString(withoutNoops(mutations).toArray());
+    return Arrays.toString(mutations.toArray());
   }
 
   @Override
@@ -201,13 +199,5 @@ public class OTOperationImpl implements OTOperation {
     return revisionHash;
   }
 
-  private static List<Mutation> withoutNoops(final List<Mutation> mutationList) {
-    final List<Mutation> l = new ArrayList<Mutation>(mutationList.size());
-    for (final Mutation m : mutationList) {
-      if (m.getType() != MutationType.Noop) {
-       l.add(m);
-      }
-    }
-    return l;
-  }
+
 }

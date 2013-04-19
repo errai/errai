@@ -25,6 +25,14 @@ public class OTLogFormat {
 
   public static void printLogTitle() {
     System.out.printf(OTLogFormat.LOG_FORMAT, "TYPE", "MUTATIONS", "FROM", "TO", "REV", "CURR. STATE");
-    System.out.println("---------------------------------------------------------------------------------------------------------------------------");
+    System.out.println(repeat('-', 140));
+  }
+
+  private static String repeat(char c, int amount) {
+    final StringBuilder builder = new StringBuilder(amount);
+    for (int i = 0; i < amount; i++) {
+      builder.append(c);
+    }
+    return builder.toString();
   }
 }
