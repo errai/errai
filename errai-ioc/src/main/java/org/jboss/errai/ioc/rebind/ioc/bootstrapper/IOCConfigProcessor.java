@@ -310,6 +310,8 @@ public class IOCConfigProcessor {
 
               final MetaClassMember producerMember;
 
+              control.masqueradeAs(injectedType);
+
               switch (instance.getTaskType()) {
                 case PrivateMethod:
                 case Method:
@@ -319,7 +321,6 @@ public class IOCConfigProcessor {
                     control.notifyDependency(parm.getType());
                     final Set<MetaClass> interfaceTypes = fillInInterface(parm.getType());
                     control.notifyDependencies(interfaceTypes);
-
 
                     if (!producerMember.isStatic()) {
                       final GraphBuilder graphBuilder = injectionContext.getGraphBuilder();
