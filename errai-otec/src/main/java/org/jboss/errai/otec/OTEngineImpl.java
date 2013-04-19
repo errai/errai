@@ -16,12 +16,6 @@
 
 package org.jboss.errai.otec;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.otec.mutation.CharacterData;
 import org.jboss.errai.otec.mutation.Data;
 import org.jboss.errai.otec.mutation.IndexPosition;
@@ -32,6 +26,12 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
 import org.jboss.errai.otec.operation.OTOperationsListBuilder;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -74,7 +74,6 @@ public class OTEngineImpl implements OTEngine {
   public static OTEngine createEngineWithMultiplePeers(final String name) {
     return new OTEngineImpl(new MultiplePeerState(), name);
   }
-
 
   @Override
   public ReceiveHandler getReceiveHandler(final String peerId, final int entityId) {

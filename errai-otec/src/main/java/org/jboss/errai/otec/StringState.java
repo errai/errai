@@ -22,6 +22,7 @@ package org.jboss.errai.otec;
  */
 public class StringState implements State<String> {
   public StringBuilder buffer = new StringBuilder();
+  public String stateId = "<initial>";
 
   public StringState(final String buffer) {
     this.buffer = new StringBuilder(buffer);
@@ -34,10 +35,12 @@ public class StringState implements State<String> {
     else {
       buffer.insert(pos, String.valueOf(data));
     }
+    stateId = GUIDUtil.createGUID();
   }
 
   public void delete(final int pos) {
     buffer.delete(pos, pos + 1);
+    stateId = GUIDUtil.createGUID();
   }
 
   @Override
@@ -63,8 +66,7 @@ public class StringState implements State<String> {
   }
 
   @Override
-  public String hash() {
-    // TODO return an actual hash of the state
-    return buffer.toString();
+  public String getStateId() {
+    return stateId;
   }
 }

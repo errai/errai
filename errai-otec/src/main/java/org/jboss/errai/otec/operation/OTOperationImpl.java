@@ -16,12 +16,14 @@
 
 package org.jboss.errai.otec.operation;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
+import org.jboss.errai.otec.mutation.MutationType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Christian Sadilek
@@ -33,6 +35,7 @@ public class OTOperationImpl implements OTOperation {
   private final int entityId;
   private final int revision;
   private final boolean propagate;
+  private  boolean resolvedConflict;
 
   private String revisionHash;
   private boolean nonCanon;
@@ -40,13 +43,13 @@ public class OTOperationImpl implements OTOperation {
   private final OpPair transformedFrom;
 
   private OTOperationImpl(OTEngine engine, final List<Mutation> mutationList,
-      final int entityId,
-      final int revision,
-      final String revisionHash,
-      final OpPair transformedFrom,
-      final boolean propagate) {
+                          final int entityId,
+                          final int revision,
+                          final String revisionHash,
+                          final OpPair transformedFrom,
+                          final boolean propagate) {
     this.engine = engine;
-    
+
     this.mutations = mutationList;
     this.entityId = entityId;
     this.revision = revision;
@@ -109,7 +112,7 @@ public class OTOperationImpl implements OTOperation {
   @SuppressWarnings("unchecked")
   @Override
   public boolean apply(final OTEntity entity) {
-    revisionHash = entity.getState().hash();
+    revisionHash = entity.getState().getStateId();
 
     if (nonCanon)
       return shouldPropagate();
@@ -118,8 +121,9 @@ public class OTOperationImpl implements OTOperation {
       mutation.apply(entity.getState());
     }
 
-    System.out.println("APPLY: " + toString() + "; on=" + engine + "; stateResult=[\"" + entity.getState().get()
+    System.out.println("APPLY: " + toString() + "; on=" + engine + "; basedOnRev=" + revision +"; stateResult=[\"" + entity.getState().get()
         + "\"]");
+
     entity.incrementRevision();
 
     return shouldPropagate();
@@ -128,6 +132,11 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public void removeFromCanonHistory() {
     nonCanon = true;
+  }
+
+  @Override
+  public void markAsResolvedConflict() {
+    resolvedConflict = true;
   }
 
   @Override
@@ -151,6 +160,11 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
+  public boolean isResolvedConflict() {
+    return resolvedConflict;
+  }
+
+  @Override
   public OTOperation getBasedOn(final int revision) {
     return new OTOperationImpl(engine, mutations, entityId, revision, revisionHash, transformedFrom, propagate);
   }
@@ -169,8 +183,22 @@ public class OTOperationImpl implements OTOperation {
 
     final OTOperationImpl that = (OTOperationImpl) o;
 
-    return entityId == that.entityId
-        && !(mutations != null ? !mutations.equals(that.mutations) : that.mutations != null);
+    final List<Mutation> mutations1 = new ArrayList<Mutation>();
+    final List<Mutation> mutations2 = new ArrayList<Mutation>();
+
+    for (Mutation mutation : mutations) {
+      if (mutation.getType() != MutationType.Noop) {
+        mutations1.add(mutation);
+      }
+    }
+
+    for (Mutation mutation : that.mutations) {
+      if (mutation.getType() != MutationType.Noop) {
+        mutations2.add(mutation);
+      }
+    }
+
+    return entityId == that.entityId && mutations1.equals(mutations2);
   }
 
   @Override
