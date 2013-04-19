@@ -20,6 +20,7 @@ import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
+import org.jboss.errai.otec.util.OTLogFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,37 +37,25 @@ public class OTOperationImpl implements OTOperation {
   private final int revision;
   private final boolean propagate;
   private  boolean resolvedConflict;
-
   private String revisionHash;
   private boolean nonCanon;
 
   private final OpPair transformedFrom;
 
-  private OTOperationImpl(OTEngine engine, final List<Mutation> mutationList,
+  private OTOperationImpl(final OTEngine engine, final List<Mutation> mutationList,
                           final int entityId,
                           final int revision,
                           final String revisionHash,
                           final OpPair transformedFrom,
                           final boolean propagate) {
-    this.engine = engine;
 
+    this.engine = engine;
     this.mutations = mutationList;
     this.entityId = entityId;
     this.revision = revision;
     this.revisionHash = revisionHash;
     this.transformedFrom = transformedFrom;
     this.propagate = propagate;
-  }
-
-
-  public static OTOperation createOperation(final OTEngine engine,
-                                            final List<Mutation> mutationList,
-                                            final int entityId,
-                                            final String revisionHash,
-                                            final OpPair transformedFrom) {
-
-
-    return createOperation(engine, mutationList, entityId, -1, revisionHash, transformedFrom);
   }
 
   public static OTOperation createOperation(final OTEngine engine,
@@ -121,8 +110,17 @@ public class OTOperationImpl implements OTOperation {
       mutation.apply(entity.getState());
     }
 
-    System.out.println("APPLY: " + toString() + "; on=" + engine + "; basedOnRev=" + revision +"; stateResult=[\"" + entity.getState().get()
-        + "\"]");
+    System.out.printf(OTLogFormat.LOG_FORMAT,
+        "APPLY",
+        toString(),
+        "-",
+        engine.toString(),
+        revision,
+        "\"" + entity.getState().get() + "\""
+    );
+
+//    System.out.println("APPLY: " + toString() + "; on=" + engine
+//        + "; basedOnRev=" + revision +"; stateResult=[\"" + entity.getState().get() + "\"]");
 
     entity.incrementRevision();
 
@@ -183,38 +181,33 @@ public class OTOperationImpl implements OTOperation {
 
     final OTOperationImpl that = (OTOperationImpl) o;
 
-    final List<Mutation> mutations1 = new ArrayList<Mutation>();
-    final List<Mutation> mutations2 = new ArrayList<Mutation>();
-
-    for (Mutation mutation : mutations) {
-      if (mutation.getType() != MutationType.Noop) {
-        mutations1.add(mutation);
-      }
-    }
-
-    for (Mutation mutation : that.mutations) {
-      if (mutation.getType() != MutationType.Noop) {
-        mutations2.add(mutation);
-      }
-    }
-
-    return entityId == that.entityId && mutations1.equals(mutations2);
+    return entityId == that.entityId && withoutNoops(mutations).equals(withoutNoops(that.mutations));
   }
 
   @Override
   public int hashCode() {
-    int result = mutations != null ? mutations.hashCode() : 0;
+    int result = withoutNoops(mutations).hashCode();
     result = 31 * result + entityId;
     return result;
   }
 
   @Override
   public String toString() {
-    return Arrays.toString(mutations.toArray());
+    return Arrays.toString(withoutNoops(mutations).toArray());
   }
 
   @Override
   public String getRevisionHash() {
     return revisionHash;
+  }
+
+  private static List<Mutation> withoutNoops(final List<Mutation> mutationList) {
+    final List<Mutation> l = new ArrayList<Mutation>(mutationList.size());
+    for (final Mutation m : mutationList) {
+      if (m.getType() != MutationType.Noop) {
+       l.add(m);
+      }
+    }
+    return l;
   }
 }

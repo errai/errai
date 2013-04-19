@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.util;
 
 /**
+ * @author Christian Sadilek
  * @author Mike Brock
  */
-class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
-  @Override
-  public void syncComplete(final OTEntity<StringState> entity) {
-    //System.out.println("InitialState: [\"" + entity.getState().get() + "\"]");
+public class OTLogFormat {
+  public static final String LOG_FORMAT = "%-9s %-70s %-10s %-10s %-4s %-30s\n";
+
+  public static void printLogTitle() {
+    System.out.printf(OTLogFormat.LOG_FORMAT, "TYPE", "MUTATIONS", "FROM", "TO", "REV", "CURR. STATE");
+    System.out.println("---------------------------------------------------------------------------------------------------------------------------");
   }
 }

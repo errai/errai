@@ -25,7 +25,9 @@ import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
+import org.jboss.errai.otec.util.OTLogFormat;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -42,6 +44,7 @@ public class OtecPrototypingTest {
 
   @Test
   public void testApplyLocalOperation() {
+
     setupEngines("Hello, World?");
 
     final OTOperationsFactory operationsFactory = serverEngine.getOperationsFactory();
@@ -464,22 +467,22 @@ public class OtecPrototypingTest {
     final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
 
     final OTOperation ins1 = opFactoryClientA.createOperation(clientAEntity)
-          .add(MutationType.Insert, IndexPosition.of(1), CharacterData.of('1'))
-          .build();
+        .add(MutationType.Insert, IndexPosition.of(1), CharacterData.of('1'))
+        .build();
 
     final OTOperation ins2 = opFactoryClientA.createOperation(clientAEntity)
-          .add(MutationType.Insert, IndexPosition.of(2), CharacterData.of('2'))
-          .build();
+        .add(MutationType.Insert, IndexPosition.of(2), CharacterData.of('2'))
+        .build();
 
     final OTOperation ins3 = opFactoryClientA.createOperation(clientAEntity)
-          .add(MutationType.Insert, IndexPosition.of(3), CharacterData.of('3'))
-          .build();
+        .add(MutationType.Insert, IndexPosition.of(3), CharacterData.of('3'))
+        .build();
 
     final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
     final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
     final OTOperation delG = opFactoryClientB.createOperation(clientBEntity)
-          .add(MutationType.Delete, IndexPosition.of(0))
-          .build();
+        .add(MutationType.Delete, IndexPosition.of(0))
+        .build();
 
     suspendEngines();
 
@@ -502,7 +505,7 @@ public class OtecPrototypingTest {
 
     assertAllLogsConsistent(expectedState, initialState);
   }
-  
+
   @Test
   public void testCompoundTransformWithMultipleInsertsVsOneInsert() {
     final String initialState = "go";
@@ -535,8 +538,8 @@ public class OtecPrototypingTest {
     clientEngineA.notifyOperation(ins2);
     clientEngineA.notifyOperation(ins3);
     clientEngineB.notifyOperation(insAT);
-    resumeEnginesAB();    
-    
+    resumeEnginesAB();
+
     assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "g123oat";
     assertEquals(expectedState, serverEntity.getState().get());
@@ -549,7 +552,7 @@ public class OtecPrototypingTest {
 
     assertAllLogsConsistent(expectedState, initialState);
   }
-  
+
   @Test
   public void testCompoundTransformWithMultipleInsertsVsOneInsertInvertedOrder() {
     final String initialState = "go";
@@ -582,8 +585,8 @@ public class OtecPrototypingTest {
     clientEngineA.notifyOperation(ins2);
     clientEngineA.notifyOperation(ins3);
     clientEngineB.notifyOperation(insAT);
-    resumeEnginesBA();    
-    
+    resumeEnginesBA();
+
     assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "g123oat";
     assertEquals(expectedState, serverEntity.getState().get());
@@ -596,8 +599,8 @@ public class OtecPrototypingTest {
 
     assertAllLogsConsistent(expectedState, initialState);
   }
-  
-  private void setupEngines(String initialState) {
+
+  private void setupEngines(final String initialState) {
     clientEngineA = OTEngineImpl.createEngineWithSinglePeer("ClientA");
     clientEngineB = OTEngineImpl.createEngineWithSinglePeer("ClientB");
     serverEngine = OTEngineImpl.createEngineWithMultiplePeers("Server");
@@ -614,12 +617,12 @@ public class OtecPrototypingTest {
     clientEngineB.syncRemoteEntity(serverEngine.getId(), serverEntity.getId(), new MockEntitySyncCompletionCallback());
   }
 
-  private void assertAllLogsConsistent(String expectedResult, String initialState) {
-    System.out.println("----[log replay]-----");
+  private void assertAllLogsConsistent(final String expectedResult, final String initialState) {
+    System.out.println("\n----[log replay]-----");
 
-    State clientAState = new StringState(initialState);
-    State clientBState = new StringState(initialState);
-    State serverState = new StringState(initialState);
+    final State clientAState = new StringState(initialState);
+    final State clientBState = new StringState(initialState);
+    final State serverState = new StringState(initialState);
 
     final TransactionLog transactionLogA =
         clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId()).getTransactionLog();
@@ -633,21 +636,29 @@ public class OtecPrototypingTest {
 
     System.out.println("Client A: " + transactionLogA);
     System.out.println("Client B: " + transactionLogB);
-    System.out.println("Server: " + serverLog);
+    System.out.println("Server  : " + serverLog);
+
     assertEquals(expectedResult, valueA);
     assertEquals(expectedResult, valueB);
     assertEquals(expectedResult, valueServer);
+
     System.out.println("----[end]------");
   }
 
-  private String replayLogAndReturnResult(State state, TransactionLog log) {
-    for (OTOperation operation : log.getCanonLog()) {
-      for (Mutation mutation : operation.getMutations()) {
+  @SuppressWarnings("unchecked")
+  private String replayLogAndReturnResult(final State state, final TransactionLog log) {
+    for (final OTOperation operation : log.getCanonLog()) {
+      for (final Mutation mutation : operation.getMutations()) {
         mutation.apply(state);
       }
     }
 
     return (String) state.get();
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    OTLogFormat.printLogTitle();
   }
 
   @After

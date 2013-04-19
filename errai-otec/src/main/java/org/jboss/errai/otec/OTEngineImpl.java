@@ -26,6 +26,7 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
 import org.jboss.errai.otec.operation.OTOperationsListBuilder;
+import org.jboss.errai.otec.util.OTLogFormat;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,29 +86,7 @@ public class OTEngineImpl implements OTEngine {
 
     final OTPeer peer = peerState.getPeer(peerId);
 
-    return new ReceiveHandler() {
-      @Override
-      public void receive(final OTOperation operation) {
-        final List<OTOperation> transformedOps;
-
-        if (peerState.hasConflictResolutionPrecedence()) {
-          transformedOps = Transformer.createTransformerLocalPrecedence(OTEngineImpl.this, entity, peer, operation).transform();
-        }
-        else {
-          transformedOps = Transformer.createTransformerRemotePrecedence(OTEngineImpl.this, entity, peer, operation).transform();
-        }
-
-        // broadcast to all other peers subscribed to this entity
-        final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
-        for (final OTPeer otPeer : peers) {
-          for (final OTOperation op : transformedOps) {
-            if (otPeer != peer && !op.getMutations().isEmpty()) {
-              otPeer.send(entityId, op);
-            }
-          }
-        }
-      }
-    };
+    return new EngineReceiveHandler(this, entity, peer, entityId);
   }
 
   @Override
@@ -120,6 +99,16 @@ public class OTEngineImpl implements OTEngine {
       @Override
       public void receive(final State obj) {
         final OTEntity newEntity = new OTEntityImpl(entityId, obj);
+
+        System.out.printf(OTLogFormat.LOG_FORMAT,
+            "SYNC",
+            "",
+            getEngineName(),
+            getEngineName(),
+            newEntity.getRevision(),
+            "\"" + newEntity.getState().get() + "\"");
+
+
         entityState.addEntity(newEntity);
         getPeerState().associateEntity(peer, newEntity);
       }
@@ -131,7 +120,6 @@ public class OTEngineImpl implements OTEngine {
   public void syncRemoteEntity(final String peerId, final int entityId, final EntitySyncCompletionCallback callback) {
     final OTPeer peer = getPeerState().getPeer(peerId);
     assertPeerNotNull(peer);
-
     peer.beginSyncRemoteEntity(peerId, entityId, callback);
   }
 
@@ -156,33 +144,7 @@ public class OTEngineImpl implements OTEngine {
 
   @Override
   public OTOperationsFactory getOperationsFactory() {
-    return new OTOperationsFactory() {
-      @Override
-      public OTOperationsListBuilder createOperation(final OTEntity entity) {
-        return new OTOperationsListBuilder() {
-          List<Mutation> operationList = new ArrayList<Mutation>();
-
-          @Override
-          public OTOperationsListBuilder add(final MutationType type, final Position position, final Data data) {
-            operationList.add(
-                new StringMutation(type, (IndexPosition) position, (CharacterData) data)
-            );
-            return this;
-          }
-
-          @Override
-          public OTOperation build() {
-            return OTOperationImpl.createOperation(OTEngineImpl.this, operationList, entity.getId(), -1, null, null);
-          }
-
-          @Override
-          public OTOperationsListBuilder add(final MutationType type, final Position position) {
-            operationList.add(new StringMutation(type, (IndexPosition) position, null));
-            return this;
-          }
-        };
-      }
-    };
+    return new DefaultOTOperationsFactory(this);
   }
 
   private static void assertPeerNotNull(final OTPeer peer) {
@@ -274,5 +236,75 @@ public class OTEngineImpl implements OTEngine {
   @Override
   public String getEngineName() {
     return name;
+  }
+
+  private static class DefaultOTOperationsFactory implements OTOperationsFactory {
+    private OTEngineImpl otEngine;
+
+    public DefaultOTOperationsFactory(final OTEngineImpl otEngine) {
+      this.otEngine = otEngine;
+    }
+
+    @Override
+    public OTOperationsListBuilder createOperation(final OTEntity entity) {
+      return new OTOperationsListBuilder() {
+        List<Mutation> operationList = new ArrayList<Mutation>();
+
+        @Override
+        public OTOperationsListBuilder add(final MutationType type, final Position position, final Data data) {
+          operationList.add(
+              new StringMutation(type, (IndexPosition) position, (CharacterData) data)
+          );
+          return this;
+        }
+
+        @Override
+        public OTOperation build() {
+          return OTOperationImpl.createOperation(otEngine, operationList, entity.getId(), -1, null, null);
+        }
+
+        @Override
+        public OTOperationsListBuilder add(final MutationType type, final Position position) {
+          operationList.add(new StringMutation(type, (IndexPosition) position, null));
+          return this;
+        }
+      };
+    }
+  }
+
+  private static class EngineReceiveHandler implements ReceiveHandler {
+    private final OTEntity entity;
+    private final OTPeer peer;
+    private final int entityId;
+    private OTEngineImpl otEngine;
+
+    public EngineReceiveHandler(OTEngineImpl otEngine, OTEntity entity, OTPeer peer, int entityId) {
+      this.entity = entity;
+      this.peer = peer;
+      this.entityId = entityId;
+      this.otEngine = otEngine;
+    }
+
+    @Override
+    public void receive(final OTOperation operation) {
+      final List<OTOperation> transformedOps;
+
+      if (otEngine.peerState.hasConflictResolutionPrecedence()) {
+        transformedOps = Transformer.createTransformerLocalPrecedence(otEngine, entity, peer, operation).transform();
+      }
+      else {
+        transformedOps = Transformer.createTransformerRemotePrecedence(otEngine, entity, peer, operation).transform();
+      }
+
+      // broadcast to all other peers subscribed to this entity
+      final Set<OTPeer> peers = otEngine.getPeerState().getPeersFor(entity);
+      for (final OTPeer otPeer : peers) {
+        for (final OTOperation op : transformedOps) {
+          if (otPeer != peer && !op.isNoop()) {
+            otPeer.send(entityId, op);
+          }
+        }
+      }
+    }
   }
 }

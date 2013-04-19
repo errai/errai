@@ -69,10 +69,10 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Char
   @Override
   public String toString() {
     if (getData() == null) {
-      return type + "[" + getPosition() + "]";
+      return type.getShortName() + "[" + getPosition() + "]";
     }
     else {
-      return type + "[" + getPosition() + ", \"" + getData() + "\"]";
+      return type.getShortName() + "[" + getPosition() + ",\"" + getData() + "\"]";
     }
   }
 }

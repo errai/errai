@@ -16,7 +16,6 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.GUIDUtil;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -43,7 +42,7 @@ public class GUIDTests {
               synchronized (set) {
                 System.out.print("[>] -> ");
 
-                for (String s : localSet) {
+                for (final String s : localSet) {
                   if (!set.add(s)) {
                     throw new RuntimeException("collision: " + s);
                   }

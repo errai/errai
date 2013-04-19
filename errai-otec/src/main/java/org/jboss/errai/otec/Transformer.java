@@ -24,6 +24,7 @@ import org.jboss.errai.otec.mutation.StringMutation;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OpPair;
+import org.jboss.errai.otec.util.OTLogFormat;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -76,8 +77,13 @@ public class Transformer {
         final State revState = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
         entity.getState().syncStateFrom(revState);
 
-        System.out.println("REWIND_STATE: on=" + engine.getEngineName() + "; newRevision="
-            + remoteOp.getRevision() + "; stateResult=[\"" + entity.getState().get() + "\"]");
+        System.out.printf(OTLogFormat.LOG_FORMAT,
+            "REWIND",
+            "<<>>",
+            engine.getEngineName(),
+            engine.getEngineName(),
+            remoteOp.getRevision(),
+            "\"" + entity.getState().get() + "\"");
 
         transactionLog.pruneFromOperation(localOps.get(1));
       }
@@ -205,6 +211,14 @@ public class Transformer {
         transformedOp.markAsResolvedConflict();
       }
     }
+
+    System.out.printf(OTLogFormat.LOG_FORMAT,
+           "TRANSFORM",
+           remoteOp + "→" + transformedOp,
+           "-",
+           engine.getEngineName(),
+           remoteOp.getRevision(),
+           "\"" + entity.getState().get() + "\"");
 
     return transformedOp;
   }

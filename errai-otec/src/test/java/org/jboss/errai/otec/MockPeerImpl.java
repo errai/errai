@@ -18,6 +18,7 @@ package org.jboss.errai.otec;
 
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
+import org.jboss.errai.otec.util.OTLogFormat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class MockPeerImpl implements OTPeer {
 
   private final Map<Integer, Integer> lastTransmittedSequencees = new HashMap<Integer, Integer>();
 
-  public MockPeerImpl(OTEngine localEngine, OTEngine engine) {
+  public MockPeerImpl(final OTEngine localEngine, final OTEngine engine) {
     this.localEngine = localEngine;
     this.remoteEngine = engine;
   }
@@ -42,9 +43,14 @@ public class MockPeerImpl implements OTPeer {
   }
 
   @Override
-  public void send(int entityId, OTOperation operation) {
-    final String x = "TX: " + operation + "; from=" + localEngine + "; rev=" + operation.getRevision() + "; to=" + remoteEngine;
-    System.out.println(x);
+  public void send(final int entityId, final OTOperation operation) {
+    System.out.printf(OTLogFormat.LOG_FORMAT,
+        "TRANSMIT",
+        operation.toString(),
+        localEngine.toString(),
+        remoteEngine.toString(),
+        operation.getRevision(),
+        "\"" + localEngine.getEntityStateSpace().getEntity(entityId).getState().get() + "\"");
 
     //note: this is simulating sending these operations over the wire.
     remoteEngine.getReceiveHandler(localEngine.getId(), entityId)
@@ -53,9 +59,21 @@ public class MockPeerImpl implements OTPeer {
     lastTransmittedSequencees.put(entityId, operation.getRevision());
   }
 
-  public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback) {
+  @SuppressWarnings("unchecked")
+  public void beginSyncRemoteEntity(final String peerId,
+                                    final int entityId,
+                                    final EntitySyncCompletionCallback<State> callback) {
+
     final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
     localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
+
+    System.out.printf(OTLogFormat.LOG_FORMAT,
+        "SYNC",
+        "",
+        remoteEngine.getEngineName(),
+        localEngine.getEngineName(),
+        entity.getRevision(),
+        "\"" + entity.getState().get() + "\"");
 
     localEngine.associateEntity(remoteEngine.getId(), entityId);
     remoteEngine.associateEntity(localEngine.getId(), entityId);
@@ -65,12 +83,12 @@ public class MockPeerImpl implements OTPeer {
 
 
   @Override
-  public int getLastKnownRemoteSequence(OTEntity entity) {
+  public int getLastKnownRemoteSequence(final OTEntity entity) {
     return 0;
   }
 
   @Override
-  public int getLastTransmittedSequence(OTEntity entity) {
+  public int getLastTransmittedSequence(final OTEntity entity) {
     final Integer integer = lastTransmittedSequencees.get(entity.getId());
     return integer == null ? 0 : integer;
   }
