@@ -17,6 +17,7 @@ package org.jboss.errai.jpa.sync.test.client;
 
 
 
+import org.jboss.errai.jpa.sync.test.server.DataSyncServiceUnitTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 

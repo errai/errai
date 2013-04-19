@@ -1,4 +1,4 @@
-package org.jboss.errai.jpa.sync.test.client;
+package org.jboss.errai.jpa.sync.test.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
