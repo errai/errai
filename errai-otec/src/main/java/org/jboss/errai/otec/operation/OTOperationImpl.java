@@ -108,17 +108,7 @@ public class OTOperationImpl implements OTOperation {
       mutation.apply(entity.getState());
     }
 
-    System.out.printf(OTLogFormat.LOG_FORMAT,
-        "APPLY",
-        toString(),
-        "-",
-        engine.toString(),
-        revision,
-        "\"" + entity.getState().get() + "\""
-    );
-
-//    System.out.println("APPLY: " + toString() + "; on=" + engine
-//        + "; basedOnRev=" + revision +"; stateResult=[\"" + entity.getState().get() + "\"]");
+    OTLogFormat.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
 
     entity.incrementRevision();
 
@@ -198,6 +188,4 @@ public class OTOperationImpl implements OTOperation {
   public String getRevisionHash() {
     return revisionHash;
   }
-
-
 }

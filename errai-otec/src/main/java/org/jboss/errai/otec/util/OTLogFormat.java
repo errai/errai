@@ -21,11 +21,15 @@ package org.jboss.errai.otec.util;
  * @author Mike Brock
  */
 public class OTLogFormat {
-  public static final String LOG_FORMAT = "%-9s %-70s %-10s %-10s %-4s %-30s\n";
+  public static final String LOG_FORMAT = "%-9s %-10s %-10s %-70s %-4s %-30s\n";
 
   public static void printLogTitle() {
-    System.out.printf(OTLogFormat.LOG_FORMAT, "TYPE", "MUTATIONS", "FROM", "TO", "REV", "CURR. STATE");
+    System.out.printf(OTLogFormat.LOG_FORMAT, "TYPE", "FROM", "TO", "MUTATIONS", "REV", "CURR. STATE");
     System.out.println(repeat('-', 140));
+  }
+
+  public static void log(String type, String mutations, String from, String to, int rev, String state) {
+    System.out.printf(LOG_FORMAT, type, from, to, mutations, rev, state);
   }
 
   private static String repeat(char c, int amount) {

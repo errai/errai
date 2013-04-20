@@ -44,8 +44,7 @@ public class MockPeerImpl implements OTPeer {
 
   @Override
   public void send(final int entityId, final OTOperation operation) {
-    System.out.printf(OTLogFormat.LOG_FORMAT,
-        "TRANSMIT",
+    OTLogFormat.log("TRANSMIT",
         operation.toString(),
         localEngine.toString(),
         remoteEngine.toString(),
@@ -67,13 +66,11 @@ public class MockPeerImpl implements OTPeer {
     final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
     localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
 
-    System.out.printf(OTLogFormat.LOG_FORMAT,
-        "SYNC",
-        "",
-        remoteEngine.getEngineName(),
-        localEngine.getEngineName(),
-        entity.getRevision(),
-        "\"" + entity.getState().get() + "\"");
+    OTLogFormat.log("SYNC",  "",
+            remoteEngine.getEngineName(),
+            localEngine.getEngineName(),
+            entity.getRevision(),
+            "\"" + entity.getState().get() + "\"");
 
     localEngine.associateEntity(remoteEngine.getId(), entityId);
     remoteEngine.associateEntity(localEngine.getId(), entityId);

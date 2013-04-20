@@ -618,7 +618,9 @@ public class OtecPrototypingTest {
   }
 
   private void assertAllLogsConsistent(final String expectedResult, final String initialState) {
-    System.out.println("\n----[log replay]-----");
+    System.out.println();
+    System.out.println("===================================================");
+    System.out.println("\nCLIENT LOG REPLAYS:\n");
 
     final State clientAState = new StringState(initialState);
     final State clientBState = new StringState(initialState);
@@ -630,13 +632,9 @@ public class OtecPrototypingTest {
         clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId()).getTransactionLog();
     final TransactionLog serverLog = serverEntity.getTransactionLog();
 
-    final String valueA = replayLogAndReturnResult(clientAState, transactionLogA);
-    final String valueB = replayLogAndReturnResult(clientBState, transactionLogB);
-    final String valueServer = replayLogAndReturnResult(serverState, serverLog);
-
-    System.out.println("Client A: " + transactionLogA);
-    System.out.println("Client B: " + transactionLogB);
-    System.out.println("Server  : " + serverLog);
+    final String valueA = replayLogAndReturnResult("ClientA", clientAState, transactionLogA);
+    final String valueB = replayLogAndReturnResult("ClientB", clientBState, transactionLogB);
+    final String valueServer = replayLogAndReturnResult("Server", serverState, serverLog);
 
     assertEquals(expectedResult, valueA);
     assertEquals(expectedResult, valueB);
@@ -646,12 +644,18 @@ public class OtecPrototypingTest {
   }
 
   @SuppressWarnings("unchecked")
-  private String replayLogAndReturnResult(final State state, final TransactionLog log) {
+  private String replayLogAndReturnResult(final String name, final State state, final TransactionLog log) {
+    renderPlaybackHeader(name);
+    renderInitialStatePlayback(state);
+
     for (final OTOperation operation : log.getCanonLog()) {
       for (final Mutation mutation : operation.getMutations()) {
         mutation.apply(state);
+        renderMutationPlayback(mutation, state);
       }
     }
+
+    System.out.println("\n");
 
     return (String) state.get();
   }
@@ -663,6 +667,24 @@ public class OtecPrototypingTest {
 
   @After
   public void tearDown() throws Exception {
-    System.out.println("\n==========================\n");
+    System.out.println("===================================================");
+  }
+
+  private static final String PLAYBACK_FORMAT = "%-30s %-40s\n";
+
+  private static void renderPlaybackHeader(String stateName) {
+    System.out.println("===================================================");
+    System.out.println("Client: " + stateName);
+    System.out.println();
+    System.out.printf(PLAYBACK_FORMAT, "MUTATION", "STATE");
+    System.out.println("---------------------------------------------------");
+  }
+
+  private static void renderInitialStatePlayback(State state) {
+    System.out.printf(PLAYBACK_FORMAT, "SYNC", "\"" + String.valueOf(state.get()) + "\"");
+  }
+
+  private static void renderMutationPlayback(Mutation mutation, State state) {
+    System.out.printf(PLAYBACK_FORMAT, mutation, "\"" + String.valueOf(state.get()) + "\"");
   }
 }

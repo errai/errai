@@ -38,26 +38,24 @@ public class Transformer {
   private final OTEngine engine;
   private final boolean remoteWins;
   private final OTEntity entity;
-  private final OTPeer peer;
   private final OTOperation remoteOp;
 
-  private Transformer(final OTEngine engine, final boolean remoteWins, final OTEntity entity, final OTPeer peer,
+  private Transformer(final OTEngine engine, final boolean remoteWins, final OTEntity entity,
                       final OTOperation remoteOp) {
     this.engine = engine;
     this.remoteWins = remoteWins;
     this.entity = entity;
-    this.peer = peer;
     this.remoteOp = remoteOp;
   }
 
   public static Transformer createTransformerLocalPrecedence(final OTEngine engine, final OTEntity entity,
-                                                             final OTPeer peer, final OTOperation operation) {
-    return new Transformer(engine, false, entity, peer, operation);
+                                                             final OTOperation operation) {
+    return new Transformer(engine, false, entity, operation);
   }
 
   public static Transformer createTransformerRemotePrecedence(final OTEngine engine, final OTEntity entity,
-                                                              final OTPeer peer, final OTOperation operation) {
-    return new Transformer(engine, true, entity, peer, operation);
+                                                              final OTOperation operation) {
+    return new Transformer(engine, true, entity, operation);
   }
 
   @SuppressWarnings("unchecked")
@@ -77,10 +75,9 @@ public class Transformer {
         final State revState = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
         entity.getState().syncStateFrom(revState);
 
-        System.out.printf(OTLogFormat.LOG_FORMAT,
-            "REWIND",
+        OTLogFormat.log("REWIND",
             "<<>>",
-            engine.getEngineName(),
+            "-",
             engine.getEngineName(),
             remoteOp.getRevision(),
             "\"" + entity.getState().get() + "\"");
@@ -127,9 +124,9 @@ public class Transformer {
 
   private OTOperation transform(final OTOperation remoteOp, final OTOperation localOp) {
     OTOperation transformedOp = null;
-    final List<Mutation> transformedMutations = new ArrayList<Mutation>();
     final List<Mutation> remoteMutations = remoteOp.getMutations();
     final List<Mutation> localMutations = localOp.getMutations();
+    final List<Mutation> transformedMutations = new ArrayList<Mutation>(remoteMutations.size());
 
     final Iterator<Mutation> remoteOpMutations;
     final Iterator<Mutation> localOpMutations;
@@ -146,7 +143,6 @@ public class Transformer {
       remoteOpMutations = remoteMutations.iterator();
       localOpMutations = localMutations.iterator();
     }
-
 
     int offset = 0;
     while (remoteOpMutations.hasNext()) {
@@ -222,9 +218,8 @@ public class Transformer {
     }
 
     if (!remoteOp.equals(transformedOp)) {
-      System.out.printf(OTLogFormat.LOG_FORMAT,
-          "TRANSFORM",
-          remoteOp + "→" + transformedOp,
+      OTLogFormat.log("TRANSFORM",
+          remoteOp + "▶" + transformedOp,
           "-",
           engine.getEngineName(),
           remoteOp.getRevision(),
@@ -250,7 +245,7 @@ public class Transformer {
       @Override
       public Mutation next() {
         try {
-          if (iteratorDelegate.hasNext()) {
+          if (pos < mutationList.size()) {
             return iteratorDelegate.next();
           }
           else {
@@ -268,27 +263,4 @@ public class Transformer {
       }
     };
   }
-//
-//  private static List<Mutation> createPadded(final List<Mutation> mutationList, final int largerSize) {
-//
-//    final int paddingSize = largerSize - mutationList.size();
-//
-//    final List<Mutation> mutations = new ArrayList<Mutation>(mutationList);
-//    final IndexPosition lastPosition = (IndexPosition) mutationList.get(mutationList.size() - 1).getPosition();
-//    for (int i = 0; i < paddingSize; i++) {
-//      mutations.add(StringMutation.noop(lastPosition));
-//    }
-//
-//    return mutations;
-//  }
-
-//  public static List<Mutation> withoutNoops(final List<Mutation> mutationList) {
-//    final List<Mutation> l = new ArrayList<Mutation>(mutationList.size());
-//    for (final Mutation m : mutationList) {
-//      if (m.getType() != MutationType.Noop) {
-//        l.add(m);
-//      }
-//    }
-//    return l;
-//  }
 }

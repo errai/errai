@@ -26,7 +26,6 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
 import org.jboss.errai.otec.operation.OTOperationsListBuilder;
-import org.jboss.errai.otec.util.OTLogFormat;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -99,16 +98,6 @@ public class OTEngineImpl implements OTEngine {
       @Override
       public void receive(final State obj) {
         final OTEntity newEntity = new OTEntityImpl(entityId, obj);
-
-        System.out.printf(OTLogFormat.LOG_FORMAT,
-            "SYNC",
-            "",
-            getEngineName(),
-            getEngineName(),
-            newEntity.getRevision(),
-            "\"" + newEntity.getState().get() + "\"");
-
-
         entityState.addEntity(newEntity);
         getPeerState().associateEntity(peer, newEntity);
       }
@@ -278,7 +267,10 @@ public class OTEngineImpl implements OTEngine {
     private final int entityId;
     private OTEngineImpl otEngine;
 
-    public EngineReceiveHandler(OTEngineImpl otEngine, OTEntity entity, OTPeer peer, int entityId) {
+    public EngineReceiveHandler(final OTEngineImpl otEngine,
+                                final OTEntity entity,
+                                final OTPeer peer,
+                                final int entityId) {
       this.entity = entity;
       this.peer = peer;
       this.entityId = entityId;
@@ -290,10 +282,10 @@ public class OTEngineImpl implements OTEngine {
       final List<OTOperation> transformedOps;
 
       if (otEngine.peerState.hasConflictResolutionPrecedence()) {
-        transformedOps = Transformer.createTransformerLocalPrecedence(otEngine, entity, peer, operation).transform();
+        transformedOps = Transformer.createTransformerLocalPrecedence(otEngine, entity, operation).transform();
       }
       else {
-        transformedOps = Transformer.createTransformerRemotePrecedence(otEngine, entity, peer, operation).transform();
+        transformedOps = Transformer.createTransformerRemotePrecedence(otEngine, entity, operation).transform();
       }
 
       // broadcast to all other peers subscribed to this entity
