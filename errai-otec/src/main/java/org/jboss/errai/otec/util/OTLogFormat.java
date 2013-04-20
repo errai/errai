@@ -24,7 +24,7 @@ public class OTLogFormat {
   public static final String LOG_FORMAT = "%-9s %-10s %-10s %-70s %-4s %-30s\n";
 
   public static void printLogTitle() {
-    System.out.printf(OTLogFormat.LOG_FORMAT, "TYPE", "FROM", "TO", "MUTATIONS", "REV", "CURR. STATE");
+    System.out.printf(OTLogFormat.LOG_FORMAT, "TYPE", "FROM", "TO", "MUTATIONS", "REV", "STATE");
     System.out.println(repeat('-', 140));
   }
 

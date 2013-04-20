@@ -79,7 +79,7 @@ public class Transformer {
             "<<>>",
             "-",
             engine.getEngineName(),
-            remoteOp.getRevision(),
+            remoteOp.getRevision() + 1,
             "\"" + entity.getState().get() + "\"");
 
         transactionLog.pruneFromOperation(localOps.get(1));

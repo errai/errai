@@ -640,7 +640,7 @@ public class OtecPrototypingTest {
     assertEquals(expectedResult, valueB);
     assertEquals(expectedResult, valueServer);
 
-    System.out.println("----[end]------");
+    System.out.println("------[end]------");
   }
 
   @SuppressWarnings("unchecked")
@@ -674,7 +674,7 @@ public class OtecPrototypingTest {
 
   private static void renderPlaybackHeader(String stateName) {
     System.out.println("===================================================");
-    System.out.println("Client: " + stateName);
+    System.out.println("NODE: " + stateName);
     System.out.println();
     System.out.printf(PLAYBACK_FORMAT, "MUTATION", "STATE");
     System.out.println("---------------------------------------------------");
