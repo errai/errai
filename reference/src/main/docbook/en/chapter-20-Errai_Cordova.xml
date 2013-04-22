@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="sid-65274252">
+   <title>Errai Cordova</title>
+   <para>As part of the 3.0 release Errai now supports mobile development. One of the modules that makes this feasible is the Cordova module. It offers a way to integrate with native hardware in a Errai way.</para>
+   <section id="sid-65274252_ErraiCordova-Getstarted">
+      <title>Get started</title>
+      <para>The Errai Cordova module is directly integrated with ERRAI:Container and you can use it by adding the following in your App.gwt.xml:</para>
+      <section id="sid-65274252_ErraiCordova-App.gwt.xml">
+         <title>App.gwt.xml</title>
+         <informalexample>
+            <programlisting language="xml">
+&lt;inherits name="org.jboss.errai.ui.Cordova"/&gt;
+</programlisting>
+         </informalexample>
+         <para>
+          You could also start from a forge or
+          <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=57049130">maven archetype</ulink>
+          .
+        </para>
+      </section>
+   </section>
+   <section id="sid-65274252_ErraiCordova-Integratewithnativehardware">
+      <title>Integrate with native hardware</title>
+      <para>When the Cordova is included you can integrate with native hardware in a very 'Errai' by injecting the native components strait into you code:</para>
+      <informalexample>
+         <programlisting language="java">
+@Templated("#main")
+public class KitchenSinkClient extends Composite {
+  @Inject
+  Camera camera;
+
+  @Inject
+  @DataField
+  Button takePicture;
+
+  @EventHandler("takePicture")
+  public void onTakePicktureClicked(ClickEvent event) {
+    PictureOptions options = new PictureOptions(25);
+    options.setDestinationType(PictureOptions.DESTINATION_TYPE_DATA_URL);
+    options.setSourceType(PictureOptions.PICTURE_SOURCE_TYPE_CAMERA);
+
+    camera.getPicture(options, new PictureCallback() {
+
+      @Override
+      public void onSuccess(String data) {
+        image.setUrl(UriUtils.fromSafeConstant("data:image/jpeg;base64," + data));
+      }
+
+      @Override
+      public void onFailure(String error) {
+        setGeneralErrorMessage("Could not take picture: " + error);
+      }
+    });
+  }
+</programlisting>
+      </informalexample>
+      <para>The components that are supported come from the https://code.google.com/p/gwt-phonegap/ project have a look there form more documentation.</para>
+      <para>The native supported hardere you can inject consists of:</para>
+      <itemizedlist>
+         <listitem>
+            <para>Camera</para>
+         </listitem>
+         <listitem>
+            <para>Accelerometer</para>
+         </listitem>
+         <listitem>
+            <para>Contacts</para>
+         </listitem>
+         <listitem>
+            <para>Capture (Provides access to the audio, image, and video capture capabilities of the device).</para>
+         </listitem>
+         <listitem>
+            <para>Compass</para>
+         </listitem>
+         <listitem>
+            <para>Notification (http://docs.phonegap.com/en/edge/cordova_notification_notification.md.html#Notification</para>
+         </listitem>
+         <listitem>
+            <para>File create a native file</para>
+         </listitem>
+         <listitem>
+            <para>Device Get general information about the device.</para>
+         </listitem>
+      </itemizedlist>
+      <para>So to integrate with these things all we have to do is</para>
+      <informalexample>
+         <programlisting language="java">@Inject</programlisting>
+      </informalexample>
+      <para>these classes. There are also a couple of CDI events one can observer to be informed about hardware state:</para>
+      <itemizedlist>
+         <listitem>
+            <para>BackButtonEvent</para>
+         </listitem>
+         <listitem>
+            <para>BatteryCriticalEvent</para>
+         </listitem>
+         <listitem>
+            <para>BatteryEvent</para>
+         </listitem>
+         <listitem>
+            <para>BatteryLowEvent</para>
+         </listitem>
+         <listitem>
+            <para>BatteryStatusEvent</para>
+         </listitem>
+         <listitem>
+            <para>EndCallButtonEvent</para>
+         </listitem>
+         <listitem>
+            <para>MenuButtonEvent</para>
+         </listitem>
+         <listitem>
+            <para>OffLineEvent</para>
+         </listitem>
+         <listitem>
+            <para>OnlineEvent</para>
+         </listitem>
+         <listitem>
+            <para>PauseEvent</para>
+         </listitem>
+         <listitem>
+            <para>ResumeEvent</para>
+         </listitem>
+         <listitem>
+            <para>SearchButtonEvent</para>
+         </listitem>
+         <listitem>
+            <para>StartCallButtonEvent</para>
+         </listitem>
+         <listitem>
+            <para>VolumeDownButtonEvent</para>
+         </listitem>
+         <listitem>
+            <para>VolumeUpButtonEvent</para>
+         </listitem>
+      </itemizedlist>
+      <para>Example of how to use these events:</para>
+      <informalexample>
+         <programlisting language="java">
+private void updatedProjectList(@Observes ) {
+  projects.add(0, null);
+  projectListBox.setAcceptableValues(projects);
+}
+</programlisting>
+      </informalexample>
+   </section>
+</chapter>
