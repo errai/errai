@@ -13,6 +13,22 @@
 
   <artifactId>errai-jpa-datasync</artifactId>
 
+  <properties>
+    <version.org.jboss.jbossas>7.1.1.Final</version.org.jboss.jbossas>
+  </properties>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.arquillian</groupId>
+        <artifactId>arquillian-bom</artifactId>
+        <version>1.0.3.Final</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
   <dependencies>
 
     <!-- This dependency comes first to ensure this project doesn't see the GWT translatable
@@ -22,19 +38,6 @@
       <artifactId>hibernate-jpa-2.0-api</artifactId>
       <version>1.0.1.Final</version>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jpa-client</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <!-- Ideally, this should be an optional dependency. We could provide different options for the datasync transport. -->
-    <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-bus</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -48,6 +51,35 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
+    </dependency>
+
+
+    <!-- BEGIN ARQUILLIAN -->
+    <dependency>
+        <groupId>org.jboss.arquillian.junit</groupId>
+        <artifactId>arquillian-junit-container</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.arquillian.extension</groupId>
+      <artifactId>arquillian-gwt</artifactId>
+      <version>1.0.0.Alpha2</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- END ARQUILLIAN -->
+
+    <!-- Errai and GWT dependencies have to come after Arquillian -->
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jpa-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- Ideally, this should be an optional dependency. We could provide different options for the datasync transport. -->
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-bus</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -75,6 +107,47 @@
         <directory>src/test/resources</directory>
       </testResource>
     </testResources>
+
+    <plugins>
+      <!-- Arquillian versions are not even close to sane. Need to skip enforcer rules. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[2.1,)</versionRange>
+                    <goals>
+                      <goal>unpack</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <profiles>
@@ -107,6 +180,11 @@
                   <value>${project.build.directory}</value>
                 </property>
 
+                <property>
+                  <name>jbossHome</name>
+                  <value>${project.build.directory}/jboss-as-${version.org.jboss.jbossas}</value>
+                </property>
+
                 <!-- Do not accidently package server test marshallers when building Errai -->
                 <property>
                   <name>errai.marshalling.server.classOutput.enabled</name>
@@ -131,6 +209,63 @@
                 <include>**/AllDataSyncTests.java</include>
               </includes>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>arq-jbossas-managed</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-arquillian-container-managed</artifactId>
+          <version>${version.org.jboss.jbossas}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.arquillian.protocol</groupId>
+            <artifactId>arquillian-protocol-servlet</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-dist</artifactId>
+          <version>${version.org.jboss.jbossas}</version>
+          <type>zip</type>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>unpack</id>
+                <phase>process-test-classes</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.jboss.as</groupId>
+                      <artifactId>jboss-as-dist</artifactId>
+                      <version>${version.org.jboss.jbossas}</version>
+                      <type>zip</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>${project.build.directory}</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
