@@ -16,15 +16,14 @@
 
 package org.jboss.errai.ui.client.widget;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.databinding.client.BindableListChangeHandler;
+import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.SyncToAsyncBeanManagerAdpater;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanDef;
@@ -57,16 +56,17 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite implements HasValue<List<M>> {
+public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Composite implements HasValue<List<M>>,
+    BindableListChangeHandler<M> {
 
   private final ComplexPanel panel;
-  private List<M> items;
+  private BindableListWrapper<M> items;
 
   private final List<WidgetCreationalCallback> callbacks = new LinkedList<WidgetCreationalCallback>();
   private int pendingCallbacks;
 
   private boolean valueChangeHandlerInitialized;
-  
+
   protected ListWidget() {
     this(new VerticalPanel());
   }
@@ -111,7 +111,8 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   /**
    * Sets the list of model objects. A widget instance of type <W> will be added to the panel for
-   * each object in the list.
+   * each object in the list. The list will be wrapped in an {@link BindableListWrapper} to make
+   * direct changes to the list observable.
    * <p>
    * If the standard synchronous bean manager is used it is guaranteed that all widgets have been
    * added to the panel when this method returns. In case the asynchronous bean manager is used this
@@ -123,8 +124,18 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    *          removed.
    */
   public void setItems(List<M> items) {
-    this.items = new ListWrapper(items);
+    if (items instanceof BindableListWrapper) {
+      this.items = (BindableListWrapper<M>) items;
+    }
+    else {
+      this.items = new BindableListWrapper<M>(items);
+    }
 
+    this.items.addChangeHandler(this);
+    init();
+  }
+
+  private void init() {
     // The AsyncBeanManager API works in both synchronous and asynchronous IOC mode
     AsyncBeanManager bm = IOC.getAsyncBeanManager();
 
@@ -173,7 +184,6 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     return (W) panel.getWidget(index);
   }
 
-  
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<M>> handler) {
     if (!valueChangeHandlerInitialized) {
@@ -190,7 +200,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public List<M> getValue() {
-   return items;
+    return items;
   }
 
   @Override
@@ -206,7 +216,7 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       ValueChangeEvent.fireIfNotEqual(this, oldValue, value);
     }
   }
-  
+
   /**
    * A callback invoked by the {@link AsyncBeanManager} or {@link SyncToAsyncBeanManagerAdpater}
    * when the widget instance was created. It will associate the corresponding model instance with
@@ -237,187 +247,75 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     }
   }
 
-  private class ListWrapper implements List<M> {
-    private final List<M> list;
+  @Override
+  public void onItemAdded(M item) {
+    addWidget(item);
+  }
 
-    public ListWrapper(List<M> list) {
-      this.list = list;
-    }
-
-    @Override
-    public boolean add(M e) {
-      boolean b = list.add(e);
-      addWidget(e);
-      return b;
-    }
-
-    @Override
-    public void add(int index, M element) {
-      list.add(index, element);
-      for (int i = index; i < list.size(); i++) {
-        addAndReplaceWidget(index, i);
-      }
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends M> c) {
-      boolean b = list.addAll(c);
-      for (M m : c) {
-        addWidget(m);
-      }
-      return b;
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<? extends M> c) {
-      boolean b = list.addAll(index, c);
-      for (int i = index; i < list.size(); i++) {
-        addAndReplaceWidget(index, i);
-      }
-      return b;
-    }
-
-    @Override
-    public void clear() {
-      list.clear();
-      panel.clear();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-      return list.contains(o);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-      return list.containsAll(c);
-    }
-
-    @Override
-    public M get(int index) {
-      return list.get(index);
-    }
-
-    @Override
-    public int indexOf(Object o) {
-      return list.indexOf(o);
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return list.isEmpty();
-    }
-
-    @Override
-    public Iterator<M> iterator() {
-      return list.iterator();
-    }
-
-    @Override
-    public int lastIndexOf(Object o) {
-      return list.lastIndexOf(o);
-    }
-
-    @Override
-    public ListIterator<M> listIterator() {
-      return list.listIterator();
-    }
-
-    @Override
-    public ListIterator<M> listIterator(int index) {
-      return list.listIterator(index);
-    }
-
-    @Override
-    public boolean remove(Object o) {
-      int index = list.indexOf(o);
-      boolean b = list.remove(o);
-      if (b) {
-        panel.remove(index);
-      }
-      return b;
-    }
-
-    @Override
-    public M remove(int index) {
-      M m = list.remove(index);
-      panel.remove(index);
-      return m;
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-      List<Integer> indexes = new ArrayList<Integer>();
-      for (Object m : c) {
-        Integer index = list.indexOf(m);
-        if (!indexes.contains(index)) {
-          indexes.add(index);
-        }
-      }
-      Collections.sort(indexes, Collections.reverseOrder());
-
-      boolean b = list.removeAll(c);
-      if (b) {
-        for (Integer index : indexes) {
-          panel.remove(index);
-        }
-      }
-      return b;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-      return list.retainAll(c);
-    }
-
-    @Override
-    public M set(int index, M element) {
-      M m = list.set(index, element);
-      for (int i = index; i < list.size(); i++) {
-        addAndReplaceWidget(index, i);
-      }
-      return m;
-    }
-
-    @Override
-    public int size() {
-      return list.size();
-    }
-
-    @Override
-    public List<M> subList(int fromIndex, int toIndex) {
-      return list.subList(fromIndex, toIndex);
-    }
-
-    @Override
-    public Object[] toArray() {
-      return list.toArray();
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a) {
-      return list.toArray(a);
-    }
-
-    private void addAndReplaceWidget(final int startIndex, final int index) {
-      if (index < panel.getWidgetCount()) {
-        panel.remove(startIndex);
-      }
-      addWidget(list.get(index));
-    }
-
-    private void addWidget(final M m) {
-      // This call is always synchronous, since the list can only be manipulated after
-      // onItemsRendered was called. At that point the code of a potential split point must have
-      // already been downloaded.
-      AsyncBeanDef<W> itemBeanDef = IOC.getAsyncBeanManager().lookupBean(getItemWidgetType());
-      itemBeanDef.getInstance(new CreationalCallback<W>() {
-        @Override
-        public void callback(W widget) {
-          widget.setModel(m);
-          panel.add(widget);
-        }
-      });
+  @Override
+  public void onItemAddedAt(int index, M item) {
+    for (int i = index; i < items.size(); i++) {
+      addAndReplaceWidget(index, i);
     }
   }
+
+  @Override
+  public void onItemsAdded(Collection<? extends M> items) {
+    for (M m : items) {
+      addWidget(m);
+    }
+  }
+
+  @Override
+  public void onItemsAddedAt(int index, Collection<? extends M> item) {
+    for (int i = index; i < items.size(); i++) {
+      addAndReplaceWidget(index, i);
+    }
+  }
+
+  @Override
+  public void onItemsCleared() {
+    panel.clear();
+  }
+
+  @Override
+  public void onItemRemovedAt(int index) {
+    panel.remove(index);
+  }
+
+  @Override
+  public void onItemsRemovedAt(List<Integer> indexes) {
+    for (Integer index : indexes) {
+      panel.remove(index);
+    }
+  }
+
+  @Override
+  public void onItemChanged(int index, M item) {
+    for (int i = index; i < items.size(); i++) {
+      addAndReplaceWidget(index, i);
+    }
+  }
+
+  private void addAndReplaceWidget(final int startIndex, final int index) {
+    if (index < panel.getWidgetCount()) {
+      panel.remove(startIndex);
+    }
+    addWidget(items.get(index));
+  }
+
+  private void addWidget(final M m) {
+    // This call is always synchronous, since the list can only be manipulated after
+    // onItemsRendered was called. At that point the code of a potential split point must have
+    // already been downloaded.
+    AsyncBeanDef<W> itemBeanDef = IOC.getAsyncBeanManager().lookupBean(getItemWidgetType());
+    itemBeanDef.getInstance(new CreationalCallback<W>() {
+      @Override
+      public void callback(W widget) {
+        widget.setModel(m);
+        panel.add(widget);
+      }
+    });
+  }
+
 }

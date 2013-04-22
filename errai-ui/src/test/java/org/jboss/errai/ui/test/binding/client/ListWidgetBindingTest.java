@@ -17,7 +17,6 @@
 package org.jboss.errai.ui.test.binding.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -53,8 +52,14 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertEquals("Expected two widgets", 0, template.getListWidget().getWidgetCount());
 
     TestModel model = template.getModel();
-    model.setChildren(Arrays.asList(new TestModel(1, "c1"), new TestModel(2, "c2")));
+    List<TestModel> children = new ArrayList<TestModel>();
+    children.add(new TestModel(1, "c1"));
+    children.add(new TestModel(2, "c2"));
+    model.setChildren(children);
     assertEquals("Expected two widgets", 2, template.getListWidget().getWidgetCount());
+    
+    model.getChildren().add(new TestModel(3, "c3"));
+    assertEquals("Expected three widgets", 3, template.getListWidget().getWidgetCount());
   }
 
   @Test

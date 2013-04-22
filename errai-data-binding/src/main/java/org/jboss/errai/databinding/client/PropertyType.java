@@ -16,6 +16,8 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.List;
+
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
@@ -28,10 +30,12 @@ public class PropertyType {
 
   private final Class type;
   private final boolean bindable;
+  private final boolean list;
 
-  public PropertyType(Class type, boolean bindable) {
+  public PropertyType(Class type, boolean bindable, boolean list) {
     this.type = type;
     this.bindable = bindable;
+    this.list = list;
   }
 
   /**
@@ -50,5 +54,14 @@ public class PropertyType {
    */
   public boolean isBindable() {
     return bindable;
+  }
+  
+  /**
+   * Indicates whether or not the property type is a {@link List}.
+   * 
+   * @return true if type is a list, otherwise false.
+   */
+  public boolean isList() {
+    return list;
   }
 }

@@ -40,23 +40,24 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the target model and bound widgets in sync.
+ * Manages bindings and acts in behalf of a {@link BindableProxy} to keep the target model and bound
+ * widgets in sync.
  * <p>
  * An agent will:
  * <ul>
- * <li>Carry out an initial state sync between the bound widgets and the target model, if specified (see
- * {@link DataBinder#DataBinder(Object, InitialState)})</li>
+ * <li>Carry out an initial state sync between the bound widgets and the target model, if specified
+ * (see {@link DataBinder#DataBinder(Object, InitialState)})</li>
  * 
  * <li>Update the bound widget when a setter method is invoked on the model (see
- * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for widgets that either implement {@link HasValue}
- * or {@link HasText})</li>
+ * {@link #updateWidgetsAndFireEvent(String, Object, Object)}). Works for widgets that either
+ * implement {@link HasValue} or {@link HasText})</li>
  * 
- * <li>Update the bound widgets when a non-accessor method is invoked on the model (by comparing all bound properties to
- * detect changes). See {@link #updateWidgetsAndFireEvents()}. Works for widgets that either implement {@link HasValue}
- * or {@link HasText})</li>
+ * <li>Update the bound widgets when a non-accessor method is invoked on the model (by comparing all
+ * bound properties to detect changes). See {@link #updateWidgetsAndFireEvents()}. Works for widgets
+ * that either implement {@link HasValue} or {@link HasText})</li>
  * 
- * <li>Update the target model in response to value change events (only works for bound widgets that implement
- * {@link HasValue})</li>
+ * <li>Update the target model in response to value change events (only works for bound widgets that
+ * implement {@link HasValue})</li>
  * <ul>
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -68,7 +69,7 @@ import com.google.gwt.user.client.ui.Widget;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   final Multimap<String, Binding> bindings = LinkedHashMultimap.create();
-  
+
   final Map<String, PropertyType> propertyTypes = new HashMap<String, PropertyType>();
   final Map<String, DataBinder> binders = new HashMap<String, DataBinder>();
   final Map<String, Object> knownValues = new HashMap<String, Object>();
@@ -88,22 +89,25 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   /**
    * Makes the settings of this BindableProxyAgent match those of the given agent.
    * <p>
-   * IMPORTANT NOTE: this is currently implemented by sharing the PropertyChangeHandler registrations with the given
-   * agent. You should discard all references to the "other" agent after calling this method.
+   * IMPORTANT NOTE: this is currently implemented by sharing the PropertyChangeHandler
+   * registrations with the given agent. You should discard all references to the "other" agent
+   * after calling this method.
    * 
    * @param other
-   *          the agent to copy/share settings from. Should not be used after you pass it to this method.
+   *          the agent to copy/share settings from. Should not be used after you pass it to this
+   *          method.
    */
   public void copyStateFrom(BindableProxyAgent<T> other) {
     for (Binding binding : other.bindings.values()) {
       bind(binding.getWidget(), binding.getProperty(), binding.getConverter());
     }
-    
+
     propertyChangeHandlerSupport = other.propertyChangeHandlerSupport;
   }
-  
+
   /**
-   * Copies the values of all properties to be able to compare them in case they change outside a setter method. 
+   * Copies the values of all properties to be able to compare them in case they change outside a
+   * setter method.
    */
   void copyValues() {
     for (String property : propertyTypes.keySet()) {
@@ -121,12 +125,13 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Returns the widgets currently bound to the provided property (see {@link #bind(Widget, String, Converter)}).
+   * Returns the widgets currently bound to the provided property (see
+   * {@link #bind(Widget, String, Converter)}).
    * 
    * @param property
    *          the name of the model property
-   * @return the list of widgets currently bound to the provided property or an empty list if no widget was bound to the
-   *         property.
+   * @return the list of widgets currently bound to the provided property or an empty list if no
+   *         widget was bound to the property.
    */
   public List<Widget> getWidgets(final String property) {
     List<Widget> widgets = new ArrayList<Widget>();
@@ -146,8 +151,8 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Binds the provided widget to the specified property (or property chain) of the model instance associated with this
-   * proxy (see {@link DataBinder#setModel(Object, InitialState)}).
+   * Binds the provided widget to the specified property (or property chain) of the model instance
+   * associated with this proxy (see {@link DataBinder#setModel(Object, InitialState)}).
    * 
    * @param widget
    *          the widget to bind to, must not be null.
@@ -191,23 +196,28 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       });
     }
     else if (!(widget instanceof HasText)) {
-      throw new RuntimeException("Widget must implement " + HasValue.class.getName() + " or " + HasText.class.getName() + "!");
+      throw new RuntimeException("Widget must implement " + HasValue.class.getName() + " or " + HasText.class.getName()
+          + "!");
     }
-    
+
+    if (propertyTypes.get(property).isList()) {
+      ensureListProxied(property);
+    }
     bindings.put(property, new Binding(property, widget, converter, handlerRegistration));
     syncState(widget, property, initialState);
   }
 
   /**
-   * Creates a data binder for a nested property to support property chains. The nested data binder is initialized with
-   * the current value of the specified property, or with a new instance of the property type if the value is null. The
-   * proxy's value for this property is then replaced with the proxy managed by the nested data binder.
+   * Creates a data binder for a nested property to support property chains. The nested data binder
+   * is initialized with the current value of the specified property, or with a new instance of the
+   * property type if the value is null. The proxy's value for this property is then replaced with
+   * the proxy managed by the nested data binder.
    * 
    * @param widget
    *          the widget to bind to, must not be null.
    * @param property
-   *          the property of the model to bind the widget to, must not be null. The property must be of a @Bindable
-   *          type.
+   *          the property of the model to bind the widget to, must not be null. The property must
+   *          be of a @Bindable type.
    * @param converter
    *          the converter to use for this binding, null if default conversion should be used.
    */
@@ -286,14 +296,15 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   }
 
   /**
-   * Updates all bound widgets if necessary (if a bound property's value has changed). This method is invoked in case a
-   * bound property changed outside the property's write method (when using a non accessor method).
+   * Updates all bound widgets if necessary (if a bound property's value has changed). This method
+   * is invoked in case a bound property changed outside the property's write method (when using a
+   * non accessor method).
    */
   void updateWidgetsAndFireEvents() {
     for (String property : propertyTypes.keySet()) {
       Object knownValue = knownValues.get(property);
       Object actualValue = proxy.get(property);
-      
+
       if ((knownValue == null && actualValue != null) ||
           (knownValue != null && !knownValue.equals(actualValue))) {
 
@@ -322,7 +333,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue) {
     updateWidgetsAndFireEvent(property, oldValue, newValue, null);
   }
-  
+
   /**
    * Updates all bound widgets and fires the corresponding {@link PropertyChangeEvent}.
    * 
@@ -335,15 +346,19 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @param newValue
    *          The new value of the property.
    * @param excluding
-   *          A widget reference that does not need to be updated (the origin of the value change event).
+   *          A widget reference that does not need to be updated (the origin of the value change
+   *          event).
    */
-  private <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue, final Widget excluding) {
+  private <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue,
+      final Widget excluding) {
+    
     for (Binding binding : bindings.get(property)) {
       Widget widget = binding.getWidget();
       Converter converter = binding.getConverter();
 
-      if (widget == excluding) continue;
-      
+      if (widget == excluding)
+        continue;
+
       if (widget instanceof HasValue) {
         HasValue hv = (HasValue) widget;
         Object widgetValue =
@@ -358,10 +373,10 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         ht.setText((String) widgetValue);
       }
     }
-    
+
     firePropertyChangeEvent(property, oldValue, newValue);
   }
-  
+
   /**
    * Fires a property change event.
    * 
@@ -377,25 +392,26 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   private <P> void firePropertyChangeEvent(final String property, final P oldValue, final P newValue) {
     PropertyChangeEvent<P> event = new PropertyChangeEvent<P>(proxy, Assert.notNull(property), oldValue, newValue);
     propertyChangeHandlerSupport.notifyHandlers(event);
-    
+
     knownValues.put(property, newValue);
   }
 
   /**
-   * Synchronizes the state of the provided widgets and model property based on the value of the provided {@link InitialState}.
+   * Synchronizes the state of the provided widgets and model property based on the value of the
+   * provided {@link InitialState}.
    * 
    * @param widget
    *          The widget to synchronize. Must not be null.
    * @param property
    *          The name of the model property that should be synchronized. Must not be null.
    * @param initialState
-   *          Specifies the origin of the initial state of both model and UI widget. If null, no state
-   *          synchronization should be carried out.
+   *          Specifies the origin of the initial state of both model and UI widget. If null, no
+   *          state synchronization should be carried out.
    */
   private void syncState(final Widget widget, final String property, final InitialState initialState) {
     Assert.notNull(widget);
     Assert.notNull(property);
-    
+
     if (initialState != null) {
       Object value = proxy.get(property);
       if (widget instanceof HasValue) {
@@ -412,6 +428,19 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
         proxy.set(property, value);
         firePropertyChangeEvent(property, knownValues.get(property), value);
       }
+    }
+  }
+
+  /**
+   * Ensures that the given property is wrapped in a {@link BindableListWrapper}.
+   * 
+   * @param property
+   *          the name of the list property
+   */
+  private void ensureListProxied(String property) {
+    Object value = proxy.get(property);
+    if (!(value instanceof BindableListWrapper)) {
+      proxy.set(property, new BindableListWrapper((List) value));
     }
   }
 
