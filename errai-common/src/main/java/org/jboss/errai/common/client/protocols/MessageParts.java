@@ -107,6 +107,8 @@ public enum MessageParts {
    */
   StackTrace,
 
+  Reason,
+
   /**
    * If this attribute is present, the bus should give priority to processing it and not subject it to
    * window matching.

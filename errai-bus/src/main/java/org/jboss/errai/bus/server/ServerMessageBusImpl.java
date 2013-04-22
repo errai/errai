@@ -724,8 +724,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public boolean contains(final MessageQueue queue) {
       return queues.contains(queue);
     }
-
   }
+
   /**
    * Unsubscribes a remote subscription and fires the appropriate listeners
    *

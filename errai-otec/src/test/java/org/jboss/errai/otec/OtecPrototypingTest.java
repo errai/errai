@@ -39,12 +39,10 @@ public class OtecPrototypingTest {
   OTEngine clientEngineA;
   OTEngine clientEngineB;
   OTEngine serverEngine;
-
   OTEntity serverEntity;
 
   @Test
   public void testApplyLocalOperation() {
-
     setupEngines("Hello, World?");
 
     final OTOperationsFactory operationsFactory = serverEngine.getOperationsFactory();
@@ -672,7 +670,7 @@ public class OtecPrototypingTest {
 
   private static final String PLAYBACK_FORMAT = "%-30s %-40s\n";
 
-  private static void renderPlaybackHeader(String stateName) {
+  private static void renderPlaybackHeader(final String stateName) {
     System.out.println("===================================================");
     System.out.println("NODE: " + stateName);
     System.out.println();
@@ -680,11 +678,11 @@ public class OtecPrototypingTest {
     System.out.println("---------------------------------------------------");
   }
 
-  private static void renderInitialStatePlayback(State state) {
+  private static void renderInitialStatePlayback(final State state) {
     System.out.printf(PLAYBACK_FORMAT, "SYNC", "\"" + String.valueOf(state.get()) + "\"");
   }
 
-  private static void renderMutationPlayback(Mutation mutation, State state) {
+  private static void renderMutationPlayback(final Mutation mutation, final State state) {
     System.out.printf(PLAYBACK_FORMAT, mutation, "\"" + String.valueOf(state.get()) + "\"");
   }
 }

@@ -310,8 +310,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             case Disconnect:
               stop(false);
-
-              if (message.hasPart("Reason")) {
+              if (message.hasPart(MessageParts.Reason)) {
                 managementConsole
                     .displayError("The bus was disconnected by the server", "Reason: "
                         + message.get(String.class, "Reason"), null);
@@ -827,7 +826,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
-   *
    * Checks if subject is already listed in the subscriptions map
    *
    * @param subject
