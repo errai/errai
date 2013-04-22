@@ -16,8 +16,6 @@
 
 package org.jboss.errai.otec.operation;
 
-import org.jboss.errai.otec.Position;
-import org.jboss.errai.otec.mutation.Data;
 import org.jboss.errai.otec.mutation.MutationType;
 
 /**
@@ -25,9 +23,10 @@ import org.jboss.errai.otec.mutation.MutationType;
  * @author Mike Brock
  */
 public interface OTOperationsListBuilder {
-  public OTOperationsListBuilder add(MutationType type, Position position);
 
-  public OTOperationsListBuilder add(MutationType type, Position position, Data data);
+  public OTOperationsListBuilder add(MutationType type, int position, char data);
+
+  public OTOperationsListBuilder add(MutationType type, int position, String data);
 
   public OTOperation build();
 }

@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.mutation;
+package org.jboss.errai.otec;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IntegerData implements Data<Integer> {
-  public final int data;
-
-  public IntegerData(int data) {
-    this.data = data;
-  }
-
-  public Integer get() {
-    return data;
+public class OtThreeEngineABTest extends ThreeEngineOtecTest {
+  @Override
+  protected void resume() {
+    resumeEnginesAB();
   }
 }

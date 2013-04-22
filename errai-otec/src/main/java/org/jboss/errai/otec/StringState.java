@@ -35,12 +35,31 @@ public class StringState implements State<String> {
     else {
       buffer.insert(pos, String.valueOf(data));
     }
+    updateStateId();
+  }
+
+  private void updateStateId() {
     stateId = GUIDUtil.createGUID();
+  }
+
+  public void insert(final int pos, final String data) {
+    if (pos == buffer.length()) {
+      buffer.append(data);
+    }
+    else {
+      buffer.insert(pos, data);
+    }
+    updateStateId();
   }
 
   public void delete(final int pos) {
     buffer.delete(pos, pos + 1);
-    stateId = GUIDUtil.createGUID();
+    updateStateId();
+  }
+
+  public void delete(final int pos, final int length) {
+    buffer.delete(pos, pos + length);
+    updateStateId();
   }
 
   @Override

@@ -14,28 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.mutation;
+package org.jboss.errai.otec;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class CharacterData implements Data<Character> {
-  private final char data;
-
-  private CharacterData(final char data) {
-    this.data = data;
-  }
-
-  public static CharacterData of(final char data) {
-    return new CharacterData(data);
-  }
-
-  public Character get() {
-    return data;
-  }
-
-  public String toString() {
-    return String.valueOf(data);
+public class OtThreeEngineBATest extends ThreeEngineOtecTest {
+  @Override
+  protected void resume() {
+    resumeEnginesBA();
   }
 }

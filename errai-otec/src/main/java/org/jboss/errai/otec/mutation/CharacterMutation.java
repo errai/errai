@@ -23,23 +23,23 @@ import org.jboss.errai.otec.StringState;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public class StringMutation implements Mutation<StringState, IndexPosition, String> {
+public class CharacterMutation implements Mutation<StringState, IndexPosition, Character> {
   private final MutationType type;
   private final int position;
-  private final String data;
+  private final char data;
 
-  private StringMutation(final MutationType type, final int position, final String data) {
+  private CharacterMutation(final MutationType type, final int position, final char data) {
     this.type = type;
     this.position = position;
     this.data = data;
   }
 
-  public static StringMutation noop(int position) {
-    return of(MutationType.Noop, position, null);
+  public static CharacterMutation noop(int position) {
+    return of(MutationType.Noop, position, (char) 0);
   }
 
-  public static StringMutation of(final MutationType type, final int position, final String data) {
-    return new StringMutation(type, position, data);
+  public static CharacterMutation of(final MutationType type, final int position, final char data) {
+    return new CharacterMutation(type, position, data);
   }
 
   @Override
@@ -53,13 +53,13 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Stri
   }
 
   @Override
-  public String getData() {
+  public Character getData() {
     return data;
   }
 
   @Override
   public int length() {
-    return data == null ? 1 : data.length();
+    return 1;
   }
 
   @Override
@@ -69,19 +69,19 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Stri
         state.insert(position, data);
         break;
       case Delete:
-        state.delete(position, length());
+        state.delete(position);
         break;
     }
   }
 
   @Override
-  public Mutation<StringState, IndexPosition, String> newBasedOn(int index) {
+  public Mutation<StringState, IndexPosition, Character> newBasedOn(int index) {
     return of(type, index, data);
   }
 
   @Override
   public String toString() {
-    if (getData() == null) {
+    if (getData() == null || getData() == 0) {
       return type.getShortName() + "[" + getPosition() + "]";
     }
     else {

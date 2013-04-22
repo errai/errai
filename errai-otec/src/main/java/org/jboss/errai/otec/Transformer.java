@@ -16,11 +16,9 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.mutation.CharacterData;
-import org.jboss.errai.otec.mutation.IndexPosition;
+import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
-import org.jboss.errai.otec.mutation.StringMutation;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OpPair;
@@ -149,10 +147,10 @@ public class Transformer {
       final Mutation rm = remoteOpMutations.next();
       final Mutation lm = localOpMutations.next();
 
-      final IndexPosition rmIdx = (IndexPosition) rm.getPosition();
-      final IndexPosition lmIdx = (IndexPosition) lm.getPosition();
+      final int rmIdx = rm.getPosition();
+      final int lmIdx = lm.getPosition();
 
-      final int diff = rmIdx.getPosition() - lmIdx.getPosition();
+      final int diff = rmIdx - lmIdx;
 
       if (diff < 0) {
         if (rm.getType() != MutationType.Noop) {
@@ -164,12 +162,12 @@ public class Transformer {
         switch (rm.getType()) {
           case Insert:
             if (!remoteWins && lm.getType() == MutationType.Insert) {
-              offset++;
+              offset += lm.length();
             }
             break;
           case Delete:
             if (lm.getType() == MutationType.Insert) {
-              offset++;
+              offset += lm.length();
             }
             else if (lm.getType() == MutationType.Delete) {
               doTransform = false;
@@ -177,8 +175,7 @@ public class Transformer {
             break;
         }
         if (doTransform) {
-          transformedMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset),
-              (CharacterData) rm.getData()));
+          transformedMutations.add(rm.newBasedOn(rmIdx + offset));
         }
       }
       else if (diff >= 0) {
@@ -186,25 +183,24 @@ public class Transformer {
           switch (rm.getType()) {
             case Insert:
               if (lm.getType() == MutationType.Insert) {
-                offset++;
+                offset += lm.length();
               }
               if (lm.getType() == MutationType.Delete) {
-                offset--;
+                offset -= lm.length();
               }
               break;
             case Delete:
               if (lm.getType() == MutationType.Insert) {
-                offset++;
+                offset += lm.length();
               }
               if (lm.getType() == MutationType.Delete) {
-                offset--;
+                offset -= lm.length();
               }
               break;
           }
         }
 
-        transformedMutations.add(new StringMutation(rm.getType(), IndexPosition.of(rmIdx.getPosition() + offset),
-            (CharacterData) rm.getData()));
+        transformedMutations.add(rm.newBasedOn(rmIdx + offset));
       }
 
       transformedOp =
@@ -230,8 +226,8 @@ public class Transformer {
   }
 
   private static Iterator<Mutation> noopPaddedIterator(final List<Mutation> mutationList, final int largerSize) {
-    final IndexPosition lastPosition = (IndexPosition) mutationList.get(mutationList.size() - 1).getPosition();
-    final StringMutation paddedMutation = StringMutation.noop(lastPosition);
+    final int lastPosition = mutationList.get(mutationList.size() - 1).getPosition();
+    final CharacterMutation paddedMutation = CharacterMutation.noop(lastPosition);
 
     return new Iterator<Mutation>() {
       int pos = 0;

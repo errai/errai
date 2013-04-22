@@ -16,9 +16,7 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.mutation.CharacterData;
-import org.jboss.errai.otec.mutation.Data;
-import org.jboss.errai.otec.mutation.IndexPosition;
+import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.mutation.StringMutation;
@@ -237,25 +235,26 @@ public class OTEngineImpl implements OTEngine {
     @Override
     public OTOperationsListBuilder createOperation(final OTEntity entity) {
       return new OTOperationsListBuilder() {
-        List<Mutation> operationList = new ArrayList<Mutation>();
+        List<Mutation> mutationList = new ArrayList<Mutation>();
 
         @Override
-        public OTOperationsListBuilder add(final MutationType type, final Position position, final Data data) {
-          operationList.add(
-              new StringMutation(type, (IndexPosition) position, (CharacterData) data)
+        public OTOperationsListBuilder add(final MutationType type, final int position, final char data) {
+          mutationList.add(
+              CharacterMutation.of(type, position, data)
           );
           return this;
         }
 
         @Override
-        public OTOperation build() {
-          return OTOperationImpl.createOperation(otEngine, operationList, entity.getId(), -1, null, null);
-        }
+        public OTOperationsListBuilder add(MutationType type, int position, String data) {
+          mutationList.add(
+              StringMutation.of(type, position, data)
+           );
+           return this;        }
 
         @Override
-        public OTOperationsListBuilder add(final MutationType type, final Position position) {
-          operationList.add(new StringMutation(type, (IndexPosition) position, null));
-          return this;
+        public OTOperation build() {
+          return OTOperationImpl.createOperation(otEngine, mutationList, entity.getId(), -1, null, null);
         }
       };
     }

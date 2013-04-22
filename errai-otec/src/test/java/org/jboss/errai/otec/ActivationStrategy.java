@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.mutation;
+package org.jboss.errai.otec;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public interface Data<T> {
-  public T get();
+public interface ActivationStrategy {
+  public void activate(Runnable doBeforeResume);
 }
