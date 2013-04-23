@@ -1,0 +1,42 @@
+/* moo */
+html,body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    color: white;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: black;
+    text-align: center;
+    min-width: 626px;
+    min-height: 400px;
+}
+
+a {
+    color: #ffaa33;
+}
+
+.rotateBox {
+    background: #ddd;
+    color: black;
+    margin: 40px;
+    font-size: x-large;
+    width: 100px;
+    height: 100px;
+    padding-top: 40px;
+    border-radius: 6px;
+    border: 3px solid white;
+    display: inline-block;
+}
+
+/* The template itself should not display! */
+#rotateMeTemplate {
+    display: none;
+}
+.loginPanel {
+  background: rgba(50, 50, 50, 100);
+  border-radius: 3px;
+  padding: 20px;
+}
