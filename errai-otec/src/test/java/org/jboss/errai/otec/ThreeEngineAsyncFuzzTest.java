@@ -16,12 +16,15 @@
 
 package org.jboss.errai.otec;
 
+import org.junit.runner.RunWith;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Mike Brock
  */
+@RunWith(ManyTimesTestRunner.class)
 public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
   protected List<AsynchronousMockPeerlImpl> peersStarted = new ArrayList<AsynchronousMockPeerlImpl>();
 
@@ -52,6 +55,4 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
       t.printStackTrace();
     }
   }
-
-
 }
