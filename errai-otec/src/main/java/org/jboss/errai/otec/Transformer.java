@@ -83,6 +83,7 @@ public class Transformer {
         transactionLog.pruneFromOperation(localOps.get(1));
       }
 
+      boolean appliedTransform = false;
       OTOperation applyOver = remoteOp;
       int idx = 0;
       for (final OTOperation localOp : localOps) {
@@ -94,19 +95,40 @@ public class Transformer {
             applyOver = transform(applyOver,
                 transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
           }
-
-          applyOver.apply(entity);
-          transactionLog.appendLog(applyOver);
         }
         else {
           final OTOperation ot = transform(localOp, applyOver);
-          if (idx != localOps.size()) {
-            applyOver = transform(applyOver, ot);
+
+          /**
+           * IMPORTANT!
+           *
+           * Check to see if the result of the transform of localOp over applyOver has resulted in a effective change.
+           * If it has it means we *must* apply the transformed remoteOp immediately because the applyOver operation
+           * has an effect on localOp (meaning that applyOver is of a lower index of localOp).
+           *
+           * If not, we must continue to defer applyOver.
+           *
+           * This is important because if we do not do this, the history will be reverse-shuffled every time a
+           * rewind occurs leading to a breakdown of the algorithm if the history diverges by 3..n revisions.
+           */
+          if (!appliedTransform && ot.getTransformedFrom() != null
+              && !ot.getTransformedFrom().getRemoteOp().equals(ot)) {
+
+            applyOver.apply(entity);
+            transactionLog.appendLog(applyOver);
+            appliedTransform = true;
           }
+
+          applyOver = transform(applyOver, ot);
 
           ot.apply(entity);
           transactionLog.appendLog(ot);
         }
+      }
+
+      if (!appliedTransform) {
+        applyOver.apply(entity);
+        transactionLog.appendLog(applyOver);
       }
 
       if (applyOver.isResolvedConflict()) {
@@ -121,7 +143,7 @@ public class Transformer {
   }
 
   private OTOperation transform(final OTOperation remoteOp, final OTOperation localOp) {
-    OTOperation transformedOp = null;
+    final OTOperation transformedOp;
     final List<Mutation> remoteMutations = remoteOp.getMutations();
     final List<Mutation> localMutations = localOp.getMutations();
     final List<Mutation> transformedMutations = new ArrayList<Mutation>(remoteMutations.size());
@@ -143,6 +165,8 @@ public class Transformer {
     }
 
     int offset = 0;
+    boolean didResolveConflict = false;
+
     while (remoteOpMutations.hasNext()) {
       final Mutation rm = remoteOpMutations.next();
       final Mutation lm = localOpMutations.next();
@@ -175,8 +199,16 @@ public class Transformer {
             break;
         }
         if (doTransform) {
-          transformedMutations.add(rm.newBasedOn(rmIdx + offset));
+          if (offset == 0) {
+            transformedMutations.add(rm);
+          }
+          else {
+            transformedMutations.add(rm.newBasedOn(rmIdx + offset));
+          }
+
+          didResolveConflict = true;
         }
+
       }
       else if (diff >= 0) {
         if (lm.getType() != MutationType.Noop) {
@@ -200,17 +232,22 @@ public class Transformer {
           }
         }
 
-        transformedMutations.add(rm.newBasedOn(rmIdx + offset));
+        if (offset == 0) {
+          transformedMutations.add(rm);
+        }
+        else {
+          transformedMutations.add(rm.newBasedOn(rmIdx + offset));
+        }
       }
+    }
 
-      transformedOp =
-          OTOperationImpl.createLocalOnlyOperation(engine, transformedMutations, entity.getId(), entity.getRevision(),
-              entity.getState().getStateId(),
-              OpPair.of(remoteOp, localOp));
+    transformedOp =
+        OTOperationImpl.createLocalOnlyOperation(engine, transformedMutations, entity.getId(), entity.getRevision(),
+            entity.getState().getStateId(),
+            OpPair.of(remoteOp, localOp));
 
-      if (!remoteWins && diff == 0) {
-        transformedOp.markAsResolvedConflict();
-      }
+    if (!remoteWins && didResolveConflict) {
+      transformedOp.markAsResolvedConflict();
     }
 
     if (!remoteOp.equals(transformedOp)) {
