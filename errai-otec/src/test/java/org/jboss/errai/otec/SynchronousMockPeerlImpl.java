@@ -67,8 +67,8 @@ public class SynchronousMockPeerlImpl implements OTPeer {
     localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
 
     OTLogFormat.log("SYNC",  "",
-            remoteEngine.getEngineName(),
-            localEngine.getEngineName(),
+            remoteEngine.getName(),
+            localEngine.getName(),
             entity.getRevision(),
             "\"" + entity.getState().get() + "\"");
 
@@ -91,7 +91,7 @@ public class SynchronousMockPeerlImpl implements OTPeer {
   }
 
   public String toString() {
-    return remoteEngine.getEngineName();
+    return remoteEngine.getName();
   }
 
 }

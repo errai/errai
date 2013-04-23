@@ -17,8 +17,10 @@
 package org.jboss.errai.otec;
 
 import static org.junit.Assert.assertEquals;
-import junit.framework.Assert;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import junit.framework.Assert;
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
@@ -183,5 +185,10 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     Assert.assertEquals(expectedState, clientBEntity.getState().get());
 
     assertAllLogsConsistent(expectedState, initialState);
+  }
+
+  public static void main(String[] args) {
+    final HashCode foo = Hashing.md5().hashString("foo");
+    System.out.println(foo.toString());
   }
 }

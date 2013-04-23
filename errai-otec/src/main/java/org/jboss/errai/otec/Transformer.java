@@ -75,7 +75,7 @@ public class Transformer {
         OTLogFormat.log("REWIND",
             "<<>>",
             "-",
-            engine.getEngineName(),
+            engine.getName(),
             remoteOp.getRevision() + 1,
             "\"" + entity.getState().get() + "\"");
 
@@ -228,7 +228,7 @@ public class Transformer {
 
     transformedOp =
         OTOperationImpl.createLocalOnlyOperation(engine, transformedMutations, entity.getId(), entity.getRevision(),
-            entity.getState().getStateId(),
+            entity.getState().getHash(),
             OpPair.of(remoteOp, localOp));
 
     if (!remoteWins && didResolveConflict) {
@@ -238,7 +238,7 @@ public class Transformer {
     OTLogFormat.log("TRANSFORM",
         remoteOp + " , " + localOp + " -> " + transformedOp,
         "-",
-        engine.getEngineName(),
+        engine.getName(),
         remoteOp.getRevision(),
         "\"" + entity.getState().get() + "\"");
 

@@ -99,7 +99,7 @@ public class OTOperationImpl implements OTOperation {
   @SuppressWarnings("unchecked")
   @Override
   public boolean apply(final OTEntity entity) {
-    revisionHash = entity.getState().getStateId();
+    revisionHash = entity.getState().getHash();
 
     if (nonCanon)
       return shouldPropagate();

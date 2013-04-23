@@ -198,7 +198,7 @@ public class OTEngineImpl implements OTEngine {
   }
 
   @Override
-  public void setEngineMode(final OTEngineMode mode) {
+  public void setMode(final OTEngineMode mode) {
     if (this.mode == OTEngineMode.Offline && mode == OTEngineMode.Online) {
       transmitDeferredTransactions();
     }
@@ -229,11 +229,11 @@ public class OTEngineImpl implements OTEngine {
 
   @Override
   public String toString() {
-    return getEngineName();
+    return getName();
   }
 
   @Override
-  public String getEngineName() {
+  public String getName() {
     return name;
   }
 

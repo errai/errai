@@ -16,6 +16,8 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.util.Md5Digest;
+
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -39,7 +41,7 @@ public class StringState implements State<String> {
   }
 
   private void updateStateId() {
-    stateId = buffer.toString();
+    stateId = createHashFor(buffer.toString());
   }
 
   public void insert(final int pos, final String data) {
@@ -86,7 +88,26 @@ public class StringState implements State<String> {
   }
 
   @Override
-  public String getStateId() {
+  public String getHash() {
     return stateId;
+  }
+
+  private static String createHashFor(final String string) {
+    try {
+    final Md5Digest digest = new Md5Digest();
+    digest.update(string.getBytes("UTF-8"));
+
+    return hashToHexString(digest.digest());
+    }
+    catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
+  private static String hashToHexString(final byte[] hash) {
+    final StringBuilder hexString = new StringBuilder(hash.length);
+    for (byte mdbyte : hash) {
+      hexString.append(Integer.toHexString(0xFF & mdbyte));
+    }
+    return hexString.toString();
   }
 }

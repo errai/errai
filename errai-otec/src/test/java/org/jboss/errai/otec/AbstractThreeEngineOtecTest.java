@@ -40,6 +40,7 @@ public abstract class AbstractThreeEngineOtecTest {
     System.out.println();
     System.out.printf(PLAYBACK_FORMAT, "MUTATION", "STATE");
     System.out.println("---------------------------------------------------");
+
   }
 
   private static void renderInitialStatePlayback(final State state) {
@@ -51,21 +52,21 @@ public abstract class AbstractThreeEngineOtecTest {
   }
 
   protected void suspendEngines() {
-    clientEngineA.setEngineMode(OTEngineMode.Offline);
-    clientEngineB.setEngineMode(OTEngineMode.Offline);
-    serverEngine.setEngineMode(OTEngineMode.Offline);
+    clientEngineA.setMode(OTEngineMode.Offline);
+    clientEngineB.setMode(OTEngineMode.Offline);
+    serverEngine.setMode(OTEngineMode.Offline);
   }
 
   protected void resumeEnginesAB() {
-    serverEngine.setEngineMode(OTEngineMode.Online);
-    clientEngineA.setEngineMode(OTEngineMode.Online);
-    clientEngineB.setEngineMode(OTEngineMode.Online);
+    serverEngine.setMode(OTEngineMode.Online);
+    clientEngineA.setMode(OTEngineMode.Online);
+    clientEngineB.setMode(OTEngineMode.Online);
   }
 
   protected void resumeEnginesBA() {
-    serverEngine.setEngineMode(OTEngineMode.Online);
-    clientEngineB.setEngineMode(OTEngineMode.Online);
-    clientEngineA.setEngineMode(OTEngineMode.Online);
+    serverEngine.setMode(OTEngineMode.Online);
+    clientEngineB.setMode(OTEngineMode.Online);
+    clientEngineA.setMode(OTEngineMode.Online);
   }
 
   protected abstract OTPeer createPeerFor(OTEngine local, OTEngine remote);
@@ -121,7 +122,11 @@ public abstract class AbstractThreeEngineOtecTest {
   }
 
   @SuppressWarnings("unchecked")
-  private String replayLogAndReturnResult(final String name, final State state, int revision, final TransactionLog log) {
+  private String replayLogAndReturnResult(final String name,
+                                          final State state,
+                                          int revision,
+                                          final TransactionLog log) {
+
     renderPlaybackHeader(name, revision);
     renderInitialStatePlayback(state);
 
@@ -132,6 +137,7 @@ public abstract class AbstractThreeEngineOtecTest {
       }
     }
 
+    System.out.println("RESULTING HASH: " + state.getHash());
     System.out.println("\n");
 
     return (String) state.get();
