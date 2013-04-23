@@ -1,0 +1,23 @@
+html {
+	padding: 15px;
+}
+
+body {
+	font-family: 'Voces', 'Verdana', 'Arial', sans-serif;
+	font-size: 11pt;
+	color: #fff;
+	background-color: #555;
+}
+
+a {
+    color: #ffaa33;
+}
+
+iframe {
+	border: none;
+	margin-left: auto;
+	margin-right: auto;
+	border-radius: 6px;
+	width: 800px;
+	height: 260px;
+}
