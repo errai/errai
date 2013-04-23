@@ -3,6 +3,8 @@ package org.jboss.errai.aerogear.api.pipeline.impl;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.errai.aerogear.api.pipeline.auth.Authenticator;
+import org.jboss.errai.aerogear.api.pipeline.auth.User;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 
 /**
  * @author edewit@redhat.com
@@ -20,16 +22,13 @@ public class AuthenticatorAdapter implements Authenticator {
   }
 
   @Override
-  public void enroll(String username, String password, AsyncCallback<String> callback) {
-    enroll0(username, password, callback);
+  public void enroll(User user, AsyncCallback<String> callback) {
+    enroll0(MarshallingWrapper.toJSON(user), callback);
   }
 
-  private native void enroll0(String username, String password, AsyncCallback<String> callback) /*-{
+  private native void enroll0(String object, AsyncCallback<String> callback) /*-{
       this.@org.jboss.errai.aerogear.api.pipeline.impl.AuthenticatorAdapter::auth.enroll(
-          {
-              username: username,
-              password: password
-          },
+          eval('[' + object + '][0]'),
           {
               success: function (data) {
                   callback.@com.google.gwt.user.client.rpc.AsyncCallback::onSuccess(Ljava/lang/Object;)(data.username);

@@ -2,13 +2,21 @@ package org.jboss.errai.aerogear.api.pipeline.impl;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jboss.errai.aerogear.api.pipeline.*;
+import org.jboss.errai.aerogear.api.pipeline.PagedList;
+import org.jboss.errai.aerogear.api.pipeline.Pipe;
+import org.jboss.errai.aerogear.api.pipeline.PipeFactory;
+import org.jboss.errai.aerogear.api.pipeline.ReadFilter;
 import org.jboss.errai.aerogear.api.pipeline.auth.AuthenticationFactory;
 import org.jboss.errai.aerogear.api.pipeline.auth.Authenticator;
+import org.jboss.errai.aerogear.api.pipeline.auth.User;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.jboss.errai.aerogear.api.pipeline.PipeFactory.Config;
 
 /**
  * @author edewit@redhat.com
@@ -95,7 +103,7 @@ public class PipeTest extends GWTTestCase {
 
   public void testPaging() {
     //given
-    Pipe<Task> pipe = new PipeFactory().createPipe(Task.class, new PipeFactory.Config("pageTestWebLink"));
+    Pipe<Task> pipe = new PipeFactory().createPipe(Task.class, new Config("pageTestWebLink"));
 
     ReadFilter filter = new ReadFilter();
     filter.setOffset(1);
@@ -115,7 +123,7 @@ public class PipeTest extends GWTTestCase {
 
   public void testSecurity() {
     Authenticator auth = new AuthenticationFactory().createAuthenticator("auth");
-    Pipe<Task> securePipe = new PipeFactory().createPipe(Task.class, "auth", auth);
+    Pipe<Task> securePipe = new PipeFactory().createPipe(Task.class, new Config("auth"), auth);
     cleanToken();
 
     securePipe.read(new AsyncCallback<List<Task>>() {
@@ -138,7 +146,10 @@ public class PipeTest extends GWTTestCase {
     Authenticator auth = new AuthenticationFactory().createAuthenticator("auth");
     cleanToken();
 
-    auth.enroll("john", "1234", new FailingAsyncCallback<String>() {
+    final User user = new User();
+    user.setUsername("john");
+    user.setPassword("1234");
+    auth.enroll(user, new FailingAsyncCallback<String>() {
       @Override
       public void onSuccess(String result) {
         assertEquals("john", result);

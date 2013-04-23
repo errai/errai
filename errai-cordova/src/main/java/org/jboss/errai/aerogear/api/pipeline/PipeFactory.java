@@ -1,6 +1,5 @@
 package org.jboss.errai.aerogear.api.pipeline;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import org.jboss.errai.aerogear.api.pipeline.auth.Authenticator;
 import org.jboss.errai.aerogear.api.pipeline.impl.AuthenticatorAdapter;
@@ -33,8 +32,7 @@ public class PipeFactory {
     return createPipe(type, new Config(name));
   }
 
-  public <T> Pipe<T> createPipe(Class<T> type, String name, Authenticator authenticator) {
-    Config config = new Config(name);
+  public <T> Pipe<T> createPipe(Class<T> type, Config config, Authenticator authenticator) {
     AuthenticatorAdapter adapter = (AuthenticatorAdapter) authenticator;
     JavaScriptObject object =
             setup(config.name, config.type.getName(), config.recordId, config.baseUrl, adapter.unwrap());

@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface Authenticator {
 
-  void enroll(String username, String password, AsyncCallback<String> callback);
+  void enroll(User user, AsyncCallback<String> callback);
   void login(String username, String password, AsyncCallback<String> callback);
   void logout(AsyncCallback<Void> callback);
 }
