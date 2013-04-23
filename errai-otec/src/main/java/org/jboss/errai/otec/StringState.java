@@ -39,7 +39,7 @@ public class StringState implements State<String> {
   }
 
   private void updateStateId() {
-    stateId = GUIDUtil.createGUID();
+    stateId = buffer.toString();
   }
 
   public void insert(final int pos, final String data) {
@@ -78,6 +78,7 @@ public class StringState implements State<String> {
     if (fromState instanceof StringState) {
       buffer.delete(0, buffer.length());
       buffer.append(fromState.get().toString());
+      updateStateId();
     }
     else {
       throw new RuntimeException("cannot sync state with non-StringState");

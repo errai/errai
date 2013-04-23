@@ -27,11 +27,11 @@ import org.junit.Before;
 /**
  * @author Mike Brock
  */
-public class AbstractThreeEngineOtecTest {
+public abstract class AbstractThreeEngineOtecTest {
   private static final String PLAYBACK_FORMAT = "%-30s %-40s\n";
-  OTEngine clientEngineA;
-  OTEngine clientEngineB;
-  OTEngine serverEngine;
+  OTEngineImpl clientEngineA;
+  OTEngineImpl clientEngineB;
+  OTEngineImpl serverEngine;
   OTEntity serverEntity;
 
   private static void renderPlaybackHeader(final String stateName) {
@@ -68,15 +68,17 @@ public class AbstractThreeEngineOtecTest {
     clientEngineA.setEngineMode(OTEngineMode.Online);
   }
 
-  protected void setupEngines(final String initialState) {
-    clientEngineA = OTEngineImpl.createEngineWithSinglePeer("ClientA");
-    clientEngineB = OTEngineImpl.createEngineWithSinglePeer("ClientB");
-    serverEngine = OTEngineImpl.createEngineWithMultiplePeers("Server");
+  protected abstract OTPeer createPeerFor(OTEngine local, OTEngine remote);
 
-    clientEngineA.registerPeer(new MockPeerImpl(clientEngineA, serverEngine));
-    clientEngineB.registerPeer(new MockPeerImpl(clientEngineB, serverEngine));
-    serverEngine.registerPeer(new MockPeerImpl(serverEngine, clientEngineA));
-    serverEngine.registerPeer(new MockPeerImpl(serverEngine, clientEngineB));
+  protected void setupEngines(final String initialState) {
+    clientEngineA =  (OTEngineImpl) OTEngineImpl.createEngineWithSinglePeer("ClientA");
+    clientEngineB = (OTEngineImpl) OTEngineImpl.createEngineWithSinglePeer("ClientB");
+    serverEngine = (OTEngineImpl) OTEngineImpl.createEngineWithMultiplePeers("Server");
+
+    clientEngineA.registerPeer(createPeerFor(clientEngineA, serverEngine));
+    clientEngineB.registerPeer(createPeerFor(clientEngineB, serverEngine));
+    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineA));
+    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineB));
 
     final StringState state = new StringState(initialState);
     serverEntity = serverEngine.getEntityStateSpace().addEntity(state);

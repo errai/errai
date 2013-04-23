@@ -33,6 +33,14 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
 
   protected abstract void resume();
 
+  protected void allDone() {
+  }
+
+  @Override
+  protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
+    return new SynchronousMockPeerlImpl(local, remote);
+  }
+
   @Test
   public void testApplyLocalOperation() {
     setupEngines("Hello, World?");
@@ -66,6 +74,8 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
         .build();
 
     clientEngineA.notifyOperation(op);
+
+    resume();
 
     assertEquals(1, serverEntity.getTransactionLog().getLog().size());
     assertTrue(serverEntity.getTransactionLog().getLog().contains(op));

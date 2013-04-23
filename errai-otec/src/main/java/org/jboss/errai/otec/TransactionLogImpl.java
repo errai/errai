@@ -124,6 +124,8 @@ public class TransactionLogImpl implements TransactionLog {
 
       while (operationListIterator.hasNext()) {
         final OTOperation op = operationListIterator.next();
+        if (!op.isCanon()) continue;
+
         if (op.getRevision() < revision) {
           for (final Mutation mutation : op.getMutations()) {
             mutation.apply(stateToTranslate);
@@ -182,5 +184,4 @@ public class TransactionLogImpl implements TransactionLog {
       return state;
     }
   }
-
 }

@@ -37,7 +37,6 @@ import java.util.Set;
  */
 public class OTEngineImpl implements OTEngine {
   private final String engineId;
-
   private final PeerState peerState;
   private final OTEntityState entityState = new OTEntityStateImpl();
   private OTEngineMode mode = OTEngineMode.Online;
@@ -112,19 +111,33 @@ public class OTEngineImpl implements OTEngine {
 
   @Override
   public void notifyOperation(OTOperation operation) {
+    notifyRemotes(applyLocally(operation));
+  }
+
+  public OTOperation applyLocally(OTOperation operation) {
     final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
 
     if (operation.getRevision() == -1) {
       operation = operation.getBasedOn(entity.getRevision());
     }
 
-    final boolean propagate = operation.apply(entity);
+    operation.apply(entity);
     entity.getTransactionLog().appendLog(operation);
 
-    if (propagate && mode == OTEngineMode.Online) {
+    return operation;
+  }
+
+  public void notifyRemotes(final OTOperation operation) {
+    if (!operation.shouldPropagate()) {
+      return;
+    }
+
+    final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
+
+    if (mode == OTEngineMode.Online) {
       final Collection<OTPeer> peersFor = getPeerState().getPeersFor(entity);
       for (final OTPeer peer : peersFor) {
-        peer.send(entity.getId(), operation);
+        peer.send(operation);
       }
     }
   }
@@ -203,7 +216,7 @@ public class OTEngineImpl implements OTEngine {
 
         for (final OTOperation op : log) {
           if (getPeerState().shouldForwardOperation(op)) {
-            peer.send(entry.getKey().getId(), op);
+            peer.send(op);
           }
         }
       }
@@ -249,8 +262,9 @@ public class OTEngineImpl implements OTEngine {
         public OTOperationsListBuilder add(MutationType type, int position, String data) {
           mutationList.add(
               StringMutation.of(type, position, data)
-           );
-           return this;        }
+          );
+          return this;
+        }
 
         @Override
         public OTOperation build() {
@@ -278,21 +292,24 @@ public class OTEngineImpl implements OTEngine {
 
     @Override
     public void receive(final OTOperation operation) {
-      final List<OTOperation> transformedOps;
+      synchronized (otEngine) {
 
-      if (otEngine.peerState.hasConflictResolutionPrecedence()) {
-        transformedOps = Transformer.createTransformerLocalPrecedence(otEngine, entity, operation).transform();
-      }
-      else {
-        transformedOps = Transformer.createTransformerRemotePrecedence(otEngine, entity, operation).transform();
-      }
+        final List<OTOperation> transformedOps;
 
-      // broadcast to all other peers subscribed to this entity
-      final Set<OTPeer> peers = otEngine.getPeerState().getPeersFor(entity);
-      for (final OTPeer otPeer : peers) {
-        for (final OTOperation op : transformedOps) {
-          if (otPeer != peer && !op.isNoop()) {
-            otPeer.send(entityId, op);
+        if (otEngine.peerState.hasConflictResolutionPrecedence()) {
+          transformedOps = Transformer.createTransformerLocalPrecedence(otEngine, entity, operation).transform();
+        }
+        else {
+          transformedOps = Transformer.createTransformerRemotePrecedence(otEngine, entity, operation).transform();
+        }
+
+        // broadcast to all other peers subscribed to this entity
+        final Set<OTPeer> peers = otEngine.getPeerState().getPeersFor(entity);
+        for (final OTPeer otPeer : peers) {
+          for (final OTOperation op : transformedOps) {
+            if (otPeer != peer && !op.isNoop()) {
+              otPeer.send(op);
+            }
           }
         }
       }

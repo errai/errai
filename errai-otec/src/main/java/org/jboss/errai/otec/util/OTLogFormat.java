@@ -29,7 +29,10 @@ public class OTLogFormat {
   }
 
   public static void log(String type, String mutations, String from, String to, int rev, String state) {
-    System.out.printf(LOG_FORMAT, type, from, to, mutations, rev, state);
+    synchronized (OTLogFormat.class) {
+      System.out.printf(LOG_FORMAT, type, from, to, mutations, rev, state);
+      System.out.flush();
+    }
   }
 
   private static String repeat(char c, int amount) {

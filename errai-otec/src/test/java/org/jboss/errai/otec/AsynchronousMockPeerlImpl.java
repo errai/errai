@@ -22,19 +22,61 @@ import org.jboss.errai.otec.util.OTLogFormat;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * @author Mike Brock
  */
-public class MockPeerImpl implements OTPeer {
+public class AsynchronousMockPeerlImpl implements OTPeer {
   private OTEngine localEngine;
   private OTEngine remoteEngine;
 
   private final Map<Integer, Integer> lastTransmittedSequencees = new HashMap<Integer, Integer>();
+  final Thread thread;
 
-  public MockPeerImpl(final OTEngine localEngine, final OTEngine engine) {
+  private final ArrayBlockingQueue<OTOperation> outboundQueue = new ArrayBlockingQueue<OTOperation>(100);
+
+  public AsynchronousMockPeerlImpl(final OTEngine localEngine, final OTEngine engine) {
     this.localEngine = localEngine;
     this.remoteEngine = engine;
+
+    this.thread = new Thread() {
+      @Override
+      public void run() {
+        while (!outboundQueue.isEmpty()) {
+          try {
+            final long millis = (long) (Math.random() * 10);
+       //     System.out.println("delay:" + millis);
+            Thread.sleep(millis);
+            transmit();
+          }
+          catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    };
+  }
+
+  private void transmit() {
+    final OTOperation operation = outboundQueue.poll();
+
+    if (operation == null) {
+      return;
+    }
+
+    OTLogFormat.log("TRANSMIT",
+        operation.toString(),
+        localEngine.toString(),
+        remoteEngine.toString(),
+        operation.getRevision(),
+        "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
+
+    //note: this is simulating sending these operations over the wire.
+    remoteEngine.getReceiveHandler(localEngine.getId(), operation.getEntityId())
+        .receive(OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
+
+    lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
   }
 
   @Override
@@ -43,19 +85,8 @@ public class MockPeerImpl implements OTPeer {
   }
 
   @Override
-  public void send(final int entityId, final OTOperation operation) {
-    OTLogFormat.log("TRANSMIT",
-        operation.toString(),
-        localEngine.toString(),
-        remoteEngine.toString(),
-        operation.getRevision(),
-        "\"" + localEngine.getEntityStateSpace().getEntity(entityId).getState().get() + "\"");
-
-    //note: this is simulating sending these operations over the wire.
-    remoteEngine.getReceiveHandler(localEngine.getId(), entityId)
-        .receive(OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
-
-    lastTransmittedSequencees.put(entityId, operation.getRevision());
+  public void send(final OTOperation operation) {
+    outboundQueue.offer(operation);
   }
 
   @SuppressWarnings("unchecked")
@@ -66,11 +97,11 @@ public class MockPeerImpl implements OTPeer {
     final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
     localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
 
-    OTLogFormat.log("SYNC",  "",
-            remoteEngine.getEngineName(),
-            localEngine.getEngineName(),
-            entity.getRevision(),
-            "\"" + entity.getState().get() + "\"");
+    OTLogFormat.log("SYNC", "",
+        remoteEngine.getEngineName(),
+        localEngine.getEngineName(),
+        entity.getRevision(),
+        "\"" + entity.getState().get() + "\"");
 
     localEngine.associateEntity(remoteEngine.getId(), entityId);
     remoteEngine.associateEntity(localEngine.getId(), entityId);
@@ -88,6 +119,14 @@ public class MockPeerImpl implements OTPeer {
   public int getLastTransmittedSequence(final OTEntity entity) {
     final Integer integer = lastTransmittedSequencees.get(entity.getId());
     return integer == null ? 0 : integer;
+  }
+
+  public void start() {
+    thread.start();
+  }
+
+  public Thread getThread() {
+    return thread;
   }
 
   public String toString() {
