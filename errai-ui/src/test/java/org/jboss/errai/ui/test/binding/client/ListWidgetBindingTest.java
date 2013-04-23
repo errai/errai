@@ -49,7 +49,7 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
     BindingTemplate template = app.getTemplate();
     assertNotNull("Template instance was not injected!", template);
-    assertEquals("Expected two widgets", 0, template.getListWidget().getWidgetCount());
+    assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
 
     TestModel model = template.getModel();
     List<TestModel> children = new ArrayList<TestModel>();
