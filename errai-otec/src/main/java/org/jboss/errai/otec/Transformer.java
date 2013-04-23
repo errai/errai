@@ -16,6 +16,10 @@
 
 package org.jboss.errai.otec;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
@@ -23,10 +27,6 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OpPair;
 import org.jboss.errai.otec.util.OTLogFormat;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -101,19 +101,19 @@ public class Transformer {
 
           /**
            * IMPORTANT!
-           *
-           * Check to see if the result of the transform of localOp over applyOver has resulted in a effective change.
-           * If it has it means we *must* apply the transformed remoteOp immediately because the applyOver operation
-           * has an effect on localOp (meaning that applyOver is of a lower index of localOp).
-           *
+           * 
+           * Check to see if the result of the transform of localOp over applyOver has resulted in a
+           * effective change. If it has it means we *must* apply the transformed remoteOp
+           * immediately because the applyOver operation has an effect on localOp (meaning that
+           * applyOver is of a lower index of localOp).
+           * 
            * If not, we must continue to defer applyOver.
-           *
-           * This is important because if we do not do this, the history will be reverse-shuffled every time a
-           * rewind occurs leading to a breakdown of the algorithm if the history diverges by 3..n revisions.
+           * 
+           * This is important because if we do not do this, the history will be reverse-shuffled
+           * every time a rewind occurs leading to a breakdown of the algorithm if the history
+           * diverges by 3..n revisions.
            */
-          if (!appliedTransform && ot.getTransformedFrom() != null
-              && !ot.getTransformedFrom().getRemoteOp().equals(ot)) {
-
+          if (!appliedTransform && !localOp.equals(ot)) {
             applyOver.apply(entity);
             transactionLog.appendLog(applyOver);
             appliedTransform = true;
@@ -184,19 +184,19 @@ public class Transformer {
       else if (diff == 0) {
         boolean doTransform = true;
         switch (rm.getType()) {
-          case Insert:
-            if (!remoteWins && lm.getType() == MutationType.Insert) {
-              offset += lm.length();
-            }
-            break;
-          case Delete:
-            if (lm.getType() == MutationType.Insert) {
-              offset += lm.length();
-            }
-            else if (lm.getType() == MutationType.Delete) {
-              doTransform = false;
-            }
-            break;
+        case Insert:
+          if (!remoteWins && lm.getType() == MutationType.Insert) {
+            offset += lm.length();
+          }
+          break;
+        case Delete:
+          if (lm.getType() == MutationType.Insert) {
+            offset += lm.length();
+          }
+          else if (lm.getType() == MutationType.Delete) {
+            doTransform = false;
+          }
+          break;
         }
         if (doTransform) {
           if (offset == 0) {
@@ -213,22 +213,22 @@ public class Transformer {
       else if (diff >= 0) {
         if (lm.getType() != MutationType.Noop) {
           switch (rm.getType()) {
-            case Insert:
-              if (lm.getType() == MutationType.Insert) {
-                offset += lm.length();
-              }
-              if (lm.getType() == MutationType.Delete) {
-                offset -= lm.length();
-              }
-              break;
-            case Delete:
-              if (lm.getType() == MutationType.Insert) {
-                offset += lm.length();
-              }
-              if (lm.getType() == MutationType.Delete) {
-                offset -= lm.length();
-              }
-              break;
+          case Insert:
+            if (lm.getType() == MutationType.Insert) {
+              offset += lm.length();
+            }
+            if (lm.getType() == MutationType.Delete) {
+              offset -= lm.length();
+            }
+            break;
+          case Delete:
+            if (lm.getType() == MutationType.Insert) {
+              offset += lm.length();
+            }
+            if (lm.getType() == MutationType.Delete) {
+              offset -= lm.length();
+            }
+            break;
           }
         }
 
@@ -250,14 +250,12 @@ public class Transformer {
       transformedOp.markAsResolvedConflict();
     }
 
-    if (!remoteOp.equals(transformedOp)) {
-      OTLogFormat.log("TRANSFORM",
-          remoteOp + "▶" + transformedOp,
+    OTLogFormat.log("TRANSFORM",
+          remoteOp + " , " + localOp + " -> " + transformedOp,
           "-",
           engine.getEngineName(),
           remoteOp.getRevision(),
           "\"" + entity.getState().get() + "\"");
-    }
 
     return transformedOp;
   }
