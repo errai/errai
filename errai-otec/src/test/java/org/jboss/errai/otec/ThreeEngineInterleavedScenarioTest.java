@@ -173,7 +173,7 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
 
     Assert.assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "g1o2ao3";
-    assertAllLogsConsistent(expectedState, initialState);
+
     Assert.assertEquals(expectedState, serverEntity.getState().get());
 
     Assert.assertEquals(4, clientAEntity.getTransactionLog().getCanonLog().size());

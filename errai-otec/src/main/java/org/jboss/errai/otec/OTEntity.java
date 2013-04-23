@@ -29,5 +29,7 @@ public interface OTEntity<T extends State> {
   public int getId();
   public TransactionLog getTransactionLog();
   public T getState();
+
+  void decrementRevisionCounter();
 }
 

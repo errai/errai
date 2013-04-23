@@ -110,8 +110,8 @@ public class OTOperationImpl implements OTOperation {
 
     OTLogFormat.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
 
+    entity.getTransactionLog().appendLog(this);
     entity.incrementRevision();
-
     return shouldPropagate();
   }
 

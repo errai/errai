@@ -34,9 +34,9 @@ public abstract class AbstractThreeEngineOtecTest {
   OTEngineImpl serverEngine;
   OTEntity serverEntity;
 
-  private static void renderPlaybackHeader(final String stateName) {
+  private static void renderPlaybackHeader(final String stateName, int currentRevision) {
     System.out.println("===================================================");
-    System.out.println("NODE: " + stateName);
+    System.out.println("NODE: " + stateName + "; CURRENT REVISION: " + currentRevision);
     System.out.println();
     System.out.printf(PLAYBACK_FORMAT, "MUTATION", "STATE");
     System.out.println("---------------------------------------------------");
@@ -102,20 +102,27 @@ public abstract class AbstractThreeEngineOtecTest {
         clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId()).getTransactionLog();
     final TransactionLog serverLog = serverEntity.getTransactionLog();
 
-    final String valueA = replayLogAndReturnResult("ClientA", clientAState, transactionLogA);
-    final String valueB = replayLogAndReturnResult("ClientB", clientBState, transactionLogB);
-    final String valueServer = replayLogAndReturnResult("Server", serverState, serverLog);
+    final int revisionA = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId()).getRevision();
+    final int revisionB = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId()).getRevision();
+    final int revisionServer = serverEntity.getRevision();
+
+    final String valueA = replayLogAndReturnResult("ClientA", clientAState, revisionA, transactionLogA);
+    final String valueB = replayLogAndReturnResult("ClientB", clientBState, revisionB, transactionLogB);
+    final String valueServer = replayLogAndReturnResult("Server", serverState, revisionServer, serverLog);
 
     assertEquals(expectedResult, valueA);
     assertEquals(expectedResult, valueB);
     assertEquals(expectedResult, valueServer);
 
+    assertEquals(revisionServer, revisionA);
+    assertEquals(revisionServer, revisionB);
+
     System.out.println("------[end]------");
   }
 
   @SuppressWarnings("unchecked")
-  private String replayLogAndReturnResult(final String name, final State state, final TransactionLog log) {
-    renderPlaybackHeader(name);
+  private String replayLogAndReturnResult(final String name, final State state, int revision, final TransactionLog log) {
+    renderPlaybackHeader(name, revision);
     renderInitialStatePlayback(state);
 
     for (final OTOperation operation : log.getCanonLog()) {

@@ -122,7 +122,6 @@ public class OTEngineImpl implements OTEngine {
     }
 
     operation.apply(entity);
-    entity.getTransactionLog().appendLog(operation);
 
     return operation;
   }

@@ -64,7 +64,7 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
   protected void runChild(final FrameworkMethod method, final RunNotifier notifier) {
     final Description description = describeChild(method);
 
-    if (method.getAnnotation(NoFuzz.class) != null) {
+    if (Boolean.getBoolean("errai.otec.testing.skipfuzz") || method.getAnnotation(NoFuzz.class) != null) {
       notifier.fireTestIgnored(description);
       return;
     }

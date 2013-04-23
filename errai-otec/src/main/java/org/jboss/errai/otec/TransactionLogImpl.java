@@ -33,8 +33,10 @@ import java.util.ListIterator;
 public class TransactionLogImpl implements TransactionLog {
   private final List<StateSnapshot> stateSnapshots = new ArrayList<StateSnapshot>();
   private final List<OTOperation> transactionLog = new LinkedList<OTOperation>();
+  private final OTEntity entity;
 
   private TransactionLogImpl(final OTEntity entity) {
+    this.entity = entity;
     stateSnapshots.add(new StateSnapshot(entity.getRevision(), entity.getState().snapshot()));
   }
 
@@ -54,6 +56,7 @@ public class TransactionLogImpl implements TransactionLog {
     synchronized (transactionLog) {
       final ListIterator<OTOperation> delIter = transactionLog.listIterator(transactionLog.indexOf(operation));
       while (delIter.hasNext()) {
+        entity.decrementRevisionCounter();
         delIter.next().removeFromCanonHistory();
       }
     }
