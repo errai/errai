@@ -53,17 +53,19 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
     final Class<?> javaClass = getTestClass().getJavaClass();
     final String testMethod = testName(method);
 
-    final int runCount = 2500;
-    for (int i = 1; i < runCount; i++) {
-      description.addChild(Description.createTestDescription(javaClass, "[" + i + "] " + testMethod));
-    }
+//    final int runCount = 5000;
+//    for (int i = 1; i < runCount; i++) {
+//      description.addChild(Description.createTestDescription(javaClass, "[" + i + "] " + testMethod));
+//    }
     return description;
   }
 
   @Override
   protected void runChild(final FrameworkMethod method, final RunNotifier notifier) {
+    final Description description = describeChild(method);
+
     if (method.getAnnotation(NoFuzz.class) != null) {
-      notifier.fireTestIgnored(describeChild(method));
+      notifier.fireTestIgnored(description);
       return;
     }
 
@@ -71,19 +73,26 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
     try {
 
       Set<String> variationsTested = new HashSet<String>();
+      final EachTestNotifier eachTestNotifier = new EachTestNotifier(notifier, description);
 
-      for (final Description child : describeChild(method).getChildren()) {
+      notifier.fireTestStarted(description);
+      for (int i = 0; i < 5000; i++) {
         final ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024 * 1024);
         System.setOut(new PrintStream(byteStream));
-        runLeafNode(method, notifier, child, byteStream, oldPrintOut, variationsTested);
+        if (!runLeafNode(method, eachTestNotifier, byteStream, oldPrintOut, variationsTested)) {
+          return;
+        }
       }
 
-      oldPrintOut.println("Tested " + variationsTested.size() + " unique variations of: " + describeChild(method));
-//
-//      for (String v : variationsTested) {
-//        oldPrintOut.println(v);
-//      }
 
+      oldPrintOut.println("Tested " + variationsTested.size() + " unique variations of: " + describeChild(method));
+
+      for (String v : variationsTested) {
+        oldPrintOut.println("*****");
+        oldPrintOut.println(v);
+      }
+
+   //   notifier.fireTestFinished(description);
       super.runChild(method, notifier);
     }
     finally {
@@ -91,32 +100,33 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
     }
   }
 
-  protected void runLeafNode(final FrameworkMethod method,
-                             final RunNotifier notifier,
-                             final Description description,
+  protected boolean runLeafNode(final FrameworkMethod method,
+                             final EachTestNotifier notifier,
                              final ByteArrayOutputStream outputBucket,
                              final PrintStream originalPrintOut,
                              final Set<String> variations) {
-    final EachTestNotifier eachNotifier = new EachTestNotifier(notifier, description);
-    if (method.getAnnotation(Ignore.class) != null) {
-      eachNotifier.fireTestIgnored();
-      return;
-    }
-    eachNotifier.fireTestStarted();
+//    final EachTestNotifier eachNotifier = new EachTestNotifier(notifier, description);
+//    if (method.getAnnotation(Ignore.class) != null) {
+//      eachNotifier.fireTestIgnored();
+//      return;
+//    }
+//    eachNotifier.fireTestStarted();
     try {
       methodBlock(method).evaluate();
+      return true;
     }
     catch (AssumptionViolatedException e) {
-      eachNotifier.addFailedAssumption(e);
+      notifier.addFailedAssumption(e);
     }
     catch (Throwable e) {
       originalPrintOut.println("FAILURE REPORT:\n\n");
       originalPrintOut.println(new String(outputBucket.toByteArray()));
-      eachNotifier.addFailure(e);
+      notifier.addFailure(e);
     }
     finally {
       variations.add(new String(outputBucket.toByteArray()).trim());
-      eachNotifier.fireTestFinished();
+    //  notifier.fireTestFinished();
     }
+    return false;
   }
 }
