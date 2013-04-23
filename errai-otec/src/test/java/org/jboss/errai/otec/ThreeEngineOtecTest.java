@@ -33,15 +33,12 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
 
   protected abstract void resume();
 
-  protected void allDone() {
-  }
-
   @Override
   protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
     return new SynchronousMockPeerlImpl(local, remote);
   }
 
-  @Test
+  @Test @NoFuzz
   public void testApplyLocalOperation() {
     setupEngines("Hello, World?");
 
@@ -61,7 +58,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     assertEquals("Hello, World!", serverEntity.getState().get());
   }
 
-  @Test
+  @Test @NoFuzz
   public void testNotifyRemoteOperation() {
     final String initialState = "Hello, World?";
     setupEngines(initialState);
@@ -94,7 +91,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
   /**
    * http://en.wikipedia.org/wiki/File:Basicot.png
    */
-  @Test
+  @Test @NoFuzz
   public void testWikipediaExampleXab() {
     final String initialState = "abc";
     setupEngines(initialState);
@@ -131,7 +128,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     assertAllLogsConsistent(expectedState, initialState);
   }
 
-  @Test
+  @Test @NoFuzz
   public void testWikipediaExampleBcx() {
     final String initialState = "abc";
     setupEngines(initialState);

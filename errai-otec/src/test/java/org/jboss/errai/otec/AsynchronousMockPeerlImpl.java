@@ -45,8 +45,7 @@ public class AsynchronousMockPeerlImpl implements OTPeer {
       public void run() {
         while (!outboundQueue.isEmpty()) {
           try {
-            final long millis = (long) (Math.random() * 10);
-       //     System.out.println("delay:" + millis);
+            final long millis = (long) (Math.random() * 12);
             Thread.sleep(millis);
             transmit();
           }
