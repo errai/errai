@@ -24,65 +24,53 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
-import org.junit.runners.model.Statement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Mike Brock
  */
 public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
-  public ManyTimesTestRunner(Class<?> testClass) throws InitializationError {
+  public ManyTimesTestRunner(final Class<?> testClass) throws InitializationError {
     super(testClass);
   }
 
   @Override
-  protected List<FrameworkMethod> getChildren() {
-    return super.getChildren();
-  }
-
-  @Override
-  protected Description describeChild(FrameworkMethod method) {
+  protected Description describeChild(final FrameworkMethod method) {
     if (method.getAnnotation(Ignore.class) == null) {
       return describeRepeatTest(method);
     }
     return super.describeChild(method);
   }
 
-  private Description describeRepeatTest(FrameworkMethod method) {
-    //   int times = method.getAnnotation(Repeat.class).value();
+  private Description describeRepeatTest(final FrameworkMethod method) {
+    final Description description = Description.createSuiteDescription(
+        testName(method));
 
-    Description description = Description.createSuiteDescription(
-        testName(method) + " many times",
-        method.getAnnotations());
+    final Class<?> javaClass = getTestClass().getJavaClass();
+    final String testMethod = testName(method);
 
     for (int i = 1; i < 1000; i++) {
-      description.addChild(Description.createTestDescription(
-          getTestClass().getJavaClass(),
-          "[" + i + "] " + testName(method)));
+      description.addChild(Description.createTestDescription(javaClass, "[" + i + "] " + testMethod));
     }
     return description;
   }
 
   @Override
-  protected void runChild(final FrameworkMethod method, RunNotifier notifier) {
-    Description description = describeChild(method);
-    final ArrayList<Description> children = description.getChildren();
-    for (Description child : children) {
+  protected void runChild(final FrameworkMethod method, final RunNotifier notifier) {
+    for (final Description child : describeChild(method).getChildren()) {
+      System.out.println("<<RUNNING:" + child.getDisplayName() +">>");
       runLeafNode(method, notifier, child);
+      System.out.println("<<FINISHED:" + child.getDisplayName() +">>");
     }
 
-    super.runChild(method, notifier);
+     super.runChild(method, notifier);
   }
 
-  protected void runLeafNode(FrameworkMethod method, RunNotifier notifier, Description description) {
-    EachTestNotifier eachNotifier = new EachTestNotifier(notifier, description);
+  protected void runLeafNode(final FrameworkMethod method, final RunNotifier notifier, final Description description) {
+    final EachTestNotifier eachNotifier = new EachTestNotifier(notifier, description);
     if (method.getAnnotation(Ignore.class) != null) {
       eachNotifier.fireTestIgnored();
       return;
     }
-
     eachNotifier.fireTestStarted();
     try {
       methodBlock(method).evaluate();
@@ -96,14 +84,5 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
     finally {
       eachNotifier.fireTestFinished();
     }
-  }
-
-  private void runRepeatedly(Statement statement, Description description, RunNotifier notifier) {
-
-
-    //  for (Description desc : description.getChildren()) {
-
-    //   runLeaf(statement, desc, notifier);
-    //  }
   }
 }
