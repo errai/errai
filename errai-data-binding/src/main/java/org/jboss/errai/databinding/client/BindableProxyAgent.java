@@ -196,12 +196,12 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
       });
     }
     else if (!(widget instanceof HasText)) {
-      throw new RuntimeException("Widget must implement " + HasValue.class.getName() + " or " + HasText.class.getName()
-          + "!");
+      throw new RuntimeException("Widget must implement either " + HasValue.class.getName() +
+          " or " + HasText.class.getName() + "!");
     }
 
     if (propertyTypes.get(property).isList()) {
-      ensureListProxied(property);
+      proxy.set(property, ensureBoundListIsProxied(property));
     }
     bindings.put(property, new Binding(property, widget, converter, handlerRegistration));
     syncState(widget, property, initialState);
@@ -351,7 +351,7 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   private <P> void updateWidgetsAndFireEvent(final String property, final P oldValue, final P newValue,
       final Widget excluding) {
-    
+
     for (Binding binding : bindings.get(property)) {
       Widget widget = binding.getWidget();
       Converter converter = binding.getConverter();
@@ -436,12 +436,29 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * 
    * @param property
    *          the name of the list property
+   * 
+   * @return a new the wrapped (proxied) list or the provided list if already proxied
    */
-  private void ensureListProxied(String property) {
-    Object value = proxy.get(property);
-    if (!(value instanceof BindableListWrapper)) {
-      proxy.set(property, new BindableListWrapper((List) value));
+  private List ensureBoundListIsProxied(String property) {
+    return ensureBoundListIsProxied(property, (List) proxy.get(property));
+  }
+
+  /**
+   * Ensures that the given property is wrapped in a {@link BindableListWrapper}.
+   * 
+   * @param property
+   *          the name of the list property
+   * 
+   * @param list
+   *          the list that needs to be proxied
+   *          
+   * @return a new the wrapped (proxied) list or the provided list if already proxied
+   */
+  List ensureBoundListIsProxied(String property, List list) {
+    if (!(list instanceof BindableListWrapper) && bindings.containsKey(property)) {
+      return new BindableListWrapper(list);
     }
+    return list;
   }
 
   @Override

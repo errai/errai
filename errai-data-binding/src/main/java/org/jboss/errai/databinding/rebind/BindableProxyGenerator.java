@@ -44,7 +44,6 @@ import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.If;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.databinding.client.BindableListWrapper;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyAgent;
 import org.jboss.errai.databinding.client.HasProperties;
@@ -192,8 +191,8 @@ public class BindableProxyGenerator {
       
       Statement wrappedListProperty = EmptyStatement.INSTANCE;
       if (paramType.isAssignableTo(List.class)) {
-        wrappedListProperty = 
-          Stmt.loadVariable(property).assignValue(Stmt.newObject(BindableListWrapper.class, Stmt.loadVariable(property)));
+        wrappedListProperty = Stmt.loadVariable(property).assignValue(
+            agent().invoke("ensureBoundListIsProxied", property, Stmt.loadVariable(property))); 
       }
       
       Statement callSetterOnTarget =
