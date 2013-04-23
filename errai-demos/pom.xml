@@ -8,9 +8,14 @@
   <packaging>pom</packaging>
   
   <modules>
-  	<module>errai-bus</module>
-  	<module>errai-cdi</module>
-  	<module>errai-jpa</module>
+  	<module>bus-stress-test</module>
+  	<module>stockdemo</module>
+  	<module>errai-cdi-mobile-demo</module>
+  	<module>errai-cdi-mvp-demo</module>
+  	<module>errai-cdi-tagcloud-demo</module>
+  	<module>errai-jpa-demo-basic</module>
+  	<module>errai-jpa-grocery-list</module>
+  	<module>errai-jpa-demo-todo-list</module>
   </modules>
 
 </project>
