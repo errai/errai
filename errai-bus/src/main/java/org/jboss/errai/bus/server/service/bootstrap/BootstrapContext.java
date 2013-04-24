@@ -39,7 +39,9 @@ public class BootstrapContext {
 
   private Logger log = LoggerFactory.getLogger(BootstrapContext.class);
 
-  public BootstrapContext(ErraiService service, ServerMessageBus bus, ErraiServiceConfigurator config) {
+  public BootstrapContext(final ErraiService service,
+                          final ServerMessageBus bus,
+                          final ErraiServiceConfigurator config) {
     this.service = service;
     this.bus = bus;
     this.config = config;
@@ -57,7 +59,7 @@ public class BootstrapContext {
     return config.getMetaDataScanner();
   }
 
-  public void defer(Runnable task) {
+  public void defer(final Runnable task) {
     this.deferredTasks.push(task);
   }
 
@@ -69,7 +71,7 @@ public class BootstrapContext {
     log.debug("running deferred bootstrap tasks ...");
 
     while (!deferredTasks.isEmpty()) {
-      Runnable task = deferredTasks.pop();
+      final Runnable task = deferredTasks.pop();
       task.run();
     }
   }

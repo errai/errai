@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.rebind;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.RemoteCallSendable;
 import org.jboss.errai.bus.client.framework.AbstractRpcProxy;
@@ -38,12 +41,9 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.CallContextStatus;
 import org.jboss.errai.config.rebind.ProxyUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Generates an Errai RPC remote proxy.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyGenerator {
@@ -55,7 +55,7 @@ public class RpcProxyGenerator {
 
   public ClassStructureBuilder<?> generate() {
     String safeProxyClassName = remote.getFullyQualifiedName().replace('.', '_') + "Impl";
-    ClassStructureBuilder<?> classBuilder = 
+    ClassStructureBuilder<?> classBuilder =
       ClassBuilder.define(safeProxyClassName, AbstractRpcProxy.class)
         .packageScope()
         .implementsInterface(remote)
@@ -78,7 +78,7 @@ public class RpcProxyGenerator {
     Parameter[] finalParms = new Parameter[parms.length];
     List<Statement> parmVars = new ArrayList<Statement>();
     for (int i = 0; i < parms.length; i++) {
-      finalParms[i] = Parameter.of(parms[i].getType(), parms[i].getName(), true);
+      finalParms[i] = Parameter.of(parms[i].getType().getErased(), parms[i].getName(), true);
       parmVars.add(Stmt.loadVariable(parms[i].getName()));
     }
 
@@ -87,7 +87,7 @@ public class RpcProxyGenerator {
           Stmt.newArray(Object.class).initialize(parmVars.toArray());
 
     BlockBuilder<?> methodBlock =
-        classBuilder.publicMethod(method.getReturnType(), method.getName(), finalParms);
+        classBuilder.publicMethod(method.getReturnType().getErased(), method.getName(), finalParms);
 
     if (intercepted) {
       methodBlock.append(generateInterceptorLogic(classBuilder, method,
@@ -134,10 +134,10 @@ public class RpcProxyGenerator {
             .finish();
   }
 
-  private Statement generateRequest(ClassStructureBuilder<?> classBuilder, 
+  private Statement generateRequest(ClassStructureBuilder<?> classBuilder,
       MetaMethod method, Statement methodParams, boolean intercepted) {
     BlockStatement requestBlock = new BlockStatement();
-    
+
     requestBlock.addStatement(Stmt.declareVariable("sendable", RemoteCallSendable.class, null));
     requestBlock.addStatement(
         If.isNull(Variable.get("errorCallback"))
@@ -162,10 +162,10 @@ public class RpcProxyGenerator {
                 .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
                 .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))))
         .finish());
-    
+
     requestBlock.addStatement(Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
         .invoke("sendRequest", Variable.get("bus"), Variable.get("sendable")));
-    
+
     return requestBlock;
   }
 }

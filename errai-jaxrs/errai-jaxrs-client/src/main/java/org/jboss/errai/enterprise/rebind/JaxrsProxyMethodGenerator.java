@@ -19,9 +19,9 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Cookies;
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
@@ -42,9 +42,8 @@ import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Cookies;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Generates a JAX-RS remote proxy method.

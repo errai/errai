@@ -99,7 +99,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       synchronized (queue.getActivationLock()) {
         if (queue.messagesWaiting()) {
           queue.poll(writer);
-          writer.write("\n\n".getBytes());
+          writer.write(SSE_TERMINATION_BYTES);
         }
 
         queue.setActivationCallback(new QueueActivationCallback() {
@@ -109,7 +109,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
               queue.setActivationCallback(null);
               queue.poll(writer);
 
-              writer.write("\n\n".getBytes());
+              writer.write(SSE_TERMINATION_BYTES);
 
               queue.heartBeat();
               writer.flush();

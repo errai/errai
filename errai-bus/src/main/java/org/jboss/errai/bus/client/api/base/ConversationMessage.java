@@ -24,8 +24,8 @@ import org.jboss.errai.common.client.protocols.MessageParts;
  * reference message (usually called the <i>incoming message</i>). When a
  * ConversationMessage is dispatched, it will only be delivered to the bus that
  * the incoming message originated from.
- * <p>
- *
+ * <p/>
+ * <p/>
  * <pre>
  * public class SomeService implements MessageCallback {
  *   public void callback(CommandMessage message) {
@@ -39,7 +39,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
  *   }
  * }
  * </pre>
- *
+ * <p/>
  * It is possible for a message sender to specify a
  * {@link org.jboss.errai.common.client.protocols.MessageParts#ReplyTo ReplyTo}
  * message component, which by default will be used to route the message. We
@@ -53,7 +53,8 @@ public class ConversationMessage extends CommandMessage {
    * Creates a new ConversationMessage using an incoming message as a reference.
    *
    * @param inReplyTo
-   *          the incoming message.
+   *     the incoming message.
+   *
    * @return a ConversationMessage that will be routed to the MessageBus that
    *         sent the {@code inReplyTo} message.
    */
@@ -66,11 +67,11 @@ public class ConversationMessage extends CommandMessage {
    * reference message.
    *
    * @param commandType
-   *          The command type for this message. Command is an optional
-   *          extension for creating services that can respond to different
-   *          specific commands. Must not be null.
+   *     The command type for this message. Command is an optional
+   *     extension for creating services that can respond to different
+   *     specific commands. Must not be null.
    * @param inReplyTo
-   *          the incoming message. Must not be null.
+   *     the incoming message. Must not be null.
    */
   public static ConversationMessage create(Enum<?> commandType, Message inReplyTo) {
     ConversationMessage message = new ConversationMessage(inReplyTo);
@@ -83,11 +84,11 @@ public class ConversationMessage extends CommandMessage {
    * reference message.
    *
    * @param commandType
-   *          The command type for this message. Command is an optional
-   *          extension for creating services that can respond to different
-   *          specific commands. Must not be null.
+   *     The command type for this message. Command is an optional
+   *     extension for creating services that can respond to different
+   *     specific commands. Must not be null.
    * @param inReplyTo
-   *          the incoming message. Must not be null.
+   *     the incoming message. Must not be null.
    */
   public static ConversationMessage create(String commandType, Message inReplyTo) {
     ConversationMessage message = new ConversationMessage(inReplyTo);
@@ -105,11 +106,9 @@ public class ConversationMessage extends CommandMessage {
     }
 
     if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
-      if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
-        throw new RuntimeException(
-            "cannot have a conversation. there is no session data or ReplyTo field." +
-            " Are you sure you referenced an incoming message?");
-      }
+      throw new RuntimeException(
+          "cannot have a conversation. there is no session data or ReplyTo field." +
+              " Are you sure you referenced an incoming message?");
     }
   }
 }

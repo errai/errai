@@ -306,7 +306,11 @@ public class IOCConfigProcessor {
               final MetaClass injectedType = instance.getElementTypeOrMethodReturnType();
               injectionContext.addTopLevelType(injectedType);
 
+              control.masqueradeAs(injectedType);
+
               final MetaClassMember producerMember;
+
+              control.masqueradeAs(injectedType);
 
               switch (instance.getTaskType()) {
                 case PrivateMethod:
@@ -314,7 +318,17 @@ public class IOCConfigProcessor {
                   producerMember = instance.getMethod();
 
                   for (final MetaParameter parm : instance.getMethod().getParameters()) {
-                    control.notifyDependencies(fillInInterface(parm.getType()));
+                    control.notifyDependency(parm.getType());
+                    final Set<MetaClass> interfaceTypes = fillInInterface(parm.getType());
+                    control.notifyDependencies(interfaceTypes);
+
+                    if (!producerMember.isStatic()) {
+                      final GraphBuilder graphBuilder = injectionContext.getGraphBuilder();
+                      graphBuilder.addDependency(producerMember.getDeclaringClass(), Dependency.on(parm.getType()));
+                      for (MetaClass type : interfaceTypes) {
+                        graphBuilder.addDependency(producerMember.getDeclaringClass(), Dependency.on(type));
+                      }
+                    }
                   }
 
                   break;
@@ -331,8 +345,6 @@ public class IOCConfigProcessor {
 
               injectionContext.registerInjector(producerInjector);
 
-
-              control.masqueradeAs(injectedType);
 
               if (!producerMember.isStatic()) {
                 // if this is a static producer, it does not have a dependency on its parent bean

@@ -73,7 +73,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   @Override
-  public boolean poll(ByteWriteAdapter stream) throws IOException {
+  public boolean poll(final ByteWriteAdapter stream) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
@@ -90,7 +90,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   @Override
-  public boolean poll(java.util.concurrent.TimeUnit timeUnit, int time, ByteWriteAdapter stream) throws IOException {
+  public boolean poll(final java.util.concurrent.TimeUnit timeUnit, final int time, final ByteWriteAdapter stream) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
@@ -153,7 +153,7 @@ public class MessageQueueImpl implements MessageQueue {
    * @param activationCallback
    *     - new activation callback function
    */
-  public void setActivationCallback(QueueActivationCallback activationCallback) {
+  public void setActivationCallback(final QueueActivationCallback activationCallback) {
     synchronized (activationLock) {
       this.activationCallback = activationCallback;
     }
@@ -222,7 +222,7 @@ public class MessageQueueImpl implements MessageQueue {
     return pagedOut;
   }
 
-  public void setPaged(boolean pagedOut) {
+  public void setPaged(final boolean pagedOut) {
     this.pagedOut = pagedOut;
   }
 
@@ -269,7 +269,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   @Override
-  public void setDeliveryHandler(MessageDeliveryHandler handler) {
+  public void setDeliveryHandler(final MessageDeliveryHandler handler) {
     this.deliveryHandler = handler;
   }
 
@@ -304,7 +304,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   @Override
-  public void setTimeout(long timeout) {
+  public void setTimeout(final long timeout) {
     this.timeout = timeout;
   }
 

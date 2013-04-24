@@ -17,8 +17,19 @@
 package org.jboss.errai.otec.mutation;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public enum MutationType {
-  Cursor, Insert, Retain, Delete
+  Insert("INS"), Delete("DEL"), Noop("NOOP");
+
+  private final String shortName;
+
+  private MutationType(String shortName) {
+    this.shortName = shortName;
+  }
+
+  public String getShortName() {
+    return shortName;
+  }
 }

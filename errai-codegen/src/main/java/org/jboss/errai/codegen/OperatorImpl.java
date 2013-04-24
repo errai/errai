@@ -68,7 +68,7 @@ public class OperatorImpl implements Operator {
   public boolean canBeApplied(MetaClass clazz) {
     if (constraints.length == 0) return true;
 
-    for (MetaClass mc : constraints) {
+    for (final MetaClass mc : constraints) {
       if (mc.asBoxed().isAssignableFrom(clazz.asBoxed())) return true;
     }
 

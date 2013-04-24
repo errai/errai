@@ -19,6 +19,7 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrappe
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.EnumMapEntity.SomeEnum;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ImmutableEntity;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.NumberEntity;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
 import org.junit.Test;
@@ -64,7 +66,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     final User user =
         new User(11l, "first", "last", 20, Gender.MALE, new User(12l, "first2", "last2", 40, Gender.FEMALE, null));
     final User friend1 =
-        new User(13l, "friend1-first", "friend1-last", 1, Gender.MALE, null);
+        new User(10000000000000001L, "friend1-first", "friend1-last", 1, Gender.MALE, null);
     final User friend2 =
         new User(14l, "friend2-first", "friend2-last", 2, Gender.FEMALE, null);
 
@@ -118,8 +120,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     users.add(new User(11l, "first", "last", 20, Gender.MALE, null));
     users.add(new User(12l, "first2", "last2", 40, Gender.MALE, null));
 
-    String jackson = MarshallingWrapper.toJSON(users);
-    System.out.println(jackson);
+    String jackson = MarshallingWrapper.toJSON(users);    
     call(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
@@ -234,6 +235,35 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             finishTest();
           }
         }).postJacksonPortableWithEnumMapEntity(jackson);
+  }
+  
+  @Test
+  public void testJacksonMarshallingOfEntityWithNumbers() {
+    delayTestFinish(5000);
+
+    final NumberEntity e = new NumberEntity();
+    e.setI(13);
+    e.setIs(Arrays.asList(14, 15, 16));
+    e.setD(23d);
+    e.setDs(Arrays.asList(24d, 25d, 26d));
+    e.setF(33f);
+    e.setFs(Arrays.asList(24f, 25f, 26f));
+    e.setL(43l);
+    e.setLs(Arrays.asList(44l, 45l, 46l));
+    e.setS((short) 43);
+    e.setSs(Arrays.asList((short) 54, (short) 55, (short) 56));
+    
+    String jackson = MarshallingWrapper.toJSON(e);
+    call(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            NumberEntity result = MarshallingWrapper.fromJSON(jackson, NumberEntity.class);
+            assertEquals(e, result);
+            finishTest();
+          }
+        }).postJacksonPortableWithAllNumberTypes(jackson);
   }
 
 

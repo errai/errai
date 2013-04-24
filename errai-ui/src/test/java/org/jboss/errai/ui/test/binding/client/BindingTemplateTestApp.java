@@ -1,6 +1,8 @@
 package org.jboss.errai.ui.test.binding.client;
 
-import com.google.gwt.user.client.ui.RootPanel;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.client.widget.UnOrderedList;
@@ -9,8 +11,7 @@ import org.jboss.errai.ui.test.binding.client.res.BindingListWidget;
 import org.jboss.errai.ui.test.binding.client.res.BindingTemplate;
 import org.jboss.errai.ui.test.common.client.TestModel;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import com.google.gwt.user.client.ui.RootPanel;
 
 @EntryPoint
 public class BindingTemplateTestApp {
@@ -20,10 +21,7 @@ public class BindingTemplateTestApp {
 
   @Inject
   private BindingTemplate template;
-  
-  @Inject
-  private BindingListWidget listWidget;
-
+   
   @Inject
   @UnOrderedList
   private ListWidget<TestModel, BindingItemWidget> ulListWidget;
@@ -38,10 +36,10 @@ public class BindingTemplateTestApp {
   }
   
   public BindingListWidget getListWidget() {
-    return listWidget;
+    return template.getListWidget();
   }
 
-  public ListWidget getUlListWidget() {
+  public ListWidget<TestModel, BindingItemWidget> getUlListWidget() {
     return ulListWidget;
   }
 }

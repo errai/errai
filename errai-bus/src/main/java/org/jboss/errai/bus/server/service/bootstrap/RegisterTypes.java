@@ -24,8 +24,6 @@ import java.util.Queue;
 
 class RegisterTypes implements BootstrapExecution {
   public void execute(BootstrapContext context) {
- //   final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
-
     DataConversion.addConversionHandler(Queue.class, new ConversionHandler() {
       @Override
       public Object convertFrom(Object in) {
@@ -41,6 +39,4 @@ class RegisterTypes implements BootstrapExecution {
       }
     });
   }
-
-
 }

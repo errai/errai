@@ -185,9 +185,16 @@ public class BindableProxyGenerator {
 
       MetaClass paramType = setterMethod.getParameters()[0].getType();
 
-      // If the set method we are proxying returns a value, capture that value into a local variable
+      // If the setter method we are proxying returns a value, capture that value into a local variable
       Statement returnValueOfSetter = null;
       String returnValName = ensureSafeLocalVariableName("returnValueOfSetter", setterMethod);
+      
+      Statement wrappedListProperty = EmptyStatement.INSTANCE;
+      if (paramType.isAssignableTo(List.class)) {
+        wrappedListProperty = Stmt.loadVariable(property).assignValue(
+            agent().invoke("ensureBoundListIsProxied", property, Stmt.loadVariable(property))); 
+      }
+      
       Statement callSetterOnTarget =
           target().invoke(setterMethod.getName(), Cast.to(paramType, Stmt.loadVariable(property)));
       if (!setterMethod.getReturnType().equals(MetaClassFactory.get(void.class))) {
@@ -217,6 +224,7 @@ public class BindableProxyGenerator {
           .append(updateNestedProxy)
           .append(
               Stmt.declareVariable(oldValName, paramType, target().invoke(getterMethod.getName())))
+          .append(wrappedListProperty)    
           .append(callSetterOnTarget)
           .append(
               agent().invoke("updateWidgetsAndFireEvent", property, Variable.get(oldValName), Variable.get(property)))
@@ -287,7 +295,8 @@ public class BindableProxyGenerator {
             "put",
             property,
             Stmt.newObject(PropertyType.class, readMethod.getReturnType().asBoxed().asClass(),
-                readMethod.getReturnType().isAnnotationPresent(Bindable.class))
+                readMethod.getReturnType().isAnnotationPresent(Bindable.class),
+                readMethod.getReturnType().isAssignableTo(List.class))
             )
             );
       }

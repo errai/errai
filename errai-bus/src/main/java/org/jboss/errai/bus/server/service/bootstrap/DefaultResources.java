@@ -37,7 +37,7 @@ import org.jboss.errai.bus.server.util.ServerLaundryList;
  * @see org.jboss.errai.common.client.api.ResourceProvider
  */
 class DefaultResources implements BootstrapExecution {
-  public void execute(BootstrapContext context) {
+  public void execute(final BootstrapContext context) {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context
         .getConfig();
 
@@ -58,18 +58,18 @@ class DefaultResources implements BootstrapExecution {
 
     LaundryListProviderFactory
         .setLaundryListProvider(new LaundryListProvider() {
-          public LaundryList getLaundryList(Object ref) {
+          public LaundryList getLaundryList(final Object ref) {
             return ServerLaundryList.get((QueueSession) ref);
           }
         });
   }
 
-  private TaskManager resolveTaskManager(ErraiServiceConfigurator config) {
-    TaskManager result = null;
-    String tmProp = config.getProperty("errai.taskmanager_implementation");
+  private TaskManager resolveTaskManager(final ErraiServiceConfigurator config) {
+    TaskManager result;
+    final String tmProp = config.getProperty("errai.taskmanager_implementation");
     if (tmProp != null) {
       try {
-        Class<?> tm = DefaultResources.class.getClassLoader().loadClass(
+        final Class<?> tm = DefaultResources.class.getClassLoader().loadClass(
             tmProp);
         result = (TaskManager) tm.newInstance();
       }
