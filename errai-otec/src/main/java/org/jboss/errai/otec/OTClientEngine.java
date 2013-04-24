@@ -35,14 +35,15 @@ import java.util.Set;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public class OTEngineImpl implements OTEngine {
-  private final String engineId;
-  private final PeerState peerState;
-  private final OTEntityState entityState = new OTEntityStateImpl();
-  private OTEngineMode mode = OTEngineMode.Online;
+public class OTClientEngine implements OTEngine {
+  protected final String engineId;
+  protected final PeerState peerState;
+  protected final OTEntityState entityState = new OTEntityStateImpl();
+  protected volatile OTEngineMode mode = OTEngineMode.Offline;
   private String name;
 
-  private OTEngineImpl(final PeerState peerState, final String name) {
+
+  protected OTClientEngine(final PeerState peerState, final String name) {
     engineId = GUIDUtil.createGUID();
     if (name == null) {
       this.name = engineId;
@@ -59,30 +60,35 @@ public class OTEngineImpl implements OTEngine {
     return createEngineWithSinglePeer(null);
   }
 
-  @SuppressWarnings("UnusedDeclaration")
-  public static OTEngine createEngineWithMultiplePeers() {
-    return createEngineWithMultiplePeers(null);
-  }
-
   public static OTEngine createEngineWithSinglePeer(final String name) {
-    return new OTEngineImpl(new SinglePeerState(), name);
-  }
-
-  public static OTEngine createEngineWithMultiplePeers(final String name) {
-    return new OTEngineImpl(new MultiplePeerState(), name);
+    final OTClientEngine otClientEngine = new OTClientEngine(new SinglePeerState(), name);
+    otClientEngine.start();
+    return otClientEngine;
   }
 
   @Override
-  public ReceiveHandler getReceiveHandler(final String peerId, final int entityId) {
-    final OTEntity entity = entityState.getEntity(entityId);
+  public void receive(final String peerId, final int entityId, final OTOperation remoteOp) {
 
-    if (entity == null) {
-      throw new OTException("could not find entity for reference: " + entityId);
+    final List<OTOperation> transformedOps;
+    final OTPeer peer = getPeerState().getPeer(peerId);
+    final OTEntity entity = getEntityStateSpace().getEntity(entityId);
+
+    if (peerState.hasConflictResolutionPrecedence()) {
+      transformedOps = Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
+    }
+    else {
+      transformedOps = Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
     }
 
-    final OTPeer peer = peerState.getPeer(peerId);
-
-    return new EngineReceiveHandler(this, entity, peer, entityId);
+    // broadcast to all other peers subscribed to this entity
+    final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
+    for (final OTPeer otPeer : peers) {
+      for (final OTOperation op : transformedOps) {
+        if (otPeer != peer && !op.isNoop()) {
+          otPeer.send(op);
+        }
+      }
+    }
   }
 
   @Override
@@ -110,7 +116,7 @@ public class OTEngineImpl implements OTEngine {
   }
 
   @Override
-  public void notifyOperation(OTOperation operation) {
+  public void notifyOperation(final OTOperation operation) {
     notifyRemotes(applyLocally(operation));
   }
 
@@ -197,12 +203,21 @@ public class OTEngineImpl implements OTEngine {
     getPeerState().registerPeer(peer);
   }
 
-  @Override
-  public void setMode(final OTEngineMode mode) {
+  protected void setMode(final OTEngineMode mode) {
     if (this.mode == OTEngineMode.Offline && mode == OTEngineMode.Online) {
       transmitDeferredTransactions();
     }
     this.mode = mode;
+  }
+
+  @Override
+  public void start() {
+    setMode(OTEngineMode.Online);
+  }
+
+  @Override
+  public void stop(boolean wait) {
+    setMode(OTEngineMode.Offline);
   }
 
   private void transmitDeferredTransactions() {
@@ -238,9 +253,9 @@ public class OTEngineImpl implements OTEngine {
   }
 
   private static class DefaultOTOperationsFactory implements OTOperationsFactory {
-    private OTEngineImpl otEngine;
+    private OTClientEngine otEngine;
 
-    public DefaultOTOperationsFactory(final OTEngineImpl otEngine) {
+    public DefaultOTOperationsFactory(final OTClientEngine otEngine) {
       this.otEngine = otEngine;
     }
 
@@ -258,7 +273,7 @@ public class OTEngineImpl implements OTEngine {
         }
 
         @Override
-        public OTOperationsListBuilder add(MutationType type, int position, String data) {
+        public OTOperationsListBuilder add(final MutationType type, final int position, final String data) {
           mutationList.add(
               StringMutation.of(type, position, data)
           );
@@ -270,48 +285,6 @@ public class OTEngineImpl implements OTEngine {
           return OTOperationImpl.createOperation(otEngine, mutationList, entity.getId(), -1, null, null);
         }
       };
-    }
-  }
-
-  private static class EngineReceiveHandler implements ReceiveHandler {
-    private final OTEntity entity;
-    private final OTPeer peer;
-    private final int entityId;
-    private OTEngineImpl otEngine;
-
-    public EngineReceiveHandler(final OTEngineImpl otEngine,
-                                final OTEntity entity,
-                                final OTPeer peer,
-                                final int entityId) {
-      this.entity = entity;
-      this.peer = peer;
-      this.entityId = entityId;
-      this.otEngine = otEngine;
-    }
-
-    @Override
-    public void receive(final OTOperation operation) {
-      synchronized (otEngine) {
-
-        final List<OTOperation> transformedOps;
-
-        if (otEngine.peerState.hasConflictResolutionPrecedence()) {
-          transformedOps = Transformer.createTransformerLocalPrecedence(otEngine, entity, operation).transform();
-        }
-        else {
-          transformedOps = Transformer.createTransformerRemotePrecedence(otEngine, entity, operation).transform();
-        }
-
-        // broadcast to all other peers subscribed to this entity
-        final Set<OTPeer> peers = otEngine.getPeerState().getPeersFor(entity);
-        for (final OTPeer otPeer : peers) {
-          for (final OTOperation op : transformedOps) {
-            if (otPeer != peer && !op.isNoop()) {
-              otPeer.send(op);
-            }
-          }
-        }
-      }
     }
   }
 }

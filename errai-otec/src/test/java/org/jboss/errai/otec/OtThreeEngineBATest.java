@@ -21,7 +21,8 @@ package org.jboss.errai.otec;
  */
 public class OtThreeEngineBATest extends ThreeEngineOtecTest {
   @Override
-  protected void resume() {
+  protected void startEnginesAndWait() {
     resumeEnginesBA();
+    stopServerEngineAndWait();
   }
 }

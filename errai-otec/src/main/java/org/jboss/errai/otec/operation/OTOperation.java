@@ -54,5 +54,4 @@ public interface OTOperation {
   void markAsResolvedConflict();
   
   OpPair getTransformedFrom();
-  
 }

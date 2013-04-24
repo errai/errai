@@ -18,8 +18,6 @@ package org.jboss.errai.otec;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
 import junit.framework.Assert;
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.operation.OTOperation;
@@ -73,6 +71,8 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     clientEngineA.notifyRemotes(ins2);
     clientEngineA.notifyRemotes(ins3);
 
+    stopServerEngineAndWait();
+
     assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "123456o";
     assertEquals(expectedState, serverEntity.getState().get());
@@ -123,6 +123,8 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     clientEngineB.notifyRemotes(insAT);
     clientEngineA.notifyRemotes(ins3);
 
+    stopServerEngineAndWait();
+
     Assert.assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "g123oat";
     Assert.assertEquals(expectedState, serverEntity.getState().get());
@@ -171,7 +173,9 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     clientEngineA.notifyRemotes(ins3);
     clientEngineA.notifyRemotes(ins2);
     clientEngineB.notifyRemotes(insAT);
-    clientEngineA.notifyRemotes(ins1);          
+    clientEngineA.notifyRemotes(ins1);
+
+    stopServerEngineAndWait();
 
     Assert.assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "g1o2ao3";
@@ -185,10 +189,5 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     Assert.assertEquals(expectedState, clientBEntity.getState().get());
 
     assertAllLogsConsistent(expectedState, initialState);
-  }
-
-  public static void main(String[] args) {
-    final HashCode foo = Hashing.md5().hashString("foo");
-    System.out.println(foo.toString());
   }
 }

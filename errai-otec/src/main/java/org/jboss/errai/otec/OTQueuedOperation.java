@@ -14,30 +14,33 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.mutation;
+package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.Position;
+import org.jboss.errai.otec.operation.OTOperation;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IndexPosition implements Position {
-  private final int position;
+public class OTQueuedOperation {
+  private final OTOperation operation;
+  private final String peerId;
+  private final int entityId;
 
-  private IndexPosition(final int position) {
-    this.position = position;
+  public OTQueuedOperation(final OTOperation operation, final String peerId, final int entityId) {
+    this.operation = operation;
+    this.peerId = peerId;
+    this.entityId = entityId;
   }
 
-  public static IndexPosition of(final int position) {
-    return new IndexPosition(position);
+  public OTOperation getOperation() {
+    return operation;
   }
 
-  public int getPosition() {
-    return this.position;
+  public String getPeerId() {
+    return peerId;
   }
 
-  public String toString() {
-    return String.valueOf(position);
+  public int getEntityId() {
+    return entityId;
   }
 }

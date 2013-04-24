@@ -23,7 +23,7 @@ import org.jboss.errai.otec.StringState;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public class StringMutation implements Mutation<StringState, IndexPosition, String> {
+public class StringMutation implements Mutation<StringState, String> {
   private final MutationType type;
   private final int position;
   private final String data;
@@ -75,7 +75,7 @@ public class StringMutation implements Mutation<StringState, IndexPosition, Stri
   }
 
   @Override
-  public Mutation<StringState, IndexPosition, String> newBasedOn(int index) {
+  public Mutation<StringState, String> newBasedOn(int index) {
     return of(type, index, data);
   }
 

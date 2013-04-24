@@ -52,8 +52,8 @@ public class SynchronousMockPeerlImpl implements OTPeer {
         "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
 
     //note: this is simulating sending these operations over the wire.
-    remoteEngine.getReceiveHandler(localEngine.getId(), operation.getEntityId())
-        .receive(OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
+    remoteEngine.receive(localEngine.getId(), operation.getEntityId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
+
 
     lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
   }

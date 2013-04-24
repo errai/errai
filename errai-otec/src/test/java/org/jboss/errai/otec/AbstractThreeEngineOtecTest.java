@@ -29,9 +29,9 @@ import org.junit.Before;
  */
 public abstract class AbstractThreeEngineOtecTest {
   private static final String PLAYBACK_FORMAT = "%-30s %-40s\n";
-  OTEngineImpl clientEngineA;
-  OTEngineImpl clientEngineB;
-  OTEngineImpl serverEngine;
+  OTClientEngine clientEngineA;
+  OTClientEngine clientEngineB;
+  OTServerEngine serverEngine;
   OTEntity serverEntity;
 
   private static void renderPlaybackHeader(final String stateName, int currentRevision) {
@@ -52,29 +52,29 @@ public abstract class AbstractThreeEngineOtecTest {
   }
 
   protected void suspendEngines() {
-    clientEngineA.setMode(OTEngineMode.Offline);
-    clientEngineB.setMode(OTEngineMode.Offline);
-    serverEngine.setMode(OTEngineMode.Offline);
+    clientEngineA.stop(false);
+    clientEngineB.stop(false);
+    serverEngine.stop(false);
   }
 
   protected void resumeEnginesAB() {
-    serverEngine.setMode(OTEngineMode.Online);
-    clientEngineA.setMode(OTEngineMode.Online);
-    clientEngineB.setMode(OTEngineMode.Online);
+    serverEngine.start();
+    clientEngineA.start();
+    clientEngineB.start();
   }
 
   protected void resumeEnginesBA() {
-    serverEngine.setMode(OTEngineMode.Online);
-    clientEngineB.setMode(OTEngineMode.Online);
-    clientEngineA.setMode(OTEngineMode.Online);
+    serverEngine.start();
+    clientEngineB.start();
+    clientEngineA.start();
   }
 
   protected abstract OTPeer createPeerFor(OTEngine local, OTEngine remote);
 
   protected void setupEngines(final String initialState) {
-    clientEngineA =  (OTEngineImpl) OTEngineImpl.createEngineWithSinglePeer("ClientA");
-    clientEngineB = (OTEngineImpl) OTEngineImpl.createEngineWithSinglePeer("ClientB");
-    serverEngine = (OTEngineImpl) OTEngineImpl.createEngineWithMultiplePeers("Server");
+    clientEngineA = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientA");
+    clientEngineB = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientB");
+    serverEngine = (OTServerEngine) OTServerEngine.createEngineWithMultiplePeers("Server");
 
     clientEngineA.registerPeer(createPeerFor(clientEngineA, serverEngine));
     clientEngineB.registerPeer(createPeerFor(clientEngineB, serverEngine));
@@ -141,6 +141,10 @@ public abstract class AbstractThreeEngineOtecTest {
     System.out.println("\n");
 
     return (String) state.get();
+  }
+
+  protected void stopServerEngineAndWait() {
+    serverEngine.stop(true);
   }
 
   @Before

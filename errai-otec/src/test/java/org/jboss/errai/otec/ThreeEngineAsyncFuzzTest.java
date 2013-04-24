@@ -34,7 +34,7 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
 
   @Override
   protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
-    if (local.getName().equals("Server"))  {
+    if (local.getName().equals("Server")) {
       return new SynchronousMockPeerlImpl(local, remote);
     }
     final AsynchronousMockPeerlImpl asynchronousMockPeerl = new AsynchronousMockPeerlImpl(local, remote);
@@ -43,7 +43,7 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
   }
 
   @Override
-  protected void resume() {
+  protected void startEnginesAndWait() {
     for (AsynchronousMockPeerlImpl peer : peersStarted)
       peer.start();
 
@@ -54,5 +54,7 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
     catch (Throwable t) {
       t.printStackTrace();
     }
+
+    stopServerEngineAndWait();
   }
 }

@@ -23,7 +23,7 @@ import org.jboss.errai.otec.StringState;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public class CharacterMutation implements Mutation<StringState, IndexPosition, Character> {
+public class CharacterMutation implements Mutation<StringState, Character> {
   private final MutationType type;
   private final int position;
   private final char data;
@@ -34,7 +34,7 @@ public class CharacterMutation implements Mutation<StringState, IndexPosition, C
     this.data = data;
   }
 
-  public static CharacterMutation noop(int position) {
+  public static CharacterMutation noop(final int position) {
     return of(MutationType.Noop, position, (char) 0);
   }
 
@@ -75,7 +75,7 @@ public class CharacterMutation implements Mutation<StringState, IndexPosition, C
   }
 
   @Override
-  public Mutation<StringState, IndexPosition, Character> newBasedOn(int index) {
+  public Mutation<StringState, Character> newBasedOn(int index) {
     return of(type, index, data);
   }
 
