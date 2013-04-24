@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="login-box" class="modal" data-field="root">
+    <form name="login" id="login-form" class="auth-form">
+        <div id="login-msg" data-field="message"></div>
+        <fieldset>
+            <legend>Login:</legend>
+            <div>
+                <label for="login-username" id="username_label">Username</label>
+                <input name="username" id="login-username" data-field="username" type="text" required
+                       placeholder="Your username"/>
+            </div>
+            <div>
+                <label for="login-password" id="password_label">Password</label>
+                <input name="password" id="login-password" data-field="password" type="password" required/>
+            </div>
+            <div data-role="controlgroup" data-type="horizontal">
+                <a href="#" class="btn btn-primary" data-field="login">Login</a>
+                <a href="#" class="btn form-close" data-field="cancel">Cancel</a>
+            </div>
+            <div id="result"></div>
+        </fieldset>
+    </form>
+    <a id="register-button" class="btn" data-field="register">Register</a>
+</div>
+
+</body>
+</html>

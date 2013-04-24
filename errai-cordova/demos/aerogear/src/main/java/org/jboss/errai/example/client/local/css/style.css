@@ -317,10 +317,9 @@ footer {
 }
 
 .modal {
-    top: 10px;
+    position: inherit;
     width: 250px;
     padding: 20px;
-    margin: 0 0 0 -135px;
 }
 
 .color-picker {

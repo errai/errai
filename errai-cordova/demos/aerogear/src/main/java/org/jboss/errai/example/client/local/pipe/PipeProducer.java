@@ -2,6 +2,8 @@ package org.jboss.errai.example.client.local.pipe;
 
 import org.jboss.errai.aerogear.api.pipeline.Pipe;
 import org.jboss.errai.aerogear.api.pipeline.PipeFactory;
+import org.jboss.errai.aerogear.api.pipeline.auth.AuthenticationFactory;
+import org.jboss.errai.aerogear.api.pipeline.auth.Authenticator;
 import org.jboss.errai.example.shared.Project;
 import org.jboss.errai.example.shared.Tag;
 import org.jboss.errai.example.shared.Task;
@@ -16,6 +18,17 @@ import static org.jboss.errai.aerogear.api.pipeline.PipeFactory.Config;
  */
 @ApplicationScoped
 public class PipeProducer {
+  private final Authenticator auth;
+
+  public PipeProducer() {
+    // //todo-server/
+    auth = new AuthenticationFactory().createAuthenticator("auth", "", "auth/enroll", "auth/login", "auth/logout");
+  }
+
+  @Produces
+  private Authenticator authenticator() {
+    return auth;
+  }
 
   @Produces
   @Tasks
@@ -36,6 +49,6 @@ public class PipeProducer {
   }
 
   private <T> Pipe<T> createPipe(Class<T> type, Config config) {
-    return new PipeFactory().createPipe(type, config);
+    return new PipeFactory().createPipe(type, config, auth);
   }
 }
