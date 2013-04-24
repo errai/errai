@@ -74,7 +74,7 @@ public class DataSyncServiceUnitTest {
     localSimpleEntity.setString("This was recorded on sticky tape and rust.");
 
     List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
-    syncRequest.add(SyncRequestOperation.created(localSimpleEntity.clone()));
+    syncRequest.add(SyncRequestOperation.created(new SimpleEntity(localSimpleEntity)));
 
     // now do the actual sync
     List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
@@ -125,7 +125,7 @@ public class DataSyncServiceUnitTest {
     em.flush();
     em.detach(remoteSimpleEntity);
 
-    SimpleEntity localSimpleEntity = remoteSimpleEntity.clone();
+    SimpleEntity localSimpleEntity = new SimpleEntity(remoteSimpleEntity);
 
     SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from("allSimpleEntities", SimpleEntity.class, NO_PARAMS);
 
@@ -149,10 +149,10 @@ public class DataSyncServiceUnitTest {
     em.flush();
     em.detach(remoteSimpleEntity);
 
-    SimpleEntity localEntityExpectedState = remoteSimpleEntity.clone();
+    SimpleEntity localEntityExpectedState = new SimpleEntity(remoteSimpleEntity);
     localEntityExpectedState.setString("Go ahead, Apollo");
 
-    SimpleEntity localEntityNewState = remoteSimpleEntity.clone();
+    SimpleEntity localEntityNewState = new SimpleEntity(remoteSimpleEntity);
     localEntityNewState.setString("Crosstalk");
 
     SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from("allSimpleEntities", SimpleEntity.class, NO_PARAMS);
@@ -180,7 +180,7 @@ public class DataSyncServiceUnitTest {
     em.persist(remoteSimpleEntity);
     em.flush();
 
-    SimpleEntity localSimpleEntity = remoteSimpleEntity.clone();
+    SimpleEntity localSimpleEntity = new SimpleEntity(remoteSimpleEntity);
 
     remoteSimpleEntity.setString("This is different");
     em.flush();
@@ -210,9 +210,9 @@ public class DataSyncServiceUnitTest {
     em.flush();
     em.detach(remoteSimpleEntity);
 
-    SimpleEntity localEntityExpectedState = remoteSimpleEntity.clone();
+    SimpleEntity localEntityExpectedState = new SimpleEntity(remoteSimpleEntity);
 
-    SimpleEntity localEntityNewState = remoteSimpleEntity.clone();
+    SimpleEntity localEntityNewState = new SimpleEntity(remoteSimpleEntity);
     localEntityNewState.setString("No crosstalk");
 
     SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from("allSimpleEntities", SimpleEntity.class, NO_PARAMS);
@@ -328,7 +328,7 @@ public class DataSyncServiceUnitTest {
     localSimpleEntity.setString("Unwitting impostor");
 
     List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
-    syncRequest.add(SyncRequestOperation.created(localSimpleEntity.clone()));
+    syncRequest.add(SyncRequestOperation.created(new SimpleEntity(localSimpleEntity)));
 
     // now do the actual sync
     List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);

@@ -1,8 +1,6 @@
 package org.jboss.errai.jpa.sync.test.client.entity;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,6 +21,16 @@ public class SimpleEntity implements Cloneable {
   private Integer integer;
 
   private Timestamp date;
+
+  public SimpleEntity() {
+  }
+
+  public SimpleEntity(SimpleEntity copyMe) {
+    id = copyMe.id;
+    string = copyMe.string;
+    integer = copyMe.integer;
+    date = copyMe.date;
+  }
 
   public Long getId() {
     return id;
@@ -60,19 +68,9 @@ public class SimpleEntity implements Cloneable {
   }
 
   @Override
-  public SimpleEntity clone() {
-    try {
-      return (SimpleEntity) super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new AssertionError();
-    }
-  }
-
-  @Override
   public String toString() {
     // Warning: tests rely on this toString() fully representing the state of the object
-    DateFormat df = SimpleDateFormat.getDateTimeInstance();
-    return "SimpleEntity [id=" + id + ", string=" + string + ", integer=" + integer + ", date=" + df.format(date) + "]";
+    return "SimpleEntity [id=" + id + ", string=" + string + ", integer=" + integer + ", date=" + date.toString() + "]";
   }
 
 }
