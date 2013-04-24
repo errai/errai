@@ -124,7 +124,7 @@ public abstract class AbstractThreeEngineOtecTest {
   @SuppressWarnings("unchecked")
   private String replayLogAndReturnResult(final String name,
                                           final State state,
-                                          int revision,
+                                          final int revision,
                                           final TransactionLog log) {
 
     renderPlaybackHeader(name, revision);
