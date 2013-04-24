@@ -143,7 +143,7 @@ public class PipeTest extends GWTTestCase {
   }
 
   public void testSecurityRegister() {
-    Authenticator auth = new AuthenticationFactory().createAuthenticator("auth");
+    Authenticator auth = new AuthenticationFactory().createAuthenticator("auth", "auth/");
     cleanToken();
 
     final User user = new User();
