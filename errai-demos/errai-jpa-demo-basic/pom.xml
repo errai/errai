@@ -2,6 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jboss.errai.demos</groupId>
+  <name>Errai::JPA::Demos::Basic</name>
+  <artifactId>errai-jpa-demo-basic</artifactId>
+  <version>3.0-SNAPSHOT</version>
+  <packaging>war</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,12 +23,7 @@
     <argLine></argLine>
   </properties>
 
-  <name>Errai::JPA::Demos::Basic</name>
-  <artifactId>errai-jpa-demo-basic</artifactId>
-  <packaging>war</packaging>
-
   <dependencies>
-
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jpa-client</artifactId>

@@ -14,7 +14,8 @@
   	<module>errai-cdi-mvp-demo</module>
   	<module>errai-cdi-tagcloud-demo</module>
   	<module>errai-jpa-demo-basic</module>
-  	<module>errai-jpa-grocery-list</module>
+  	<!-- not compileable  now ... add again once resolved-->
+  	<!-- >module>errai-jpa-demo-grocery-list</module-->
   	<module>errai-jpa-demo-todo-list</module>
   </modules>
 
