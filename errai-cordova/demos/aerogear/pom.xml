@@ -41,6 +41,13 @@
     <uel.impl.version>2.1.2-b04</uel.impl.version>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>plugins</id>
+      <url>http://gwtquery-plugins.googlecode.com/svn/mavenrepo</url>
+    </repository>
+  </repositories>
+
   <dependencyManagement>
 
     <dependencies>
@@ -256,7 +263,7 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
 
     <dependency>
       <groupId>net.auroris</groupId>
-      <artifactId>color-picker</artifactId>
+      <artifactId>gwt-colorpicker</artifactId>
       <version>2.1</version>
     </dependency>
 
