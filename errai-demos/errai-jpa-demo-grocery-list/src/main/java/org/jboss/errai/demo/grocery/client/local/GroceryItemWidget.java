@@ -43,21 +43,21 @@ import com.google.gwt.user.client.ui.Label;
 public class GroceryItemWidget extends Composite implements HasModel<Item> {
 
     @Inject private @AutoBound DataBinder<Item> itemBinder;
-    
+
     @Inject private @Bound @DataField Label name;
-    
+
     @Inject private @Bound @DataField Label comment;
-    
+
     @Inject private @Bound(property="department.name") @DataField Label department;
-    
+
     private @Bound(converter=RelativeTimeConverter.class) @DataField
-    
+
     final Element addedOn = DOM.createSpan();
-    
+
     private @Bound(converter=UsernameConverter.class) @DataField
-    
+
     final Element addedBy = DOM.createSpan();
-    
+
     @EventHandler
     public void onMouseOver(MouseOverEvent event) {
         System.out.println("MouseOver " + itemBinder.getModel().getName());
@@ -72,7 +72,7 @@ public class GroceryItemWidget extends Composite implements HasModel<Item> {
 
     /**
      * Changes the model object visualized by this class to the given one.
-     * 
+     *
      * @param item The item that should become the model of this class. Must not be null.
      * @return The proxied version of the given item object, for purposes of data binding. If you intend to make any changes to
      *         the state of the item after adding it to this widget, you must do so via this returned proxy. If you modify the

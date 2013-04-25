@@ -1,3 +1,19 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.demo.busstress.client.local;
 
 import javax.annotation.PostConstruct;
@@ -29,158 +45,160 @@ import com.google.gwt.user.client.ui.Widget;
 @EntryPoint
 public class StressTestClient extends Composite {
 
-  private static StressTestClientUiBinder uiBinder = GWT.create(StressTestClientUiBinder.class);
+    private static StressTestClientUiBinder uiBinder = GWT.create(StressTestClientUiBinder.class);
 
-  @UiField IntegerBox messageInterval;
-  @UiField Label messageIntervalError;
+    @UiField IntegerBox messageInterval;
+    @UiField Label messageIntervalError;
 
-  @UiField IntegerBox messageSize;
-  @UiField Label messageSizeError;
+    @UiField IntegerBox messageSize;
+    @UiField Label messageSizeError;
 
-  @UiField IntegerBox messageMultiplier;
+    @UiField IntegerBox messageMultiplier;
 
+    @UiField Button startButton;
 
-  @UiField Button startButton;
-
-  @UiHandler("startButton")
-  public void onStartButtonClick(ClickEvent click) {
-    restart();
-  }
-
-  @UiField Button stopButton;
-
-  @UiHandler("stopButton")
-  void onStopButtonClick(ClickEvent event) {
-    stopIfRunning();
-  }
-
-  @UiField SimplePanel statusPanel;
-
-  @UiField VerticalPanel resultsPanel;
-
-  private ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
-
-  private Timer sendTimer;
-
-  /**
-   * The message payload that gets sent to the server.
-   */
-  private String messageValue;
-
-  interface StressTestClientUiBinder extends UiBinder<Widget, StressTestClient> {
-  }
-
-  @PostConstruct
-  private void init() {
-    initWidget(uiBinder.createAndBindUi(this));
-
-    BusStatusWidget busStatusWidget = new BusStatusWidget();
-    bus.addLifecycleListener(busStatusWidget);
-    statusPanel.add(busStatusWidget);
-
-    RootPanel.get().add(this);
-  }
-
-  public void restart() {
-    if (!validateSettings()) {
-      return;
-    }
-    stopIfRunning();
-
-    final Stats stats = new Stats();
-    final StatsPanel statsPanel = new StatsPanel();
-    resultsPanel.insert(statsPanel, 0);
-
-    // create the message payload
-    Integer messageSizeInt = messageSize.getValue();
-    StringBuilder sb = new StringBuilder(messageSizeInt);
-    for (int i = 0; i < messageSizeInt; i++) {
-      sb.append("!");
-    }
-    messageValue = sb.toString();
-
-    if (messageMultiplier.getValue() == null || messageMultiplier.getValue() < 1) {
-      messageMultiplier.setValue(1);
+    @UiHandler("startButton")
+    public void onStartButtonClick(ClickEvent click) {
+        restart();
     }
 
-    final int multipler = messageMultiplier.getValue();
+    @UiField
+    Button stopButton;
 
-    sendTimer = new Timer() {
-      private boolean hasStarted;
+    @UiHandler("stopButton")
+    void onStopButtonClick(ClickEvent event) {
+        stopIfRunning();
+    }
 
-      @Override
-      public void run() {
-        hasStarted = true;
+    @UiField
+    SimplePanel statusPanel;
 
-        for (int i = 0; i < multipler; i++) {
-          MessageBuildSendable sendable = MessageBuilder.createMessage()
-                  .toSubject("StressTestService")
-                  .withValue(messageValue)
-                  .done()
-                  .repliesTo(new MessageCallback() {
-                    @Override
-                    public void callback(Message message) {
-                      stats.registerReceivedMessage(message);
-                      statsPanel.updateStatsLabels(stats);
-                    }
-                  });
-          sendable.sendNowWith(bus);
+    @UiField
+    VerticalPanel resultsPanel;
 
-          stats.registerSentMessage(sendable.getMessage());
+    private ClientMessageBus bus = (ClientMessageBus) ErraiBus.get();
+
+    private Timer sendTimer;
+
+    /**
+     * The message payload that gets sent to the server.
+     */
+    private String messageValue;
+
+    interface StressTestClientUiBinder extends UiBinder<Widget, StressTestClient> {
+    }
+
+    @PostConstruct
+    private void init() {
+        initWidget(uiBinder.createAndBindUi(this));
+
+        BusStatusWidget busStatusWidget = new BusStatusWidget();
+        bus.addLifecycleListener(busStatusWidget);
+        statusPanel.add(busStatusWidget);
+
+        RootPanel.get().add(this);
+    }
+
+    public void restart() {
+        if (!validateSettings()) {
+            return;
+        }
+        stopIfRunning();
+
+        final Stats stats = new Stats();
+        final StatsPanel statsPanel = new StatsPanel();
+        resultsPanel.insert(statsPanel, 0);
+
+        // create the message payload
+        Integer messageSizeInt = messageSize.getValue();
+        StringBuilder sb = new StringBuilder(messageSizeInt);
+        for (int i = 0; i < messageSizeInt; i++) {
+            sb.append("!");
+        }
+        messageValue = sb.toString();
+
+        if (messageMultiplier.getValue() == null || messageMultiplier.getValue() < 1) {
+            messageMultiplier.setValue(1);
         }
 
-        statsPanel.updateStatsLabels(stats);
-      }
+        final int multipler = messageMultiplier.getValue();
 
-      @Override
-      public void cancel() {
-        super.cancel();
-        if (hasStarted) {
-          stats.registerTestFinishing();
-          statsPanel.onRunFinished(stats);
+        sendTimer = new Timer() {
+            private boolean hasStarted;
+
+            @Override
+            public void run() {
+                hasStarted = true;
+
+                for (int i = 0; i < multipler; i++) {
+                    MessageBuildSendable sendable = MessageBuilder.createMessage()
+                        .toSubject("StressTestService")
+                        .withValue(messageValue)
+                        .done()
+                        .repliesTo(new MessageCallback() {
+                            @Override
+                            public void callback(Message message) {
+                                stats.registerReceivedMessage(message);
+                                statsPanel.updateStatsLabels(stats);
+                            }
+                        });
+                    sendable.sendNowWith(bus);
+
+                    stats.registerSentMessage(sendable.getMessage());
+                }
+
+                statsPanel.updateStatsLabels(stats);
+            }
+
+            @Override
+            public void cancel() {
+                super.cancel();
+                if (hasStarted) {
+                    stats.registerTestFinishing();
+                    statsPanel.onRunFinished(stats);
+                }
+            }
+        };
+        sendTimer.scheduleRepeating(messageInterval.getValue());
+
+        stats.registerTestStarting();
+        statsPanel.onRunStarted(stats);
+    }
+
+    private boolean validateSettings() {
+        boolean valid = true;
+
+        if (messageSize.getValue() == null) {
+            valid = false;
+            messageSizeError.setText("Numbers only");
+            messageSize.addStyleName("error");
         }
-      }
-    };
-    sendTimer.scheduleRepeating(messageInterval.getValue());
+        else {
+            messageSizeError.setText("");
+            messageSize.removeStyleName("error");
+        }
 
-    stats.registerTestStarting();
-    statsPanel.onRunStarted(stats);
-  }
+        if (messageInterval.getValue() == null) {
+            valid = false;
+            messageIntervalError.setText("Numbers only");
+            messageInterval.addStyleName("error");
+        }
+        else {
+            messageIntervalError.setText("");
+            messageInterval.removeStyleName("error");
+        }
 
-  private boolean validateSettings() {
-    boolean valid = true;
-
-    if (messageSize.getValue() == null) {
-      valid = false;
-      messageSizeError.setText("Numbers only");
-      messageSize.addStyleName("error");
-    }
-    else {
-      messageSizeError.setText("");
-      messageSize.removeStyleName("error");
+        return valid;
     }
 
-    if (messageInterval.getValue() == null) {
-      valid = false;
-      messageIntervalError.setText("Numbers only");
-      messageInterval.addStyleName("error");
+    /**
+     * Stops the timer if it's running. Does nothing otherwise. Safe to call any time.
+     */
+    void stopIfRunning() {
+        if (sendTimer != null) {
+            sendTimer.cancel();
+            sendTimer = null;
+        }
     }
-    else {
-      messageIntervalError.setText("");
-      messageInterval.removeStyleName("error");
-    }
-
-    return valid;
-  }
-
-  /**
-   * Stops the timer if it's running. Does nothing otherwise. Safe to call any time.
-   */
-  void stopIfRunning() {
-    if (sendTimer != null) {
-      sendTimer.cancel();
-      sendTimer = null;
-    }
-  }
 
 }
