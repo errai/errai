@@ -1,89 +1,105 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 body {
-	background-color: #777;
-	font-family: helvetica, sans-serif;
-	text-align: center;
+    background-color: #777;
+    font-family: helvetica, sans-serif;
+    text-align: center;
 }
 
 h1 {
-	color: #f60;
-	font-size: 60px;
-	margin-top: 50px;
-	margin-bottom: 50px;
+    color: #f60;
+    font-size: 60px;
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 div.mainContentArea {
-	margin: auto;
-	border: 20px solid #fff;
-	box-shadow: 5px 5px 7px #333;
-	border-radius: 15px;
-	background-color: #fff;
-	width: 600px;
+    margin: auto;
+    border: 20px solid #fff;
+    box-shadow: 5px 5px 7px #333;
+    border-radius: 15px;
+    background-color: #fff;
+    width: 600px;
 }
 
 div.mainContentArea>input {
-	font-size: 40px;
-	width: 100%;
-	margin-bottom: 20px;
+    font-size: 40px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .itemsContainer {
-	width: 100%;
+    width: 100%;
 }
 
 div.item {
-	width: 100%;
-	font-size: 35px;
-	text-align: left;
-	margin-top: 10px;
-	border-bottom: 1px solid #eee;
-	margin-bottom: 7px;
+    width: 100%;
+    font-size: 35px;
+    text-align: left;
+    margin-top: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 7px;
 }
 
-div.item input, div.item span.gwt-CheckBox {
-	width: 20px;
-	height: 32px;
-	margin-left: 5px;
-	vertical-align: top;
+div.item input,div.item span.gwt-CheckBox {
+    width: 20px;
+    height: 32px;
+    margin-left: 5px;
+    vertical-align: top;
 }
 
 div.item span {
-	width: 85%;
-	display: inline-block;
-	margin-left: 6px;
+    width: 85%;
+    display: inline-block;
+    margin-left: 6px;
 }
 
 div.item .done {
-	text-decoration: line-through;
-	color: #aaa;
+    text-decoration: line-through;
+    color: #aaa;
 }
 
 div.mainContentArea button {
-	font-size: 20px;
-	margin-top: 20px;
-	margin-bottom: 10px;
+    font-size: 20px;
+    margin-top: 20px;
+    margin-bottom: 10px;
 }
 
 /* Don't forget the phones! */
 @media only screen and (max-width: 600px) , only screen and (max-device-width: 600px) {
-	body {
-		margin: 0px;
-	}
-	h1 {
-		text-align: left;
-		font-size: 80px;
-		margin-left: 10px;
-	}
-	div.mainContentArea {
-		width: 100%;
-		border: none;
-		box-shadow: none;
-		border-radius: 0px;
-	}
-	div.mainContentArea>input {
-		font-size: 80px;
-		margin-bottom: 15px;
-	}
-	div.item span {
-		font-size: 60px;
-	}
+    body {
+        margin: 0px;
+    }
+    h1 {
+        text-align: left;
+        font-size: 80px;
+        margin-left: 10px;
+    }
+    div.mainContentArea {
+        width: 100%;
+        border: none;
+        box-shadow: none;
+        border-radius: 0px;
+    }
+    div.mainContentArea>input {
+        font-size: 80px;
+        margin-bottom: 15px;
+    }
+    div.item span {
+        font-size: 60px;
+    }
 }
