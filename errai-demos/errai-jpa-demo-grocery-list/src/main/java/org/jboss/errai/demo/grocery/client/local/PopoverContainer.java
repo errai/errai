@@ -1,3 +1,19 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.demo.grocery.client.local;
 
 import javax.annotation.PostConstruct;
@@ -50,69 +66,69 @@ import com.google.gwt.user.client.ui.Widget;
 @Dependent
 public class PopoverContainer extends Composite {
 
-  /**
-   * This is the widget that contains the user-supplied title we show in the popover.
-   */
-  @DataField
-  private DivElement popoverTitle = Document.get().createDivElement();
+    /**
+     * This is the widget that contains the user-supplied title we show in the popover.
+     */
+    @DataField
+    private DivElement popoverTitle = Document.get().createDivElement();
 
-  /**
-   * This is the widget that contains the user-supplied content we show in the popover.
-   */
-  @Inject @DataField
-  private VerticalPanel popoverContent;
+    /**
+     * This is the widget that contains the user-supplied content we show in the popover.
+     */
+    @Inject
+    @DataField
+    private VerticalPanel popoverContent;
 
-  /**
-   * Positions the popover so that its arrow points at the centre of the given widget Makes the popover visible
-   * @param positionNear
-   */
-  public void show(Widget positionNear) {
-    getElement().getStyle().setDisplay(Display.BLOCK);
-    getElement().getStyle().setLeft(positionNear.getAbsoluteLeft() + positionNear.getOffsetWidth(), Unit.PX);
-    getElement().getStyle().setTop(
+    /**
+     * Positions the popover so that its arrow points at the centre of the given widget Makes the popover visible
+     * 
+     * @param positionNear
+     */
+    public void show(Widget positionNear) {
+        getElement().getStyle().setDisplay(Display.BLOCK);
+        getElement().getStyle().setLeft(positionNear.getAbsoluteLeft() + positionNear.getOffsetWidth(), Unit.PX);
+        getElement().getStyle().setTop(
             positionNear.getAbsoluteTop() + positionNear.getOffsetHeight() / 2
-            - getElement().getOffsetHeight() / 2, Unit.PX);
-  }
+                - getElement().getOffsetHeight() / 2, Unit.PX);
+    }
 
-  /**
-   * Causes this popover to become invisible.
-   */
-  public void hide() {
-    getElement().getStyle().setDisplay(Display.NONE);
-  }
+    /**
+     * Causes this popover to become invisible.
+     */
+    public void hide() {
+        getElement().getStyle().setDisplay(Display.NONE);
+    }
 
-  /**
-   * Sets the widget that will be displayed as the title of this popover,
-   * replacing any existing title widget.
-   */
-  public void setTitleHtml(SafeHtml html) {
-    popoverTitle.setInnerHTML(html.asString());
-  }
+    /**
+     * Sets the widget that will be displayed as the title of this popover, replacing any existing title widget.
+     */
+    public void setTitleHtml(SafeHtml html) {
+        popoverTitle.setInnerHTML(html.asString());
+    }
 
-  /**
-   * Sets the widget that will be displayed as the title of this popover,
-   * replacing any existing body widget.
-   */
-  public void setBodyWidget(Widget bodyWidget) {
-    popoverContent.clear();
-    popoverContent.add(bodyWidget);
-  }
+    /**
+     * Sets the widget that will be displayed as the title of this popover, replacing any existing body widget.
+     */
+    public void setBodyWidget(Widget bodyWidget) {
+        popoverContent.clear();
+        popoverContent.add(bodyWidget);
+    }
 
-  /**
-   * Adds this popover to the document so it can be made visible. This method is
-   * called automatically when this bean is created.
-   */
-  @PostConstruct
-  private void init() {
-    RootPanel.get().add(this);
-  }
+    /**
+     * Adds this popover to the document so it can be made visible. This method is called automatically when this bean is
+     * created.
+     */
+    @PostConstruct
+    private void init() {
+        RootPanel.get().add(this);
+    }
 
-  /**
-   * Removes this popover from the document so it does not leak resources. This
-   * method is called automatically when this bean is destroyed.
-   */
-  @PreDestroy
-  private void destroy() {
-    RootPanel.get().remove(this);
-  }
+    /**
+     * Removes this popover from the document so it does not leak resources. This method is called automatically when this bean
+     * is destroyed.
+     */
+    @PreDestroy
+    private void destroy() {
+        RootPanel.get().remove(this);
+    }
 }
