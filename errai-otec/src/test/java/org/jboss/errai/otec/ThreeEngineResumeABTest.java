@@ -19,10 +19,10 @@ package org.jboss.errai.otec;
 /**
  * @author Mike Brock
  */
-public class OtThreeEngineBATest extends ThreeEngineOtecTest {
+public class ThreeEngineResumeABTest extends ThreeEngineOtecTest {
   @Override
   protected void startEnginesAndWait() {
-    resumeEnginesBA();
+    resumeEnginesAB();
     stopServerEngineAndWait();
   }
 }

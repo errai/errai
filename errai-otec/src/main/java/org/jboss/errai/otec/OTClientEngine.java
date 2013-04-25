@@ -65,6 +65,12 @@ public class OTClientEngine implements OTEngine {
     otClientEngine.start();
     return otClientEngine;
   }
+  
+  public static OTEngine createEngineWithMultiplePeers(final String name) {
+    final OTClientEngine otClientEngine = new OTClientEngine(new MultiplePeerState(), name);
+    otClientEngine.start();
+    return otClientEngine;
+  }
 
   @Override
   public void receive(final String peerId, final int entityId, final OTOperation remoteOp) {

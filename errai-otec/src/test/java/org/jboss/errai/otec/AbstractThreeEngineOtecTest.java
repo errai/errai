@@ -18,8 +18,6 @@ package org.jboss.errai.otec;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jboss.errai.otec.mutation.Mutation;
-import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.util.OTLogFormat;
 import org.junit.After;
 import org.junit.Before;
@@ -29,8 +27,7 @@ import org.junit.rules.TestName;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractThreeEngineOtecTest {
-  private static final String PLAYBACK_FORMAT = "%-30s %-40s\n";
+public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
   OTClientEngine clientEngineA;
   OTClientEngine clientEngineB;
   OTServerEngine serverEngine;
@@ -38,23 +35,6 @@ public abstract class AbstractThreeEngineOtecTest {
 
   @Rule
   public TestName name = new TestName();
-
-  private static void renderPlaybackHeader(final String stateName, int currentRevision) {
-    System.out.println("===================================================");
-    System.out.println("NODE: " + stateName + "; CURRENT REVISION: " + currentRevision);
-    System.out.println();
-    System.out.printf(PLAYBACK_FORMAT, "MUTATION", "STATE");
-    System.out.println("---------------------------------------------------");
-
-  }
-
-  private static void renderInitialStatePlayback(final State state) {
-    System.out.printf(PLAYBACK_FORMAT, "SYNC", "\"" + String.valueOf(state.get()) + "\"");
-  }
-
-  private static void renderMutationPlayback(final Mutation mutation, final State state) {
-    System.out.printf(PLAYBACK_FORMAT, mutation, "\"" + String.valueOf(state.get()) + "\"");
-  }
 
   protected void suspendEngines() {
     clientEngineA.stop(false);
@@ -73,8 +53,6 @@ public abstract class AbstractThreeEngineOtecTest {
     clientEngineB.start();
     clientEngineA.start();
   }
-
-  protected abstract OTPeer createPeerFor(OTEngine local, OTEngine remote);
 
   protected void setupEngines(final String initialState) {
     clientEngineA = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientA");
@@ -126,42 +104,17 @@ public abstract class AbstractThreeEngineOtecTest {
     System.out.println("------[end]------");
   }
 
-  @SuppressWarnings("unchecked")
-  private String replayLogAndReturnResult(final String name,
-                                          final State state,
-                                          final int revision,
-                                          final TransactionLog log) {
-
-    renderPlaybackHeader(name, revision);
-    renderInitialStatePlayback(state);
-
-    for (final OTOperation operation : log.getCanonLog()) {
-      for (final Mutation mutation : operation.getMutations()) {
-        mutation.apply(state);
-        renderMutationPlayback(mutation, state);
-      }
-    }
-
-    System.out.println("RESULTING HASH: " + state.getHash());
-    System.out.println("\n");
-
-    return (String) state.get();
-  }
-
   protected void stopServerEngineAndWait() {
     serverEngine.stop(true);
   }
 
   @Before
   public void setUp() throws Exception {
-    System.out.println(OTLogFormat.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
+    System.out.println("\n" + OTLogFormat.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
         + OTLogFormat.repeat('*', 30));
     OTLogFormat.printLogTitle();
   }
 
   @After
-  public void tearDown() throws Exception {
-    System.out.println(OTLogFormat.repeat('*', 30) + " Finished: " + name.getMethodName() + " "
-        + OTLogFormat.repeat('*', 30) + "\n");
-  }
+  public void tearDown() throws Exception {}
 }
