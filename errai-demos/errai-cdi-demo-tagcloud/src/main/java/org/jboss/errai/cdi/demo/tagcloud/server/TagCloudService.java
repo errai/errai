@@ -1,12 +1,13 @@
-/*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,89 +45,89 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
 @ApplicationScoped
 public class TagCloudService {
 
-  @SuppressWarnings("serial")
-  private static Set<Tag> initialTags = new CopyOnWriteArraySet<Tag>() {
-    {
-      add(new Tag("Errai", 10));
-      add(new Tag("Seam", 99));
-      add(new Tag("GWT", 7));
-      add(new Tag("RESTEasy", 5));
-      add(new Tag("Infinispan", 77));
-      add(new Tag("Hibernate", 13));
-      add(new Tag("RichFaces", 22));
-      add(new Tag("HornetQ", 11));
-      add(new Tag("jBPM", 45));
-      add(new Tag("JGroups", 88));
-      add(new Tag("StormGrind", 66));
-      add(new Tag("RiftSaw", 19));
-      add(new Tag("Netty", 9));
-      add(new Tag("Drools", 16));
-      add(new Tag("Railo", 5));
-      add(new Tag("AppServer", 9));
-    }
-  };
-
-  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-  private ScheduledFuture<?> updater = null;
-
-  @Inject
-  private Event<TagCloud> tagCloudEvent;
-
-  @Inject
-  @Updated
-  private Event<Tag> updatedTagEvent;
-
-  @Inject
-  @New
-  private Event<Tag> newTagEvent;
-
-  @PostConstruct
-  public void start() {
-    updater = scheduler.scheduleAtFixedRate(new Runnable() {
-      @Override
-      public void run() {
-        createRandomChange();
-      }
-    }, 0, 2, TimeUnit.SECONDS);
-  }
-
-  @PreDestroy
-  public void stop() {
-    if (updater != null)
-      updater.cancel(true);
-  }
-
-  public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
-    tagCloudEvent.fire(new TagCloud(initialTags));
-  }
-
-  private void createRandomChange() {
-    if (Math.random() > 0.9) {
-      // add a random tag
-      List<Tag> tags = new ArrayList<Tag>(initialTags);
-      Tag randomTag = new Tag(randomString(tags.get(new Random().nextInt(initialTags.size())).getName()),
-          (int) Math.ceil(Math.random() * 100));
-      initialTags.add(randomTag);
-      newTagEvent.fire(randomTag);
-    }
-    else {
-      // modify a tag
-      for (Tag tag : initialTags) {
-        if (Math.random() > 0.8) {
-          tag.setFrequency((int) Math.ceil(Math.random() * 100));
-          updatedTagEvent.fire(tag);
+    @SuppressWarnings("serial")
+    private static Set<Tag> initialTags = new CopyOnWriteArraySet<Tag>() {
+        {
+            add(new Tag("Errai", 10));
+            add(new Tag("Seam", 99));
+            add(new Tag("GWT", 7));
+            add(new Tag("RESTEasy", 5));
+            add(new Tag("Infinispan", 77));
+            add(new Tag("Hibernate", 13));
+            add(new Tag("RichFaces", 22));
+            add(new Tag("HornetQ", 11));
+            add(new Tag("jBPM", 45));
+            add(new Tag("JGroups", 88));
+            add(new Tag("StormGrind", 66));
+            add(new Tag("RiftSaw", 19));
+            add(new Tag("Netty", 9));
+            add(new Tag("Drools", 16));
+            add(new Tag("Railo", 5));
+            add(new Tag("AppServer", 9));
         }
-      }
-    }
-  }
+    };
 
-  private String randomString(String base) {
-    Random r = new Random();
-    StringBuilder sb = new StringBuilder(base.length());
-    for (int i = 0; i < base.length(); i++) {
-      sb.append(base.charAt(r.nextInt(base.length())));
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> updater = null;
+
+    @Inject
+    private Event<TagCloud> tagCloudEvent;
+
+    @Inject
+    @Updated
+    private Event<Tag> updatedTagEvent;
+
+    @Inject
+    @New
+    private Event<Tag> newTagEvent;
+
+    @PostConstruct
+    public void start() {
+        updater = scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                createRandomChange();
+            }
+        }, 0, 2, TimeUnit.SECONDS);
     }
 
-    return sb.toString();
-  }
+    @PreDestroy
+    public void stop() {
+        if (updater != null)
+            updater.cancel(true);
+    }
+
+    public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
+        tagCloudEvent.fire(new TagCloud(initialTags));
+    }
+
+    private void createRandomChange() {
+        if (Math.random() > 0.9) {
+            // add a random tag
+            List<Tag> tags = new ArrayList<Tag>(initialTags);
+            Tag randomTag = new Tag(randomString(tags.get(new Random().nextInt(initialTags.size())).getName()),
+                (int) Math.ceil(Math.random() * 100));
+            initialTags.add(randomTag);
+            newTagEvent.fire(randomTag);
+        }
+        else {
+            // modify a tag
+            for (Tag tag : initialTags) {
+                if (Math.random() > 0.8) {
+                    tag.setFrequency((int) Math.ceil(Math.random() * 100));
+                    updatedTagEvent.fire(tag);
+                }
+            }
+        }
+    }
+
+    private String randomString(String base) {
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder(base.length());
+        for (int i = 0; i < base.length(); i++) {
+            sb.append(base.charAt(r.nextInt(base.length())));
+        }
+
+        return sb.toString();
+    }
 }

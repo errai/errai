@@ -46,7 +46,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * A form for editing the properties of a new or existing Item object.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Dependent
@@ -68,7 +68,7 @@ public class ItemForm extends Composite {
     @Inject @DataField private Button saveButton;
 
     private Runnable afterSaveAction;
-    
+
     @PostConstruct
     private void setupSuggestions() {
         MultiWordSuggestOracle iso = (MultiWordSuggestOracle) name.getSuggestOracle();
@@ -96,7 +96,7 @@ public class ItemForm extends Composite {
     /**
      * Returns the store instance that is permanently associated with this form. The returned instance is bound to this store's
      * fields: updates to the form fields will cause matching updates in the returned object's state, and vice-versa.
-     * 
+     *
      * @return the Item instance that is bound to the fields of this form.
      */
     public Item getItem() {

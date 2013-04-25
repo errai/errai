@@ -74,28 +74,28 @@ public class StorePage extends Composite {
 
     @Inject
     private @DataField SimplePanel mapContainer;
-    
+
     @Inject
     private @DataField Button saveButton;
 
     @Inject
     private @AutoBound DataBinder<Store> storeBinder;
-    
+
     @Inject
     private @DataField TextBox locationSearchBox;
-    
+
     @Inject
     private @Bound @DataField TextBox name;
-    
+
     @Inject
     private @Bound @DataField TextBox address;
-    
+
     @Inject
     private @Bound @DataField SliderBar radius;
 
     @Inject
     private @DataField SuggestBox addDepartment;
-    
+
     @Inject
     private @DataField DepartmentList departmentList;
 
@@ -109,7 +109,7 @@ public class StorePage extends Composite {
 
     @Inject
     private GeoFencingProvider geoFencingProvider;
-    
+
     private Marker marker;
     private Markers markers;
     private Vector vectorLayer;
@@ -256,7 +256,7 @@ public class StorePage extends Composite {
      * If the store's location is set to something reasonable (that is, not 0 degrees north, 0 degrees east), this method
      * centers the map on that location and places a marker on it. Otherwise, this method tries to center the map on the user's
      * current location.
-     * 
+     *
      * @param map the map to place the marker on
      */
     private void placeMarkerAtStoreLocation(final Map map) {

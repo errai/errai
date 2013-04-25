@@ -81,7 +81,7 @@ public class PopoverContainer extends Composite {
 
     /**
      * Positions the popover so that its arrow points at the centre of the given widget Makes the popover visible
-     * 
+     *
      * @param positionNear
      */
     public void show(Widget positionNear) {
