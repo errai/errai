@@ -31,7 +31,7 @@ public class OTServerEngine extends OTClientEngine {
   private final ArrayBlockingQueue<OTQueuedOperation> incomingQueue
       = new ArrayBlockingQueue<OTQueuedOperation>(100, true);
 
-  private OTServerEngine(PeerState peerState, String name) {
+  private OTServerEngine(final PeerState peerState, final String name) {
     super(peerState, name);
   }
 
@@ -77,7 +77,7 @@ public class OTServerEngine extends OTClientEngine {
   private static class PollingThread extends Thread {
     private final OTServerEngine serverEngine;
 
-    private PollingThread(OTServerEngine serverEngine) {
+    private PollingThread(final OTServerEngine serverEngine) {
       this.serverEngine = serverEngine;
     }
 
@@ -118,7 +118,7 @@ public class OTServerEngine extends OTClientEngine {
   }
 
   @Override
-  public void receive(String peerId, int entityId, OTOperation remoteOp) {
+  public void receive(final String peerId, final int entityId, final OTOperation remoteOp) {
     if (entityId == -1) {
       return;
     }
