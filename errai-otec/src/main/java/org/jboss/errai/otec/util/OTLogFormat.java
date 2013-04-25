@@ -35,7 +35,7 @@ public class OTLogFormat {
     }
   }
 
-  private static String repeat(char c, int amount) {
+  public static String repeat(char c, int amount) {
     final StringBuilder builder = new StringBuilder(amount);
     for (int i = 0; i < amount; i++) {
       builder.append(c);

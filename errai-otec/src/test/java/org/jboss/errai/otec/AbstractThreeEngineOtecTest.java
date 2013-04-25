@@ -23,6 +23,8 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.util.OTLogFormat;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 /**
  * @author Mike Brock
@@ -33,6 +35,9 @@ public abstract class AbstractThreeEngineOtecTest {
   OTClientEngine clientEngineB;
   OTServerEngine serverEngine;
   OTEntity serverEntity;
+
+  @Rule
+  public TestName name = new TestName();
 
   private static void renderPlaybackHeader(final String stateName, int currentRevision) {
     System.out.println("===================================================");
@@ -149,11 +154,14 @@ public abstract class AbstractThreeEngineOtecTest {
 
   @Before
   public void setUp() throws Exception {
+    System.out.println(OTLogFormat.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
+        + OTLogFormat.repeat('*', 30));
     OTLogFormat.printLogTitle();
   }
 
   @After
   public void tearDown() throws Exception {
-    System.out.println("===================================================");
+    System.out.println(OTLogFormat.repeat('*', 30) + " Finished: " + name.getMethodName() + " "
+        + OTLogFormat.repeat('*', 30) + "\n");
   }
 }
