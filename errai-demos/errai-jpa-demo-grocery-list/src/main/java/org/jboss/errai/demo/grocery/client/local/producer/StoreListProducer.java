@@ -1,3 +1,19 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.demo.grocery.client.local.producer;
 
 import com.google.gwt.maps.client.base.LatLng;
@@ -23,89 +39,92 @@ import java.util.List;
  */
 @ApplicationScoped
 public class StoreListProducer {
-  @Inject
-  private EntityManager entityManager;
 
-  @Inject
-  private LocationProvider locationProvider;
+    @Inject
+    private EntityManager entityManager;
 
-  @Inject
-  protected Event<StoreChangedEvent> storeListChanged;
+    @Inject
+    private LocationProvider locationProvider;
 
-  // TODO eliminate this after making a bridge from JPA lifecycle events to CDI events
-  private static StoreListProducer INSTANCE;
-  private List<Store> stores;
-  private LatLng here;
+    @Inject
+    protected Event<StoreChangedEvent> storeListChanged;
 
-  @PostConstruct
-  private void initInstance() {
-    INSTANCE = this;
-    updateStoreList();
-    locationProvider.watchPosition(new LocationProvider.LocationCallback() {
-      @Override
-      public void onSuccess(final LatLng here) {
-        StoreListProducer.this.here = here;
-        sortStoreListOnLocation();
-        fireStoreChangeEvent();
-      }
-    });
-  }
+    // TODO eliminate this after making a bridge from JPA lifecycle events to CDI events
+    private static StoreListProducer INSTANCE;
+    private List<Store> stores;
+    private LatLng here;
 
-  private void sortStoreListOnLocation() {
-    Collections.sort(stores, new Comparator<Store>() {
-      @Override
-      public int compare(Store one, Store two) {
-        LatLng storeOneLocation = LatLng.newInstance(one.getLatitude(), one.getLongitude());
-        LatLng storeTwoLocation = LatLng.newInstance(two.getLatitude(), two.getLongitude());
-
-        double distanceOne = SphericalUtils.computeDistanceBetween(storeOneLocation, here);
-        double distanceTwo = SphericalUtils.computeDistanceBetween(storeTwoLocation, here);
-
-        return distanceOne < distanceTwo ? -1 : distanceOne == distanceTwo ? 0 : 1;
-      }
-    });
-  }
-
-  private void updateStoreList() {
-    stores = entityManager.createNamedQuery("allStores", Store.class).getResultList();
-    if (here != null) {
-      sortStoreListOnLocation();
-    }
-  }
-
-  @PreDestroy
-  private void deInitInstance() {
-    INSTANCE = null;
-  }
-
-  // TODO make a bridge from JPA lifecycle events to CDI events
-  public static class StoreListener {
-    @PostPersist @PostUpdate @PostRemove
-    public void onStoreListChange(Store s) {
-      if (INSTANCE != null) {
-        INSTANCE.updateStoreList();
-        INSTANCE.fireStoreChangeEvent();
-      }
-    }
-  }
-
-  private void fireStoreChangeEvent() {
-    storeListChanged.fire(new StoreChangedEvent(stores));
-  }
-
-  public List<Store> getStoresSortedOnDistance() {
-    return stores;
-  }
-
-  public static class StoreChangedEvent {
-    private final List<Store> stores;
-
-    public StoreChangedEvent(List<Store> stores) {
-      this.stores = stores;
+    @PostConstruct
+    private void initInstance() {
+        INSTANCE = this;
+        updateStoreList();
+        locationProvider.watchPosition(new LocationProvider.LocationCallback() {
+            @Override
+            public void onSuccess(final LatLng here) {
+                StoreListProducer.this.here = here;
+                sortStoreListOnLocation();
+                fireStoreChangeEvent();
+            }
+        });
     }
 
-    public List<Store> getStores() {
-      return stores;
+    private void sortStoreListOnLocation() {
+        Collections.sort(stores, new Comparator<Store>() {
+            @Override
+            public int compare(Store one, Store two) {
+                LatLng storeOneLocation = LatLng.newInstance(one.getLatitude(), one.getLongitude());
+                LatLng storeTwoLocation = LatLng.newInstance(two.getLatitude(), two.getLongitude());
+
+                double distanceOne = SphericalUtils.computeDistanceBetween(storeOneLocation, here);
+                double distanceTwo = SphericalUtils.computeDistanceBetween(storeTwoLocation, here);
+
+                return distanceOne < distanceTwo ? -1 : distanceOne == distanceTwo ? 0 : 1;
+            }
+        });
     }
-  }
+
+    private void updateStoreList() {
+        stores = entityManager.createNamedQuery("allStores", Store.class).getResultList();
+        if (here != null) {
+            sortStoreListOnLocation();
+        }
+    }
+
+    @PreDestroy
+    private void deInitInstance() {
+        INSTANCE = null;
+    }
+
+    // TODO make a bridge from JPA lifecycle events to CDI events
+    public static class StoreListener {
+        @PostPersist
+        @PostUpdate
+        @PostRemove
+        public void onStoreListChange(Store s) {
+            if (INSTANCE != null) {
+                INSTANCE.updateStoreList();
+                INSTANCE.fireStoreChangeEvent();
+            }
+        }
+    }
+
+    private void fireStoreChangeEvent() {
+        storeListChanged.fire(new StoreChangedEvent(stores));
+    }
+
+    public List<Store> getStoresSortedOnDistance() {
+        return stores;
+    }
+
+    public static class StoreChangedEvent {
+        private final List<Store> stores;
+
+        public StoreChangedEvent(List<Store> stores) {
+            this.stores = stores;
+        }
+
+        public List<Store> getStores() {
+            return stores;
+        }
+    }
 }

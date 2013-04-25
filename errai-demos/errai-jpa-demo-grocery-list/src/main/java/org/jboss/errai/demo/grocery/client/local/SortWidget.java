@@ -1,3 +1,19 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.demo.grocery.client.local;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,63 +37,70 @@ import static org.jboss.errai.demo.grocery.client.local.GroceryListWidget.SortBy
  * @author edewit@redhat.com
  */
 @Templated("#main")
-@SuppressWarnings({"UnusedDeclaration", "UnusedParameters"})
+@SuppressWarnings({ "UnusedDeclaration", "UnusedParameters" })
 public class SortWidget extends Composite {
-  @Inject
-  GroceryListWidget groceryListWidget;
+    @Inject
+    GroceryListWidget groceryListWidget;
 
-  @Inject
-  StoreListProducer storeListProducer;
+    @Inject
+    StoreListProducer storeListProducer;
 
-  @Inject @DataField
-  Anchor name;
+    @Inject
+    @DataField
+    Anchor name;
 
-  @Inject @DataField
-  Anchor recentlyAdded;
+    @Inject
+    @DataField
+    Anchor recentlyAdded;
 
-  @Inject @DataField
-  Anchor department;
+    @Inject
+    @DataField
+    Anchor department;
 
-  @Inject @DataField
-  Anchor storeAnchor;
+    @Inject
+    @DataField
+    Anchor storeAnchor;
 
-  @Inject @DataField @OrderedList
-  ListWidget<Store, StoreListItem> stores;
+    @Inject
+    @DataField
+    @OrderedList
+    ListWidget<Store, StoreListItem> stores;
 
-  @PostConstruct
-  public void buildStoreFilter() {
-    refresh();
-  }
+    @PostConstruct
+    public void buildStoreFilter() {
+        refresh();
+    }
 
-  public void storeListChanged(@Observes StoreListProducer.StoreChangedEvent event) {
-    refresh();
-  }
+    public void storeListChanged(@Observes StoreListProducer.StoreChangedEvent event) {
+        refresh();
+    }
 
-  private void refresh() {
-    stores.setItems(storeListProducer.getStoresSortedOnDistance());
-  }
-  @EventHandler("name")
-  public void onNameItemClick(ClickEvent e) {
-    changeSortOrder(NAME);
-  }
+    private void refresh() {
+        stores.setItems(storeListProducer.getStoresSortedOnDistance());
+    }
 
-  @EventHandler("recentlyAdded")
-  public void onRecentlyAddedItemClick(ClickEvent e) {
-    changeSortOrder(RECENTLY_ADDED);
-  }
+    @EventHandler("name")
+    public void onNameItemClick(ClickEvent e) {
+        changeSortOrder(NAME);
+    }
 
-  @EventHandler("department")
-  public void onDepartmentItemClick(ClickEvent e) {
-    changeSortOrder(DEPARTMENT);
-  }
+    @EventHandler("recentlyAdded")
+    public void onRecentlyAddedItemClick(ClickEvent e) {
+        changeSortOrder(RECENTLY_ADDED);
+    }
 
-  @EventHandler("storeAnchor")
-  public void onStoreItemClick(ClickEvent e) {
-    changeSortOrder(STORE_LOCATION);
-  }
+    @EventHandler("department")
+    public void onDepartmentItemClick(ClickEvent e) {
+        changeSortOrder(DEPARTMENT);
+    }
 
-  private void changeSortOrder(GroceryListWidget.SortBy order) {
-    groceryListWidget.sortBy(order);
-    groceryListWidget.refresh();
-  }
+    @EventHandler("storeAnchor")
+    public void onStoreItemClick(ClickEvent e) {
+        changeSortOrder(STORE_LOCATION);
+    }
+
+    private void changeSortOrder(GroceryListWidget.SortBy order) {
+        groceryListWidget.sortBy(order);
+        groceryListWidget.refresh();
+    }
 }
