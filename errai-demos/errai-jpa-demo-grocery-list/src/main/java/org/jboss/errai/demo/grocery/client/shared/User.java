@@ -23,7 +23,7 @@ import javax.persistence.NamedQuery;
 
 /**
  * Represents a user of the grocery list application.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Entity

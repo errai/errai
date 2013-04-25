@@ -29,7 +29,7 @@ import javax.persistence.OneToMany;
 
 /**
  * Represents a grocery list: a collection of {@link Item grocery items} that is maintained by a particular user.
- * 
+ *
  * @author jfuerth
  */
 @Entity

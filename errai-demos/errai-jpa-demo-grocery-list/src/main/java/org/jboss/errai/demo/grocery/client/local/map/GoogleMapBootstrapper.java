@@ -28,7 +28,7 @@ import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 /**
  * Attempts to load the Google Maps JavaScript asynchronously, passes in the Maps API key, and delays app initialization until
  * the maps library is loaded and ready.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 @EntryPoint
@@ -75,7 +75,7 @@ public class GoogleMapBootstrapper {
 
     /**
      * Executes the given runnable once all required Maps APIs are loaded.
-     * 
+     *
      * @param r The Runnable to run when the Maps API is ready. Must not be null.
      */
     public static void whenReady(Runnable r) {

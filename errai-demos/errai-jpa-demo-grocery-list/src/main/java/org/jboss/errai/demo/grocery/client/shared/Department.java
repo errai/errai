@@ -30,7 +30,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
  * Department (section of a store) that an item can be found in.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Bindable
@@ -95,7 +95,7 @@ public class Department {
 
     /**
      * Finds the pre-existing department that has the given name, creating a new one if no such department exists.
-     * 
+     *
      * @param em The entity manager to search for the department in.
      * @param name The name of the department to look for.
      * @return an existing Department from JPA storage, or a new department instance if no existing one was found. Return value

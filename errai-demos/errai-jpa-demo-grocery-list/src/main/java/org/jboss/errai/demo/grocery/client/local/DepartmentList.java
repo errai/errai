@@ -30,7 +30,7 @@ import com.google.gwt.event.dom.client.*;
  * A list of Department objects (each represented by a DepartmentWidget) whose entries can be dragged to rearrange their order.
  * <p>
  * It should be easy at some point in the future to generalize this and include it alongside ListWidget in the framework.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
@@ -54,7 +54,7 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
      * <li>If you want to save the list in its rearranged state, you have to retain a reference to the list and persist it in
      * its new order when this list widget has been disposed (or any other time you like)
      * </ol>
-     * 
+     *
      * @param items The list of items to display in the list. This list must support the add() and remove() operations, or
      *        drag-and-drop operations will fail.
      */
@@ -134,7 +134,7 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
 
     /**
      * Animates the creation and destruction of a gap above a certain item in the list.
-     * 
+     *
      * @author Jonathan Fuerth <jfuerth@redhat.com>
      */
     class ItemMoveAnimation extends Animation {
@@ -162,7 +162,7 @@ public class DepartmentList extends ListWidget<Department, DepartmentWidget> {
 
         /**
          * Runs this animation forward, to make the widget grow empty space above its contents.
-         * 
+         *
          * @param targetGrowth the amount to grow by once the animation has finished.
          */
         public void forward(double targetGrowth) {
