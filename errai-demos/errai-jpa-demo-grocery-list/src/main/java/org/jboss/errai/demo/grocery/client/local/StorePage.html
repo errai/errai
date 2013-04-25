@@ -1,39 +1,44 @@
 <!DOCTYPE html>
+<!--
+ JBoss, Home of Professional Open Source
+ Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ contributors by the @authors tag. See the copyright.txt in the
+ distribution for a full listing of individual contributors.
 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
 <link href="css/bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="css/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 <link href="css/GroceryList.css" rel="stylesheet">
 
 <div class=container>
-  <div data-field=main class=row>
-    <div class=span6>
-      <form class="form-search">
-        <input id=locationSearchBox type=text class="span5 search-query"
-            data-field=locationSearchBox placeholder="Search Business Name or Address">
-      </form>
+    <div data-field=main class=row>
+        <div class=span6>
+            <form class="form-search">
+                <input id=locationSearchBox type=text class="span5 search-query" data-field=locationSearchBox
+                    placeholder="Search Business Name or Address">
+            </form>
 
-      <hr>
-
-      <label for=storeName>Store Name:</label>
-      <input id=storeName class=span5 type=text data-field=name><br>
-
-      <label for=storeAddress>Address:</label>
-      <input id=storeAddress class=span5 type=text data-field=address><br>
-
-      <label for=radius>Notification radius</label>
-      <div id=radius data-field=radius>this is the slider</div>
-      <br/>
-
-      <label for=storeDepartments><span>Departments:</span> <i class=muted>(drag to rearrange)</i></label>
-      <div id=storeDepartments class=span5 data-field=departmentList></div><br>
-      <input class=span5 type=text placeholder="Add a department" data-field=addDepartment>
-
-      <br>
-      <br>
-      <button class=btn data-field=saveButton>Save</button>
+            <hr>
+            <label for=storeName>Store Name:</label> <input id=storeName class=span5 type=text data-field=name><br>
+            <label for=storeAddress>Address:</label> <input id=storeAddress class=span5 type=text data-field=address><br>
+            <label for=radius>Notification radius</label>
+            <div id=radius data-field=radius>this is the slider</div>
+            <br /> <label for=storeDepartments><span>Departments:</span> <i class=muted>(drag to rearrange)</i></label>
+            <div id=storeDepartments class=span5 data-field=departmentList></div>
+            <br> <input class=span5 type=text placeholder="Add a department" data-field=addDepartment> <br> <br>
+            <button class=btn data-field=saveButton>Save</button>
+        </div>
+        <div class=span6>
+            <div class=map data-field=mapContainer>This is a map of the store location</div>
+        </div>
     </div>
-    <div class=span6>
-      <div class=map data-field=mapContainer>This is a map of the store location</div>
-    </div>
-  </div>
 </div>

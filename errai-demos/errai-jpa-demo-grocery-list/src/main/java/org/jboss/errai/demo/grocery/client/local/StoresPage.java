@@ -1,3 +1,19 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.demo.grocery.client.local;
 
 import com.google.common.collect.ImmutableMultimap;
@@ -25,28 +41,36 @@ import static org.jboss.errai.demo.grocery.client.local.producer.StoreListProduc
 @Templated("#root")
 @Page
 public class StoresPage extends Composite {
-  @Inject private EntityManager em;
 
-  @Inject TransitionTo<StorePage> toStorePage;
-  @Inject @DataField ListWidget<Store, StoreWidget> storeList;
+    @Inject
+    private EntityManager em;
 
-  @Inject @DataField Button addStoreButton;
+    @Inject
+    TransitionTo<StorePage> toStorePage;
 
-  @PostConstruct
-  private void initInstance() {
-    List<Store> allStores = em.createNamedQuery("allStores", Store.class).getResultList();
-    storeList.setItems(allStores);
-  }
+    @Inject
+    @DataField
+    ListWidget<Store, StoreWidget> storeList;
 
-  public void storeListChanged(@Observes StoreChangedEvent event) {
-    storeList.setItems(event.getStores());
-  }
+    @Inject
+    @DataField
+    Button addStoreButton;
 
-  @EventHandler("addStoreButton")
-  public void onStoreAddButtonClick(ClickEvent event) {
-    Store newStore = new Store();
-    em.persist(newStore);
-    em.flush();
-    toStorePage.go(ImmutableMultimap.of("id", String.valueOf(newStore.getId())));
-  }
+    @PostConstruct
+    private void initInstance() {
+        List<Store> allStores = em.createNamedQuery("allStores", Store.class).getResultList();
+        storeList.setItems(allStores);
+    }
+
+    public void storeListChanged(@Observes StoreChangedEvent event) {
+        storeList.setItems(event.getStores());
+    }
+
+    @EventHandler("addStoreButton")
+    public void onStoreAddButtonClick(ClickEvent event) {
+        Store newStore = new Store();
+        em.persist(newStore);
+        em.flush();
+        toStorePage.go(ImmutableMultimap.of("id", String.valueOf(newStore.getId())));
+    }
 }

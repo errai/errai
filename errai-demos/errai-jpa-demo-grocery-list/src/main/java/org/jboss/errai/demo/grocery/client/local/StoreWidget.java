@@ -1,3 +1,19 @@
+/**
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jboss.errai.demo.grocery.client.local;
 
 import javax.enterprise.context.Dependent;
@@ -26,39 +42,49 @@ import com.google.gwt.user.client.ui.Label;
 @Templated("#main")
 public class StoreWidget extends Composite implements HasModel<Store> {
 
-  @Inject private @AutoBound DataBinder<Store> storeBinder;
-  @Inject private @Bound @DataField Label name;
-  @Inject private @Bound @DataField InlineLabel address;
+    @Inject
+    private @AutoBound DataBinder<Store> storeBinder;
 
-  @Inject private @DataField Label departments;
-  @Inject private @DataField Button deleteButton;
+    @Inject
+    private @Bound @DataField Label name;
 
-  @Inject private TransitionTo<StorePage> toStorePage;
+    @Inject
+    private @Bound @DataField InlineLabel address;
 
-  @Inject EntityManager em;
+    @Inject
+    private @DataField Label departments;
 
-  @Override
-  public Store getModel() {
-    return storeBinder.getModel();
-  }
+    @Inject
+    private @DataField Button deleteButton;
 
-  @Override
-  public void setModel(Store store) {
-    if (store.getName() == null || store.getName().trim().length() == 0) {
-      store.setName("Unnamed Store"); // XXX this side effect is not in a great place
+    @Inject
+    private TransitionTo<StorePage> toStorePage;
+
+    @Inject
+    EntityManager em;
+
+    @Override
+    public Store getModel() {
+        return storeBinder.getModel();
     }
-    storeBinder.setModel(store, InitialState.FROM_MODEL);
-    departments.setText(store.getDepartments().size() + " Departments");
-  }
 
-  @EventHandler
-  private void onClick(ClickEvent e) {
-    toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
-  }
+    @Override
+    public void setModel(Store store) {
+        if (store.getName() == null || store.getName().trim().length() == 0) {
+            store.setName("Unnamed Store"); // XXX this side effect is not in a great place
+        }
+        storeBinder.setModel(store, InitialState.FROM_MODEL);
+        departments.setText(store.getDepartments().size() + " Departments");
+    }
 
-  @EventHandler("deleteButton")
-  private void deleteThisStore(ClickEvent e) {
-    em.remove(getModel());
-    em.flush();
-  }
+    @EventHandler
+    private void onClick(ClickEvent e) {
+        toStorePage.go(ImmutableMultimap.of("id", String.valueOf(storeBinder.getModel().getId())));
+    }
+
+    @EventHandler("deleteButton")
+    private void deleteThisStore(ClickEvent e) {
+        em.remove(getModel());
+        em.flush();
+    }
 }
