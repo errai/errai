@@ -16,19 +16,20 @@
 
 package org.jboss.errai.otec;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.util.OTLogFormat;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class SynchronousMockPeerlImpl implements OTPeer {
-  private OTEngine localEngine;
-  private OTEngine remoteEngine;
+  private final OTEngine localEngine;
+  private final OTEngine remoteEngine;
 
   private final Map<Integer, Integer> lastTransmittedSequencees = new ConcurrentHashMap<Integer, Integer>();
 
@@ -58,6 +59,7 @@ public class SynchronousMockPeerlImpl implements OTPeer {
     lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public void beginSyncRemoteEntity(final String peerId,
                                     final int entityId,
@@ -90,6 +92,7 @@ public class SynchronousMockPeerlImpl implements OTPeer {
     return integer == null ? 0 : integer;
   }
 
+  @Override
   public String toString() {
     return remoteEngine.getName();
   }

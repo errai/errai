@@ -16,13 +16,14 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.operation.OTOperation;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.jboss.errai.otec.operation.OTOperation;
+
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class OTServerEngine extends OTClientEngine {
   private PollingThread pollingThread;
@@ -51,6 +52,7 @@ public class OTServerEngine extends OTClientEngine {
       return;
     }
     super.start();
+    this.incomingQueue.clear();
     this.pollingThread = new PollingThread(this);
     this.pollingThread.start();
   }
@@ -60,7 +62,6 @@ public class OTServerEngine extends OTClientEngine {
     if (!wait) {
       super.stop(wait);
     }
-
     incomingQueue.offer(new OTQueuedOperation(null, null, -1));
 
     try {
@@ -74,7 +75,7 @@ public class OTServerEngine extends OTClientEngine {
   }
 
   private static class PollingThread extends Thread {
-    private OTServerEngine serverEngine;
+    private final OTServerEngine serverEngine;
 
     private PollingThread(OTServerEngine serverEngine) {
       this.serverEngine = serverEngine;

@@ -16,6 +16,12 @@
 
 package org.jboss.errai.otec;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
@@ -24,12 +30,6 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
 import org.jboss.errai.otec.operation.OTOperationsListBuilder;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -253,7 +253,7 @@ public class OTClientEngine implements OTEngine {
   }
 
   private static class DefaultOTOperationsFactory implements OTOperationsFactory {
-    private OTClientEngine otEngine;
+    private final OTClientEngine otEngine;
 
     public DefaultOTOperationsFactory(final OTClientEngine otEngine) {
       this.otEngine = otEngine;
