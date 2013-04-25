@@ -33,7 +33,7 @@ import org.jboss.errai.demo.grocery.client.shared.qual.Updated;
  * <p>
  * Ideally there would be no need for this class: Errai's EntityManager could just fire these qualified CDI events when it's
  * firing the less-usable-from-CDI JPA events.
- * 
+ *
  * @author jfuerth
  */
 @ApplicationScoped
@@ -47,16 +47,16 @@ public class EventTranslator {
     }
 
     // ========= Item ==========
-    
+
     @Inject
     private @New Event<Item> newItemEvent;
-    
+
     @Inject
     private @Updated Event<Item> updatedItemEvent;
-    
+
     @Inject
     private @Removed Event<Item> removedItemEvent;
-    
+
     void fireNewItemEvent(Item i) {
         newItemEvent.fire(i);
     }

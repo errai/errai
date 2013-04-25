@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.Composite;
 
 /**
  * Simple widget displaying the welcome message and the "get started" button.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Dependent
