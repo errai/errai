@@ -16,6 +16,10 @@
 
 package org.jboss.errai.otec;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
@@ -23,10 +27,6 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OpPair;
 import org.jboss.errai.otec.util.OTLogFormat;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -62,9 +62,8 @@ public class Transformer {
     final TransactionLog transactionLog = entity.getTransactionLog();
     final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision());
 
-    // if no operation was carried out we can just apply the new operations
     if (localOps.isEmpty()) {
-      remoteOp.apply(entity);
+      OTOperationImpl.createLocalOnlyOperation(remoteOp).apply(entity);
       transformedOps.add(remoteOp);
     }
     else {
@@ -109,7 +108,7 @@ public class Transformer {
       }
 
       if (!appliedRemoteOp) {
-        applyOver.apply(entity);
+        OTOperationImpl.createLocalOnlyOperation(applyOver).apply(entity);
       }
 
       if (applyOver.isResolvedConflict()) {

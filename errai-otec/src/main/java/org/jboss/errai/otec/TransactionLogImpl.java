@@ -16,15 +16,15 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.mutation.Mutation;
-import org.jboss.errai.otec.operation.OTOperation;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+
+import org.jboss.errai.otec.mutation.Mutation;
+import org.jboss.errai.otec.operation.OTOperation;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -166,6 +166,7 @@ public class TransactionLogImpl implements TransactionLog {
     }
   }
 
+  @Override
   public String toString() {
     return Arrays.toString(getCanonLog().toArray());
   }

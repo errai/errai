@@ -16,13 +16,13 @@
 
 package org.jboss.errai.otec.operation;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.util.OTLogFormat;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Christian Sadilek
@@ -32,11 +32,11 @@ public class OTOperationImpl implements OTOperation {
   private final OTEngine engine;
   private final List<Mutation> mutations;
   private final int entityId;
-  private final int revision;
   private final boolean propagate;
-  private  boolean resolvedConflict;
+  private boolean resolvedConflict;
   private String revisionHash;
   private boolean nonCanon;
+  private int revision;
 
   private final OpPair transformedFrom;
 
@@ -80,6 +80,11 @@ public class OTOperationImpl implements OTOperation {
     return new OTOperationImpl(engine, operation.getMutations(), operation.getEntityId(), operation.getRevision(),
         operation.getRevisionHash(), operation.getTransformedFrom(), false);
   }
+  
+  public static OTOperation createLocalOnlyOperation(final OTOperation operation) {
+    return new OTOperationImpl(operation.getEngine(), operation.getMutations(), operation.getEntityId(), -1,
+        operation.getRevisionHash(), operation.getTransformedFrom(), false);
+  }
 
   @Override
   public List<Mutation> getMutations() {
@@ -100,6 +105,9 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public boolean apply(final OTEntity entity) {
     revisionHash = entity.getState().getHash();
+    if (revision == -1) {
+      revision = entity.getRevision();
+    }
 
     if (nonCanon)
       return shouldPropagate();
@@ -109,7 +117,6 @@ public class OTOperationImpl implements OTOperation {
     }
 
     OTLogFormat.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
-
     entity.getTransactionLog().appendLog(this);
     entity.incrementRevision();
     return shouldPropagate();
