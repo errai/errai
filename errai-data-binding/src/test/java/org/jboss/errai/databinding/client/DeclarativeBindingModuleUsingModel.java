@@ -40,7 +40,7 @@ public class DeclarativeBindingModuleUsingModel extends DeclarativeBindingSuperT
   public static final Date TEST_DATE = DateTimeFormat.getFormat("yyyy/MM/dd").parse("1980/22/06");
 
   @Bound
-  private final Label id = new Label("id");
+  private final Label id = new Label("");
 
   @Bound(property = "child.name")
   private final TextBox name = new TextBox();
