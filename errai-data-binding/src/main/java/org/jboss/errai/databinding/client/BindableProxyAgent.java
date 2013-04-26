@@ -200,10 +200,11 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
           " or " + HasText.class.getName() + "!");
     }
 
+    bindings.put(property, new Binding(property, widget, converter, handlerRegistration));
+    
     if (propertyTypes.get(property).isList()) {
       proxy.set(property, ensureBoundListIsProxied(property));
     }
-    bindings.put(property, new Binding(property, widget, converter, handlerRegistration));
     syncState(widget, property, initialState);
   }
 
@@ -456,7 +457,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    */
   List ensureBoundListIsProxied(String property, List list) {
     if (!(list instanceof BindableListWrapper) && bindings.containsKey(property)) {
-      return new BindableListWrapper(list);
+      List newList = new BindableListWrapper(list);
+      updateWidgetsAndFireEvent(property, proxy.get(property), newList);
+      return newList;
     }
     return list;
   }

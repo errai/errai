@@ -52,12 +52,17 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
 
     TestModel model = template.getModel();
+    assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
+    model.getChildren().add(new TestModel(3, "c3"));
+    assertEquals("Expected one widget", 1, template.getListWidget().getWidgetCount());
+    model.getChildren().remove(0);
+    assertEquals("Expected zero widgets", 0, template.getListWidget().getWidgetCount());
+    
     List<TestModel> children = new ArrayList<TestModel>();
     children.add(new TestModel(1, "c1"));
     children.add(new TestModel(2, "c2"));
     model.setChildren(children);
     assertEquals("Expected two widgets", 2, template.getListWidget().getWidgetCount());
-    
     model.getChildren().add(new TestModel(3, "c3"));
     assertEquals("Expected three widgets", 3, template.getListWidget().getWidgetCount());
   }

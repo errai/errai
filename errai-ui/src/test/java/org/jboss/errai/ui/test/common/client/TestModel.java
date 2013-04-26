@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ui.test.common.client;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class TestModel {
   private String name;
   private Date lastChanged;
   private String phoneNumber;
-  private List<TestModel> children;
+  private List<TestModel> children = new ArrayList<TestModel>();
   
   private TestModel child;
 
