@@ -108,7 +108,8 @@ public class Transformer {
       }
 
       if (!appliedRemoteOp) {
-        OTOperationImpl.createLocalOnlyOperation(applyOver).apply(entity);
+        applyOver = OTOperationImpl.createLocalOnlyOperation(applyOver);
+        applyOver.apply(entity);
       }
 
       if (applyOver.isResolvedConflict()) {

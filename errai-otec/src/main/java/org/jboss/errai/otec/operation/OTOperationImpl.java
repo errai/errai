@@ -45,7 +45,8 @@ public class OTOperationImpl implements OTOperation {
                           final int revision,
                           final String revisionHash,
                           final OpPair transformedFrom,
-                          final boolean propagate) {
+                          final boolean propagate,
+                          final boolean resolvedConflict) {
 
     this.engine = engine;
     this.mutations = mutationList;
@@ -54,6 +55,7 @@ public class OTOperationImpl implements OTOperation {
     this.revisionHash = revisionHash;
     this.transformedFrom = transformedFrom;
     this.propagate = propagate;
+    this.resolvedConflict = resolvedConflict;
   }
 
   public static OTOperation createOperation(final OTEngine engine,
@@ -63,7 +65,7 @@ public class OTOperationImpl implements OTOperation {
                                             final String revisionHash,
                                             final OpPair transformedFrom) {
 
-    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, true);
+    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, true, false);
   }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
@@ -73,17 +75,17 @@ public class OTOperationImpl implements OTOperation {
                                                      final String revisionHash,
                                                      final OpPair transformedFrom) {
 
-    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, false);
+    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, false, false);
   }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine, final OTOperation operation) {
     return new OTOperationImpl(engine, operation.getMutations(), operation.getEntityId(), operation.getRevision(),
-        operation.getRevisionHash(), operation.getTransformedFrom(), false);
+        operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict());
   }
   
   public static OTOperation createLocalOnlyOperation(final OTOperation operation) {
     return new OTOperationImpl(operation.getEngine(), operation.getMutations(), operation.getEntityId(), -1,
-        operation.getRevisionHash(), operation.getTransformedFrom(), false);
+        operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict());
   }
 
   @Override
@@ -159,7 +161,7 @@ public class OTOperationImpl implements OTOperation {
 
   @Override
   public OTOperation getBasedOn(final int revision) {
-    return new OTOperationImpl(engine, mutations, entityId, revision, revisionHash, transformedFrom, propagate);
+    return new OTOperationImpl(engine, mutations, entityId, revision, revisionHash, transformedFrom, propagate, resolvedConflict);
   }
 
   @Override
