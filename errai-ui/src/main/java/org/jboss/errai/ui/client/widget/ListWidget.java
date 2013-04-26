@@ -125,6 +125,8 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    *          removed.
    */
   public void setItems(List<M> items) {
+    boolean changed = this.items != items;
+    
     if (items instanceof BindableListWrapper) {
       this.items = (BindableListWrapper<M>) items;
     }
@@ -132,7 +134,9 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       this.items = new BindableListWrapper<M>(items);
     }
 
-    this.items.addChangeHandler(this);
+    if (changed) {
+      this.items.addChangeHandler(this);
+    }
     init();
   }
 

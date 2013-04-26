@@ -19,11 +19,9 @@ package org.jboss.errai.databinding.client;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 
 /**
  * Wraps a List<M> to notify change handlers of all operations that mutate the underlying list.
@@ -35,7 +33,7 @@ import java.util.Set;
 public class BindableListWrapper<M> implements List<M> {
 
   private final List<M> list;
-  private final Set<BindableListChangeHandler<M>> handlers = new HashSet<BindableListChangeHandler<M>>();
+  private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
 
   public BindableListWrapper(List<M> list) {
     this.list = list;
