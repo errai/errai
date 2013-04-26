@@ -22,11 +22,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-
-  <description>
-        JAX-RS Integration for Errai
-    </description>
-
+  
   <developers>
     <developer>
       <name>Christian Sadilek</name>

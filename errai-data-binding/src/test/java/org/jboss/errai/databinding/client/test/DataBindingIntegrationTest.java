@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.TextBox;
  * Tests functionality provided by the {@link DataBinder} API.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
- * @author David Cracauer <dcracauer@gmail.com>
  */
 public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 

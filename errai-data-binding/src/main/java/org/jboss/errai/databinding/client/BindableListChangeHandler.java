@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * A change handler to monitor changes of a bindable list (see {@link BindableListWrapper}).
+ * A change handler for monitoring changes of bindable lists (see {@link BindableListWrapper}).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
