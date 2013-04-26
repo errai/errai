@@ -83,9 +83,14 @@ public class OTOperationImpl implements OTOperation {
         operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict());
   }
   
-  public static OTOperation createLocalOnlyOperation(final OTOperation operation) {
-    return new OTOperationImpl(operation.getEngine(), operation.getMutations(), operation.getEntityId(), -1,
-        operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict());
+  public static OTOperation createOperation(final OTOperation op) {
+    return new OTOperationImpl(op.getEngine(), op.getMutations(), op.getEntityId(), -1,
+        op.getRevisionHash(), op.getTransformedFrom(), op.shouldPropagate(), op.isResolvedConflict());
+  }
+  
+  public static OTOperation createOperation(final OTOperation op, final OpPair transformedFrom) {
+    return new OTOperationImpl(op.getEngine(), op.getMutations(), op.getEntityId(), -1,
+        op.getRevisionHash(), transformedFrom, op.shouldPropagate(), op.isResolvedConflict());
   }
 
   @Override

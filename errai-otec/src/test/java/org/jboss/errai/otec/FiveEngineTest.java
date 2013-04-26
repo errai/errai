@@ -21,7 +21,6 @@ import static junit.framework.Assert.assertEquals;
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -117,7 +116,7 @@ public class FiveEngineTest extends AbstractOtecTest {
     System.out.println("------[end]------");
   }
 
-  @Ignore @Test
+  @Test
   public void testSingleClientEngineTransmissionDelayed() {
     final String initialState = "";
     setupEngines(initialState);

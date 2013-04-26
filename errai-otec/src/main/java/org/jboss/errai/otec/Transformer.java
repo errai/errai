@@ -63,7 +63,7 @@ public class Transformer {
     final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision());
 
     if (localOps.isEmpty()) {
-      OTOperationImpl.createLocalOnlyOperation(remoteOp).apply(entity);
+      OTOperationImpl.createOperation(remoteOp).apply(entity);
       transformedOps.add(remoteOp);
     }
     else {
@@ -108,7 +108,7 @@ public class Transformer {
       }
 
       if (!appliedRemoteOp) {
-        applyOver = OTOperationImpl.createLocalOnlyOperation(applyOver);
+        applyOver = OTOperationImpl.createOperation(applyOver);
         applyOver.apply(entity);
       }
 
@@ -163,8 +163,8 @@ public class Transformer {
         }
       }
       else if (diff == 0) {
-        if (localOp.getRevision() != remoteOp.getRevision()) {
-          transformedMutations.add(rm);
+        if (localOp.getRevision() != remoteOp.getRevision() && !remoteOp.isResolvedConflict()) {
+            transformedMutations.add(rm);
         }
         else {
           boolean doTransform = true;
@@ -185,7 +185,12 @@ public class Transformer {
           }
           if (doTransform) {
             if (offset == 0) {
-              transformedMutations.add(rm);
+              if (!localOp.isResolvedConflict()) {
+                transformedMutations.add(rm);
+              }
+              else {
+                transformedMutations.add(lm);
+              }
             }
             else {
               transformedMutations.add(rm.newBasedOn(rmIdx + offset));
@@ -196,7 +201,7 @@ public class Transformer {
         }
       }
       else if (diff > 0) {
-        if (lm.getType() != MutationType.Noop) {
+        if (lm.getType() != MutationType.Noop && !localOp.isResolvedConflict()) {
           switch (rm.getType()) {
             case Insert:
               if (lm.getType() == MutationType.Insert) {
@@ -231,7 +236,7 @@ public class Transformer {
             entity.getState().getHash(),
             OpPair.of(remoteOp, localOp));
 
-    if (!remoteWins && didResolveConflict) {
+    if (didResolveConflict || remoteOp.isResolvedConflict()) {
       transformedOp.markAsResolvedConflict();
     }
 
