@@ -25,8 +25,9 @@ import java.util.List;
  * @author Mike Brock
  */
 public interface TransactionLog {
+  public Object getLock();
+
   public List<OTOperation> getLog();
-  public List<OTOperation> getLogLatestEntries(int numberOfEntries);
 
   public List<OTOperation> getLogFromId(int revision);
 
@@ -37,4 +38,6 @@ public interface TransactionLog {
   State getEffectiveStateForRevision(int revision);
 
   void pruneFromOperation(OTOperation operation);
+
+  void cleanLog();
 }

@@ -47,7 +47,7 @@ public class SinglePeerState implements PeerState {
 
   @Override
   public Map<OTEntity, Set<OTPeer>> getEntityPeerRelationshipMap() {
-    final Map<OTEntity, Set<OTPeer>> entityPeerMap = new HashMap<OTEntity, Set<OTPeer>>();
+    final Map<OTEntity, Set<OTPeer>> entityPeerMap = new HashMap<OTEntity, Set<OTPeer>>(associatedEntities.size() * 2);
     for (final OTEntity associatedEntity : associatedEntities) {
       entityPeerMap.put(associatedEntity, Collections.singleton(remotePeer));
     }

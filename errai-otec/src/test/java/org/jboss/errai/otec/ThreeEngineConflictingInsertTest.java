@@ -28,7 +28,7 @@ import org.junit.Test;
  */
 public class ThreeEngineConflictingInsertTest extends AbstractThreeEngineOtecTest {
   @Override
-  protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
+  protected OTPeer createPeerFor(final OTEngine local, final OTEngine remote) {
     return new SynchronousMockPeerlImpl(local, remote);
   }
 

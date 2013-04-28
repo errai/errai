@@ -61,7 +61,7 @@ public final class Md5Digest extends MessageDigest {
    * @return A byte[].
    */
   public static byte[] toBytes(long n) {
-    byte[] b = new byte[8];
+    final byte[] b = new byte[8];
 
     b[0] = (byte) (n);
     n >>>= 8;
@@ -88,7 +88,7 @@ public final class Md5Digest extends MessageDigest {
    * @param in A byte[].
    * @param out An int[].
    */
-  private static void byte2int(byte[] in, int[] out) {
+  private static void byte2int(final byte[] in, final int[] out) {
     for (int inpos = 0, outpos = 0; outpos < 16; outpos++) {
       out[outpos] = ((in[inpos++] & 0xff) | ((in[inpos++] & 0xff) << 8)
           | ((in[inpos++] & 0xff) << 16) | ((in[inpos++] & 0xff) << 24));
@@ -103,7 +103,7 @@ public final class Md5Digest extends MessageDigest {
    * @param z An int.
    * @return An int.
    */
-  private static int f(int x, int y, int z) {
+  private static int f(final int x, final int y, final int z) {
     return (z ^ (x & (y ^ z)));
   }
 
@@ -119,7 +119,7 @@ public final class Md5Digest extends MessageDigest {
    * @param ac An int.
    * @return An int.
    */
-  private static int ff(int a, int b, int c, int d, int x, int s, int ac) {
+  private static int ff(int a, final int b, final int c, final int d, final int x, final int s, final int ac) {
     a += x + ac + f(b, c, d);
     a = (a << s | a >>> -s);
     return a + b;
@@ -133,7 +133,7 @@ public final class Md5Digest extends MessageDigest {
    * @param z An int.
    * @return An int.
    */
-  private static int g(int x, int y, int z) {
+  private static int g(final int x, final int y, final int z) {
     return (y ^ (z & (x ^ y)));
   }
 
@@ -149,7 +149,7 @@ public final class Md5Digest extends MessageDigest {
    * @param ac An int.
    * @return An int.
    */
-  private static int gg(int a, int b, int c, int d, int x, int s, int ac) {
+  private static int gg(int a, final int b, final int c, final int d, final int x, final int s, final int ac) {
     a += x + ac + g(b, c, d);
     a = (a << s | a >>> -s);
     return a + b;
@@ -163,7 +163,7 @@ public final class Md5Digest extends MessageDigest {
    * @param z An int.
    * @return An int.
    */
-  private static int h(int x, int y, int z) {
+  private static int h(final int x, final int y, final int z) {
     return (x ^ y ^ z);
   }
 
@@ -179,7 +179,7 @@ public final class Md5Digest extends MessageDigest {
    * @param ac An int.
    * @return An int.
    */
-  private static int hh(int a, int b, int c, int d, int x, int s, int ac) {
+  private static int hh(int a, final int b, final int c, final int d, final int x, final int s, final int ac) {
     a += x + ac + h(b, c, d);
     a = (a << s | a >>> -s);
     return a + b;
@@ -193,7 +193,7 @@ public final class Md5Digest extends MessageDigest {
    * @param z An int.
    * @return An int.
    */
-  private static int i(int x, int y, int z) {
+  private static int i(final int x, final int y, final int z) {
     return (y ^ (x | ~z));
   }
 
@@ -209,7 +209,7 @@ public final class Md5Digest extends MessageDigest {
    * @param ac An int.
    * @return An int.
    */
-  private static int ii(int a, int b, int c, int d, int x, int s, int ac) {
+  private static int ii(int a, final int b, final int c, final int d, final int x, final int s, final int ac) {
     a += x + ac + i(b, c, d);
     a = (a << s | a >>> -s);
     return a + b;
@@ -221,7 +221,7 @@ public final class Md5Digest extends MessageDigest {
    * @param in An int[].
    * @param out A byte[].
    */
-  private static void int2byte(int[] in, byte[] out) {
+  private static void int2byte(final int[] in, final byte[] out) {
     for (int inpos = 0, outpos = 0; inpos < 4; inpos++) {
       out[outpos++] = (byte) (in[inpos] & 0xff);
       out[outpos++] = (byte) ((in[inpos] >>> 8) & 0xff);
@@ -250,8 +250,8 @@ public final class Md5Digest extends MessageDigest {
 
   @Override
   protected byte[] engineDigest() {
-    byte[] bits = toBytes(counter << 3);
-    byte[] digest = new byte[16];
+    final byte[] bits = toBytes(counter << 3);
+    final byte[] digest = new byte[16];
 
     if (remainder > 8) {
       engineUpdate(padding, 0, remainder - 8);
@@ -288,14 +288,14 @@ public final class Md5Digest extends MessageDigest {
   }
 
   @Override
-  protected void engineUpdate(byte input) {
+  protected void engineUpdate(final byte input) {
     // TODO(jat): better implementation
     oneByte [0] = input;
     engineUpdate(oneByte, 0, 1);
   }
 
   @Override
-  protected void engineUpdate(byte[] input, int offset, int len) {
+  protected void engineUpdate(final byte[] input, int offset, int len) {
     while (true) {
       if (len >= remainder) {
         System.arraycopy(input, offset, buffer, (int) (counter & 63L),
@@ -319,7 +319,7 @@ public final class Md5Digest extends MessageDigest {
    * 
    * @param buffer A byte[].
    */
-  private void transform(byte[] buffer) {
+  private void transform(final byte[] buffer) {
     int a, b, c, d;
 
     byte2int(buffer, x);

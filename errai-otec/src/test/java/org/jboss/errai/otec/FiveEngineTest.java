@@ -35,7 +35,7 @@ public class FiveEngineTest extends AbstractOtecTest {
   OTEntity serverEntity;
 
   @Override
-  protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
+  protected OTPeer createPeerFor(final OTEngine local, final OTEngine remote) {
     return new SynchronousMockPeerlImpl(local, remote);
   }
 
@@ -50,16 +50,12 @@ public class FiveEngineTest extends AbstractOtecTest {
     clientEngineD = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientD");
     serverEngine = (OTClientEngine) OTClientEngine.createEngineWithMultiplePeers("Server");
 
-    clientEngineA.registerPeer(createPeerFor(clientEngineA, serverEngine));
-    clientEngineB.registerPeer(createPeerFor(clientEngineB, serverEngine));
-    clientEngineC.registerPeer(createPeerFor(clientEngineC, serverEngine));
-    clientEngineD.registerPeer(createPeerFor(clientEngineD, serverEngine));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineA));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineB));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineC));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineD));
+    peer(clientEngineA, serverEngine);
+    peer(clientEngineB, serverEngine);
+    peer(clientEngineC, serverEngine);
+    peer(clientEngineD, serverEngine);
 
-    final StringState state = new StringState(initialState);
+    final StringState state = StringState.of(initialState);
     serverEntity = serverEngine.getEntityStateSpace().addEntity(state);
 
     clientEngineA.syncRemoteEntity(serverEngine.getId(), serverEntity.getId(), new MockEntitySyncCompletionCallback());
@@ -73,11 +69,11 @@ public class FiveEngineTest extends AbstractOtecTest {
     System.out.println("===================================================");
     System.out.println("\nCLIENT LOG REPLAYS:\n");
 
-    final State clientAState = new StringState(initialState);
-    final State clientBState = new StringState(initialState);
-    final State clientCState = new StringState(initialState);
-    final State clientDState = new StringState(initialState);
-    final State serverState = new StringState(initialState);
+    final State clientAState = StringState.of(initialState);
+    final State clientBState = StringState.of(initialState);
+    final State clientCState = StringState.of(initialState);
+    final State clientDState = StringState.of(initialState);
+    final State serverState = StringState.of(initialState);
 
     final TransactionLog transactionLogA =
         clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId()).getTransactionLog();

@@ -16,10 +16,6 @@
 
 package org.jboss.errai.otec;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
@@ -27,6 +23,10 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OpPair;
 import org.jboss.errai.otec.util.OTLogFormat;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -71,7 +71,7 @@ public class Transformer {
         final State revState = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
         entity.getState().syncStateFrom(revState);
 
-        OTLogFormat.log("REWIND",
+        assert OTLogFormat.log("REWIND",
             "<<>>",
             "-",
             engine.getName(),
@@ -81,11 +81,12 @@ public class Transformer {
         transactionLog.pruneFromOperation(localOps.get(1));
       }
 
+      boolean first = true;
       boolean appliedRemoteOp = false;
       OTOperation applyOver = remoteOp;
-      int idx = 0;
       for (final OTOperation localOp : localOps) {
-        if (idx++ == 0) {
+        if (first) {
+          first = false;
           if (applyOver.getRevisionHash().equals(localOp.getRevisionHash())) {
             applyOver = transform(applyOver, localOp);
           }
@@ -164,7 +165,7 @@ public class Transformer {
       }
       else if (diff == 0) {
         if (localOp.getRevision() != remoteOp.getRevision() && !remoteOp.isResolvedConflict()) {
-            transformedMutations.add(rm);
+          transformedMutations.add(rm);
         }
         else {
           boolean doTransform = true;
@@ -240,7 +241,7 @@ public class Transformer {
       transformedOp.markAsResolvedConflict();
     }
 
-    OTLogFormat.log("TRANSFORM",
+    assert OTLogFormat.log("TRANSFORM",
         remoteOp + " , " + localOp + " -> " + transformedOp,
         "-",
         engine.getName(),
@@ -251,11 +252,10 @@ public class Transformer {
   }
 
   private static Iterator<Mutation> noopPaddedIterator(final List<Mutation> mutationList, final int largerSize) {
-    final int lastPosition = mutationList.get(mutationList.size() - 1).getPosition();
-    final CharacterMutation paddedMutation = CharacterMutation.noop(lastPosition);
-
     return new Iterator<Mutation>() {
       int pos = 0;
+      final int lastPosition = mutationList.get(mutationList.size() - 1).getPosition();
+      final CharacterMutation paddedMutation = CharacterMutation.noop(lastPosition);
       final Iterator<Mutation> iteratorDelegate = mutationList.iterator();
 
       @Override
@@ -280,7 +280,7 @@ public class Transformer {
 
       @Override
       public void remove() {
-        iteratorDelegate.remove();
+        throw new UnsupportedOperationException();
       }
     };
   }

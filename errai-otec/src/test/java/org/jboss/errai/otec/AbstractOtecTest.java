@@ -16,8 +16,10 @@
 
 package org.jboss.errai.otec;
 
+import junit.framework.Assert;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.operation.OTOperation;
+import org.junit.Before;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -26,6 +28,22 @@ public abstract class AbstractOtecTest {
   private static final String PLAYBACK_FORMAT = "%-30s %-40s\n";
   
   protected abstract OTPeer createPeerFor(OTEngine local, OTEngine remote);
+
+  protected void assertSystemAssertionsEnabled() {
+    // test that JVM assertions are enabled.
+    boolean assertionsEnabled = false;
+    assert assertionsEnabled = true;
+
+    /**
+     * The OT logging framework is now guarded behind JVM assertion calls to allow it to be efficiently disabled.
+     * This will allow us to bake in the logging system without worrying about impacting production performance
+     * of constructing complex logging calls.
+     *
+     * If JVM are not enabled (-ea) then logging calls will not be executed, and these tests may not succeed if
+     * they're testing logging behaviour.
+     */
+    Assert.assertTrue("System assertions MUST be enabled (-ea) to run these tests", assertionsEnabled);
+  }
   
   @SuppressWarnings("unchecked")
   protected String replayLogAndReturnResult(final String name,
@@ -64,5 +82,15 @@ public abstract class AbstractOtecTest {
 
   private static void renderMutationPlayback(final Mutation mutation, final State state) {
     System.out.printf(PLAYBACK_FORMAT, mutation, "\"" + String.valueOf(state.get()) + "\"");
+  }
+
+  public void peer(final OTEngine engine1, final OTEngine engine2) {
+    engine1.registerPeer(createPeerFor(engine1, engine2));
+    engine2.registerPeer(createPeerFor(engine2, engine1));
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    assertSystemAssertionsEnabled();
   }
 }

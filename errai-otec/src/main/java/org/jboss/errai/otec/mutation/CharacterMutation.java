@@ -75,7 +75,7 @@ public class CharacterMutation implements Mutation<StringState, Character> {
   }
 
   @Override
-  public Mutation<StringState, Character> newBasedOn(int index) {
+  public Mutation<StringState, Character> newBasedOn(final int index) {
     return of(type, index, data);
   }
 

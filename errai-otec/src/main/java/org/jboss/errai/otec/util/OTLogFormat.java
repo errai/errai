@@ -28,14 +28,15 @@ public class OTLogFormat {
     System.out.println(repeat('-', 140));
   }
 
-  public static void log(String type, String mutations, String from, String to, int rev, String state) {
+  public static boolean log(final String type, final String mutations, final String from, final String to, final int rev, final String state) {
     synchronized (OTLogFormat.class) {
       System.out.printf(LOG_FORMAT, type, from, to, mutations, rev, state);
       System.out.flush();
+      return true;
     }
   }
 
-  public static String repeat(char c, int amount) {
+  public static String repeat(final char c, final int amount) {
     final StringBuilder builder = new StringBuilder(amount);
     for (int i = 0; i < amount; i++) {
       builder.append(c);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.harness;
 
 import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
@@ -47,17 +47,7 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
   }
 
   private Description describeRepeatTest(final FrameworkMethod method) {
-    final Description description = Description.createSuiteDescription(
-        testName(method));
-
-    final Class<?> javaClass = getTestClass().getJavaClass();
-    final String testMethod = testName(method);
-
-//    final int runCount = 5000;
-//    for (int i = 1; i < runCount; i++) {
-//      description.addChild(Description.createTestDescription(javaClass, "[" + i + "] " + testMethod));
-//    }
-    return description;
+    return Description.createSuiteDescription(testName(method));
   }
 
   @Override
@@ -71,8 +61,7 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
 
     final PrintStream oldPrintOut = System.out;
     try {
-
-      Set<String> variationsTested = new HashSet<String>();
+      final Set<String> variationsTested = new HashSet<String>();
       final EachTestNotifier eachTestNotifier = new EachTestNotifier(notifier, description);
 
       notifier.fireTestStarted(description);
@@ -87,12 +76,11 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
 
       oldPrintOut.println("Tested " + variationsTested.size() + " unique variations of: " + describeChild(method));
 
-      for (String v : variationsTested) {
+      for (final String v : variationsTested) {
         oldPrintOut.println("*****");
         oldPrintOut.println(v);
       }
 
-   //   notifier.fireTestFinished(description);
       super.runChild(method, notifier);
     }
     finally {
@@ -101,16 +89,10 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
   }
 
   protected boolean runLeafNode(final FrameworkMethod method,
-                             final EachTestNotifier notifier,
-                             final ByteArrayOutputStream outputBucket,
-                             final PrintStream originalPrintOut,
-                             final Set<String> variations) {
-//    final EachTestNotifier eachNotifier = new EachTestNotifier(notifier, description);
-//    if (method.getAnnotation(Ignore.class) != null) {
-//      eachNotifier.fireTestIgnored();
-//      return;
-//    }
-//    eachNotifier.fireTestStarted();
+                                final EachTestNotifier notifier,
+                                final ByteArrayOutputStream outputBucket,
+                                final PrintStream originalPrintOut,
+                                final Set<String> variations) {
     try {
       methodBlock(method).evaluate();
       return true;
@@ -125,7 +107,6 @@ public class ManyTimesTestRunner extends BlockJUnit4ClassRunner {
     }
     finally {
       variations.add(new String(outputBucket.toByteArray()).trim());
-    //  notifier.fireTestFinished();
     }
     return false;
   }

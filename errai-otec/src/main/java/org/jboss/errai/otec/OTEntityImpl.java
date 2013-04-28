@@ -78,5 +78,4 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   public String toString() {
     return entity.getClass().getName() + "[revision=" + getRevision() + "; id=" + entityId + "]=\"" + getState().get() + "\"";
   }
-
 }

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.util.GUIDUtil;
 import org.junit.Ignore;
 import org.junit.Test;
 

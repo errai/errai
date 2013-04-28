@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.harness;
 
-import org.jboss.errai.otec.operation.OTOperation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface ReceiveHandler {
-  public void receive(OTOperation operations);
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NoFuzz {
 }

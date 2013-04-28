@@ -34,10 +34,6 @@ public class StringMutation implements Mutation<StringState, String> {
     this.data = data;
   }
 
-  public static StringMutation noop(int position) {
-    return of(MutationType.Noop, position, null);
-  }
-
   public static StringMutation of(final MutationType type, final int position, final String data) {
     return new StringMutation(type, position, data);
   }

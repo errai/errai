@@ -19,7 +19,6 @@ package org.jboss.errai.otec;
 import org.jboss.errai.otec.operation.OTOperation;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Mike Brock
  */
 public class MultiplePeerState implements PeerState {
-
   private final Map<String, OTPeer> peers = new ConcurrentHashMap<String, OTPeer>();
   private final Map<OTEntity, Set<OTPeer>> associatedEntities = new ConcurrentHashMap<OTEntity, Set<OTPeer>>();
 
@@ -46,7 +44,7 @@ public class MultiplePeerState implements PeerState {
   @Override
   public Set<OTPeer> getPeersFor(final OTEntity entity) {
     final Set<OTPeer> otPeers = associatedEntities.get(entity);
-    return otPeers == null ? Collections.<OTPeer>emptySet() : otPeers;
+    return otPeers == null ? Collections.<OTPeer>emptySet() : Collections.unmodifiableSet(otPeers);
   }
 
   @Override
@@ -56,10 +54,9 @@ public class MultiplePeerState implements PeerState {
 
   @Override
   public void associateEntity(final OTPeer peer, final OTEntity entity) {
-     Set<OTPeer> peers = associatedEntities.get(entity);
-
+    Set<OTPeer> peers = associatedEntities.get(entity);
     if (peers == null) {
-      peers = new HashSet<OTPeer>();
+      peers = Collections.newSetFromMap(new ConcurrentHashMap<OTPeer, Boolean>());
       associatedEntities.put(entity, peers);
     }
     peers.add(peer);

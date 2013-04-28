@@ -19,6 +19,7 @@ package org.jboss.errai.otec;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
+import org.jboss.errai.otec.harness.NoFuzz;
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationsFactory;

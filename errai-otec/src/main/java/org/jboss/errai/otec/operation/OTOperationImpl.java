@@ -16,13 +16,13 @@
 
 package org.jboss.errai.otec.operation;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.util.OTLogFormat;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Christian Sadilek
@@ -123,7 +123,7 @@ public class OTOperationImpl implements OTOperation {
       mutation.apply(entity.getState());
     }
 
-    OTLogFormat.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
+    assert OTLogFormat.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
     entity.getTransactionLog().appendLog(this);
     entity.incrementRevision();
     return shouldPropagate();

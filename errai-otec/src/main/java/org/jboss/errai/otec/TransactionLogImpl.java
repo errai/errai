@@ -16,22 +16,26 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.mutation.Mutation;
+import org.jboss.errai.otec.operation.OTOperation;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-
-import org.jboss.errai.otec.mutation.Mutation;
-import org.jboss.errai.otec.operation.OTOperation;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class TransactionLogImpl implements TransactionLog {
-  private final List<StateSnapshot> stateSnapshots = new ArrayList<StateSnapshot>();
+  private final Object lock = new Object();
+
+  private volatile boolean logDirty = false;
+  private final List<StateSnapshot> stateSnapshots = new LinkedList<StateSnapshot>();
   private final List<OTOperation> transactionLog = new LinkedList<OTOperation>();
   private final OTEntity entity;
 
@@ -45,33 +49,32 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
+  public Object getLock() {
+    return lock;
+  }
+
+  @Override
   public List<OTOperation> getLog() {
-    synchronized (transactionLog) {
+    synchronized (lock) {
       return transactionLog;
     }
   }
 
   @Override
   public void pruneFromOperation(final OTOperation operation) {
-    synchronized (transactionLog) {
+    synchronized (lock) {
       final ListIterator<OTOperation> delIter = transactionLog.listIterator(transactionLog.indexOf(operation));
       while (delIter.hasNext()) {
         entity.decrementRevisionCounter();
         delIter.next().removeFromCanonHistory();
       }
-    }
-  }
-
-  @Override
-  public List<OTOperation> getLogLatestEntries(final int numberOfEntries) {
-    synchronized (transactionLog) {
-      return transactionLog.subList(transactionLog.size() - numberOfEntries - 1, transactionLog.size() - 1);
+      logDirty = true;
     }
   }
 
   @Override
   public List<OTOperation> getLogFromId(final int revision) {
-    synchronized (transactionLog) {
+    synchronized (lock) {
       if (transactionLog.isEmpty()) {
         return Collections.emptyList();
       }
@@ -99,21 +102,26 @@ public class TransactionLogImpl implements TransactionLog {
 
   @Override
   public List<OTOperation> getCanonLog() {
-    synchronized (transactionLog) {
-      final List<OTOperation> canonLog = new ArrayList<OTOperation>();
-      for (final OTOperation operation : transactionLog) {
-        if (operation.isCanon()) {
-          canonLog.add(operation);
+    synchronized (lock) {
+      if (logDirty) {
+        final List<OTOperation> canonLog = new ArrayList<OTOperation>(transactionLog.size());
+        for (final OTOperation operation : transactionLog) {
+          if (operation.isCanon()) {
+            canonLog.add(operation);
+          }
         }
+        return canonLog;
       }
-      return canonLog;
+      else {
+        return transactionLog;
+      }
     }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public State getEffectiveStateForRevision(final int revision) {
-    synchronized (transactionLog) {
+    synchronized (lock) {
       final StateSnapshot latestSnapshotState = getLatestParentSnapshot(revision);
       final State stateToTranslate = latestSnapshotState.getState().snapshot();
       final ListIterator<OTOperation> operationListIterator
@@ -136,12 +144,13 @@ public class TransactionLogImpl implements TransactionLog {
         }
       }
 
+      makeSnapshot(revision, stateToTranslate);
       return stateToTranslate;
     }
   }
 
   private StateSnapshot getLatestParentSnapshot(final int revision) {
-    synchronized (transactionLog) {
+    synchronized (lock) {
       final ListIterator<StateSnapshot> snapshotListIterator = stateSnapshots.listIterator(stateSnapshots.size());
 
       while (snapshotListIterator.hasPrevious()) {
@@ -155,14 +164,31 @@ public class TransactionLogImpl implements TransactionLog {
     }
   }
 
+  private void makeSnapshot(final int revision, final State state) {
+    stateSnapshots.add(new StateSnapshot(revision, state));
+  }
+
   @Override
   public void appendLog(final OTOperation operation) {
-    synchronized (transactionLog) {
+    synchronized (lock) {
       if (operation.isNoop()) {
         return;
       }
 
       transactionLog.add(operation);
+    }
+  }
+
+  @Override
+  public void cleanLog() {
+    synchronized (lock) {
+      final Iterator<OTOperation> iterator = transactionLog.iterator();
+      while (iterator.hasNext()) {
+        if (!iterator.next().isCanon()) {
+          iterator.remove();
+        }
+      }
+      logDirty = false;
     }
   }
 

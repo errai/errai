@@ -22,6 +22,5 @@ package org.jboss.errai.otec;
 class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
   @Override
   public void syncComplete(final OTEntity<StringState> entity) {
-    //System.out.println("InitialState: [\"" + entity.getState().get() + "\"]");
   }
 }

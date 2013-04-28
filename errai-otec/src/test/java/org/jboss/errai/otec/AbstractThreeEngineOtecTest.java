@@ -59,12 +59,10 @@ public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
     clientEngineB = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientB");
     serverEngine = (OTServerEngine) OTServerEngine.createEngineWithMultiplePeers("Server");
 
-    clientEngineA.registerPeer(createPeerFor(clientEngineA, serverEngine));
-    clientEngineB.registerPeer(createPeerFor(clientEngineB, serverEngine));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineA));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineB));
+    peer(clientEngineA, serverEngine);
+    peer(clientEngineB, serverEngine);
 
-    final StringState state = new StringState(initialState);
+    final StringState state = StringState.of(initialState);
     serverEntity = serverEngine.getEntityStateSpace().addEntity(state);
 
     clientEngineA.syncRemoteEntity(serverEngine.getId(), serverEntity.getId(), new MockEntitySyncCompletionCallback());
@@ -76,9 +74,9 @@ public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
     System.out.println("===================================================");
     System.out.println("\nCLIENT LOG REPLAYS:\n");
 
-    final State clientAState = new StringState(initialState);
-    final State clientBState = new StringState(initialState);
-    final State serverState = new StringState(initialState);
+    final State clientAState = StringState.of(initialState);
+    final State clientBState = StringState.of(initialState);
+    final State serverState = StringState.of(initialState);
 
     final TransactionLog transactionLogA =
         clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId()).getTransactionLog();
@@ -110,6 +108,8 @@ public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
 
   @Before
   public void setUp() throws Exception {
+    assertSystemAssertionsEnabled();
+
     System.out.println("\n" + OTLogFormat.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
         + OTLogFormat.repeat('*', 30));
     OTLogFormat.printLogTitle();

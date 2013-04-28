@@ -26,8 +26,12 @@ public class StringState implements State<String> {
   public StringBuilder buffer = new StringBuilder();
   public String stateId = "<initial>";
 
-  public StringState(final String buffer) {
+  private StringState(final String buffer) {
     this.buffer = new StringBuilder(buffer);
+  }
+
+  public static StringState of(final String buffer) {
+    return new StringState(buffer);
   }
 
   public void insert(final int pos, final char data) {
@@ -71,7 +75,7 @@ public class StringState implements State<String> {
 
   @Override
   public State<String> snapshot() {
-    return new StringState(buffer.toString());
+    return of(buffer.toString());
   }
 
   @SuppressWarnings("RedundantStringToString")

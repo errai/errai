@@ -16,12 +16,6 @@
 
 package org.jboss.errai.otec;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
@@ -30,6 +24,13 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OTOperationsFactory;
 import org.jboss.errai.otec.operation.OTOperationsListBuilder;
+import org.jboss.errai.otec.util.GUIDUtil;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -65,7 +66,7 @@ public class OTClientEngine implements OTEngine {
     otClientEngine.start();
     return otClientEngine;
   }
-  
+
   public static OTEngine createEngineWithMultiplePeers(final String name) {
     final OTClientEngine otClientEngine = new OTClientEngine(new MultiplePeerState(), name);
     otClientEngine.start();
@@ -146,8 +147,7 @@ public class OTClientEngine implements OTEngine {
     final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
 
     if (mode == OTEngineMode.Online) {
-      final Collection<OTPeer> peersFor = getPeerState().getPeersFor(entity);
-      for (final OTPeer peer : peersFor) {
+      for (final OTPeer peer : getPeerState().getPeersFor(entity)) {
         peer.send(operation);
       }
     }
@@ -200,7 +200,6 @@ public class OTClientEngine implements OTEngine {
       throw new OTException("not entity for id: " + entityId);
     }
 
-
     getPeerState().disassociateEntity(peer, entity);
   }
 
@@ -231,13 +230,18 @@ public class OTClientEngine implements OTEngine {
     for (final Map.Entry<OTEntity, Set<OTPeer>> entry : entityPeerRelationshipMap.entrySet()) {
 
       for (final OTPeer peer : entry.getValue()) {
-        final Collection<OTOperation> log
-            = entry.getKey().getTransactionLog().getLogFromId(peer.getLastTransmittedSequence(entry.getKey()));
+        final TransactionLog transactionLog = entry.getKey().getTransactionLog();
+        synchronized (transactionLog.getLock()) {
+          final Collection<OTOperation> log
+              = transactionLog.getLogFromId(peer.getLastTransmittedSequence(entry.getKey()));
 
-        for (final OTOperation op : log) {
-          if (getPeerState().shouldForwardOperation(op)) {
-            peer.send(op);
+          for (final OTOperation op : log) {
+            if (getPeerState().shouldForwardOperation(op)) {
+              peer.send(op);
+            }
           }
+
+          transactionLog.cleanLog();
         }
       }
     }

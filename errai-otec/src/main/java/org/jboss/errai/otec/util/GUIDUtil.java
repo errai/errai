@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.util;
 
 /**
  * Simple GUID utility that implements a modified form of the Linear Congruent Generator (LCG) algorithm,

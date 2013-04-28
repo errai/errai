@@ -26,7 +26,7 @@ import org.jboss.errai.otec.operation.OTOperationImpl;
 @SuppressWarnings("unchecked")
 public class OTTestEntity extends OTEntityImpl {
   public OTTestEntity(final OTEntity entity) {
-    super(entity.getId(), new StringState(((String) entity.getState().get())));
+    super(entity.getId(), StringState.of(((String) entity.getState().get())));
 
     final TransactionLog transactionLog = entity.getTransactionLog();
     for (final OTOperation operation : transactionLog.getLog()) {

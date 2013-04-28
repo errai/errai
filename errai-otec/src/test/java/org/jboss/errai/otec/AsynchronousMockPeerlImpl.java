@@ -71,7 +71,6 @@ public class AsynchronousMockPeerlImpl implements OTPeer {
         operation.getRevision(),
         "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
 
-
     remoteEngine.receive(localEngine.getId(), operation.getEntityId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
 
     lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
@@ -106,7 +105,6 @@ public class AsynchronousMockPeerlImpl implements OTPeer {
 
     callback.syncComplete(entity);
   }
-
 
   @Override
   public int getLastKnownRemoteSequence(final OTEntity entity) {

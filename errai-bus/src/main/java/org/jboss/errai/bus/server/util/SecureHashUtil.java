@@ -19,7 +19,6 @@ package org.jboss.errai.bus.server.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Random;
 
 /**
  * A utility class for producing secure hashes throughout the Errai code where needed.
@@ -84,7 +83,7 @@ public class SecureHashUtil {
     try {
       final MessageDigest md = MessageDigest.getInstance(algorithm);
 
-      for (byte[] seed : seeds) {
+      for (final byte[] seed : seeds) {
         md.update(seed);
       }
 
@@ -99,16 +98,16 @@ public class SecureHashUtil {
     }
   }
 
-  public static String hashToHexString(byte[] hash) {
+  public static String hashToHexString(final byte[] hash) {
     final StringBuilder hexString = new StringBuilder(hash.length);
-    for (byte mdbyte : hash) {
+    for (final byte mdbyte : hash) {
       hexString.append(Integer.toHexString(0xFF & mdbyte));
     }
     return hexString.toString();
   }
 
   private static byte[] seed() {
-    byte[] seed = new byte[16];
+    final byte[] seed = new byte[16];
     random.nextBytes(seed);
     return seed;
   }

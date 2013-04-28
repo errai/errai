@@ -16,10 +16,10 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.operation.OTOperation;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-import org.jboss.errai.otec.operation.OTOperation;
 
 /**
  * @author Mike Brock
@@ -71,6 +71,7 @@ public class OTServerEngine extends OTClientEngine {
       }
     }
     catch (InterruptedException e) {
+      // ignore
     }
   }
 
