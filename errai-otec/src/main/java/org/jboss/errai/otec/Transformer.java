@@ -58,9 +58,9 @@ public class Transformer {
 
   @SuppressWarnings("unchecked")
   public List<OTOperation> transform() {
-    final List<OTOperation> transformedOps = new ArrayList<OTOperation>();
     final TransactionLog transactionLog = entity.getTransactionLog();
     final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision());
+    final List<OTOperation> transformedOps = new ArrayList<OTOperation>(localOps.size());
 
     if (localOps.isEmpty()) {
       OTOperationImpl.createOperation(remoteOp).apply(entity);
@@ -68,8 +68,7 @@ public class Transformer {
     }
     else {
       if (localOps.size() > 1) {
-        final State revState = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
-        entity.getState().syncStateFrom(revState);
+        entity.getState().syncStateFrom(transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1));
 
         assert OTLogFormat.log("REWIND",
             "<<>>",
@@ -154,9 +153,7 @@ public class Transformer {
       final Mutation lm = localOpMutations.next();
 
       final int rmIdx = rm.getPosition();
-      final int lmIdx = lm.getPosition();
-
-      final int diff = rmIdx - lmIdx;
+      final int diff = rmIdx - lm.getPosition();
 
       if (diff < 0) {
         if (rm.getType() != MutationType.Noop) {
