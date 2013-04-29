@@ -39,10 +39,7 @@ public class ReachabilityTest {
 
   private static String getSource(Class clazz) throws Exception {
     final String pathSeparator = File.separator;
-
-    final String name = clazz.getName()
-        .replaceAll("\\.", pathSeparator)
-        + ".java";
+    final String name = clazz.getName().replace('.', pathSeparator.charAt(0)) + ".java";
     final InputStream inputStream = clazz.getClassLoader().getResourceAsStream(name);
 
     if (inputStream == null) {
