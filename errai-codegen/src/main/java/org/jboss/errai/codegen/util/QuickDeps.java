@@ -203,7 +203,7 @@ public class QuickDeps {
     for (final String pkg : wildcardPackages) {
 
       final String fqcn = pkg.concat(".").concat(name);
-      final String slashified = fqcn.replaceAll("\\.", "/");
+      final String slashified = fqcn.replace('.', File.separator.charAt(0));
       final String source = slashified.concat(".java");
       final String clazz = slashified.concat(".class");
 
