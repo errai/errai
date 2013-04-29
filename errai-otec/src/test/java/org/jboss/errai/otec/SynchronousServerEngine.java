@@ -20,12 +20,27 @@ import org.jboss.errai.otec.operation.OTOperation;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTPeer {
-  public String getId();
-  public void send(OTOperation operation);
-  public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback);
-  public int getLastKnownRemoteSequence(Integer entity);
-  public int getLastTransmittedSequence(Integer entity);
+public class SynchronousServerEngine extends OTServerEngine {
+  protected SynchronousServerEngine(final PeerState peerState, final String name) {
+    super(name, peerState);
+  }
+
+  public static OTEngine createEngineWithMultiplePeers(final String name) {
+    final SynchronousServerEngine otServerEngine = new SynchronousServerEngine(new MultiplePeerState(), name);
+    return otServerEngine;
+  }
+
+  @Override
+  public void receive(String peerId, OTOperation remoteOp) {
+    handleOperation(new OTQueuedOperation(remoteOp, peerId, remoteOp.getEntityId()));
+  }
+
+  @Override
+  public void start() {
+  }
+
+  @Override
+  public void stop(boolean wait) {
+  }
 }

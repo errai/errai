@@ -16,7 +16,6 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.atomizer.EntityChangeStream;
 import org.jboss.errai.otec.util.OTLogFormat;
 
 import java.util.HashMap;
@@ -30,26 +29,23 @@ public abstract class AbstractMockPeer implements OTPeer {
   protected OTEngine remoteEngine;
   protected final Map<Integer, Integer> lastTransmittedSequencees = new HashMap<Integer, Integer>();
 
+
   @Override
   public String getId() {
     return remoteEngine.getId();
   }
 
   @Override
-  public int getLastKnownRemoteSequence(final OTEntity entity) {
+  public int getLastKnownRemoteSequence(final Integer entity) {
     return 0;
   }
 
   @Override
-  public int getLastTransmittedSequence(final OTEntity entity) {
-    final Integer integer = lastTransmittedSequencees.get(entity.getId());
+  public int getLastTransmittedSequence(final Integer entity) {
+    final Integer integer = lastTransmittedSequencees.get(entity);
     return integer == null ? 0 : integer;
   }
 
-  @Override
-  public void registerEntityStream(EntityChangeStream stream) {
-
-  }
 
   @Override @SuppressWarnings("unchecked")
   public void beginSyncRemoteEntity(final String peerId,
@@ -70,7 +66,6 @@ public abstract class AbstractMockPeer implements OTPeer {
 
     callback.syncComplete(entity);
   }
-
 
   @Override
   public String toString() {

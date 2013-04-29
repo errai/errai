@@ -46,7 +46,7 @@ public class SynchronousMockPeerlImpl extends AbstractMockPeer {
         "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
 
     //note: this is simulating sending these operations over the wire.
-    remoteEngine.receive(localEngine.getId(), operation.getEntityId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
+    remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
     lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
   }
 

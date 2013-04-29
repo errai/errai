@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.atomizer.EntityChangeStream;
 import org.jboss.errai.otec.operation.OTOperation;
 
 import java.util.Collections;
@@ -29,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MultiplePeerState implements PeerState {
   private final Map<String, OTPeer> peers = new ConcurrentHashMap<String, OTPeer>();
-  private final Map<OTEntity, Set<OTPeer>> associatedEntities = new ConcurrentHashMap<OTEntity, Set<OTPeer>>();
+  private final Map<Integer, Set<OTPeer>> associatedEntities = new ConcurrentHashMap<Integer, Set<OTPeer>>();
 
   @Override
   public void registerPeer(final OTPeer peer) {
@@ -42,18 +43,18 @@ public class MultiplePeerState implements PeerState {
   }
 
   @Override
-  public Set<OTPeer> getPeersFor(final OTEntity entity) {
+  public Set<OTPeer> getPeersFor(final Integer entity) {
     final Set<OTPeer> otPeers = associatedEntities.get(entity);
     return otPeers == null ? Collections.<OTPeer>emptySet() : Collections.unmodifiableSet(otPeers);
   }
 
   @Override
-  public Map<OTEntity, Set<OTPeer>> getEntityPeerRelationshipMap() {
+  public Map<Integer, Set<OTPeer>> getEntityPeerRelationshipMap() {
     return Collections.unmodifiableMap(associatedEntities);
   }
 
   @Override
-  public void associateEntity(final OTPeer peer, final OTEntity entity) {
+  public void associateEntity(final OTPeer peer, final Integer entity) {
     Set<OTPeer> peers = associatedEntities.get(entity);
     if (peers == null) {
       peers = Collections.newSetFromMap(new ConcurrentHashMap<OTPeer, Boolean>());
@@ -63,11 +64,21 @@ public class MultiplePeerState implements PeerState {
   }
 
   @Override
-  public void disassociateEntity(final OTPeer peer, final OTEntity entity) {
+  public void disassociateEntity(final OTPeer peer, final Integer entity) {
     final Set<OTPeer> peers = associatedEntities.get(entity);
     if (peer != null) {
       peers.remove(peer);
     }
+  }
+
+  @Override
+  public void addEntityStream(EntityChangeStream stream) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void flushEntityStreams(Integer entityId) {
+    throw new UnsupportedOperationException();
   }
 
   @Override

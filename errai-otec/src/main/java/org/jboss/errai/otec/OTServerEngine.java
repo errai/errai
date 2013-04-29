@@ -18,6 +18,7 @@ package org.jboss.errai.otec;
 
 import org.jboss.errai.otec.operation.OTOperation;
 
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -25,18 +26,18 @@ import java.util.concurrent.TimeUnit;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class OTServerEngine extends OTClientEngine {
+public class OTServerEngine extends AbstractOTEngine {
   private PollingThread pollingThread;
 
   private final ArrayBlockingQueue<OTQueuedOperation> incomingQueue
       = new ArrayBlockingQueue<OTQueuedOperation>(100, true);
 
-  private OTServerEngine(final PeerState peerState, final String name) {
-    super(peerState, name);
+  protected OTServerEngine(final String name, final PeerState peerState) {
+    super(name, peerState);
   }
 
   public static OTEngine createEngineWithMultiplePeers(final String name) {
-    final OTServerEngine otServerEngine = new OTServerEngine(new MultiplePeerState(), name);
+    final OTServerEngine otServerEngine = new OTServerEngine(name, new MultiplePeerState());
     otServerEngine.start();
     return otServerEngine;
   }
@@ -51,7 +52,7 @@ public class OTServerEngine extends OTClientEngine {
     if (mode == OTEngineMode.Online) {
       return;
     }
-    super.start();
+    setMode(OTEngineMode.Online);
     this.incomingQueue.clear();
     this.pollingThread = new PollingThread(this);
     this.pollingThread.start();
@@ -60,14 +61,14 @@ public class OTServerEngine extends OTClientEngine {
   @Override
   public void stop(final boolean wait) {
     if (!wait) {
-      super.stop(wait);
+      setMode(OTEngineMode.Offline);
     }
     incomingQueue.offer(new OTQueuedOperation(null, null, -1));
 
     try {
       pollingThread.join();
       if (wait) {
-        super.stop(false);
+        setMode(OTEngineMode.Offline);
       }
     }
     catch (InterruptedException e) {
@@ -110,7 +111,7 @@ public class OTServerEngine extends OTClientEngine {
         return false;
       }
 
-      super.receive(queuedOp.getPeerId(), queuedOp.getEntityId(), queuedOp.getOperation());
+      handleOperation(queuedOp);
     }
     catch (Throwable t) {
       t.printStackTrace();
@@ -118,12 +119,25 @@ public class OTServerEngine extends OTClientEngine {
     return true;
   }
 
+  protected void handleOperation(final OTQueuedOperation queuedOp) {
+    final OTOperation transformedOp = applyFromRemote(queuedOp.getOperation());
+    final OTPeer peer = getPeerState().getPeer(queuedOp.getPeerId());
+
+    // broadcast to all other peers subscribed to this entity
+    final Set<OTPeer> peers = getPeerState().getPeersFor(queuedOp.getEntityId());
+    for (final OTPeer otPeer : peers) {
+      if (otPeer != peer && !transformedOp.isNoop()) {
+        otPeer.send(transformedOp);
+      }
+    }
+  }
+
   @Override
-  public void receive(final String peerId, final int entityId, final OTOperation remoteOp) {
-    if (entityId == -1) {
+  public void receive(final String peerId, final OTOperation remoteOp) {
+    if (remoteOp.getEntityId() == -1) {
       return;
     }
 
-    incomingQueue.offer(new OTQueuedOperation(remoteOp, peerId, entityId));
+    incomingQueue.offer(new OTQueuedOperation(remoteOp, peerId, remoteOp.getEntityId()));
   }
 }

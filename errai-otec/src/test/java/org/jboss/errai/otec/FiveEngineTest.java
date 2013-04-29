@@ -31,7 +31,7 @@ public class FiveEngineTest extends AbstractOtecTest {
   OTClientEngine clientEngineB;
   OTClientEngine clientEngineC;
   OTClientEngine clientEngineD;
-  OTClientEngine serverEngine;
+  AbstractOTEngine serverEngine;
   OTEntity serverEntity;
 
   @Override
@@ -48,7 +48,7 @@ public class FiveEngineTest extends AbstractOtecTest {
     clientEngineB = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientB");
     clientEngineC = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientC");
     clientEngineD = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientD");
-    serverEngine = (OTClientEngine) OTClientEngine.createEngineWithMultiplePeers("Server");
+    serverEngine = (OTServerEngine) SynchronousServerEngine.createEngineWithMultiplePeers("Server");
 
     peer(clientEngineA, serverEngine);
     peer(clientEngineB, serverEngine);

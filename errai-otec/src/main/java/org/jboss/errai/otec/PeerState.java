@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.atomizer.EntityChangeStream;
 import org.jboss.errai.otec.operation.OTOperation;
 
 import java.util.Map;
@@ -29,13 +30,16 @@ public interface PeerState {
   public void registerPeer(OTPeer peer);
 
   public OTPeer getPeer(String peerId);
-  public Set<OTPeer> getPeersFor(OTEntity entity);
-  public Map<OTEntity, Set<OTPeer>> getEntityPeerRelationshipMap();
+  public Set<OTPeer> getPeersFor(Integer entity);
+  public Map<Integer, Set<OTPeer>> getEntityPeerRelationshipMap();
 
-  public void associateEntity(OTPeer peer, OTEntity entity);
-  public void disassociateEntity(OTPeer peer, OTEntity entity);
+  public void associateEntity(OTPeer peer, Integer entity);
+  public void disassociateEntity(OTPeer peer, Integer entity);
 
   public boolean shouldForwardOperation(OTOperation operation);
 
   public boolean hasConflictResolutionPrecedence();
+
+  public void addEntityStream(EntityChangeStream stream);
+  public void flushEntityStreams(Integer entityId);
 }

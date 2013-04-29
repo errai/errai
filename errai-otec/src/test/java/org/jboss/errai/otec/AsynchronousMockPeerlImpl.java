@@ -66,7 +66,7 @@ public class AsynchronousMockPeerlImpl extends AbstractMockPeer {
         operation.getRevision(),
         "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
 
-    remoteEngine.receive(localEngine.getId(), operation.getEntityId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
+    remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
 
     lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
   }

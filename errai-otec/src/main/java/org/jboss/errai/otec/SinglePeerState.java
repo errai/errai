@@ -16,6 +16,9 @@
 
 package org.jboss.errai.otec;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import org.jboss.errai.otec.atomizer.EntityChangeStream;
 import org.jboss.errai.otec.operation.OTOperation;
 
 import java.util.Collections;
@@ -29,7 +32,9 @@ import java.util.Set;
  */
 public class SinglePeerState implements PeerState {
   OTPeer remotePeer;
-  final Set<OTEntity> associatedEntities = Collections.newSetFromMap(new IdentityHashMap<OTEntity, Boolean>());
+  final Set<Integer> associatedEntities = Collections.newSetFromMap(new IdentityHashMap<Integer, Boolean>());
+  private final Multimap<Integer, EntityChangeStream> entityChangeStreamList
+      = HashMultimap.create();
 
   @Override
   public OTPeer getPeer(final String peerId) {
@@ -46,27 +51,39 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
-  public Map<OTEntity, Set<OTPeer>> getEntityPeerRelationshipMap() {
-    final Map<OTEntity, Set<OTPeer>> entityPeerMap = new HashMap<OTEntity, Set<OTPeer>>(associatedEntities.size() * 2);
-    for (final OTEntity associatedEntity : associatedEntities) {
+  public Map<Integer, Set<OTPeer>> getEntityPeerRelationshipMap() {
+    final Map<Integer, Set<OTPeer>> entityPeerMap = new HashMap<Integer, Set<OTPeer>>(associatedEntities.size() * 2);
+    for (final Integer associatedEntity : associatedEntities) {
       entityPeerMap.put(associatedEntity, Collections.singleton(remotePeer));
     }
     return Collections.unmodifiableMap(entityPeerMap);
   }
 
   @Override
-  public Set<OTPeer> getPeersFor(final OTEntity entity) {
+  public Set<OTPeer> getPeersFor(final Integer entity) {
     return Collections.singleton(remotePeer);
   }
 
   @Override
-  public void associateEntity(final OTPeer peer, final OTEntity entity) {
+  public void associateEntity(final OTPeer peer, final Integer entity) {
     associatedEntities.add(entity);
   }
 
   @Override
-  public void disassociateEntity(final OTPeer peer, final OTEntity entity) {
+  public void disassociateEntity(final OTPeer peer, final Integer entity) {
     associatedEntities.remove(entity);
+  }
+
+  @Override
+  public void addEntityStream(EntityChangeStream stream) {
+    entityChangeStreamList.put(stream.getEntityId(), stream);
+  }
+
+  @Override
+  public void flushEntityStreams(Integer entityId) {
+    for (EntityChangeStream entityChangeStream : entityChangeStreamList.get(entityId)) {
+      entityChangeStream.flush();
+    }
   }
 
   @Override

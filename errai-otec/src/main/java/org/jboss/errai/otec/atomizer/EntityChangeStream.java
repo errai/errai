@@ -20,6 +20,7 @@ package org.jboss.errai.otec.atomizer;
  * @author Mike Brock
  */
 public interface EntityChangeStream {
+  public int getEntityId();
   public void notifyInsert(int index, String data);
   public void notifyDelete(int index, String data);
   public void flush();
