@@ -44,7 +44,7 @@ public class ReachabilityTest {
       throw new RuntimeException("not found!");
     }
 
-    return Files.toString(new File(url.getFile()), Charset.forName("UTF-8"));
+    return Files.toString(new File(url.toURI()), Charset.forName("UTF-8"));
   }
 
   @Test
@@ -91,5 +91,4 @@ public class ReachabilityTest {
 
     Assert.assertEquals(expected, quickTypeDependencyList);
   }
-
 }

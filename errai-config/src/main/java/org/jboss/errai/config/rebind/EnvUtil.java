@@ -588,6 +588,4 @@ public abstract class EnvUtil {
       results.addAll(QuickDeps.getQuickTypeDependencyList(new String(sourceBuffer), null));
     }
   }
-
-
 }
