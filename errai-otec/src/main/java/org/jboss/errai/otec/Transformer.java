@@ -251,8 +251,7 @@ public class Transformer {
   private static Iterator<Mutation> noopPaddedIterator(final List<Mutation> mutationList, final int largerSize) {
     return new Iterator<Mutation>() {
       int pos = 0;
-      final int lastPosition = mutationList.get(mutationList.size() - 1).getPosition();
-      final CharacterMutation paddedMutation = CharacterMutation.noop(lastPosition);
+      final CharacterMutation paddedMutation = CharacterMutation.noop(mutationList.get(mutationList.size() - 1).getPosition());
       final Iterator<Mutation> iteratorDelegate = mutationList.iterator();
 
       @Override
@@ -262,16 +261,11 @@ public class Transformer {
 
       @Override
       public Mutation next() {
-        try {
-          if (pos < mutationList.size()) {
-            return iteratorDelegate.next();
-          }
-          else {
-            return paddedMutation;
-          }
+        if (pos++ < mutationList.size()) {
+          return iteratorDelegate.next();
         }
-        finally {
-          pos++;
+        else {
+          return paddedMutation;
         }
       }
 
