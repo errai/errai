@@ -20,18 +20,13 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.util.OTLogFormat;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * @author Mike Brock
  */
-public class AsynchronousMockPeerlImpl implements OTPeer {
-  private OTEngine localEngine;
-  private OTEngine remoteEngine;
+public class AsynchronousMockPeerlImpl extends AbstractMockPeer {
 
-  private final Map<Integer, Integer> lastTransmittedSequencees = new HashMap<Integer, Integer>();
   final Thread thread;
 
   private final ArrayBlockingQueue<OTOperation> outboundQueue = new ArrayBlockingQueue<OTOperation>(100);
@@ -77,44 +72,8 @@ public class AsynchronousMockPeerlImpl implements OTPeer {
   }
 
   @Override
-  public String getId() {
-    return remoteEngine.getId();
-  }
-
-  @Override
   public void send(final OTOperation operation) {
     outboundQueue.offer(operation);
-  }
-
-  @SuppressWarnings("unchecked")
-  public void beginSyncRemoteEntity(final String peerId,
-                                    final int entityId,
-                                    final EntitySyncCompletionCallback<State> callback) {
-
-    final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
-    localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
-
-    OTLogFormat.log("SYNC", "",
-        remoteEngine.getName(),
-        localEngine.getName(),
-        entity.getRevision(),
-        "\"" + entity.getState().get() + "\"");
-
-    localEngine.associateEntity(remoteEngine.getId(), entityId);
-    remoteEngine.associateEntity(localEngine.getId(), entityId);
-
-    callback.syncComplete(entity);
-  }
-
-  @Override
-  public int getLastKnownRemoteSequence(final OTEntity entity) {
-    return 0;
-  }
-
-  @Override
-  public int getLastTransmittedSequence(final OTEntity entity) {
-    final Integer integer = lastTransmittedSequencees.get(entity.getId());
-    return integer == null ? 0 : integer;
   }
 
   public void start() {
@@ -123,10 +82,6 @@ public class AsynchronousMockPeerlImpl implements OTPeer {
 
   public Thread getThread() {
     return thread;
-  }
-
-  public String toString() {
-    return remoteEngine.getName();
   }
 
 }

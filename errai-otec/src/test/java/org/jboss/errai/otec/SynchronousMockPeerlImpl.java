@@ -20,18 +20,11 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.util.OTLogFormat;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class SynchronousMockPeerlImpl implements OTPeer {
-  private final OTEngine localEngine;
-  private final OTEngine remoteEngine;
-
-  private final Map<Integer, Integer> lastTransmittedSequencees = new ConcurrentHashMap<Integer, Integer>();
+public class SynchronousMockPeerlImpl extends AbstractMockPeer {
 
   public SynchronousMockPeerlImpl(final OTEngine localEngine, final OTEngine engine) {
     this.localEngine = localEngine;
@@ -57,40 +50,4 @@ public class SynchronousMockPeerlImpl implements OTPeer {
     lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
   }
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public void beginSyncRemoteEntity(final String peerId,
-                                    final int entityId,
-                                    final EntitySyncCompletionCallback<State> callback) {
-
-    final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
-    localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
-
-    OTLogFormat.log("SYNC",  "",
-            remoteEngine.getName(),
-            localEngine.getName(),
-            entity.getRevision(),
-            "\"" + entity.getState().get() + "\"");
-
-    localEngine.associateEntity(remoteEngine.getId(), entityId);
-    remoteEngine.associateEntity(localEngine.getId(), entityId);
-
-    callback.syncComplete(entity);
-  }
-
-  @Override
-  public int getLastKnownRemoteSequence(final OTEntity entity) {
-    return 0;
-  }
-
-  @Override
-  public int getLastTransmittedSequence(final OTEntity entity) {
-    final Integer integer = lastTransmittedSequencees.get(entity.getId());
-    return integer == null ? 0 : integer;
-  }
-
-  @Override
-  public String toString() {
-    return remoteEngine.getName();
-  }
 }

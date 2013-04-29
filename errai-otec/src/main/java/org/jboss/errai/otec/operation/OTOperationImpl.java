@@ -58,6 +58,24 @@ public class OTOperationImpl implements OTOperation {
     this.resolvedConflict = resolvedConflict;
   }
 
+  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
+                                                     final List<Mutation> mutationList,
+                                                     final OTEntity entity,
+                                                     final OpPair pair) {
+    return new OTOperationImpl(engine, mutationList, entity.getId(), entity.getRevision(), entity.getState().getHash(), pair, false, false);
+
+  }
+
+
+  public static OTOperation createOperation(final OTEngine engine,
+                                            final List<Mutation> mutationList,
+                                            final int entityId,
+                                            final int revision,
+                                            final String revisionHash) {
+    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, null, true, false);
+
+  }
+
   public static OTOperation createOperation(final OTEngine engine,
                                             final List<Mutation> mutationList,
                                             final int entityId,
@@ -68,26 +86,26 @@ public class OTOperationImpl implements OTOperation {
     return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, true, false);
   }
 
-  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
-                                                     final List<Mutation> mutationList,
-                                                     final int entityId,
-                                                     final int revision,
-                                                     final String revisionHash,
-                                                     final OpPair transformedFrom) {
-
-    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, false, false);
-  }
+//  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
+//                                                     final List<Mutation> mutationList,
+//                                                     final int entityId,
+//                                                     final int revision,
+//                                                     final String revisionHash,
+//                                                     final OpPair transformedFrom) {
+//
+//    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, false, false);
+//  }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine, final OTOperation operation) {
     return new OTOperationImpl(engine, operation.getMutations(), operation.getEntityId(), operation.getRevision(),
         operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict());
   }
-  
+
   public static OTOperation createOperation(final OTOperation op) {
     return new OTOperationImpl(op.getEngine(), op.getMutations(), op.getEntityId(), -1,
         op.getRevisionHash(), op.getTransformedFrom(), op.shouldPropagate(), op.isResolvedConflict());
   }
-  
+
   public static OTOperation createOperation(final OTOperation op, final OpPair transformedFrom) {
     return new OTOperationImpl(op.getEngine(), op.getMutations(), op.getEntityId(), -1,
         op.getRevisionHash(), transformedFrom, op.shouldPropagate(), op.isResolvedConflict());

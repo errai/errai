@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
-
-import org.jboss.errai.otec.atomizer.EntityChangeStream;
-import org.jboss.errai.otec.operation.OTOperation;
+package org.jboss.errai.otec.atomizer;
 
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTPeer {
-  public String getId();
-  public void send(OTOperation operation);
-  public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback);
-  public int getLastKnownRemoteSequence(OTEntity entity);
-  public int getLastTransmittedSequence(OTEntity entity);
-  public void registerEntityStream(EntityChangeStream stream);
+public interface EntityChangeStream {
+  public void notifyInsert(int index, String data);
+  public void notifyDelete(int index, String data);
+  public void flush();
 }
