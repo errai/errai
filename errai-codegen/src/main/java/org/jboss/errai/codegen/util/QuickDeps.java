@@ -220,6 +220,10 @@ public class QuickDeps {
         }
 
         final String path = URLDecoder.decode(new File(urlFile).getCanonicalFile().toURI().getPath(), "UTF-8");
+        System.out.println("urlFile: " + urlFile);
+        System.out.println("     to: " + path);
+        System.out.println(" source: " + source);
+        System.out.println("  clazz: " + clazz);
 
         if (urlFile.endsWith(source) || urlFile.endsWith(clazz)) {
           if (split != -1 || path.equalsIgnoreCase(urlFile)) {
