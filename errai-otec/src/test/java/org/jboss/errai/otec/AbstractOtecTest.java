@@ -17,6 +17,7 @@
 package org.jboss.errai.otec;
 
 import junit.framework.Assert;
+
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.operation.OTOperation;
 import org.junit.Before;

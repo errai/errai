@@ -16,6 +16,10 @@
 
 package org.jboss.errai.otec;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jboss.errai.otec.mutation.CharacterMutation;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
@@ -23,10 +27,6 @@ import org.jboss.errai.otec.operation.OTOperation;
 import org.jboss.errai.otec.operation.OTOperationImpl;
 import org.jboss.errai.otec.operation.OpPair;
 import org.jboss.errai.otec.util.OTLogFormat;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -143,7 +143,7 @@ public class Transformer {
     }
 
     int offset = 0;
-    boolean didResolveConflict = false;
+    boolean resolvesConflict = false;
 
     while (remoteOpMutations.hasNext()) {
       final Mutation rm = remoteOpMutations.next();
@@ -158,71 +158,52 @@ public class Transformer {
         }
       }
       else if (diff == 0) {
-        if (localOp.getRevision() != remoteOp.getRevision() && !remoteOp.isResolvedConflict()) {
+        if (remoteOp.getRevision() != localOp.getRevision() && !remoteOp.isResolvedConflict()) {
           transformedMutations.add(rm);
         }
         else {
-          boolean doTransform = true;
           switch (rm.getType()) {
-            case Insert:
-              if (!remoteWins && lm.getType() == MutationType.Insert) {
-                offset += lm.length();
-              }
-              break;
-            case Delete:
-              if (lm.getType() == MutationType.Insert) {
-                offset += lm.length();
-              }
-              else if (lm.getType() == MutationType.Delete) {
-                doTransform = false;
-              }
-              break;
+          case Insert:
+            if (!remoteWins && lm.getType() == MutationType.Insert) {
+              offset += lm.length();
+            }
+            resolvesConflict = true;
+            break;
+          case Delete:
+            if (lm.getType() == MutationType.Insert) {
+              offset += lm.length();
+              resolvesConflict = true;
+            }
+            break;
           }
-          if (doTransform) {
-            if (offset == 0) {
-              if (!localOp.isResolvedConflict()) {
-                transformedMutations.add(rm);
-              }
-              else {
-                transformedMutations.add(lm);
-              }
-            }
-            else {
-              transformedMutations.add(rm.newBasedOn(rmIdx + offset));
-            }
-
-            didResolveConflict = true;
+          if (resolvesConflict) {
+            transformedMutations.add(adjustMutationToIndex(rmIdx + offset, rm));
           }
         }
       }
       else if (diff > 0) {
         if (lm.getType() != MutationType.Noop && !localOp.isResolvedConflict()) {
           switch (rm.getType()) {
-            case Insert:
-              if (lm.getType() == MutationType.Insert) {
-                offset += lm.length();
-              }
-              if (lm.getType() == MutationType.Delete) {
-                offset -= lm.length();
-              }
-              break;
-            case Delete:
-              if (lm.getType() == MutationType.Insert) {
-                offset += lm.length();
-              }
-              if (lm.getType() == MutationType.Delete) {
-                offset -= lm.length();
-              }
-              break;
+          case Insert:
+            if (lm.getType() == MutationType.Insert) {
+              offset += lm.length();
+            }
+            if (lm.getType() == MutationType.Delete) {
+              offset -= lm.length();
+            }
+            break;
+          case Delete:
+            if (lm.getType() == MutationType.Insert) {
+              offset += lm.length();
+            }
+            if (lm.getType() == MutationType.Delete) {
+              offset -= lm.length();
+            }
+            break;
           }
         }
 
-        if (offset == 0) {
-          transformedMutations.add(rm);
-        }
-        else {
-          transformedMutations.add(rm.newBasedOn(rmIdx + offset));
-        }
+        transformedMutations.add(adjustMutationToIndex(rmIdx + offset, rm));
       }
     }
 
@@ -231,7 +212,7 @@ public class Transformer {
             entity.getState().getHash(),
             OpPair.of(remoteOp, localOp));
 
-    if (didResolveConflict || remoteOp.isResolvedConflict()) {
+    if (resolvesConflict || remoteOp.isResolvedConflict()) {
       transformedOp.markAsResolvedConflict();
     }
 
@@ -248,7 +229,8 @@ public class Transformer {
   private static Iterator<Mutation> noopPaddedIterator(final List<Mutation> mutationList, final int largerSize) {
     return new Iterator<Mutation>() {
       int pos = 0;
-      final CharacterMutation paddedMutation = CharacterMutation.noop(mutationList.get(mutationList.size() - 1).getPosition());
+      final CharacterMutation paddedMutation = CharacterMutation.noop(mutationList.get(mutationList.size() - 1)
+          .getPosition());
       final Iterator<Mutation> iteratorDelegate = mutationList.iterator();
 
       @Override
@@ -271,5 +253,14 @@ public class Transformer {
         throw new UnsupportedOperationException();
       }
     };
+  }
+  
+  private Mutation adjustMutationToIndex(int idx, Mutation mutation) {
+    if (idx == mutation.getPosition()) {
+      return mutation;
+    }
+    else {
+      return mutation.newBasedOn(idx);
+    }
   }
 }

@@ -16,11 +16,11 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.harness.ManyTimesTestRunner;
-import org.junit.runner.RunWith;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.errai.otec.harness.ManyTimesTestRunner;
+import org.junit.runner.RunWith;
 
 /**
  * @author Mike Brock
