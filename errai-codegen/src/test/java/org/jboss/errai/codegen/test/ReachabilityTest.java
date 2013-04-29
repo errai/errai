@@ -16,7 +16,7 @@
 
 package org.jboss.errai.codegen.test;
 
-import com.google.gwt.thirdparty.guava.common.io.Files;
+import com.google.common.io.Files;
 import org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths;
 import org.jboss.errai.codegen.test.model.FakeBean;
 import org.jboss.errai.codegen.util.QuickDeps;
@@ -38,7 +38,7 @@ import java.util.Set;
 public class ReachabilityTest {
 
   private static String getSource(Class clazz) throws Exception {
-    final URL url = clazz.getClassLoader().getResource(clazz.getName().replaceAll("\\.", "/") + ".java");
+    final URL url = clazz.getClassLoader().getResource(clazz.getName().replaceAll("\\.", File.pathSeparator) + ".java");
 
     if (url == null) {
       throw new RuntimeException("not found!");
