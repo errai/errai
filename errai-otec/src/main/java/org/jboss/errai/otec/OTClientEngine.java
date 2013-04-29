@@ -75,25 +75,22 @@ public class OTClientEngine implements OTEngine {
 
   @Override
   public void receive(final String peerId, final int entityId, final OTOperation remoteOp) {
-
-    final List<OTOperation> transformedOps;
+    final OTOperation transformedOp;
     final OTPeer peer = getPeerState().getPeer(peerId);
     final OTEntity entity = getEntityStateSpace().getEntity(entityId);
 
     if (peerState.hasConflictResolutionPrecedence()) {
-      transformedOps = Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
+      transformedOp = Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
     }
     else {
-      transformedOps = Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
+      transformedOp = Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
     }
 
     // broadcast to all other peers subscribed to this entity
     final Set<OTPeer> peers = getPeerState().getPeersFor(entity);
     for (final OTPeer otPeer : peers) {
-      for (final OTOperation op : transformedOps) {
-        if (otPeer != peer && !op.isNoop()) {
-          otPeer.send(op);
-        }
+      if (otPeer != peer && !transformedOp.isNoop()) {
+        otPeer.send(transformedOp);
       }
     }
   }

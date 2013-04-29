@@ -57,14 +57,13 @@ public class Transformer {
   }
 
   @SuppressWarnings("unchecked")
-  public List<OTOperation> transform() {
+  public OTOperation transform() {
     final TransactionLog transactionLog = entity.getTransactionLog();
     final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision());
-    final List<OTOperation> transformedOps = new ArrayList<OTOperation>(localOps.size());
 
     if (localOps.isEmpty()) {
       OTOperationImpl.createOperation(remoteOp).apply(entity);
-      transformedOps.add(remoteOp);
+      return remoteOp;
     }
     else {
       if (localOps.size() > 1) {
@@ -113,14 +112,12 @@ public class Transformer {
       }
 
       if (applyOver.isResolvedConflict()) {
-        transformedOps.add(applyOver);
+        return applyOver;
       }
       else {
-        transformedOps.add(remoteOp);
+        return remoteOp;
       }
     }
-
-    return transformedOps;
   }
 
   private OTOperation transform(final OTOperation remoteOp, final OTOperation localOp) {
