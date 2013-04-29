@@ -254,13 +254,8 @@ public class Transformer {
       }
     };
   }
-  
+
   private Mutation adjustMutationToIndex(int idx, Mutation mutation) {
-    if (idx == mutation.getPosition()) {
-      return mutation;
-    }
-    else {
-      return mutation.newBasedOn(idx);
-    }
+    return (idx == mutation.getPosition()) ? mutation : mutation.newBasedOn(idx);
   }
 }
