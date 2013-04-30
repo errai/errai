@@ -82,7 +82,7 @@ public class StringState implements State<String> {
   @Override
   public void syncStateFrom(final State<String> fromState) {
     if (fromState instanceof StringState) {
-      buffer.delete(0, buffer.length());
+      clear();
       buffer.append(fromState.get().toString());
       updateStateId();
     }
@@ -94,6 +94,11 @@ public class StringState implements State<String> {
   @Override
   public String getHash() {
     return stateId;
+  }
+
+  @Override
+  public void clear() {
+    buffer.delete(0, buffer.length());
   }
 
   private static String createHashFor(final String string) {

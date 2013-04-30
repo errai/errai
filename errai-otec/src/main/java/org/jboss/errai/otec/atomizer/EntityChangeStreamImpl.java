@@ -18,14 +18,15 @@ package org.jboss.errai.otec.atomizer;
 
 import static org.jboss.errai.otec.operation.OTOperationImpl.createOperation;
 
-import java.util.Collections;
-
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
+import org.jboss.errai.otec.StringState;
 import org.jboss.errai.otec.mutation.Mutation;
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.mutation.StringMutation;
 import org.jboss.errai.otec.operation.OTOperation;
+
+import java.util.Collections;
 
 /**
  * @author Mike Brock
@@ -39,7 +40,8 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   private int start = 0;
   private int cursor = 0;
-  private final StringBuilder builder = new StringBuilder();
+  private final StringState insertState = StringState.of("");
+  private final StringState deleteState = StringState.of("");
 
   public EntityChangeStreamImpl(final OTEngine engine, final OTEntity entity) {
     this.engine = engine;
@@ -53,23 +55,31 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void notifyInsert(final int index, final String data) {
-    checkIfMustSend(index);
+    checkIfMustFlush(index);
     if (type == null) {
       start = index;
       type = MutationType.Insert;
     }
 
-    builder.append(data);
-
-    cursor = index + data.length();
+    cursor = (index - start);
+    insertState.insert(cursor, data);
   }
 
   @Override
   public void notifyDelete(final int index, final String data) {
-    flush();
-    type = MutationType.Delete;
-    builder.insert(0, data);
-    flush();
+    checkIfMustFlush(index);
+    if (type == null) {
+      start = index;
+      type = MutationType.Delete;
+    }
+
+    cursor = (index - start);
+    if (!insertState.get().isEmpty()) {
+      insertState.delete(cursor, data.length());
+    }
+    else {
+      deleteState.insert(deleteState.get().length(), data);
+    }
   }
 
   @Override
@@ -79,44 +89,38 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     }
 
     engine.notifyOperation(toOperation());
-    builder.delete(0, builder.length());
+    insertState.clear();
+    deleteState.clear();
   }
 
-  private void checkIfMustSend(final int index) {
+  private void checkIfMustFlush(final int index) {
     if (type == null) {
       return;
     }
 
-    if (type == MutationType.Insert) {
-      if (index < cursor || index > cursor + 1) {
-        flush();
-      }
-    }
-    else {
-      if (index > cursor || index < cursor - 1) {
-        flush();
-      }
+    if (index < start || index > start + insertState.get().length()) {
+      flush();
     }
   }
 
   private OTOperation toOperation() {
 
     final OTOperation operation;
-    if (type == MutationType.Insert) {
+    if (!insertState.get().isEmpty()) {
       operation = createOperation(engine,
-          Collections.<Mutation>singletonList(StringMutation.of(MutationType.Insert, start, builder.toString())),
+          Collections.<Mutation>singletonList(StringMutation.of(MutationType.Insert, start, insertState.get())),
           entity.getId(), entity.getRevision(), entity.getState().getHash()
       );
     }
     else {
       operation = createOperation(engine,
-          Collections.<Mutation>singletonList(StringMutation.of(MutationType.Delete, start, builder.toString())),
+          Collections.<Mutation>singletonList(StringMutation.of(MutationType.Delete, start, deleteState.get())),
           entity.getId(), entity.getRevision(), entity.getState().getHash()
       );
     }
 
     start = -1;
-    cursor = -1;
+    cursor = 0;
 
     type = null;
 

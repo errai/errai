@@ -25,4 +25,5 @@ public interface State<T> {
   public State<T> snapshot();
   public void syncStateFrom(State<T> fromState);
   public String getHash();
+  public void clear();
 }
