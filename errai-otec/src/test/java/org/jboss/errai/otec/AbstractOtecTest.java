@@ -18,8 +18,14 @@ package org.jboss.errai.otec;
 
 import junit.framework.Assert;
 
-import org.jboss.errai.otec.mutation.Mutation;
-import org.jboss.errai.otec.operation.OTOperation;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.client.State;
+import org.jboss.errai.otec.client.TransactionLog;
+import org.jboss.errai.otec.client.mutation.Mutation;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.util.OTLogUtil;
+import org.jboss.errai.otec.harness.OTTestingLogger;
 import org.junit.Before;
 
 /**
@@ -92,6 +98,7 @@ public abstract class AbstractOtecTest {
 
   @Before
   public void setUp() throws Exception {
+    OTLogUtil.setLogAdapter(new OTTestingLogger());
     assertSystemAssertionsEnabled();
   }
 }

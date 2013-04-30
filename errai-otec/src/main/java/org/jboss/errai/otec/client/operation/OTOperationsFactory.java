@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.client.operation;
 
-import org.jboss.errai.otec.client.EntitySyncCompletionCallback;
 import org.jboss.errai.otec.client.OTEntity;
-import org.jboss.errai.otec.client.StringState;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
-  @Override
-  public void syncComplete(final OTEntity<StringState> entity) {
-  }
+public interface OTOperationsFactory {
+  public OTOperationsListBuilder createOperation(OTEntity entity);
 }

@@ -18,10 +18,12 @@ package org.jboss.errai.otec;
 
 import static org.junit.Assert.assertEquals;
 
-import org.jboss.errai.otec.atomizer.EntityChangeStream;
-import org.jboss.errai.otec.atomizer.EntityChangeStreamImpl;
-import org.jboss.errai.otec.mutation.MutationType;
-import org.jboss.errai.otec.operation.OTOperation;
+import org.jboss.errai.otec.client.atomizer.EntityChangeStream;
+import org.jboss.errai.otec.client.atomizer.EntityChangeStreamImpl;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.StringState;
+import org.jboss.errai.otec.client.mutation.MutationType;
+import org.jboss.errai.otec.client.operation.OTOperation;
 import org.junit.Test;
 
 /**
@@ -220,4 +222,29 @@ public class EntityChangeStreamTest {
     assertEquals("Wrong mutation data", "C", opInsert.getMutations().get(0).getData());
     assertEquals("Wrong mutation position", 2, opInsert.getMutations().get(0).getPosition());
   }
+
+
+  @Test
+  public void testAutomaticFlushByDeleteOverflowLeftXXX() {
+    MockOTEngine engine = new MockOTEngine();
+    OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of(""));
+
+    EntityChangeStream ecs = new EntityChangeStreamImpl(engine, entity);
+    ecs.notifyInsert(0, "A");
+    ecs.notifyInsert(1, "B");
+    ecs.notifyInsert(2, "C");
+    ecs.notifyDelete(2, "C");
+    ecs.notifyDelete(1, "B");
+    ecs.notifyDelete(0, "A");
+    ecs.notifyInsert(0, "I");
+    ecs.flush();
+
+    assertEquals("Expected exactly one operations", 1, engine.getNotifiedOperations().size());
+    OTOperation opInsert = engine.getNotifiedOperations().get(0);
+    assertEquals("Expected exactly one mutation", 1, opInsert.getMutations().size());
+    assertEquals("Expected delete mutation", MutationType.Insert, opInsert.getMutations().get(0).getType());
+    assertEquals("Wrong mutation data", "I", opInsert.getMutations().get(0).getData());
+    assertEquals("Wrong mutation position", 0, opInsert.getMutations().get(0).getPosition());
+  }
 }
+

@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
-
-import org.jboss.errai.otec.client.EntitySyncCompletionCallback;
-import org.jboss.errai.otec.client.OTEntity;
-import org.jboss.errai.otec.client.StringState;
+package org.jboss.errai.otec.client.mutation;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
-  @Override
-  public void syncComplete(final OTEntity<StringState> entity) {
+public enum MutationType {
+  Insert("INS"), Delete("DEL"), Noop("NOOP");
+
+  private final String shortName;
+
+  private MutationType(String shortName) {
+    this.shortName = shortName;
+  }
+
+  public String getShortName() {
+    return shortName;
   }
 }

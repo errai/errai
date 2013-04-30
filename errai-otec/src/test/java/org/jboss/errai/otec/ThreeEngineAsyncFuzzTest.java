@@ -19,6 +19,8 @@ package org.jboss.errai.otec;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.harness.ManyTimesTestRunner;
 import org.junit.runner.RunWith;
 

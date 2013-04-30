@@ -119,7 +119,6 @@
     <module>errai-bus-jboss7-websocket</module>
     <module>errai-jboss-as-support</module>
     <module>errai-otec</module>
-    <module>errai-otec-gwt</module>
   </modules>
 
   <dependencies>

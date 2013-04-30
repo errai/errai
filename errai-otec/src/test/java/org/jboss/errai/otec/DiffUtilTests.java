@@ -19,9 +19,9 @@ package org.jboss.errai.otec;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jboss.errai.otec.mutation.MutationType;
-import org.jboss.errai.otec.util.DiffUtil;
-import org.jboss.errai.otec.util.MeyersDiff;
+import org.jboss.errai.otec.client.mutation.MutationType;
+import org.jboss.errai.otec.client.util.DiffUtil;
+import org.jboss.errai.otec.client.util.MeyersDiff;
 import org.junit.Test;
 
 import java.util.LinkedList;

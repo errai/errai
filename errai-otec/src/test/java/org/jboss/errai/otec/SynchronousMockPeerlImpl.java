@@ -16,9 +16,10 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.operation.OTOperation;
-import org.jboss.errai.otec.operation.OTOperationImpl;
-import org.jboss.errai.otec.util.OTLogFormat;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.operation.OTOperationImpl;
+import org.jboss.errai.otec.client.util.OTLogUtil;
 
 /**
  * @author Mike Brock
@@ -38,7 +39,7 @@ public class SynchronousMockPeerlImpl extends AbstractMockPeer {
 
   @Override
   public void send(final OTOperation operation) {
-    OTLogFormat.log("TRANSMIT",
+    OTLogUtil.log("TRANSMIT",
         operation.toString(),
         localEngine.toString(),
         remoteEngine.toString(),

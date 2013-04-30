@@ -16,7 +16,12 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.operation.OTOperation;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTQueuedOperation;
+import org.jboss.errai.otec.client.PeerState;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.server.MultiplePeerState;
+import org.jboss.errai.otec.server.OTServerEngine;
 
 /**
  * @author Mike Brock

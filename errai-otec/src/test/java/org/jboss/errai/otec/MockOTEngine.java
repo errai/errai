@@ -19,8 +19,14 @@ package org.jboss.errai.otec;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.otec.operation.OTOperation;
-import org.jboss.errai.otec.operation.OTOperationsFactory;
+import org.jboss.errai.otec.client.EntitySyncCompletionCallback;
+import org.jboss.errai.otec.client.InitialStateReceiveHandler;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTEntityState;
+import org.jboss.errai.otec.client.OTEntityStateImpl;
+import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.operation.OTOperationsFactory;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

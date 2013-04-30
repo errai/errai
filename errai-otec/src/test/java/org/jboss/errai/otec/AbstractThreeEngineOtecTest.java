@@ -18,7 +18,14 @@ package org.jboss.errai.otec;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jboss.errai.otec.util.OTLogFormat;
+import org.jboss.errai.otec.client.OTClientEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.State;
+import org.jboss.errai.otec.client.StringState;
+import org.jboss.errai.otec.client.TransactionLog;
+import org.jboss.errai.otec.client.util.OTLogUtil;
+import org.jboss.errai.otec.harness.OTTestingLogger;
+import org.jboss.errai.otec.server.OTServerEngine;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -110,9 +117,9 @@ public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
   public void setUp() throws Exception {
     assertSystemAssertionsEnabled();
 
-    System.out.println("\n" + OTLogFormat.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
-        + OTLogFormat.repeat('*', 30));
-    OTLogFormat.printLogTitle();
+    System.out.println("\n" + OTTestingLogger.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
+        + OTTestingLogger.repeat('*', 30));
+    OTLogUtil.printLogTitle();
   }
 
   @After

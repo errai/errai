@@ -14,17 +14,44 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec;
+package org.jboss.errai.otec.client.operation;
 
-import org.jboss.errai.otec.client.EntitySyncCompletionCallback;
+import java.util.List;
+
+import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
-import org.jboss.errai.otec.client.StringState;
+import org.jboss.errai.otec.client.mutation.Mutation;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
-  @Override
-  public void syncComplete(final OTEntity<StringState> entity) {
-  }
+public interface OTOperation {
+  List<Mutation> getMutations();
+
+  int getEntityId();
+
+  int getRevision();
+
+  String getRevisionHash();
+  
+  boolean shouldPropagate();
+
+  boolean apply(OTEntity entity);
+
+  OTEngine getEngine();
+
+  boolean isNoop();
+
+  OTOperation getBasedOn(int revision);
+
+  boolean isCanon();
+
+  boolean isResolvedConflict();
+
+  void removeFromCanonHistory();
+
+  void markAsResolvedConflict();
+  
+  OpPair getTransformedFrom();
 }

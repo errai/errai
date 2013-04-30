@@ -18,9 +18,12 @@ package org.jboss.errai.otec;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jboss.errai.otec.mutation.MutationType;
-import org.jboss.errai.otec.operation.OTOperation;
-import org.jboss.errai.otec.operation.OTOperationsFactory;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.client.mutation.MutationType;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.operation.OTOperationsFactory;
 import org.junit.Test;
 
 /**

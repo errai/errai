@@ -16,7 +16,12 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.util.OTLogFormat;
+import org.jboss.errai.otec.client.EntitySyncCompletionCallback;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.client.State;
+import org.jboss.errai.otec.client.util.OTLogUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +60,7 @@ public abstract class AbstractMockPeer implements OTPeer {
     final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
     localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
 
-    OTLogFormat.log("SYNC", "",
+    OTLogUtil.log("SYNC", "",
         remoteEngine.getName(),
         localEngine.getName(),
         entity.getRevision(),
