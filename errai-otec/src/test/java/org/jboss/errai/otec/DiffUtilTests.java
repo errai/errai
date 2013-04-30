@@ -21,7 +21,10 @@ import static junit.framework.Assert.assertEquals;
 
 import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.util.DiffUtil;
+import org.jboss.errai.otec.util.MeyersDiff;
 import org.junit.Test;
+
+import java.util.LinkedList;
 
 /**
  * @author Mike Brock
@@ -55,7 +58,6 @@ public class DiffUtilTests {
     assertEquals(0, diff.getCursor());
   }
 
-
   @Test
   public void testDeleteDiff() {
     final DiffUtil.Delta diff = DiffUtil.diff("bob the cat", "bobcat");
@@ -81,5 +83,13 @@ public class DiffUtilTests {
     assertEquals(MutationType.Delete, diff.getType());
     assertEquals("bob the cat", diff.getDeltaText());
     assertEquals(0, diff.getCursor());
+  }
+
+  @Test
+  public void testMeyerDiff() {
+    final LinkedList<MeyersDiff.Diff> diffs = new MeyersDiff().diff_main("bob the cat", "bob a the cat!!!");
+
+    System.out.println(diffs);
+
   }
 }
