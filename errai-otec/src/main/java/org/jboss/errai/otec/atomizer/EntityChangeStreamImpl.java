@@ -18,6 +18,8 @@ package org.jboss.errai.otec.atomizer;
 
 import static org.jboss.errai.otec.operation.OTOperationImpl.createOperation;
 
+import java.util.Collections;
+
 import org.jboss.errai.otec.OTEngine;
 import org.jboss.errai.otec.OTEntity;
 import org.jboss.errai.otec.mutation.Mutation;
@@ -25,10 +27,9 @@ import org.jboss.errai.otec.mutation.MutationType;
 import org.jboss.errai.otec.mutation.StringMutation;
 import org.jboss.errai.otec.operation.OTOperation;
 
-import java.util.Collections;
-
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EntityChangeStreamImpl implements EntityChangeStream {
   private final OTEngine engine;
@@ -66,11 +67,8 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
   @Override
   public void notifyDelete(final int index, final String data) {
     flush();
-
     type = MutationType.Delete;
-
     builder.insert(0, data);
-
     flush();
   }
 
@@ -81,6 +79,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     }
 
     engine.notifyOperation(toOperation());
+    builder.delete(0, builder.length());
   }
 
   private void checkIfMustSend(final int index) {
@@ -89,7 +88,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     }
 
     if (type == MutationType.Insert) {
-      if (index <= cursor || index > cursor + 1) {
+      if (index < cursor || index > cursor + 1) {
         flush();
       }
     }
@@ -108,8 +107,6 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
           Collections.<Mutation>singletonList(StringMutation.of(MutationType.Insert, start, builder.toString())),
           entity.getId(), entity.getRevision(), entity.getState().getHash()
       );
-      builder.delete(0, builder.length());
-
     }
     else {
       operation = createOperation(engine,

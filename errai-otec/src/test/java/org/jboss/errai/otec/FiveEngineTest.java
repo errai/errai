@@ -113,7 +113,7 @@ public class FiveEngineTest extends AbstractOtecTest {
   }
 
   @Test
-  public void testSingleClientEngineTransmissionDelayed() {
+  public void testTransmissionOfSingleClientDelayed() {
     final String initialState = "";
     setupEngines(initialState);
 
@@ -166,6 +166,72 @@ public class FiveEngineTest extends AbstractOtecTest {
     clientEngineD.notifyRemotes(insD1);
     
     insB3 = clientEngineB.applyLocally(insB3);
+    clientEngineB.notifyRemotes(insB3);
+
+    stopServerEngineAndWait();
+
+    final String expectedState = "The quick brown fox jumps over the lazy dog";
+    assertEquals(expectedState, serverEntity.getState().get());
+    assertEquals(expectedState, clientAEntity.getState().get());
+    assertEquals(expectedState, clientBEntity.getState().get());
+    assertEquals(expectedState, clientCEntity.getState().get());
+    assertEquals(expectedState, clientDEntity.getState().get());
+    assertAllLogsConsistent(expectedState, initialState);
+  }
+  
+  @Test
+  public void testTransmissionOfTwoClientsDelayed() {
+    final String initialState = "";
+    setupEngines(initialState);
+
+    final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    OTOperation insA1 = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 0, "The brown ")
+        .build();
+
+    final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+    OTOperation insB1 = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 4, "quick ")
+        .build();
+
+    OTOperation insB2 = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 26, "over the ")
+        .build();
+
+    OTOperation insB3 = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 35, "dog")
+        .build();
+
+    final OTOperationsFactory opFactoryClientC = clientEngineC.getOperationsFactory();
+    final OTEntity clientCEntity = clientEngineC.getEntityStateSpace().getEntity(serverEntity.getId());
+    OTOperation insC1 = opFactoryClientC.createOperation(clientCEntity)
+        .add(MutationType.Insert, 10, "fox jumps ")
+        .build();
+
+    final OTOperationsFactory opFactoryClientD = clientEngineD.getOperationsFactory();
+    final OTEntity clientDEntity = clientEngineD.getEntityStateSpace().getEntity(serverEntity.getId());
+    OTOperation insD1 = opFactoryClientD.createOperation(clientDEntity)
+        .add(MutationType.Insert, 0, "lazy ")
+        .build();
+
+    insD1 = clientEngineD.applyLocally(insD1);
+    
+    insA1 = clientEngineA.applyLocally(insA1);
+    clientEngineA.notifyRemotes(insA1);
+
+    insC1 = clientEngineC.applyLocally(insC1);
+    clientEngineC.notifyRemotes(insC1);
+
+    insB1 = clientEngineB.applyLocally(insB1);
+    clientEngineB.notifyRemotes(insB1);
+    
+    insB2 = clientEngineB.applyLocally(insB2);
+    insB3 = clientEngineB.applyLocally(insB3);
+
+    clientEngineB.notifyRemotes(insB2);
+    clientEngineD.notifyRemotes(insD1);
     clientEngineB.notifyRemotes(insB3);
 
     stopServerEngineAndWait();
