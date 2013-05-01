@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
+import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
@@ -79,7 +80,7 @@ public class BuildMetaField extends MetaField implements Builder {
 
   @Override
   public Annotation[] getAnnotations() {
-    return new Annotation[0];
+    return AnnotationParser.parseAnnotations(annotations.toArray(new Annotation[annotations.size()]));
   }
 
   @Override
@@ -144,7 +145,7 @@ public class BuildMetaField extends MetaField implements Builder {
 
   @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : annotations) {
+    for (Annotation a : getAnnotations()) {
       if (a.annotationType().equals(annotation)) {
         return (A) a;
       }
@@ -208,7 +209,7 @@ public class BuildMetaField extends MetaField implements Builder {
     }
 
     if (!annotations.isEmpty()) {
-      for (Annotation a : annotations) {
+      for (Annotation a : getAnnotations()) {
         builder.append(new AnnotationLiteral(a).getCanonicalString(Context.create())).append(" ");
       }
     }

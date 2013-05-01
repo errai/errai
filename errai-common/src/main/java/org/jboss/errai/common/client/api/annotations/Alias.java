@@ -1,4 +1,4 @@
-package org.jboss.errai.codegen.meta;
+package org.jboss.errai.common.client.api.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

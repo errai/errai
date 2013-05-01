@@ -33,13 +33,7 @@ import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.*;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrettyPrinter;
@@ -371,7 +365,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public Annotation[] getAnnotations() {
-    return annotations.toArray(new Annotation[annotations.size()]);
+    return AnnotationParser.parseAnnotations(annotations.toArray(new Annotation[annotations.size()]));
   }
 
   @Override
@@ -594,7 +588,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       context.addVariable(Variable.create(buildMetaField.getName(), buildMetaField.getType()));
     }
 
-    for (final Annotation a : annotations) {
+    for (final Annotation a : getAnnotations()) {
       buf.append(new AnnotationLiteral(a).getCanonicalString(context));
       buf.append(" ");
     }

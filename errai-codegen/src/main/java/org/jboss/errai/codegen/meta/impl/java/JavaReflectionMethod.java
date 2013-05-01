@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.common.client.api.Assert;
 
 import com.google.common.reflect.TypeToken;
@@ -100,7 +101,7 @@ public class JavaReflectionMethod extends MetaMethod {
   public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache != null)
       return _annotationsCache;
-    return _annotationsCache = method.getAnnotations();
+    return _annotationsCache = AnnotationParser.parseAnnotations(method.getAnnotations());
   }
 
   @Override

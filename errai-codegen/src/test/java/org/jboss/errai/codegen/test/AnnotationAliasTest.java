@@ -3,7 +3,7 @@ package org.jboss.errai.codegen.test;
 import com.google.common.base.Function;
 import com.sun.tools.javac.util.List;
 import junit.framework.TestCase;
-import org.jboss.errai.codegen.meta.Alias;
+import org.jboss.errai.common.client.api.annotations.Alias;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.junit.Test;
