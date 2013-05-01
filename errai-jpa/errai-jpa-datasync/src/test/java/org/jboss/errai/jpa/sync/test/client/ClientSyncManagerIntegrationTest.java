@@ -17,11 +17,13 @@ import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.shared.DataSyncService;
+import org.jboss.errai.jpa.sync.client.shared.DeleteResponse;
 import org.jboss.errai.jpa.sync.client.shared.IdChangeResponse;
 import org.jboss.errai.jpa.sync.client.shared.NewRemoteEntityResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
 import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
+import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 import org.jboss.errai.jpa.sync.test.client.entity.SimpleEntity;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -114,8 +116,70 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNull(esem.find(SimpleEntity.class, originalId));
     assertNull(dsem.find(SimpleEntity.class, originalId));
 
-    assertEquals(esem.find(SimpleEntity.class, newId).toString(), newEntity.toString());
-    assertEquals(dsem.find(SimpleEntity.class, newId).toString(), newEntity.toString());
+    SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, newId);
+    SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, newId);
+    assertEquals(changedEntityExpected.toString(), newEntity.toString());
+    assertEquals(changedEntityDesired.toString(), newEntity.toString());
+    assertNotSame(changedEntityDesired, changedEntityExpected);
+  }
+
+  public void testUpdateExistingEntity() {
+    SimpleEntity newEntity = new SimpleEntity();
+    newEntity.setString("the string value");
+    newEntity.setDate(new Timestamp(1234567L));
+    newEntity.setInteger(9999);
+
+    ErraiEntityManager esem = csm.getExpectedStateEm();
+    ErraiEntityManager dsem = csm.getDesiredStateEm();
+
+    // persist this as both the "expected state" from the server and the "desired state" on the client
+    esem.persist(newEntity);
+    esem.flush();
+    esem.detach(newEntity);
+
+    dsem.persist(newEntity);
+    dsem.flush();
+    dsem.detach(newEntity);
+
+    // now cook up a server response that says something changed
+    newEntity.setString("a new string value");
+    newEntity.setInteger(110011);
+    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    fakeServerResponses.add(new UpdateResponse<SimpleEntity>(newEntity));
+    feedResponseToClientSyncManager(fakeServerResponses);
+
+    SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, newEntity.getId());
+    SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, newEntity.getId());
+    assertEquals(changedEntityExpected.toString(), newEntity.toString());
+    assertEquals(changedEntityDesired.toString(), newEntity.toString());
+    assertNotSame(changedEntityDesired, changedEntityExpected);
+  }
+
+  public void testDeleteExistingEntity() {
+    SimpleEntity newEntity = new SimpleEntity();
+    newEntity.setString("the string value");
+    newEntity.setDate(new Timestamp(1234567L));
+    newEntity.setInteger(9999);
+
+    ErraiEntityManager esem = csm.getExpectedStateEm();
+    ErraiEntityManager dsem = csm.getDesiredStateEm();
+
+    // persist this as both the "expected state" from the server and the "desired state" on the client
+    esem.persist(newEntity);
+    esem.flush();
+    esem.detach(newEntity);
+
+    dsem.persist(newEntity);
+    dsem.flush();
+    dsem.detach(newEntity);
+
+    // now cook up a server response that says it got deleted
+    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    fakeServerResponses.add(new DeleteResponse<SimpleEntity>(newEntity));
+    feedResponseToClientSyncManager(fakeServerResponses);
+
+    assertNull(esem.find(SimpleEntity.class, newEntity.getId()));
+    assertNull(dsem.find(SimpleEntity.class, newEntity.getId()));
   }
 
   public <Y> void feedResponseToClientSyncManager(final List<SyncResponse<Y>> fakeServerResponses) {
