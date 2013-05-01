@@ -17,15 +17,9 @@
 package org.jboss.errai.otec.client;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public interface State<T> {
-  public T get();
-  public State<T> snapshot();
-  public void syncStateFrom(State<T> fromState);
-  public String getHash();
-  public void clear();
-
-  public void addStateChangeListener(StateChangeListener stateChangeListener);
+public interface StateChangeListener {
+  public int getCursorPos();
+  public void onStateChange(final int newCursorPos, final Object newValue);
 }

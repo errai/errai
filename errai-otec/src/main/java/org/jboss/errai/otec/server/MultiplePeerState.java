@@ -80,7 +80,7 @@ public class MultiplePeerState implements PeerState {
 
   @Override
   public void flushEntityStreams(Integer entityId) {
-    throw new UnsupportedOperationException();
+   // throw new UnsupportedOperationException();
   }
 
   @Override

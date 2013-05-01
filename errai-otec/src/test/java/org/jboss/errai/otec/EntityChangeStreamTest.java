@@ -114,11 +114,12 @@ public class EntityChangeStreamTest {
   @Test
   public void testDeleteAndInsert() {
     MockOTEngine engine = new MockOTEngine();
-    OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of("ABC"));
+    OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of(""));
 
     EntityChangeStream ecs = new EntityChangeStreamImpl(engine, entity);
-    ecs.notifyDelete(2, "C");
-    ecs.notifyInsert(2, "C");
+    ecs.notifyInsert(0, "A");
+    ecs.notifyDelete(0, "A");
+    ecs.notifyInsert(0, "B");
     ecs.flush();
 
     assertEquals("Expected exactly one operations", 1, engine.getNotifiedOperations().size());
@@ -126,8 +127,8 @@ public class EntityChangeStreamTest {
     OTOperation opInsert = engine.getNotifiedOperations().get(0);
     assertEquals("Expected exactly one mutation", 1, opInsert.getMutations().size());
     assertEquals("Expected insert mutation", MutationType.Insert, opInsert.getMutations().get(0).getType());
-    assertEquals("Wrong mutation data", "C", opInsert.getMutations().get(0).getData());
-    assertEquals("Wrong mutation position", 2, opInsert.getMutations().get(0).getPosition());
+    assertEquals("Wrong mutation data", "B", opInsert.getMutations().get(0).getData());
+    assertEquals("Wrong mutation position", 0, opInsert.getMutations().get(0).getPosition());
   }
 
   @Test

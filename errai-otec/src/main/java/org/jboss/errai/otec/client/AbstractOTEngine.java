@@ -55,6 +55,7 @@ public abstract class AbstractOTEngine implements OTEngine {
 
   protected OTOperation applyFromRemote(final OTOperation remoteOp) {
     final OTEntity entity = getEntityStateSpace().getEntity(remoteOp.getEntityId());
+    getPeerState().flushEntityStreams(entity.getId());
 
     if (peerState.hasConflictResolutionPrecedence()) {
       return Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
@@ -110,6 +111,7 @@ public abstract class AbstractOTEngine implements OTEngine {
 
   public OTOperation applyLocally(OTOperation operation) {
     final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
+    getPeerState().flushEntityStreams(entity.getId());
 
     if (operation.getRevision() == -1) {
       operation = operation.getBasedOn(entity.getRevision());
@@ -142,7 +144,8 @@ public abstract class AbstractOTEngine implements OTEngine {
     return entityState;
   }
 
-  protected PeerState getPeerState() {
+  @Override
+  public PeerState getPeerState() {
     return peerState;
   }
 

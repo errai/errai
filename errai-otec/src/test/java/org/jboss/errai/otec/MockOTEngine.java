@@ -16,17 +16,18 @@
 
 package org.jboss.errai.otec;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.otec.client.EntitySyncCompletionCallback;
 import org.jboss.errai.otec.client.InitialStateReceiveHandler;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntityState;
 import org.jboss.errai.otec.client.OTEntityStateImpl;
 import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.client.PeerState;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OTOperationsFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -99,7 +100,12 @@ public class MockOTEngine implements OTEngine {
   public void receive(String peerId, OTOperation remoteOp) {
     throw new UnsupportedOperationException("Not implemented yet");
   }
-  
+
+  @Override
+  public PeerState getPeerState() {
+    throw new UnsupportedOperationException();
+  }
+
   public List<OTOperation> getNotifiedOperations() {
     return notifiedOps;
   }

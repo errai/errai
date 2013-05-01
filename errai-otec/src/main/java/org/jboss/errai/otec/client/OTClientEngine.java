@@ -41,10 +41,8 @@ public class OTClientEngine extends AbstractOTEngine {
 
   @Override
   public void receive(final String peerId, final OTOperation remoteOp) {
-    getPeerState().flushEntityStreams(remoteOp.getEntityId());
     applyFromRemote(remoteOp);
   }
-
 
   @Override
   public void start() {

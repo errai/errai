@@ -27,16 +27,19 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.StateChangeListener;
 import org.jboss.errai.otec.client.util.DiffUtil;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek
  */
 public abstract class Atomizer {
   private Atomizer() {
@@ -48,6 +51,7 @@ public abstract class Atomizer {
   public static void syncWidgetWith(final OTEngine engine, final OTEntity entity, final ValueBoxBase widget) {
 
     final EntityChangeStreamImpl entityChangeStream = new EntityChangeStreamImpl(engine, entity);
+    engine.getPeerState().addEntityStream(entityChangeStream);
 
     widget.setValue(entity.getState().get());
 
@@ -60,9 +64,6 @@ public abstract class Atomizer {
 
         if (widget.getSelectedText().length() > 0) {
           entityChangeStream.notifyDelete(widget.getCursorPos(), widget.getSelectedText());
-
-          // this needs to happen in this case.
-          entityChangeStream.flush();
         }
         else if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
           final int index = widget.getCursorPos() - 1;
@@ -103,6 +104,58 @@ public abstract class Atomizer {
           }.schedule(1);
         }
         widget.onBrowserEvent(event);
+      }
+    });
+
+    attachCutHandler(widget.getElement(), new Runnable() {
+      @Override
+      public void run() {
+        entityChangeStream.notifyDelete(widget.getCursorPos(), widget.getSelectedText());
+      }
+    });
+
+    attachTextDragHandler(widget.getElement(), new Runnable() {
+          @Override
+          public void run() {
+            entityChangeStream.notifyDelete(widget.getCursorPos(), widget.getSelectedText());
+            entityChangeStream.flush();
+          }
+        },
+        new Runnable() {
+          @Override
+          public void run() {
+            final String old = (String) entity.getState().get();
+            new Timer() {
+              @Override
+              public void run() {
+                final String newValue = (String) widget.getValue();
+
+                final DiffUtil.Delta diff = DiffUtil.diff(old, newValue);
+                if (diff.getDeltaText().length() > 0) {
+                  entityChangeStream.notifyInsert(diff.getCursor(), diff.getDeltaText());
+                }
+              }
+            }.schedule(1);
+          }
+        }
+    );
+
+    entity.getState().addStateChangeListener(new StateChangeListener() {
+      @Override
+      public int getCursorPos() {
+        return widget.getCursorPos();
+      }
+
+      @Override
+      public void onStateChange(final int newCursorPos, final Object newValue) {
+        final Object oldValue = widget.getValue();
+
+        if (oldValue.equals(newValue))  {
+          return;
+        }
+
+        widget.setValue(newValue);
+        widget.setCursorPos(newCursorPos);
       }
     });
 
@@ -148,5 +201,30 @@ public abstract class Atomizer {
 
     return false;
   }
+
+  private static native void attachCutHandler(Element element, Runnable runnable) /*-{
+      element.oncut = function () {
+          runnable.@java.lang.Runnable::run()();
+          return true;
+      }
+
+
+  }-*/;
+
+  private static native void attachTextDragHandler(Element element, Runnable onStart, Runnable onFinish) /*-{
+
+      element.ondragstart = function () {
+          onStart.@java.lang.Runnable::run()();
+          return true;
+      }
+
+
+      element.ondragend = function () {
+          onFinish.@java.lang.Runnable::run()();
+          return true;
+      }
+
+
+  }-*/;
 
 }

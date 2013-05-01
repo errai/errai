@@ -18,11 +18,15 @@ package org.jboss.errai.otec.client;
 
 import org.jboss.errai.otec.client.util.Md5Digest;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StringState implements State<String> {
+  private List<StateChangeListener> stateChangeListeners = new LinkedList<StateChangeListener>();
   public StringBuilder buffer = new StringBuilder();
   public String stateId = "<initial>";
 
@@ -41,11 +45,9 @@ public class StringState implements State<String> {
     else {
       buffer.insert(pos, String.valueOf(data));
     }
-    updateStateId();
-  }
 
-  private void updateStateId() {
-    stateId = createHashFor(buffer.toString());
+    updateStateId();
+    notifyStateChangeListeners(pos, 1);
   }
 
   public void insert(final int pos, final String data) {
@@ -56,16 +58,34 @@ public class StringState implements State<String> {
       buffer.insert(pos, data);
     }
     updateStateId();
+    notifyStateChangeListeners(pos, data.length());
   }
 
   public void delete(final int pos) {
     buffer.delete(pos, pos + 1);
     updateStateId();
+    notifyStateChangeListeners(pos, -1);
   }
 
   public void delete(final int pos, final int length) {
     buffer.delete(pos, pos + length);
     updateStateId();
+    notifyStateChangeListeners(pos, -length);
+  }
+
+  private void updateStateId() {
+    final String string = buffer.toString();
+    stateId = createHashFor(string);
+  }
+
+  private void notifyStateChangeListeners(final int pos, final int offset) {
+    for (StateChangeListener listener : stateChangeListeners) {
+      int cursorPos = listener.getCursorPos();
+      if (cursorPos > pos) {
+        cursorPos += offset;
+      }
+      listener.onStateChange(cursorPos, buffer.toString());
+    }
   }
 
   @Override
@@ -101,20 +121,26 @@ public class StringState implements State<String> {
     buffer.delete(0, buffer.length());
   }
 
+  @Override
+  public void addStateChangeListener(final StateChangeListener stateChangeListener) {
+    stateChangeListeners.add(stateChangeListener);
+  }
+
   private static String createHashFor(final String string) {
     try {
-    final Md5Digest digest = new Md5Digest();
-    digest.update(string.getBytes("UTF-8"));
+      final Md5Digest digest = new Md5Digest();
+      digest.update(string.getBytes("UTF-8"));
 
-    return hashToHexString(digest.digest());
+      return hashToHexString(digest.digest());
     }
     catch (Throwable e) {
       throw new RuntimeException(e);
     }
   }
+
   private static String hashToHexString(final byte[] hash) {
     final StringBuilder hexString = new StringBuilder(hash.length);
-    for (byte mdbyte : hash) {
+    for (final byte mdbyte : hash) {
       hexString.append(Integer.toHexString(0xFF & mdbyte));
     }
     return hexString.toString();

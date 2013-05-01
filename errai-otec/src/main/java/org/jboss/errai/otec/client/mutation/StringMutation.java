@@ -16,6 +16,8 @@
 
 package org.jboss.errai.otec.client.mutation;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.otec.client.StringState;
 
 
@@ -23,6 +25,7 @@ import org.jboss.errai.otec.client.StringState;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
+@Portable
 public class StringMutation implements Mutation<StringState, String> {
   private final MutationType type;
   private final int position;
@@ -34,7 +37,9 @@ public class StringMutation implements Mutation<StringState, String> {
     this.data = data;
   }
 
-  public static StringMutation of(final MutationType type, final int position, final String data) {
+  public static StringMutation of(@MapsTo("type") final MutationType type,
+                                  @MapsTo("position") final int position,
+                                  @MapsTo("data") final String data) {
     return new StringMutation(type, position, data);
   }
 

@@ -18,8 +18,6 @@ package org.jboss.errai.otec.client.atomizer;
 
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createOperation;
 
-import java.util.Collections;
-
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
@@ -27,6 +25,8 @@ import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.mutation.StringMutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
+
+import java.util.Collections;
 
 /**
  * @author Mike Brock
@@ -36,9 +36,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
   private final OTEngine engine;
   private final OTEntity entity;
 
-  private MutationType type;
-
-  private int start = 0;
+  private int start = -1;
   private int cursor = 0;
   private final StringState insertState = StringState.of("");
   private final StringState deleteState = StringState.of("");
@@ -52,27 +50,29 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
   public int getEntityId() {
     return entity.getId();
   }
- 
+
   @Override
   public void notifyInsert(final int index, final String data) {
-    checkIfMustFlush(index);
+    //System.out.println("notifyInsert:" + index + ":" + data);
 
-    if (type == null) {
+    checkIfMustFlush(index, MutationType.Insert);
+
+    if (start == -1) {
       start = index;
-      type = MutationType.Insert;
     }
 
     cursor = (index - start);
     insertState.insert(cursor, data);
-
   }
 
   @Override
   public void notifyDelete(final int index, final String data) {
-    checkIfMustFlush(index);
-    if (type == null) {
+    //System.out.println("notifyDelete:" + index + ":" + data);
+
+    checkIfMustFlush(index, MutationType.Delete);
+
+    if (start == -1) {
       start = index;
-      type = MutationType.Delete;
     }
 
     cursor = (index - start);
@@ -84,17 +84,19 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     }
   }
 
+  private static boolean flushing = false;
+
   @Override
   public void flush() {
-    if (type == null) {
+    if (start == -1 || flushing) {
       return;
     }
+    flushing = true;
 
     try {
       final OTOperation operation = toOperation();
 
-      System.out.println(operation);
-
+      //System.out.println("FLUSH:" + operation);
       engine.notifyOperation(operation);
       insertState.clear();
       deleteState.clear();
@@ -102,16 +104,21 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     catch (Throwable t) {
       t.printStackTrace();
     }
-
- //   System.out.println("EntityState=\"" + entity.getState().get() + "\"");
+    finally {
+      flushing = false;
+    }
   }
 
-  private void checkIfMustFlush(final int index) {
-    if (type == null) {
+  private void checkIfMustFlush(final int index, final MutationType type) {
+    if (start == -1) {
       return;
     }
 
-    if (index < start || index > start + insertState.get().length()) {
+    // cannot handle going from -1 of the start and back.
+    if (type == MutationType.Insert && !deleteState.get().isEmpty()) {
+      flush();
+    }
+    else if (index < start || index > start + insertState.get().length()) {
       flush();
     }
   }
@@ -135,8 +142,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     start = -1;
     cursor = 0;
 
-    type = null;
-
     return operation;
   }
+
 }

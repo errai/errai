@@ -90,7 +90,6 @@ public class SinglePeerState implements PeerState {
       entityChangeStream.flush();
     }
   }
-
   @Override
   public boolean shouldForwardOperation(final OTOperation operation) {
     return operation.shouldPropagate();

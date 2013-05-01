@@ -38,6 +38,8 @@ public interface OTEngine {
 
   public OTOperationsFactory getOperationsFactory();
 
+  public PeerState getPeerState();
+
   public void associateEntity(String peerId, int entityId);
 
   public void disassociateEntity(String peerId, int entityId);
