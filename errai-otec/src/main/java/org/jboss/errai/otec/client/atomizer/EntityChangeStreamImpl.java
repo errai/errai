@@ -65,7 +65,6 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     cursor = (index - start);
     insertState.insert(cursor, data);
 
-  //  System.out.println("insState=\"" + insertState.get() + "\";deleteState=\"" + deleteState.get() + "\"");
   }
 
   @Override
@@ -83,8 +82,6 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     else {
       deleteState.insert(deleteState.get().length(), data);
     }
-
-  //  System.out.println("insState=\"" + insertState.get() + "\";deleteState=\"" + deleteState.get() + "\"");
   }
 
   @Override
@@ -96,7 +93,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     try {
       final OTOperation operation = toOperation();
 
-      System.out.println("FlushOp=" + operation);
+      System.out.println(operation);
 
       engine.notifyOperation(operation);
       insertState.clear();
@@ -106,7 +103,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
       t.printStackTrace();
     }
 
-    System.out.println("EntityState=\"" + entity.getState().get() + "\"");
+ //   System.out.println("EntityState=\"" + entity.getState().get() + "\"");
   }
 
   private void checkIfMustFlush(final int index) {
