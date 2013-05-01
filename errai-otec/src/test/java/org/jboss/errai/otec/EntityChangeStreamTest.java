@@ -18,10 +18,10 @@ package org.jboss.errai.otec;
 
 import static org.junit.Assert.assertEquals;
 
-import org.jboss.errai.otec.client.atomizer.EntityChangeStream;
-import org.jboss.errai.otec.client.atomizer.EntityChangeStreamImpl;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
+import org.jboss.errai.otec.client.atomizer.EntityChangeStream;
+import org.jboss.errai.otec.client.atomizer.EntityChangeStreamImpl;
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.junit.Test;
@@ -153,7 +153,7 @@ public class EntityChangeStreamTest {
   }
 
   @Test
-  public void testAutomaticFlushByInsertOverflowRight() {
+  public void testAutomaticFlushByInsertOutOfRangeRight() {
     MockOTEngine engine = new MockOTEngine();
     OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of(""));
 
@@ -172,7 +172,7 @@ public class EntityChangeStreamTest {
   }
 
   @Test
-  public void testAutomaticFlushByInsertOverflowLeft() {
+  public void testAutomaticFlushByInsertOutOfRangeLeft() {
     MockOTEngine engine = new MockOTEngine();
     OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of("ABCD"));
 
@@ -190,7 +190,7 @@ public class EntityChangeStreamTest {
   }
 
   @Test
-  public void testAutomaticFlushByDeleteOverflowRight() {
+  public void testAutomaticFlushByDeleteOutOfRangeRight() {
     MockOTEngine engine = new MockOTEngine();
     OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of("ABC"));
 
@@ -207,7 +207,7 @@ public class EntityChangeStreamTest {
   }
 
   @Test
-  public void testAutomaticFlushByDeleteOverflowLeft() {
+  public void testAutomaticFlushByDeleteOutOfRangeLeft() {
     MockOTEngine engine = new MockOTEngine();
     OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of("ABCD"));
 
@@ -225,7 +225,7 @@ public class EntityChangeStreamTest {
 
 
   @Test
-  public void testAutomaticFlushByDeleteOverflowLeftXXX() {
+  public void testInsertAndDeleteToStart() {
     MockOTEngine engine = new MockOTEngine();
     OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of(""));
 

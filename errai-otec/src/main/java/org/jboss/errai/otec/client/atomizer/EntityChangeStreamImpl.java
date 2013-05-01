@@ -18,6 +18,8 @@ package org.jboss.errai.otec.client.atomizer;
 
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createOperation;
 
+import java.util.Collections;
+
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
@@ -25,8 +27,6 @@ import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.mutation.StringMutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
-
-import java.util.Collections;
 
 /**
  * @author Mike Brock
@@ -52,16 +52,10 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
   public int getEntityId() {
     return entity.getId();
   }
-
+ 
   @Override
   public void notifyInsert(final int index, final String data) {
-    // cannot handle going from -1 of the start and back.
-    if (deleteState.get().length() != 0) {
-      flush();
-    }
-    else {
-      checkIfMustFlush(index);
-    }
+    checkIfMustFlush(index);
 
     if (type == null) {
       start = index;
@@ -90,7 +84,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
       deleteState.insert(deleteState.get().length(), data);
     }
 
-    System.out.println("insState=\"" + insertState.get() + "\";deleteState=\"" + deleteState.get() + "\"");
+  //  System.out.println("insState=\"" + insertState.get() + "\";deleteState=\"" + deleteState.get() + "\"");
   }
 
   @Override
