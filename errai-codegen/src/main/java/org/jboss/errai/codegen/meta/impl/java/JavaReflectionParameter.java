@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.meta.impl.java;
 
+import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -42,7 +43,7 @@ public class JavaReflectionParameter extends MetaParameter {
     this.name = "jp" + paramNameCounter.getAndIncrement();
     
     this.type = type;
-    this.annotations = annotations;
+    this.annotations = AnnotationParser.parseAnnotations(annotations);
     this.declaredBy = declaredBy;
   }
 

@@ -18,11 +18,7 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassMember;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.*;
 
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
@@ -37,15 +33,16 @@ public class GWTParameter extends MetaParameter {
   private final TypeOracle oracle;
 
   GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaMethod declaredBy) {
-    this.parameter = parameter;
-    this.annotations = parameter.getAnnotations();
-    this.declaredBy = declaredBy;
-    this.oracle = oracle;
+    this(oracle, parameter, (MetaClassMember) declaredBy);
   }
 
   GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaConstructor declaredBy) {
+    this(oracle, parameter, (MetaClassMember) declaredBy);
+  }
+
+  private GWTParameter(final TypeOracle oracle, final JParameter parameter, final MetaClassMember declaredBy) {
     this.parameter = parameter;
-    this.annotations = parameter.getAnnotations();
+    this.annotations = AnnotationParser.parseAnnotations(parameter.getAnnotations());
     this.declaredBy = declaredBy;
     this.oracle = oracle;
   }

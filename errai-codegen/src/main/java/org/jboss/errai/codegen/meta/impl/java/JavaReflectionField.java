@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.AnnotationParser;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -49,7 +50,7 @@ public class JavaReflectionField extends MetaField {
     if (_annotationsCache != null) {
       return _annotationsCache;
     }
-    return _annotationsCache = field.getAnnotations();
+    return _annotationsCache = AnnotationParser.parseAnnotations(field.getAnnotations());
   }
 
   @SuppressWarnings("unchecked")

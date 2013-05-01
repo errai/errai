@@ -40,6 +40,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.meta.AnnotationParser;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private volatile Annotation[] _annotationsCache;
@@ -338,7 +339,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache == null) {
-      _annotationsCache = parseAnnotations(getEnclosedMetaObject().getAnnotations());
+      _annotationsCache = AnnotationParser.parseAnnotations(getEnclosedMetaObject().getAnnotations());
     }
     return _annotationsCache;
   }

@@ -19,11 +19,7 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.*;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import java.lang.annotation.Annotation;
@@ -41,7 +37,7 @@ public class GWTConstructor extends MetaConstructor {
 
   public GWTConstructor(final TypeOracle oracle, final JConstructor c) {
     this.constructor = c;
-    this.annotations = c.getAnnotations();
+    this.annotations = AnnotationParser.parseAnnotations(c.getAnnotations());
 
     this.declaringClass = GWTClass.newInstance(oracle, c.getEnclosingType());
     this.oracle = oracle;

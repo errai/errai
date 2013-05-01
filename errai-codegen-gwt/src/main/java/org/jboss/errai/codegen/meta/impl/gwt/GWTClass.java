@@ -27,12 +27,7 @@ import java.util.Set;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.builder.impl.Scope;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.*;
 import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.util.GWTPrivateMemberAccessor;
 import org.jboss.errai.codegen.util.GenUtil;
@@ -71,7 +66,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
     final JClassType classOrInterface = classType.isClassOrInterface();
     if (classOrInterface != null) {
-      annotations = parseAnnotations(classOrInterface.getAnnotations());
+      annotations = AnnotationParser.parseAnnotations(classOrInterface.getAnnotations());
     }
     else {
       annotations = new Annotation[0];

@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.meta.MetaType;
 
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.meta.AnnotationParser;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -51,7 +52,7 @@ public class GWTField extends MetaField {
 
   @Override
   public Annotation[] getAnnotations() {
-    return annotations == null ? new Annotation[0] : annotations;
+    return annotations == null ? new Annotation[0] : AnnotationParser.parseAnnotations(annotations);
   }
 
   @SuppressWarnings("unchecked")

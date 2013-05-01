@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.AnnotationParser;
 import org.jboss.errai.codegen.util.GenUtil;
 
 import java.lang.annotation.Annotation;
@@ -106,7 +107,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
   @Override
   public synchronized Annotation[] getAnnotations() {
     if (annotationsCache == null) {
-      annotationsCache = constructor.getAnnotations();
+      annotationsCache = AnnotationParser.parseAnnotations(constructor.getAnnotations());
     }
     return annotationsCache;
   }

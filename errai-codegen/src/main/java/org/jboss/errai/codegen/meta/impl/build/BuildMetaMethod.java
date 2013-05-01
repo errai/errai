@@ -29,12 +29,7 @@ import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.literal.AnnotationLiteral;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassMember;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.MetaType;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.*;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -226,7 +221,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public Annotation[] getAnnotations() {
-    return annotations.toArray(new Annotation[annotations.size()]);
+    return AnnotationParser.parseAnnotations(annotations.toArray(new Annotation[annotations.size()]));
   }
 
   @Override
