@@ -16,19 +16,7 @@
   <properties>
     <version.org.jboss.jbossas>7.1.1.Final</version.org.jboss.jbossas>
   </properties>
-  
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.jboss.arquillian</groupId>
-        <artifactId>arquillian-bom</artifactId>
-        <version>1.0.3.Final</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-  
+
   <dependencies>
 
     <!-- This dependency comes first to ensure this project doesn't see the GWT translatable
@@ -53,21 +41,6 @@
       <scope>test</scope>
     </dependency>
 
-
-    <!-- BEGIN ARQUILLIAN -->
-    <dependency>
-        <groupId>org.jboss.arquillian.junit</groupId>
-        <artifactId>arquillian-junit-container</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.arquillian.extension</groupId>
-      <artifactId>arquillian-gwt</artifactId>
-      <version>1.0.0.Alpha2</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- END ARQUILLIAN -->
-
     <!-- Errai and GWT dependencies have to come after Arquillian -->
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -79,6 +52,13 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-bus</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- Again, maybe this should be optional. The client sync manager currently uses CDI to notify locally when a sync has completed. -->
+    <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-cdi-client</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -107,17 +87,6 @@
         <directory>src/test/resources</directory>
       </testResource>
     </testResources>
-
-    <plugins>
-      <!-- Arquillian versions are not even close to sane. Need to skip enforcer rules. -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
 
     <pluginManagement>
       <plugins>
@@ -209,63 +178,6 @@
                 <include>**/AllDataSyncTests.java</include>
               </includes>
             </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>arq-jbossas-managed</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.as</groupId>
-          <artifactId>jboss-as-arquillian-container-managed</artifactId>
-          <version>${version.org.jboss.jbossas}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.protocol</groupId>
-            <artifactId>arquillian-protocol-servlet</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.jboss.as</groupId>
-          <artifactId>jboss-as-dist</artifactId>
-          <version>${version.org.jboss.jbossas}</version>
-          <type>zip</type>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>unpack</id>
-                <phase>process-test-classes</phase>
-                <goals>
-                  <goal>unpack</goal>
-                </goals>
-                <configuration>
-                  <artifactItems>
-                    <artifactItem>
-                      <groupId>org.jboss.as</groupId>
-                      <artifactId>jboss-as-dist</artifactId>
-                      <version>${version.org.jboss.jbossas}</version>
-                      <type>zip</type>
-                      <overWrite>false</overWrite>
-                      <outputDirectory>${project.build.directory}</outputDirectory>
-                    </artifactItem>
-                  </artifactItems>
-                </configuration>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>
