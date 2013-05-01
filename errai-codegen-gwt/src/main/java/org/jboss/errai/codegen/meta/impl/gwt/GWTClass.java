@@ -71,7 +71,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
     final JClassType classOrInterface = classType.isClassOrInterface();
     if (classOrInterface != null) {
-      annotations = classOrInterface.getAnnotations();
+      annotations = parseAnnotations(classOrInterface.getAnnotations());
     }
     else {
       annotations = new Annotation[0];

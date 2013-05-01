@@ -16,9 +16,7 @@
 
 package org.jboss.errai.common.client.api.interceptor;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Indicates that calls to the annotated method will be intercepted by the specified interceptor(s). When used on
@@ -28,6 +26,7 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
 public @interface InterceptedCall {
 
   /**

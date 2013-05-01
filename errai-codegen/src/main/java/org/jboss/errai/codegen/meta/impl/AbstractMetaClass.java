@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.meta.impl;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
 
+import org.jboss.errai.codegen.meta.Alias;
 import org.jboss.errai.codegen.meta.BeanDescriptor;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -261,6 +262,34 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         return getStaticMethods();
       }
     }, name, parameters);
+  }
+
+  protected Annotation[] parseAnnotations(Annotation[] annotations) {
+    Set<Annotation> result = new HashSet<Annotation>();
+    for (Annotation annotation : annotations) {
+      unwrap(result, annotation, annotation.annotationType().getAnnotations());
+    }
+
+    return result.toArray(new Annotation[result.size()]);
+  }
+
+  private void unwrap(Set<Annotation> result, Annotation parent, Annotation[] annotations) {
+    result.add(parent);
+    if (isAliasType(parent)) {
+      for (Annotation annotation : annotations) {
+        unwrap(result, annotation, annotation.annotationType().getAnnotations());
+      }
+    }
+  }
+
+  private boolean isAliasType(Annotation parent) {
+    final Annotation[] annotations = parent.annotationType().getAnnotations();
+    for (Annotation annotation : annotations) {
+      if (Alias.class.equals(annotation.annotationType())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static interface GetMethodsCallback {

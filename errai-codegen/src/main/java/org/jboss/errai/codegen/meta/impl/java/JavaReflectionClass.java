@@ -338,7 +338,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public synchronized Annotation[] getAnnotations() {
     if (_annotationsCache == null) {
-      _annotationsCache = getEnclosedMetaObject().getAnnotations();
+      _annotationsCache = parseAnnotations(getEnclosedMetaObject().getAnnotations());
     }
     return _annotationsCache;
   }
