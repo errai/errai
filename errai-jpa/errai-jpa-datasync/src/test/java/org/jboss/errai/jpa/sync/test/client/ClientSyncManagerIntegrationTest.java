@@ -79,8 +79,11 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     ErraiEntityManager esem = csm.getExpectedStateEm();
     ErraiEntityManager dsem = csm.getDesiredStateEm();
 
-    assertEquals(esem.find(SimpleEntity.class, newEntity.getId()).toString(), newEntity.toString());
-    assertEquals(dsem.find(SimpleEntity.class, newEntity.getId()).toString(), newEntity.toString());
+    SimpleEntity newEntityExpected = esem.find(SimpleEntity.class, newEntity.getId());
+    SimpleEntity newEntityDesired = dsem.find(SimpleEntity.class, newEntity.getId());
+    assertEquals(newEntityExpected.toString(), newEntity.toString());
+    assertEquals(newEntityDesired.toString(), newEntity.toString());
+    assertNotSame("Expected State and Desired State instances must be separate", newEntityExpected, newEntityDesired);
   }
 
   public void testIdChange() {

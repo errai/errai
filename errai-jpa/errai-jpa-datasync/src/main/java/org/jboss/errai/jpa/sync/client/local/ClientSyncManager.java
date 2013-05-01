@@ -177,8 +177,10 @@ public class ClientSyncManager {
       }
       else if (response instanceof NewRemoteEntityResponse) {
         NewRemoteEntityResponse<E> nrer = (NewRemoteEntityResponse<E>) response;
-        expectedStateEm.persist(nrer.getEntity());
-        desiredStateEm.persist(nrer.getEntity());
+
+        // these are really "persist" operations, but using merge so each entity manager gets its own instance
+        expectedStateEm.merge(nrer.getEntity());
+        desiredStateEm.merge(nrer.getEntity());
       }
       else if (response instanceof UpdateResponse) {
         UpdateResponse<E> ur = (UpdateResponse<E>) response;
