@@ -60,6 +60,9 @@ public abstract class Atomizer {
 
         if (widget.getSelectedText().length() > 0) {
           entityChangeStream.notifyDelete(widget.getCursorPos(), widget.getSelectedText());
+
+          // this needs to happen in this case.
+          entityChangeStream.flush();
         }
         else if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
           final int index = widget.getCursorPos() - 1;
