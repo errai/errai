@@ -31,7 +31,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
   DataSyncServiceUnitTest.class,
   ErraiJpaAttributeAccessorTest.class,
-  JavaReflectionAttributeAccessorTest.class})
+  JavaReflectionAttributeAccessorTest.class,
+  ClientSyncManagerIntegrationTest.class})
 public class AllDataSyncTests {
 
 }

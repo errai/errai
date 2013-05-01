@@ -70,7 +70,7 @@ public class SimpleEntity implements Cloneable {
   @Override
   public String toString() {
     // Warning: tests rely on this toString() fully representing the state of the object
-    return "SimpleEntity [id=" + id + ", string=" + string + ", integer=" + integer + ", date=" + date.toString() + "]";
+    return "SimpleEntity [id=" + id + ", string=" + string + ", integer=" + integer + ", date=" + (date == null ? null : date.toString()) + "]";
   }
 
 }

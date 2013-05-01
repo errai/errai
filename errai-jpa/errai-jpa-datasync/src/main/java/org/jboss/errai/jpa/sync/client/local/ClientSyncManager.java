@@ -36,7 +36,10 @@ import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 @ApplicationScoped
 public class ClientSyncManager {
 
-  @Inject Caller<DataSyncService> dataSyncService;
+  /**
+   * Temporarily public so we can override the caller from within the tests. Will find a better way in the future!
+   */
+  public @Inject Caller<DataSyncService> dataSyncService;
 
   @Inject Event<DataSyncCompleteEvent<?>> completeEvent;
 
@@ -108,6 +111,15 @@ public class ClientSyncManager {
     }).coldSync(syncSet, localResults);
   }
 
+  /**
+   * Performs operations on the desired and expected state entity managers to
+   * reconcile them with the new information in the given sync response
+   * operations.
+   *
+   * @param syncResponses
+   *          a list of sync response operations that was received from the
+   *          server.
+   */
   private <E> void applyResults(List<SyncResponse<E>> syncResponses) {
     // XXX could we factor this decision tree into apply() methods on the sync response objects?
     for (SyncResponse<E> response : syncResponses) {
@@ -179,8 +191,31 @@ public class ClientSyncManager {
     }
   }
 
+  /**
+   * Shallow-copies the value of the given attribute from fromEntity to toEntity.
+   */
   private <X, Y> void copyAttribtue(SingularAttribute<X, Y> attr, X fromEntity, X toEntity) {
     Y newValue = attributeAccessor.get(attr, fromEntity);
     attributeAccessor.set(attr, toEntity, newValue);
+  }
+
+  /**
+   * Returns the persistence context that holds the "expected state" of this
+   * Client-side Sync Manager (the state that we believe the entities have on
+   * the server). This method exists mostly to promote testability, and is
+   * rarely needed by applications at runtime.
+   */
+  public ErraiEntityManager getExpectedStateEm() {
+    return expectedStateEm;
+  }
+
+  /**
+   * Returns the persistence context that holds the "desired state" of this
+   * Client-side Sync Manager (the state that the application has set up, which
+   * we will eventually sync to the server). This method exists mostly to
+   * promote testability, and is rarely needed by applications at runtime.
+   */
+  public ErraiEntityManager getDesiredStateEm() {
+    return desiredStateEm;
   }
 }
