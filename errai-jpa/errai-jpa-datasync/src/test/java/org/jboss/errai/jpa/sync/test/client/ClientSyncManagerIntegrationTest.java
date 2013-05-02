@@ -198,6 +198,43 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNull(dsem.find(SimpleEntity.class, newEntity.getId()));
   }
 
+  public void testUpdateFromClient() {
+    SimpleEntity entity = new SimpleEntity();
+    entity.setString("the string value");
+    entity.setDate(new Timestamp(1234567L));
+    entity.setInteger(9999);
+
+    ErraiEntityManager esem = csm.getExpectedStateEm();
+    ErraiEntityManager dsem = csm.getDesiredStateEm();
+
+    // first persist the expected state
+    SimpleEntity originalEntityState = esem.merge(entity);
+    esem.flush();
+    esem.clear();
+
+    // now make a change and persist the desired state
+    SimpleEntity.setId(entity, originalEntityState.getId());
+    entity.setString("this has been updated");
+
+    dsem.persist(entity);
+    dsem.flush();
+    dsem.clear();
+
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    expectedClientRequests.add(SyncRequestOperation.updated(entity, originalEntityState));
+
+    // the server will respond with confirmation of the update
+    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    fakeServerResponses.add(new UpdateResponse<SimpleEntity>(entity));
+    performColdSync(expectedClientRequests, fakeServerResponses);
+
+    SimpleEntity changedEntityExpected = esem.find(SimpleEntity.class, entity.getId());
+    SimpleEntity changedEntityDesired = dsem.find(SimpleEntity.class, entity.getId());
+    assertEquals(changedEntityExpected.toString(), entity.toString());
+    assertEquals(changedEntityDesired.toString(), entity.toString());
+    assertNotSame(changedEntityDesired, changedEntityExpected);
+  }
+
   public <Y> void performColdSync(
           final List<SyncRequestOperation<Y>> expectedClientRequests,
           final List<SyncResponse<Y>> fakeServerResponses) {
