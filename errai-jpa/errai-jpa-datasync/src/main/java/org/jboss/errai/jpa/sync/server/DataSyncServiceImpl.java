@@ -77,9 +77,8 @@ public class DataSyncServiceImpl implements DataSyncService {
       switch (syncReq.getType()) {
       case UPDATED:
         localResults.remove(remoteId);
-        E expectedLocalState = syncReq.getExpectedState(); // XXX should reuse remoteExpectedState
-        if (entityComparator.isDifferent(localState, expectedLocalState)) {
-          syncResponse.add(new ConflictResponse<E>(expectedLocalState, localState, remoteNewState));
+        if (entityComparator.isDifferent(localState, remoteExpectedState)) {
+          syncResponse.add(new ConflictResponse<E>(remoteExpectedState, localState, remoteNewState));
         }
         else {
           em.merge(remoteNewState);
