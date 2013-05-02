@@ -23,6 +23,7 @@ package org.jboss.errai.otec.client;
 public interface OTEntity<T extends State> {
   public int getRevision();
   public void setRevision(int revision);
+  public void resetRevisionCounterTo(int revision);
 
   public void incrementRevision();
 

@@ -28,6 +28,7 @@ import java.util.Set;
  */
 public interface PeerState {
   public void registerPeer(OTPeer peer);
+  public void deregisterPeer(OTPeer peer);
 
   public OTPeer getPeer(String peerId);
   public Set<OTPeer> getPeersFor(Integer entity);

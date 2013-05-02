@@ -116,6 +116,7 @@ public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
   @Before
   public void setUp() throws Exception {
     assertSystemAssertionsEnabled();
+    OTLogUtil.setLogAdapter(new OTTestingLogger());
 
     System.out.println("\n" + OTTestingLogger.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
         + OTTestingLogger.repeat('*', 30));

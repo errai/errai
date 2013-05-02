@@ -80,6 +80,11 @@ public class CharacterMutation implements Mutation<StringState, Character> {
   }
 
   @Override
+  public Mutation<StringState, Character> newBasedOn(int index, int truncate) {
+    return newBasedOn(index);
+  }
+
+  @Override
   public String toString() {
     if (getData() == null || getData() == 0) {
       return type.getShortName() + "[" + getPosition() + "]";

@@ -78,11 +78,7 @@ public abstract class Atomizer {
     HANDLER_REGISTRATION_MAP.put(widget, widget.addKeyPressHandler(new KeyPressHandler() {
       @Override
       public void onKeyPress(final KeyPressEvent event) {
-        if (shouldIgnoreKeyPress(event)) {
-          return;
-        }
-
-        if (event.getUnicodeCharCode() != 0) {
+        if (event.getUnicodeCharCode() != 13 && event.getUnicodeCharCode() != 0) {
           entityChangeStream.notifyInsert(widget.getCursorPos(), String.valueOf(event.getCharCode()));
         }
       }
@@ -155,7 +151,9 @@ public abstract class Atomizer {
         }
 
         widget.setValue(newValue);
-        widget.setCursorPos(newCursorPos);
+        if (String.valueOf(newValue).length() >= newCursorPos) {
+          widget.setCursorPos(newCursorPos);
+        }
       }
     });
 
@@ -177,10 +175,6 @@ public abstract class Atomizer {
     int keyCode;
     if (event instanceof KeyDownEvent) {
       keyCode = ((KeyDownEvent) event).getNativeKeyCode();
-    }
-    else if (event instanceof KeyPressEvent) {
-      keyCode = ((KeyPressEvent) event).getUnicodeCharCode();
-      return keyCode == 0;
     }
     else {
       return true;

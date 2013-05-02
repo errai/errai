@@ -40,4 +40,8 @@ public class OpPair {
   public OTOperation getLocalOp() {
     return localOp;
   }
+
+  public String toString() {
+    return "OpPair(" + remoteOp + "::" + localOp + ")";
+  }
 }

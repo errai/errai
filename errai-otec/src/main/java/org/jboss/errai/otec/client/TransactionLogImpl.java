@@ -63,7 +63,12 @@ public class TransactionLogImpl implements TransactionLog {
   @Override
   public void pruneFromOperation(final OTOperation operation) {
     synchronized (lock) {
-      final ListIterator<OTOperation> delIter = transactionLog.listIterator(transactionLog.indexOf(operation));
+      final int index = transactionLog.indexOf(operation);
+      if (index == -1) {
+        return;
+      }
+
+      final ListIterator<OTOperation> delIter = transactionLog.listIterator(index);
       while (delIter.hasNext()) {
         entity.decrementRevisionCounter();
         delIter.next().removeFromCanonHistory();
@@ -73,7 +78,7 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public List<OTOperation> getLogFromId(final int revision) {
+  public List<OTOperation> getLogFromId(final int revision, boolean includeNonCanon) {
     synchronized (lock) {
       if (transactionLog.isEmpty()) {
         return Collections.emptyList();
@@ -84,6 +89,9 @@ public class TransactionLogImpl implements TransactionLog {
 
       while (operationListIterator.hasPrevious()) {
         final OTOperation previous = operationListIterator.previous();
+        if (!includeNonCanon && !previous.isCanon()) {
+          continue;
+        }
         operationList.add(previous);
         if (previous.getRevision() == revision) {
           Collections.reverse(operationList);
@@ -176,6 +184,28 @@ public class TransactionLogImpl implements TransactionLog {
       }
 
       transactionLog.add(operation);
+    }
+  }
+
+  @Override
+  public void insertLog(int revision, OTOperation operation) {
+    synchronized (lock) {
+      final ListIterator<OTOperation> operationListIterator
+          = transactionLog.listIterator(transactionLog.size());
+
+      while (operationListIterator.hasPrevious()) {
+        if (operationListIterator.previous().getRevision() == revision) {
+          operationListIterator.set(operation);
+          break;
+        }
+      }
+    }
+  }
+
+  @Override
+  public void markDirty() {
+    synchronized (lock) {
+      this.logDirty = true;
     }
   }
 

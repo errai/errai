@@ -18,6 +18,7 @@ package org.jboss.errai.otec.client.operation;
 
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.State;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.util.OTLogUtil;
 
@@ -66,6 +67,15 @@ public class OTOperationImpl implements OTOperation {
 
   }
 
+  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
+                                                     final List<Mutation> mutationList,
+                                                     final OTEntity entity,
+                                                     final int revision,
+                                                     final OpPair pair) {
+
+    return new OTOperationImpl(engine, mutationList, entity.getId(), revision, entity.getState().getHash(), pair, false, false);
+
+  }
 
   public static OTOperation createOperation(final OTEngine engine,
                                             final List<Mutation> mutationList,
@@ -126,11 +136,10 @@ public class OTOperationImpl implements OTOperation {
     return revision;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
+  @SuppressWarnings("unchecked")
   public boolean apply(final OTEntity entity) {
     try {
-      assert OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
 
       revisionHash = entity.getState().getHash();
       if (revision == -1) {
@@ -140,9 +149,13 @@ public class OTOperationImpl implements OTOperation {
       if (nonCanon)
         return shouldPropagate();
 
+      final State state = entity.getState();
+
       for (final Mutation mutation : mutations) {
-        mutation.apply(entity.getState());
+        mutation.apply(state);
       }
+
+      assert OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
 
       entity.getTransactionLog().appendLog(this);
       entity.incrementRevision();

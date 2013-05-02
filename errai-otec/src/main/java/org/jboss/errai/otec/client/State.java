@@ -26,6 +26,7 @@ public interface State<T> {
   public void syncStateFrom(State<T> fromState);
   public String getHash();
   public void clear();
+  public State<T> getTransientState();
 
   public void addStateChangeListener(StateChangeListener stateChangeListener);
 }

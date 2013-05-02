@@ -40,6 +40,14 @@ public class MultiplePeerState implements PeerState {
   }
 
   @Override
+  public void deregisterPeer(OTPeer peer) {
+    peers.remove(peer);
+    for (Set<OTPeer> otPeers : associatedEntities.values()) {
+      otPeers.remove(peer);
+    }
+  }
+
+  @Override
   public OTPeer getPeer(final String peerId) {
     return peers.get(peerId);
   }

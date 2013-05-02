@@ -27,11 +27,15 @@ import java.util.List;
  */
 public class StringState implements State<String> {
   private List<StateChangeListener> stateChangeListeners = new LinkedList<StateChangeListener>();
-  public StringBuilder buffer = new StringBuilder();
+  public StringBuffer buffer;
   public String stateId = "<initial>";
 
   private StringState(final String buffer) {
-    this.buffer = new StringBuilder(buffer);
+    this.buffer = new StringBuffer(buffer);
+  }
+
+  private StringState(final StringBuffer buffer) {
+    this.buffer = buffer;
   }
 
   public static StringState of(final String buffer) {
@@ -51,11 +55,16 @@ public class StringState implements State<String> {
   }
 
   public void insert(final int pos, final String data) {
-    if (pos == buffer.length()) {
-      buffer.append(data);
+    try {
+      if (pos == buffer.length()) {
+        buffer.append(data);
+      }
+      else {
+        buffer.insert(pos, data);
+      }
     }
-    else {
-      buffer.insert(pos, data);
+    catch (ArrayIndexOutOfBoundsException e) {
+      System.out.println();
     }
     updateStateId();
     notifyStateChangeListeners(pos, data.length());
@@ -79,11 +88,16 @@ public class StringState implements State<String> {
   }
 
   private void notifyStateChangeListeners(final int pos, final int offset) {
-    for (StateChangeListener listener : stateChangeListeners) {
+    for (final StateChangeListener listener : stateChangeListeners) {
       int cursorPos = listener.getCursorPos();
       if (cursorPos > pos) {
         cursorPos += offset;
       }
+
+      if (cursorPos < 0) {
+        cursorPos = 0;
+      }
+
       listener.onStateChange(cursorPos, buffer.toString());
     }
   }
@@ -119,6 +133,11 @@ public class StringState implements State<String> {
   @Override
   public void clear() {
     buffer.delete(0, buffer.length());
+  }
+
+  @Override
+  public State<String> getTransientState() {
+    return new StringState(buffer);
   }
 
   @Override

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.otec.client.util;
 
+import org.jboss.errai.common.client.util.LogUtil;
+
 /**
  * @author Mike Brock
  */
@@ -27,6 +29,7 @@ public class OTLogUtil {
 
     @Override
     public boolean log(String type, String mutations, String from, String to, int rev, String state) {
+      LogUtil.log(type + ":" + mutations + ";rev=" + rev );
       return true;
     }
   };

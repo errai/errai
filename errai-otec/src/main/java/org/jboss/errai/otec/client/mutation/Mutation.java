@@ -13,4 +13,5 @@ public interface Mutation<T extends State, D> {
   public int length();
   public void apply(T state);
   public Mutation<T, D> newBasedOn(int index);
+  public Mutation<T, D> newBasedOn(int index, int truncate);
 }

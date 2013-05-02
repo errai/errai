@@ -65,7 +65,11 @@ public class ClientOTPeerImpl implements OTPeer {
         .noErrorHandling().repliesTo(new MessageCallback() {
       @Override
       public void callback(Message message) {
-        callback.syncComplete(engine.getEntityStateSpace().addEntity(StringState.of(message.getValue(String.class))));
+        final OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of(message.getValue(String.class)));
+        final Integer revision = message.get(Integer.class, "revision");
+        entity.setRevision(revision);
+        entity.resetRevisionCounterTo(revision);
+        callback.syncComplete(entity);
       }
     }).sendNowWith(bus);
   }

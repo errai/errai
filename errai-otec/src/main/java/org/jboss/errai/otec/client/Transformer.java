@@ -16,6 +16,9 @@
 
 package org.jboss.errai.otec.client;
 
+import static org.jboss.errai.otec.client.operation.OTOperationImpl.createLocalOnlyOperation;
+
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.mutation.CharacterMutation;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.mutation.MutationType;
@@ -25,6 +28,7 @@ import org.jboss.errai.otec.client.operation.OpPair;
 import org.jboss.errai.otec.client.util.OTLogUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -59,7 +63,7 @@ public class Transformer {
   @SuppressWarnings("unchecked")
   public OTOperation transform() {
     final TransactionLog transactionLog = entity.getTransactionLog();
-    final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision());
+    final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision(), false);
 
     if (localOps.isEmpty()) {
       OTOperationImpl.createOperation(remoteOp).apply(entity);
@@ -85,10 +89,12 @@ public class Transformer {
       for (final OTOperation localOp : localOps) {
         if (first) {
           first = false;
-          if (applyOver.getRevisionHash().equals(localOp.getRevisionHash())) {
+          if (applyOver.getRevisionHash().equals(localOp.getRevisionHash()) || localOp.isResolvedConflict()) {
             applyOver = transform(applyOver, localOp);
           }
           else {
+            LogUtil.log("DIAMOND_RESOLVE: applyOver=" + applyOver.toString() + "; localOp=" + localOp + "; localOp.transformedFrom=" + localOp.getTransformedFrom());
+
             applyOver = transform(applyOver,
                 transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
           }
@@ -152,7 +158,44 @@ public class Transformer {
       final int rmIdx = rm.getPosition();
       final int diff = rmIdx - lm.getPosition();
 
+      final TransactionLog transactionLog = entity.getTransactionLog();
       if (diff < 0) {
+        if (rm.getType() == MutationType.Delete) {
+          if (rm.getPosition() + rm.length() > lm.getPosition()) {
+            if (lm.getType() == MutationType.Insert) {
+              // uh-oh.. our local insert is inside the range of this remote delete ... move the insert
+              // to the beginning of the delete range to resolve this.
+
+              final State rewind
+                  = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
+              localOp.removeFromCanonHistory();
+              transactionLog.markDirty();
+              final Mutation mutation = lm.newBasedOn(rm.getPosition());
+              mutation.apply(rewind);
+              final OTOperation localOnlyOperation = createLocalOnlyOperation(engine, Collections.singletonList(mutation), entity, localOp.getRevision(), OpPair.of(remoteOp, localOp));
+              transactionLog.insertLog(localOp.getRevision(), localOnlyOperation);
+
+              entity.getState().syncStateFrom(rewind);
+
+              transformedMutations.add(rm.newBasedOn(mutation.getPosition() + lm.length()));
+
+              continue;
+
+              //transformedMutations.add(StringMutation.of(MutationType.Insert, rm.g));
+            }
+            else if (lm.getType() == MutationType.Delete) {
+              final int truncate = lm.getPosition() - rm.getPosition();
+              final Mutation mutation = rm.newBasedOn(rm.getPosition(), truncate);
+
+              transformedMutations.add(mutation);
+              resolvesConflict = true;
+
+              continue;
+            }
+          }
+
+        }
+
         if (rm.getType() != MutationType.Noop) {
           transformedMutations.add(rm);
         }
@@ -163,18 +206,18 @@ public class Transformer {
         }
         else {
           switch (rm.getType()) {
-          case Insert:
-            if (!remoteWins && lm.getType() == MutationType.Insert) {
-              offset += lm.length();
-            }
-            resolvesConflict = true;
-            break;
-          case Delete:
-            if (lm.getType() == MutationType.Insert) {
-              offset += lm.length();
+            case Insert:
+              if (!remoteWins && lm.getType() == MutationType.Insert) {
+                offset += lm.length();
+              }
               resolvesConflict = true;
-            }
-            break;
+              break;
+            case Delete:
+              if (lm.getType() == MutationType.Insert) {
+                offset += lm.length();
+                resolvesConflict = true;
+              }
+              break;
           }
           if (resolvesConflict) {
             transformedMutations.add(adjustMutationToIndex(rmIdx + offset, rm));
@@ -184,22 +227,63 @@ public class Transformer {
       else if (diff > 0) {
         if (lm.getType() != MutationType.Noop && !localOp.isResolvedConflict()) {
           switch (rm.getType()) {
-          case Insert:
-            if (lm.getType() == MutationType.Insert) {
-              offset += lm.length();
-            }
-            if (lm.getType() == MutationType.Delete) {
-              offset -= lm.length();
-            }
-            break;
-          case Delete:
-            if (lm.getType() == MutationType.Insert) {
-              offset += lm.length();
-            }
-            if (lm.getType() == MutationType.Delete) {
-              offset -= lm.length();
-            }
-            break;
+            case Insert:
+              if (lm.getType() == MutationType.Insert) {
+                offset += lm.length();
+              }
+              if (lm.getType() == MutationType.Delete) {
+                if (remoteWins && (lm.getPosition() + lm.length()) > rm.getPosition()) {
+                  final State rewind
+                      = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
+                  final Mutation mutation = rm.newBasedOn(lm.getPosition());
+                  //transactionLog.pruneFromOperation(localOp);
+
+                  localOp.removeFromCanonHistory();
+                  transactionLog.markDirty();
+
+                  mutation.apply(rewind);
+                  entity.getState().syncStateFrom(rewind);
+
+                  transactionLog.insertLog(remoteOp.getRevision(),
+                      createLocalOnlyOperation(engine, Collections.singletonList(mutation), entity, remoteOp.getRevision(), OpPair.of(remoteOp, localOp)));
+                  transformedMutations.add(lm.newBasedOn(mutation.getPosition() + rm.length()));
+
+                  continue;
+                }
+
+                offset -= lm.length();
+              }
+              break;
+            case Delete:
+              if (lm.getType() == MutationType.Insert) {
+                offset += lm.length();
+              }
+              if (lm.getType() == MutationType.Delete) {
+                if (remoteWins && (lm.getPosition() + lm.length()) > rm.getPosition()) {
+                  final State rewind
+                      = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
+
+                  rm.apply(rewind);
+
+                  transactionLog.insertLog(localOp.getRevision(),
+                      remoteOp);
+
+                  localOp.removeFromCanonHistory();
+
+                  entity.getState().syncStateFrom(rewind);
+
+                  final int truncate = rm.getPosition() - lm.getPosition();
+                  final Mutation mutation = lm.newBasedOn(lm.getPosition(), truncate);
+
+                  transformedMutations.add(mutation);
+                  resolvesConflict = true;
+
+                  continue;
+                }
+
+                offset -= lm.length();
+              }
+              break;
           }
         }
 
@@ -208,7 +292,7 @@ public class Transformer {
     }
 
     transformedOp =
-        OTOperationImpl.createLocalOnlyOperation(engine, transformedMutations, entity,
+        createLocalOnlyOperation(engine, transformedMutations, entity,
             OpPair.of(remoteOp, localOp));
 
     if (resolvesConflict || remoteOp.isResolvedConflict()) {

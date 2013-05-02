@@ -29,15 +29,19 @@ public interface TransactionLog {
 
   public List<OTOperation> getLog();
 
-  public List<OTOperation> getLogFromId(int revision);
+  public List<OTOperation> getLogFromId(int revision, boolean includeNonCanon);
 
   public List<OTOperation> getCanonLog();
+
+  public void insertLog(int revision, OTOperation operation);
 
   public void appendLog(OTOperation operation);
 
   State getEffectiveStateForRevision(int revision);
 
   void pruneFromOperation(OTOperation operation);
+
+  void markDirty();
 
   void cleanLog();
 }

@@ -16,11 +16,11 @@
 
 package org.jboss.errai.otec.client.operation;
 
-import java.util.List;
-
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.mutation.Mutation;
+
+import java.util.List;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

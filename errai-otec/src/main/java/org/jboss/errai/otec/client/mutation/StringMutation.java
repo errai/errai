@@ -81,12 +81,34 @@ public class StringMutation implements Mutation<StringState, String> {
   }
 
   @Override
+  public Mutation<StringState, String> newBasedOn(int index, int truncate) {
+    final String newData;
+    if (data.length() > truncate && truncate >= 0) {
+      newData = data.substring(0, truncate);
+    }
+    else {
+      newData = data;
+    }
+
+    return of(type, index, newData);
+  }
+
+  @Override
   public String toString() {
     if (getData() == null) {
       return type.getShortName() + "[" + getPosition() + "]";
     }
     else {
-      return type.getShortName() + "[" + getPosition() + ",\"" + getData() + "\"]";
+      return type.getShortName() + "[" + getPosition() + ",\"" + truncateString(getData()) + "\"]";
+    }
+  }
+
+  private static String truncateString(String string) {
+    if (string.length() > 8) {
+      return string.substring(0, 8) + "...";
+    }
+    else {
+      return string;
     }
   }
 }

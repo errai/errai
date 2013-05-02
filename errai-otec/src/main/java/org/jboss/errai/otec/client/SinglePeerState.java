@@ -51,6 +51,10 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
+  public void deregisterPeer(OTPeer peer) {
+  }
+
+  @Override
   public Map<Integer, Set<OTPeer>> getEntityPeerRelationshipMap() {
     final Map<Integer, Set<OTPeer>> entityPeerMap = new HashMap<Integer, Set<OTPeer>>(associatedEntities.size() * 2);
     for (final Integer associatedEntity : associatedEntities.keySet()) {

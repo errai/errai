@@ -43,6 +43,12 @@ public class OTEntityImpl<T extends State> implements OTEntity<T>, Cloneable {
   @Override
   public void setRevision(final int revision) {
     this.revision = revision;
+    //   this.revisionCounter = revision;
+  }
+
+  @Override
+  public void resetRevisionCounterTo(int revision) {
+    this.revisionCounter = revision + 1;
   }
 
   @Override

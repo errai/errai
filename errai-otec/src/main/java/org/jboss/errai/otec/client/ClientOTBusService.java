@@ -3,6 +3,7 @@ package org.jboss.errai.otec.client;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.otec.client.operation.OTOperation;
 
 /**
  * @author Mike Brock
@@ -14,8 +15,8 @@ public class ClientOTBusService {
       @Override
       public void callback(Message message) {
         final OpDto opDto = message.getValue(OpDto.class);
-
-        engine.receive("<ServerEngine>",  opDto.otOperation(engine));
+        final OTOperation remoteOp = opDto.otOperation(engine);
+        engine.receive("<ServerEngine>", remoteOp);
       }
     });
   }
