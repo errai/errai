@@ -235,6 +235,7 @@ public class DataSyncServiceUnitTest {
     localSimpleEntity.setDate(new Timestamp(-2960391600000L));
     localSimpleEntity.setInteger(42);
     localSimpleEntity.setString("Mr. Watson--come here--I want to see you.");
+    SimpleEntity.setId(localSimpleEntity, 123L);
 
     SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from("allSimpleEntities", SimpleEntity.class, NO_PARAMS);
 
@@ -289,8 +290,14 @@ public class DataSyncServiceUnitTest {
     remoteSimpleEntity.setDate(new Timestamp(123456700000L));
     remoteSimpleEntity.setInteger(9);
     remoteSimpleEntity.setString("You will be terminated");
+
+    // ensure it gets an ID assigned
+    em.persist(remoteSimpleEntity);
     em.flush();
+
+    // now delete it
     em.remove(remoteSimpleEntity);
+    em.flush();
     em.detach(remoteSimpleEntity);
 
     SyncableDataSet<SimpleEntity> sds = SyncableDataSet.from("allSimpleEntities", SimpleEntity.class, NO_PARAMS);
@@ -299,7 +306,7 @@ public class DataSyncServiceUnitTest {
     List<SyncRequestOperation<SimpleEntity>> syncRequest = new ArrayList<SyncRequestOperation<SimpleEntity>>();
     syncRequest.add(SyncRequestOperation.deleted(remoteSimpleEntity));
 
-    // now do the actual sync
+    // now do the actual sync (which should have no effect, since remote entity is already gone)
     List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
     // ensure the response is empty, as expected

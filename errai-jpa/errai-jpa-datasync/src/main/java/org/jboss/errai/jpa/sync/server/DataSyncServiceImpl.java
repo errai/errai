@@ -51,23 +51,11 @@ public class DataSyncServiceImpl implements DataSyncService {
 
     for (SyncRequestOperation<E> syncReq : syncRequestOps) {
 
-      // the new state (updated since last sync) after mutation by the client
-      final E remoteNewState;
-      if (syncReq.getEntity() != null) {
-        remoteNewState = syncReq.getEntity();
-      }
-      else {
-        remoteNewState = null;
-      }
+      // the new state desired by the client. Can be null (for example, entity was remotely deleted).
+      final E remoteNewState = syncReq.getEntity();
 
-      // the expected state (last thing this client saw from us)
-      final E remoteExpectedState;
-      if (syncReq.getExpectedState() != null) {
-        remoteExpectedState = syncReq.getExpectedState();
-      }
-      else {
-        remoteExpectedState = null;
-      }
+      // the expected state (last thing this client saw from us). Can be null (for example, entity was remotely created).
+      final E remoteExpectedState = syncReq.getExpectedState();
 
       // the JPA ID of the remote entity, whether new to us or known before
       final Object remoteId;
@@ -78,16 +66,11 @@ public class DataSyncServiceImpl implements DataSyncService {
         remoteId = id(remoteExpectedState);
       }
       else {
-        remoteId = null;
+        throw new IllegalArgumentException("New and Expected states can't both be null");
       }
 
-      final E localState;
-      if (remoteId != null) {
-        localState = localResults.get(remoteId);
-      }
-      else {
-        localState = null;
-      }
+      // our actual local copy of the entity (null if it has been deleted)
+      final E localState = localResults.get(remoteId);
 
       // TODO handle related entities reachable from the given ones
 
