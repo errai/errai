@@ -79,27 +79,35 @@ public class ClientSyncManager {
 
   public <E> void coldSync(String queryName, Class<E> queryResultType, Map<String, Object> queryParams) {
     final TypedQuery<E> query = desiredStateEm.createNamedQuery(queryName, queryResultType);
+    final TypedQuery<E> expectedQuery = expectedStateEm.createNamedQuery(queryName, queryResultType);
     for (Map.Entry<String, Object> param : queryParams.entrySet()) {
       query.setParameter(param.getKey(), param.getValue());
+      expectedQuery.setParameter(param.getKey(), param.getValue());
     }
-    final Map<String, Object> fetchOptions = new HashMap<String, Object>();
-    final List<SyncRequestOperation<E>> localResults = new ArrayList<SyncRequestOperation<E>>();
 
+    final Map<Key<E, Object>, E> expectedResults = new HashMap<Key<E, Object>, E>();
+    for (E expectedState : expectedQuery.getResultList()) {
+      expectedResults.put((Key<E, Object>) expectedStateEm.keyFor(expectedState), expectedState);
+    }
+
+    final List<SyncRequestOperation<E>> syncRequests = new ArrayList<SyncRequestOperation<E>>();
     for (E desiredState : query.getResultList()) {
       Key<E, ?> key = desiredStateEm.keyFor(desiredState);
-      E expectedState = expectedStateEm.find(key, fetchOptions);
+      E expectedState = expectedResults.remove(key);
       if (expectedState == null) {
-        localResults.add(SyncRequestOperation.created(desiredState));
+        syncRequests.add(SyncRequestOperation.created(desiredState));
       }
       else if (entityComparator.isDifferent(desiredState, expectedState)) {
-        localResults.add(SyncRequestOperation.updated(desiredState, expectedState));
+        syncRequests.add(SyncRequestOperation.updated(desiredState, expectedState));
       }
       else /* desiredState == expectedState */ {
-        localResults.add(SyncRequestOperation.unchanged(expectedState));
+        syncRequests.add(SyncRequestOperation.unchanged(expectedState));
       }
     }
 
-    // TODO find locally deleted entities!
+    for (Map.Entry<Key<E, Object>, E> remainingEntry : expectedResults.entrySet()) {
+      syncRequests.add(SyncRequestOperation.deleted(remainingEntry.getValue()));
+    }
 
     final SyncableDataSet<E> syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
     dataSyncService.call(new RemoteCallback<List<SyncResponse<E>>>() {
@@ -108,7 +116,7 @@ public class ClientSyncManager {
         applyResults(syncResponse);
         completeEvent.fire(new DataSyncCompleteEvent<E>(true, syncResponse));
       }
-    }).coldSync(syncSet, localResults);
+    }).coldSync(syncSet, syncRequests);
   }
 
   /**
@@ -153,8 +161,11 @@ public class ClientSyncManager {
         E resolved = expectedStateEm.find(expectedStateEm.keyFor(dr.getEntity()), Collections.<String,Object>emptyMap());
         expectedStateEm.remove(resolved);
 
+        // the DeleteResponse could be a reaction to our own delete request, in which case resolved == null
         resolved = desiredStateEm.find(desiredStateEm.keyFor(dr.getEntity()), Collections.<String,Object>emptyMap());
-        desiredStateEm.remove(resolved);
+        if (resolved != null) {
+          desiredStateEm.remove(resolved);
+        }
       }
       else if (response instanceof IdChangeResponse) {
         IdChangeResponse<E> icr = (IdChangeResponse<E>) response;

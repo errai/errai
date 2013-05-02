@@ -271,8 +271,10 @@ public class DataSyncServiceUnitTest {
     // now do the actual sync
     List<SyncResponse<SimpleEntity>> syncResponse = dss.coldSync(sds, syncRequest);
 
-    // ensure the response is empty, as expected
-    assertEquals("Got unexpected response: " + syncResponse, 0, syncResponse.size());
+    // the server's response should acknowledge the delete operation
+    assertEquals("Got unexpected response: " + syncResponse, 1, syncResponse.size());
+    DeleteResponse<SimpleEntity> deleteResponse = (DeleteResponse<SimpleEntity>) syncResponse.get(0);
+    assertEquals(remoteSimpleEntity.toString(), deleteResponse.getEntity().toString());
 
     // verify the server deleted the entity
     TypedQuery<SimpleEntity> query = em.createNamedQuery("allSimpleEntities", SimpleEntity.class);

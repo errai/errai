@@ -110,6 +110,7 @@ public class DataSyncServiceImpl implements DataSyncService {
           // FIXME need to compare expected state with actual; issue conflict if they differ
           localResults.remove(remoteId);
           em.remove(localState);
+          syncResponse.add(new DeleteResponse<E>(localState));
         }
         break;
 

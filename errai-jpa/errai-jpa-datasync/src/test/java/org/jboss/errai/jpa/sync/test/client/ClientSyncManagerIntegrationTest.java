@@ -235,6 +235,32 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNotSame(changedEntityDesired, changedEntityExpected);
   }
 
+  public void testDeleteFromClient() {
+    SimpleEntity entity = new SimpleEntity();
+    entity.setString("the string value");
+    entity.setDate(new Timestamp(1234567L));
+    entity.setInteger(9999);
+
+    ErraiEntityManager esem = csm.getExpectedStateEm();
+    ErraiEntityManager dsem = csm.getDesiredStateEm();
+
+    // first persist the expected state
+    esem.persist(entity);
+    esem.flush();
+    esem.clear();
+
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    expectedClientRequests.add(SyncRequestOperation.deleted(entity));
+
+    // assuming no conflict, the server deletes the entity and generates the appropriate response
+    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    fakeServerResponses.add(new DeleteResponse<SimpleEntity>(entity));
+    performColdSync(expectedClientRequests, fakeServerResponses);
+
+    assertNull(esem.find(SimpleEntity.class, entity.getId()));
+    assertNull(dsem.find(SimpleEntity.class, entity.getId()));
+  }
+
   public <Y> void performColdSync(
           final List<SyncRequestOperation<Y>> expectedClientRequests,
           final List<SyncResponse<Y>> fakeServerResponses) {
