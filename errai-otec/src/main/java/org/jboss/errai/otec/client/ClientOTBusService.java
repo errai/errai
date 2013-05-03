@@ -21,7 +21,7 @@ public class ClientOTBusService {
         if (opDto == null && message.hasPart("PurgeHint")) {
           final Integer entityId = message.get(Integer.class, "EntityId");
           final Integer purgeHint = message.get(Integer.class, "PurgeHint");
-          final int i = engine.getEntityStateSpace().getEntity(entityId).getTransactionLog().purgeTo(purgeHint);
+          final int i = engine.getEntityStateSpace().getEntity(entityId).getTransactionLog().purgeTo(purgeHint - 100);
 
           LogUtil.log("purged " + i + " old entries from log.");
         }

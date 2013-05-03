@@ -62,6 +62,9 @@ public class TransactionLogImpl implements TransactionLog {
 
   @Override
   public int purgeTo(final int revision) {
+    if (revision < 0) {
+      return 0;
+    }
     synchronized (lock) {
       int purged = 0;
       final Iterator<OTOperation> iterator = transactionLog.iterator();
@@ -70,6 +73,9 @@ public class TransactionLogImpl implements TransactionLog {
           purged++;
           iterator.remove();
         }
+        else {
+          break;
+        }
       }
 
       if (stateSnapshots.size() > 1) {
@@ -77,6 +83,9 @@ public class TransactionLogImpl implements TransactionLog {
         while (iterator1.hasNext()) {
           if (iterator1.next().getRevision() < revision) {
             iterator1.remove();
+          }
+          else {
+            break;
           }
         }
       }
