@@ -56,18 +56,17 @@ public class StringState implements State<String> {
 
   public void insert(final int pos, final String data) {
     try {
-    if (pos == buffer.length()) {
-      buffer.append(data);
-    }
-    else {
-      buffer.insert(pos, data);
-    }
+      if (pos == buffer.length()) {
+        buffer.append(data);
+      }
+      else {
+        buffer.insert(pos, data);
+      }
 
-    updateStateId();
-    notifyStateChangeListeners(pos, data.length());
+      updateStateId();
+      notifyStateChangeListeners(pos, data.length());
     }
     catch (StringIndexOutOfBoundsException e) {
-      System.out.println();
     }
   }
 
@@ -78,9 +77,13 @@ public class StringState implements State<String> {
   }
 
   public void delete(final int pos, final int length) {
-    buffer.delete(pos, pos + length);
-    updateStateId();
-    notifyStateChangeListeners(pos, -length);
+    try {
+      buffer.delete(pos, pos + length);
+      updateStateId();
+      notifyStateChangeListeners(pos, -length);
+    }
+    catch (StringIndexOutOfBoundsException e) {
+    }
   }
 
   private void updateStateId() {

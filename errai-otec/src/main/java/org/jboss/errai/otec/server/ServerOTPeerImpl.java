@@ -36,6 +36,8 @@ public class ServerOTPeerImpl implements OTPeer {
   private final String queueId;
   private final MessageBus bus;
   private final Map<Integer, AtomicInteger> lastSentSequences = new ConcurrentHashMap<Integer, AtomicInteger>();
+  protected final Map<Integer, PeerData> peerDataMap = new ConcurrentHashMap<Integer, PeerData>();
+
 
   public ServerOTPeerImpl(String remoteEngineId, MessageBus bus) {
     this.queueId = remoteEngineId;
@@ -48,6 +50,18 @@ public class ServerOTPeerImpl implements OTPeer {
   }
 
   @Override
+  public void sendPurgeHint(Integer entityId, int revision) {
+    CommandMessage.create()
+        .toSubject("ClientOTEngine")
+        .set("PurgeHint", revision)
+        .set("EntityId", entityId)
+        .set(MessageParts.SessionID, queueId)
+        .set(MessageParts.PriorityProcessing, "1")
+        .sendNowWith(bus);
+  }
+
+
+  @Override
   public void send(OTOperation operation) {
     CommandMessage.create()
         .toSubject("ClientOTEngine")
@@ -56,11 +70,7 @@ public class ServerOTPeerImpl implements OTPeer {
         .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);
 
-    AtomicInteger atomicInteger = lastSentSequences.get(operation.getEntityId());
-    if (atomicInteger == null) {
-      lastSentSequences.put(operation.getEntityId(), atomicInteger = new AtomicInteger());
-    }
-    atomicInteger.set(operation.getRevision());
+    getPeerData(operation.getEntityId()).setLastKnownTransmittedSequence(operation.getRevision());
   }
 
   @Override
@@ -68,13 +78,47 @@ public class ServerOTPeerImpl implements OTPeer {
   }
 
   @Override
+  public void setLastKnownRemoteSequence(Integer entity, int sequence) {
+    getPeerData(entity).setLastKnownRemoteSequence(sequence);
+  }
+
+  @Override
   public int getLastKnownRemoteSequence(Integer entity) {
-    return 0;
+    return getPeerData(entity).getLastKnownRemoteSequence();
   }
 
   @Override
   public int getLastTransmittedSequence(Integer entity) {
     final AtomicInteger seq = lastSentSequences.get(entity);
     return seq == null ? 0 : seq.get();
+  }
+
+  protected PeerData getPeerData(Integer entityId) {
+     PeerData peerData = peerDataMap.get(entityId);
+     if (peerData == null) {
+       peerDataMap.put(entityId, peerData = new PeerData());
+     }
+     return peerData;
+   }
+
+  static class PeerData {
+    volatile AtomicInteger lastKnownRemoteSequence = new AtomicInteger();
+    volatile AtomicInteger lastKnownTransmittedSequence = new AtomicInteger();
+
+    public int getLastKnownRemoteSequence() {
+      return lastKnownRemoteSequence.get();
+    }
+
+    public void setLastKnownRemoteSequence(int lastKnownRemoteSequence) {
+      this.lastKnownRemoteSequence.set(lastKnownRemoteSequence);
+    }
+
+    public int getLastKnownTransmittedSequence() {
+      return lastKnownTransmittedSequence.get();
+    }
+
+    public void setLastKnownTransmittedSequence(int lastKnownTransmittedSequence) {
+      this.lastKnownTransmittedSequence.set(lastKnownTransmittedSequence);
+    }
   }
 }

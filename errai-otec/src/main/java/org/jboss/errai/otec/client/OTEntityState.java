@@ -16,6 +16,8 @@
 
 package org.jboss.errai.otec.client;
 
+import java.util.Collection;
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
@@ -24,6 +26,8 @@ public interface OTEntityState {
   public OTEntity getEntity(int id);
   public OTEntity addEntity(State objectReference);
   public void addEntity(OTEntity entity);
+
+  public Collection<OTEntity> getEntities();
 
   public void removeEntity(int objectReference);
 }

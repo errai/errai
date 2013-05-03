@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.client;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +45,12 @@ public class OTEntityStateImpl implements OTEntityState {
   public void addEntity(final OTEntity entity) {
     entityMap.put(entity.getId(), entity);
     entity.incrementRevision();
+  }
+
+
+  @Override
+  public Collection<OTEntity> getEntities() {
+    return entityMap.values();
   }
 
   @Override

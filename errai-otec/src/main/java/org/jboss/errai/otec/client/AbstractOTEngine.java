@@ -63,6 +63,7 @@ public abstract class AbstractOTEngine implements OTEngine {
     else {
       return Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
     }
+
   }
 
   @Override

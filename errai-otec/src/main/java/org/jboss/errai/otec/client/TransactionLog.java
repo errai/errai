@@ -39,6 +39,8 @@ public interface TransactionLog {
 
   State getEffectiveStateForRevision(int revision);
 
+  int purgeTo(int revision);
+
   void pruneFromOperation(OTOperation operation);
 
   void markDirty();

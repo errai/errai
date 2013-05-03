@@ -49,6 +49,16 @@ public class ClientOTPeerImpl implements OTPeer {
   }
 
   @Override
+  public void sendPurgeHint(Integer entityId, int revision) {
+    CommandMessage.create()
+        .toSubject("ServerOTEngine")
+        .set("PurgeHint", revision)
+        .set("EntityId", entityId)
+        .set(MessageParts.PriorityProcessing, "1")
+        .sendNowWith(bus);
+  }
+
+  @Override
   public void send(OTOperation operation) {
     CommandMessage.create()
         .toSubject("ServerOTEngine")
@@ -76,6 +86,10 @@ public class ClientOTPeerImpl implements OTPeer {
         callback.syncComplete(entity);
       }
     }).sendNowWith(bus);
+  }
+
+  @Override
+  public void setLastKnownRemoteSequence(Integer entity, int sequence) {
   }
 
   @Override

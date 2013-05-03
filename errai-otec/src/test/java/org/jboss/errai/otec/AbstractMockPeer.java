@@ -32,8 +32,7 @@ import java.util.Map;
 public abstract class AbstractMockPeer implements OTPeer {
   protected OTEngine localEngine;
   protected OTEngine remoteEngine;
-  protected final Map<Integer, Integer> lastTransmittedSequencees = new HashMap<Integer, Integer>();
-
+  protected final Map<Integer, PeerData> peerDataMap = new HashMap<Integer, PeerData>();
 
   @Override
   public String getId() {
@@ -42,17 +41,29 @@ public abstract class AbstractMockPeer implements OTPeer {
 
   @Override
   public int getLastKnownRemoteSequence(final Integer entity) {
-    return 0;
+    return getPeerData(entity).lastKnownRemoteSequence;
   }
 
   @Override
   public int getLastTransmittedSequence(final Integer entity) {
-    final Integer integer = lastTransmittedSequencees.get(entity);
-    return integer == null ? 0 : integer;
+    return getPeerData(entity).lastKnownTransmittedSequence;
   }
 
+  @Override
+  public void setLastKnownRemoteSequence(Integer entity, int sequence) {
+    getPeerData(entity).lastKnownRemoteSequence = sequence;
+  }
 
-  @Override @SuppressWarnings("unchecked")
+  protected synchronized PeerData getPeerData(Integer entityId) {
+    PeerData peerData = peerDataMap.get(entityId);
+    if (peerData == null) {
+      peerDataMap.put(entityId, peerData = new PeerData());
+    }
+    return peerData;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
   public void beginSyncRemoteEntity(final String peerId,
                                     final int entityId,
                                     final EntitySyncCompletionCallback<State> callback) {
@@ -75,5 +86,26 @@ public abstract class AbstractMockPeer implements OTPeer {
   @Override
   public String toString() {
     return remoteEngine.getName();
+  }
+
+  static class PeerData {
+    volatile int lastKnownRemoteSequence;
+    volatile int lastKnownTransmittedSequence;
+
+    public int getLastKnownRemoteSequence() {
+      return lastKnownRemoteSequence;
+    }
+
+    public void setLastKnownRemoteSequence(int lastKnownRemoteSequence) {
+      this.lastKnownRemoteSequence = lastKnownRemoteSequence;
+    }
+
+    public int getLastKnownTransmittedSequence() {
+      return lastKnownTransmittedSequence;
+    }
+
+    public void setLastKnownTransmittedSequence(int lastKnownTransmittedSequence) {
+      this.lastKnownTransmittedSequence = lastKnownTransmittedSequence;
+    }
   }
 }

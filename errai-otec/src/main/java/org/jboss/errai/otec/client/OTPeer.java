@@ -25,7 +25,9 @@ import org.jboss.errai.otec.client.operation.OTOperation;
 public interface OTPeer {
   public String getId();
   public void send(OTOperation operation);
+  public void sendPurgeHint(Integer entityId, int revision);
   public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback);
+  public void setLastKnownRemoteSequence(Integer entity, int sequence);
   public int getLastKnownRemoteSequence(Integer entity);
   public int getLastTransmittedSequence(Integer entity);
 }

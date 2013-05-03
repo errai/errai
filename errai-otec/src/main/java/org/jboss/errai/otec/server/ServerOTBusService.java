@@ -21,21 +21,31 @@ public class ServerOTBusService {
     messageBus.subscribe("ServerOTEngine", new MessageCallback() {
       @Override
       public void callback(final Message message) {
-        final OTOperation remoteOp = message.getValue(OpDto.class).otOperation(engine);
+        final OpDto value = message.getValue(OpDto.class);
 
-        final QueueSession session = message.getResource(QueueSession.class, "Session");
-//        final LocalContext localContext = LocalContext.get(message);
-//
-//        ClientDemuxer clientStats = localContext.getAttribute(ClientDemuxer.class, ClientDemuxer.class.getName());
-//        if (clientStats == null) {
-//          localContext.setAttribute(ClientDemuxer.class.getName(), clientStats = new ClientDemuxer());
-//        }
+        if (value == null && message.hasPart("PurgeHint")) {
+          final Integer entityId = message.get(Integer.class, "EntityId");
+          final Integer purgeHint = message.get(Integer.class, "PurgeHint");
+          final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
+          final String session = queueSession.getSessionId();
+          engine.getPeerState().getPeer(session).setLastKnownRemoteSequence(entityId, purgeHint);
+        }
+        else {
+          final OTOperation remoteOp = value.otOperation(engine);
+          final QueueSession session = message.getResource(QueueSession.class, "Session");
+          engine.receive(session.getSessionId(), remoteOp);
+        }
 
-//        for (final OTOperation otOperation : clientStats.getEnginePlanFor(remoteOp)) {
-//          engine.receive(session.getSessionId(), otOperation);
-//        }
+        //        final LocalContext localContext = LocalContext.get(message);
+        //
+        //        ClientDemuxer clientStats = localContext.getAttribute(ClientDemuxer.class, ClientDemuxer.class.getName());
+        //        if (clientStats == null) {
+        //          localContext.setAttribute(ClientDemuxer.class.getName(), clientStats = new ClientDemuxer());
+        //        }
 
-        engine.receive(session.getSessionId(), remoteOp);
+        //        for (final OTOperation otOperation : clientStats.getEnginePlanFor(remoteOp)) {
+        //          engine.receive(session.getSessionId(), otOperation);
+        //        }
       }
     });
 

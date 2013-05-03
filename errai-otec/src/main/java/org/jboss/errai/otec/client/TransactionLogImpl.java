@@ -61,6 +61,31 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
+  public int purgeTo(final int revision) {
+    synchronized (lock) {
+      int purged = 0;
+      final Iterator<OTOperation> iterator = transactionLog.iterator();
+      while (iterator.hasNext()) {
+        if (iterator.next().getRevision() < revision) {
+          purged++;
+          iterator.remove();
+        }
+      }
+
+      if (stateSnapshots.size() > 1) {
+        final Iterator<StateSnapshot> iterator1 = stateSnapshots.iterator();
+        while (iterator1.hasNext()) {
+          if (iterator1.next().getRevision() < revision) {
+            iterator1.remove();
+          }
+        }
+      }
+
+      return purged;
+    }
+  }
+
+  @Override
   public void pruneFromOperation(final OTOperation operation) {
     synchronized (lock) {
       final int index = transactionLog.indexOf(operation);

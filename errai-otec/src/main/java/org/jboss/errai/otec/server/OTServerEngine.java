@@ -19,6 +19,7 @@ package org.jboss.errai.otec.server;
 import org.jboss.errai.otec.client.AbstractOTEngine;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEngineMode;
+import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.OTQueuedOperation;
 import org.jboss.errai.otec.client.PeerState;
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class OTServerEngine extends AbstractOTEngine {
   private PollingThread pollingThread;
+  private HousekeeperThread housekeeperThread;
 
   private final ArrayBlockingQueue<OTQueuedOperation> incomingQueue
       = new ArrayBlockingQueue<OTQueuedOperation>(100, true);
@@ -62,6 +64,10 @@ public class OTServerEngine extends AbstractOTEngine {
     this.incomingQueue.clear();
     this.pollingThread = new PollingThread(this);
     this.pollingThread.start();
+    this.housekeeperThread = new HousekeeperThread(this);
+    this.housekeeperThread.setPriority(Thread.MIN_PRIORITY);
+    this.housekeeperThread.start();
+
   }
 
   @Override
@@ -79,6 +85,47 @@ public class OTServerEngine extends AbstractOTEngine {
     }
     catch (InterruptedException e) {
       // ignore
+    }
+  }
+
+  private static class HousekeeperThread extends Thread {
+    private final OTServerEngine serverEngine;
+
+    private HousekeeperThread(final OTServerEngine serverEngine) {
+      this.serverEngine = serverEngine;
+    }
+
+    @Override
+    public void run() {
+      while (serverEngine.mode == OTEngineMode.Online) {
+        try {
+          Thread.sleep(10000);
+
+          for (final OTEntity otEntity : serverEngine.getEntityStateSpace().getEntities()) {
+            int lastKnown = -1;
+            final Set<OTPeer> peersFor = serverEngine.getPeerState().getPeersFor(otEntity.getId());
+            for (final OTPeer otPeer : peersFor) {
+              final int sequence = otPeer.getLastKnownRemoteSequence(otEntity.getId());
+              if (lastKnown == -1 || sequence < lastKnown) {
+                lastKnown = sequence;
+              }
+            }
+
+            if (lastKnown != -1) {
+              final int i = otEntity.getTransactionLog().purgeTo(lastKnown);
+              if (i > 0) {
+                System.out.println("purged " + i + " old entries from transaction log.");
+                for (final OTPeer otPeer : peersFor) {
+                  otPeer.sendPurgeHint(otEntity.getId(), lastKnown);
+                }
+              }
+            }
+          }
+        }
+        catch (InterruptedException e) {
+          // fall though.
+        }
+      }
     }
   }
 
@@ -147,10 +194,12 @@ public class OTServerEngine extends AbstractOTEngine {
       return;
     }
 
+
     System.out.println("RECV:" + remoteOp + ";rev:" + remoteOp.getRevision() + ";peerId=" + peerId);
 
-   // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
+    // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
 
     incomingQueue.offer(new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId()));
+    getPeerState().getPeer(peerId).setLastKnownRemoteSequence(remoteOp.getEntityId(), remoteOp.getRevision());
   }
 }
