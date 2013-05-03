@@ -82,7 +82,7 @@
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
     <guice.version>3.0</guice.version>
-    <guava.version>13.0.1</guava.version>
+    <guava.version>14.0.1</guava.version>
     <mvel.version>2.1.Beta8</mvel.version>
     <appengine.version>1.7.6</appengine.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
