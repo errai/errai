@@ -1,17 +1,17 @@
 package org.jboss.errai.codegen.test;
 
 import com.google.common.base.Function;
-import com.sun.tools.javac.util.List;
 import junit.framework.TestCase;
-import org.jboss.errai.common.client.api.annotations.Alias;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.common.client.api.annotations.Alias;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 import java.util.Collection;
 
 import static com.google.common.collect.Collections2.transform;
@@ -33,7 +33,7 @@ public class AnnotationAliasTest extends TestCase {
 
     //then
     assertNotNull(annotations);
-    final Collection<Class<? extends Annotation>> annotationCollection = transform(List.from(annotations),
+    final Collection<Class<? extends Annotation>> annotationCollection = transform(Arrays.asList(annotations),
             new Function<Annotation, Class<? extends Annotation>>() {
               @Nullable
               @Override
