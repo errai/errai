@@ -18,7 +18,6 @@ package org.jboss.errai.otec.client;
 
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createLocalOnlyOperation;
 
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.mutation.CharacterMutation;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.mutation.MutationType;
@@ -68,7 +67,7 @@ public class Transformer {
       localOps = transactionLog.getLogFromId(remoteOp.getRevision(), false);
     }
     catch (OTException e) {
-      LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
+      //LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
       throw e;
     }
 

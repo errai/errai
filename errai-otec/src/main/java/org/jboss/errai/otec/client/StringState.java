@@ -55,6 +55,7 @@ public class StringState implements State<String> {
   }
 
   public void insert(final int pos, final String data) {
+    try {
     if (pos == buffer.length()) {
       buffer.append(data);
     }
@@ -64,6 +65,10 @@ public class StringState implements State<String> {
 
     updateStateId();
     notifyStateChangeListeners(pos, data.length());
+    }
+    catch (StringIndexOutOfBoundsException e) {
+      System.out.println();
+    }
   }
 
   public void delete(final int pos) {

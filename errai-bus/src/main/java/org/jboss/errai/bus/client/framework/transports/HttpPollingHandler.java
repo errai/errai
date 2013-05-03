@@ -204,8 +204,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
         return;
       }
       else {
-        toSend.addAll(txMessages);
         toSend.addAll(getDeferredToSend());
+        toSend.addAll(txMessages);
       }
 
       specialParms = Collections.emptyMap();

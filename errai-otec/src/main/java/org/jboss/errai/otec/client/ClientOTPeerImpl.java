@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.operation.OTOperation;
 
 import java.util.HashMap;
@@ -54,6 +55,8 @@ public class ClientOTPeerImpl implements OTPeer {
         .set(MessageParts.Value, OpDto.fromOperation(operation))
         .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);
+
+    LogUtil.log("TRANSMIT:" + operation);
 
     lastSentSequences.put(operation.getEntityId(), operation.getRevision());
   }

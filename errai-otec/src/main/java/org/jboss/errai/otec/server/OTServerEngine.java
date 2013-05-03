@@ -69,7 +69,7 @@ public class OTServerEngine extends AbstractOTEngine {
     if (!wait) {
       setMode(OTEngineMode.Offline);
     }
-    incomingQueue.offer(new OTQueuedOperation(null, null, -1));
+    incomingQueue.offer(new OTQueuedOperation(-1, null, null, -1));
 
     try {
       pollingThread.join();
@@ -110,8 +110,6 @@ public class OTServerEngine extends AbstractOTEngine {
     try {
       final OTQueuedOperation queuedOp = incomingQueue.poll(10, TimeUnit.MINUTES);
 
-
-
       if (queuedOp == null) {
         return true;
       }
@@ -149,8 +147,10 @@ public class OTServerEngine extends AbstractOTEngine {
       return;
     }
 
+    System.out.println("RECV:" + remoteOp + ";rev:" + remoteOp.getRevision() + ";peerId=" + peerId);
+
    // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
 
-    incomingQueue.offer(new OTQueuedOperation(remoteOp, peerId, remoteOp.getEntityId()));
+    incomingQueue.offer(new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId()));
   }
 }

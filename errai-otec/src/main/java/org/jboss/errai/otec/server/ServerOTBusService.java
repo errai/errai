@@ -11,6 +11,7 @@ import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.OpDto;
+import org.jboss.errai.otec.client.operation.OTOperation;
 
 /**
  * @author Mike Brock
@@ -19,19 +20,29 @@ public class ServerOTBusService {
   public static void startOTService(final MessageBus messageBus, final OTEngine engine) {
     messageBus.subscribe("ServerOTEngine", new MessageCallback() {
       @Override
-      public void callback(Message message) {
-        final OpDto opDto = message.getValue(OpDto.class);
+      public void callback(final Message message) {
+        final OTOperation remoteOp = message.getValue(OpDto.class).otOperation(engine);
 
-        final String session = message.getResource(QueueSession.class, "Session").getSessionId();
+        final QueueSession session = message.getResource(QueueSession.class, "Session");
+//        final LocalContext localContext = LocalContext.get(message);
+//
+//        ClientDemuxer clientStats = localContext.getAttribute(ClientDemuxer.class, ClientDemuxer.class.getName());
+//        if (clientStats == null) {
+//          localContext.setAttribute(ClientDemuxer.class.getName(), clientStats = new ClientDemuxer());
+//        }
 
-        engine.receive(session, opDto.otOperation(engine));
+//        for (final OTOperation otOperation : clientStats.getEnginePlanFor(remoteOp)) {
+//          engine.receive(session.getSessionId(), otOperation);
+//        }
+
+        engine.receive(session.getSessionId(), remoteOp);
       }
     });
 
     messageBus.subscribe("ServerOTEngineSyncService", new MessageCallback() {
       @Override
-      public void callback(Message message) {
-        Integer entityId = message.getValue(Integer.class);
+      public void callback(final Message message) {
+        final Integer entityId = message.getValue(Integer.class);
 
         final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
         final String session = queueSession.getSessionId();

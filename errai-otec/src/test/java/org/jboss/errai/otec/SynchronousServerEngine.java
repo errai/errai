@@ -38,7 +38,7 @@ public class SynchronousServerEngine extends OTServerEngine {
 
   @Override
   public void receive(String peerId, OTOperation remoteOp) {
-    handleOperation(new OTQueuedOperation(remoteOp, peerId, remoteOp.getEntityId()));
+    handleOperation(new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId()));
   }
 
   @Override

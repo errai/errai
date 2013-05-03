@@ -21,15 +21,21 @@ import org.jboss.errai.otec.client.operation.OTOperation;
 /**
  * @author Mike Brock
  */
-public class OTQueuedOperation {
+public class OTQueuedOperation implements Comparable<OTQueuedOperation> {
+  private final int version;
   private final OTOperation operation;
   private final String peerId;
   private final int entityId;
 
-  public OTQueuedOperation(final OTOperation operation, final String peerId, final int entityId) {
+  public OTQueuedOperation(int version, final OTOperation operation, final String peerId, final int entityId) {
+    this.version = version;
     this.operation = operation;
     this.peerId = peerId;
     this.entityId = entityId;
+  }
+
+  public int getVersion() {
+    return version;
   }
 
   public OTOperation getOperation() {
@@ -42,5 +48,10 @@ public class OTQueuedOperation {
 
   public int getEntityId() {
     return entityId;
+  }
+
+  @Override
+  public int compareTo(OTQueuedOperation o) {
+    return version - o.getVersion();
   }
 }

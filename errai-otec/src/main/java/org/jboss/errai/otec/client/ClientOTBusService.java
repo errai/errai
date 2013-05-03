@@ -3,6 +3,7 @@ package org.jboss.errai.otec.client;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.operation.OTOperation;
 
 /**
@@ -16,6 +17,7 @@ public class ClientOTBusService {
       public void callback(Message message) {
         final OpDto opDto = message.getValue(OpDto.class);
         final OTOperation remoteOp = opDto.otOperation(engine);
+        LogUtil.log("RECV:" + remoteOp);
         engine.receive("<ServerEngine>", remoteOp);
       }
     });
