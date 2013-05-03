@@ -11,12 +11,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.TypedQuery;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
+import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
 import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.StorageBackendFactory;
@@ -169,25 +170,37 @@ public class ClientSyncManager {
       }
       else if (response instanceof IdChangeResponse) {
         IdChangeResponse<E> icr = (IdChangeResponse<E>) response;
-        expectedStateEm.persist(icr.getEntity());
-
-        // XXX the following is probably better handled internally by the ErraiEntityManager
-
-        @SuppressWarnings("unchecked")
-        Class<E> class1 = (Class<E>) icr.getEntity().getClass();
-        E oldEntity = desiredStateEm.find(class1, icr.getOldId());
-        desiredStateEm.remove(oldEntity);
+        E newEntity = icr.getEntity();
+        expectedStateEm.persist(newEntity);
 
         @SuppressWarnings("unchecked")
-        EntityType<E> type = desiredStateEm.getMetamodel().entity((Class<E>) oldEntity.getClass());
-        SingularAttribute<? super E, ?> idAttr = type.getId(type.getIdType().getJavaType());
-        copyAttribtue(idAttr, icr.getEntity(), oldEntity);
-
-        Map<String, Object> hints = new HashMap<String, Object>();
-        desiredStateEm.persist(oldEntity);
+        ErraiEntityType<E> entityType = desiredStateEm.getMetamodel().entity((Class<E>) newEntity.getClass());
+        ErraiSingularAttribute<? super E, Object> idAttr = entityType.getId(Object.class);
+        changeId(entityType, icr.getOldId(), idAttr.get(newEntity));
+        desiredStateEm.merge(newEntity);
       }
       else if (response instanceof NewRemoteEntityResponse) {
         NewRemoteEntityResponse<E> nrer = (NewRemoteEntityResponse<E>) response;
+
+        @SuppressWarnings("unchecked")
+        Class<E> entityClass = (Class<E>) nrer.getEntity().getClass();
+
+        Key<E, ?> conflictingKey = desiredStateEm.keyFor(nrer.getEntity());
+        E inTheWay = desiredStateEm.find(conflictingKey, Collections.<String,Object>emptyMap());
+        if (inTheWay != null) {
+          ErraiEntityType<E> entityType = desiredStateEm.getMetamodel().entity(entityClass);
+          ErraiSingularAttribute<? super E, Object> idAttr = entityType.getId(Object.class);
+          ErraiIdGenerator<Object> idGenerator = idAttr.getValueGenerator();
+          if (idGenerator != null && idGenerator.hasNext(desiredStateEm)) {
+            Object newLocalId = idGenerator.next(desiredStateEm);
+            changeId(entityType, conflictingKey.getId(), newLocalId);
+          }
+          else {
+            throw new IllegalStateException(
+                    "New entity from server would clobber local entity with same id, and we are unable to generate a new ID." +
+                    " Conflict is for: " + conflictingKey);
+          }
+        }
 
         // these are really "persist" operations, but using merge so each entity manager gets its own instance
         expectedStateEm.merge(nrer.getEntity());
@@ -205,11 +218,22 @@ public class ClientSyncManager {
   }
 
   /**
-   * Shallow-copies the value of the given attribute from fromEntity to toEntity.
+   * Changes the ID of an existing entity in desiredStateEm.
+   *
+   * @param entityType The metamodel type for the entity whose ID is to be changed
+   * @param oldId The ID that the entity currently has.
+   * @param newId The ID that the entity will have when this method returns.
    */
-  private <X, Y> void copyAttribtue(SingularAttribute<X, Y> attr, X fromEntity, X toEntity) {
-    Y newValue = attributeAccessor.get(attr, fromEntity);
-    attributeAccessor.set(attr, toEntity, newValue);
+  private <E> void changeId(ErraiEntityType<E> entityType, Object oldId, Object newId) {
+    // XXX this routine is probably better handled internally by the ErraiEntityManager
+    // TODO what about related entities that refer to this one? (needs tests)
+
+    E entity = desiredStateEm.find(entityType.getJavaType(), oldId);
+    desiredStateEm.remove(entity);
+    desiredStateEm.flush();
+    desiredStateEm.detach(entity);
+    entityType.getId(Object.class).set(entity, newId);
+    desiredStateEm.persist(entity);
   }
 
   /**

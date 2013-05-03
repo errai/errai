@@ -132,6 +132,49 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNotSame(changedEntityDesired, changedEntityExpected);
   }
 
+  // a hybrid of "new entity from server" and "id change from server"
+  // the scenario is that we have a local entity with, say, ID 100
+  // and the server tells us "here's a new entity. its ID is 100!"
+  // so we have to move our existing entity out of the way before accepting the remote one.
+  public void testNewEntityWithConflictingIdFromServer() {
+    SimpleEntity newRemote = new SimpleEntity();
+    newRemote.setString("new entity from server");
+    newRemote.setDate(new Timestamp(1234567L));
+    newRemote.setInteger(9999);
+    SimpleEntity.setId(newRemote, 100L);
+
+    SimpleEntity existingLocal = new SimpleEntity();
+    existingLocal.setString("existing local entity");
+    existingLocal.setDate(new Timestamp(7654321L));
+    existingLocal.setInteger(8888);
+    SimpleEntity.setId(existingLocal, 100L);
+
+    ErraiEntityManager esem = csm.getExpectedStateEm();
+    ErraiEntityManager dsem = csm.getDesiredStateEm();
+
+    dsem.persist(existingLocal);
+    dsem.flush();
+
+    assertNull(esem.find(SimpleEntity.class, existingLocal.getId()));
+    assertEquals(dsem.find(SimpleEntity.class, existingLocal.getId()).toString(), existingLocal.toString());
+
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    expectedClientRequests.add(SyncRequestOperation.created(existingLocal)); // note that the mock server will ignore this for the purpose of this test
+
+    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    fakeServerResponses.add(new NewRemoteEntityResponse<SimpleEntity>(newRemote));
+    performColdSync(expectedClientRequests, fakeServerResponses);
+
+    // now the ID of existingLocal (still managed by dsem) should not be 100 anymore
+
+    assertFalse("Existing id " + existingLocal.getId() + " should not be the same as new object's ID " + newRemote.getId(),
+            existingLocal.getId() == newRemote.getId());
+    assertSame(existingLocal, dsem.find(SimpleEntity.class, existingLocal.getId()));
+
+    assertEquals(newRemote.toString(), dsem.find(SimpleEntity.class, newRemote.getId()).toString());
+    assertEquals(newRemote.toString(), esem.find(SimpleEntity.class, newRemote.getId()).toString());
+  }
+
   public void testUpdateFromServer() {
     SimpleEntity newEntity = new SimpleEntity();
     newEntity.setString("the string value");
