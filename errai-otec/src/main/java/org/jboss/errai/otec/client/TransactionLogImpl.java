@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.client;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
 
@@ -103,6 +104,13 @@ public class TransactionLogImpl implements TransactionLog {
         return Collections.emptyList();
       }
       else {
+        LogUtil.log("Could not find revision: " + revision);
+        LogUtil.log("Current Log:\n");
+        for (OTOperation operation : transactionLog) {
+          LogUtil.log("Rev:" + operation.getRevision() + ":" + operation);
+        }
+
+
         throw new OTException("unable to find revision in log: " + revision);
       }
     }

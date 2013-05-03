@@ -53,6 +53,7 @@ public class ServerOTPeerImpl implements OTPeer {
         .toSubject("ClientOTEngine")
         .set(MessageParts.Value, OpDto.fromOperation(operation))
         .set(MessageParts.SessionID, queueId)
+        .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);
 
     AtomicInteger atomicInteger = lastSentSequences.get(operation.getEntityId());

@@ -151,8 +151,12 @@ public abstract class Atomizer {
         }
 
         widget.setValue(newValue);
-        if (String.valueOf(newValue).length() >= newCursorPos) {
+        final int length = String.valueOf(newValue).length();
+        if (length >= newCursorPos) {
           widget.setCursorPos(newCursorPos);
+        }
+        else {
+          widget.setCursorPos(length);
         }
       }
     });

@@ -55,17 +55,13 @@ public class StringState implements State<String> {
   }
 
   public void insert(final int pos, final String data) {
-    try {
-      if (pos == buffer.length()) {
-        buffer.append(data);
-      }
-      else {
-        buffer.insert(pos, data);
-      }
+    if (pos == buffer.length()) {
+      buffer.append(data);
     }
-    catch (ArrayIndexOutOfBoundsException e) {
-      System.out.println();
+    else {
+      buffer.insert(pos, data);
     }
+
     updateStateId();
     notifyStateChangeListeners(pos, data.length());
   }

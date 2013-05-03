@@ -110,12 +110,17 @@ public class OTServerEngine extends AbstractOTEngine {
     try {
       final OTQueuedOperation queuedOp = incomingQueue.poll(10, TimeUnit.MINUTES);
 
+
+
       if (queuedOp == null) {
         return true;
       }
       else if (queuedOp.getEntityId() == -1) {
         return false;
       }
+//
+//      System.out.println("POLL_FROM_QUEUE:" + queuedOp.getOperation()
+//          + ";rev" + queuedOp.getOperation().getRevision() + ";entity:" + queuedOp.getEntityId());
 
       handleOperation(queuedOp);
     }
@@ -143,6 +148,8 @@ public class OTServerEngine extends AbstractOTEngine {
     if (remoteOp.getEntityId() == -1) {
       return;
     }
+
+   // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
 
     incomingQueue.offer(new OTQueuedOperation(remoteOp, peerId, remoteOp.getEntityId()));
   }

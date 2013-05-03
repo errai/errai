@@ -325,7 +325,6 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     assertAllLogsConsistent(expectedState, initialState);
   }
 
-
   @Test
   public void testCompoundTransformWithCompleteDeleteInsertCrossingRangeFront() {
     final String initialState = "The quick brown fox jumps over the lazy dog.";

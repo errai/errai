@@ -18,7 +18,6 @@ package org.jboss.errai.otec.client.atomizer;
 
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createOperation;
 
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
@@ -96,7 +95,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
     try {
       final OTOperation operation = toOperation();
-      LogUtil.log("FLUSH: " + operation);
+    //  LogUtil.log("FLUSH: " + operation + ";rev=" + operation.getRevision());
 
       //System.out.println("FLUSH:" + operation);
       engine.notifyOperation(operation);

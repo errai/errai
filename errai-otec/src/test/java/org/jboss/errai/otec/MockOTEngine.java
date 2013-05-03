@@ -38,7 +38,7 @@ public class MockOTEngine implements OTEngine {
 
   @Override
   public String getId() {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return "Mock!";
   }
 
   @Override
@@ -98,7 +98,7 @@ public class MockOTEngine implements OTEngine {
 
   @Override
   public void receive(String peerId, OTOperation remoteOp) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    notifiedOps.add(remoteOp);
   }
 
   @Override

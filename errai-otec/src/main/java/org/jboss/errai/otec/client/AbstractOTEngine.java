@@ -105,13 +105,17 @@ public abstract class AbstractOTEngine implements OTEngine {
   }
 
   @Override
-  public void notifyOperation(final OTOperation operation) {
+  public void notifyOperation(OTOperation operation) {
+//    final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
+//
+//    if (operation.getRevision() == -1) {
+//      operation = operation.getBasedOn(entity.getRevision());
+//    }
     notifyRemotes(applyLocally(operation));
   }
 
   public OTOperation applyLocally(OTOperation operation) {
     final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
-    getPeerState().flushEntityStreams(entity.getId());
 
     if (operation.getRevision() == -1) {
       operation = operation.getBasedOn(entity.getRevision());

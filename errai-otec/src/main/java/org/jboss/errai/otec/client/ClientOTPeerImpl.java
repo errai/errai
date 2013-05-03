@@ -52,6 +52,7 @@ public class ClientOTPeerImpl implements OTPeer {
     CommandMessage.create()
         .toSubject("ServerOTEngine")
         .set(MessageParts.Value, OpDto.fromOperation(operation))
+        .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);
 
     lastSentSequences.put(operation.getEntityId(), operation.getRevision());

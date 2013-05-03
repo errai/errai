@@ -63,7 +63,14 @@ public class Transformer {
   @SuppressWarnings("unchecked")
   public OTOperation transform() {
     final TransactionLog transactionLog = entity.getTransactionLog();
-    final List<OTOperation> localOps = transactionLog.getLogFromId(remoteOp.getRevision(), false);
+    final List<OTOperation> localOps;
+    try {
+      localOps = transactionLog.getLogFromId(remoteOp.getRevision(), false);
+    }
+    catch (OTException e) {
+      LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
+      throw e;
+    }
 
     if (localOps.isEmpty()) {
       OTOperationImpl.createOperation(remoteOp).apply(entity);
@@ -93,7 +100,7 @@ public class Transformer {
             applyOver = transform(applyOver, localOp);
           }
           else {
-            LogUtil.log("DIAMOND_RESOLVE: applyOver=" + applyOver.toString() + "; localOp=" + localOp + "; localOp.transformedFrom=" + localOp.getTransformedFrom());
+        //    LogUtil.log("DIAMOND_RESOLVE: applyOver=" + applyOver.toString() + "; localOp=" + localOp + "; localOp.transformedFrom=" + localOp.getTransformedFrom());
 
             applyOver = transform(applyOver,
                 transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
