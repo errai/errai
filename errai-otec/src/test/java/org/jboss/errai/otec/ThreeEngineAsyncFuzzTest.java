@@ -16,10 +16,13 @@
 
 package org.jboss.errai.otec;
 
-import org.junit.runner.RunWith;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.harness.ManyTimesTestRunner;
+import org.junit.runner.RunWith;
 
 /**
  * @author Mike Brock
@@ -34,7 +37,7 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
 
   @Override
   protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
-    if (local.getName().equals("Server"))  {
+    if (local.getName().equals("Server")) {
       return new SynchronousMockPeerlImpl(local, remote);
     }
     final AsynchronousMockPeerlImpl asynchronousMockPeerl = new AsynchronousMockPeerlImpl(local, remote);
@@ -43,7 +46,7 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
   }
 
   @Override
-  protected void resume() {
+  protected void startEnginesAndWait() {
     for (AsynchronousMockPeerlImpl peer : peersStarted)
       peer.start();
 
@@ -54,5 +57,7 @@ public class ThreeEngineAsyncFuzzTest extends ThreeEngineOtecTest {
     catch (Throwable t) {
       t.printStackTrace();
     }
+
+    stopServerEngineAndWait();
   }
 }

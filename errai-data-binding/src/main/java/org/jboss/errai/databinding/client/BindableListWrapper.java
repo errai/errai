@@ -208,5 +208,6 @@ public class BindableListWrapper<M> implements List<M> {
   
   public void removeChangeHandler(BindableListChangeHandler<M> handler) {
     handlers.remove(handler);
-  }
+  }  
+  
 }

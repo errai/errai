@@ -21,6 +21,7 @@ import org.mvel2.util.ParseTools;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -203,7 +204,7 @@ public class QuickDeps {
     for (final String pkg : wildcardPackages) {
 
       final String fqcn = pkg.concat(".").concat(name);
-      final String slashified = fqcn.replaceAll("\\.", "/");
+      final String slashified = fqcn.replace('.', '/');
       final String source = slashified.concat(".java");
       final String clazz = slashified.concat(".class");
 
@@ -211,15 +212,21 @@ public class QuickDeps {
       if ((url = classLoader.getResource(source)) != null
           || (url = classLoader.getResource(clazz)) != null) {
 
-        String urlFile = url.getFile();
+        String urlFile = URLDecoder.decode(url.getFile(), "UTF-8");
 
         int split;
         if ((split = urlFile.lastIndexOf('!')) != -1)  {
           urlFile = urlFile.substring(split + 2);
         }
 
+        final String path = URLDecoder.decode(new File(urlFile).getCanonicalFile().toURI().getPath(), "UTF-8");
+        System.out.println("urlFile: " + urlFile);
+        System.out.println("     to: " + path);
+        System.out.println(" source: " + source);
+        System.out.println("  clazz: " + clazz);
+
         if (urlFile.endsWith(source) || urlFile.endsWith(clazz)) {
-          if (split != -1 || new File(urlFile).getCanonicalFile().getAbsolutePath().equals(urlFile)) {
+          if (split != -1 || path.equalsIgnoreCase(urlFile)) {
             imports.put(fqcn, fqcn);
             imports.put(name, fqcn);
             usedTypes.add(fqcn);

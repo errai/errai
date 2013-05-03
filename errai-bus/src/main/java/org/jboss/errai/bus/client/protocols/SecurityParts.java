@@ -31,22 +31,22 @@ public enum SecurityParts {
   Password,
 
   /**
-   * A comma-seperated string of credentials required.
+   * A comma-separated string of credentials required.
    */
   CredentialsRequired,
 
   /**
-   * A comma-seperated string of roles.
+   * A comma-separated string of roles.
    */
   Roles,
 
   /**
-   * The actual credential objects associted with the session.
+   * The actual credential objects associated with the session.
    */
   Credentials,
 
   /**
-   * Message explaining the reason for a security rejectin.
+   * Message explaining the reason for a security rejection.
    */
   RejectedMessage
 }

@@ -16,12 +16,15 @@
 
 package org.jboss.errai.otec;
 
+import org.jboss.errai.otec.client.EntitySyncCompletionCallback;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.StringState;
+
 /**
  * @author Mike Brock
  */
 class MockEntitySyncCompletionCallback implements EntitySyncCompletionCallback<StringState> {
   @Override
   public void syncComplete(final OTEntity<StringState> entity) {
-    //System.out.println("InitialState: [\"" + entity.getState().get() + "\"]");
   }
 }

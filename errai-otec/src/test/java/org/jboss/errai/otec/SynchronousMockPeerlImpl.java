@@ -16,21 +16,16 @@
 
 package org.jboss.errai.otec;
 
-import org.jboss.errai.otec.operation.OTOperation;
-import org.jboss.errai.otec.operation.OTOperationImpl;
-import org.jboss.errai.otec.util.OTLogFormat;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.operation.OTOperationImpl;
+import org.jboss.errai.otec.client.util.OTLogUtil;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class SynchronousMockPeerlImpl implements OTPeer {
-  private OTEngine localEngine;
-  private OTEngine remoteEngine;
-
-  private final Map<Integer, Integer> lastTransmittedSequencees = new ConcurrentHashMap<Integer, Integer>();
+public class SynchronousMockPeerlImpl extends AbstractMockPeer {
 
   public SynchronousMockPeerlImpl(final OTEngine localEngine, final OTEngine engine) {
     this.localEngine = localEngine;
@@ -44,7 +39,7 @@ public class SynchronousMockPeerlImpl implements OTPeer {
 
   @Override
   public void send(final OTOperation operation) {
-    OTLogFormat.log("TRANSMIT",
+    OTLogUtil.log("TRANSMIT",
         operation.toString(),
         localEngine.toString(),
         remoteEngine.toString(),
@@ -52,46 +47,11 @@ public class SynchronousMockPeerlImpl implements OTPeer {
         "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
 
     //note: this is simulating sending these operations over the wire.
-    remoteEngine.getReceiveHandler(localEngine.getId(), operation.getEntityId())
-        .receive(OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
-
-    lastTransmittedSequencees.put(operation.getEntityId(), operation.getRevision());
-  }
-
-  @SuppressWarnings("unchecked")
-  public void beginSyncRemoteEntity(final String peerId,
-                                    final int entityId,
-                                    final EntitySyncCompletionCallback<State> callback) {
-
-    final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
-    localEngine.getEntityStateSpace().addEntity(new OTTestEntity(entity));
-
-    OTLogFormat.log("SYNC",  "",
-            remoteEngine.getName(),
-            localEngine.getName(),
-            entity.getRevision(),
-            "\"" + entity.getState().get() + "\"");
-
-    localEngine.associateEntity(remoteEngine.getId(), entityId);
-    remoteEngine.associateEntity(localEngine.getId(), entityId);
-
-    callback.syncComplete(entity);
-  }
-
-
-  @Override
-  public int getLastKnownRemoteSequence(final OTEntity entity) {
-    return 0;
+    remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
+    getPeerData(operation.getEntityId()).setLastKnownTransmittedSequence(operation.getRevision());
   }
 
   @Override
-  public int getLastTransmittedSequence(final OTEntity entity) {
-    final Integer integer = lastTransmittedSequencees.get(entity.getId());
-    return integer == null ? 0 : integer;
+  public void sendPurgeHint(Integer entityId, int revision) {
   }
-
-  public String toString() {
-    return remoteEngine.getName();
-  }
-
 }

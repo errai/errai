@@ -42,16 +42,15 @@ import java.util.concurrent.locks.ReentrantLock;
  * extent of the buffer, plus the delta from the beginning of the physical buffer in memory to the closest tail.
  * </p>
  *
+ * @author Mike Brock
  * @see BufferColor
  * @see BufferFilter
- *
- * @author Mike Brock
  * @since Errai v2.0
  */
 public class TransmissionBuffer implements Buffer {
   public static final long STARTING_SEQUENCE = 0;
 
-  public static final int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
+  public static final int DEFAULT_SEGMENT_SIZE = 1024 * 16;              /* 16 Kilobytes */
   private static final int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
 
   private static final int SEGMENT_HEADER_SIZE = 4;                      /* to accommodate a 32-bit integer  */
@@ -86,18 +85,18 @@ public class TransmissionBuffer implements Buffer {
    */
   private final AtomicLong writeSequenceNumber = new AtomicLong(STARTING_SEQUENCE) {
     @SuppressWarnings("UnusedDeclaration") public volatile long a1
-            ,
-            a2
-            ,
-            a3
-            ,
-            a4
-            ,
-            a5
-            ,
-            a6
-            ,
-            a7 = 7L;
+        ,
+        a2
+        ,
+        a3
+        ,
+        a4
+        ,
+        a5
+        ,
+        a6
+        ,
+        a7 = 7L;
   };
 
   /**
@@ -145,8 +144,11 @@ public class TransmissionBuffer implements Buffer {
    * Creates a heap allocated transmission buffer with a specified segment size and segments. The resulting buffer
    * will be of size: <i>segmentSize * segments</i>.
    *
-   * @param segmentSize the size of individual segments
-   * @param segments    the total number of segments
+   * @param segmentSize
+   *     the size of individual segments
+   * @param segments
+   *     the total number of segments
+   *
    * @return an instance of the transmission buffer
    */
   public static TransmissionBuffer create(final int segmentSize, final int segments) {
@@ -157,8 +159,11 @@ public class TransmissionBuffer implements Buffer {
    * Creates a direct allocated transmission buffer with a custom segment size and segments. The resulting buffer
    * will be of size: <i>segmentSize * segments</i>.
    *
-   * @param segmentSize the size of the individual segments
-   * @param segments    the total number of segments
+   * @param segmentSize
+   *     the size of the individual segments
+   * @param segments
+   *     the total number of segments
+   *
    * @return an instance of the transmission buffer
    */
   public static TransmissionBuffer createDirect(final int segmentSize, final int segments) {
@@ -169,8 +174,11 @@ public class TransmissionBuffer implements Buffer {
    * Writes from the {@link InputStream} into the buffer. Space is allocated and the data expected to be written
    * by checking the {@link java.io.InputStream#available()} value.
    *
-   * @param inputStream the input stream to read into the buffer.
-   * @param bufferColor the color of the data to be inserted.
+   * @param inputStream
+   *     the input stream to read into the buffer.
+   * @param bufferColor
+   *     the color of the data to be inserted.
+   *
    * @throws IOException
    */
   @Override
@@ -182,13 +190,20 @@ public class TransmissionBuffer implements Buffer {
    * Writes from an {@link InputStream} into the buffer using the specified {@param writeSize} to allocate space
    * in the buffer.
    *
-   * @param writeSize   the size in bytes to be allocated.
-   * @param inputStream the input stream to read into the buffer.
-   * @param bufferColor the color of the data to be inserted.
+   * @param writeSize
+   *     the size in bytes to be allocated.
+   * @param inputStream
+   *     the input stream to read into the buffer.
+   * @param bufferColor
+   *     the color of the data to be inserted.
+   *
    * @throws IOException
    */
   @Override
-  public void write(final int writeSize, final InputStream inputStream, final BufferColor bufferColor) throws IOException {
+  public void write(final int writeSize,
+                    final InputStream inputStream,
+                    final BufferColor bufferColor) throws IOException {
+
     if (writeSize > bufferSize) {
       throw new IOException("write size larger than buffer can fit");
     }
@@ -205,11 +220,8 @@ public class TransmissionBuffer implements Buffer {
       // write the chunk size header for the data we're about to write
       writeChunkSize(writeCursor, writeSize);
 
-      writeCursor += SEGMENT_HEADER_SIZE;
-
-      final int end = writeCursor + writeSize;
+      final int end = (writeCursor += SEGMENT_HEADER_SIZE) + writeSize;
       final int initialRead = end > bufferSize ? bufferSize : end;
-      final long newHead = writeHead + allocSize;
 
       /*
       * Allocate the segments to the this color
@@ -229,7 +241,7 @@ public class TransmissionBuffer implements Buffer {
         }
       }
 
-      headSequence = newHead;
+      headSequence = writeHead + allocSize;
     }
     finally {
       bufferColor.wake();
@@ -240,14 +252,17 @@ public class TransmissionBuffer implements Buffer {
   /**
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
    *
-   * @param outputStream the <tt>OutputStream</tt> to read into.
-   * @param bufferColor  the buffer color
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to read into.
+   * @param bufferColor
+   *     the buffer color
+   *
    * @return returns a boolean indicating whether or not the cursor advanced.
+   *
    * @throws IOException
    */
   @Override
   public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor) throws IOException {
-
     // obtain this color's read lock
     bufferColor.lock.lock();
 
@@ -258,7 +273,7 @@ public class TransmissionBuffer implements Buffer {
     long read = bufferColor.sequence.get();
     long lastSeq = read;
 
-   // checkOverflow(read);
+    // checkOverflow(read);
 
     try {
       while ((read = readNextChunk(writeHead, read, bufferColor, outputStream, null)) != -1)
@@ -280,14 +295,22 @@ public class TransmissionBuffer implements Buffer {
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
    * with a provided {@link BufferFilter}.
    *
-   * @param outputStream the <tt>OutputStream</tt> to read into.
-   * @param bufferColor  the buffer color
-   * @param callback     a callback to be used during the read operation.
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to read into.
+   * @param bufferColor
+   *     the buffer color
+   * @param callback
+   *     a callback to be used during the read operation.
+   *
    * @return returns a boolean indicating whether or not the cursor advanced.
+   *
    * @throws IOException
    */
   @Override
-  public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor, final BufferFilter callback) throws IOException {
+  public boolean read(final ByteWriteAdapter outputStream,
+                      final BufferColor bufferColor,
+                      final BufferFilter callback) throws IOException {
+
     return read(outputStream, bufferColor, callback, (int) headSequence % segments);
   }
 
@@ -295,18 +318,27 @@ public class TransmissionBuffer implements Buffer {
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
    * with a provided {@link BufferFilter}.
    *
-   * @param outputStream the <tt>OutputStream</tt> to read into.
-   * @param bufferColor  the buffer color.
-   * @param callback     a callback to be used during the read operation.
-   * @param sequence     the sequence number to seek from in the buffer.
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to read into.
+   * @param bufferColor
+   *     the buffer color.
+   * @param callback
+   *     a callback to be used during the read operation.
+   * @param sequence
+   *     the sequence number to seek from in the buffer.
+   *
    * @return returns a boolean indicating whether or not the cursor advanced.
+   *
    * @throws IOException
    */
   @Override
-  public boolean read(final ByteWriteAdapter outputStream, final BufferColor bufferColor, final BufferFilter callback, final long sequence) throws IOException {
+  public boolean read(final ByteWriteAdapter outputStream,
+                      final BufferColor bufferColor,
+                      final BufferFilter callback,
+                      final long sequence) throws IOException {
+
     // attempt to obtain this color's read lock
     if (bufferColor.lock.tryLock()) {
-
       try {
         // get the current head position.
         final long writeHead = headSequence;
@@ -344,15 +376,22 @@ public class TransmissionBuffer implements Buffer {
    * Reads from the buffer into the provided <tt>OutputStream</tt>, waiting indefinitely for data to arrive that is
    * relavent to the specified {@link BufferColor}
    *
-   * @param outputStream the <tt>OutputStream</tt> to read into.
-   * @param bufferColor  the buffer color
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to read into.
+   * @param bufferColor
+   *     the buffer color
+   *
    * @return returns a boolean indicating whether or not the cursor advanced.
-   * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
-   *                              the specified <tt>OuputStream</tt>
-   * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
+   *
+   * @throws IOException
+   *     an IOException is thrown if there is an inability to read from the buffer or write to
+   *     the specified <tt>OuputStream</tt>
+   * @throws InterruptedException
+   *     thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(final ByteWriteAdapter outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
+  public boolean readWait(final ByteWriteAdapter outputStream,
+                          final BufferColor bufferColor) throws InterruptedException, IOException {
     bufferColor.lock.lockInterruptibly();
 
     try {
@@ -391,18 +430,28 @@ public class TransmissionBuffer implements Buffer {
    * Reads from the buffer into the provided <tt>OutputStream</tt>, waiting up to the specified wait time for data
    * of the specified color to become available. Otherwise, the method returns without error, having read nothing.
    *
-   * @param unit         the unit of time that will be used as the basis for waiting
-   * @param time         the amount of time to wait in the specified units
-   * @param outputStream the <tt>OutputStream</tt> to write to.
-   * @param bufferColor  the buffer color
+   * @param unit
+   *     the unit of time that will be used as the basis for waiting
+   * @param time
+   *     the amount of time to wait in the specified units
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to write to.
+   * @param bufferColor
+   *     the buffer color
+   *
    * @return returns a boolean indicating whether or not the cursor advanced.
-   * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
-   *                              the specified <tt>OuputStream</tt>
-   * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
+   *
+   * @throws IOException
+   *     an IOException is thrown if there is an inability to read from the buffer or write to
+   *     the specified <tt>OuputStream</tt>
+   * @throws InterruptedException
+   *     thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(final TimeUnit unit, final long time,
-                          final ByteWriteAdapter outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
+  public boolean readWait(final TimeUnit unit,
+                          final long time,
+                          final ByteWriteAdapter outputStream,
+                          final BufferColor bufferColor) throws IOException, InterruptedException {
     final ReentrantLock lock = bufferColor.getLock();
     lock.lockInterruptibly();
 
@@ -445,15 +494,23 @@ public class TransmissionBuffer implements Buffer {
    * Reads from the buffer into the provided <tt>OutputStream</tt>, waiting indefinitely for data
    * of the specified color to become available. Otherwise, the method returns without error, having read nothing.
    *
-   * @param outputStream the <tt>OutputStream</tt> to write to.
-   * @param bufferColor  the buffer color
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to write to.
+   * @param bufferColor
+   *     the buffer color
+   *
    * @return returns a boolean indicating whether or not the cursor advanced.
-   * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
-   *                              the specified <tt>OutputStream</tt>
-   * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
+   *
+   * @throws IOException
+   *     an IOException is thrown if there is an inability to read from the buffer or write to
+   *     the specified <tt>OutputStream</tt>
+   * @throws InterruptedException
+   *     thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(final ByteWriteAdapter outputStream, final BufferColor bufferColor, final BufferFilter callback) throws IOException, InterruptedException {
+  public boolean readWait(final ByteWriteAdapter outputStream,
+                          final BufferColor bufferColor,
+                          final BufferFilter callback) throws IOException, InterruptedException {
     return readWait(TimeUnit.NANOSECONDS, -1, outputStream, bufferColor, callback);
   }
 
@@ -462,15 +519,24 @@ public class TransmissionBuffer implements Buffer {
    * of the specified color to become available with the provided callback. Otherwise, the method returns
    * without error, having read nothing.
    *
-   * @param outputStream the <tt>OutputStream</tt> to write to.
-   * @param bufferColor  the buffer color
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to write to.
+   * @param bufferColor
+   *     the buffer color
+   *
    * @return returns a boolean indicating whether or not the cursor advanced.
-   * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
-   *                              the specified <tt>OutputStream</tt>
-   * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
+   *
+   * @throws IOException
+   *     an IOException is thrown if there is an inability to read from the buffer or write to
+   *     the specified <tt>OutputStream</tt>
+   * @throws InterruptedException
+   *     thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public boolean readWait(final TimeUnit unit, final long time, final ByteWriteAdapter outputStream, final BufferColor bufferColor,
+  public boolean readWait(final TimeUnit unit,
+                          final long time,
+                          final ByteWriteAdapter outputStream,
+                          final BufferColor bufferColor,
                           final BufferFilter callback) throws IOException, InterruptedException {
     final ReentrantLock lock = bufferColor.lock;
     lock.lockInterruptibly();
@@ -540,9 +606,13 @@ public class TransmissionBuffer implements Buffer {
    * Returns the next segment containing data for the specified {@param bufferColor}, up to the specified
    * {@param head} position, from the specified {@param segment} position.
    *
-   * @param bufferColor the buffer color
-   * @param headSeq     the sequence position to seek up to
-   * @param colorSeq    the sequence position to seek from.
+   * @param bufferColor
+   *     the buffer color
+   * @param headSeq
+   *     the sequence position to seek up to
+   * @param colorSeq
+   *     the sequence position to seek from.
+   *
    * @return returns an long representing the initial sequence to read from
    */
   private long getNextSegment(final BufferColor bufferColor, final long headSeq, long colorSeq) {
@@ -562,16 +632,27 @@ public class TransmissionBuffer implements Buffer {
    * <p/>
    * This method accepts an optional {@link BufferFilter}. Null can be passed if no callback is needed.
    *
-   * @param head         the head position to seek to.
-   * @param sequence     the sequence position to seek from
-   * @param color        the data color for the buffer.
-   * @param outputStream the <tt>OutputStream</tt> to read into.
-   * @param callback     an optional {@link BufferFilter}.
+   * @param head
+   *     the head position to seek to.
+   * @param sequence
+   *     the sequence position to seek from
+   * @param color
+   *     the data color for the buffer.
+   * @param outputStream
+   *     the <tt>OutputStream</tt> to read into.
+   * @param callback
+   *     an optional {@link BufferFilter}.
+   *
    * @return returns the segment position after reading + 1.
-   * @throws IOException thrown if data cannot be read from the buffer or written to the OutputStream.
+   *
+   * @throws IOException
+   *     thrown if data cannot be read from the buffer or written to the OutputStream.
    */
-  private long readNextChunk(final long head, final long sequence, final BufferColor color,
-                             final ByteWriteAdapter outputStream, final BufferFilter callback) throws IOException {
+  private long readNextChunk(final long head,
+                             final long sequence,
+                             final BufferColor color,
+                             final ByteWriteAdapter outputStream,
+                             final BufferFilter callback) throws IOException {
 
     final long sequenceToRead = getNextSegment(color, head, sequence);
     if (sequenceToRead != -1) {
@@ -625,14 +706,16 @@ public class TransmissionBuffer implements Buffer {
   /**
    * Read in the size of the chunk.
    *
-   * @param position the position in the buffer to read the data.
+   * @param position
+   *     the position in the buffer to read the data.
+   *
    * @return the size in bytes.
    */
   private int readChunkSize(final int position) {
     return ((((int) _buffer.get(position + 3)) & 0xFF)) +
-            ((((int) _buffer.get(position + 2)) & 0xFF) << 8) +
-            ((((int) _buffer.get(position + 1)) & 0xFF) << 16) +
-            ((((int) _buffer.get(position)) & 0xFF) << 24);
+        ((((int) _buffer.get(position + 2)) & 0xFF) << 8) +
+        ((((int) _buffer.get(position + 1)) & 0xFF) << 16) +
+        ((((int) _buffer.get(position)) & 0xFF) << 24);
   }
 
   private void writeChunkSize(final int position, final int size) {
@@ -658,7 +741,9 @@ public class TransmissionBuffer implements Buffer {
       int pos = i * segmentSize;
       int length = readChunkSize(pos);
       build.append("Segment ").append(i).append(" <color:")
-              .append((int) segmentMap[i]).append(";length:").append(length).append(";location:").append(pos).append(">");
+          .append((int) segmentMap[i]).append(";length:").append(length)
+          .append(";location:").append(pos).append(">");
+
       pos += SEGMENT_HEADER_SIZE;
 
       final byte[] buf = new byte[length];

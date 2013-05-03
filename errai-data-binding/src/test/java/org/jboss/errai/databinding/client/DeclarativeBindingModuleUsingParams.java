@@ -57,7 +57,6 @@ public class DeclarativeBindingModuleUsingParams extends DeclarativeBindingSuper
   @Inject
   public void setLabel(@Bound Label id) {
     this.id = id;
-    this.id.setText("id");
   }
 
   @Override

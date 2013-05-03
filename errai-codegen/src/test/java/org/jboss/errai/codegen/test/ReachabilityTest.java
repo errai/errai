@@ -16,7 +16,7 @@
 
 package org.jboss.errai.codegen.test;
 
-import com.google.gwt.thirdparty.guava.common.io.Files;
+import com.google.common.io.CharStreams;
 import org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths;
 import org.jboss.errai.codegen.test.model.FakeBean;
 import org.jboss.errai.codegen.util.QuickDeps;
@@ -24,10 +24,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,13 +38,15 @@ import java.util.Set;
 public class ReachabilityTest {
 
   private static String getSource(Class clazz) throws Exception {
-    final URL url = clazz.getClassLoader().getResource(clazz.getName().replaceAll("\\.", "/") + ".java");
+    final String pathSeparator = File.separator;
+    final String name = clazz.getName().replace('.', pathSeparator.charAt(0)) + ".java";
+    final InputStream inputStream = clazz.getClassLoader().getResourceAsStream(name);
 
-    if (url == null) {
-      throw new RuntimeException("not found!");
+    if (inputStream == null) {
+      throw new RuntimeException("not found: " + name);
     }
 
-    return Files.toString(new File(url.getFile()), Charset.forName("UTF-8"));
+    return CharStreams.toString(new InputStreamReader(inputStream));
   }
 
   @Test
@@ -91,5 +93,4 @@ public class ReachabilityTest {
 
     Assert.assertEquals(expected, quickTypeDependencyList);
   }
-
 }

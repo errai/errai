@@ -63,7 +63,7 @@ public class BufferColor {
    * Wake up all threads which are monitoring this color.
    */
   public void wake() {
-    dataWaiting.signalAll();
+    dataWaiting.signal();
   }
 
   /**
@@ -77,7 +77,7 @@ public class BufferColor {
     return lock;
   }
 
-  private BufferColor(short color) {
+  private BufferColor(final short color) {
     this.color = color;
   }
 

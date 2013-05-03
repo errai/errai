@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.TextBox;
  * Tests functionality provided by the {@link DataBinder} API.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
- * @author David Cracauer <dcracauer@gmail.com>
  */
 public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
@@ -672,13 +671,17 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     DeclarativeBindingModuleUsingModel module =
          IOC.getBeanManager().lookupBean(DeclarativeBindingModuleUsingModel.class).getInstance();
     TestModel model = new TestModel();
-    model.setName("custom model");
+    model.setId(123);
+    model.setName("custom name");
     module.setModel(model);
 
     // ensure the model is proxied, caused by @ModelSetter
     assertTrue(module.getModel() instanceof BindableProxy);
     assertTrue(module.getModel().getName().equals(model.getName()));
+    assertEquals("123", module.getLabel().getText());
     
+    module.getLabel().setText("");
+    module.getDateTextBox().setText("");
     testDeclarativeBinding(module);
   }
 
@@ -692,7 +695,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public void testDeclarativeBinding(DeclarativeBindingModule module) {
     Label idLabel = module.getLabel();
     assertNotNull(idLabel);
-    assertEquals("id", idLabel.getText());
+    assertEquals("", idLabel.getText());
 
     TextBox nameTextBox = module.getNameTextBox();
     assertNotNull(nameTextBox);

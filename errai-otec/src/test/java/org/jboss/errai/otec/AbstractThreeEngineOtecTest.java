@@ -18,70 +18,58 @@ package org.jboss.errai.otec;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jboss.errai.otec.mutation.Mutation;
-import org.jboss.errai.otec.operation.OTOperation;
-import org.jboss.errai.otec.util.OTLogFormat;
+import org.jboss.errai.otec.client.OTClientEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.State;
+import org.jboss.errai.otec.client.StringState;
+import org.jboss.errai.otec.client.TransactionLog;
+import org.jboss.errai.otec.client.util.OTLogUtil;
+import org.jboss.errai.otec.harness.OTTestingLogger;
+import org.jboss.errai.otec.server.OTServerEngine;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractThreeEngineOtecTest {
-  private static final String PLAYBACK_FORMAT = "%-30s %-40s\n";
-  OTEngineImpl clientEngineA;
-  OTEngineImpl clientEngineB;
-  OTEngineImpl serverEngine;
+public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
+  OTClientEngine clientEngineA;
+  OTClientEngine clientEngineB;
+  OTServerEngine serverEngine;
   OTEntity serverEntity;
 
-  private static void renderPlaybackHeader(final String stateName, int currentRevision) {
-    System.out.println("===================================================");
-    System.out.println("NODE: " + stateName + "; CURRENT REVISION: " + currentRevision);
-    System.out.println();
-    System.out.printf(PLAYBACK_FORMAT, "MUTATION", "STATE");
-    System.out.println("---------------------------------------------------");
-
-  }
-
-  private static void renderInitialStatePlayback(final State state) {
-    System.out.printf(PLAYBACK_FORMAT, "SYNC", "\"" + String.valueOf(state.get()) + "\"");
-  }
-
-  private static void renderMutationPlayback(final Mutation mutation, final State state) {
-    System.out.printf(PLAYBACK_FORMAT, mutation, "\"" + String.valueOf(state.get()) + "\"");
-  }
+  @Rule
+  public TestName name = new TestName();
 
   protected void suspendEngines() {
-    clientEngineA.setMode(OTEngineMode.Offline);
-    clientEngineB.setMode(OTEngineMode.Offline);
-    serverEngine.setMode(OTEngineMode.Offline);
+    clientEngineA.stop(false);
+    clientEngineB.stop(false);
+    serverEngine.stop(false);
   }
 
   protected void resumeEnginesAB() {
-    serverEngine.setMode(OTEngineMode.Online);
-    clientEngineA.setMode(OTEngineMode.Online);
-    clientEngineB.setMode(OTEngineMode.Online);
+    serverEngine.start();
+    clientEngineA.start();
+    clientEngineB.start();
   }
 
   protected void resumeEnginesBA() {
-    serverEngine.setMode(OTEngineMode.Online);
-    clientEngineB.setMode(OTEngineMode.Online);
-    clientEngineA.setMode(OTEngineMode.Online);
+    serverEngine.start();
+    clientEngineB.start();
+    clientEngineA.start();
   }
 
-  protected abstract OTPeer createPeerFor(OTEngine local, OTEngine remote);
-
   protected void setupEngines(final String initialState) {
-    clientEngineA =  (OTEngineImpl) OTEngineImpl.createEngineWithSinglePeer("ClientA");
-    clientEngineB = (OTEngineImpl) OTEngineImpl.createEngineWithSinglePeer("ClientB");
-    serverEngine = (OTEngineImpl) OTEngineImpl.createEngineWithMultiplePeers("Server");
+    clientEngineA = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientA");
+    clientEngineB = (OTClientEngine) OTClientEngine.createEngineWithSinglePeer("ClientB");
+    serverEngine = (OTServerEngine) OTServerEngine.createEngineWithMultiplePeers("Server");
 
-    clientEngineA.registerPeer(createPeerFor(clientEngineA, serverEngine));
-    clientEngineB.registerPeer(createPeerFor(clientEngineB, serverEngine));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineA));
-    serverEngine.registerPeer(createPeerFor(serverEngine, clientEngineB));
+    peer(clientEngineA, serverEngine);
+    peer(clientEngineB, serverEngine);
 
-    final StringState state = new StringState(initialState);
+    final StringState state = StringState.of(initialState);
     serverEntity = serverEngine.getEntityStateSpace().addEntity(state);
 
     clientEngineA.syncRemoteEntity(serverEngine.getId(), serverEntity.getId(), new MockEntitySyncCompletionCallback());
@@ -93,9 +81,9 @@ public abstract class AbstractThreeEngineOtecTest {
     System.out.println("===================================================");
     System.out.println("\nCLIENT LOG REPLAYS:\n");
 
-    final State clientAState = new StringState(initialState);
-    final State clientBState = new StringState(initialState);
-    final State serverState = new StringState(initialState);
+    final State clientAState = StringState.of(initialState);
+    final State clientBState = StringState.of(initialState);
+    final State serverState = StringState.of(initialState);
 
     final TransactionLog transactionLogA =
         clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId()).getTransactionLog();
@@ -121,35 +109,20 @@ public abstract class AbstractThreeEngineOtecTest {
     System.out.println("------[end]------");
   }
 
-  @SuppressWarnings("unchecked")
-  private String replayLogAndReturnResult(final String name,
-                                          final State state,
-                                          int revision,
-                                          final TransactionLog log) {
-
-    renderPlaybackHeader(name, revision);
-    renderInitialStatePlayback(state);
-
-    for (final OTOperation operation : log.getCanonLog()) {
-      for (final Mutation mutation : operation.getMutations()) {
-        mutation.apply(state);
-        renderMutationPlayback(mutation, state);
-      }
-    }
-
-    System.out.println("RESULTING HASH: " + state.getHash());
-    System.out.println("\n");
-
-    return (String) state.get();
+  protected void stopServerEngineAndWait() {
+    serverEngine.stop(true);
   }
 
   @Before
   public void setUp() throws Exception {
-    OTLogFormat.printLogTitle();
+    assertSystemAssertionsEnabled();
+    OTLogUtil.setLogAdapter(new OTTestingLogger());
+
+    System.out.println("\n" + OTTestingLogger.repeat('*', 30) + " Starting: " + name.getMethodName() + " "
+        + OTTestingLogger.repeat('*', 30));
+    OTLogUtil.printLogTitle();
   }
 
   @After
-  public void tearDown() throws Exception {
-    System.out.println("===================================================");
-  }
+  public void tearDown() throws Exception {}
 }

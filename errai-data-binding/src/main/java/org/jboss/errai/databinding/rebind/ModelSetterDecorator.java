@@ -1,5 +1,8 @@
 package org.jboss.errai.databinding.rebind;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
@@ -8,13 +11,11 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.ModelSetter;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Causes the generation of a proxy that overrides a method annotated with {@link ModelSetter}. The
@@ -46,7 +47,8 @@ public class ModelSetterDecorator extends IOCDecoratorExtension<ModelSetter> {
           ctx.getTargetInjector().addProxyProperty("dataBinder", DataBinder.class, dataBinder);
 
     ctx.getTargetInjector().addInvokeBefore(ctx.getMethod(),
-          Stmt.nestedCall(proxyProperty.getProxiedValueReference()).invoke("setModel", Refs.get("a0")));
+          Stmt.nestedCall(proxyProperty.getProxiedValueReference())
+          .invoke("setModel", Refs.get("a0"), Stmt.loadStatic(InitialState.class, "FROM_MODEL")));
 
     ctx.getTargetInjector().addInvokeBefore(
           ctx.getMethod(),

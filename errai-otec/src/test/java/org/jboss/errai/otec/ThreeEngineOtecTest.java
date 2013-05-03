@@ -19,9 +19,13 @@ package org.jboss.errai.otec;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-import org.jboss.errai.otec.mutation.MutationType;
-import org.jboss.errai.otec.operation.OTOperation;
-import org.jboss.errai.otec.operation.OTOperationsFactory;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.harness.NoFuzz;
+import org.jboss.errai.otec.client.mutation.MutationType;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.operation.OTOperationsFactory;
 import org.junit.Test;
 
 /**
@@ -31,14 +35,15 @@ import org.junit.Test;
 
 public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
 
-  protected abstract void resume();
+  protected abstract void startEnginesAndWait();
 
   @Override
   protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
     return new SynchronousMockPeerlImpl(local, remote);
   }
 
-  @Test @NoFuzz
+  @Test
+  @NoFuzz
   public void testApplyLocalOperation() {
     setupEngines("Hello, World?");
 
@@ -58,7 +63,8 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     assertEquals("Hello, World!", serverEntity.getState().get());
   }
 
-  @Test @NoFuzz
+  @Test
+  @NoFuzz
   public void testNotifyRemoteOperation() {
     final String initialState = "Hello, World?";
     setupEngines(initialState);
@@ -72,7 +78,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
 
     clientEngineA.notifyOperation(op);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(1, serverEntity.getTransactionLog().getLog().size());
     assertTrue(serverEntity.getTransactionLog().getLog().contains(op));
@@ -91,7 +97,8 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
   /**
    * http://en.wikipedia.org/wiki/File:Basicot.png
    */
-  @Test @NoFuzz
+  @Test
+  @NoFuzz
   public void testWikipediaExampleXab() {
     final String initialState = "abc";
     setupEngines(initialState);
@@ -112,7 +119,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(insX);
     serverEngine.notifyOperation(delC);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "xab";
@@ -128,7 +135,8 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     assertAllLogsConsistent(expectedState, initialState);
   }
 
-  @Test @NoFuzz
+  @Test
+  @NoFuzz
   public void testWikipediaExampleBcx() {
     final String initialState = "abc";
     setupEngines(initialState);
@@ -149,7 +157,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(insX);
     serverEngine.notifyOperation(delA);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "bcx";
@@ -188,7 +196,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(delA);
     clientEngineB.notifyOperation(insT);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "got";
@@ -225,7 +233,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(insT);
     clientEngineB.notifyOperation(delA);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "got";
@@ -262,7 +270,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(delA1);
     clientEngineB.notifyOperation(delA2);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(1, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "got";
@@ -300,7 +308,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(insAT);
     clientEngineB.notifyOperation(insO);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "goat";
@@ -348,7 +356,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(ins3);
     clientEngineB.notifyOperation(delG);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "123o";
@@ -395,7 +403,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(ins2);
     clientEngineA.notifyOperation(ins3);
     clientEngineB.notifyOperation(insAT);
-    resume();
+    startEnginesAndWait();
 
     assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "g123oat";
@@ -434,7 +442,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(insX);
     serverEngine.notifyOperation(delC);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "xab";
@@ -483,7 +491,7 @@ public abstract class ThreeEngineOtecTest extends AbstractThreeEngineOtecTest {
     clientEngineA.notifyOperation(ins3);
     clientEngineB.notifyOperation(delG);
 
-    resume();
+    startEnginesAndWait();
 
     assertEquals(4, serverEntity.getTransactionLog().getCanonLog().size());
     final String expectedState = "123456o";

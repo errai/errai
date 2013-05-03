@@ -18,9 +18,12 @@ package org.jboss.errai.otec;
 
 import static junit.framework.Assert.assertEquals;
 
-import org.jboss.errai.otec.mutation.MutationType;
-import org.jboss.errai.otec.operation.OTOperation;
-import org.jboss.errai.otec.operation.OTOperationsFactory;
+import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTPeer;
+import org.jboss.errai.otec.client.mutation.MutationType;
+import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.operation.OTOperationsFactory;
 import org.junit.Test;
 
 /**
@@ -28,84 +31,86 @@ import org.junit.Test;
  */
 public class ThreeEngineConflictingInsertTest extends AbstractThreeEngineOtecTest {
   @Override
-  protected OTPeer createPeerFor(OTEngine local, OTEngine remote) {
+  protected OTPeer createPeerFor(final OTEngine local, final OTEngine remote) {
     return new SynchronousMockPeerlImpl(local, remote);
   }
 
   @Test
-   public void testConflictingInserts() {
-     final String initialState = "go";
-     setupEngines(initialState);
+  public void testConflictingInserts() {
+    final String initialState = "go";
+    setupEngines(initialState);
 
-     final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
-     final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
-     final OTOperation insA = opFactoryClientA.createOperation(clientAEntity)
-         .add(MutationType.Insert, 2, 'a')
-         .build();
+    final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation insA = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 2, 'a')
+        .build();
 
-     final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
-     final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
-     final OTOperation insT = opFactoryClientB.createOperation(clientBEntity)
-         .add(MutationType.Insert, 2, 't')
-         .build();
+    final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation insT = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 2, 't')
+        .build();
 
-     suspendEngines();
+    suspendEngines();
 
-     clientEngineA.notifyOperation(insA);
-     clientEngineB.notifyOperation(insT);
+    clientEngineA.notifyOperation(insA);
+    clientEngineB.notifyOperation(insT);
 
-     resumeEnginesAB();
+    resumeEnginesAB();
+    stopServerEngineAndWait();
 
-     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
-     final String expectedState = "goat";
-     assertEquals(expectedState, serverEntity.getState().get());
+    assertEquals(2, serverEntity.getTransactionLog().getLog().size());
+    final String expectedState = "goat";
+    assertEquals(expectedState, serverEntity.getState().get());
 
-     assertEquals(2, clientAEntity.getTransactionLog().getLog().size());
-     assertEquals(expectedState, clientAEntity.getState().get());
+    assertEquals(2, clientAEntity.getTransactionLog().getLog().size());
+    assertEquals(expectedState, clientAEntity.getState().get());
 
-     assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
-     assertEquals(expectedState, clientBEntity.getState().get());
+    assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
+    assertEquals(expectedState, clientBEntity.getState().get());
 
-     assertAllLogsConsistent(expectedState, initialState);
-   }
+    assertAllLogsConsistent(expectedState, initialState);
+  }
 
 
   @Test
-   public void testConflictingInsertsInvertedOrder() {
-     final String initialState = "go";
-     setupEngines(initialState);
+  public void testConflictingInsertsInvertedOrder() {
+    final String initialState = "go";
+    setupEngines(initialState);
 
-     final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
-     final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
-     final OTOperation insA = opFactoryClientA.createOperation(clientAEntity)
-         .add(MutationType.Insert, 2, 'a')
-         .build();
+    final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation insA = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 2, 'a')
+        .build();
 
-     final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
-     final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
-     final OTOperation insT = opFactoryClientB.createOperation(clientBEntity)
-         .add(MutationType.Insert, 2, 't')
-         .build();
+    final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTOperation insT = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 2, 't')
+        .build();
 
-     suspendEngines();
+    suspendEngines();
 
-     clientEngineA.notifyOperation(insA);
-     clientEngineB.notifyOperation(insT);
+    clientEngineA.notifyOperation(insA);
+    clientEngineB.notifyOperation(insT);
 
-     resumeEnginesBA();
+    resumeEnginesBA();
+    stopServerEngineAndWait();
 
-     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
-     final String expectedState = "gota";
-     assertEquals(expectedState, serverEntity.getState().get());
+    assertEquals(2, serverEntity.getTransactionLog().getLog().size());
+    final String expectedState = "gota";
+    assertEquals(expectedState, serverEntity.getState().get());
 
-     assertEquals(2, clientAEntity.getTransactionLog().getLog().size());
-     assertEquals(expectedState, clientAEntity.getState().get());
+    assertEquals(2, clientAEntity.getTransactionLog().getLog().size());
+    assertEquals(expectedState, clientAEntity.getState().get());
 
-     assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
-     assertEquals(expectedState, clientBEntity.getState().get());
+    assertEquals(2, clientBEntity.getTransactionLog().getLog().size());
+    assertEquals(expectedState, clientBEntity.getState().get());
 
-     assertAllLogsConsistent(expectedState, initialState);
-   }
+    assertAllLogsConsistent(expectedState, initialState);
+  }
 
   @Test
   public void testConflictingInsertsWithStringMutations() {
@@ -130,6 +135,7 @@ public class ThreeEngineConflictingInsertTest extends AbstractThreeEngineOtecTes
     clientEngineB.notifyOperation(insT);
 
     resumeEnginesAB();
+    stopServerEngineAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "goaat";
@@ -167,6 +173,7 @@ public class ThreeEngineConflictingInsertTest extends AbstractThreeEngineOtecTes
     clientEngineB.notifyOperation(insT);
 
     resumeEnginesBA();
+    stopServerEngineAndWait();
 
     assertEquals(2, serverEntity.getTransactionLog().getLog().size());
     final String expectedState = "gotaa";

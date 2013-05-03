@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ui.client.widget;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -124,6 +125,8 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
    *          removed.
    */
   public void setItems(List<M> items) {
+    boolean changed = this.items != items;
+    
     if (items instanceof BindableListWrapper) {
       this.items = (BindableListWrapper<M>) items;
     }
@@ -131,7 +134,9 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
       this.items = new BindableListWrapper<M>(items);
     }
 
-    this.items.addChangeHandler(this);
+    if (changed) {
+      this.items.addChangeHandler(this);
+    }
     init();
   }
 
@@ -200,6 +205,10 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
 
   @Override
   public List<M> getValue() {
+    if (items == null) {
+      items = new BindableListWrapper<M>(new ArrayList<M>()); 
+      items.addChangeHandler(this);
+    }
     return items;
   }
 
