@@ -131,7 +131,7 @@ public class Transformer {
                 final OTOperation replayRemoteOp = OTOperationImpl.createOperation(operation);
 
                 if (transform(localOp, replayRemoteOp).equals(localOp)) {
-                  localOpPrime.apply(entity);
+                  OTOperationImpl.createOperation(localOpPrime).apply(entity);
                   appliedLocal = true;
                 }
 
