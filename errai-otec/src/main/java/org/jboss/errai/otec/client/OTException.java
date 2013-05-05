@@ -24,4 +24,8 @@ public class OTException extends RuntimeException {
   public OTException(final String message) {
     super(message);
   }
+
+  public OTException(final String message, Throwable t) {
+    super(message, t);
+  }
 }
