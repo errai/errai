@@ -94,6 +94,47 @@ public class StringMutation implements Mutation<StringState, String> {
   }
 
   @Override
+  public Mutation<StringState, String> combineWith(final Mutation<StringState, String> combine) {
+    switch (combine.getType()) {
+      case Delete:
+        switch (type) {
+          case Delete:
+            if (position == combine.getPosition() + combine.length()) {
+              return of(MutationType.Delete, combine.getPosition(), combine.getData() + data);
+            }
+            break;
+
+        }
+
+        break;
+      case Insert:
+        switch (type) {
+          case Insert:
+            if (position == combine.getPosition() + combine.length()) {
+               return of(MutationType.Insert, combine.getPosition(), combine.getData() + data);
+            }
+            else if (position >= combine.getPosition() && position < combine.getPosition() + combine.length()) {
+              final String frontTrim = combine.getData().substring(0, position - combine.getPosition());
+              final String rearTrim = combine.getData().substring(position - combine.getPosition());
+              return of(MutationType.Insert, combine.getPosition(), frontTrim + data + rearTrim);
+            }
+            break;
+          case Delete:
+            if (position >= combine.getPosition() && position < combine.getPosition() + combine.length()) {
+              final String frontTrim = combine.getData().substring(0, position - combine.getPosition());
+              final String rearTrim = combine.getData().substring(position - combine.getPosition() + length());
+
+              return of(MutationType.Insert, combine.getPosition(), frontTrim.concat(rearTrim));
+            }
+            break;
+        }
+    }
+
+    return null;
+
+  }
+
+  @Override
   public String toString() {
     if (getData() == null) {
       return type.getShortName() + "[" + getPosition() + "]";

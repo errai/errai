@@ -19,11 +19,13 @@ package org.jboss.errai.otec;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
+import org.jboss.errai.otec.client.Transformer;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OTOperationImpl;
 import org.jboss.errai.otec.client.util.OTLogUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -53,8 +55,8 @@ public class SynchronousMockPeerlImpl extends AbstractMockPeer {
 
     //note: this is simulating sending these operations over the wire.
     if (!remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation))) {
-      final OTEntity entity = localEngine.getEntityStateSpace().getEntity(operation.getEntityId());
-      forceResync(operation.getEntityId(), entity.getRevision(), String.valueOf(entity.getState().get()));
+//      final OTEntity entity = localEngine.getEntityStateSpace().getEntity(operation.getEntityId());
+//      forceResync(operation.getEntityId(), entity.getRevision(), String.valueOf(entity.getState().get()));
     }
     getPeerData(operation.getEntityId()).setLastKnownTransmittedSequence(operation.getRevision());
   }
@@ -66,7 +68,7 @@ public class SynchronousMockPeerlImpl extends AbstractMockPeer {
   @Override
   public void forceResync(Integer entityId, int revision, String state) {
     final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
-    final String cliState = String.valueOf(entity.getState().get());
+   // final String cliState = String.valueOf(entity.getState().get());
     final List<OTOperation> canonLog = entity.getTransactionLog().getCanonLog();
 
     final List<OTOperation> replayOver = new ArrayList<OTOperation>();
@@ -81,13 +83,12 @@ public class SynchronousMockPeerlImpl extends AbstractMockPeer {
     entity.setRevision(revision);
     entity.resetRevisionCounterTo(revision);
 
+    final Collection<OTOperation> combined = Transformer.opCombinitator(remoteEngine, replayOver);
 
+//    for (OTOperation operation : combined) {
+//      remoteEngine.notifyOperation(operation);
+//    }
 
-
-
-
-    System.out.println();
-
-
+ //   System.out.println();
   }
 }
