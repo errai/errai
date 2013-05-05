@@ -24,11 +24,11 @@ public class OrderFixerTests {
 
     final OTEngine engine = OTClientEngine.createEngineWithSinglePeer();
 
-    final OTOperation op0 = OTOperationImpl.createOperation(engine, Collections.<Mutation>emptyList(), 0, 0, "");
-    final OTOperation op1 = OTOperationImpl.createOperation(engine, Collections.<Mutation>emptyList(), 0, 1, "");
-    final OTOperation op2 = OTOperationImpl.createOperation(engine, Collections.<Mutation>emptyList(), 0, 2, "");
-    final OTOperation op3 = OTOperationImpl.createOperation(engine, Collections.<Mutation>emptyList(), 0, 3, "");
-    final OTOperation op4 = OTOperationImpl.createOperation(engine, Collections.<Mutation>emptyList(), 0, 4, "");
+    final OTOperation op0 = OTOperationImpl.createOperation(engine, engine.getId(), Collections.<Mutation>emptyList(), 0, 0, "");
+    final OTOperation op1 = OTOperationImpl.createOperation(engine, engine.getId(), Collections.<Mutation>emptyList(), 0, 1, "");
+    final OTOperation op2 = OTOperationImpl.createOperation(engine, engine.getId(), Collections.<Mutation>emptyList(), 0, 2, "");
+    final OTOperation op3 = OTOperationImpl.createOperation(engine, engine.getId(), Collections.<Mutation>emptyList(), 0, 3, "");
+    final OTOperation op4 = OTOperationImpl.createOperation(engine, engine.getId(), Collections.<Mutation>emptyList(), 0, 4, "");
 
     final Collection<OTOperation> engineSubmissionPlan = clientStats.getEnginePlanFor(op0);
     final Collection<OTOperation> engineSubmissionPlan1 = clientStats.getEnginePlanFor(op2);

@@ -52,5 +52,5 @@ public interface OTEngine {
 
   void stop(boolean wait);
 
-  void receive(String peerId, OTOperation remoteOp);
+  boolean receive(String peerId, OTOperation remoteOp);
 }

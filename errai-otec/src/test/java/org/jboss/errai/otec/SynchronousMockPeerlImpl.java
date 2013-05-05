@@ -17,9 +17,14 @@
 package org.jboss.errai.otec;
 
 import org.jboss.errai.otec.client.OTEngine;
+import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.StringState;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OTOperationImpl;
 import org.jboss.errai.otec.client.util.OTLogUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -47,11 +52,42 @@ public class SynchronousMockPeerlImpl extends AbstractMockPeer {
         "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
 
     //note: this is simulating sending these operations over the wire.
-    remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation));
+    if (!remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation))) {
+      final OTEntity entity = localEngine.getEntityStateSpace().getEntity(operation.getEntityId());
+      forceResync(operation.getEntityId(), entity.getRevision(), String.valueOf(entity.getState().get()));
+    }
     getPeerData(operation.getEntityId()).setLastKnownTransmittedSequence(operation.getRevision());
   }
 
   @Override
   public void sendPurgeHint(Integer entityId, int revision) {
+  }
+
+  @Override
+  public void forceResync(Integer entityId, int revision, String state) {
+    final OTEntity entity = remoteEngine.getEntityStateSpace().getEntity(entityId);
+    final String cliState = String.valueOf(entity.getState().get());
+    final List<OTOperation> canonLog = entity.getTransactionLog().getCanonLog();
+
+    final List<OTOperation> replayOver = new ArrayList<OTOperation>();
+    for (OTOperation operation : canonLog) {
+      if (operation.getAgentId().equals(remoteEngine.getId())) {
+        replayOver.add(operation);
+      }
+    }
+
+    entity.getTransactionLog().purgeTo(entity.getRevision());
+    entity.getState().syncStateFrom(StringState.of(state));
+    entity.setRevision(revision);
+    entity.resetRevisionCounterTo(revision);
+
+
+
+
+
+
+    System.out.println();
+
+
   }
 }

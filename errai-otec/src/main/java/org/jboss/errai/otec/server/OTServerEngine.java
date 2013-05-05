@@ -17,6 +17,7 @@
 package org.jboss.errai.otec.server;
 
 import org.jboss.errai.otec.client.AbstractOTEngine;
+import org.jboss.errai.otec.client.BadSync;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEngineMode;
 import org.jboss.errai.otec.client.OTEntity;
@@ -169,6 +170,12 @@ public class OTServerEngine extends AbstractOTEngine {
 
       handleOperation(queuedOp);
     }
+    catch (BadSync sync) {
+      final OTEntity entity = getEntityStateSpace().getEntity(sync.getEntityId());
+
+      getPeerState().getPeer(sync.getAgentId())
+           .forceResync(sync.getEntityId(), entity.getRevision(),String.valueOf(entity.getState().get()));
+    }
     catch (Throwable t) {
       t.printStackTrace();
     }
@@ -189,9 +196,9 @@ public class OTServerEngine extends AbstractOTEngine {
   }
 
   @Override
-  public void receive(final String peerId, final OTOperation remoteOp) {
+  public boolean receive(final String peerId, final OTOperation remoteOp) {
     if (remoteOp.getEntityId() == -1) {
-      return;
+      return true;
     }
 
 
@@ -201,5 +208,6 @@ public class OTServerEngine extends AbstractOTEngine {
 
     incomingQueue.offer(new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId()));
     getPeerState().getPeer(peerId).setLastKnownRemoteSequence(remoteOp.getEntityId(), remoteOp.getRevision());
+    return true;
   }
 }

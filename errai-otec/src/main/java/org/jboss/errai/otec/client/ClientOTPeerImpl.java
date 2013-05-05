@@ -89,6 +89,10 @@ public class ClientOTPeerImpl implements OTPeer {
   }
 
   @Override
+  public void forceResync(Integer entityId, int revision, String state) {
+  }
+
+  @Override
   public void setLastKnownRemoteSequence(Integer entity, int sequence) {
   }
 

@@ -40,8 +40,14 @@ public class OTClientEngine extends AbstractOTEngine {
   }
 
   @Override
-  public void receive(final String peerId, final OTOperation remoteOp) {
-    applyFromRemote(remoteOp);
+  public boolean receive(final String peerId, final OTOperation remoteOp) {
+    try {
+      applyFromRemote(remoteOp);
+      return true;
+    }
+    catch (BadSync badSync) {
+      return false;
+    }
   }
 
   @Override

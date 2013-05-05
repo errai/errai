@@ -97,8 +97,9 @@ public class MockOTEngine implements OTEngine {
   }
 
   @Override
-  public void receive(String peerId, OTOperation remoteOp) {
+  public boolean receive(String peerId, OTOperation remoteOp) {
     notifiedOps.add(remoteOp);
+    return true;
   }
 
   @Override

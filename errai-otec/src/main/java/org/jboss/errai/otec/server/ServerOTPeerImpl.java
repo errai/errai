@@ -39,7 +39,7 @@ public class ServerOTPeerImpl implements OTPeer {
   protected final Map<Integer, PeerData> peerDataMap = new ConcurrentHashMap<Integer, PeerData>();
 
 
-  public ServerOTPeerImpl(String remoteEngineId, MessageBus bus) {
+  public ServerOTPeerImpl(final String remoteEngineId, final MessageBus bus) {
     this.queueId = remoteEngineId;
     this.bus = bus;
   }
@@ -50,7 +50,7 @@ public class ServerOTPeerImpl implements OTPeer {
   }
 
   @Override
-  public void sendPurgeHint(Integer entityId, int revision) {
+  public void sendPurgeHint(final Integer entityId, final int revision) {
     CommandMessage.create()
         .toSubject("ClientOTEngine")
         .set("PurgeHint", revision)
@@ -62,7 +62,7 @@ public class ServerOTPeerImpl implements OTPeer {
 
 
   @Override
-  public void send(OTOperation operation) {
+  public void send(final OTOperation operation) {
     CommandMessage.create()
         .toSubject("ClientOTEngine")
         .set(MessageParts.Value, OpDto.fromOperation(operation))
@@ -74,26 +74,39 @@ public class ServerOTPeerImpl implements OTPeer {
   }
 
   @Override
-  public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback) {
+  public void forceResync(final Integer entityId, final int revision, final String state) {
+    CommandMessage.create()
+        .toSubject("ClientOTEngineSyncService")
+        .set(MessageParts.Value, state)
+        .set("EntityId", entityId)
+        .set("Revision", revision)
+        .set(MessageParts.SessionID, queueId)
+        .set(MessageParts.PriorityProcessing, "1")
+        .sendNowWith(bus);
   }
 
   @Override
-  public void setLastKnownRemoteSequence(Integer entity, int sequence) {
+  public void beginSyncRemoteEntity(final String peerId, final int entityId, final EntitySyncCompletionCallback<State> callback) {
+  }
+
+  @Override
+  public void setLastKnownRemoteSequence(final Integer entity, final int sequence) {
     getPeerData(entity).setLastKnownRemoteSequence(sequence);
   }
 
   @Override
-  public int getLastKnownRemoteSequence(Integer entity) {
+  public int getLastKnownRemoteSequence(final Integer entity) {
     return getPeerData(entity).getLastKnownRemoteSequence();
   }
 
   @Override
-  public int getLastTransmittedSequence(Integer entity) {
+  public int getLastTransmittedSequence(final Integer entity) {
     final AtomicInteger seq = lastSentSequences.get(entity);
     return seq == null ? 0 : seq.get();
   }
 
-  protected PeerData getPeerData(Integer entityId) {
+
+  protected PeerData getPeerData(final Integer entityId) {
      PeerData peerData = peerDataMap.get(entityId);
      if (peerData == null) {
        peerDataMap.put(entityId, peerData = new PeerData());
@@ -109,7 +122,7 @@ public class ServerOTPeerImpl implements OTPeer {
       return lastKnownRemoteSequence.get();
     }
 
-    public void setLastKnownRemoteSequence(int lastKnownRemoteSequence) {
+    public void setLastKnownRemoteSequence(final int lastKnownRemoteSequence) {
       this.lastKnownRemoteSequence.set(lastKnownRemoteSequence);
     }
 
@@ -117,7 +130,7 @@ public class ServerOTPeerImpl implements OTPeer {
       return lastKnownTransmittedSequence.get();
     }
 
-    public void setLastKnownTransmittedSequence(int lastKnownTransmittedSequence) {
+    public void setLastKnownTransmittedSequence(final int lastKnownTransmittedSequence) {
       this.lastKnownTransmittedSequence.set(lastKnownTransmittedSequence);
     }
   }

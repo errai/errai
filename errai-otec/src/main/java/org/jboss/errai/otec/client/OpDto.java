@@ -92,6 +92,6 @@ public class OpDto {
       opPair = this.opPairDto.toOpPair(engine);
     }
 
-    return OTOperationImpl.createOperation(engine, mutations, entityId, revisionId, hash, opPair);
+    return OTOperationImpl.createOperation(engine, engine.getId(), mutations, entityId, revisionId, hash, opPair);
   }
 }
