@@ -29,8 +29,10 @@ import org.jboss.errai.otec.client.util.OTLogUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -70,6 +72,7 @@ public class Transformer {
       localOps = transactionLog.getLogFromId(remoteOp.getRevision(), true);
     }
     catch (OTException e) {
+      e.printStackTrace();
       throw new BadSync("", entity.getId(), remoteOp.getAgentId());
 
       //LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
@@ -91,27 +94,73 @@ public class Transformer {
             remoteOp.getRevision() + 1,
             "\"" + entity.getState().get() + "\"");
 
+
         transactionLog.pruneFromOperation(localOps.get(1));
+
+        for (final OTOperation op : localOps) {
+          if (op.getOuterPath() != op) {
+            op.getOuterPath().invalidate();
+          }
+        }
       }
 
       boolean first = true;
       boolean appliedRemoteOp = false;
       OTOperation applyOver = remoteOp;
+      OTOperation localOpPrime = null;
+      final Set<OTOperation> exclude = new HashSet<OTOperation>();
       for (final OTOperation localOp : localOps) {
+        if (!localOp.isValid() || exclude.contains(localOp)) {
+          continue;
+        }
+
         if (first) {
           first = false;
           if (applyOver.getRevisionHash().equals(localOp.getRevisionHash()) || localOp.isResolvedConflict()) {
             applyOver = transform(applyOver, localOp);
           }
           else {
-            OTOperation outerPath = localOp.getOuterPath();
-            applyOver = transform(applyOver,
-                transform(outerPath.getTransformedFrom().getLocalOp(),
-                    outerPath.getTransformedFrom().getRemoteOp()));
+            if (applyOver.getTransformedFrom() == null) {
+              // we have a history divergence that we now must deal with.
+              final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, localOp);
+              boolean appliedLocal = false;
+
+              localOpPrime = localOp;
+              for (final OTOperation operation : previousRemoteOpsTo) {
+                exclude.add(operation);
+                final OTOperation replayRemoteOp = OTOperationImpl.createOperation(operation);
+
+                if (transform(localOp, replayRemoteOp).equals(localOp)) {
+                  localOpPrime.apply(entity);
+                  appliedLocal = true;
+                }
+
+                replayRemoteOp.apply(entity);
+              }
+              applyOver = transform(applyOver, localOp);
+
+              if (!appliedLocal) {
+                localOpPrime = transform(localOpPrime, applyOver);
+                localOpPrime.apply(entity);
+              }
+
+              applyOver = transform(applyOver, localOp);
+              applyOver.apply(entity);
+              appliedRemoteOp = true;
+            }
+            else {
+              //  final OTOperation outerPath = localOp.getOuterPath();
+              applyOver = transform(applyOver,
+                  transform(localOp.getTransformedFrom().getLocalOp(),
+                      localOp.getTransformedFrom().getRemoteOp()));
+            }
           }
         }
         else {
-          final OTOperation ot = transform(localOp, applyOver);
+          OTOperation ot = transform(localOp, applyOver);
+          if (localOpPrime != null) {
+            ot = transform(ot, localOpPrime);
+          }
 
           if (!appliedRemoteOp && !localOp.equals(ot)) {
             applyOver.apply(entity);
@@ -400,5 +449,9 @@ public class Transformer {
 
   private Mutation adjustMutationToIndex(int idx, Mutation mutation) {
     return (idx == mutation.getPosition()) ? mutation : mutation.newBasedOn(idx);
+  }
+
+  public String toString() {
+    return String.valueOf(entity.getState().get());
   }
 }

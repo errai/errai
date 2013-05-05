@@ -38,6 +38,7 @@ public class OTOperationImpl implements OTOperation {
   private boolean resolvedConflict;
   private String revisionHash;
   private boolean nonCanon;
+  private boolean invalid = false;
   private int revision;
   private OTOperation outerPath;
 
@@ -181,8 +182,13 @@ public class OTOperationImpl implements OTOperation {
         return shouldPropagate();
 
       final State state = entity.getState();
+      final String stateString = String.valueOf(state.get());
 
       for (final Mutation mutation : mutations) {
+        if (stateString.contains(String.valueOf(mutation.getData()))) {
+          System.out.println();
+        }
+
         mutation.apply(state);
       }
 
@@ -251,6 +257,16 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public OTOperation getOuterPath() {
     return outerPath;
+  }
+
+  @Override
+  public boolean isValid() {
+    return !invalid;
+  }
+
+  @Override
+  public void invalidate() {
+    invalid = true;
   }
 
   @Override

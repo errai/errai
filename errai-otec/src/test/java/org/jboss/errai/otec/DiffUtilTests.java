@@ -21,7 +21,7 @@ import static junit.framework.Assert.assertEquals;
 
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.util.DiffUtil;
-import org.jboss.errai.otec.client.util.MeyersDiff;
+import org.jboss.errai.otec.client.util.DiffPatchMerge;
 import org.junit.Test;
 
 import java.util.LinkedList;
@@ -87,7 +87,7 @@ public class DiffUtilTests {
 
   @Test
   public void testMeyerDiff() {
-    final LinkedList<MeyersDiff.Diff> diffs = new MeyersDiff().diff_main("bob the cat", "bob a the cat!!!");
+    final LinkedList<DiffPatchMerge.Diff> diffs = new DiffPatchMerge().diff_main("bob the cat", "bob a the cat!!!");
 
     System.out.println(diffs);
 

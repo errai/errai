@@ -123,10 +123,13 @@ public class TransactionLogImpl implements TransactionLog {
 
       while (operationListIterator.hasPrevious()) {
         final OTOperation previous = operationListIterator.previous();
+
         if (!includeNonCanon && !previous.isCanon()) {
           continue;
         }
+
         operationList.add(previous);
+
         if (previous.getRevision() == revision) {
           Collections.reverse(operationList);
           return operationList;
@@ -137,15 +140,30 @@ public class TransactionLogImpl implements TransactionLog {
         return Collections.emptyList();
       }
       else {
-//        LogUtil.log("Could not find revision: " + revision);
-//        LogUtil.log("Current Log:\n");
-//        for (OTOperation operation : transactionLog) {
-//          LogUtil.log("Rev:" + operation.getRevision() + ":" + operation);
-//        }
-
-
         throw new OTException("unable to find revision in log: " + revision);
       }
+    }
+  }
+
+  @Override
+  public List<OTOperation> getPreviousRemoteOpsTo(OTOperation remoteOp, OTOperation localOp) {
+    final String agentId = remoteOp.getAgentId();
+    final int minRev = localOp.getRevision();
+    synchronized (lock) {
+      final ListIterator<OTOperation> iter = transactionLog.listIterator(transactionLog.size());
+
+      final List<OTOperation> collect = new LinkedList<OTOperation>();
+      while (iter.hasPrevious()) {
+        final OTOperation previous = iter.previous();
+        if (previous.getRevision() < minRev) {
+          break;
+        }
+        if (agentId.equals(previous.getAgentId())) {
+          collect.add(previous);
+        }
+      }
+
+      return collect;
     }
   }
 

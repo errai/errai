@@ -7,7 +7,7 @@ import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.operation.OTOperation;
-import org.jboss.errai.otec.client.util.MeyersDiff;
+import org.jboss.errai.otec.client.util.DiffPatchMerge;
 
 import java.util.LinkedList;
 
@@ -46,8 +46,8 @@ public class ClientOTBusService {
                  //   entity.setRevision(revision);
                   //  entity.resetRevisionCounterTo(revision);
                     final OTEntity entity = engine.getEntityStateSpace().getEntity(remoteOp.getEntityId());
-                    final LinkedList<MeyersDiff.Diff> diffs
-                        = new MeyersDiff().diff_main(String.valueOf(entity.getState().get()), value);
+                    final LinkedList<DiffPatchMerge.Diff> diffs
+                        = new DiffPatchMerge().diff_main(String.valueOf(entity.getState().get()), value);
 
 
                   }

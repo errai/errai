@@ -60,4 +60,8 @@ public interface OTOperation {
   OTOperation getOuterPath();
 
   void setOuterPath(OTOperation outerPath);
+
+  boolean isValid();
+
+  void invalidate();
 }

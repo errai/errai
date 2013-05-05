@@ -174,7 +174,7 @@ public class OTServerEngine extends AbstractOTEngine {
       final OTEntity entity = getEntityStateSpace().getEntity(sync.getEntityId());
 
       getPeerState().getPeer(sync.getAgentId())
-           .forceResync(sync.getEntityId(), entity.getRevision(),String.valueOf(entity.getState().get()));
+          .forceResync(sync.getEntityId(), entity.getRevision(), String.valueOf(entity.getState().get()));
     }
     catch (Throwable t) {
       t.printStackTrace();
@@ -202,12 +202,14 @@ public class OTServerEngine extends AbstractOTEngine {
     }
 
 
-  //  System.out.println("RECV:" + remoteOp + ";rev:" + remoteOp.getRevision() + ";peerId=" + peerId);
+    //  System.out.println("RECV:" + remoteOp + ";rev:" + remoteOp.getRevision() + ";peerId=" + peerId);
 
     // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
 
-    incomingQueue.offer(new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId()));
+    final OTQueuedOperation e = new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId());
+    //incomingQueue.offer(e);
     getPeerState().getPeer(peerId).setLastKnownRemoteSequence(remoteOp.getEntityId(), remoteOp.getRevision());
+    handleOperation(e);
     return true;
   }
 }
