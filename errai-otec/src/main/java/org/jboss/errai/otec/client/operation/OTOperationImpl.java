@@ -39,8 +39,32 @@ public class OTOperationImpl implements OTOperation {
   private String revisionHash;
   private boolean nonCanon;
   private int revision;
+  private OTOperation outerPath;
 
   private final OpPair transformedFrom;
+
+  private OTOperationImpl(final OTEngine engine,
+                           final String agentId,
+                           final List<Mutation> mutationList,
+                           final int entityId,
+                           final int revision,
+                           final String revisionHash,
+                           final OpPair transformedFrom,
+                           final boolean propagate,
+                           final boolean resolvedConflict,
+                           final OTOperation outerPath) {
+
+     this.engine = engine;
+     this.agentId = agentId;
+     this.mutations = mutationList;
+     this.entityId = entityId;
+     this.revision = revision;
+     this.revisionHash = revisionHash;
+     this.transformedFrom = transformedFrom;
+     this.propagate = propagate;
+     this.resolvedConflict = resolvedConflict;
+     this.outerPath = outerPath == null ? this : outerPath;
+   }
 
   private OTOperationImpl(final OTEngine engine,
                           final String agentId,
@@ -51,16 +75,8 @@ public class OTOperationImpl implements OTOperation {
                           final OpPair transformedFrom,
                           final boolean propagate,
                           final boolean resolvedConflict) {
+    this(engine, agentId, mutationList, entityId, revision, revisionHash, transformedFrom, propagate, resolvedConflict, null);
 
-    this.engine = engine;
-    this.agentId = agentId;
-    this.mutations = mutationList;
-    this.entityId = entityId;
-    this.revision = revision;
-    this.revisionHash = revisionHash;
-    this.transformedFrom = transformedFrom;
-    this.propagate = propagate;
-    this.resolvedConflict = resolvedConflict;
   }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
@@ -126,8 +142,9 @@ public class OTOperationImpl implements OTOperation {
   }
 
   public static OTOperation createOperation(final OTOperation op, final OpPair transformedFrom) {
-    return new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
+    final OTOperationImpl otOperation = new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
         op.getRevisionHash(), transformedFrom, op.shouldPropagate(), op.isResolvedConflict());
+    return otOperation;
   }
 
   @Override
@@ -218,12 +235,22 @@ public class OTOperationImpl implements OTOperation {
 
   @Override
   public OTOperation getBasedOn(final int revision) {
-    return new OTOperationImpl(engine, agentId, mutations, entityId, revision, revisionHash, transformedFrom, propagate, resolvedConflict);
+    return new OTOperationImpl(engine, agentId, mutations, entityId, revision, revisionHash, transformedFrom, propagate, resolvedConflict, outerPath);
   }
 
   @Override
   public OpPair getTransformedFrom() {
     return transformedFrom;
+  }
+
+  @Override
+  public void setOuterPath(OTOperation outerPath) {
+    this.outerPath = outerPath;
+  }
+
+  @Override
+  public OTOperation getOuterPath() {
+    return outerPath;
   }
 
   @Override

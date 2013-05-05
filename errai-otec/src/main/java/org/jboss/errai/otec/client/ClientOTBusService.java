@@ -31,7 +31,7 @@ public class ClientOTBusService {
         }
         else {
           final OTOperation remoteOp = opDto.otOperation(engine);
-          LogUtil.log("RECV:" + remoteOp);
+        //  LogUtil.log("RECV:" + remoteOp);
           if (!engine.receive("<ServerEngine>", remoteOp)) {
             MessageBuilder.createMessage()
                 .toSubject("ServerOTEngineSyncService")
