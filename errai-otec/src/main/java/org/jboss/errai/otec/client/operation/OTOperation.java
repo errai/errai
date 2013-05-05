@@ -56,4 +56,8 @@ public interface OTOperation {
   OpPair getTransformedFrom();
 
   String getAgentId();
+
+  OTOperation getOuterPath();
+
+  void setOuterPath(OTOperation outerPath);
 }

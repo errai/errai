@@ -104,15 +104,10 @@ public class Transformer {
             applyOver = transform(applyOver, localOp);
           }
           else {
-            //    LogUtil.log("DIAMOND_RESOLVE: applyOver=" + applyOver.toString() + "; localOp=" + localOp + "; localOp.transformedFrom=" + localOp.getTransformedFrom());
-
-//            if (localOp.getTransformedFrom() == null) {
-//              throw new BadSync("cannot resolve path", entity.getId(), remoteOp.getAgentId());
-//            }
-//            else {
+            OTOperation outerPath = localOp.getOuterPath();
             applyOver = transform(applyOver,
-                transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
-//            }
+                transform(outerPath.getTransformedFrom().getLocalOp(),
+                    outerPath.getTransformedFrom().getRemoteOp()));
           }
         }
         else {
@@ -310,6 +305,8 @@ public class Transformer {
     transformedOp =
         createLocalOnlyOperation(engine, remoteOp.getAgentId(), transformedMutations, entity,
             OpPair.of(remoteOp, localOp));
+
+    remoteOp.setOuterPath(transformedOp);
 
     if (resolvesConflict || remoteOp.isResolvedConflict()) {
       transformedOp.markAsResolvedConflict();
