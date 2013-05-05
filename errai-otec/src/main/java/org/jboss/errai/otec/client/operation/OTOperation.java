@@ -54,4 +54,6 @@ public interface OTOperation {
   void markAsResolvedConflict();
   
   OpPair getTransformedFrom();
+
+  String getAgentId();
 }

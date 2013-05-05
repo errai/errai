@@ -16,19 +16,24 @@
 
 package org.jboss.errai.otec.client;
 
-import org.jboss.errai.otec.client.operation.OTOperation;
-
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTPeer {
-  public String getId();
-  public void send(OTOperation operation);
-  public void sendPurgeHint(Integer entityId, int revision);
-  public void forceResync(Integer entityId, int revision, String state);
-  public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback);
-  public void setLastKnownRemoteSequence(Integer entity, int sequence);
-  public int getLastKnownRemoteSequence(Integer entity);
-  public int getLastTransmittedSequence(Integer entity);
+public class BadSync extends RuntimeException {
+  private final int entityId;
+  private final String agentId;
+
+  public BadSync(String message, int entityId, String agentId) {
+    super(message);
+    this.entityId = entityId;
+    this.agentId = agentId;
+  }
+
+  public int getEntityId() {
+    return entityId;
+  }
+
+  public String getAgentId() {
+    return agentId;
+  }
 }

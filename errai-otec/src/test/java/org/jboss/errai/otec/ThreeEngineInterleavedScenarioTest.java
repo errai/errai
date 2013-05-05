@@ -370,4 +370,95 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
 
     assertAllLogsConsistent(expectedState, initialState);
   }
+
+  @Test
+  public void testVeryLongHistoryDivergence() {
+    final String initialState = "";
+    setupEngines(initialState);
+
+    final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+
+    OTOperation a = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 0, "A")
+        .build();
+    OTOperation b = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 1, "B")
+        .build();
+    OTOperation c = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 2, "C")
+        .build();
+    OTOperation d = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 3, "D")
+        .build();
+    OTOperation e = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 4, "E")
+        .build();
+    OTOperation f = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 5, "F")
+        .build();
+    OTOperation g = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 6, "G")
+        .build();
+    OTOperation h = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 6, "H")
+        .build();
+
+
+    final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
+    OTOperation x = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 0, "X")
+        .build();
+    OTOperation y = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 1, "Y")
+        .build();
+    OTOperation z = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 2, "Z")
+        .build();
+
+
+    /** ClientA apply: "abc" **/
+    a = clientEngineA.applyLocally(a);
+    b = clientEngineA.applyLocally(b);
+    c = clientEngineA.applyLocally(c);
+
+    /** ClientA send : "abc" **/
+    clientEngineA.notifyRemotes(a);
+    clientEngineA.notifyRemotes(b);
+    clientEngineA.notifyRemotes(c);
+
+    /** ClientA apply: "defgd" **/
+    d = clientEngineA.applyLocally(d);
+    e = clientEngineA.applyLocally(e);
+    f = clientEngineA.applyLocally(f);
+    g = clientEngineA.applyLocally(g);
+    h = clientEngineA.applyLocally(h);
+
+    /** ClientB apply: "XY" **/
+    x = clientEngineB.applyLocally(x);
+    y = clientEngineB.applyLocally(y);
+
+    /** ClientB send: "XY" **/
+    clientEngineB.notifyRemotes(x);
+    clientEngineB.notifyRemotes(y);
+
+    /** ClientA send: "DEFG" **/
+    clientEngineA.notifyRemotes(d);
+    clientEngineA.notifyRemotes(e);
+    clientEngineA.notifyRemotes(f);
+    clientEngineA.notifyRemotes(g);
+
+
+    /** ClientB apply: "Z" **/
+    z = clientEngineB.applyLocally(z);
+
+    /** ClientA send: "H" **/
+    clientEngineA.notifyRemotes(h);
+
+    /** ClientB send: "Z" **/
+    clientEngineB.notifyRemotes(z);
+
+    stopServerEngineAndWait();
+  }
 }

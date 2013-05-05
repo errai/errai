@@ -41,7 +41,9 @@ public class Transformer {
   private final OTEntity entity;
   private final OTOperation remoteOp;
 
-  private Transformer(final OTEngine engine, final boolean remoteWins, final OTEntity entity,
+  private Transformer(final OTEngine engine,
+                      final boolean remoteWins,
+                      final OTEntity entity,
                       final OTOperation remoteOp) {
     this.engine = engine;
     this.remoteWins = remoteWins;
@@ -67,9 +69,11 @@ public class Transformer {
       localOps = transactionLog.getLogFromId(remoteOp.getRevision(), false);
     }
     catch (OTException e) {
+      throw new BadSync("", entity.getId(), remoteOp.getAgentId());
+
       //LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
-      throw e;
     }
+
 
     if (localOps.isEmpty()) {
       OTOperationImpl.createOperation(remoteOp).apply(entity);
@@ -99,10 +103,15 @@ public class Transformer {
             applyOver = transform(applyOver, localOp);
           }
           else {
-        //    LogUtil.log("DIAMOND_RESOLVE: applyOver=" + applyOver.toString() + "; localOp=" + localOp + "; localOp.transformedFrom=" + localOp.getTransformedFrom());
+            //    LogUtil.log("DIAMOND_RESOLVE: applyOver=" + applyOver.toString() + "; localOp=" + localOp + "; localOp.transformedFrom=" + localOp.getTransformedFrom());
 
-            applyOver = transform(applyOver,
-                transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
+            if (localOp.getTransformedFrom() == null) {
+               throw new BadSync("cannot resolve path", entity.getId(), remoteOp.getAgentId());
+            }
+            else {
+              applyOver = transform(applyOver,
+                  transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
+            }
           }
         }
         else {
@@ -178,7 +187,7 @@ public class Transformer {
               transactionLog.markDirty();
               final Mutation mutation = lm.newBasedOn(rm.getPosition());
               mutation.apply(rewind);
-              final OTOperation localOnlyOperation = createLocalOnlyOperation(engine, Collections.singletonList(mutation), entity, localOp.getRevision(), OpPair.of(remoteOp, localOp));
+              final OTOperation localOnlyOperation = createLocalOnlyOperation(engine, remoteOp.getAgentId(), Collections.singletonList(mutation), entity, localOp.getRevision(), OpPair.of(remoteOp, localOp));
               transactionLog.insertLog(localOp.getRevision(), localOnlyOperation);
 
               entity.getState().syncStateFrom(rewind);
@@ -251,7 +260,7 @@ public class Transformer {
                   entity.getState().syncStateFrom(rewind);
 
                   transactionLog.insertLog(remoteOp.getRevision(),
-                      createLocalOnlyOperation(engine, Collections.singletonList(mutation), entity, remoteOp.getRevision(), OpPair.of(remoteOp, localOp)));
+                      createLocalOnlyOperation(engine, remoteOp.getAgentId(), Collections.singletonList(mutation), entity, remoteOp.getRevision(), OpPair.of(remoteOp, localOp)));
                   transformedMutations.add(lm.newBasedOn(mutation.getPosition() + rm.length()));
 
                   continue;
@@ -298,7 +307,7 @@ public class Transformer {
     }
 
     transformedOp =
-        createLocalOnlyOperation(engine, transformedMutations, entity,
+        createLocalOnlyOperation(engine, remoteOp.getAgentId(), transformedMutations, entity,
             OpPair.of(remoteOp, localOp));
 
     if (resolvesConflict || remoteOp.isResolvedConflict()) {

@@ -128,13 +128,13 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
     final OTOperation operation;
     if (!insertState.get().isEmpty()) {
-      operation = createOperation(engine,
+      operation = createOperation(engine, engine.getId(),
           Collections.<Mutation>singletonList(StringMutation.of(MutationType.Insert, start, insertState.get())),
           entity.getId(), entity.getRevision(), entity.getState().getHash()
       );
     }
     else {
-      operation = createOperation(engine,
+      operation = createOperation(engine, engine.getId(),
           Collections.<Mutation>singletonList(StringMutation.of(MutationType.Delete, start, deleteState.get())),
           entity.getId(), entity.getRevision(), entity.getState().getHash()
       );

@@ -77,6 +77,10 @@ public class AsynchronousMockPeerlImpl extends AbstractMockPeer {
   }
 
   @Override
+  public void forceResync(Integer entityId, int revision, String state) {
+  }
+
+  @Override
   public void send(final OTOperation operation) {
     outboundQueue.offer(operation);
   }
