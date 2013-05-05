@@ -27,6 +27,7 @@ import org.jboss.errai.otec.client.operation.OpPair;
 import org.jboss.errai.otec.client.util.OTLogUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -66,7 +67,7 @@ public class Transformer {
     final TransactionLog transactionLog = entity.getTransactionLog();
     final List<OTOperation> localOps;
     try {
-      localOps = transactionLog.getLogFromId(remoteOp.getRevision(), false);
+      localOps = transactionLog.getLogFromId(remoteOp.getRevision(), true);
     }
     catch (OTException e) {
       throw new BadSync("", entity.getId(), remoteOp.getAgentId());
@@ -105,13 +106,13 @@ public class Transformer {
           else {
             //    LogUtil.log("DIAMOND_RESOLVE: applyOver=" + applyOver.toString() + "; localOp=" + localOp + "; localOp.transformedFrom=" + localOp.getTransformedFrom());
 
-            if (localOp.getTransformedFrom() == null) {
-               throw new BadSync("cannot resolve path", entity.getId(), remoteOp.getAgentId());
-            }
-            else {
-              applyOver = transform(applyOver,
-                  transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
-            }
+//            if (localOp.getTransformedFrom() == null) {
+//              throw new BadSync("cannot resolve path", entity.getId(), remoteOp.getAgentId());
+//            }
+//            else {
+            applyOver = transform(applyOver,
+                transform(localOp.getTransformedFrom().getLocalOp(), localOp.getTransformedFrom().getRemoteOp()));
+//            }
           }
         }
         else {
@@ -351,6 +352,53 @@ public class Transformer {
         throw new UnsupportedOperationException();
       }
     };
+  }
+
+  public static Collection<OTOperation> opCombinitator(OTEngine engine, List<OTOperation> toCombine) {
+    if (toCombine.size() == 1) {
+      return toCombine;
+    }
+
+    final List<Mutation> mutationList = new ArrayList<Mutation>();
+    for (final OTOperation op : toCombine) {
+      mutationList.addAll(op.getMutations());
+    }
+
+    final Mutation combined = mutationCombinitator(mutationList);
+
+    if (combined == null) {
+      return toCombine;
+    }
+    else {
+      final List<OTOperation> combinedOps = new ArrayList<OTOperation>();
+      final OTOperation operation
+          = OTOperationImpl.createOperation(engine,
+          toCombine.get(0).getAgentId(),
+          Collections.singletonList(combined),
+          toCombine.get(0).getEntityId(),
+          -1,
+          toCombine.get(0).getRevisionHash());
+
+      return Collections.singletonList(operation);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static Mutation mutationCombinitator(final Collection<Mutation> toCombine) {
+    Mutation last = null;
+    for (final Mutation m : toCombine) {
+      if (last != null) {
+        last = m.combineWith(last);
+        if (last == null) {
+          return null;
+        }
+      }
+      else {
+        last = m;
+      }
+    }
+
+    return last;
   }
 
   private Mutation adjustMutationToIndex(int idx, Mutation mutation) {

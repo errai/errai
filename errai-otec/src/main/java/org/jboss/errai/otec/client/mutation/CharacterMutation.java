@@ -75,6 +75,11 @@ public class CharacterMutation implements Mutation<StringState, Character> {
   }
 
   @Override
+  public Mutation<StringState, Character> combineWith(Mutation<StringState, Character> combine) {
+    return null;
+  }
+
+  @Override
   public Mutation<StringState, Character> newBasedOn(final int index) {
     return of(type, index, data);
   }
