@@ -67,6 +67,7 @@ public class StringState implements State<String> {
       notifyStateChangeListeners(pos, data.length());
     }
     catch (StringIndexOutOfBoundsException e) {
+      throw new OTException("could not update state", e);
     }
   }
 
@@ -83,6 +84,7 @@ public class StringState implements State<String> {
       notifyStateChangeListeners(pos, -length);
     }
     catch (StringIndexOutOfBoundsException e) {
+      throw new OTException("could not update state", e);
     }
   }
 
