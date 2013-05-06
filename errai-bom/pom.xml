@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ JBoss, Home of Professional Open Source
+ Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ contributors by the @authors tag. See the copyright.txt in the
+ distribution for a full listing of individual contributors.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.jboss.errai.bom</groupId>
+    <artifactId>errai-bom</artifactId>
+    <version>3.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>JBoss Errai BOM</name>
+    
+    <properties>
+    	<version.org.jboss.errai>${project.version}</version.org.jboss.errai>
+    </properties>
+
+    <dependencyManagement>
+
+        <dependencies>
+            <!-- Errai Core and ErraiBus -->
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-bus</artifactId>
+                <version>${version.org.jboss.errai}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>jsr250-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-ioc</artifactId>
+                <version>${version.org.jboss.errai}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>jsr250-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-tools</artifactId>
+                <version>${version.org.jboss.errai}</version>
+            </dependency>
+
+            <!-- Errai JAX-RS -->
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-jaxrs-client</artifactId>
+                <version>${version.org.jboss.errai}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-jaxrs-provider</artifactId>
+                <version>${version.org.jboss.errai}</version>
+            </dependency>
+
+            <!-- Errai CDI Integration Modules -->
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-cdi-client</artifactId>
+                <version>${version.org.jboss.errai}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-javax-enterprise</artifactId>
+                <version>${version.org.jboss.errai}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-weld-integration</artifactId>
+                <version>${version.org.jboss.errai}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>jboss7-support</artifactId>
+                <version>${version.org.jboss.errai}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${version.com.google.gwt}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev</artifactId>
+                <version>${version.com.google.gwt}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

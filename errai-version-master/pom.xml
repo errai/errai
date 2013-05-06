@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2011 JBoss, by Red Hat, Inc
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>Errai version master BOM</name>
+  <groupId>org.jboss.errai.bom</groupId>
+  <artifactId>errai-version-master</artifactId>
+  <version>3.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <!-- !!! The only single place for Errai project to define versions is here !!! -->
+  <!-- Keep versions property names in alphabetical order, please -->
+  <properties>
+  	<apache.maven.artifact.version>3.0.5</apache.maven.artifact.version>
+    <apache.maven.model.version>3.0.5</apache.maven.model.version>
+    <apache.maven.plugin.api.version>3.0.5</apache.maven.plugin.api.version>
+    <apache.maven.repo.metadata.version>3.0</apache.maven.repo.metadata.version>
+    <apache.maven.settings>3.0</apache.maven.settings>
+    <appengine.version>1.7.6</appengine.version>
+    <cal10n.version>0.7.4</cal10n.version>
+    <cdi.api.version>1.0-SP4</cdi.api.version>
+    <commons.logging.version>1.1.1</commons.logging.version>
+    <commons.codec.version>1.4</commons.codec.version>
+    <el.api.version>2.2</el.api.version>
+    <guava.version>13.0.1</guava.version>
+    <guice.version>3.0</guice.version>
+    <gwt.version>2.5.1</gwt.version>
+    <javassist.version>3.15.0-GA</javassist.version>
+    <javax.persitence.api.version>1.0</javax.persitence.api.version>
+    <jboss.logging.version>3.1.0.GA</jboss.logging.version>
+    <jboss.servlet.api.spec30.version>1.0.0.Final</jboss.servlet.api.spec30.version>
+    <jsr305.version>1.3.9</jsr305.version>
+    <junit.version>4.8.1</junit.version>
+    <log4.version>1.2.16</log4.version>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <mvel.version>2.1.Beta8</mvel.version>
+    <plexus.interpolation.version>1.14</plexus.interpolation.version>
+    <plexus.classwords.version>2.4</plexus.classwords.version>
+    <plexus.component.annotations.version>1.5.5</plexus.component.annotations.version>
+    <plexus.sisu.inject.version>2.3.0</plexus.sisu.inject.version>
+    <plexus.utils.version>1.5.5</plexus.utils.version>
+    <slf4j.version>1.6.1</slf4j.version>
+    <validation.api.version>1.0.0.GA</validation.api.version>
+  </properties>
+
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-model</artifactId>
+        <version>${apache.maven.model.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-repository-metadata</artifactId>
+        <version>${apache.maven.repo.metadata.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-artifact</artifactId>
+        <version>${apache.maven.artifact.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-settings</artifactId>
+        <version>${apache.maven.settings}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>${apache.maven.plugin.api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-interpolation</artifactId>
+        <version>${plexus.interpolation.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-component-annotations</artifactId>
+        <version>${plexus.component.annotations.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>${plexus.utils.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-classworlds</artifactId>
+        <version>${plexus.classwords.version}</version>
+      </dependency>
+
+
+      <dependency>
+        <groupId>org.sonatype.sisu</groupId>
+        <artifactId>sisu-inject-plexus</artifactId>
+        <version>${plexus.sisu.inject.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-user</artifactId>
+        <version>${gwt.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-dev</artifactId>
+        <version>${gwt.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${guice.version}</version>
+
+        <exclusions>
+          <exclusion>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
+
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava-gwt</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <!-- Guava and Reflections both depend on JSR 305 from the findbugs 
+        project, but they specify different versions. This pins to the newer of the 
+        two. -->
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${jsr305.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mvel</groupId>
+        <artifactId>mvel2</artifactId>
+        <version>${mvel.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>javax.persistence</groupId>
+        <artifactId>persistence-api</artifactId>
+        <version>${javax.persitence.api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-api-1.0-sdk</artifactId>
+        <version>${appengine.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-api-labs</artifactId>
+        <version>${appengine.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${commons.logging.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>${jboss.logging.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons.codec.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>${javassist.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.spec.javax.servlet</groupId>
+        <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+        <version>${jboss.servlet.api.spec30.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.enterprise</groupId>
+        <artifactId>cdi-api</artifactId>
+        <version>${cdi.api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.el</groupId>
+        <artifactId>el-api</artifactId>
+        <version>${el.api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>ch.qos.cal10n</groupId>
+        <artifactId>cal10n-api</artifactId>
+        <version>${cal10n.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+  <!-- TODO >
+  
+  --- add this in next refactoring iteration into parent pom dependency management ---
+  
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>org.jboss.errai.bom</groupId>
+  			<artifactId>errai-version-master</artifactId>
+  			<version>${project.version}</version>
+  			<type>pom</type>
+  			<scope>import</scope>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement-->
+  
+  
+  
+</project>
