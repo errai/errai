@@ -83,6 +83,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     // accumulation of pages with startingPage=true (for ensuring there is exactly one default page)
     List<MetaClass> defaultPages = new ArrayList<MetaClass>();
+    MetaClass loginPages = null;
 
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
@@ -102,15 +103,21 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                 " are both named [" + pageName + "]");
       }
       Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
-      if (annotation.startingPage() == true) {
+      if (annotation.startingPage()) {
         defaultPages.add(pageClass);
+        pageImplStmt = createSpecialPageLookup(ctor, pageImplStmt, "startingPage");
 
-        // need to assign the page impl to a variable and add it to the map twice
-        ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
-        pageImplStmt = Variable.get("defaultPage");
-        ctor.append(
-            Stmt.nestedCall(Refs.get("pagesByName"))
-                .invoke("put", "", pageImplStmt));
+      }
+      if (annotation.loginPage()) {
+        if (loginPages != null) {
+          throw new GenerationException(
+                  "Found more then one @Page with loginPage = true" + loginPages
+                          + "\nOnly one @Page with must de designated as the login page.");
+        }
+
+        loginPages = pageClass;
+        pageImplStmt = createSpecialPageLookup(ctor, pageImplStmt, "loginPage");
+
       }
       else if (pageName.equals("")) {
         throw new GenerationException(
@@ -118,8 +125,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                 " page with startingPage=true is permitted to have an empty path.");
       }
       ctor.append(
-          Stmt.nestedCall(Refs.get("pagesByName"))
-              .invoke("put", pageName, pageImplStmt));
+              Stmt.nestedCall(Refs.get("pagesByName"))
+                      .invoke("put", pageName, pageImplStmt));
     }
     ctor.finish();
 
@@ -150,6 +157,17 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     return out;
   }
+
+  private Statement createSpecialPageLookup(ConstructorBlockBuilder<?> ctor, Statement pageImplStmt, String name) {
+    // need to assign the page impl to a variable and add it to the map twice
+    ctor.append(Stmt.declareFinalVariable(name, PageNode.class, pageImplStmt));
+    pageImplStmt = Variable.get(name);
+    ctor.append(
+        Stmt.nestedCall(Refs.get("pagesByName"))
+            .invoke("put", !"startingPage".equals(name) ? name : "", pageImplStmt));
+    return pageImplStmt;
+  }
+
   /**
    * Generates a new instance of an anonymous inner class that implements the PageNode interface.
    * 

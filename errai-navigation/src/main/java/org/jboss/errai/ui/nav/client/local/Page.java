@@ -37,4 +37,6 @@ public @interface Page {
    * {@code true}. It is a compile-time error otherwise.
    */
   boolean startingPage() default false;
+
+  boolean loginPage() default false;
 }
