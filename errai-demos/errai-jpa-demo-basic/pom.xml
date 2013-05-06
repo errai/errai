@@ -634,8 +634,7 @@
                     <strict>true</strict>
                     <logLevel>INFO</logLevel>
                     <runTarget>index.html</runTarget>
-                    <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:CompileThreshold=100
-                        -XX:+UseNUMA</extraJvmArgs>
+                    <extraJvmArgs>${argLine} -Xmx1g -Xms1g -XX:MaxPermSize=200m -XX:+AggressiveOpts -XX:+UseNUMA -XX:CompileThreshold=100</extraJvmArgs>
                     <soyc>false</soyc>
                     <hostedWebapp>src/main/webapp/</hostedWebapp>
                     <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>
