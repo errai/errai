@@ -91,6 +91,10 @@ public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
         clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId()).getTransactionLog();
     final TransactionLog serverLog = serverEntity.getTransactionLog();
 
+    transactionLogA.cleanLog();
+    transactionLogB.cleanLog();
+    serverLog.cleanLog();
+
     final int revisionA = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId()).getRevision();
     final int revisionB = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId()).getRevision();
     final int revisionServer = serverEntity.getRevision();
@@ -124,5 +128,6 @@ public abstract class AbstractThreeEngineOtecTest extends AbstractOtecTest {
   }
 
   @After
-  public void tearDown() throws Exception {}
+  public void tearDown() throws Exception {
+  }
 }

@@ -26,7 +26,7 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public interface OTOperation {
+public interface OTOperation extends Comparable<OTOperation> {
   List<Mutation> getMutations();
 
   int getEntityId();

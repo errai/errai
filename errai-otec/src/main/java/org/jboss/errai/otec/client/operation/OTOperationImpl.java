@@ -45,27 +45,27 @@ public class OTOperationImpl implements OTOperation {
   private final OpPair transformedFrom;
 
   private OTOperationImpl(final OTEngine engine,
-                           final String agentId,
-                           final List<Mutation> mutationList,
-                           final int entityId,
-                           final int revision,
-                           final String revisionHash,
-                           final OpPair transformedFrom,
-                           final boolean propagate,
-                           final boolean resolvedConflict,
-                           final OTOperation outerPath) {
+                          final String agentId,
+                          final List<Mutation> mutationList,
+                          final int entityId,
+                          final int revision,
+                          final String revisionHash,
+                          final OpPair transformedFrom,
+                          final boolean propagate,
+                          final boolean resolvedConflict,
+                          final OTOperation outerPath) {
 
-     this.engine = engine;
-     this.agentId = agentId;
-     this.mutations = mutationList;
-     this.entityId = entityId;
-     this.revision = revision;
-     this.revisionHash = revisionHash;
-     this.transformedFrom = transformedFrom;
-     this.propagate = propagate;
-     this.resolvedConflict = resolvedConflict;
-     this.outerPath = outerPath == null ? this : outerPath;
-   }
+    this.engine = engine;
+    this.agentId = agentId;
+    this.mutations = mutationList;
+    this.entityId = entityId;
+    this.revision = revision;
+    this.revisionHash = revisionHash;
+    this.transformedFrom = transformedFrom;
+    this.propagate = propagate;
+    this.resolvedConflict = resolvedConflict;
+    this.outerPath = outerPath == null ? this : outerPath;
+  }
 
   private OTOperationImpl(final OTEngine engine,
                           final String agentId,
@@ -120,16 +120,6 @@ public class OTOperationImpl implements OTOperation {
 
     return new OTOperationImpl(engine, agentId, mutationList, entityId, revision, revisionHash, transformedFrom, true, false);
   }
-
-//  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
-//                                                     final List<Mutation> mutationList,
-//                                                     final int entityId,
-//                                                     final int revision,
-//                                                     final String revisionHash,
-//                                                     final OpPair transformedFrom) {
-//
-//    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, false, false);
-//  }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
                                                      final OTOperation operation) {
@@ -193,6 +183,10 @@ public class OTOperationImpl implements OTOperation {
       }
 
       assert OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
+
+      if (transformedFrom != null) {
+     //   transformedFrom.getRemoteOp().setOuterPath(this);
+      }
 
       entity.getTransactionLog().appendLog(this);
       entity.incrementRevision();
@@ -267,6 +261,11 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public void invalidate() {
     invalid = true;
+  }
+
+  @Override
+  public int compareTo(OTOperation o) {
+    return revision - o.getRevision();
   }
 
   @Override

@@ -27,8 +27,9 @@ import org.jboss.errai.otec.client.operation.OTOperationsListBuilder;
 import org.jboss.errai.otec.client.util.GUIDUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -213,10 +214,23 @@ public abstract class AbstractOTEngine implements OTEngine {
 
         final TransactionLog transactionLog = entity.getTransactionLog();
         synchronized (transactionLog.getLock()) {
-          final Collection<OTOperation> log
-              = transactionLog.getLogFromId(peer.getLastTransmittedSequence(entry.getKey()), true);
+          final List<OTOperation> log = transactionLog.getLog();
+          final int lastTransmittedSequence = peer.getLastTransmittedSequence(entry.getKey());
+          final List<OTOperation> toSend = new ArrayList<OTOperation>();
 
-          for (final OTOperation op : log) {
+          final ListIterator<OTOperation> iter = log.listIterator(log.size());
+          while (iter.hasPrevious()) {
+            final OTOperation previous = iter.previous();
+
+            toSend.add(previous);
+
+            if (previous.getRevision() == lastTransmittedSequence) {
+              Collections.reverse(toSend);
+              break;
+            }
+          }
+
+          for (final OTOperation op : toSend) {
             if (getPeerState().shouldForwardOperation(op)) {
               peer.send(op);
             }

@@ -29,7 +29,7 @@ public interface TransactionLog {
 
   public List<OTOperation> getLog();
 
-  public List<OTOperation> getLogFromId(int revision, boolean includeNonCanon);
+  public List<OTOperation> getLocalOpsSinceRemoteOperation(OTOperation remoteOp, boolean includeNonCanon);
 
   public List<OTOperation> getCanonLog();
 

@@ -461,7 +461,7 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
 
     stopServerEngineAndWait();
 
-    final String expected = "ABCXYZDEFGH";
+    final String expected = "XYZABCDEFGH";
 
     assertAllLogsConsistent(expected, initialState);
 
