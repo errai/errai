@@ -59,4 +59,12 @@ public class Contact {
 	public String getFullName() {
 		return firstName + " " + lastName;
 	}
+
+  @Override
+  public String toString() {
+    return "Contact [id=" + id + ", firstName=" + firstName + ", lastName="
+        + lastName + ", emailAddress=" + emailAddress + "]";
+  }
+	
+	
 }

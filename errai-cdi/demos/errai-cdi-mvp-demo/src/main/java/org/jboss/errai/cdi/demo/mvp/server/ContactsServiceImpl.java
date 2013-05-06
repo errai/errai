@@ -3,6 +3,7 @@ package org.jboss.errai.cdi.demo.mvp.server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -13,6 +14,8 @@ import org.jboss.errai.cdi.demo.mvp.client.shared.ContactsService;
 
 @ApplicationScoped @Service
 public class ContactsServiceImpl implements ContactsService {
+  
+  private final AtomicInteger id = new AtomicInteger();
 
   private static final String[] contactsFirstNameData = new String[] {
       "Hollie", "Emerson", "Healy", "Brigitte", "Elba", "Claudio",
@@ -46,23 +49,26 @@ public class ContactsServiceImpl implements ContactsService {
     // TODO: Create a real UID for each contact
     //
     for (int i = 0; i < contactsFirstNameData.length && i < contactsLastNameData.length && i < contactsEmailData.length; ++i) {
-      Contact contact = new Contact(String.valueOf(i), contactsFirstNameData[i], contactsLastNameData[i], contactsEmailData[i]);
+      Contact contact = new Contact(String.valueOf(id.incrementAndGet()), contactsFirstNameData[i], contactsLastNameData[i], contactsEmailData[i]);
       contacts.put(contact.getId(), contact); 
     }
   }
   
+  @Override
   public Contact addContact(Contact contact) {
-    contact.setId(String.valueOf(contacts.size()));
+    contact.setId(String.valueOf(id.incrementAndGet()));
     contacts.put(contact.getId(), contact); 
     return contact;
   }
 
+  @Override
   public Contact updateContact(Contact contact) {
     contacts.remove(contact.getId());
     contacts.put(contact.getId(), contact); 
     return contact;
   }
 
+  @Override
   public Boolean deleteContact(String id) {
     contacts.remove(id);
     return true;
@@ -78,6 +84,7 @@ public class ContactsServiceImpl implements ContactsService {
     return getContactDetails();
   }
   
+  @Override
   public ArrayList<ContactDetails> getContactDetails() {
     ArrayList<ContactDetails> contactDetails = new ArrayList<ContactDetails>();
     
@@ -90,6 +97,7 @@ public class ContactsServiceImpl implements ContactsService {
     return contactDetails;
   }
 
+  @Override
   public Contact getContact(String id) {
     return contacts.get(id);
   }
