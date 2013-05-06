@@ -48,7 +48,7 @@
   <modules>
     <module>errai-jaxrs-client</module>
     <module>errai-jaxrs-provider</module>
-    <module>demos/jaxrs-demo</module>
+    <!-- module>demos/jaxrs-demo</module-->
   </modules>
 
   <dependencyManagement>

@@ -26,83 +26,36 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <weld.version>1.1.6.Final</weld.version>
-        <jetty.version>6.1.25</jetty.version>
-        <slf4j.version>1.6.1</slf4j.version>
-        <validation.api.version>1.0.0.GA</validation.api.version>
-        <mvel.version>2.1.Beta8</mvel.version>
-        <cdiapi.version>1.0-SP4</cdiapi.version>
-        <gwt.version>2.5.1</gwt.version>
-        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
-        <maven.war.plugin.version>2.3</maven.war.plugin.version>
-        <maven.deploy.plugin.version>2.1.1</maven.deploy.plugin.version>
+        <webDescriptor>jboss7</webDescriptor>
+        <skipTests>true</skipTests>
         <argLine></argLine>
+        <!-- maven plugins versions -->
+        <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
+        <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
+        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+        <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+        <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- Project Dependencies -->
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-ioc</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.inject</groupId>
-                        <artifactId>javax.inject</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.annotation</groupId>
-                        <artifactId>jsr250-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.enterprise</groupId>
-                <artifactId>cdi-api</artifactId>
-                <version>${cdiapi.version}</version>
-            </dependency>
-
-            <!-- CDI Integration Modules -->
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-cdi-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-cdi-jetty</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-uibinder</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-weld-integration</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-javax-enterprise</artifactId>
-                <version>${project.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <!-- GWT -->
-            <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-user</artifactId>
-                <version>${gwt.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.errai.bom</groupId>
+				<artifactId>errai-version-master</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.jboss.errai.bom</groupId>
+				<artifactId>errai-bom</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -235,7 +188,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.version}</version>
+                <version>${maven.gwt.plugin.version}</version>
                 <configuration>
                     <logLevel>INFO</logLevel>
                     <runTarget>Contacts.html</runTarget>
@@ -278,8 +231,9 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.4.1</version>
+                <version>${maven.clean.plugin.version}</version>
                 <configuration>
                     <filesets>
                         <fileset>

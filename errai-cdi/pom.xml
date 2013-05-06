@@ -66,11 +66,11 @@
         <module>jetty</module>
         <module>errai-cdi-client</module>
         <module>weld-integration</module>
-        <module>demos/errai-cdi-mobile-demo</module>
+        <!-- module>demos/errai-cdi-mobile-demo</module>
         <module>demos/errai-cdi-mvp-demo</module>
         <module>demos/errai-cdi-stock-demo</module>
         <module>demos/errai-cdi-tagcloud-demo</module>
-        <module>demos/errai-cdi-stress-test</module>
+        <module>demos/errai-cdi-stress-test</module-->
     </modules>
 
     <dependencyManagement>

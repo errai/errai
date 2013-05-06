@@ -26,23 +26,41 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <weld.version>1.1.6.Final</weld.version>
-        <jetty.version>6.1.25</jetty.version>
-        <slf4j.version>1.6.1</slf4j.version>
-        <validation.api.version>1.0.0.GA</validation.api.version>
-        <mvel.version>2.1.Beta8</mvel.version>
-        <cdiapi.version>1.0-SP4</cdiapi.version>
-        <gwt.version>2.5.1</gwt.version>
-        <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
-        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+        <webDescriptor>jboss7</webDescriptor>
+        <skipTests>true</skipTests>
         <argLine></argLine>
+        <!-- maven plugins versions -->
+        <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
+        <maven.surefire.plugin.version>2.5</maven.surefire.plugin.version>
+        <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
+        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+        <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+        <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+			<dependency>
+				<groupId>org.jboss.errai.bom</groupId>
+				<artifactId>errai-version-master</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.jboss.errai.bom</groupId>
+				<artifactId>errai-bom</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+        
             <!-- Note: everything in following section only exists to converge the version
                 numbers inherited transitively from the ostermiller-syntax dependency. If we switch to some
                 other syntax highlighter, all of this stuff can (and should) be removed.
+                
+                !!! CLEAN UP THIS ONE !!!  - what is this ???
             -->
             <dependency>
                 <groupId>org.apache.maven</groupId>
@@ -74,56 +92,7 @@
                 <artifactId>plexus-container-default</artifactId>
                 <version>1.0.0</version>
             </dependency>
-
-            <!-- Project Dependencies -->
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-ioc</artifactId>
-                <version>${project.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.inject</groupId>
-                        <artifactId>javax.inject</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.annotation</groupId>
-                        <artifactId>jsr250-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.enterprise</groupId>
-                <artifactId>cdi-api</artifactId>
-                <version>${cdiapi.version}</version>
-            </dependency>
-
-            <!-- CDI Integration Modules -->
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-cdi-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-cdi-jetty</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-html5</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-             <!-- GWT -->
-            <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-user</artifactId>
-                <version>${gwt.version}</version>
-            </dependency>
-        </dependencies>
+		</dependencies>
     </dependencyManagement>
 
     <dependencies>
@@ -224,7 +193,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.version}</version>
+                <version>${maven.gwt.plugin.version}</version>
                 <configuration>
                     <logLevel>INFO</logLevel>
                     <runTarget>App.html</runTarget>

@@ -91,11 +91,12 @@
   </properties>
 
   <modules>
+  	<module>errai-version-master</module>
     <module>errai-common</module>
     <module>errai-javax-enterprise</module>
     <module>errai-ioc</module>
     <module>errai-bus</module>
-    <module>errai-bus/demos</module>
+    <!-- module>errai-bus/demos</module-->
     <module>errai-tools</module>
     <module>errai-codegen</module>
     <module>errai-marshalling</module>
@@ -124,6 +125,7 @@
     <module>errai-otec</module>
     <module>errai-security</module>
     <module>errai-cdi-async-databinding-tests</module>
+    <module>errai-bom</module>
   </modules>
 
   <dependencies>
@@ -685,7 +687,7 @@
         <argLine>-d32 -XX:CompileThreshold=1000</argLine>
       </properties>
     </profile>
-
+    
     <profile>
       <id>integration-test</id>
       <build>
@@ -735,6 +737,14 @@
         </snapshotRepository>
       </distributionManagement>
     </profile>
+    
+    <profile>
+      <id>withDemos</id>
+      <modules>
+        <module>errai-demos</module>
+      </modules>
+    </profile>
+    
     
     <profile>
       <id>distro</id>

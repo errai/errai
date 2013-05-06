@@ -19,6 +19,13 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+	<parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>10</version>
+        <relativePath/>
+    </parent>
+
     <groupId>org.jboss.errai.bom</groupId>
     <artifactId>errai-bom</artifactId>
     <version>3.0-SNAPSHOT</version>
@@ -106,18 +113,33 @@
                 <artifactId>jboss7-support</artifactId>
                 <version>${version.org.jboss.errai}</version>
             </dependency>
-
+            
+	        <dependency>
+	            <groupId>org.jboss.errai</groupId>
+	            <artifactId>errai-common</artifactId>
+                <version>${version.org.jboss.errai}</version>
+	        </dependency>
+	        
+			<dependency>
+			    <groupId>org.jboss.errai</groupId>
+			    <artifactId>errai-html5</artifactId>
+                <version>${version.org.jboss.errai}</version>
+			</dependency>
+	        
             <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-user</artifactId>
-                <version>${version.com.google.gwt}</version>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-cdi-jetty</artifactId>
+                <version>${version.org.jboss.errai}</version>
             </dependency>
+	        
+			<dependency>
+			    <groupId>org.jboss.errai</groupId>
+			    <artifactId>errai-uibinder</artifactId>
+                <version>${version.org.jboss.errai}</version>
+			</dependency>
+	        
+            
 
-            <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-dev</artifactId>
-                <version>${version.com.google.gwt}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
