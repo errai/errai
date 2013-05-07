@@ -39,6 +39,8 @@ public interface OTOperation extends Comparable<OTOperation> {
 
   boolean apply(OTEntity entity);
 
+  boolean apply(OTEntity entity, boolean transiently);
+
   OTEngine getEngine();
 
   boolean isNoop();

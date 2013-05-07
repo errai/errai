@@ -23,9 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -174,6 +176,8 @@ public class TransactionLogImpl implements TransactionLog {
         }
       }
 
+      Collections.reverse(collect);
+
       return collect;
     }
   }
@@ -193,12 +197,10 @@ public class TransactionLogImpl implements TransactionLog {
 
   @SuppressWarnings("unchecked")
   @Override
-  public State getEffectiveStateForRevision(final int revision) {
+  public LogQuery getEffectiveStateForRevision(final int revision) {
     synchronized (lock) {
       final StateSnapshot latestSnapshotState = getLatestParentSnapshot(revision);
       final State stateToTranslate = latestSnapshotState.getState().snapshot();
-
-      //   Collections.sort(transactionLog);
 
       final ListIterator<OTOperation> operationListIterator
           = transactionLog.listIterator(transactionLog.size());
@@ -211,24 +213,27 @@ public class TransactionLogImpl implements TransactionLog {
 
       System.out.println("start replay from index: " + operationListIterator.nextIndex());
 
-
+      final Set<OTOperation> contingent = new LinkedHashSet<OTOperation>();
       while (operationListIterator.hasNext()) {
         final OTOperation op = operationListIterator.next();
 
         if (!op.isCanon()) {
-          System.out.println("skip:" + op);
           continue;
         }
 
         if (op.getRevision() < revision) {
           for (final Mutation mutation : op.getMutations()) {
+            if (((String)stateToTranslate.get()).contains(String.valueOf(mutation.getData()))) {
+              System.out.println();
+            }
             mutation.apply(stateToTranslate);
           }
+          contingent.add(op);
         }
       }
 
       makeSnapshot(revision, stateToTranslate);
-      return stateToTranslate;
+      return new LogQuery(stateToTranslate, contingent);
     }
   }
 

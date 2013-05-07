@@ -64,7 +64,7 @@ public class OTOperationImpl implements OTOperation {
     this.transformedFrom = transformedFrom;
     this.propagate = propagate;
     this.resolvedConflict = resolvedConflict;
-    this.outerPath = outerPath == null ? this : outerPath;
+    this.outerPath = this;
   }
 
   private OTOperationImpl(final OTEngine engine,
@@ -133,9 +133,8 @@ public class OTOperationImpl implements OTOperation {
   }
 
   public static OTOperation createOperation(final OTOperation op, final OpPair transformedFrom) {
-    final OTOperationImpl otOperation = new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
+    return new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
         op.getRevisionHash(), transformedFrom, op.shouldPropagate(), op.isResolvedConflict());
-    return otOperation;
   }
 
   @Override
@@ -159,8 +158,13 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
+  public boolean apply(OTEntity entity) {
+    return apply(entity, false);
+  }
+
+  @Override
   @SuppressWarnings("unchecked")
-  public boolean apply(final OTEntity entity) {
+  public boolean apply(final OTEntity entity, final boolean transiently) {
     try {
 
       revisionHash = entity.getState().getHash();
@@ -185,11 +189,14 @@ public class OTOperationImpl implements OTOperation {
       assert OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
 
       if (transformedFrom != null) {
-     //   transformedFrom.getRemoteOp().setOuterPath(this);
+        transformedFrom.getRemoteOp().setOuterPath(this);
       }
 
-      entity.getTransactionLog().appendLog(this);
-      entity.incrementRevision();
+      if (!transiently) {
+        entity.getTransactionLog().appendLog(this);
+        entity.incrementRevision();
+      }
+
       return shouldPropagate();
     }
     catch (Throwable t) {

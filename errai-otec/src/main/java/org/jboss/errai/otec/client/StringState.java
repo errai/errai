@@ -170,4 +170,9 @@ public class StringState implements State<String> {
     }
     return hexString.toString();
   }
+
+  @Override
+  public String toString() {
+    return "\"" + buffer.toString() + "\"";
+  }
 }

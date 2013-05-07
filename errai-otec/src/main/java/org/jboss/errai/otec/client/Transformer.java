@@ -69,7 +69,13 @@ public class Transformer {
     final TransactionLog transactionLog = entity.getTransactionLog();
     final List<OTOperation> localOps;
     try {
-      localOps = transactionLog.getLocalOpsSinceRemoteOperation(remoteOp, true);
+      if (remoteOp.getRevisionHash().equals(entity.getState().getHash())) {
+        // nothing has happened since this!
+        localOps = Collections.emptyList();
+      }
+      else {
+        localOps = transactionLog.getLocalOpsSinceRemoteOperation(remoteOp, true);
+      }
     }
     catch (OTException e) {
       e.printStackTrace();
@@ -78,6 +84,11 @@ public class Transformer {
       //LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
     }
 
+    final Set<OTOperation> appliedInState;
+    boolean first = true;
+    boolean appliedRemoteOp = false;
+    OTOperation applyOver = remoteOp;
+    OTOperation localOpPrime = null;
     if (localOps.isEmpty()) {
       createOperation(remoteOp).apply(entity);
       return remoteOp;
@@ -88,7 +99,9 @@ public class Transformer {
           System.out.println();
         }
 
-        entity.getState().syncStateFrom(transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1));
+        final LogQuery query = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
+        entity.getState().syncStateFrom(query.getEffectiveState());
+        appliedInState = query.getContingentOps();
 
         assert OTLogUtil.log("REWIND",
             "<<>>",
@@ -97,104 +110,119 @@ public class Transformer {
             remoteOp.getRevision() + 1,
             "\"" + entity.getState().get() + "\"");
 
+        final OTOperation localOp = localOps.get(0);
 
-     //  transactionLog.pruneFromOperation(localOps.get(1));
 
-        for (final OTOperation op : localOps) {
-          if (op.getOuterPath() != op) {
-            op.getOuterPath().invalidate();
+        if (!localOp.getRevisionHash().equals(remoteOp.getRevisionHash())) {
+          final Iterator<OTOperation> cleanIter = localOps.iterator();
+          final Set<OTOperation> toRemove = new HashSet<OTOperation>();
+
+          while (cleanIter.hasNext()) {
+            final OTOperation o = cleanIter.next();
+
+            if (o.getOuterPath() != o) {
+              toRemove.add(o.getOuterPath());
+            }
+            else if (toRemove.contains(o)) {
+              cleanIter.remove();
+            }
           }
+
+          // we have a history divergence that we now must deal with.
+          final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, localOp);
+          localOps.removeAll(previousRemoteOpsTo);
+
+          boolean appliedLocalOp = false;
+
+          if (appliedInState.contains(localOp)) {
+            appliedLocalOp = true;
+          }
+
+          localOpPrime = localOp;
+          boolean _first = true;
+          for (final OTOperation operation : previousRemoteOpsTo) {
+            //  operation.removeFromCanonHistory();
+            final OTOperation replayRemoteOp = createOperation(operation);
+
+            if (!appliedLocalOp && transform(localOp, replayRemoteOp).equals(localOp)) {
+              // localOp.removeFromCanonHistory();
+              entity.decrementRevisionCounter();
+              createOperation(localOpPrime).apply(entity, true);
+              appliedLocalOp = true;
+            }
+
+            if (!appliedInState.contains(replayRemoteOp)) {
+              if (!localOp.equals(operation)) {
+                replayRemoteOp.apply(entity, true);
+              }
+            }
+
+            if (applyOver.getRevisionHash().equals(operation.getRevisionHash()) || operation.isResolvedConflict()) {
+              applyOver = transform(applyOver, operation);
+            }
+            else {
+              applyOver = transform(applyOver,
+                  transform(operation.getTransformedFrom().getLocalOp(), operation.getTransformedFrom().getRemoteOp()));
+            }
+          }
+          //  applyOver = transform(applyOver, localOp);
+
+          if (!appliedLocalOp) {
+            localOp.removeFromCanonHistory();
+            entity.decrementRevisionCounter();
+            localOpPrime = transform(localOpPrime, applyOver);
+
+            createOperation(localOpPrime).apply(entity);
+            appliedLocalOp = true;
+          }
+
+          if (!appliedRemoteOp) {
+            applyOver = transform(applyOver, localOp);
+            applyOver.apply(entity);
+            appliedRemoteOp = true;
+          }
+
+          if (!localOps.isEmpty()) {
+            localOps.remove(0);
+          }
+
+          first = false;
         }
       }
 
-      boolean first = true;
-      boolean appliedRemoteOp = false;
-      OTOperation applyOver = remoteOp;
-      OTOperation localOpPrime = null;
-      final Set<OTOperation> exclude = new HashSet<OTOperation>();
       for (final OTOperation localOp : localOps) {
-        if (!localOp.isValid() || exclude.contains(localOp)) {
-          continue;
-        }
-
         if (first) {
           first = false;
           if (applyOver.getRevisionHash().equals(localOp.getRevisionHash()) || localOp.isResolvedConflict()) {
             applyOver = transform(applyOver, localOp);
           }
           else {
-            if (localOp.getTransformedFrom() == null) {
-              // we have a history divergence that we now must deal with.
-              final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, localOp);
-              boolean appliedLocalOp = false;
-
-              localOpPrime = localOp;
-              for (final OTOperation operation : previousRemoteOpsTo) {
-                if (operation.equals(localOp)) {
-                  applyOver = transform(applyOver, operation.getTransformedFrom().getLocalOp());
-                  applyOver = transform(applyOver, operation.getTransformedFrom().getRemoteOp());
-                  applyOver.apply(entity);
-                  appliedLocalOp = true;
-                  appliedRemoteOp = true;
-
-                  System.out.println("*A*");
-                  continue;
-                }
-
-                exclude.add(operation);
-                operation.removeFromCanonHistory();
-                final OTOperation replayRemoteOp = createOperation(operation);
-
-                if (transform(localOp, replayRemoteOp).equals(localOp)) {
-                  createOperation(localOpPrime).apply(entity);
-                  appliedLocalOp = true;
-                }
-              //  localOp.setOuterPath(localOp);
-                replayRemoteOp.apply(entity);
-              }
-              applyOver = transform(applyOver, localOp);
-
-              if (!appliedLocalOp) {
-                final String str = "[applyOver:" + applyOver + ";localOpPrime: " + localOpPrime + "]";
-                System.out.println(str);
-
-                localOpPrime = transform(localOpPrime, applyOver);
-                createOperation(localOpPrime).apply(entity);
-              }
-              else {
-                System.out.println();
-              }
-
-              if (!appliedRemoteOp) {
-                applyOver = transform(applyOver, localOp);
-                applyOver.apply(entity);
-                appliedRemoteOp = true;
-              }
-            }
-            else {
-              //  final OTOperation outerPath = localOp.getOuterPath();
-              applyOver = transform(applyOver,
-                  transform(localOp.getTransformedFrom().getLocalOp(),
-                      localOp.getTransformedFrom().getRemoteOp()));
-            }
+            applyOver = transform(applyOver,
+                transform(localOp.getTransformedFrom().getLocalOp(),
+                    localOp.getTransformedFrom().getRemoteOp()));
           }
         }
         else {
-          localOp.removeFromCanonHistory();
-          entity.decrementRevisionCounter();
-
           OTOperation ot = transform(localOp, applyOver);
+
           if (localOpPrime != null) {
             ot = transform(ot, localOpPrime);
           }
 
-          if (!appliedRemoteOp && !localOp.equals(ot)) {
+          final boolean changedLocally = !localOp.equals(ot);
+
+          if (changedLocally) {
+            localOp.removeFromCanonHistory();
+            entity.decrementRevisionCounter();
+          }
+
+          if (!appliedRemoteOp && changedLocally) {
             applyOver.apply(entity);
             appliedRemoteOp = true;
           }
 
           applyOver = transform(applyOver, ot);
-          ot.apply(entity);
+          ot.apply(entity, !changedLocally);
         }
       }
 
@@ -252,8 +280,8 @@ public class Transformer {
               // uh-oh.. our local insert is inside the range of this remote delete ... move the insert
               // to the beginning of the delete range to resolve this.
 
-              final State rewind
-                  = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
+              final LogQuery effectiveStateForRevision = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
+              final State rewind = effectiveStateForRevision.getEffectiveState();
               localOp.removeFromCanonHistory();
               transactionLog.markDirty();
               final Mutation mutation = lm.newBasedOn(rm.getPosition());
@@ -319,8 +347,9 @@ public class Transformer {
               }
               if (lm.getType() == MutationType.Delete) {
                 if (remoteWins && (lm.getPosition() + lm.length()) > rm.getPosition()) {
+                  final LogQuery effectiveStateForRevision = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
                   final State rewind
-                      = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
+                      = effectiveStateForRevision.getEffectiveState();
                   final Mutation mutation = rm.newBasedOn(lm.getPosition());
                   //transactionLog.pruneFromOperation(localOp);
 
@@ -346,8 +375,9 @@ public class Transformer {
               }
               if (lm.getType() == MutationType.Delete) {
                 if (remoteWins && (lm.getPosition() + lm.length()) > rm.getPosition()) {
+                  final LogQuery effectiveStateForRevision = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
                   final State rewind
-                      = transactionLog.getEffectiveStateForRevision(localOp.getRevision());
+                      = effectiveStateForRevision.getEffectiveState();
 
                   rm.apply(rewind);
 
@@ -381,7 +411,7 @@ public class Transformer {
         createLocalOnlyOperation(engine, remoteOp.getAgentId(), transformedMutations, entity,
             OpPair.of(remoteOp, localOp));
 
-   // remoteOp.setOuterPath(transformedOp);
+    // remoteOp.setOuterPath(transformedOp);
 
     if (resolvesConflict || remoteOp.isResolvedConflict()) {
       transformedOp.markAsResolvedConflict();
