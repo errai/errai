@@ -207,7 +207,7 @@ public class OTServerEngine extends AbstractOTEngine {
     // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
 
     final OTQueuedOperation e = new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId());
-    //incomingQueue.offer(e);
+   // incomingQueue.offer(e);
     getPeerState().getPeer(peerId).setLastKnownRemoteSequence(remoteOp.getEntityId(), remoteOp.getRevision());
     handleOperation(e);
     return true;

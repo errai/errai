@@ -54,6 +54,8 @@ public interface OTOperation extends Comparable<OTOperation> {
   void removeFromCanonHistory();
 
   void markAsResolvedConflict();
+
+  void unmarkAsResolvedConflict();
   
   OpPair getTransformedFrom();
 

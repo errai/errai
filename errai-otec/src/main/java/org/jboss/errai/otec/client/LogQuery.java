@@ -18,6 +18,7 @@ package org.jboss.errai.otec.client;
 
 import org.jboss.errai.otec.client.operation.OTOperation;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,10 +27,12 @@ import java.util.Set;
 public class LogQuery {
   private final State effectiveState;
   private final Set<OTOperation> contingentOps;
+  private final List<OTOperation> localOpsNeedsMerge;
 
-  public LogQuery(State effectiveState, Set<OTOperation> contingentOps) {
+  public LogQuery(State effectiveState, Set<OTOperation> contingentOps, List<OTOperation> localOpsNeedsMerge) {
     this.effectiveState = effectiveState;
     this.contingentOps = contingentOps;
+    this.localOpsNeedsMerge = localOpsNeedsMerge;
   }
 
   public State getEffectiveState() {
@@ -38,5 +41,9 @@ public class LogQuery {
 
   public Set<OTOperation> getContingentOps() {
     return contingentOps;
+  }
+
+  public List<OTOperation> getLocalOpsNeedsMerge() {
+    return localOpsNeedsMerge;
   }
 }

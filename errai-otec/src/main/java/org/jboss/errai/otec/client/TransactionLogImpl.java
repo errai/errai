@@ -22,6 +22,7 @@ import org.jboss.errai.otec.client.operation.OTOperation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -68,6 +69,20 @@ public class TransactionLogImpl implements TransactionLog {
       return 0;
     }
     synchronized (lock) {
+      cleanLog();
+
+      final LogQuery effectiveStateForRevision = getEffectiveStateForRevision(stateSnapshots.get(stateSnapshots.size() - 1).getRevision());
+      final State effectiveState = effectiveStateForRevision.getEffectiveState();
+
+      final List<OTOperation> canonLog = getCanonLog();
+      for (final OTOperation operation : canonLog) {
+        for (final Mutation mutation : operation.getMutations()) {
+          mutation.apply(effectiveState);
+        }
+      }
+
+      makeSnapshot(canonLog.get(canonLog.size() -1).getRevision(), effectiveState);
+
       int purged = 0;
       final Iterator<OTOperation> iterator = transactionLog.iterator();
       while (iterator.hasNext()) {
@@ -211,9 +226,8 @@ public class TransactionLogImpl implements TransactionLog {
         }
       }
 
-      System.out.println("start replay from index: " + operationListIterator.nextIndex());
-
       final Set<OTOperation> contingent = new LinkedHashSet<OTOperation>();
+      final List<OTOperation> needsMerge = new LinkedList<OTOperation>();
       while (operationListIterator.hasNext()) {
         final OTOperation op = operationListIterator.next();
 
@@ -223,17 +237,18 @@ public class TransactionLogImpl implements TransactionLog {
 
         if (op.getRevision() < revision) {
           for (final Mutation mutation : op.getMutations()) {
-            if (((String)stateToTranslate.get()).contains(String.valueOf(mutation.getData()))) {
-              System.out.println();
-            }
             mutation.apply(stateToTranslate);
           }
-          contingent.add(op);
+          contingent.add(op.getOuterPath());
+        }
+        else {
+          needsMerge.add(op);
         }
       }
 
-      makeSnapshot(revision, stateToTranslate);
-      return new LogQuery(stateToTranslate, contingent);
+
+      //makeSnapshot(revision, stateToTranslate);
+      return new LogQuery(stateToTranslate, contingent, needsMerge);
     }
   }
 
@@ -253,7 +268,8 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   private void makeSnapshot(final int revision, final State state) {
-    //   stateSnapshots.add(new StateSnapshot(revision, state));
+    stateSnapshots.add(new StateSnapshot(revision, state));
+    cleanLog();
   }
 
   @Override
@@ -294,24 +310,18 @@ public class TransactionLogImpl implements TransactionLog {
     synchronized (lock) {
       Collections.sort(transactionLog);
 
+      final Set<OTOperation> applied = new HashSet<OTOperation>();
+
       final Iterator<OTOperation> iterator = transactionLog.iterator();
       while (iterator.hasNext()) {
         final OTOperation next = iterator.next();
 
-        if (!next.isCanon()) {
-          System.out.println("removed:" + next);
+        if (!next.isCanon() || applied.contains(next)) {
           iterator.remove();
-          continue;
         }
-
-        final OTOperation outerPath = next.getOuterPath();
-        if (outerPath != next
-            && outerPath.getTransformedFrom() != null
-            && outerPath.getTransformedFrom().getRemoteOp().equals(next)) {
-
-          outerPath.removeFromCanonHistory();
+        else {
+          applied.add(next.getOuterPath());
         }
-
       }
       logDirty = false;
     }

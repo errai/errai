@@ -64,7 +64,7 @@ public class OTOperationImpl implements OTOperation {
     this.transformedFrom = transformedFrom;
     this.propagate = propagate;
     this.resolvedConflict = resolvedConflict;
-    this.outerPath = this;
+    this.outerPath = outerPath == null ? this : outerPath;
   }
 
   private OTOperationImpl(final OTEngine engine,
@@ -176,13 +176,8 @@ public class OTOperationImpl implements OTOperation {
         return shouldPropagate();
 
       final State state = entity.getState();
-      final String stateString = String.valueOf(state.get());
 
       for (final Mutation mutation : mutations) {
-        if (stateString.contains(String.valueOf(mutation.getData()))) {
-          System.out.println();
-        }
-
         mutation.apply(state);
       }
 
@@ -213,6 +208,11 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public void markAsResolvedConflict() {
     resolvedConflict = true;
+  }
+
+  @Override
+  public void unmarkAsResolvedConflict() {
+    resolvedConflict = false;
   }
 
   @Override
@@ -251,7 +251,11 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public void setOuterPath(OTOperation outerPath) {
+  public void setOuterPath(final OTOperation outerPath) {
+//    if (this.outerPath != this) {
+//      this.outerPath.setOuterPath(outerPath);
+//    }
+
     this.outerPath = outerPath;
   }
 

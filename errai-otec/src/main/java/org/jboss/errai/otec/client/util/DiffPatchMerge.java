@@ -20,19 +20,13 @@
 
 package org.jboss.errai.otec.client.util;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /*
  * Functions for diff, match and patch.
@@ -834,7 +828,7 @@ public class DiffPatchMerge {
     if (changes) {
       diff_cleanupMerge(diffs);
     }
-    diff_cleanupSemanticLossless(diffs);
+  //  diff_cleanupSemanticLossless(diffs);
 
     // Find any overlaps between deletions and insertions.
     // e.g: <del>abcxxx</del><ins>xxxdef</ins>
@@ -895,90 +889,90 @@ public class DiffPatchMerge {
     }
   }
 
-  /**
-   * Look for single edits surrounded on both sides by equalities
-   * which can be shifted sideways to align the edit to a word boundary.
-   * e.g: The c<ins>at c</ins>ame. -> The <ins>cat </ins>came.
-   * @param diffs LinkedList of Diff objects.
-   */
-  public void diff_cleanupSemanticLossless(LinkedList<Diff> diffs) {
-    String equality1, edit, equality2;
-    String commonString;
-    int commonOffset;
-    int score, bestScore;
-    String bestEquality1, bestEdit, bestEquality2;
-    // Create a new iterator at the start.
-    ListIterator<Diff> pointer = diffs.listIterator();
-    Diff prevDiff = pointer.hasNext() ? pointer.next() : null;
-    Diff thisDiff = pointer.hasNext() ? pointer.next() : null;
-    Diff nextDiff = pointer.hasNext() ? pointer.next() : null;
-    // Intentionally ignore the first and last element (don't need checking).
-    while (nextDiff != null) {
-      if (prevDiff.operation == Operation.EQUAL &&
-          nextDiff.operation == Operation.EQUAL) {
-        // This is a single edit surrounded by equalities.
-        equality1 = prevDiff.text;
-        edit = thisDiff.text;
-        equality2 = nextDiff.text;
-
-        // First, shift the edit as far left as possible.
-        commonOffset = diff_commonSuffix(equality1, edit);
-        if (commonOffset != 0) {
-          commonString = edit.substring(edit.length() - commonOffset);
-          equality1 = equality1.substring(0, equality1.length() - commonOffset);
-          edit = commonString + edit.substring(0, edit.length() - commonOffset);
-          equality2 = commonString + equality2;
-        }
-
-        // Second, step character by character right, looking for the best fit.
-        bestEquality1 = equality1;
-        bestEdit = edit;
-        bestEquality2 = equality2;
-        bestScore = diff_cleanupSemanticScore(equality1, edit)
-            + diff_cleanupSemanticScore(edit, equality2);
-        while (edit.length() != 0 && equality2.length() != 0
-            && edit.charAt(0) == equality2.charAt(0)) {
-          equality1 += edit.charAt(0);
-          edit = edit.substring(1) + equality2.charAt(0);
-          equality2 = equality2.substring(1);
-          score = diff_cleanupSemanticScore(equality1, edit)
-              + diff_cleanupSemanticScore(edit, equality2);
-          // The >= encourages trailing rather than leading whitespace on edits.
-          if (score >= bestScore) {
-            bestScore = score;
-            bestEquality1 = equality1;
-            bestEdit = edit;
-            bestEquality2 = equality2;
-          }
-        }
-
-        if (!prevDiff.text.equals(bestEquality1)) {
-          // We have an improvement, save it back to the diff.
-          if (bestEquality1.length() != 0) {
-            prevDiff.text = bestEquality1;
-          } else {
-            pointer.previous(); // Walk past nextDiff.
-            pointer.previous(); // Walk past thisDiff.
-            pointer.previous(); // Walk past prevDiff.
-            pointer.remove(); // Delete prevDiff.
-            pointer.next(); // Walk past thisDiff.
-            pointer.next(); // Walk past nextDiff.
-          }
-          thisDiff.text = bestEdit;
-          if (bestEquality2.length() != 0) {
-            nextDiff.text = bestEquality2;
-          } else {
-            pointer.remove(); // Delete nextDiff.
-            nextDiff = thisDiff;
-            thisDiff = prevDiff;
-          }
-        }
-      }
-      prevDiff = thisDiff;
-      thisDiff = nextDiff;
-      nextDiff = pointer.hasNext() ? pointer.next() : null;
-    }
-  }
+//  /**
+//   * Look for single edits surrounded on both sides by equalities
+//   * which can be shifted sideways to align the edit to a word boundary.
+//   * e.g: The c<ins>at c</ins>ame. -> The <ins>cat </ins>came.
+//   * @param diffs LinkedList of Diff objects.
+//   */
+//  public void diff_cleanupSemanticLossless(LinkedList<Diff> diffs) {
+//    String equality1, edit, equality2;
+//    String commonString;
+//    int commonOffset;
+//    int score, bestScore;
+//    String bestEquality1, bestEdit, bestEquality2;
+//    // Create a new iterator at the start.
+//    ListIterator<Diff> pointer = diffs.listIterator();
+//    Diff prevDiff = pointer.hasNext() ? pointer.next() : null;
+//    Diff thisDiff = pointer.hasNext() ? pointer.next() : null;
+//    Diff nextDiff = pointer.hasNext() ? pointer.next() : null;
+//    // Intentionally ignore the first and last element (don't need checking).
+//    while (nextDiff != null) {
+//      if (prevDiff.operation == Operation.EQUAL &&
+//          nextDiff.operation == Operation.EQUAL) {
+//        // This is a single edit surrounded by equalities.
+//        equality1 = prevDiff.text;
+//        edit = thisDiff.text;
+//        equality2 = nextDiff.text;
+//
+//        // First, shift the edit as far left as possible.
+//        commonOffset = diff_commonSuffix(equality1, edit);
+//        if (commonOffset != 0) {
+//          commonString = edit.substring(edit.length() - commonOffset);
+//          equality1 = equality1.substring(0, equality1.length() - commonOffset);
+//          edit = commonString + edit.substring(0, edit.length() - commonOffset);
+//          equality2 = commonString + equality2;
+//        }
+//
+//        // Second, step character by character right, looking for the best fit.
+//        bestEquality1 = equality1;
+//        bestEdit = edit;
+//        bestEquality2 = equality2;
+//        bestScore = diff_cleanupSemanticScore(equality1, edit)
+//            + diff_cleanupSemanticScore(edit, equality2);
+//        while (edit.length() != 0 && equality2.length() != 0
+//            && edit.charAt(0) == equality2.charAt(0)) {
+//          equality1 += edit.charAt(0);
+//          edit = edit.substring(1) + equality2.charAt(0);
+//          equality2 = equality2.substring(1);
+//          score = diff_cleanupSemanticScore(equality1, edit)
+//              + diff_cleanupSemanticScore(edit, equality2);
+//          // The >= encourages trailing rather than leading whitespace on edits.
+//          if (score >= bestScore) {
+//            bestScore = score;
+//            bestEquality1 = equality1;
+//            bestEdit = edit;
+//            bestEquality2 = equality2;
+//          }
+//        }
+//
+//        if (!prevDiff.text.equals(bestEquality1)) {
+//          // We have an improvement, save it back to the diff.
+//          if (bestEquality1.length() != 0) {
+//            prevDiff.text = bestEquality1;
+//          } else {
+//            pointer.previous(); // Walk past nextDiff.
+//            pointer.previous(); // Walk past thisDiff.
+//            pointer.previous(); // Walk past prevDiff.
+//            pointer.remove(); // Delete prevDiff.
+//            pointer.next(); // Walk past thisDiff.
+//            pointer.next(); // Walk past nextDiff.
+//          }
+//          thisDiff.text = bestEdit;
+//          if (bestEquality2.length() != 0) {
+//            nextDiff.text = bestEquality2;
+//          } else {
+//            pointer.remove(); // Delete nextDiff.
+//            nextDiff = thisDiff;
+//            thisDiff = prevDiff;
+//          }
+//        }
+//      }
+//      prevDiff = thisDiff;
+//      thisDiff = nextDiff;
+//      nextDiff = pointer.hasNext() ? pointer.next() : null;
+//    }
+//  }
 
   /**
    * Given two strings, compute a score representing whether the internal
@@ -988,54 +982,54 @@ public class DiffPatchMerge {
    * @param two Second string.
    * @return The score.
    */
-  private int diff_cleanupSemanticScore(String one, String two) {
-    if (one.length() == 0 || two.length() == 0) {
-      // Edges are the best.
-      return 6;
-    }
-
-    // Each port of this function behaves slightly differently due to
-    // subtle differences in each language's definition of things like
-    // 'whitespace'.  Since this function's purpose is largely cosmetic,
-    // the choice has been made to use each language's native features
-    // rather than force total conformity.
-    char char1 = one.charAt(one.length() - 1);
-    char char2 = two.charAt(0);
-    boolean nonAlphaNumeric1 = !Character.isLetterOrDigit(char1);
-    boolean nonAlphaNumeric2 = !Character.isLetterOrDigit(char2);
-    boolean whitespace1 = nonAlphaNumeric1 && Character.isWhitespace(char1);
-    boolean whitespace2 = nonAlphaNumeric2 && Character.isWhitespace(char2);
-    boolean lineBreak1 = whitespace1
-        && Character.getType(char1) == Character.CONTROL;
-    boolean lineBreak2 = whitespace2
-        && Character.getType(char2) == Character.CONTROL;
-    boolean blankLine1 = lineBreak1 && BLANKLINEEND.matcher(one).find();
-    boolean blankLine2 = lineBreak2 && BLANKLINESTART.matcher(two).find();
-
-    if (blankLine1 || blankLine2) {
-      // Five points for blank lines.
-      return 5;
-    } else if (lineBreak1 || lineBreak2) {
-      // Four points for line breaks.
-      return 4;
-    } else if (nonAlphaNumeric1 && !whitespace1 && whitespace2) {
-      // Three points for end of sentences.
-      return 3;
-    } else if (whitespace1 || whitespace2) {
-      // Two points for whitespace.
-      return 2;
-    } else if (nonAlphaNumeric1 || nonAlphaNumeric2) {
-      // One point for non-alphanumeric.
-      return 1;
-    }
-    return 0;
-  }
+//  private int diff_cleanupSemanticScore(String one, String two) {
+//    if (one.length() == 0 || two.length() == 0) {
+//      // Edges are the best.
+//      return 6;
+//    }
+//
+//    // Each port of this function behaves slightly differently due to
+//    // subtle differences in each language's definition of things like
+//    // 'whitespace'.  Since this function's purpose is largely cosmetic,
+//    // the choice has been made to use each language's native features
+//    // rather than force total conformity.
+//    char char1 = one.charAt(one.length() - 1);
+//    char char2 = two.charAt(0);
+//    boolean nonAlphaNumeric1 = !Character.isLetterOrDigit(char1);
+//    boolean nonAlphaNumeric2 = !Character.isLetterOrDigit(char2);
+//    boolean whitespace1 = nonAlphaNumeric1 && Character.isWhitespace(char1);
+//    boolean whitespace2 = nonAlphaNumeric2 && Character.isWhitespace(char2);
+//    boolean lineBreak1 = whitespace1
+//        && Character.getType(char1) == Character.CONTROL;
+//    boolean lineBreak2 = whitespace2
+//        && Character.getType(char2) == Character.CONTROL;
+//    boolean blankLine1 = lineBreak1 && BLANKLINEEND.matcher(one).find();
+//    boolean blankLine2 = lineBreak2 && BLANKLINESTART.matcher(two).find();
+//
+//    if (blankLine1 || blankLine2) {
+//      // Five points for blank lines.
+//      return 5;
+//    } else if (lineBreak1 || lineBreak2) {
+//      // Four points for line breaks.
+//      return 4;
+//    } else if (nonAlphaNumeric1 && !whitespace1 && whitespace2) {
+//      // Three points for end of sentences.
+//      return 3;
+//    } else if (whitespace1 || whitespace2) {
+//      // Two points for whitespace.
+//      return 2;
+//    } else if (nonAlphaNumeric1 || nonAlphaNumeric2) {
+//      // One point for non-alphanumeric.
+//      return 1;
+//    }
+//    return 0;
+//  }
 
   // Define some regex patterns for matching boundaries.
-  private Pattern BLANKLINEEND
-      = Pattern.compile("\\n\\r?\\n\\Z", Pattern.DOTALL);
-  private Pattern BLANKLINESTART
-      = Pattern.compile("\\A\\r?\\n\\r?\\n", Pattern.DOTALL);
+//  private Pattern BLANKLINEEND
+//      = Pattern.compile("\\n\\r?\\n\\Z", Pattern.DOTALL);
+//  private Pattern BLANKLINESTART
+//      = Pattern.compile("\\A\\r?\\n\\r?\\n", Pattern.DOTALL);
 
   /**
    * Reduce the number of edits by eliminating operationally trivial equalities.
@@ -1420,121 +1414,7 @@ public class DiffPatchMerge {
     return levenshtein;
   }
 
-  /**
-   * Crush the diff into an encoded string which describes the operations
-   * required to transform text1 into text2.
-   * E.g. =3\t-2\t+ing  -> Keep 3 chars, delete 2 chars, insert 'ing'.
-   * Operations are tab-separated.  Inserted text is escaped using %xx notation.
-   * @param diffs Array of Diff objects.
-   * @return Delta text.
-   */
-  public String diff_toDelta(LinkedList<Diff> diffs) {
-    StringBuilder text = new StringBuilder();
-    for (Diff aDiff : diffs) {
-      switch (aDiff.operation) {
-      case INSERT:
-        try {
-          text.append("+").append(URLEncoder.encode(aDiff.text, "UTF-8")
-                                            .replace('+', ' ')).append("\t");
-        } catch (UnsupportedEncodingException e) {
-          // Not likely on modern system.
-          throw new Error("This system does not support UTF-8.", e);
-        }
-        break;
-      case DELETE:
-        text.append("-").append(aDiff.text.length()).append("\t");
-        break;
-      case EQUAL:
-        text.append("=").append(aDiff.text.length()).append("\t");
-        break;
-      }
-    }
-    String delta = text.toString();
-    if (delta.length() != 0) {
-      // Strip off trailing tab character.
-      delta = delta.substring(0, delta.length() - 1);
-      delta = unescapeForEncodeUriCompatability(delta);
-    }
-    return delta;
-  }
 
-  /**
-   * Given the original text1, and an encoded string which describes the
-   * operations required to transform text1 into text2, compute the full diff.
-   * @param text1 Source string for the diff.
-   * @param delta Delta text.
-   * @return Array of Diff objects or null if invalid.
-   * @throws IllegalArgumentException If invalid input.
-   */
-  public LinkedList<Diff> diff_fromDelta(String text1, String delta)
-      throws IllegalArgumentException {
-    LinkedList<Diff> diffs = new LinkedList<Diff>();
-    int pointer = 0;  // Cursor in text1
-    String[] tokens = delta.split("\t");
-    for (String token : tokens) {
-      if (token.length() == 0) {
-        // Blank tokens are ok (from a trailing \t).
-        continue;
-      }
-      // Each token begins with a one character parameter which specifies the
-      // operation of this token (delete, insert, equality).
-      String param = token.substring(1);
-      switch (token.charAt(0)) {
-      case '+':
-        // decode would change all "+" to " "
-        param = param.replace("+", "%2B");
-        try {
-          param = URLDecoder.decode(param, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-          // Not likely on modern system.
-          throw new Error("This system does not support UTF-8.", e);
-        } catch (IllegalArgumentException e) {
-          // Malformed URI sequence.
-          throw new IllegalArgumentException(
-              "Illegal escape in diff_fromDelta: " + param, e);
-        }
-        diffs.add(new Diff(Operation.INSERT, param));
-        break;
-      case '-':
-        // Fall through.
-      case '=':
-        int n;
-        try {
-          n = Integer.parseInt(param);
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException(
-              "Invalid number in diff_fromDelta: " + param, e);
-        }
-        if (n < 0) {
-          throw new IllegalArgumentException(
-              "Negative number in diff_fromDelta: " + param);
-        }
-        String text;
-        try {
-          text = text1.substring(pointer, pointer += n);
-        } catch (StringIndexOutOfBoundsException e) {
-          throw new IllegalArgumentException("Delta length (" + pointer
-              + ") larger than source text length (" + text1.length()
-              + ").", e);
-        }
-        if (token.charAt(0) == '=') {
-          diffs.add(new Diff(Operation.EQUAL, text));
-        } else {
-          diffs.add(new Diff(Operation.DELETE, text));
-        }
-        break;
-      default:
-        // Anything else is an error.
-        throw new IllegalArgumentException(
-            "Invalid diff operation in diff_fromDelta: " + token.charAt(0));
-      }
-    }
-    if (pointer != text1.length()) {
-      throw new IllegalArgumentException("Delta length (" + pointer
-          + ") smaller than source text length (" + text1.length() + ").");
-    }
-    return diffs;
-  }
 
 
   //  MATCH FUNCTIONS
@@ -1998,7 +1878,7 @@ public class DiffPatchMerge {
             // The end points match, but the content is unacceptably bad.
             results[x] = false;
           } else {
-            diff_cleanupSemanticLossless(diffs);
+        //    diff_cleanupSemanticLossless(diffs);
             int index1 = 0;
             for (Diff aDiff : aPatch.diffs) {
               if (aDiff.operation != Operation.EQUAL) {
@@ -2214,93 +2094,93 @@ public class DiffPatchMerge {
    * @return List of Patch objects.
    * @throws IllegalArgumentException If invalid input.
    */
-  public List<Patch> patch_fromText(String textline)
-      throws IllegalArgumentException {
-    List<Patch> patches = new LinkedList<Patch>();
-    if (textline.length() == 0) {
-      return patches;
-    }
-    List<String> textList = Arrays.asList(textline.split("\n"));
-    LinkedList<String> text = new LinkedList<String>(textList);
-    Patch patch;
-    Pattern patchHeader
-        = Pattern.compile("^@@ -(\\d+),?(\\d*) \\+(\\d+),?(\\d*) @@$");
-    Matcher m;
-    char sign;
-    String line;
-    while (!text.isEmpty()) {
-      m = patchHeader.matcher(text.getFirst());
-      if (!m.matches()) {
-        throw new IllegalArgumentException(
-            "Invalid patch string: " + text.getFirst());
-      }
-      patch = new Patch();
-      patches.add(patch);
-      patch.start1 = Integer.parseInt(m.group(1));
-      if (m.group(2).length() == 0) {
-        patch.start1--;
-        patch.length1 = 1;
-      } else if (m.group(2).equals("0")) {
-        patch.length1 = 0;
-      } else {
-        patch.start1--;
-        patch.length1 = Integer.parseInt(m.group(2));
-      }
-
-      patch.start2 = Integer.parseInt(m.group(3));
-      if (m.group(4).length() == 0) {
-        patch.start2--;
-        patch.length2 = 1;
-      } else if (m.group(4).equals("0")) {
-        patch.length2 = 0;
-      } else {
-        patch.start2--;
-        patch.length2 = Integer.parseInt(m.group(4));
-      }
-      text.removeFirst();
-
-      while (!text.isEmpty()) {
-        try {
-          sign = text.getFirst().charAt(0);
-        } catch (IndexOutOfBoundsException e) {
-          // Blank line?  Whatever.
-          text.removeFirst();
-          continue;
-        }
-        line = text.getFirst().substring(1);
-        line = line.replace("+", "%2B");  // decode would change all "+" to " "
-        try {
-          line = URLDecoder.decode(line, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-          // Not likely on modern system.
-          throw new Error("This system does not support UTF-8.", e);
-        } catch (IllegalArgumentException e) {
-          // Malformed URI sequence.
-          throw new IllegalArgumentException(
-              "Illegal escape in patch_fromText: " + line, e);
-        }
-        if (sign == '-') {
-          // Deletion.
-          patch.diffs.add(new Diff(Operation.DELETE, line));
-        } else if (sign == '+') {
-          // Insertion.
-          patch.diffs.add(new Diff(Operation.INSERT, line));
-        } else if (sign == ' ') {
-          // Minor equality.
-          patch.diffs.add(new Diff(Operation.EQUAL, line));
-        } else if (sign == '@') {
-          // Start of next patch.
-          break;
-        } else {
-          // WTF?
-          throw new IllegalArgumentException(
-              "Invalid patch mode '" + sign + "' in: " + line);
-        }
-        text.removeFirst();
-      }
-    }
-    return patches;
-  }
+//  public List<Patch> patch_fromText(String textline)
+//      throws IllegalArgumentException {
+//    List<Patch> patches = new LinkedList<Patch>();
+//    if (textline.length() == 0) {
+//      return patches;
+//    }
+//    List<String> textList = Arrays.asList(textline.split("\n"));
+//    LinkedList<String> text = new LinkedList<String>(textList);
+//    Patch patch;
+//    Pattern patchHeader
+//        = Pattern.compile("^@@ -(\\d+),?(\\d*) \\+(\\d+),?(\\d*) @@$");
+//    Matcher m;
+//    char sign;
+//    String line;
+//    while (!text.isEmpty()) {
+//      m = patchHeader.matcher(text.getFirst());
+//      if (!m.matches()) {
+//        throw new IllegalArgumentException(
+//            "Invalid patch string: " + text.getFirst());
+//      }
+//      patch = new Patch();
+//      patches.add(patch);
+//      patch.start1 = Integer.parseInt(m.group(1));
+//      if (m.group(2).length() == 0) {
+//        patch.start1--;
+//        patch.length1 = 1;
+//      } else if (m.group(2).equals("0")) {
+//        patch.length1 = 0;
+//      } else {
+//        patch.start1--;
+//        patch.length1 = Integer.parseInt(m.group(2));
+//      }
+//
+//      patch.start2 = Integer.parseInt(m.group(3));
+//      if (m.group(4).length() == 0) {
+//        patch.start2--;
+//        patch.length2 = 1;
+//      } else if (m.group(4).equals("0")) {
+//        patch.length2 = 0;
+//      } else {
+//        patch.start2--;
+//        patch.length2 = Integer.parseInt(m.group(4));
+//      }
+//      text.removeFirst();
+//
+//      while (!text.isEmpty()) {
+//        try {
+//          sign = text.getFirst().charAt(0);
+//        } catch (IndexOutOfBoundsException e) {
+//          // Blank line?  Whatever.
+//          text.removeFirst();
+//          continue;
+//        }
+//        line = text.getFirst().substring(1);
+//        line = line.replace("+", "%2B");  // decode would change all "+" to " "
+//        try {
+//          line = URLDecoder.decode(line, "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//          // Not likely on modern system.
+//          throw new Error("This system does not support UTF-8.", e);
+//        } catch (IllegalArgumentException e) {
+//          // Malformed URI sequence.
+//          throw new IllegalArgumentException(
+//              "Illegal escape in patch_fromText: " + line, e);
+//        }
+//        if (sign == '-') {
+//          // Deletion.
+//          patch.diffs.add(new Diff(Operation.DELETE, line));
+//        } else if (sign == '+') {
+//          // Insertion.
+//          patch.diffs.add(new Diff(Operation.INSERT, line));
+//        } else if (sign == ' ') {
+//          // Minor equality.
+//          patch.diffs.add(new Diff(Operation.EQUAL, line));
+//        } else if (sign == '@') {
+//          // Start of next patch.
+//          break;
+//        } else {
+//          // WTF?
+//          throw new IllegalArgumentException(
+//              "Invalid patch mode '" + sign + "' in: " + line);
+//        }
+//        text.removeFirst();
+//      }
+//    }
+//    return patches;
+//  }
 
 
   /**
@@ -2397,76 +2277,5 @@ public class DiffPatchMerge {
     public Patch() {
       this.diffs = new LinkedList<Diff>();
     }
-
-    /**
-     * Emmulate GNU diff's format.
-     * Header: @@ -382,8 +481,9 @@
-     * Indicies are printed as 1-based, not 0-based.
-     * @return The GNU diff string.
-     */
-    public String toString() {
-      String coords1, coords2;
-      if (this.length1 == 0) {
-        coords1 = this.start1 + ",0";
-      } else if (this.length1 == 1) {
-        coords1 = Integer.toString(this.start1 + 1);
-      } else {
-        coords1 = (this.start1 + 1) + "," + this.length1;
-      }
-      if (this.length2 == 0) {
-        coords2 = this.start2 + ",0";
-      } else if (this.length2 == 1) {
-        coords2 = Integer.toString(this.start2 + 1);
-      } else {
-        coords2 = (this.start2 + 1) + "," + this.length2;
-      }
-      StringBuilder text = new StringBuilder();
-      text.append("@@ -").append(coords1).append(" +").append(coords2)
-          .append(" @@\n");
-      // Escape the body of the patch with %xx notation.
-      for (Diff aDiff : this.diffs) {
-        switch (aDiff.operation) {
-        case INSERT:
-          text.append('+');
-          break;
-        case DELETE:
-          text.append('-');
-          break;
-        case EQUAL:
-          text.append(' ');
-          break;
-        }
-        try {
-          text.append(URLEncoder.encode(aDiff.text, "UTF-8").replace('+', ' '))
-              .append("\n");
-        } catch (UnsupportedEncodingException e) {
-          // Not likely on modern system.
-          throw new Error("This system does not support UTF-8.", e);
-        }
-      }
-      return unescapeForEncodeUriCompatability(text.toString());
-    }
-  }
-
-  /**
-   * Unescape selected chars for compatability with JavaScript's encodeURI.
-   * In speed critical applications this could be dropped since the
-   * receiving application will certainly decode these fine.
-   * Note that this function is case-sensitive.  Thus "%3f" would not be
-   * unescaped.  But this is ok because it is only called with the output of
-   * URLEncoder.encode which returns uppercase hex.
-   *
-   * Example: "%3F" -> "?", "%24" -> "$", etc.
-   *
-   * @param str The string to escape.
-   * @return The escaped string.
-   */
-  private static String unescapeForEncodeUriCompatability(String str) {
-    return str.replace("%21", "!").replace("%7E", "~")
-        .replace("%27", "'").replace("%28", "(").replace("%29", ")")
-        .replace("%3B", ";").replace("%2F", "/").replace("%3F", "?")
-        .replace("%3A", ":").replace("%40", "@").replace("%26", "&")
-        .replace("%3D", "=").replace("%2B", "+").replace("%24", "$")
-        .replace("%2C", ",").replace("%23", "#");
   }
 }
