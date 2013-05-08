@@ -3,6 +3,8 @@ package org.jboss.errai.ui.nav.client.local;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.gwt.user.client.Cookies;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
@@ -25,6 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 @ApplicationScoped
 public class Navigation {
+  public static final String CURRENT_PAGE_COOKIE = "currentPage";
 
   private final SimplePanel contentPanel = new SimplePanel();
 
@@ -72,9 +75,28 @@ public class Navigation {
    */
   public <W extends Widget> void goTo(Class<W> toPage, Multimap<String,String> state) {
     PageNode<W> toPageInstance = navGraph.getPage(toPage);
+    navigate(toPageInstance, state);
+  }
+
+  private <W extends Widget> void navigate(PageNode<W> toPageInstance) {
+    navigate(toPageInstance, ImmutableListMultimap.<String, String>of());
+  }
+
+  private <W extends Widget> void navigate(PageNode<W> toPageInstance, Multimap<String, String> state) {
     HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
     show(toPageInstance, token);
     History.newItem(token.toString(), false);
+  }
+
+  public void goTo(String page) {
+    final PageNode<Widget> toPageInstance = navGraph.getPage(page);
+    navigate(toPageInstance);
+  }
+
+  public void goToLogin() {
+    Cookies.setCookie(CURRENT_PAGE_COOKIE, currentPage.name());
+    PageNode toPageInstance = navGraph.getPage("loginPage");
+    navigate(toPageInstance);
   }
 
   /**
