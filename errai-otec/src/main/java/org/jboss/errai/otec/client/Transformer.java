@@ -124,7 +124,6 @@ public class Transformer {
           final LogQuery query2 = transactionLog.getEffectiveStateForRevision(firstPrevRemotePp.getRevision() + 1);
           entity.getState().syncStateFrom(query2.getEffectiveState());
 
-
           localOps = query2.getLocalOpsNeedsMerge();
 
           final Set<OTOperation> toRemove = new HashSet<OTOperation>();
@@ -145,8 +144,11 @@ public class Transformer {
             operation.apply(entity, true);
           }
 
-          applyOver = translateFrom(remoteOp, lastPrevRemoteOp, previousRemoteOpsTo.size());
+          applyOver = translateFrom(remoteOp, lastPrevRemoteOp);
           createOperation(applyOver).apply(entity);
+
+          assert OTLogUtil.log("CTRNSFRM", "COMPOUND TRANSFORM FOR: " + remoteOp, "-", engine.getName(), remoteOp.getRevision() + 1,
+              "\"" + entity.getState().get() + "\"");
 
           return applyOver;
         }
@@ -208,7 +210,7 @@ public class Transformer {
     }
   }
 
-  private OTOperation translateFrom(final OTOperation remoteOp, final OTOperation basedOn, int max) {
+  private OTOperation translateFrom(final OTOperation remoteOp, final OTOperation basedOn) {
     OpPair transformedFrom = basedOn.getTransformedFrom();
     if (transformedFrom == null) {
       return remoteOp;

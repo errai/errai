@@ -54,17 +54,23 @@ public abstract class AbstractOTEngine implements OTEngine {
     this.peerState = peerState;
   }
 
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   protected OTOperation applyFromRemote(final OTOperation remoteOp) {
     final OTEntity entity = getEntityStateSpace().getEntity(remoteOp.getEntityId());
-    getPeerState().flushEntityStreams(entity.getId());
-
-    if (peerState.hasConflictResolutionPrecedence()) {
-      return Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
+    synchronized (entity) {
+      try {
+        getPeerState().flushEntityStreams(entity.getId());
+        if (peerState.hasConflictResolutionPrecedence()) {
+          return Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
+        }
+        else {
+          return Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
+        }
+      }
+      finally {
+        getPeerState().flushEntityStreams(entity.getId());
+      }
     }
-    else {
-      return Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
-    }
-
   }
 
   @Override

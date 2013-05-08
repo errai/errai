@@ -166,7 +166,6 @@ public class OTOperationImpl implements OTOperation {
   @SuppressWarnings("unchecked")
   public boolean apply(final OTEntity entity, final boolean transiently) {
     try {
-
       revisionHash = entity.getState().getHash();
       if (revision == -1) {
         revision = entity.getRevision();

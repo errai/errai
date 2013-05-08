@@ -67,6 +67,11 @@ public class StringState implements State<String> {
       notifyStateChangeListeners(pos, data.length());
     }
     catch (StringIndexOutOfBoundsException e) {
+      System.out.println("********");
+      System.out.println("FAILED TO INSERT: \""  + data + "\"");
+      System.out.println("        POSITION: " + pos);
+      System.out.println("      BUFFER LEN: " + buffer.length());
+
       throw new OTException("could not update state", e);
     }
   }
@@ -84,6 +89,10 @@ public class StringState implements State<String> {
       notifyStateChangeListeners(pos, -length);
     }
     catch (StringIndexOutOfBoundsException e) {
+      System.out.println("********");
+      System.out.println("FAILED TO DELETE: " + length);
+      System.out.println("        POSITION: " + pos);
+      System.out.println("      BUFFER LEN: " + buffer.length());
       throw new OTException("could not update state", e);
     }
   }

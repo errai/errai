@@ -51,7 +51,7 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
-  public void deregisterPeer(OTPeer peer) {
+  public void deregisterPeer(final OTPeer peer) {
   }
 
   @Override
@@ -84,13 +84,13 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
-  public void addEntityStream(EntityChangeStream stream) {
+  public void addEntityStream(final EntityChangeStream stream) {
     entityChangeStreamList.put(stream.getEntityId(), stream);
   }
 
   @Override
-  public void flushEntityStreams(Integer entityId) {
-    for (EntityChangeStream entityChangeStream : entityChangeStreamList.get(entityId)) {
+  public void flushEntityStreams(final Integer entityId) {
+    for (final EntityChangeStream entityChangeStream : entityChangeStreamList.get(entityId)) {
       entityChangeStream.flush();
     }
   }

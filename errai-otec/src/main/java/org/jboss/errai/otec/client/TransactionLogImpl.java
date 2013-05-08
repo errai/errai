@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.client;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
 
@@ -37,7 +38,6 @@ import java.util.Set;
 public class TransactionLogImpl implements TransactionLog {
   private final Object lock = new Object();
 
-  private volatile boolean logDirty = false;
   private final List<StateSnapshot> stateSnapshots = new LinkedList<StateSnapshot>();
   private final List<OTOperation> transactionLog = new LinkedList<OTOperation>();
   private final OTEntity entity;
@@ -69,19 +69,17 @@ public class TransactionLogImpl implements TransactionLog {
       return 0;
     }
     synchronized (lock) {
-      cleanLog();
+      cleanLogTo(revision);
 
-      final LogQuery effectiveStateForRevision = getEffectiveStateForRevision(stateSnapshots.get(stateSnapshots.size() - 1).getRevision());
-      final State effectiveState = effectiveStateForRevision.getEffectiveState();
+      final LogQuery effectiveStateForRevision = getEffectiveStateForRevision(revision);
 
-      final List<OTOperation> canonLog = getCanonLog();
-      for (final OTOperation operation : canonLog) {
-        for (final Mutation mutation : operation.getMutations()) {
-          mutation.apply(effectiveState);
-        }
-      }
+      makeSnapshot(revision, effectiveStateForRevision.getEffectiveState());
 
-      makeSnapshot(canonLog.get(canonLog.size() -1).getRevision(), effectiveState);
+      LogUtil.log("***PURGE***");
+      LogUtil.log("NEW SNAPSHOT: " + revision);
+      LogUtil.log("STATE:");
+      LogUtil.log(String.valueOf(effectiveStateForRevision.getEffectiveState().get()));
+      LogUtil.log("***********");
 
       int purged = 0;
       final Iterator<OTOperation> iterator = transactionLog.iterator();
@@ -134,7 +132,6 @@ public class TransactionLogImpl implements TransactionLog {
 
         next.removeFromCanonHistory();
       }
-      logDirty = true;
     }
   }
 
@@ -246,8 +243,6 @@ public class TransactionLogImpl implements TransactionLog {
         }
       }
 
-
-      //makeSnapshot(revision, stateToTranslate);
       return new LogQuery(stateToTranslate, contingent, needsMerge);
     }
   }
@@ -301,20 +296,24 @@ public class TransactionLogImpl implements TransactionLog {
   @Override
   public void markDirty() {
     synchronized (lock) {
-      this.logDirty = true;
     }
   }
 
   @Override
   public void cleanLog() {
-    synchronized (lock) {
-      Collections.sort(transactionLog);
+    cleanLogTo(entity.getRevision());
+  }
 
+  private void cleanLogTo(int rev) {
+    synchronized (lock) {
       final Set<OTOperation> applied = new HashSet<OTOperation>();
 
       final Iterator<OTOperation> iterator = transactionLog.iterator();
       while (iterator.hasNext()) {
         final OTOperation next = iterator.next();
+        if (next.getRevision() > rev)  {
+          return;
+        }
 
         if (!next.isCanon() || applied.contains(next)) {
           iterator.remove();
@@ -323,7 +322,6 @@ public class TransactionLogImpl implements TransactionLog {
           applied.add(next.getOuterPath());
         }
       }
-      logDirty = false;
     }
   }
 
