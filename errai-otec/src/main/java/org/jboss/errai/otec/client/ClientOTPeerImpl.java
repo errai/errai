@@ -18,9 +18,7 @@ package org.jboss.errai.otec.client;
 
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.operation.OTOperation;
@@ -76,16 +74,7 @@ public class ClientOTPeerImpl implements OTPeer {
     MessageBuilder.createMessage()
         .toSubject("ServerOTEngineSyncService")
         .withValue(entityId)
-        .noErrorHandling().repliesTo(new MessageCallback() {
-      @Override
-      public void callback(Message message) {
-        final OTEntity entity = engine.getEntityStateSpace().addEntity(StringState.of(message.getValue(String.class)));
-        final Integer revision = message.get(Integer.class, "revision");
-        entity.setRevision(revision);
-        entity.resetRevisionCounterTo(revision);
-        callback.syncComplete(entity);
-      }
-    }).sendNowWith(bus);
+        .noErrorHandling().repliesTo(new EntitySyncCallback(engine, callback)).sendNowWith(bus);
   }
 
   @Override
@@ -102,8 +91,14 @@ public class ClientOTPeerImpl implements OTPeer {
   }
 
   @Override
+  public boolean isSynced() {
+    return true;
+  }
+
+  @Override
   public int getLastTransmittedSequence(Integer entity) {
     final Integer seq = lastSentSequences.get(entity);
     return seq == null ? 0 : seq;
   }
+
 }

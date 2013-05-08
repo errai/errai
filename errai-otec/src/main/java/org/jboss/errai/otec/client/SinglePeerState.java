@@ -74,6 +74,10 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
+  public void forceResyncAll(OTEntity entity) {
+  }
+
+  @Override
   public void associateEntity(final OTPeer peer, final Integer entity) {
     associatedEntities.put(entity, Boolean.TRUE);
   }

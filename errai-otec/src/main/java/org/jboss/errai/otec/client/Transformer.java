@@ -84,7 +84,7 @@ public class Transformer {
     boolean first = true;
     boolean appliedRemoteOp = false;
     OTOperation applyOver = remoteOp;
-    if (localOps.isEmpty() && remoteOp.getRevisionHash().equals(entity.getState().getHash())) {
+    if (localOps.isEmpty()) {
       createOperation(remoteOp).apply(entity);
       return remoteOp;
     }

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.server;
 
+import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.atomizer.EntityChangeStream;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.PeerState;
@@ -94,6 +95,13 @@ public class MultiplePeerState implements PeerState {
   @Override
   public boolean shouldForwardOperation(final OTOperation operation) {
     return true;
+  }
+
+  @Override
+  public void forceResyncAll(OTEntity entity) {
+    for (final OTPeer otPeer : getPeersFor(entity.getId())) {
+      otPeer.forceResync(entity.getId(), entity.getRevision(), (String) entity.getState().get());
+    }
   }
 
   @Override

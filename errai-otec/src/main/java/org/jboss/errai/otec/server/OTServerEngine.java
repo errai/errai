@@ -184,7 +184,16 @@ public class OTServerEngine extends AbstractOTEngine {
 
   protected void handleOperation(final OTQueuedOperation queuedOp) {
     final OTOperation transformedOp = applyFromRemote(queuedOp.getOperation());
+
+    if (transformedOp == null) {
+      return;
+    }
+
     final OTPeer peer = getPeerState().getPeer(queuedOp.getPeerId());
+
+    if (!peer.isSynced()) {
+      return;
+    }
 
     // broadcast to all other peers subscribed to this entity
     final Set<OTPeer> peers = getPeerState().getPeersFor(queuedOp.getEntityId());

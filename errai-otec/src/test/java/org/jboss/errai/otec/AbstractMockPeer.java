@@ -83,6 +83,12 @@ public abstract class AbstractMockPeer implements OTPeer {
     callback.syncComplete(entity);
   }
 
+
+  @Override
+  public boolean isSynced() {
+    return true;
+  }
+
   @Override
   public String toString() {
     return remoteEngine.getName();

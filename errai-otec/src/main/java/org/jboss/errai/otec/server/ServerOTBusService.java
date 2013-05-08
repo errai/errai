@@ -35,17 +35,6 @@ public class ServerOTBusService {
           final QueueSession session = message.getResource(QueueSession.class, "Session");
           engine.receive(session.getSessionId(), remoteOp);
         }
-
-        //        final LocalContext localContext = LocalContext.get(message);
-        //
-        //        ClientDemuxer clientStats = localContext.getAttribute(ClientDemuxer.class, ClientDemuxer.class.getName());
-        //        if (clientStats == null) {
-        //          localContext.setAttribute(ClientDemuxer.class.getName(), clientStats = new ClientDemuxer());
-        //        }
-
-        //        for (final OTOperation otOperation : clientStats.getEnginePlanFor(remoteOp)) {
-        //          engine.receive(session.getSessionId(), otOperation);
-        //        }
       }
     });
 
@@ -75,12 +64,18 @@ public class ServerOTBusService {
 
         engine.getPeerState().associateEntity(peer, entityId);
 
-        final OTEntity entity = engine.getEntityStateSpace().getEntity(entityId);
-        MessageBuilder.createConversation(message)
-            .subjectProvided()
-            .withValue(entity.getState().get())
-            .with("revision", entity.getRevision())
-            .noErrorHandling().reply();
+        if (message.hasPart("SyncAck")) {
+          ((ServerOTPeerImpl) peer).setSynced(true);
+        }
+        else {
+          final OTEntity entity = engine.getEntityStateSpace().getEntity(entityId);
+          MessageBuilder.createConversation(message)
+              .subjectProvided()
+              .withValue(entity.getState().get())
+              .with("EntityID", entity.getId())
+              .with("revision", entity.getRevision())
+              .noErrorHandling().reply();
+        }
       }
     });
   }

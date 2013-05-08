@@ -31,4 +31,5 @@ public interface OTPeer {
   public void setLastKnownRemoteSequence(Integer entity, int sequence);
   public int getLastKnownRemoteSequence(Integer entity);
   public int getLastTransmittedSequence(Integer entity);
+  public boolean isSynced();
 }
