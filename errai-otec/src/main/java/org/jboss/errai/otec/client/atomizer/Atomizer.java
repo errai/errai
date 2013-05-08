@@ -32,10 +32,13 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ValueBoxBase;
+import org.jboss.errai.otec.client.ListenerRegistration;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StateChangeListener;
 import org.jboss.errai.otec.client.util.DiffUtil;
+
+import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -45,11 +48,10 @@ public abstract class Atomizer {
   private Atomizer() {
   }
 
-  private static final Multimap<Object, HandlerRegistration> HANDLER_REGISTRATION_MAP
-      = HashMultimap.create();
+  public static AtomizerSession syncWidgetWith(final OTEngine engine, final OTEntity entity, final ValueBoxBase widget) {
 
-  public static void syncWidgetWith(final OTEngine engine, final OTEntity entity, final ValueBoxBase widget) {
-
+    final Multimap<Object, HandlerRegistration> HANDLER_REGISTRATION_MAP
+        = HashMultimap.create();
     final EntityChangeStreamImpl entityChangeStream = new EntityChangeStreamImpl(engine, entity);
     engine.getPeerState().addEntityStream(entityChangeStream);
 
@@ -136,7 +138,7 @@ public abstract class Atomizer {
         }
     );
 
-    entity.getState().addStateChangeListener(new StateChangeListener() {
+    final ListenerRegistration listenerRegistration = entity.getState().addStateChangeListener(new StateChangeListener() {
       @Override
       public int getCursorPos() {
         return widget.getCursorPos();
@@ -146,7 +148,7 @@ public abstract class Atomizer {
       public void onStateChange(final int newCursorPos, final Object newValue) {
         final Object oldValue = widget.getValue();
 
-        if (oldValue.equals(newValue))  {
+        if (oldValue.equals(newValue)) {
           return;
         }
 
@@ -163,12 +165,25 @@ public abstract class Atomizer {
 
     DOM.sinkEvents(widget.getElement(), DOM.getEventsSunk(widget.getElement()) | Event.ONPASTE);
 
-    new Timer() {
+    final Timer timer = new Timer() {
       @Override
       public void run() {
         entityChangeStream.flush();
       }
-    }.scheduleRepeating(750);
+    };
+    timer.scheduleRepeating(750);
+
+    return new AtomizerSession() {
+      @Override
+      public void end() {
+        listenerRegistration.remove();
+        final Collection<HandlerRegistration> values = HANDLER_REGISTRATION_MAP.values();
+        for (HandlerRegistration value : values) {
+          value.removeHandler();
+        }
+        timer.cancel();
+      }
+    };
   }
 
   private static boolean shouldIgnoreKeyPress(KeyEvent event) {

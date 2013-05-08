@@ -17,6 +17,7 @@
 package org.jboss.errai.otec.server;
 
 import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.ResyncListener;
 import org.jboss.errai.otec.client.atomizer.EntityChangeStream;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.PeerState;
@@ -107,5 +108,15 @@ public class MultiplePeerState implements PeerState {
   @Override
   public boolean hasConflictResolutionPrecedence() {
     return true;
+  }
+
+  @Override
+  public void addResyncListener(Integer entity, ResyncListener resyncListener) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void notifyResync(OTEntity entity) {
+    throw new UnsupportedOperationException();
   }
 }

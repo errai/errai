@@ -34,9 +34,9 @@ public class ClientOTPeerImpl implements OTPeer {
   private final MessageBus bus;
   private final OTEngine engine;
   private final Map<Integer, Integer> lastSentSequences = new HashMap<Integer, Integer>();
+  private boolean synced = false;
 
-
-  public ClientOTPeerImpl(MessageBus bus, OTEngine engine) {
+  public ClientOTPeerImpl(final MessageBus bus, final OTEngine engine) {
     this.bus = bus;
     this.engine = engine;
   }
@@ -47,17 +47,19 @@ public class ClientOTPeerImpl implements OTPeer {
   }
 
   @Override
-  public void sendPurgeHint(Integer entityId, int revision) {
+  public void sendPurgeHint(final Integer entityId, final int revision) {
     CommandMessage.create()
         .toSubject("ServerOTEngine")
         .set("PurgeHint", revision)
         .set("EntityId", entityId)
         .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);
+
+    LogUtil.log("SEND PURGE HINT: " + revision) ;
   }
 
   @Override
-  public void send(OTOperation operation) {
+  public void send(final OTOperation operation) {
     CommandMessage.create()
         .toSubject("ServerOTEngine")
         .set(MessageParts.Value, OpDto.fromOperation(operation))
@@ -70,35 +72,47 @@ public class ClientOTPeerImpl implements OTPeer {
   }
 
   @Override
-  public void beginSyncRemoteEntity(String peerId, int entityId, final EntitySyncCompletionCallback<State> callback) {
+  public void beginSyncRemoteEntity(final String peerId,
+                                    final int entityId,
+                                    final EntitySyncCompletionCallback<State> callback) {
+    synced = false;
+
+    final EntitySyncCompletionCallback<State> completionCallback
+        = new StateEntitySyncCompletionCallback(engine, entityId, callback);
+
     MessageBuilder.createMessage()
         .toSubject("ServerOTEngineSyncService")
         .withValue(entityId)
-        .noErrorHandling().repliesTo(new EntitySyncCallback(engine, callback)).sendNowWith(bus);
+        .noErrorHandling().repliesTo(new EntitySyncCallback(engine, completionCallback)).sendNowWith(bus);
+
+    System.out.println("**** SENT RESYNC ****");
+  }
+
+  public void setSynced(final boolean synced) {
+    this.synced = synced;
   }
 
   @Override
-  public void forceResync(Integer entityId, int revision, String state) {
+  public void forceResync(final Integer entityId, final int revision, final String state) {
   }
 
   @Override
-  public void setLastKnownRemoteSequence(Integer entity, int sequence) {
+  public void setLastKnownRemoteSequence(final Integer entity, final int sequence) {
   }
 
   @Override
-  public int getLastKnownRemoteSequence(Integer entity) {
+  public int getLastKnownRemoteSequence(final Integer entity) {
     return 0;
   }
 
   @Override
   public boolean isSynced() {
-    return true;
+    return synced;
   }
 
   @Override
-  public int getLastTransmittedSequence(Integer entity) {
+  public int getLastTransmittedSequence(final Integer entity) {
     final Integer seq = lastSentSequences.get(entity);
     return seq == null ? 0 : seq;
   }
-
 }

@@ -81,6 +81,9 @@ public class Transformer {
       //LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
     }
 
+    System.out.println("RECV_REMOTE: " + remoteOp + " (hash:" + remoteOp.getRevisionHash() + ")");
+    System.out.println("STATE HASH : " + entity.getState().getHash());
+
     boolean first = true;
     boolean appliedRemoteOp = false;
     OTOperation applyOver = remoteOp;

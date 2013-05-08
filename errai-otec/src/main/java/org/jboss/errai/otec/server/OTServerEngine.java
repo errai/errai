@@ -21,6 +21,7 @@ import org.jboss.errai.otec.client.BadSync;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEngineMode;
 import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTException;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.OTQueuedOperation;
 import org.jboss.errai.otec.client.PeerState;
@@ -191,10 +192,6 @@ public class OTServerEngine extends AbstractOTEngine {
 
     final OTPeer peer = getPeerState().getPeer(queuedOp.getPeerId());
 
-    if (!peer.isSynced()) {
-      return;
-    }
-
     // broadcast to all other peers subscribed to this entity
     final Set<OTPeer> peers = getPeerState().getPeersFor(queuedOp.getEntityId());
     for (final OTPeer otPeer : peers) {
@@ -210,15 +207,18 @@ public class OTServerEngine extends AbstractOTEngine {
       return true;
     }
 
-
-    //  System.out.println("RECV:" + remoteOp + ";rev:" + remoteOp.getRevision() + ";peerId=" + peerId);
-
-    // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
-
     final OTQueuedOperation e = new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId());
-   // incomingQueue.offer(e);
     getPeerState().getPeer(peerId).setLastKnownRemoteSequence(remoteOp.getEntityId(), remoteOp.getRevision());
-    handleOperation(e);
+    try {
+      handleOperation(e);
+    }
+    catch (OTException ote) {
+      return false;
+    }
+    catch (BadSync bs) {
+      return false;
+    }
+
     return true;
   }
 }

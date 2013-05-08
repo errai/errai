@@ -156,8 +156,19 @@ public class StringState implements State<String> {
   }
 
   @Override
-  public void addStateChangeListener(final StateChangeListener stateChangeListener) {
+  public void updateHash() {
+    updateStateId();
+  }
+
+  @Override
+  public ListenerRegistration addStateChangeListener(final StateChangeListener stateChangeListener) {
     stateChangeListeners.add(stateChangeListener);
+    return new ListenerRegistration() {
+      @Override
+      public void remove() {
+        stateChangeListeners.remove(stateChangeListener);
+      }
+    };
   }
 
   private static String createHashFor(final String string) {

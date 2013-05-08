@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.client;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.operation.OTOperation;
 
 /**
@@ -42,8 +43,11 @@ public class OTClientEngine extends AbstractOTEngine {
   @Override
   public boolean receive(final String peerId, final OTOperation remoteOp) {
     try {
-      applyFromRemote(remoteOp);
-      return true;
+      return applyFromRemote(remoteOp) != null;
+    }
+    catch (OTException e) {
+      LogUtil.log("warning. unrecoverable path divergence. will resync.");
+      return false;
     }
     catch (BadSync badSync) {
       return false;

@@ -37,10 +37,15 @@ public class EntitySyncCallback implements MessageCallback {
   public void callback(final Message message) {
     final OTEntity entity
         = new OTEntityImpl<StringState>(message.get(Integer.class, "EntityID"), StringState.of(message.getValue(String.class)));
+
     engine.getEntityStateSpace().addEntity(entity);
     final Integer revision = message.get(Integer.class, "revision");
     entity.setRevision(revision);
     entity.resetRevisionCounterTo(revision);
+
+    if (revision != 0) {
+      entity.getState().updateHash();
+    }
 
     MessageBuilder.createMessage()
         .toSubject("ServerOTEngineSyncService")

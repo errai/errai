@@ -22,18 +22,34 @@ public class ServerOTBusService {
       @Override
       public void callback(final Message message) {
         final OpDto value = message.getValue(OpDto.class);
+        final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
+        final String session = queueSession.getSessionId();
+        final OTPeer peer = engine.getPeerState().getPeer(session);
+
+        if (peer == null) {
+          System.out.println("SessionID: " + session);
+          System.out.println("No session for: " + message.getParts());
+          return;
+        }
 
         if (value == null && message.hasPart("PurgeHint")) {
-          final Integer entityId = message.get(Integer.class, "EntityId");
           final Integer purgeHint = message.get(Integer.class, "PurgeHint");
-          final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
-          final String session = queueSession.getSessionId();
-          engine.getPeerState().getPeer(session).setLastKnownRemoteSequence(entityId, purgeHint);
+          final Integer entityId = message.get(Integer.class, "EntityId");
+
+          peer.setLastKnownRemoteSequence(entityId, purgeHint);
         }
-        else {
-          final OTOperation remoteOp = value.otOperation(engine);
-          final QueueSession session = message.getResource(QueueSession.class, "Session");
-          engine.receive(session.getSessionId(), remoteOp);
+        else if (value != null) {
+          final OTEntity entity = engine.getEntityStateSpace().getEntity(value.getEntityId());
+          if (entity == null) {
+            return;
+          }
+          synchronized (entity) {
+            final OTOperation remoteOp = value.otOperation(engine);
+            if (!engine.receive(session, remoteOp)) {
+              System.out.println("*** WARNING: CORRUPT PATHS - MUST RESYNC ALL ***");
+              engine.getPeerState().forceResyncAll(entity);
+            }
+          }
         }
       }
     });
@@ -64,7 +80,10 @@ public class ServerOTBusService {
 
         engine.getPeerState().associateEntity(peer, entityId);
 
+        System.out.println("Peer Register: " + session);
+
         if (message.hasPart("SyncAck")) {
+          System.out.println("RECEIVED SYNC ACK");
           ((ServerOTPeerImpl) peer).setSynced(true);
         }
         else {

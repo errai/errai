@@ -17,12 +17,13 @@ public class ClientOTBusService {
       public void callback(Message message) {
         final Integer value = message.getValue(Integer.class);
         final OTPeer peer = engine.getPeerState().getPeer("<ServerEngine>");
-        peer.beginSyncRemoteEntity("<ServerEngine>", value, new EntitySyncCompletionCallback<State>() {
-          @Override
-          public void syncComplete(OTEntity<State> entity) {
-            engine.getPeerState().flushEntityStreams(value);
-          }
-        });
+        peer.beginSyncRemoteEntity("<ServerEngine>", value, new StateEntitySyncCompletionCallback(engine, value,
+            new EntitySyncCompletionCallback<State>() {
+              @Override
+              public void syncComplete(OTEntity<State> entity) {
+                engine.getPeerState().notifyResync(entity);
+              }
+            }));
       }
     });
 
@@ -39,7 +40,18 @@ public class ClientOTBusService {
           LogUtil.log("purged " + i + " old entries from log.");
         }
         else {
-          engine.receive("<ServerEngine>", opDto.otOperation(engine));
+          final OTPeer peer = engine.getPeerState().getPeer("<ServerEngine>");
+
+          if (!engine.receive("<ServerEngine>", opDto.otOperation(engine))) {
+            peer.beginSyncRemoteEntity("<ServerEngine>", opDto.getEntityId(),
+                new StateEntitySyncCompletionCallback(engine, opDto.getEntityId(),
+                    new EntitySyncCompletionCallback<State>() {
+                      @Override
+                      public void syncComplete(OTEntity<State> entity) {
+                        engine.getPeerState().notifyResync(entity);
+                      }
+                    }));
+          }
         }
       }
     });
@@ -47,10 +59,12 @@ public class ClientOTBusService {
     new Timer() {
       @Override
       public void run() {
+        LogUtil.log("PURGE EVENT");
         for (OTEntity otEntity : engine.getEntityStateSpace().getEntities()) {
           engine.getPeerState().getPeer("<ServerEngine>").sendPurgeHint(otEntity.getId(), otEntity.getRevision());
         }
       }
     }.scheduleRepeating(30000);
   }
+
 }

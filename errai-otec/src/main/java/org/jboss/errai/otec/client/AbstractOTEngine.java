@@ -73,8 +73,6 @@ public abstract class AbstractOTEngine implements OTEngine {
         }
       }
       catch (OTException e) {
-        e.printStackTrace();
-        getPeerState().forceResyncAll(entity);
         return null;
       }
     }
@@ -121,11 +119,6 @@ public abstract class AbstractOTEngine implements OTEngine {
 
   @Override
   public void notifyOperation(OTOperation operation) {
-//    final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
-//
-//    if (operation.getRevision() == -1) {
-//      operation = operation.getBasedOn(entity.getRevision());
-//    }
     notifyRemotes(applyLocally(operation));
   }
 
@@ -155,7 +148,7 @@ public abstract class AbstractOTEngine implements OTEngine {
 
   @Override
   public OTOperationsFactory getOperationsFactory() {
-    return new OTClientEngine.DefaultOTOperationsFactory(this);
+    return new DefaultOTOperationsFactory(this);
   }
 
   @Override

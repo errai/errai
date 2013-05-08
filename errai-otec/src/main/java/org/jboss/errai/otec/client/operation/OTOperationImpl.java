@@ -18,6 +18,7 @@ package org.jboss.errai.otec.client.operation;
 
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTException;
 import org.jboss.errai.otec.client.State;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.util.OTLogUtil;
@@ -194,8 +195,8 @@ public class OTOperationImpl implements OTOperation {
       return shouldPropagate();
     }
     catch (Throwable t) {
-      t.printStackTrace();
-      throw new RuntimeException("failed to apply op", t);
+   //   t.printStackTrace();
+      throw new OTException("failed to apply op", t);
     }
   }
 
