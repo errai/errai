@@ -16,7 +16,6 @@
 
 package org.jboss.errai.otec.client;
 
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
 
@@ -75,11 +74,11 @@ public class TransactionLogImpl implements TransactionLog {
 
       makeSnapshot(revision, effectiveStateForRevision.getEffectiveState());
 
-      LogUtil.log("***PURGE***");
-      LogUtil.log("NEW SNAPSHOT: " + revision);
-      LogUtil.log("STATE:");
-      LogUtil.log(String.valueOf(effectiveStateForRevision.getEffectiveState().get()));
-      LogUtil.log("***********");
+//      LogUtil.log("***PURGE***");
+//      LogUtil.log("NEW SNAPSHOT: " + revision);
+//      LogUtil.log("STATE:");
+//      LogUtil.log(String.valueOf(effectiveStateForRevision.getEffectiveState().get()));
+//      LogUtil.log("***********");
 
       int purged = 0;
       final Iterator<OTOperation> iterator = transactionLog.iterator();

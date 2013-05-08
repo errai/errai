@@ -29,10 +29,8 @@ import org.jboss.errai.otec.client.util.OTLogUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -70,7 +68,6 @@ public class Transformer {
     List<OTOperation> localOps;
     try {
       if (remoteOp.getRevisionHash().equals(entity.getState().getHash())) {
-        // nothing has happened since this!
         localOps = Collections.emptyList();
       }
       else {
@@ -87,12 +84,11 @@ public class Transformer {
     boolean first = true;
     boolean appliedRemoteOp = false;
     OTOperation applyOver = remoteOp;
-    if (localOps.isEmpty()) {
+    if (localOps.isEmpty() && remoteOp.getRevisionHash().equals(entity.getState().getHash())) {
       createOperation(remoteOp).apply(entity);
       return remoteOp;
     }
     else {
-      //   if (localOps.size() > 1) {
       final LogQuery query = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
       entity.getState().syncStateFrom(query.getEffectiveState());
 
@@ -125,20 +121,6 @@ public class Transformer {
           entity.getState().syncStateFrom(query2.getEffectiveState());
 
           localOps = query2.getLocalOpsNeedsMerge();
-
-          final Set<OTOperation> toRemove = new HashSet<OTOperation>();
-          final Iterator<OTOperation> cleanIter = localOps.iterator();
-
-          while (cleanIter.hasNext()) {
-            final OTOperation o = cleanIter.next();
-
-            if (o.getOuterPath() != o) {
-              toRemove.add(o.getOuterPath());
-            }
-            else if (toRemove.contains(o)) {
-              cleanIter.remove();
-            }
-          }
 
           for (final OTOperation operation : localOps) {
             operation.apply(entity, true);
@@ -239,69 +221,6 @@ public class Transformer {
 
       return applyOver;
     }
-  }
-
-  private OTOperation originalRemoteOp(final OTOperation remoteOp) {
-    OpPair transformedFrom = remoteOp.getTransformedFrom();
-    if (transformedFrom == null) {
-      return remoteOp;
-    }
-    else {
-      OTOperation op = remoteOp;
-      while ((transformedFrom = op.getTransformedFrom()) != null) {
-        op = transformedFrom.getRemoteOp();
-      }
-      return op;
-    }
-  }
-
-  private OTOperation translate(final OTOperation remoteOp, final OTOperation localOp) {
-    final OTOperation transformedOp;
-    final List<Mutation> remoteMutations = remoteOp.getMutations();
-    final List<Mutation> localMutations = localOp.getMutations();
-    final List<Mutation> transformedMutations = new ArrayList<Mutation>(remoteMutations.size());
-
-    final Iterator<Mutation> remoteOpMutations;
-    final Iterator<Mutation> localOpMutations;
-
-    if (remoteMutations.size() > localMutations.size()) {
-      remoteOpMutations = noopPaddedIterator(remoteMutations, remoteMutations.size());
-      localOpMutations = noopPaddedIterator(localMutations, remoteMutations.size());
-    }
-    else if (remoteMutations.size() < localMutations.size()) {
-      remoteOpMutations = noopPaddedIterator(remoteMutations, localMutations.size());
-      localOpMutations = noopPaddedIterator(localMutations, localMutations.size());
-    }
-    else {
-      remoteOpMutations = remoteMutations.iterator();
-      localOpMutations = localMutations.iterator();
-    }
-
-    int offset = 0;
-    while (remoteOpMutations.hasNext()) {
-      Mutation rm = remoteOpMutations.next();
-      Mutation lm = localOpMutations.next();
-
-      switch (lm.getType()) {
-        case Insert:
-          rm = rm.newBasedOn(lm.getPosition() + lm.length());
-          break;
-        case Delete:
-          rm = rm.newBasedOn(lm.getPosition() - lm.length());
-      }
-
-      transformedMutations.add(rm);
-    }
-
-    final OpPair of = OpPair.of(remoteOp, localOp);
-
-    transformedOp =
-        createLocalOnlyOperation(engine, remoteOp.getAgentId(), transformedMutations, entity,
-            of);
-
-    transformedOp.markAsResolvedConflict();
-
-    return transformedOp;
   }
 
   private OTOperation transform(final OTOperation remoteOp, final OTOperation localOp) {
