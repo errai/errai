@@ -126,9 +126,7 @@ public abstract class Atomizer {
             new Timer() {
               @Override
               public void run() {
-                final String newValue = (String) widget.getValue();
-
-                final DiffUtil.Delta diff = DiffUtil.diff(old, newValue);
+                final DiffUtil.Delta diff = DiffUtil.diff(old, (String) widget.getValue());
                 if (diff.getDeltaText().length() > 0) {
                   entityChangeStream.notifyInsert(diff.getCursor(), diff.getDeltaText());
                 }
@@ -138,7 +136,8 @@ public abstract class Atomizer {
         }
     );
 
-    final ListenerRegistration listenerRegistration = entity.getState().addStateChangeListener(new StateChangeListener() {
+    final ListenerRegistration listenerRegistration
+        = entity.getState().addStateChangeListener(new StateChangeListener() {
       @Override
       public int getCursorPos() {
         return widget.getCursorPos();
@@ -146,12 +145,7 @@ public abstract class Atomizer {
 
       @Override
       public void onStateChange(final int newCursorPos, final Object newValue) {
-        final Object oldValue = widget.getValue();
-
-        if (oldValue.equals(newValue)) {
-          return;
-        }
-
+        widget.setEnabled(false);
         widget.setValue(newValue);
         final int length = String.valueOf(newValue).length();
         if (length >= newCursorPos) {
@@ -160,6 +154,7 @@ public abstract class Atomizer {
         else {
           widget.setCursorPos(length);
         }
+        widget.setEnabled(true);
       }
     });
 
@@ -171,14 +166,14 @@ public abstract class Atomizer {
         entityChangeStream.flush();
       }
     };
-    timer.scheduleRepeating(750);
+    timer.scheduleRepeating(500);
 
     return new AtomizerSession() {
       @Override
       public void end() {
         listenerRegistration.remove();
         final Collection<HandlerRegistration> values = HANDLER_REGISTRATION_MAP.values();
-        for (HandlerRegistration value : values) {
+        for (final HandlerRegistration value : values) {
           value.removeHandler();
         }
         timer.cancel();

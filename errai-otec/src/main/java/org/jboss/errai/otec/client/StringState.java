@@ -161,6 +161,11 @@ public class StringState implements State<String> {
   }
 
   @Override
+  public int length() {
+    return buffer.length();
+  }
+
+  @Override
   public ListenerRegistration addStateChangeListener(final StateChangeListener stateChangeListener) {
     stateChangeListeners.add(stateChangeListener);
     return new ListenerRegistration() {

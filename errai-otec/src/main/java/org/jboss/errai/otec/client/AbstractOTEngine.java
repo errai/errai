@@ -59,17 +59,12 @@ public abstract class AbstractOTEngine implements OTEngine {
     final OTEntity entity = getEntityStateSpace().getEntity(remoteOp.getEntityId());
     synchronized (entity) {
       try {
-        try {
-          getPeerState().flushEntityStreams(entity.getId());
-          if (peerState.hasConflictResolutionPrecedence()) {
-            return Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
-          }
-          else {
-            return Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
-          }
+        getPeerState().flushEntityStreams(entity.getId());
+        if (peerState.hasConflictResolutionPrecedence()) {
+          return Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
         }
-        finally {
-          getPeerState().flushEntityStreams(entity.getId());
+        else {
+          return Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
         }
       }
       catch (OTException e) {

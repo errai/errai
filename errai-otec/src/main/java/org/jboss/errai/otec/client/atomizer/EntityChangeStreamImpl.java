@@ -92,6 +92,11 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     if (start == -1 || flushing) {
       return;
     }
+
+    if (insertState.length() == 0 && deleteState.length() == 0) {
+      return;
+    }
+
     flushing = true;
 
     try {
