@@ -181,7 +181,7 @@ public class OTOperationImpl implements OTOperation {
         mutation.apply(state);
       }
 
-      assert OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
+      OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
 
       if (transformedFrom != null) {
         transformedFrom.getRemoteOp().setOuterPath(this);

@@ -54,8 +54,6 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void notifyInsert(final int index, final String data) {
-    //System.out.println("notifyInsert:" + index + ":" + data);
-
     checkIfMustFlush(index, MutationType.Insert);
 
     if (start == -1) {
@@ -68,8 +66,6 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void notifyDelete(final int index, final String data) {
-    //System.out.println("notifyDelete:" + index + ":" + data);
-
     checkIfMustFlush(index, MutationType.Delete);
 
     if (start == -1) {
@@ -98,21 +94,21 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     }
 
     flushing = true;
+    Atomizer.stopEvents();
 
     try {
       final OTOperation operation = toOperation();
-      LogUtil.log("FLUSH: " + operation + ";rev=" + operation.getRevision());
-
-      //System.out.println("FLUSH:" + operation);
       engine.notifyOperation(operation);
       insertState.clear();
       deleteState.clear();
+      LogUtil.log("FLUSH: " + operation + ";rev=" + operation.getRevision());
     }
     catch (Throwable t) {
       t.printStackTrace();
     }
     finally {
       flushing = false;
+      Atomizer.startEvents();
     }
   }
 

@@ -77,12 +77,10 @@ public class Transformer {
     catch (OTException e) {
       e.printStackTrace();
       throw new BadSync("", entity.getId(), remoteOp.getAgentId());
-
-      //LogUtil.log("failed while trying to transform: " + remoteOp + " rev:" + remoteOp.getRevision());
     }
 
-    System.out.println("RECV_REMOTE: " + remoteOp + " (hash:" + remoteOp.getRevisionHash() + ")");
-    System.out.println("STATE HASH : " + entity.getState().getHash());
+//    System.out.println("RECV_REMOTE: " + remoteOp + " (hash:" + remoteOp.getRevisionHash() + ")");
+//    System.out.println("STATE HASH : " + entity.getState().getHash());
 
     boolean first = true;
     boolean appliedRemoteOp = false;
@@ -95,7 +93,7 @@ public class Transformer {
       final LogQuery query = transactionLog.getEffectiveStateForRevision(remoteOp.getRevision() + 1);
       entity.getState().syncStateFrom(query.getEffectiveState());
 
-      assert OTLogUtil.log("REWIND",
+      OTLogUtil.log("REWIND",
           "<<FOR TRANSFORM OVER: " + remoteOp + ">>",
           "-",
           engine.getName(),
@@ -132,7 +130,7 @@ public class Transformer {
           applyOver = translateFrom(remoteOp, lastPrevRemoteOp);
           createOperation(applyOver).apply(entity);
 
-          assert OTLogUtil.log("CTRNSFRM", "COMPOUND TRANSFORM FOR: " + remoteOp, "-", engine.getName(), remoteOp.getRevision() + 1,
+          OTLogUtil.log("CTRNSFRM", "COMPOUND TRANSFORM FOR: " + remoteOp, "-", engine.getName(), remoteOp.getRevision() + 1,
               "\"" + entity.getState().get() + "\"");
 
           return applyOver;

@@ -68,7 +68,7 @@ public class StringState implements State<String> {
     }
     catch (StringIndexOutOfBoundsException e) {
       System.out.println("********");
-      System.out.println("FAILED TO INSERT: \""  + data + "\"");
+      System.out.println("FAILED TO INSERT: \"" + data + "\"");
       System.out.println("        POSITION: " + pos);
       System.out.println("      BUFFER LEN: " + buffer.length());
 
@@ -111,6 +111,10 @@ public class StringState implements State<String> {
 
       if (cursorPos < 0) {
         cursorPos = 0;
+      }
+
+      if (cursorPos > length()) {
+        cursorPos = length();
       }
 
       listener.onStateChange(cursorPos, buffer.toString());
@@ -180,7 +184,6 @@ public class StringState implements State<String> {
     try {
       final Md5Digest digest = new Md5Digest();
       digest.update(string.getBytes("UTF-8"));
-
       return hashToHexString(digest.digest());
     }
     catch (Throwable e) {
