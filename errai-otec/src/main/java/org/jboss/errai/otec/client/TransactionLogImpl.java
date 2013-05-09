@@ -22,10 +22,13 @@ import org.jboss.errai.otec.client.operation.OTOperation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -34,7 +37,6 @@ import java.util.ListIterator;
 public class TransactionLogImpl implements TransactionLog {
   private final Object lock = new Object();
 
-  private volatile boolean logDirty = false;
   private final List<StateSnapshot> stateSnapshots = new LinkedList<StateSnapshot>();
   private final List<OTOperation> transactionLog = new LinkedList<OTOperation>();
   private final OTEntity entity;
@@ -66,6 +68,18 @@ public class TransactionLogImpl implements TransactionLog {
       return 0;
     }
     synchronized (lock) {
+      cleanLogTo(revision);
+
+      final LogQuery effectiveStateForRevision = getEffectiveStateForRevision(revision);
+
+      makeSnapshot(revision, effectiveStateForRevision.getEffectiveState());
+
+//      LogUtil.log("***PURGE***");
+//      LogUtil.log("NEW SNAPSHOT: " + revision);
+//      LogUtil.log("STATE:");
+//      LogUtil.log(String.valueOf(effectiveStateForRevision.getEffectiveState().get()));
+//      LogUtil.log("***********");
+
       int purged = 0;
       final Iterator<OTOperation> iterator = transactionLog.iterator();
       while (iterator.hasNext()) {
@@ -105,14 +119,23 @@ public class TransactionLogImpl implements TransactionLog {
       final ListIterator<OTOperation> delIter = transactionLog.listIterator(index);
       while (delIter.hasNext()) {
         entity.decrementRevisionCounter();
-        delIter.next().removeFromCanonHistory();
+        final OTOperation next = delIter.next();
+
+        final OTOperation outerPath = next.getOuterPath();
+        if (outerPath != next && outerPath.getTransformedFrom() != null) {
+          if (outerPath.getTransformedFrom().getRemoteOp().equals(next)) {
+            outerPath.removeFromCanonHistory();
+            continue;
+          }
+        }
+
+        next.removeFromCanonHistory();
       }
-      logDirty = true;
     }
   }
 
   @Override
-  public List<OTOperation> getLogFromId(final int revision, boolean includeNonCanon) {
+  public List<OTOperation> getLocalOpsSinceRemoteOperation(final OTOperation operation, boolean includeNonCanon) {
     synchronized (lock) {
       if (transactionLog.isEmpty()) {
         return Collections.emptyList();
@@ -120,14 +143,18 @@ public class TransactionLogImpl implements TransactionLog {
 
       final ListIterator<OTOperation> operationListIterator = transactionLog.listIterator(transactionLog.size());
       final List<OTOperation> operationList = new ArrayList<OTOperation>();
+      final int revision = operation.getRevision();
 
       while (operationListIterator.hasPrevious()) {
         final OTOperation previous = operationListIterator.previous();
+
         if (!includeNonCanon && !previous.isCanon()) {
           continue;
         }
+
         operationList.add(previous);
-        if (previous.getRevision() == revision) {
+
+        if (previous.getRevision() == revision || previous.getRevisionHash().equals(operation.getRevisionHash())) {
           Collections.reverse(operationList);
           return operationList;
         }
@@ -137,42 +164,55 @@ public class TransactionLogImpl implements TransactionLog {
         return Collections.emptyList();
       }
       else {
-//        LogUtil.log("Could not find revision: " + revision);
-//        LogUtil.log("Current Log:\n");
-//        for (OTOperation operation : transactionLog) {
-//          LogUtil.log("Rev:" + operation.getRevision() + ":" + operation);
-//        }
-
-
         throw new OTException("unable to find revision in log: " + revision);
       }
     }
   }
 
   @Override
+  public List<OTOperation> getPreviousRemoteOpsTo(OTOperation remoteOp, OTOperation localOp) {
+    final String agentId = remoteOp.getAgentId();
+    final int minRev = localOp.getRevision();
+    synchronized (lock) {
+      final ListIterator<OTOperation> iter = transactionLog.listIterator(transactionLog.size());
+
+      final List<OTOperation> collect = new LinkedList<OTOperation>();
+      while (iter.hasPrevious()) {
+        final OTOperation previous = iter.previous();
+        if (previous.getRevision() < minRev) {
+          break;
+        }
+        if (agentId.equals(previous.getAgentId())) {
+          collect.add(previous);
+        }
+      }
+
+      Collections.reverse(collect);
+
+      return collect;
+    }
+  }
+
+  @Override
   public List<OTOperation> getCanonLog() {
     synchronized (lock) {
-      if (logDirty) {
-        final List<OTOperation> canonLog = new ArrayList<OTOperation>(transactionLog.size());
-        for (final OTOperation operation : transactionLog) {
-          if (operation.isCanon()) {
-            canonLog.add(operation);
-          }
+      final List<OTOperation> canonLog = new ArrayList<OTOperation>(transactionLog.size());
+      for (final OTOperation operation : transactionLog) {
+        if (operation.isCanon()) {
+          canonLog.add(operation);
         }
-        return canonLog;
       }
-      else {
-        return transactionLog;
-      }
+      return canonLog;
     }
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public State getEffectiveStateForRevision(final int revision) {
+  public LogQuery getEffectiveStateForRevision(final int revision) {
     synchronized (lock) {
       final StateSnapshot latestSnapshotState = getLatestParentSnapshot(revision);
       final State stateToTranslate = latestSnapshotState.getState().snapshot();
+
       final ListIterator<OTOperation> operationListIterator
           = transactionLog.listIterator(transactionLog.size());
 
@@ -182,19 +222,27 @@ public class TransactionLogImpl implements TransactionLog {
         }
       }
 
+      final Set<OTOperation> contingent = new LinkedHashSet<OTOperation>();
+      final List<OTOperation> needsMerge = new LinkedList<OTOperation>();
       while (operationListIterator.hasNext()) {
         final OTOperation op = operationListIterator.next();
-        if (!op.isCanon()) continue;
+
+        if (!op.isCanon()) {
+          continue;
+        }
 
         if (op.getRevision() < revision) {
           for (final Mutation mutation : op.getMutations()) {
             mutation.apply(stateToTranslate);
           }
+          contingent.add(op.getOuterPath());
+        }
+        else {
+          needsMerge.add(op);
         }
       }
 
-      makeSnapshot(revision, stateToTranslate);
-      return stateToTranslate;
+      return new LogQuery(stateToTranslate, contingent, needsMerge);
     }
   }
 
@@ -215,6 +263,7 @@ public class TransactionLogImpl implements TransactionLog {
 
   private void makeSnapshot(final int revision, final State state) {
     stateSnapshots.add(new StateSnapshot(revision, state));
+    cleanLog();
   }
 
   @Override
@@ -246,20 +295,32 @@ public class TransactionLogImpl implements TransactionLog {
   @Override
   public void markDirty() {
     synchronized (lock) {
-      this.logDirty = true;
     }
   }
 
   @Override
   public void cleanLog() {
+    cleanLogTo(entity.getRevision());
+  }
+
+  private void cleanLogTo(int rev) {
     synchronized (lock) {
+      final Set<OTOperation> applied = new HashSet<OTOperation>();
+
       final Iterator<OTOperation> iterator = transactionLog.iterator();
       while (iterator.hasNext()) {
-        if (!iterator.next().isCanon()) {
+        final OTOperation next = iterator.next();
+        if (next.getRevision() > rev)  {
+          return;
+        }
+
+        if (!next.isCanon() || applied.contains(next)) {
           iterator.remove();
         }
+        else {
+          applied.add(next.getOuterPath());
+        }
       }
-      logDirty = false;
     }
   }
 

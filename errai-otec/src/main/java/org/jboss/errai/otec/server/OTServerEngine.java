@@ -21,6 +21,7 @@ import org.jboss.errai.otec.client.BadSync;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEngineMode;
 import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTException;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.OTQueuedOperation;
 import org.jboss.errai.otec.client.PeerState;
@@ -174,7 +175,7 @@ public class OTServerEngine extends AbstractOTEngine {
       final OTEntity entity = getEntityStateSpace().getEntity(sync.getEntityId());
 
       getPeerState().getPeer(sync.getAgentId())
-           .forceResync(sync.getEntityId(), entity.getRevision(),String.valueOf(entity.getState().get()));
+          .forceResync(sync.getEntityId(), entity.getRevision(), String.valueOf(entity.getState().get()));
     }
     catch (Throwable t) {
       t.printStackTrace();
@@ -184,6 +185,11 @@ public class OTServerEngine extends AbstractOTEngine {
 
   protected void handleOperation(final OTQueuedOperation queuedOp) {
     final OTOperation transformedOp = applyFromRemote(queuedOp.getOperation());
+
+    if (transformedOp == null) {
+      return;
+    }
+
     final OTPeer peer = getPeerState().getPeer(queuedOp.getPeerId());
 
     // broadcast to all other peers subscribed to this entity
@@ -201,13 +207,18 @@ public class OTServerEngine extends AbstractOTEngine {
       return true;
     }
 
-
-  //  System.out.println("RECV:" + remoteOp + ";rev:" + remoteOp.getRevision() + ";peerId=" + peerId);
-
-    // System.out.println("ADD_TO_QUEUE:" + remoteOp + ":rev:" + remoteOp.getRevision());
-
-    incomingQueue.offer(new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId()));
+    final OTQueuedOperation e = new OTQueuedOperation(remoteOp.getRevision(), remoteOp, peerId, remoteOp.getEntityId());
     getPeerState().getPeer(peerId).setLastKnownRemoteSequence(remoteOp.getEntityId(), remoteOp.getRevision());
+    try {
+      handleOperation(e);
+    }
+    catch (OTException ote) {
+      return false;
+    }
+    catch (BadSync bs) {
+      return false;
+    }
+
     return true;
   }
 }

@@ -27,8 +27,9 @@ import org.jboss.errai.otec.client.operation.OTOperationsListBuilder;
 import org.jboss.errai.otec.client.util.GUIDUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,17 +54,23 @@ public abstract class AbstractOTEngine implements OTEngine {
     this.peerState = peerState;
   }
 
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   protected OTOperation applyFromRemote(final OTOperation remoteOp) {
     final OTEntity entity = getEntityStateSpace().getEntity(remoteOp.getEntityId());
-    getPeerState().flushEntityStreams(entity.getId());
-
-    if (peerState.hasConflictResolutionPrecedence()) {
-      return Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
+    synchronized (entity) {
+      try {
+        getPeerState().flushEntityStreams(entity.getId());
+        if (peerState.hasConflictResolutionPrecedence()) {
+          return Transformer.createTransformerLocalPrecedence(this, entity, remoteOp).transform();
+        }
+        else {
+          return Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
+        }
+      }
+      catch (OTException e) {
+        return null;
+      }
     }
-    else {
-      return Transformer.createTransformerRemotePrecedence(this, entity, remoteOp).transform();
-    }
-
   }
 
   @Override
@@ -107,11 +114,6 @@ public abstract class AbstractOTEngine implements OTEngine {
 
   @Override
   public void notifyOperation(OTOperation operation) {
-//    final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
-//
-//    if (operation.getRevision() == -1) {
-//      operation = operation.getBasedOn(entity.getRevision());
-//    }
     notifyRemotes(applyLocally(operation));
   }
 
@@ -141,7 +143,7 @@ public abstract class AbstractOTEngine implements OTEngine {
 
   @Override
   public OTOperationsFactory getOperationsFactory() {
-    return new OTClientEngine.DefaultOTOperationsFactory(this);
+    return new DefaultOTOperationsFactory(this);
   }
 
   @Override
@@ -213,10 +215,23 @@ public abstract class AbstractOTEngine implements OTEngine {
 
         final TransactionLog transactionLog = entity.getTransactionLog();
         synchronized (transactionLog.getLock()) {
-          final Collection<OTOperation> log
-              = transactionLog.getLogFromId(peer.getLastTransmittedSequence(entry.getKey()), true);
+          final List<OTOperation> log = transactionLog.getLog();
+          final int lastTransmittedSequence = peer.getLastTransmittedSequence(entry.getKey());
+          final List<OTOperation> toSend = new ArrayList<OTOperation>();
 
-          for (final OTOperation op : log) {
+          final ListIterator<OTOperation> iter = log.listIterator(log.size());
+          while (iter.hasPrevious()) {
+            final OTOperation previous = iter.previous();
+
+            toSend.add(previous);
+
+            if (previous.getRevision() == lastTransmittedSequence) {
+              Collections.reverse(toSend);
+              break;
+            }
+          }
+
+          for (final OTOperation op : toSend) {
             if (getPeerState().shouldForwardOperation(op)) {
               peer.send(op);
             }

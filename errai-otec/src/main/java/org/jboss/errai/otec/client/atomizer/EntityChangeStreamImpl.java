@@ -18,6 +18,7 @@ package org.jboss.errai.otec.client.atomizer;
 
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createOperation;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
@@ -53,8 +54,6 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void notifyInsert(final int index, final String data) {
-    //System.out.println("notifyInsert:" + index + ":" + data);
-
     checkIfMustFlush(index, MutationType.Insert);
 
     if (start == -1) {
@@ -67,8 +66,6 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void notifyDelete(final int index, final String data) {
-    //System.out.println("notifyDelete:" + index + ":" + data);
-
     checkIfMustFlush(index, MutationType.Delete);
 
     if (start == -1) {
@@ -91,22 +88,27 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     if (start == -1 || flushing) {
       return;
     }
+
+    if (insertState.length() == 0 && deleteState.length() == 0) {
+      return;
+    }
+
     flushing = true;
+    Atomizer.stopEvents();
 
     try {
       final OTOperation operation = toOperation();
-    //  LogUtil.log("FLUSH: " + operation + ";rev=" + operation.getRevision());
-
-      //System.out.println("FLUSH:" + operation);
       engine.notifyOperation(operation);
       insertState.clear();
       deleteState.clear();
+      LogUtil.log("FLUSH: " + operation + ";rev=" + operation.getRevision());
     }
     catch (Throwable t) {
       t.printStackTrace();
     }
     finally {
       flushing = false;
+      Atomizer.startEvents();
     }
   }
 

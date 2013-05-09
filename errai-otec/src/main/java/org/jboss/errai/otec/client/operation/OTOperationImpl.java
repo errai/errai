@@ -18,6 +18,7 @@ package org.jboss.errai.otec.client.operation;
 
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
+import org.jboss.errai.otec.client.OTException;
 import org.jboss.errai.otec.client.State;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.util.OTLogUtil;
@@ -38,33 +39,34 @@ public class OTOperationImpl implements OTOperation {
   private boolean resolvedConflict;
   private String revisionHash;
   private boolean nonCanon;
+  private boolean invalid = false;
   private int revision;
   private OTOperation outerPath;
 
   private final OpPair transformedFrom;
 
   private OTOperationImpl(final OTEngine engine,
-                           final String agentId,
-                           final List<Mutation> mutationList,
-                           final int entityId,
-                           final int revision,
-                           final String revisionHash,
-                           final OpPair transformedFrom,
-                           final boolean propagate,
-                           final boolean resolvedConflict,
-                           final OTOperation outerPath) {
+                          final String agentId,
+                          final List<Mutation> mutationList,
+                          final int entityId,
+                          final int revision,
+                          final String revisionHash,
+                          final OpPair transformedFrom,
+                          final boolean propagate,
+                          final boolean resolvedConflict,
+                          final OTOperation outerPath) {
 
-     this.engine = engine;
-     this.agentId = agentId;
-     this.mutations = mutationList;
-     this.entityId = entityId;
-     this.revision = revision;
-     this.revisionHash = revisionHash;
-     this.transformedFrom = transformedFrom;
-     this.propagate = propagate;
-     this.resolvedConflict = resolvedConflict;
-     this.outerPath = outerPath == null ? this : outerPath;
-   }
+    this.engine = engine;
+    this.agentId = agentId;
+    this.mutations = mutationList;
+    this.entityId = entityId;
+    this.revision = revision;
+    this.revisionHash = revisionHash;
+    this.transformedFrom = transformedFrom;
+    this.propagate = propagate;
+    this.resolvedConflict = resolvedConflict;
+    this.outerPath = outerPath == null ? this : outerPath;
+  }
 
   private OTOperationImpl(final OTEngine engine,
                           final String agentId,
@@ -120,16 +122,6 @@ public class OTOperationImpl implements OTOperation {
     return new OTOperationImpl(engine, agentId, mutationList, entityId, revision, revisionHash, transformedFrom, true, false);
   }
 
-//  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
-//                                                     final List<Mutation> mutationList,
-//                                                     final int entityId,
-//                                                     final int revision,
-//                                                     final String revisionHash,
-//                                                     final OpPair transformedFrom) {
-//
-//    return new OTOperationImpl(engine, mutationList, entityId, revision, revisionHash, transformedFrom, false, false);
-//  }
-
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
                                                      final OTOperation operation) {
     return new OTOperationImpl(engine, operation.getAgentId(), operation.getMutations(), operation.getEntityId(), operation.getRevision(),
@@ -142,9 +134,8 @@ public class OTOperationImpl implements OTOperation {
   }
 
   public static OTOperation createOperation(final OTOperation op, final OpPair transformedFrom) {
-    final OTOperationImpl otOperation = new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
+    return new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
         op.getRevisionHash(), transformedFrom, op.shouldPropagate(), op.isResolvedConflict());
-    return otOperation;
   }
 
   @Override
@@ -168,10 +159,14 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public boolean apply(final OTEntity entity) {
-    try {
+  public boolean apply(OTEntity entity) {
+    return apply(entity, false);
+  }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  public boolean apply(final OTEntity entity, final boolean transiently) {
+    try {
       revisionHash = entity.getState().getHash();
       if (revision == -1) {
         revision = entity.getRevision();
@@ -186,15 +181,22 @@ public class OTOperationImpl implements OTOperation {
         mutation.apply(state);
       }
 
-      assert OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
+      OTLogUtil.log("APPLY", toString(), "-", engine.toString(), revision, "\"" + entity.getState().get() + "\"");
 
-      entity.getTransactionLog().appendLog(this);
-      entity.incrementRevision();
+      if (transformedFrom != null) {
+        transformedFrom.getRemoteOp().setOuterPath(this);
+      }
+
+      if (!transiently) {
+        entity.getTransactionLog().appendLog(this);
+        entity.incrementRevision();
+      }
+
       return shouldPropagate();
     }
     catch (Throwable t) {
-      t.printStackTrace();
-      throw new RuntimeException("failed to apply op", t);
+   //   t.printStackTrace();
+      throw new OTException("failed to apply op", t);
     }
   }
 
@@ -206,6 +208,11 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public void markAsResolvedConflict() {
     resolvedConflict = true;
+  }
+
+  @Override
+  public void unmarkAsResolvedConflict() {
+    resolvedConflict = false;
   }
 
   @Override
@@ -244,13 +251,32 @@ public class OTOperationImpl implements OTOperation {
   }
 
   @Override
-  public void setOuterPath(OTOperation outerPath) {
+  public void setOuterPath(final OTOperation outerPath) {
+//    if (this.outerPath != this) {
+//      this.outerPath.setOuterPath(outerPath);
+//    }
+
     this.outerPath = outerPath;
   }
 
   @Override
   public OTOperation getOuterPath() {
     return outerPath;
+  }
+
+  @Override
+  public boolean isValid() {
+    return !invalid;
+  }
+
+  @Override
+  public void invalidate() {
+    invalid = true;
+  }
+
+  @Override
+  public int compareTo(OTOperation o) {
+    return revision - o.getRevision();
   }
 
   @Override

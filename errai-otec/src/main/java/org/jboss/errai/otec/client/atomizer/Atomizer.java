@@ -32,10 +32,13 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ValueBoxBase;
+import org.jboss.errai.otec.client.ListenerRegistration;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StateChangeListener;
 import org.jboss.errai.otec.client.util.DiffUtil;
+
+import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -45,11 +48,12 @@ public abstract class Atomizer {
   private Atomizer() {
   }
 
-  private static final Multimap<Object, HandlerRegistration> HANDLER_REGISTRATION_MAP
-      = HashMultimap.create();
+  private static boolean NO_PROPAGATE_STATE_CHANGE = false;
 
-  public static void syncWidgetWith(final OTEngine engine, final OTEntity entity, final ValueBoxBase widget) {
+  public static AtomizerSession syncWidgetWith(final OTEngine engine, final OTEntity entity, final ValueBoxBase widget) {
 
+    final Multimap<Object, HandlerRegistration> HANDLER_REGISTRATION_MAP
+        = HashMultimap.create();
     final EntityChangeStreamImpl entityChangeStream = new EntityChangeStreamImpl(engine, entity);
     engine.getPeerState().addEntityStream(entityChangeStream);
 
@@ -63,14 +67,20 @@ public abstract class Atomizer {
         }
 
         if (widget.getSelectedText().length() > 0) {
+          stopEvents();
           entityChangeStream.notifyDelete(widget.getCursorPos(), widget.getSelectedText());
+          startEvents();
         }
         else if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
+          stopEvents();
           final int index = widget.getCursorPos() - 1;
           entityChangeStream.notifyDelete(index, String.valueOf(widget.getText().charAt(index)));
+          startEvents();
         }
         else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+          stopEvents();
           entityChangeStream.notifyInsert(widget.getCursorPos(), "\n");
+          startEvents();
         }
       }
     }));
@@ -79,7 +89,9 @@ public abstract class Atomizer {
       @Override
       public void onKeyPress(final KeyPressEvent event) {
         if (event.getUnicodeCharCode() != 13 && event.getUnicodeCharCode() != 0) {
+          stopEvents();
           entityChangeStream.notifyInsert(widget.getCursorPos(), String.valueOf(event.getCharCode()));
+          startEvents();
         }
       }
     }));
@@ -95,7 +107,9 @@ public abstract class Atomizer {
               final String after = (String) widget.getValue();
               final DiffUtil.Delta diff = DiffUtil.diff(before, after);
 
+              stopEvents();
               entityChangeStream.notifyInsert(diff.getCursor(), diff.getDeltaText());
+              startEvents();
             }
           }.schedule(1);
         }
@@ -106,15 +120,19 @@ public abstract class Atomizer {
     attachCutHandler(widget.getElement(), new Runnable() {
       @Override
       public void run() {
+        stopEvents();
         entityChangeStream.notifyDelete(widget.getCursorPos(), widget.getSelectedText());
+        startEvents();
       }
     });
 
     attachTextDragHandler(widget.getElement(), new Runnable() {
           @Override
           public void run() {
+            stopEvents();
             entityChangeStream.notifyDelete(widget.getCursorPos(), widget.getSelectedText());
             entityChangeStream.flush();
+            startEvents();
           }
         },
         new Runnable() {
@@ -124,11 +142,11 @@ public abstract class Atomizer {
             new Timer() {
               @Override
               public void run() {
-                final String newValue = (String) widget.getValue();
-
-                final DiffUtil.Delta diff = DiffUtil.diff(old, newValue);
+                final DiffUtil.Delta diff = DiffUtil.diff(old, (String) widget.getValue());
                 if (diff.getDeltaText().length() > 0) {
+                  stopEvents();
                   entityChangeStream.notifyInsert(diff.getCursor(), diff.getDeltaText());
+                  startEvents();
                 }
               }
             }.schedule(1);
@@ -136,7 +154,8 @@ public abstract class Atomizer {
         }
     );
 
-    entity.getState().addStateChangeListener(new StateChangeListener() {
+    final ListenerRegistration listenerRegistration
+        = entity.getState().addStateChangeListener(new StateChangeListener() {
       @Override
       public int getCursorPos() {
         return widget.getCursorPos();
@@ -144,31 +163,37 @@ public abstract class Atomizer {
 
       @Override
       public void onStateChange(final int newCursorPos, final Object newValue) {
-        final Object oldValue = widget.getValue();
+        widget.setValue(newValue, false);
 
-        if (oldValue.equals(newValue))  {
+        if (NO_PROPAGATE_STATE_CHANGE) {
           return;
         }
 
-        widget.setValue(newValue);
-        final int length = String.valueOf(newValue).length();
-        if (length >= newCursorPos) {
-          widget.setCursorPos(newCursorPos);
-        }
-        else {
-          widget.setCursorPos(length);
-        }
+        widget.setCursorPos(newCursorPos);
       }
     });
 
     DOM.sinkEvents(widget.getElement(), DOM.getEventsSunk(widget.getElement()) | Event.ONPASTE);
 
-    new Timer() {
+    final Timer timer = new Timer() {
       @Override
       public void run() {
         entityChangeStream.flush();
       }
-    }.scheduleRepeating(750);
+    };
+    timer.scheduleRepeating(500);
+
+    return new AtomizerSession() {
+      @Override
+      public void end() {
+        listenerRegistration.remove();
+        final Collection<HandlerRegistration> values = HANDLER_REGISTRATION_MAP.values();
+        for (final HandlerRegistration value : values) {
+          value.removeHandler();
+        }
+        timer.cancel();
+      }
+    };
   }
 
   private static boolean shouldIgnoreKeyPress(KeyEvent event) {
@@ -198,6 +223,14 @@ public abstract class Atomizer {
     }
 
     return false;
+  }
+
+  public static void stopEvents() {
+    NO_PROPAGATE_STATE_CHANGE = true;
+  }
+
+  public static void startEvents() {
+    NO_PROPAGATE_STATE_CHANGE = false;
   }
 
   private static native void attachCutHandler(Element element, Runnable runnable) /*-{

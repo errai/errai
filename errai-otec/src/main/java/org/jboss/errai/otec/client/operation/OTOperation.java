@@ -26,7 +26,7 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public interface OTOperation {
+public interface OTOperation extends Comparable<OTOperation> {
   List<Mutation> getMutations();
 
   int getEntityId();
@@ -38,6 +38,8 @@ public interface OTOperation {
   boolean shouldPropagate();
 
   boolean apply(OTEntity entity);
+
+  boolean apply(OTEntity entity, boolean transiently);
 
   OTEngine getEngine();
 
@@ -52,6 +54,8 @@ public interface OTOperation {
   void removeFromCanonHistory();
 
   void markAsResolvedConflict();
+
+  void unmarkAsResolvedConflict();
   
   OpPair getTransformedFrom();
 
@@ -60,4 +64,8 @@ public interface OTOperation {
   OTOperation getOuterPath();
 
   void setOuterPath(OTOperation outerPath);
+
+  boolean isValid();
+
+  void invalidate();
 }

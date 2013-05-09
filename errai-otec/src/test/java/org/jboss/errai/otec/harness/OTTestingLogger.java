@@ -24,6 +24,8 @@ import org.jboss.errai.otec.client.util.OTLogAdapter;
  * @author Mike Brock
  */
 public class OTTestingLogger implements OTLogAdapter {
+  private static final String clientFilter = System.getProperty("otec.log.clientFilter");
+
 
   @Override
   public void printLogTitle() {
@@ -33,7 +35,14 @@ public class OTTestingLogger implements OTLogAdapter {
 
   @Override
   public boolean log(final String type, final String mutations, final String from, final String to, final int rev, final String state) {
+
     synchronized (OTTestingLogger.class) {
+      if (clientFilter != null) {
+        if (!clientFilter.equals(to)) {
+          return true;
+        }
+      }
+
       if (!GWT.isClient()) {
         System.out.printf(LOG_FORMAT, type, from, to, mutations, rev, state);
         System.out.flush();

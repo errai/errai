@@ -16,20 +16,9 @@
 
 package org.jboss.errai.otec.client;
 
-import org.jboss.errai.otec.client.operation.OTOperation;
-
 /**
  * @author Mike Brock
- * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface OTPeer {
-  public String getId();
-  public void send(OTOperation operation);
-  public void sendPurgeHint(Integer entityId, int revision);
-  public void forceResync(Integer entityId, int revision, String state);
-  public void beginSyncRemoteEntity(String peerId, int entityId, EntitySyncCompletionCallback<State> callback);
-  public void setLastKnownRemoteSequence(Integer entity, int sequence);
-  public int getLastKnownRemoteSequence(Integer entity);
-  public int getLastTransmittedSequence(Integer entity);
-  public boolean isSynced();
+public interface ListenerRegistration {
+  public void remove();
 }

@@ -37,7 +37,7 @@ public class ServerOTPeerImpl implements OTPeer {
   private final MessageBus bus;
   private final Map<Integer, AtomicInteger> lastSentSequences = new ConcurrentHashMap<Integer, AtomicInteger>();
   protected final Map<Integer, PeerData> peerDataMap = new ConcurrentHashMap<Integer, PeerData>();
-
+  protected volatile boolean synced;
 
   public ServerOTPeerImpl(final String remoteEngineId, final MessageBus bus) {
     this.queueId = remoteEngineId;
@@ -75,14 +75,22 @@ public class ServerOTPeerImpl implements OTPeer {
 
   @Override
   public void forceResync(final Integer entityId, final int revision, final String state) {
+    synced = false;
     CommandMessage.create()
         .toSubject("ClientOTEngineSyncService")
-        .set(MessageParts.Value, state)
-        .set("EntityId", entityId)
-        .set("Revision", revision)
+        .set(MessageParts.Value, entityId)
         .set(MessageParts.SessionID, queueId)
         .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);
+  }
+
+  @Override
+  public boolean isSynced() {
+    return synced;
+  }
+
+  public void setSynced(boolean synced) {
+    this.synced = synced;
   }
 
   @Override

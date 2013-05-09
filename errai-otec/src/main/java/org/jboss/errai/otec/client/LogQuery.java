@@ -19,33 +19,31 @@ package org.jboss.errai.otec.client;
 import org.jboss.errai.otec.client.operation.OTOperation;
 
 import java.util.List;
+import java.util.Set;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public interface TransactionLog {
-  public Object getLock();
+public class LogQuery {
+  private final State effectiveState;
+  private final Set<OTOperation> contingentOps;
+  private final List<OTOperation> localOpsNeedsMerge;
 
-  public List<OTOperation> getLog();
+  public LogQuery(State effectiveState, Set<OTOperation> contingentOps, List<OTOperation> localOpsNeedsMerge) {
+    this.effectiveState = effectiveState;
+    this.contingentOps = contingentOps;
+    this.localOpsNeedsMerge = localOpsNeedsMerge;
+  }
 
-  public List<OTOperation> getLocalOpsSinceRemoteOperation(OTOperation remoteOp, boolean includeNonCanon);
+  public State getEffectiveState() {
+    return effectiveState;
+  }
 
-  public List<OTOperation> getCanonLog();
+  public Set<OTOperation> getContingentOps() {
+    return contingentOps;
+  }
 
-  public void insertLog(int revision, OTOperation operation);
-
-  public void appendLog(OTOperation operation);
-
-  LogQuery getEffectiveStateForRevision(int revision);
-
-  int purgeTo(int revision);
-
-  void pruneFromOperation(OTOperation operation);
-
-  void markDirty();
-
-  void cleanLog();
-
-  List<OTOperation> getPreviousRemoteOpsTo(OTOperation remoteOp, OTOperation localOp);
+  public List<OTOperation> getLocalOpsNeedsMerge() {
+    return localOpsNeedsMerge;
+  }
 }

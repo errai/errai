@@ -41,6 +41,10 @@ public interface PeerState {
 
   public boolean hasConflictResolutionPrecedence();
 
+  public void addResyncListener(Integer entity, ResyncListener resyncListener);
+  public void forceResyncAll(OTEntity entity);
+  public void notifyResync(OTEntity entity);
+
   public void addEntityStream(EntityChangeStream stream);
   public void flushEntityStreams(Integer entityId);
 }

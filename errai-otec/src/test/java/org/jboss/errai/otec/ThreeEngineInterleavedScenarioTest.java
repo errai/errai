@@ -405,7 +405,6 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
         .add(MutationType.Insert, 7, "H")
         .build();
 
-
     final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
     OTOperation x = opFactoryClientB.createOperation(clientBEntity)
         .add(MutationType.Insert, 0, "X")
@@ -416,7 +415,6 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     OTOperation z = opFactoryClientB.createOperation(clientBEntity)
         .add(MutationType.Insert, 2, "Z")
         .build();
-
 
     /** ClientA apply: "abc" **/
     a = clientEngineA.applyLocally(a);
@@ -461,9 +459,8 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
 
     stopServerEngineAndWait();
 
-    final String expected = "ABCXYZDEFGH";
+    final String expected = "XYZABCDEFGH";
 
     assertAllLogsConsistent(expected, initialState);
-
   }
 }

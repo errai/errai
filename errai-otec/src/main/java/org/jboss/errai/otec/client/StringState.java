@@ -67,6 +67,11 @@ public class StringState implements State<String> {
       notifyStateChangeListeners(pos, data.length());
     }
     catch (StringIndexOutOfBoundsException e) {
+      System.out.println("********");
+      System.out.println("FAILED TO INSERT: \"" + data + "\"");
+      System.out.println("        POSITION: " + pos);
+      System.out.println("      BUFFER LEN: " + buffer.length());
+
       throw new OTException("could not update state", e);
     }
   }
@@ -84,6 +89,10 @@ public class StringState implements State<String> {
       notifyStateChangeListeners(pos, -length);
     }
     catch (StringIndexOutOfBoundsException e) {
+      System.out.println("********");
+      System.out.println("FAILED TO DELETE: " + length);
+      System.out.println("        POSITION: " + pos);
+      System.out.println("      BUFFER LEN: " + buffer.length());
       throw new OTException("could not update state", e);
     }
   }
@@ -102,6 +111,10 @@ public class StringState implements State<String> {
 
       if (cursorPos < 0) {
         cursorPos = 0;
+      }
+
+      if (cursorPos > length()) {
+        cursorPos = length();
       }
 
       listener.onStateChange(cursorPos, buffer.toString());
@@ -147,15 +160,30 @@ public class StringState implements State<String> {
   }
 
   @Override
-  public void addStateChangeListener(final StateChangeListener stateChangeListener) {
+  public void updateHash() {
+    updateStateId();
+  }
+
+  @Override
+  public int length() {
+    return buffer.length();
+  }
+
+  @Override
+  public ListenerRegistration addStateChangeListener(final StateChangeListener stateChangeListener) {
     stateChangeListeners.add(stateChangeListener);
+    return new ListenerRegistration() {
+      @Override
+      public void remove() {
+        stateChangeListeners.remove(stateChangeListener);
+      }
+    };
   }
 
   private static String createHashFor(final String string) {
     try {
       final Md5Digest digest = new Md5Digest();
       digest.update(string.getBytes("UTF-8"));
-
       return hashToHexString(digest.digest());
     }
     catch (Throwable e) {
@@ -169,5 +197,10 @@ public class StringState implements State<String> {
       hexString.append(Integer.toHexString(0xFF & mdbyte));
     }
     return hexString.toString();
+  }
+
+  @Override
+  public String toString() {
+    return "\"" + buffer.toString() + "\"";
   }
 }

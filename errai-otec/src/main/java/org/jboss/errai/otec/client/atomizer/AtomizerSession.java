@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.client;
+package org.jboss.errai.otec.client.atomizer;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
-public interface State<T> {
-  public T get();
-  public State<T> snapshot();
-  public void syncStateFrom(State<T> fromState);
-  public String getHash();
-  public void clear();
-  public State<T> getTransientState();
-  public void updateHash();
-  public int length();
-
-  public ListenerRegistration addStateChangeListener(StateChangeListener stateChangeListener);
+public interface AtomizerSession {
+  public void end();
 }

@@ -35,6 +35,8 @@ public class SinglePeerState implements PeerState {
   final Map<Integer, Boolean> associatedEntities = new IdentityHashMap<Integer, Boolean>();
   private final Multimap<Integer, EntityChangeStream> entityChangeStreamList
       = HashMultimap.create();
+  private final Multimap<Integer, ResyncListener> resyncListeners
+      = HashMultimap.create();
 
   @Override
   public OTPeer getPeer(final String peerId) {
@@ -51,7 +53,7 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
-  public void deregisterPeer(OTPeer peer) {
+  public void deregisterPeer(final OTPeer peer) {
   }
 
   @Override
@@ -74,6 +76,22 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
+  public void forceResyncAll(OTEntity entity) {
+  }
+
+  @Override
+  public void addResyncListener(Integer entity, ResyncListener resyncListener) {
+    resyncListeners.put(entity, resyncListener);
+  }
+
+  @Override
+  public void notifyResync(OTEntity entity) {
+    for (ResyncListener resyncListener : resyncListeners.get(entity.getId())) {
+      resyncListener.onResync(entity);
+    }
+  }
+
+  @Override
   public void associateEntity(final OTPeer peer, final Integer entity) {
     associatedEntities.put(entity, Boolean.TRUE);
   }
@@ -84,16 +102,17 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
-  public void addEntityStream(EntityChangeStream stream) {
+  public void addEntityStream(final EntityChangeStream stream) {
     entityChangeStreamList.put(stream.getEntityId(), stream);
   }
 
   @Override
-  public void flushEntityStreams(Integer entityId) {
-    for (EntityChangeStream entityChangeStream : entityChangeStreamList.get(entityId)) {
+  public void flushEntityStreams(final Integer entityId) {
+    for (final EntityChangeStream entityChangeStream : entityChangeStreamList.get(entityId)) {
       entityChangeStream.flush();
     }
   }
+
   @Override
   public boolean shouldForwardOperation(final OTOperation operation) {
     return operation.shouldPropagate();
