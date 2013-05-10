@@ -35,7 +35,7 @@ class HasEncodedConvMessageWrapper extends ConversationMessageWrapper implements
    * @throws ClassCastException
    *           if {@code newMessage} is not an instance of HasEncoded.
    */
-  public HasEncodedConvMessageWrapper(Message inReplyTo, Message newMessage) {
+  public HasEncodedConvMessageWrapper(final Message inReplyTo, final Message newMessage) {
     super(inReplyTo, newMessage);
     
     // have to check this now; otherwise #getEncoded() will blow up later

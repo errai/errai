@@ -156,7 +156,7 @@ public class StringState implements State<String> {
 
   @Override
   public State<String> getTransientState() {
-    return new StringState(buffer);
+    return new StringState(new StringBuffer(buffer));
   }
 
   @Override

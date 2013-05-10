@@ -29,6 +29,5 @@ public interface State<T> {
   public State<T> getTransientState();
   public void updateHash();
   public int length();
-
   public ListenerRegistration addStateChangeListener(StateChangeListener stateChangeListener);
 }

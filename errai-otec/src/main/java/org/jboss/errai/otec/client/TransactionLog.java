@@ -45,6 +45,8 @@ public interface TransactionLog {
 
   void markDirty();
 
+  void snapshot();
+
   void cleanLog();
 
   List<OTOperation> getPreviousRemoteOpsTo(OTOperation remoteOp, OTOperation localOp);

@@ -87,19 +87,13 @@ public class DefaultRemoteCallBuilder {
 
       @Override
       public void sendNowWith(final MessageBus bus) {
-        Integer id;
+        final Integer id;
 
         final String replyTo =
             message.getSubject() + "." + message.getCommandType() + ":" + (id = uniqueNumber()) + ":RespondTo:RPC";
 
         final String errorTo =
-            message.getSubject() + "." + message.getCommandType() + ":" + ((id == null) ? uniqueNumber() : id) + ":Errors:RPC";
-
-        new MessageCallback() {
-          @Override
-          public void callback(Message message) {
-          }
-        };
+            message.getSubject() + "." + message.getCommandType() + ":" + id + ":Errors:RPC";
 
         if (remoteCallback != null) {
           bus.subscribe(replyTo,
@@ -197,7 +191,7 @@ public class DefaultRemoteCallBuilder {
   }
 
   private static int uniqueNumber() {
-    return ++callCounter > 100000 ? callCounter = 0 : callCounter;
+    return ++callCounter > 1000000 ? callCounter = 0 : callCounter;
   }
 
   /**

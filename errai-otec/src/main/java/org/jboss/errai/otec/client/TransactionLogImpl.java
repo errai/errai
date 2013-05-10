@@ -74,12 +74,6 @@ public class TransactionLogImpl implements TransactionLog {
 
       makeSnapshot(revision, effectiveStateForRevision.getEffectiveState());
 
-//      LogUtil.log("***PURGE***");
-//      LogUtil.log("NEW SNAPSHOT: " + revision);
-//      LogUtil.log("STATE:");
-//      LogUtil.log(String.valueOf(effectiveStateForRevision.getEffectiveState().get()));
-//      LogUtil.log("***********");
-
       int purged = 0;
       final Iterator<OTOperation> iterator = transactionLog.iterator();
       while (iterator.hasNext()) {
@@ -135,7 +129,7 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public List<OTOperation> getLocalOpsSinceRemoteOperation(final OTOperation operation, boolean includeNonCanon) {
+  public List<OTOperation> getLocalOpsSinceRemoteOperation(final OTOperation operation, final boolean includeNonCanon) {
     synchronized (lock) {
       if (transactionLog.isEmpty()) {
         return Collections.emptyList();
@@ -170,7 +164,7 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public List<OTOperation> getPreviousRemoteOpsTo(OTOperation remoteOp, OTOperation localOp) {
+  public List<OTOperation> getPreviousRemoteOpsTo(final OTOperation remoteOp, final OTOperation localOp) {
     final String agentId = remoteOp.getAgentId();
     final int minRev = localOp.getRevision();
     synchronized (lock) {
@@ -262,7 +256,7 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   private void makeSnapshot(final int revision, final State state) {
-    stateSnapshots.add(new StateSnapshot(revision, state));
+    stateSnapshots.add(new StateSnapshot(revision, state.getTransientState()));
     cleanLog();
   }
 
@@ -278,7 +272,7 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public void insertLog(int revision, OTOperation operation) {
+  public void insertLog(final int revision, final OTOperation operation) {
     synchronized (lock) {
       final ListIterator<OTOperation> operationListIterator
           = transactionLog.listIterator(transactionLog.size());
@@ -299,18 +293,23 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
+  public void snapshot() {
+    makeSnapshot(entity.getRevision(), entity.getState());
+  }
+
+  @Override
   public void cleanLog() {
     cleanLogTo(entity.getRevision());
   }
 
-  private void cleanLogTo(int rev) {
+  private void cleanLogTo(final int rev) {
     synchronized (lock) {
       final Set<OTOperation> applied = new HashSet<OTOperation>();
 
       final Iterator<OTOperation> iterator = transactionLog.iterator();
       while (iterator.hasNext()) {
         final OTOperation next = iterator.next();
-        if (next.getRevision() > rev)  {
+        if (next.getRevision() > rev) {
           return;
         }
 

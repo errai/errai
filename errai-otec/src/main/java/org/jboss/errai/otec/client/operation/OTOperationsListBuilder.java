@@ -29,4 +29,6 @@ public interface OTOperationsListBuilder {
   public OTOperationsListBuilder add(MutationType type, int position, String data);
 
   public OTOperation build();
+
+  public void submit();
 }

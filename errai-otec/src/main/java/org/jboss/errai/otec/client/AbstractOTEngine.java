@@ -275,6 +275,11 @@ public abstract class AbstractOTEngine implements OTEngine {
         public OTOperation build() {
           return OTOperationImpl.createOperation(otEngine, otEngine.getId(), mutationList, entity.getId(), -1, null, null);
         }
+
+        @Override
+        public void submit() {
+          otEngine.notifyOperation(build());
+        }
       };
     }
   }

@@ -35,8 +35,8 @@ public class OpDto {
   private List<Mutation> mutations;
   private OpPairDto opPairDto;
 
-  public static OpDto fromOperation(OTOperation operation) {
-    OpDto dto = new OpDto();
+  public static OpDto fromOperation(final OTOperation operation) {
+    final OpDto dto = new OpDto();
     dto.entityId = operation.getEntityId();
     dto.hash = operation.getRevisionHash();
     dto.revisionId = operation.getRevision();
@@ -54,7 +54,7 @@ public class OpDto {
     return revisionId;
   }
 
-  public void setRevisionId(int revisionId) {
+  public void setRevisionId(final int revisionId) {
     this.revisionId = revisionId;
   }
 
@@ -62,7 +62,7 @@ public class OpDto {
     return entityId;
   }
 
-  public void setEntityId(int entityId) {
+  public void setEntityId(final int entityId) {
     this.entityId = entityId;
   }
 
@@ -70,7 +70,7 @@ public class OpDto {
     return hash;
   }
 
-  public void setHash(String hash) {
+  public void setHash(final String hash) {
     this.hash = hash;
   }
 
@@ -82,11 +82,11 @@ public class OpDto {
     return opPairDto;
   }
 
-  public void setMutations(List<Mutation> mutations) {
+  public void setMutations(final List<Mutation> mutations) {
     this.mutations = mutations;
   }
 
-  public OTOperation otOperation(OTEngine engine) {
+  public OTOperation otOperation(final OTEngine engine) {
     OpPair opPair = null;
     if (this.opPairDto != null) {
       opPair = this.opPairDto.toOpPair(engine);
