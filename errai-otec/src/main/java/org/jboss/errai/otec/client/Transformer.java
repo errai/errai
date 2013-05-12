@@ -85,8 +85,6 @@ public class Transformer {
       throw new BadSync("", entity.getId(), remoteOp.getAgentId());
     }
 
-
-
     boolean first = true;
     boolean appliedRemoteOp = false;
     OTOperation applyOver = remoteOp;

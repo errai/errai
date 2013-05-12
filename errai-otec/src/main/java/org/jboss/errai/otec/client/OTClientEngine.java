@@ -43,7 +43,7 @@ public class OTClientEngine extends AbstractOTEngine {
   @Override
   public boolean receive(final String peerId, final OTOperation remoteOp) {
     try {
-      LogUtil.log("RECEIVE fromPeer=" + peerId + "; op=" + remoteOp
+      LogUtil.log("RECEIVE fromPeer=" + peerId + "; op=" + remoteOp  + "; rev=" + remoteOp.getRevision()
           + "; state=\"" + getEntityStateSpace().getEntity(remoteOp.getEntityId()).getState().get() + "\"");
       return applyFromRemote(remoteOp) != null;
     }
