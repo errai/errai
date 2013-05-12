@@ -51,6 +51,12 @@ public class OTTestingLogger implements OTLogAdapter {
     }
   }
 
+  @Override
+  public boolean log(final String message) {
+    System.out.println(message);
+    return true;
+  }
+
   public static String repeat(final char c, final int amount) {
     final StringBuilder builder = new StringBuilder(amount);
     for (int i = 0; i < amount; i++) {
@@ -58,4 +64,6 @@ public class OTTestingLogger implements OTLogAdapter {
     }
     return builder.toString();
   }
+
+
 }

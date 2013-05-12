@@ -17,6 +17,7 @@ public class ClientOTBusService {
       public void callback(Message message) {
         final Integer value = message.getValue(Integer.class);
         final OTPeer peer = engine.getPeerState().getPeer("<ServerEngine>");
+
         peer.beginSyncRemoteEntity("<ServerEngine>", value, new StateEntitySyncCompletionCallback(engine, value,
             new EntitySyncCompletionCallback<State>() {
               @Override
@@ -60,7 +61,7 @@ public class ClientOTBusService {
       @Override
       public void run() {
         LogUtil.log("PURGE EVENT");
-        for (OTEntity otEntity : engine.getEntityStateSpace().getEntities()) {
+        for (final OTEntity otEntity : engine.getEntityStateSpace().getEntities()) {
           engine.getPeerState().getPeer("<ServerEngine>").sendPurgeHint(otEntity.getId(), otEntity.getRevision());
         }
       }

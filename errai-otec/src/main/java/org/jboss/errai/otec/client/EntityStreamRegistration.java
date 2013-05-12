@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.otec.client.atomizer;
+package org.jboss.errai.otec.client;
 
 /**
  * @author Mike Brock
  */
-public interface EntityChangeStream {
-  public int getEntityId();
-  public void notifyInsert(int index, String data);
-  public void notifyDelete(int index, String data);
-  public void flush();
-  public void close();
+public interface EntityStreamRegistration {
+  public void remove();
 }

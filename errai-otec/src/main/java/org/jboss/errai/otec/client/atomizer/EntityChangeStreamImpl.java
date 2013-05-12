@@ -34,6 +34,8 @@ import java.util.Collections;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EntityChangeStreamImpl implements EntityChangeStream {
+  private boolean open = true;
+
   private final OTEngine engine;
   private final OTEntity entity;
 
@@ -54,6 +56,10 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void notifyInsert(final int index, final String data) {
+    if (!open) {
+      return;
+    }
+
     checkIfMustFlush(index, MutationType.Insert);
 
     if (start == -1) {
@@ -66,6 +72,10 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void notifyDelete(final int index, final String data) {
+    if (!open) {
+         return;
+       }
+
     checkIfMustFlush(index, MutationType.Delete);
 
     if (start == -1) {
@@ -85,7 +95,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
 
   @Override
   public void flush() {
-    if (start == -1 || flushing) {
+    if (!open || start == -1 || flushing) {
       return;
     }
 
@@ -113,7 +123,7 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
   }
 
   private void checkIfMustFlush(final int index, final MutationType type) {
-    if (start == -1) {
+    if (!open || start == -1) {
       return;
     }
 
@@ -148,4 +158,8 @@ public class EntityChangeStreamImpl implements EntityChangeStream {
     return operation;
   }
 
+  @Override
+  public void close() {
+    open = false;
+  }
 }

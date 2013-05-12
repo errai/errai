@@ -32,6 +32,8 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.ValueBoxBase;
+import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.otec.client.EntityStreamRegistration;
 import org.jboss.errai.otec.client.ListenerRegistration;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
@@ -51,11 +53,14 @@ public abstract class Atomizer {
   private static boolean NO_PROPAGATE_STATE_CHANGE = false;
 
   public static AtomizerSession syncWidgetWith(final OTEngine engine, final OTEntity entity, final ValueBoxBase widget) {
+    LogUtil.log("NEW ATOMIZER SESSION (engine:" + engine.getId() + ", widget=" + widget + ")");
 
     final Multimap<Object, HandlerRegistration> HANDLER_REGISTRATION_MAP
         = HashMultimap.create();
     final EntityChangeStreamImpl entityChangeStream = new EntityChangeStreamImpl(engine, entity);
-    engine.getPeerState().addEntityStream(entityChangeStream);
+
+    final EntityStreamRegistration entityStreamRegistration
+        = engine.getPeerState().addEntityStream(entityChangeStream);
 
     widget.setValue(entity.getState().get());
 
@@ -74,7 +79,7 @@ public abstract class Atomizer {
         else if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
           stopEvents();
           final int index = widget.getCursorPos() - 1;
-          entityChangeStream.notifyDelete(index, String.valueOf(widget.getText().charAt(index)));
+          entityChangeStream.notifyDelete(index, " ");
           startEvents();
         }
         else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
@@ -163,12 +168,11 @@ public abstract class Atomizer {
 
       @Override
       public void onStateChange(final int newCursorPos, final Object newValue) {
-        widget.setValue(newValue, false);
-
         if (NO_PROPAGATE_STATE_CHANGE) {
           return;
         }
 
+        widget.setValue(newValue, false);
         widget.setCursorPos(newCursorPos);
       }
     });
@@ -186,12 +190,16 @@ public abstract class Atomizer {
     return new AtomizerSession() {
       @Override
       public void end() {
+        entityChangeStream.close();
+        timer.cancel();
+
+        LogUtil.log("END ATOMIZER SESSION");
+        entityStreamRegistration.remove();
         listenerRegistration.remove();
         final Collection<HandlerRegistration> values = HANDLER_REGISTRATION_MAP.values();
         for (final HandlerRegistration value : values) {
           value.removeHandler();
         }
-        timer.cancel();
       }
     };
   }
@@ -238,8 +246,6 @@ public abstract class Atomizer {
           runnable.@java.lang.Runnable::run()();
           return true;
       }
-
-
   }-*/;
 
   private static native void attachTextDragHandler(Element element, Runnable onStart, Runnable onFinish) /*-{

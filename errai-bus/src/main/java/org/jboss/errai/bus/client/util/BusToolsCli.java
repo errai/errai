@@ -46,6 +46,7 @@ public class BusToolsCli {
   private static boolean autoDemarshall = true;
 
   public static boolean decodeToCallback(final String jsonString, final MessageCallback callback) {
+    //LogUtil.log("[bus] RX: " + jsonString);
     final List<Message> messages = decodePayload(jsonString);
 
     for (final Message message : messages)  {

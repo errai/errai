@@ -26,6 +26,7 @@ import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.OTQueuedOperation;
 import org.jboss.errai.otec.client.PeerState;
 import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.util.OTLogUtil;
 
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -187,6 +188,7 @@ public class OTServerEngine extends AbstractOTEngine {
     final OTOperation transformedOp = applyFromRemote(queuedOp.getOperation());
 
     if (transformedOp == null) {
+      OTLogUtil.log("<DROPPED OP: " + queuedOp.getOperation() + " -- will not propagate>");
       return;
     }
 
@@ -197,6 +199,7 @@ public class OTServerEngine extends AbstractOTEngine {
     for (final OTPeer otPeer : peers) {
       if (otPeer != peer && !transformedOp.isNoop()) {
         otPeer.send(transformedOp);
+        OTLogUtil.log("SENT OP TO PEER (" + otPeer.getId() + "): " + transformedOp);
       }
     }
   }

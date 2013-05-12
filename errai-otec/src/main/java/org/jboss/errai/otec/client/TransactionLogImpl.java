@@ -158,7 +158,7 @@ public class TransactionLogImpl implements TransactionLog {
         return Collections.emptyList();
       }
       else {
-        throw new OTException("unable to find revision in log: " + revision);
+        throw new OTException("unable to find revision in log: " + revision + "; op=" + operation);
       }
     }
   }

@@ -45,6 +45,6 @@ public interface PeerState {
   public void forceResyncAll(OTEntity entity);
   public void notifyResync(OTEntity entity);
 
-  public void addEntityStream(EntityChangeStream stream);
+  public EntityStreamRegistration addEntityStream(EntityChangeStream stream);
   public void flushEntityStreams(Integer entityId);
 }

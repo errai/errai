@@ -726,6 +726,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     message.setResource(RequestDispatcher.class.getName(), BusToolsCli.getRequestDispatcherProvider())
         .setResource("Session", BusToolsCli.getClientSession()).commit();
 
+  //  LogUtil.log("[bus] send(" + message.getParts() + ")");
+
     try {
       boolean deferred = false;
       final boolean localOnly = message.isFlagSet(RoutingFlag.DeliverLocalOnly);
@@ -738,6 +740,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             deferred = true;
           }
           else if (getState() != BusState.CONNECTED) {
+          //  LogUtil.log("[bus] deferred: " + message);
             deferredMessages.add(message);
             deferred = true;
           }
@@ -746,6 +749,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         boolean routedToRemote = false;
 
         if (!localOnly && remotes.containsKey(subject)) {
+        //  LogUtil.log("[bus] sent to remote: " + message);
           remotes.get(subject).callback(message);
           routedToRemote = true;
         }
@@ -788,7 +792,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void encodeAndTransmit(final Message message) {
-    if (getState() == BusState.LOCAL_ONLY) return;
+  //  LogUtil.log("[bus] encodeAndTransmit(" + message.getParts() + ")");
+    if (getState() == BusState.LOCAL_ONLY) {
+    //  LogUtil.log("[bus] encodeAndTransmit(" + message.getParts() + ") NOT ROUTED - LOCAL ONLY");
+      return;
+    }
 
     transportHandler.transmit(Collections.singletonList(message));
   }

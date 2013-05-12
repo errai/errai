@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.server;
 
+import org.jboss.errai.otec.client.EntityStreamRegistration;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.ResyncListener;
 import org.jboss.errai.otec.client.atomizer.EntityChangeStream;
@@ -84,7 +85,7 @@ public class MultiplePeerState implements PeerState {
   }
 
   @Override
-  public void addEntityStream(EntityChangeStream stream) {
+  public EntityStreamRegistration addEntityStream(EntityChangeStream stream) {
     throw new UnsupportedOperationException();
   }
 

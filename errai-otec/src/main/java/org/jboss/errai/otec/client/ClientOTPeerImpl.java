@@ -62,8 +62,9 @@ public class ClientOTPeerImpl implements OTPeer {
   public void send(final OTOperation operation) {
     CommandMessage.create()
         .toSubject("ServerOTEngine")
-        .set(MessageParts.Value, OpDto.fromOperation(operation))
+        .set(MessageParts.Value, OpDto.fromOperation(operation, getLastTransmittedSequence(operation.getEntityId())))
         .set(MessageParts.PriorityProcessing, "1")
+        .set("lTX", getLastKnownRemoteSequence(operation.getEntityId()))
         .sendNowWith(bus);
 
     LogUtil.log("TRANSMIT:" + operation);
@@ -84,8 +85,6 @@ public class ClientOTPeerImpl implements OTPeer {
         .toSubject("ServerOTEngineSyncService")
         .withValue(entityId)
         .noErrorHandling().repliesTo(new EntitySyncCallback(engine, completionCallback)).sendNowWith(bus);
-
-    System.out.println("**** SENT RESYNC ****");
   }
 
   public void setSynced(final boolean synced) {

@@ -65,7 +65,7 @@ public class ServerOTPeerImpl implements OTPeer {
   public void send(final OTOperation operation) {
     CommandMessage.create()
         .toSubject("ClientOTEngine")
-        .set(MessageParts.Value, OpDto.fromOperation(operation))
+        .set(MessageParts.Value, OpDto.fromOperation(operation, getLastKnownRemoteSequence(operation.getEntityId())))
         .set(MessageParts.SessionID, queueId)
         .set(MessageParts.PriorityProcessing, "1")
         .sendNowWith(bus);

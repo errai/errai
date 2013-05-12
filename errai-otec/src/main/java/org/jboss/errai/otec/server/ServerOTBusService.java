@@ -7,11 +7,15 @@ import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.OpDto;
 import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.util.OTLogUtil;
+
+import java.util.Collections;
 
 /**
  * @author Mike Brock
@@ -19,6 +23,7 @@ import org.jboss.errai.otec.client.operation.OTOperation;
 public class ServerOTBusService {
   public static void startOTService(final MessageBus messageBus, final OTEngine engine) {
     messageBus.subscribe("ServerOTEngine", new MessageCallback() {
+
       @Override
       public void callback(final Message message) {
         final OpDto value = message.getValue(OpDto.class);
@@ -44,10 +49,24 @@ public class ServerOTBusService {
             return;
           }
           synchronized (entity) {
-            final OTOperation remoteOp = value.otOperation(engine);
-            if (!engine.receive(session, remoteOp)) {
-              System.out.println("*** WARNING: CORRUPT PATHS - MUST RESYNC ALL ***");
-              engine.getPeerState().forceResyncAll(entity);
+            ClientDemuxer demux = LocalContext.get(queueSession).getAttribute(ClientDemuxer.class);
+            if (demux == null) {
+              LocalContext.get(queueSession).setAttribute(ClientDemuxer.class, demux = new ClientDemuxer());
+            }
+
+         //   final Collection<OpDto> enginePlanFor = demux.getEnginePlanFor(value);
+            for (final OpDto operation : Collections.singletonList(value)) {
+
+              final OTOperation remoteOp = operation.otOperation(engine);
+
+              OTLogUtil.log("RECV", "<<from: " + remoteOp.getAgentId() + ">>" ,
+                  "REMOTE", "Server", operation.getRevision(),
+                  "\"" + String.valueOf(entity.getState().get()) + "\"");
+
+              if (!engine.receive(session, remoteOp)) {
+                System.out.println("*** WARNING: CORRUPT PATHS - MUST RESYNC ALL ***");
+                engine.getPeerState().forceResyncAll(entity);
+              }
             }
           }
         }

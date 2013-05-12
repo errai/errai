@@ -25,4 +25,6 @@ public interface OTLogAdapter {
   void printLogTitle();
 
   boolean log(String type, String mutations, String from, String to, int rev, String state);
+
+  boolean log(String message);
 }

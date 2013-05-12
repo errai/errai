@@ -16,6 +16,7 @@
 
 package org.jboss.errai.otec.client;
 
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.otec.client.util.Md5Digest;
 
 import java.util.LinkedList;
@@ -72,6 +73,9 @@ public class StringState implements State<String> {
       System.out.println("        POSITION: " + pos);
       System.out.println("      BUFFER LEN: " + buffer.length());
 
+      e.printStackTrace(System.out);
+      System.out.println("********");
+
       throw new OTException("could not update state", e);
     }
   }
@@ -107,6 +111,8 @@ public class StringState implements State<String> {
       int cursorPos = listener.getCursorPos();
       if (cursorPos > pos) {
         cursorPos += offset;
+
+        LogUtil.log("change pos: " + pos + "; offset: " + offset + "; newCursor: " + cursorPos);
       }
 
       if (cursorPos < 0) {

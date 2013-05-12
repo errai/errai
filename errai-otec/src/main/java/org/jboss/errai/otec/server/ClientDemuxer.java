@@ -1,13 +1,14 @@
 package org.jboss.errai.otec.server;
 
-import org.jboss.errai.otec.client.operation.OTOperation;
+import org.jboss.errai.otec.client.OpDto;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -15,49 +16,58 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ClientDemuxer {
   private final AtomicInteger lastSequence = new AtomicInteger(-1);
-  private final SortedMap<Integer, OTOperation> outOfOrders = new ConcurrentSkipListMap<Integer, OTOperation>();
+  private final SortedSet<OpDto> outOfOrders
+      = new TreeSet<OpDto>();
 
-  private boolean updateRemoteSequence(final int remoteSequence) {
-    final int i = lastSequence.get();
-    if (remoteSequence - 1 == i || i == -1) {
-      lastSequence.set(remoteSequence);
+  private boolean updateRemoteSequence(final int lastTx, final int newTx) {
+    if (lastSequence.get() == -1) {
+      lastSequence.set(newTx);
       return true;
     }
     else {
-      return false;
+      return lastSequence.compareAndSet(lastTx, newTx);
     }
   }
 
-  public Collection<OTOperation> getEnginePlanFor(final OTOperation operation) {
-    final boolean updated = updateRemoteSequence(operation.getRevision());
+  public synchronized Collection<OpDto> getEnginePlanFor(final OpDto dto) {
+    final boolean updated = updateRemoteSequence(dto.getLastRevisionTx(), dto.getRevision());
     if (!outOfOrders.isEmpty()) {
       if (updated) {
-        final List<OTOperation> ops = new ArrayList<OTOperation>();
-        ops.add(operation);
+        final List<OpDto> ops = new ArrayList<OpDto>();
+        ops.add(dto);
 
-        for (int i = operation.getRevision() + 1; outOfOrders.containsKey(i); i++) {
-          ops.add(outOfOrders.remove(i));
-          lastSequence.set(i);
+        final Iterator<OpDto> dtosHeld = outOfOrders.iterator();
+        OpDto d = dto;
+        while (dtosHeld.hasNext()) {
+          final OpDto heldDto = dtosHeld.next();
+          if (heldDto.getLastRevisionTx() == d.getRevision()) {
+            ops.add(heldDto);
+            dtosHeld.remove();
+            lastSequence.set(heldDto.getRevision());
+            d = heldDto;
+          }
         }
 
         return ops;
       }
       else {
-        outOfOrders.put(operation.getRevision(), operation);
+        outOfOrders.add(dto);
+        System.out.println("out of orders: " + outOfOrders);
+
         return Collections.emptyList();
       }
     }
     else if (!updated) {
       System.out.println("*** WARNING! OUT OF ORDER OPS! ***" +
-          "\nOUT OF ORDER REVISION: " + operation.getRevision() +
+          "\nOUT OF ORDER REVISION: " + dto.getRevision() +
           "\n   LAST GOOD REVISION: " + lastSequence.get() +
-          "\n          OP TO BLAME: " + operation + "\n\n");
+          "\n          OP TO BLAME: " + dto + "\n\n");
 
-      outOfOrders.put(operation.getRevision(), operation);
+      outOfOrders.add(dto);
       return Collections.emptyList();
     }
     else {
-      return Collections.singletonList(operation);
+      return Collections.singletonList(dto);
     }
   }
 }

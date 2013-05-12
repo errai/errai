@@ -24,11 +24,11 @@ import com.google.gwt.http.client.RequestTimeoutException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.RetryInfo;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.framework.BusState;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.util.BusToolsCli;
@@ -182,6 +182,8 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       return;
     }
 
+    //LogUtil.log("[bus] HttpPollingHandler.transmit(" + txMessages + ")");
+
     final List<Message> toSend = new ArrayList<Message>();
 
     boolean canDefer = true;
@@ -194,6 +196,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       for (final Message message : txMessages) {
         if (message.hasPart(MessageParts.PriorityProcessing)) {
           canDefer = false;
+          break;
         }
         else if (message.hasResource(EXTRA_URI_PARMS_RESOURCE)) {
           throw new IllegalStateException("cannot send payload. messages with special URI parms must be sent one at a time.");
@@ -201,6 +204,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       }
 
       if (canDefer && throttleMessages(txMessages)) {
+        //LogUtil.log("[bus] *DEFERRED* :: " + txMessages);
         return;
       }
       else {
@@ -214,109 +218,21 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     undeliveredMessages.addAll(toSend);
 
     final String message = BusToolsCli.encodeMessages(toSend);
+    //LogUtil.log("[bus] toSend=" + toSend);
 
     try {
       txActive = true;
       final long startTime = System.currentTimeMillis();
 
       try {
-        final RequestCallback callback = new RequestCallback() {
-          int statusCode = 0;
-
-          @Override
-          public void onResponseReceived(final Request request, final Response response) {
-            txActive = false;
-            statusCode = response.getStatusCode();
-
-            switch (statusCode) {
-              case 401:
-                if (System.currentTimeMillis() - startTime > 2000) {
-                  undeliveredMessages.removeAll(toSend);
-                }
-                try {
-                  if (BusToolsCli.decodeToCallback(response.getText(), messageCallback)) {
-                    break;
-                  }
-                }
-                catch (Throwable e) {
-                   // fall through.
-                }
-              case 0:
-              case 1:
-              case 400: // happens when JBossAS is going down
-              case 404: // happens after errai app is undeployed
-              case 408: // request timeout--probably worth retrying
-              case 500: // we expect this may happen during restart of some non-JBoss servers
-              case 502: // bad gateway--could happen if long poll request was proxied to a down server
-              case 503: // temporary overload (probably on a proxy)
-              case 504: // gateway timeout--same possibilities as 502
-              {
-                final int retryDelay = Math.min((txRetries * 1000) + 1, 10000);
-                final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
-                final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
-
-                notifyDisconnected();
-
-                if (messageBus.handleTransportError(transportError)) {
-                  return;
-                }
-
-                LogUtil.log("attempting Tx reconnection -- attempt: " + (txRetries + 1));
-                txRetries++;
-
-                new Timer() {
-                  @Override
-                  public void run() {
-                    undeliveredMessages.removeAll(toSend);
-                    transmit(toSend);
-                  }
-                }.schedule(retryDelay);
-
-                return;
-              }
-              case 200:
-                notifyConnected();
-                undeliveredMessages.removeAll(toSend);
-                break;
-
-              default: {
-                final BusTransportError transportError = new BusTransportError(request, null, statusCode, RetryInfo.NO_RETRY);
-
-                if (messageBus.handleTransportError(transportError)) {
-                  return;
-                }
-
-                // polling error is probably unrecoverable; go to local-only mode
-                DefaultErrorCallback.INSTANCE.error(null, null);
-
-                messageBus.handleTransportError(transportError);
-              }
-            }
-
-            BusToolsCli.decodeToCallback(response.getText(), messageCallback);
-          }
-
-          @Override
-          public void onError(final Request request, final Throwable exception) {
-            txActive = false;
-            notifyDisconnected();
-
-            messageBus.handleTransportError(new BusTransportError(request, exception, statusCode, RetryInfo.NO_RETRY));
-
-            for (final Message txM : txMessages) {
-              if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
-                LogUtil.log("failed to communicate with remote bus: " + exception);
-              }
-            }
-          }
-        };
-
-        sendPollingRequest(message, specialParms, callback);
+        sendPollingRequest(message, specialParms, new RemoteRequestCallback(startTime, toSend, txMessages));
       }
       catch (Exception e) {
+        e.printStackTrace();
         for (final Message txM : txMessages) {
           messageBus.callErrorHandler(txM, e);
         }
+        LogUtil.log("exception: " + e.getMessage());
       }
     }
     finally {
@@ -539,11 +455,28 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       final Map<String, String> extraParameters,
       final RequestCallback callback) throws RequestException {
 
+   // LogUtil.log("[bus] sendPollingRequest(" + payload + ")");
+
     final String serviceEntryPoint;
     final Map<String, String> parmsMap;
     final boolean waitChannel;
+    boolean activeWaitChannel = false;
 
-    if (receiveCommCallback.canWait() && !rxActive) {
+    final Iterator<RxInfo> iterator = pendingRequests.iterator();
+      while (iterator.hasNext()) {
+        final RxInfo pendingRx = iterator.next();
+        if (pendingRx.getRequest().isPending() && pendingRx.isWaiting()) {
+        //  LogUtil.log("[bus] ABORT SEND: " + pendingRx + " is waiting" );
+         // return null;
+          activeWaitChannel = true;
+        }
+
+        if (!pendingRx.getRequest().isPending()) {
+          iterator.remove();
+        }
+      }
+
+    if (!activeWaitChannel && receiveCommCallback.canWait() && !rxActive) {
       parmsMap = new HashMap<String, String>(extraParameters);
       parmsMap.put("wait", "1");
       serviceEntryPoint = messageBus.getInServiceEntryPoint();
@@ -564,17 +497,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
       );
     }
 
-    final Iterator<RxInfo> iterator = pendingRequests.iterator();
-    while (iterator.hasNext()) {
-      final RxInfo pendingRx = iterator.next();
-      if (waitChannel && pendingRx.getRequest().isPending() && pendingRx.isWaiting()) {
-        return null;
-      }
 
-      if (!pendingRx.getRequest().isPending()) {
-        iterator.remove();
-      }
-    }
 
     final long latencyTime = System.currentTimeMillis();
 
@@ -588,6 +511,7 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
     final RxInfo rxInfo = new RxInfo(System.currentTimeMillis(), waitChannel);
 
     try {
+      // LogUtil.log("[bus] TX: " + payload);
       final Request request = builder.sendRequest(payload, new RequestCallback() {
         @Override
         public void onResponseReceived(final Request request, final Response response) {
@@ -742,5 +666,106 @@ public class HttpPollingHandler implements TransportHandler, TransportStatistics
   @Override
   public int getPendingMessages() {
     return heldMessages.size();
+  }
+
+  private class RemoteRequestCallback implements RequestCallback {
+    private final long startTime;
+    private final List<Message> toSend;
+    private final List<Message> txMessages;
+    int statusCode;
+
+    public RemoteRequestCallback(long startTime, List<Message> toSend, List<Message> txMessages) {
+      this.startTime = startTime;
+      this.toSend = toSend;
+      this.txMessages = txMessages;
+      statusCode = 0;
+    }
+
+    @Override
+    public void onResponseReceived(final Request request, final Response response) {
+      txActive = false;
+      statusCode = response.getStatusCode();
+
+      switch (statusCode) {
+        case 401:
+          if (System.currentTimeMillis() - startTime > 2000) {
+            undeliveredMessages.removeAll(toSend);
+          }
+          try {
+            if (BusToolsCli.decodeToCallback(response.getText(), messageCallback)) {
+              break;
+            }
+          }
+          catch (Throwable e) {
+             // fall through.
+          }
+        case 0:
+        case 1:
+        case 400: // happens when JBossAS is going down
+        case 404: // happens after errai app is undeployed
+        case 408: // request timeout--probably worth retrying
+        case 500: // we expect this may happen during restart of some non-JBoss servers
+        case 502: // bad gateway--could happen if long poll request was proxied to a down server
+        case 503: // temporary overload (probably on a proxy)
+        case 504: // gateway timeout--same possibilities as 502
+        {
+          final int retryDelay = Math.min((txRetries * 1000) + 1, 10000);
+          final RetryInfo retryInfo = new RetryInfo(retryDelay, txRetries);
+          final BusTransportError transportError = new BusTransportError(request, null, statusCode, retryInfo);
+
+          notifyDisconnected();
+
+          if (messageBus.handleTransportError(transportError)) {
+            return;
+          }
+
+          LogUtil.log("attempting Tx reconnection -- attempt: " + (txRetries + 1));
+          txRetries++;
+
+          new Timer() {
+            @Override
+            public void run() {
+              undeliveredMessages.removeAll(toSend);
+              transmit(toSend);
+            }
+          }.schedule(retryDelay);
+
+          return;
+        }
+        case 200:
+          notifyConnected();
+          undeliveredMessages.removeAll(toSend);
+          break;
+
+        default: {
+          final BusTransportError transportError = new BusTransportError(request, null, statusCode, RetryInfo.NO_RETRY);
+
+          if (messageBus.handleTransportError(transportError)) {
+            return;
+          }
+
+          // polling error is probably unrecoverable; go to local-only mode
+          DefaultErrorCallback.INSTANCE.error(null, null);
+
+          messageBus.handleTransportError(transportError);
+        }
+      }
+
+      BusToolsCli.decodeToCallback(response.getText(), messageCallback);
+    }
+
+    @Override
+    public void onError(final Request request, final Throwable exception) {
+      txActive = false;
+      notifyDisconnected();
+
+      messageBus.handleTransportError(new BusTransportError(request, exception, statusCode, RetryInfo.NO_RETRY));
+
+      for (final Message txM : txMessages) {
+        if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
+          LogUtil.log("failed to communicate with remote bus: " + exception);
+        }
+      }
+    }
   }
 }

@@ -28,8 +28,19 @@ public class OTLogUtil {
     }
 
     @Override
-    public boolean log(final String type, final String mutations, final String from, final String to, final int rev, final String state) {
-      LogUtil.log(type + ":" + mutations + ";rev=" + rev );
+    public boolean log(final String type,
+                       final String mutations,
+                       final String from,
+                       final String to,
+                       final int rev,
+                       final String state) {
+
+      LogUtil.log(type + ":" + mutations + ";rev=" + rev +";state=\"" + state + "\"");
+      return true;
+    }
+
+    public boolean log(final String message) {
+      LogUtil.log(message);
       return true;
     }
   };
@@ -42,8 +53,19 @@ public class OTLogUtil {
     logAdapter.printLogTitle();
   }
 
-  public static boolean log(final String type, final String mutations, final String from, final String to, final int rev, final String state) {
+  public static boolean log(final String type,
+                            final String mutations,
+                            final String from,
+                            final String to,
+                            final int rev,
+                            final String state) {
+
     logAdapter.log(type, mutations, from, to, rev, state);
+    return true;
+  }
+
+  public static boolean log(final String message) {
+    logAdapter.log(message);
     return true;
   }
 }

@@ -102,8 +102,14 @@ public class SinglePeerState implements PeerState {
   }
 
   @Override
-  public void addEntityStream(final EntityChangeStream stream) {
+  public EntityStreamRegistration addEntityStream(final EntityChangeStream stream) {
     entityChangeStreamList.put(stream.getEntityId(), stream);
+    return new EntityStreamRegistration() {
+      @Override
+      public void remove() {
+         entityChangeStreamList.remove(stream.getEntityId(), stream);
+      }
+    };
   }
 
   @Override

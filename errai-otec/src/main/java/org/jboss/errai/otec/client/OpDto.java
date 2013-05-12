@@ -28,34 +28,45 @@ import java.util.List;
  * @author Mike Brock
  */
 @Portable
-public class OpDto {
+public class OpDto implements Comparable<OpDto> {
   private int revisionId;
+  private int lastRevisionTx;
   private int entityId;
   private String hash;
   private List<Mutation> mutations;
   private OpPairDto opPairDto;
 
-  public static OpDto fromOperation(final OTOperation operation) {
+  public static OpDto fromOperation(final OTOperation operation, final int lastRevisionTx) {
     final OpDto dto = new OpDto();
     dto.entityId = operation.getEntityId();
     dto.hash = operation.getRevisionHash();
     dto.revisionId = operation.getRevision();
+    dto.lastRevisionTx = lastRevisionTx;
+
     dto.mutations = operation.getMutations();
 
     if (operation.getTransformedFrom() != null) {
-      dto.opPairDto = new OpPairDto(fromOperation(operation.getTransformedFrom().getRemoteOp()),
-          fromOperation(operation.getTransformedFrom().getLocalOp()));
+      dto.opPairDto = new OpPairDto(fromOperation(operation.getTransformedFrom().getRemoteOp(), -1),
+          fromOperation(operation.getTransformedFrom().getLocalOp(), -1));
     }
 
     return dto;
   }
 
-  public int getRevisionId() {
+  public int getRevision() {
     return revisionId;
   }
 
   public void setRevisionId(final int revisionId) {
     this.revisionId = revisionId;
+  }
+
+  public int getLastRevisionTx() {
+    return lastRevisionTx;
+  }
+
+  public void setLastRevisionTx(int lastRevisionTx) {
+    this.lastRevisionTx = lastRevisionTx;
   }
 
   public int getEntityId() {
@@ -93,5 +104,14 @@ public class OpDto {
     }
 
     return OTOperationImpl.createOperation(engine, engine.getId(), mutations, entityId, revisionId, hash, opPair);
+  }
+
+  @Override
+  public int compareTo(OpDto o) {
+    return revisionId - o.revisionId;
+  }
+
+  public String toString() {
+    return "[rev=" + revisionId + ";lastRevTx=" + lastRevisionTx + ";hash=" + hash + ";mutations=" + mutations.toString() + "]";
   }
 }

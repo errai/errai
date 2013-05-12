@@ -107,9 +107,6 @@ public class Transformer {
         final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, firstOp);
 
         if (!previousRemoteOpsTo.isEmpty()) {
-          // we have a history divergence that we now must deal with.
-//          localOps.removeAll(previousRemoteOpsTo);
-
           OTOperation firstPrevRemotePp = previousRemoteOpsTo.get(0);
           while (firstPrevRemotePp.getTransformedFrom() != null) {
             firstPrevRemotePp = firstPrevRemotePp.getTransformedFrom().getRemoteOp();
@@ -129,7 +126,7 @@ public class Transformer {
           applyOver = translateFrom(remoteOp, lastPrevRemoteOp);
           createOperation(applyOver).apply(entity);
 
-          OTLogUtil.log("CTRNSFRM", "COMPOUND TRANSFORM FOR: " + remoteOp,
+          OTLogUtil.log("CTRNSFRM", "FOR: " + remoteOp + "->" + applyOver,
               "-", engine.getName(), remoteOp.getRevision() + 1, "\"" + entity.getState().get() + "\"");
 
           return applyOver;
@@ -149,7 +146,7 @@ public class Transformer {
           }
         }
         else {
-          final OTOperation ot = transform(localOp, applyOver, true);
+          final OTOperation ot = transform(localOp, applyOver, false);
 
           final boolean changedLocally = !localOp.equals(ot);
 
@@ -212,7 +209,7 @@ public class Transformer {
       Collections.reverse(translationVector);
 
       OTOperation applyOver = remoteOp;
-      for (OpPair o : translationVector) {
+      for (final OpPair o : translationVector) {
         applyOver = transform(applyOver, transform(o.getLocalOp(), o.getRemoteOp()));
       }
 
