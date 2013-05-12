@@ -66,6 +66,11 @@ public class Transformer {
   @SuppressWarnings("unchecked")
   public OTOperation transform() {
     final TransactionLog transactionLog = entity.getTransactionLog();
+
+    System.out.println("RECV_REMOTE: " + remoteOp + " (hash:" + remoteOp.getRevisionHash() + ")");
+    System.out.println("STATE      : \"" + entity.getState().get() + "\"");
+    System.out.println("STATE HASH : " + entity.getState().getHash());
+
     List<OTOperation> localOps;
     try {
       if (remoteOp.getRevisionHash().equals(entity.getState().getHash())) {
@@ -80,8 +85,7 @@ public class Transformer {
       throw new BadSync("", entity.getId(), remoteOp.getAgentId());
     }
 
-//    System.out.println("RECV_REMOTE: " + remoteOp + " (hash:" + remoteOp.getRevisionHash() + ")");
-//    System.out.println("STATE HASH : " + entity.getState().getHash());
+
 
     boolean first = true;
     boolean appliedRemoteOp = false;
@@ -103,7 +107,7 @@ public class Transformer {
 
       final OTOperation firstOp = localOps.get(0);
 
-      if (!firstOp.getRevisionHash().equals(remoteOp.getRevisionHash())) {
+    //  if (!firstOp.getRevisionHash().equals(remoteOp.getRevisionHash())) {
         final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, firstOp);
 
         if (!previousRemoteOpsTo.isEmpty()) {
@@ -130,7 +134,7 @@ public class Transformer {
               "-", engine.getName(), remoteOp.getRevision() + 1, "\"" + entity.getState().get() + "\"");
 
           return applyOver;
-        }
+     //   }
       }
 
       for (final OTOperation localOp : localOps) {
