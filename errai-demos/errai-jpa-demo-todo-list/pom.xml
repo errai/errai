@@ -26,19 +26,38 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <weld.version>1.1.6.Final</weld.version>
-        <mvel.version>2.1.Beta8</mvel.version>
-        <jetty.version>6.1.25</jetty.version>
-        <slf4j.version>1.6.1</slf4j.version>
-        <log4j.version>1.2.16</log4j.version>
-        <cdiapi.version>1.0-SP4</cdiapi.version>
-        <servletapi.version>1.0.0.Final</servletapi.version>
-        <jbosslogging.version>3.1.0.GA</jbosslogging.version>
-        <gwt.version>2.5.1</gwt.version>
-        <uel.impl.version>2.1.2-b04</uel.impl.version>
-        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+        <webDescriptor>jboss7</webDescriptor>
+        <skipTests>true</skipTests>
         <argLine></argLine>
+        <!-- maven plugins versions -->
+        <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
+        <maven.clean.plugin.version>2.4.1</maven.clean.plugin.version>
+        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+        <maven.deploy.plugin.version>2.7</maven.deploy.plugin.version>
+        <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
+        <maven.gwt.plugin.version>2.5.1</maven.gwt.plugin.version>
+        <jetty.version>6.1.25</jetty.version>
     </properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.errai.bom</groupId>
+				<artifactId>errai-version-master</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.jboss.errai.bom</groupId>
+				<artifactId>errai-bom</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -50,7 +69,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
     </dependencies>
 
@@ -69,7 +87,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.version}</version>
+                <version>${maven.gwt.plugin.version}</version>
                 <configuration>
                     <runTarget>index.html</runTarget>
                     <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:MaxPermSize=256m -XX:CompileThreshold=1000</extraJvmArgs>
@@ -94,8 +112,9 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.1.1</version>
+                <version>${maven.war.plugin.version}</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <warName>${project.artifactId}</warName>
@@ -111,7 +130,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.5</version>
+                <version>${maven.clean.plugin.version}</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -142,7 +161,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <version>${maven.resources.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>css-resources</id>
