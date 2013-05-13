@@ -37,18 +37,19 @@ public class ModelSetterDecorator extends IOCDecoratorExtension<ModelSetter> {
     if (ctx.getMethod().getParameters() == null || ctx.getMethod().getParameters().length != 1)
       throw new GenerationException("@ModelSetter method needs to have exactly one parameter: " + ctx.getMethod());
 
-    final MetaClass modelType = (MetaClass) ctx.getTargetInjector().getAttribute(DataBindingUtil.BINDER_MODEL_TYPE_VALUE);
+    final MetaClass modelType =
+        (MetaClass) ctx.getTargetInjector().getAttribute(DataBindingUtil.BINDER_MODEL_TYPE_VALUE);
     if (!ctx.getMethod().getParameters()[0].getType().equals(modelType)) {
       throw new GenerationException("@ModelSetter method parameter must be of type: " + modelType);
     }
-    
+
     final Statement dataBinder = ctx.getTransientValue(DataBindingUtil.TRANSIENT_BINDER_VALUE, DataBinder.class);
     final ProxyMaker.ProxyProperty proxyProperty =
           ctx.getTargetInjector().addProxyProperty("dataBinder", DataBinder.class, dataBinder);
 
     ctx.getTargetInjector().addInvokeBefore(ctx.getMethod(),
           Stmt.nestedCall(proxyProperty.getProxiedValueReference())
-          .invoke("setModel", Refs.get("a0"), Stmt.loadStatic(InitialState.class, "FROM_MODEL")));
+              .invoke("setModel", Refs.get("a0"), Stmt.loadStatic(InitialState.class, "FROM_MODEL")));
 
     ctx.getTargetInjector().addInvokeBefore(
           ctx.getMethod(),
