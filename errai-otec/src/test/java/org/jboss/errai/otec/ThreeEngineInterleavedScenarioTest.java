@@ -25,6 +25,7 @@ import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OTOperationsFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -460,6 +461,78 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     stopServerEngineAndWait();
 
     final String expected = "XYZABCDEFGH";
+
+    assertAllLogsConsistent(expected, initialState);
+  }
+
+  //TODO: See note in Transformer.java
+  @Test @Ignore
+  public void testVeryLongHistoryDivergence2() {
+    final String initialState = "...";
+    setupEngines(initialState);
+
+    final OTOperationsFactory opFactoryClientA = clientEngineA.getOperationsFactory();
+    final OTEntity clientAEntity = clientEngineA.getEntityStateSpace().getEntity(serverEntity.getId());
+    final OTEntity clientBEntity = clientEngineB.getEntityStateSpace().getEntity(serverEntity.getId());
+
+    OTOperation a = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 0, "A")
+        .build();
+    OTOperation b = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 1, "B")
+        .build();
+    OTOperation c = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 2, "C")
+        .build();
+    OTOperation d = opFactoryClientA.createOperation(clientAEntity)
+        .add(MutationType.Insert, 3, "D")
+        .build();
+
+
+    final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
+    OTOperation x = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 3, "X")
+        .build();
+    OTOperation y = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 4, "Y")
+        .build();
+    OTOperation z = opFactoryClientB.createOperation(clientBEntity)
+        .add(MutationType.Insert, 5, "Z")
+        .build();
+
+    /** ClientA apply: "ABCD" **/
+    a = clientEngineA.applyLocally(a);
+    b = clientEngineA.applyLocally(b);
+    c = clientEngineA.applyLocally(c);
+    d = clientEngineA.applyLocally(d);
+
+    /** ClientB apply: "XY" **/
+    x = clientEngineB.applyLocally(x);
+    y = clientEngineB.applyLocally(y);
+
+    /** ClientA send : "AB" **/
+    clientEngineA.notifyRemotes(a);
+    clientEngineA.notifyRemotes(b);
+
+    /** ClientA send: "C" **/
+    clientEngineA.notifyRemotes(c);
+
+    /** ClientB send: "XY" **/
+    clientEngineB.notifyRemotes(x);
+    clientEngineB.notifyRemotes(y);
+
+    /** ClientA send: "D" **/
+    clientEngineA.notifyRemotes(d);
+
+    /** ClientB apply: "Z" **/
+    z = clientEngineB.applyLocally(z);
+
+    /** ClientB send: "Z" **/
+    clientEngineB.notifyRemotes(z);
+
+    stopServerEngineAndWait();
+
+    final String expected = "ABCD...XYZ";
 
     assertAllLogsConsistent(expected, initialState);
   }

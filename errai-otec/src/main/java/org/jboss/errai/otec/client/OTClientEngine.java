@@ -58,8 +58,6 @@ public class OTClientEngine extends AbstractOTEngine {
 
   @Override
   public void notifyOperation(final OTOperation operation) {
-    //final OTEntity entity = getEntityStateSpace().getEntity(operation.getEntityId());
-    //getPeerState().flushEntityStreams(entity.getId());
     super.notifyOperation(operation);
   }
 

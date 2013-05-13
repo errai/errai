@@ -74,14 +74,16 @@ public class Transformer {
     List<OTOperation> localOps;
     try {
       if (remoteOp.getRevisionHash().equals(entity.getState().getHash())) {
+        OTLogUtil.log("HASH MATCHED -- DIRECT APPLY: " + remoteOp);
         localOps = Collections.emptyList();
       }
       else {
         localOps = transactionLog.getLocalOpsSinceRemoteOperation(remoteOp, true);
+        OTLogUtil.log("OPS SINCE REMOTE OP (" + remoteOp + "): " + localOps);
       }
     }
     catch (OTException e) {
-      e.printStackTrace();
+      e.printStackTrace(System.out);
       throw new BadSync("", entity.getId(), remoteOp.getAgentId());
     }
 
@@ -97,7 +99,7 @@ public class Transformer {
       entity.getState().syncStateFrom(query.getEffectiveState());
 
       OTLogUtil.log("REWIND",
-          "<<FOR TRANSFORM OVER: " + remoteOp + ">>",
+          "<<FOR TRANSFORM OVER: " + remoteOp + ";rev=" + remoteOp.getRevision() + ">>",
           "-",
           engine.getName(),
           remoteOp.getRevision() + 1,
@@ -105,34 +107,33 @@ public class Transformer {
 
       final OTOperation firstOp = localOps.get(0);
 
-    //  if (!firstOp.getRevisionHash().equals(remoteOp.getRevisionHash())) {
-        final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, firstOp);
+      //  if (!firstOp.getRevisionHash().equals(remoteOp.getRevisionHash())) {
+      final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, firstOp);
 
-        if (!previousRemoteOpsTo.isEmpty()) {
-          OTOperation firstPrevRemotePp = previousRemoteOpsTo.get(0);
-          while (firstPrevRemotePp.getTransformedFrom() != null) {
-            firstPrevRemotePp = firstPrevRemotePp.getTransformedFrom().getRemoteOp();
-          }
+      if (!previousRemoteOpsTo.isEmpty()) {
 
-          final OTOperation lastPrevRemoteOp = previousRemoteOpsTo.get(previousRemoteOpsTo.size() - 1);
-          final LogQuery query2 = transactionLog.getEffectiveStateForRevision(firstPrevRemotePp.getRevision() + 1);
+        OTOperation firstPrevRemotePp = previousRemoteOpsTo.get(0);
+        while (firstPrevRemotePp.getTransformedFrom() != null) {
+          firstPrevRemotePp = firstPrevRemotePp.getTransformedFrom().getRemoteOp();
+        }
 
-          entity.getState().syncStateFrom(query2.getEffectiveState());
+        final OTOperation lastPrevRemoteOp = previousRemoteOpsTo.get(previousRemoteOpsTo.size() - 1);
+        final LogQuery query2 = transactionLog.getEffectiveStateForRevision(firstPrevRemotePp.getRevision() + 1);
 
-          localOps = query2.getLocalOpsNeedsMerge();
+        entity.getState().syncStateFrom(query2.getEffectiveState());
 
-          for (final OTOperation operation : localOps) {
-            operation.apply(entity, true);
-          }
+        for (final OTOperation operation : query2.getLocalOpsNeedsMerge()) {
+          operation.apply(entity, true);
+        }
 
-          applyOver = translateFrom(remoteOp, lastPrevRemoteOp);
-          createOperation(applyOver).apply(entity);
+        applyOver = translateFrom(remoteOp, lastPrevRemoteOp);
 
-          OTLogUtil.log("CTRNSFRM", "FOR: " + remoteOp + "->" + applyOver,
-              "-", engine.getName(), remoteOp.getRevision() + 1, "\"" + entity.getState().get() + "\"");
+        OTLogUtil.log("CTRNSFRM", "FOR: " + remoteOp + "->" + applyOver,
+            "-", engine.getName(), remoteOp.getRevision() + 1, "\"" + entity.getState().get() + "\"");
 
-          return applyOver;
-     //   }
+        createOperation(applyOver).apply(entity);
+
+        return applyOver;
       }
 
       for (final OTOperation localOp : localOps) {
@@ -188,7 +189,15 @@ public class Transformer {
     }
   }
 
-  private OTOperation translateFrom(final OTOperation remoteOp, final OTOperation basedOn) {
+  private OTOperation translateFrom(final OTOperation remoteOp,
+                                    final OTOperation basedOn) {
+
+
+    //TODO: for this to work correctly, a chain of the remoteOp's transformed-over local ops
+    //      must be diffed over the chain of locally transformed-over ops from basedOn.
+    //      Thus, only the ops that haven't already been applied remotely should be transformed
+    //      locally. Ran out of time to implement this.
+
     OpPair transformedFrom = basedOn.getTransformedFrom();
     if (transformedFrom == null) {
       return remoteOp;
@@ -200,9 +209,11 @@ public class Transformer {
       while ((transformedFrom = op.getTransformedFrom()) != null) {
         translationVector.add(transformedFrom);
         op = transformedFrom.getRemoteOp();
+
         if (last.equals(op)) {
           continue;
         }
+
         op.unmarkAsResolvedConflict();
 
         last = op;
@@ -212,6 +223,7 @@ public class Transformer {
 
       OTOperation applyOver = remoteOp;
       for (final OpPair o : translationVector) {
+        OTLogUtil.log("***");
         applyOver = transform(applyOver, transform(o.getLocalOp(), o.getRemoteOp()));
       }
 
@@ -381,8 +393,6 @@ public class Transformer {
 
                   continue;
                 }
-
-                //             offset -= lm.length();
               }
               break;
           }
