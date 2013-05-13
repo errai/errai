@@ -12,6 +12,10 @@
   <artifactId>errai-jpa-demo-todo-list</artifactId>
   <packaging>war</packaging>
 
+  <properties>
+    <picketlink.version>3.0.0.Beta1</picketlink.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -46,6 +50,42 @@
       <scope>provided</scope>
     </dependency>
 
+
+    <!-- Begin PicketLink -->
+    <dependency>
+      <groupId>org.picketlink</groupId>
+      <artifactId>picketlink-core-api</artifactId>
+      <version>${picketlink.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.picketlink</groupId>
+      <artifactId>picketlink-core-impl</artifactId>
+      <version>${picketlink.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.picketlink</groupId>
+      <artifactId>picketlink-idm-api</artifactId>
+      <version>${picketlink.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.picketlink</groupId>
+      <artifactId>picketlink-idm-impl</artifactId>
+      <version>${picketlink.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    
+    <!-- Optional database schema when using Identity Management with JPA based Identity Store -->
+    <dependency>
+      <groupId>org.picketlink</groupId>
+      <artifactId>picketlink-idm-schema</artifactId>
+      <version>${picketlink.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <!-- End PicketLink -->
   </dependencies>
   
   <build>
@@ -63,7 +103,7 @@
           <runTarget>http://localhost:8080/errai-jpa-demo-todo-list/</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:MaxPermSize=256m -XX:CompileThreshold=1000</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <logLevel>INFO</logLevel>
+          <logLevel>DEBUG</logLevel>
         </configuration>
         <executions>
           <execution>

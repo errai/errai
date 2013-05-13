@@ -75,4 +75,9 @@ public class SyncRequestOperation<X> {
   public X getExpectedState() {
     return expectedState;
   }
+
+  @Override
+  public String toString() {
+    return type + " newState: " + newState + "; expectedState: " + expectedState;
+  }
 }

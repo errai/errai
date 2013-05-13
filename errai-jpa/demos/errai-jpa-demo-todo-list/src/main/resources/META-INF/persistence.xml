@@ -15,14 +15,33 @@
         http://java.sun.com/xml/ns/persistence
         http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
    <persistence-unit name="primary">
-      <!-- If you are running in a production environment, add a managed 
-         data source, this example data source is just for development and testing! -->
-      <!-- The datasource is deployed as WEB-INF/errai-todo-ds.xml, you
-         can find it in the source at src/main/webapp/WEB-INF/errai-todo-ds.xml -->
+
+      <!-- The datasource is described in $JBOSS_HOME/conf/standalone.xml like this:
+        <subsystem xmlns="urn:jboss:domain:datasources:1.0">
+          <datasources>
+            <datasource jndi-name="java:jboss/datasources/ErraiTodoDS" pool-name="errai-todo" enabled="true" use-java-context="true">
+              <connection-url>jdbc:postgresql:todolist</connection-url>
+              <driver-class>org.postgresql.Driver</driver-class>
+              <driver>postgresql</driver>
+              <security>
+                <user-name>todolist</user-name>
+                <password>TODO: ENTER PASSWORD HERE</password>
+              </security>
+            </datasource>
+            <drivers>
+              <driver name="postgresql" module="org.postgresql">
+                <driver-class>org.postgresql.Driver</driver-class>
+              </driver>
+            </drivers>
+          </datasources>
+        </subsystem>
+        
+        (it doesn't have to be PostgreSQL; you can use any Hibernate-compatible database)
+       -->
       <jta-data-source>java:jboss/datasources/ErraiTodoDS</jta-data-source>
       <properties>
          <!-- Properties for Hibernate -->
-         <property name="hibernate.hbm2ddl.auto" value="create-drop" />
+         <property name="hibernate.hbm2ddl.auto" value="update" />
          <property name="hibernate.show_sql" value="false" />
       </properties>
    </persistence-unit>

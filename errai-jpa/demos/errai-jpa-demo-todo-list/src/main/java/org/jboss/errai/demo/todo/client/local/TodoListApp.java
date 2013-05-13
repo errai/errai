@@ -1,19 +1,22 @@
 package org.jboss.errai.demo.todo.client.local;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import org.jboss.errai.demo.todo.shared.TodoItem;
-import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
 import org.jboss.errai.jpa.sync.client.local.DataSyncCompleteEvent;
 import org.jboss.errai.ui.client.widget.ListWidget;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageShowing;
+import org.jboss.errai.ui.nav.client.local.PageState;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -26,25 +29,30 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Templated("#main")
-@EntryPoint
+@Page(path="list")
 public class TodoListApp extends Composite {
 
-  @Inject EntityManager em;
-  @Inject ClientBeanManager bm;
+  @Inject private EntityManager em;
+  @Inject private ClientBeanManager bm;
 
-  @Inject @DataField TextBox newItemBox;
-  @Inject @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
-  @Inject @DataField Button archiveButton;
-  @Inject @DataField Button syncButton;
+  private @PageState Long userId;
+  private User user; // filled in by @PageShowing method by lookup on userId
 
-  @PostConstruct
-  public void init() {
+  @Inject private @DataField TextBox newItemBox;
+  @Inject private @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
+  @Inject private @DataField Button archiveButton;
+  @Inject private @DataField Button syncButton;
+
+  @PageShowing
+  private void onPageShowing() {
+    user = em.find(User.class, userId);
     refreshItems();
   }
 
   private void refreshItems() {
     System.out.println("Todo List Demo: refreshItems()");
-    TypedQuery<TodoItem> query = em.createNamedQuery("currentItems", TodoItem.class);
+    TypedQuery<TodoItem> query = em.createNamedQuery("allItemsForUser", TodoItem.class);
+    query.setParameter("user", user);
     itemContainer.setItems(query.getResultList());
   }
 
@@ -57,6 +65,7 @@ public class TodoListApp extends Composite {
   void onNewItem(KeyDownEvent event) {
     if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER && !newItemBox.getText().equals("")) {
       TodoItem item = new TodoItem();
+      item.setUser(user);
       item.setText(newItemBox.getText());
       em.persist(item);
       em.flush();
@@ -67,7 +76,8 @@ public class TodoListApp extends Composite {
 
   @EventHandler("archiveButton")
   void archive(ClickEvent event) {
-    TypedQuery<TodoItem> query = em.createNamedQuery("currentItems", TodoItem.class);
+    TypedQuery<TodoItem> query = em.createNamedQuery("allItemsForUser", TodoItem.class);
+    query.setParameter("user", user);
     for (TodoItem item : query.getResultList()) {
       if (item.isDone()) {
         item.setArchived(true);
@@ -80,7 +90,9 @@ public class TodoListApp extends Composite {
   @Inject ClientSyncManager syncManager;
   @EventHandler("syncButton")
   void sync(ClickEvent event) {
-    syncManager.coldSync("allItems", TodoItem.class, Collections.<String,Object>emptyMap());
+    Map<String,Object> params = new HashMap<String, Object>();
+    params.put("user", user);
+    syncManager.coldSync("allItemsForUser", TodoItem.class, params);
     System.out.println("Initiated cold sync");
   }
 

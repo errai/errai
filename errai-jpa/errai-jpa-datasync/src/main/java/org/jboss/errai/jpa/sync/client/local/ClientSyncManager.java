@@ -110,6 +110,11 @@ public class ClientSyncManager {
       syncRequests.add(SyncRequestOperation.deleted(remainingEntry.getValue()));
     }
 
+    System.out.println("Sending sync requests:");
+    for (SyncRequestOperation<?> sro : syncRequests) {
+      System.out.println("   " + sro);
+    }
+
     final SyncableDataSet<E> syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
     dataSyncService.call(new RemoteCallback<List<SyncResponse<E>>>() {
       @Override
@@ -132,6 +137,7 @@ public class ClientSyncManager {
   private <E> void applyResults(List<SyncResponse<E>> syncResponses) {
     // XXX could we factor this decision tree into apply() methods on the sync response objects?
     for (SyncResponse<E> response : syncResponses) {
+      System.out.println("SSS Handling Sync response " + response.getClass());
       if (response instanceof ConflictResponse) {
         ConflictResponse<E> cr = (ConflictResponse<E>) response;
         E actualNew = cr.getActualNew();
@@ -159,6 +165,7 @@ public class ClientSyncManager {
       }
       else if (response instanceof DeleteResponse) {
         DeleteResponse<E> dr = (DeleteResponse<E>) response;
+        System.out.println("    -> Delete " + dr.getEntity());
         E resolved = expectedStateEm.find(expectedStateEm.keyFor(dr.getEntity()), Collections.<String,Object>emptyMap());
         expectedStateEm.remove(resolved);
 
@@ -170,8 +177,9 @@ public class ClientSyncManager {
       }
       else if (response instanceof IdChangeResponse) {
         IdChangeResponse<E> icr = (IdChangeResponse<E>) response;
+        System.out.println("    -> ID Change from " + icr.getOldId() + " to " + icr.getEntity());
         E newEntity = icr.getEntity();
-        expectedStateEm.persist(newEntity);
+        newEntity = expectedStateEm.merge(newEntity);
 
         @SuppressWarnings("unchecked")
         ErraiEntityType<E> entityType = desiredStateEm.getMetamodel().entity((Class<E>) newEntity.getClass());
@@ -181,6 +189,7 @@ public class ClientSyncManager {
       }
       else if (response instanceof NewRemoteEntityResponse) {
         NewRemoteEntityResponse<E> nrer = (NewRemoteEntityResponse<E>) response;
+        System.out.println("    -> New " + nrer.getEntity());
 
         @SuppressWarnings("unchecked")
         Class<E> entityClass = (Class<E>) nrer.getEntity().getClass();
@@ -208,6 +217,7 @@ public class ClientSyncManager {
       }
       else if (response instanceof UpdateResponse) {
         UpdateResponse<E> ur = (UpdateResponse<E>) response;
+        System.out.println("    -> Update " + ur.getEntity());
         expectedStateEm.merge(ur.getEntity());
         desiredStateEm.merge(ur.getEntity());
       }
