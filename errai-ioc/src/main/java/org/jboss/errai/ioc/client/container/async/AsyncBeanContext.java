@@ -92,7 +92,7 @@ public class AsyncBeanContext {
       runnable.run();
     }
     else {
-      onFinishRunnables.add(0, runnable);
+      onFinishRunnables.add(runnable);
       _finishCheck();
     }
   }

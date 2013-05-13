@@ -177,7 +177,7 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
         final Statement beanRef = updater.run();
 
         injectContext.addBeanReference(type, beanRef);
-        targetBlock.append(Stmt.loadVariable("async").invoke("runOnFinish", blockBuilder.finish().finish()));
+        addStatementToEndOfInjector(Stmt.loadVariable("async").invoke("runOnFinish", blockBuilder.finish().finish()));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
         setCreated(true);

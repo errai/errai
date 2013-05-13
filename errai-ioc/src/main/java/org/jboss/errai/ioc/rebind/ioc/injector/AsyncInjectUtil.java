@@ -49,7 +49,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncInjectorResolveCallbac
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.async.AsyncTypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-import org.mvel2.util.ReflectionUtil;
 
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
@@ -235,22 +234,22 @@ public class AsyncInjectUtil {
     do {
       for (final MetaField field : visit.getDeclaredFields()) {
         if (InjectUtil.isInjectionPoint(ctx, field)) {
-          if (!field.isPublic()) {
-            final MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
-                field.getType());
-
-            if (meth == null) {
-              final AsyncInjectionTask task = new AsyncInjectionTask(injector, field);
-              accumulator.add(task);
-            }
-            else {
-              final AsyncInjectionTask task = new AsyncInjectionTask(injector, meth);
-              accumulator.add(task);
-            }
-          }
-          else {
+//          if (!field.isPublic()) {
+//            final MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
+//                field.getType());
+//
+//            if (meth == null) {
+//              final AsyncInjectionTask task = new AsyncInjectionTask(injector, field);
+//              accumulator.add(task);
+//            }
+//            else {
+//              final AsyncInjectionTask task = new AsyncInjectionTask(injector, meth);
+//              accumulator.add(task);
+//            }
+//          }
+//          else {
             accumulator.add(new AsyncInjectionTask(injector, field));
-          }
+//          }
         }
 
         ElementType[] elTypes;

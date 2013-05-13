@@ -187,6 +187,11 @@ public class IOCProcessingContext {
     return getBlockBuilder().append(statement);
   }
 
+  public void insertBefore(final Statement statement) {
+     getBlockBuilder().insertBefore(statement);
+  }
+
+
   public void pushBlockBuilder(final BlockBuilder<?> blockBuilder) {
     this.blockBuilder.push(blockBuilder);
   }

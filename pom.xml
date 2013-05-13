@@ -119,6 +119,7 @@
     <module>errai-bus-jboss7-websocket</module>
     <module>errai-jboss-as-support</module>
     <module>errai-otec</module>
+    <module>errai-cdi-async-databinding-tests</module>
   </modules>
 
   <dependencies>

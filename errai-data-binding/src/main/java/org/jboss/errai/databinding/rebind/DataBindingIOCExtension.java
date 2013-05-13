@@ -39,21 +39,23 @@ import java.util.Collection;
  * The purpose of this IOC extension is to provide bean instances of bindable types that are
  * qualified with {@link Model} and to expose the {@link DataBinder}s that manage these model
  * instances using {@link RefHolder}s.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 @IOCExtension
 public class DataBindingIOCExtension implements IOCExtensionConfigurator {
-  
+
   @Override
   public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
-      final IOCConfigProcessor procFactory) {}
+                        final IOCConfigProcessor procFactory) {
+  }
 
   @Override
   @SuppressWarnings("rawtypes")
   public void afterInitialization(final IOCProcessingContext context, final InjectionContext injectionContext,
-      final IOCConfigProcessor procFactory) {
+                                  final IOCConfigProcessor procFactory) {
+
 
     final Collection<MetaClass> allBindableTypes = DataBindingUtil.getAllBindableTypes(context.getGeneratorContext());
 
@@ -72,6 +74,7 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
         public Statement getBeanInstance(InjectableInstance injectableInstance) {
           setCreated(true);
           setRendered(true);
+
           final String dataBinderVar = InjectUtil.getUniqueVarName();
           final MetaClass binderClass
               = MetaClassFactory.parameterizedAs(DataBinder.class, MetaClassFactory.typeParametersOf(modelBean));
@@ -83,7 +86,15 @@ public class DataBindingIOCExtension implements IOCExtensionConfigurator {
           injectableInstance.addTransientValue(DataBindingUtil.TRANSIENT_BINDER_VALUE,
               DataBinder.class, Refs.get(dataBinderVar));
 
-          return Stmt.loadVariable(dataBinderVar).invoke("getModel");
+          if (injectionContext.isAsync()) {
+           context.append(Stmt.loadVariable(InjectUtil.getVarNameFromType(modelBean, injectableInstance))
+                .invoke("callback", Stmt.loadVariable(dataBinderVar).invoke("getModel")));
+
+            return null;
+          }
+          else {
+            return Stmt.loadVariable(dataBinderVar).invoke("getModel");
+          }
         }
 
         @Override

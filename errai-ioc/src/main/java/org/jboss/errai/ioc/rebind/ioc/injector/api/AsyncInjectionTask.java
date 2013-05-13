@@ -230,8 +230,9 @@ public class AsyncInjectionTask {
             .finish()
             .finish();
 
-        processingContext.append(Stmt.loadVariable("async").invoke("runOnFinish", finishCallback));
+       // injectableInstance.getInjector().addStatementToEndOfInjector(Stmt.loadVariable("async").invoke("runOnFinish", finishCallback));
 
+        processingContext.append(Stmt.loadVariable("async").invoke("runOnFinish", finishCallback));
         break;
       }
       case Parameter:
