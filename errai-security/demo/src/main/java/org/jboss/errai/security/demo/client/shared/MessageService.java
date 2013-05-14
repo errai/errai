@@ -9,6 +9,6 @@ import org.jboss.errai.security.shared.RequireAuthentication;
 @Remote
 public interface MessageService {
   @RequireAuthentication
-  String hello(String name);
+  String hello();
   String ping();
 }
