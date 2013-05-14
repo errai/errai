@@ -13,4 +13,6 @@ public interface SecurityManager {
   boolean isLoggedIn();
 
   void logout();
+
+  User getUser();
 }
