@@ -36,7 +36,7 @@ public class OTTestEntity extends OTEntityImpl {
     for (final OTOperation operation : transactionLog.getLog()) {
       getTransactionLog().appendLog(
           OTOperationImpl.createOperation(operation.getEngine(), operation.getAgentId(), operation.getMutations(), operation.getEntityId(),
-              operation.getRevision(), operation.getRevisionHash(), operation.getTransformedFrom()));
+              operation.getRevision(), operation.getRevisionHash(), operation.getTransformedFrom(), operation.getLastRevisionTx()));
     }
 
     setRevision(entity.getRevision());

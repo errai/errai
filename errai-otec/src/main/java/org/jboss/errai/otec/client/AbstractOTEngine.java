@@ -16,6 +16,13 @@
 
 package org.jboss.errai.otec.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.otec.client.mutation.CharacterMutation;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.mutation.MutationType;
@@ -25,13 +32,6 @@ import org.jboss.errai.otec.client.operation.OTOperationImpl;
 import org.jboss.errai.otec.client.operation.OTOperationsFactory;
 import org.jboss.errai.otec.client.operation.OTOperationsListBuilder;
 import org.jboss.errai.otec.client.util.GUIDUtil;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -273,7 +273,7 @@ public abstract class AbstractOTEngine implements OTEngine {
 
         @Override
         public OTOperation build() {
-          return OTOperationImpl.createOperation(otEngine, otEngine.getId(), mutationList, entity.getId(), -1, null, null);
+          return OTOperationImpl.createOperation(otEngine, otEngine.getId(), mutationList, entity.getId(), -1, null, null, -1);
         }
 
         @Override

@@ -16,6 +16,10 @@
 
 package org.jboss.errai.otec;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.StringState;
@@ -23,10 +27,6 @@ import org.jboss.errai.otec.client.Transformer;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OTOperationImpl;
 import org.jboss.errai.otec.client.util.OTLogUtil;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -54,7 +54,7 @@ public class SynchronousMockPeerlImpl extends AbstractMockPeer {
         "\"" + localEngine.getEntityStateSpace().getEntity(operation.getEntityId()).getState().get() + "\"");
 
     //note: this is simulating sending these operations over the wire.
-    if (!remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation))) {
+    if (!remoteEngine.receive(localEngine.getId(), OTOperationImpl.createLocalOnlyOperation(remoteEngine, operation, getLastKnownRemoteSequence(operation.getEntityId())))) {
 //      final OTEntity entity = localEngine.getEntityStateSpace().getEntity(operation.getEntityId());
 //      forceResync(operation.getEntityId(), entity.getRevision(), String.valueOf(entity.getState().get()));
     }

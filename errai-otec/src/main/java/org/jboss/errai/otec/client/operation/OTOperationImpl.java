@@ -16,15 +16,15 @@
 
 package org.jboss.errai.otec.client.operation;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.OTException;
 import org.jboss.errai.otec.client.State;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.util.OTLogUtil;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Christian Sadilek
@@ -41,6 +41,7 @@ public class OTOperationImpl implements OTOperation {
   private boolean nonCanon;
   private boolean invalid = false;
   private int revision;
+  private final int lastRevisionTx;
   private OTOperation outerPath;
 
   private final OpPair transformedFrom;
@@ -54,6 +55,7 @@ public class OTOperationImpl implements OTOperation {
                           final OpPair transformedFrom,
                           final boolean propagate,
                           final boolean resolvedConflict,
+                          final int lastRevisionTx,
                           final OTOperation outerPath) {
 
     this.engine = engine;
@@ -65,6 +67,7 @@ public class OTOperationImpl implements OTOperation {
     this.transformedFrom = transformedFrom;
     this.propagate = propagate;
     this.resolvedConflict = resolvedConflict;
+    this.lastRevisionTx = lastRevisionTx;
     this.outerPath = outerPath == null ? this : outerPath;
   }
 
@@ -76,8 +79,10 @@ public class OTOperationImpl implements OTOperation {
                           final String revisionHash,
                           final OpPair transformedFrom,
                           final boolean propagate,
-                          final boolean resolvedConflict) {
-    this(engine, agentId, mutationList, entityId, revision, revisionHash, transformedFrom, propagate, resolvedConflict, null);
+                          final boolean resolvedConflict,
+                          final int lastRevisionTx) {
+    this(engine, agentId, mutationList, entityId, revision, revisionHash, transformedFrom, propagate, resolvedConflict,
+        lastRevisionTx, null);
 
   }
 
@@ -86,7 +91,8 @@ public class OTOperationImpl implements OTOperation {
                                                      final List<Mutation> mutationList,
                                                      final OTEntity entity,
                                                      final OpPair pair) {
-    return new OTOperationImpl(engine, agentId, mutationList, entity.getId(), entity.getRevision(), entity.getState().getHash(), pair, false, false);
+    return new OTOperationImpl(engine, agentId, mutationList, entity.getId(), entity.getRevision(), entity.getState()
+        .getHash(), pair, false, false, -1);
 
   }
 
@@ -97,7 +103,8 @@ public class OTOperationImpl implements OTOperation {
                                                      final int revision,
                                                      final OpPair pair) {
 
-    return new OTOperationImpl(engine, agentId, mutationList, entity.getId(), revision, entity.getState().getHash(), pair, false, false);
+    return new OTOperationImpl(engine, agentId, mutationList, entity.getId(), revision, entity.getState().getHash(),
+        pair, false, false, -1);
 
   }
 
@@ -107,7 +114,7 @@ public class OTOperationImpl implements OTOperation {
                                             final int entityId,
                                             final int revision,
                                             final String revisionHash) {
-    return new OTOperationImpl(engine, agentId, mutationList, entityId, revision, revisionHash, null, true, false);
+    return new OTOperationImpl(engine, agentId, mutationList, entityId, revision, revisionHash, null, true, false, -1);
 
   }
 
@@ -117,25 +124,35 @@ public class OTOperationImpl implements OTOperation {
                                             final int entityId,
                                             final int revision,
                                             final String revisionHash,
-                                            final OpPair transformedFrom) {
+                                            final OpPair transformedFrom,
+                                            final int lastRevisionTx) {
 
-    return new OTOperationImpl(engine, agentId, mutationList, entityId, revision, revisionHash, transformedFrom, true, false);
+    return new OTOperationImpl(engine, agentId, mutationList, entityId, revision, revisionHash, transformedFrom, true,
+        false, lastRevisionTx);
   }
 
   public static OTOperation createLocalOnlyOperation(final OTEngine engine,
                                                      final OTOperation operation) {
-    return new OTOperationImpl(engine, operation.getAgentId(), operation.getMutations(), operation.getEntityId(), operation.getRevision(),
-        operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict());
+    return new OTOperationImpl(engine, operation.getAgentId(), operation.getMutations(), operation.getEntityId(),
+        operation.getRevision(),
+        operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict(), -1);
+  }
+
+  public static OTOperation createLocalOnlyOperation(final OTEngine engine,
+      final OTOperation operation, final int lastRevisionTx) {
+    return new OTOperationImpl(engine, operation.getAgentId(), operation.getMutations(), operation.getEntityId(),
+        operation.getRevision(),
+        operation.getRevisionHash(), operation.getTransformedFrom(), false, operation.isResolvedConflict(), lastRevisionTx);
   }
 
   public static OTOperation createOperation(final OTOperation op) {
     return new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
-        op.getRevisionHash(), op.getTransformedFrom(), op.shouldPropagate(), op.isResolvedConflict());
+        op.getRevisionHash(), op.getTransformedFrom(), op.shouldPropagate(), op.isResolvedConflict(), -1);
   }
 
   public static OTOperation createOperation(final OTOperation op, final OpPair transformedFrom) {
     return new OTOperationImpl(op.getEngine(), op.getAgentId(), op.getMutations(), op.getEntityId(), -1,
-        op.getRevisionHash(), transformedFrom, op.shouldPropagate(), op.isResolvedConflict());
+        op.getRevisionHash(), transformedFrom, op.shouldPropagate(), op.isResolvedConflict(), -1);
   }
 
   @Override
@@ -195,7 +212,7 @@ public class OTOperationImpl implements OTOperation {
       return shouldPropagate();
     }
     catch (Throwable t) {
-   //   t.printStackTrace();
+      // t.printStackTrace();
       throw new OTException("failed to apply op", t);
     }
   }
@@ -242,7 +259,8 @@ public class OTOperationImpl implements OTOperation {
 
   @Override
   public OTOperation getBasedOn(final int revision) {
-    return new OTOperationImpl(engine, agentId, mutations, entityId, revision, revisionHash, transformedFrom, propagate, resolvedConflict, outerPath);
+    return new OTOperationImpl(engine, agentId, mutations, entityId, revision, revisionHash, transformedFrom,
+        propagate, resolvedConflict, lastRevisionTx, outerPath);
   }
 
   @Override
@@ -252,9 +270,9 @@ public class OTOperationImpl implements OTOperation {
 
   @Override
   public void setOuterPath(final OTOperation outerPath) {
-//    if (this.outerPath != this) {
-//      this.outerPath.setOuterPath(outerPath);
-//    }
+    // if (this.outerPath != this) {
+    // this.outerPath.setOuterPath(outerPath);
+    // }
 
     this.outerPath = outerPath;
   }
@@ -306,5 +324,10 @@ public class OTOperationImpl implements OTOperation {
   @Override
   public String getRevisionHash() {
     return revisionHash;
+  }
+
+  @Override
+  public int getLastRevisionTx() {
+    return lastRevisionTx;
   }
 }

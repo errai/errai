@@ -17,15 +17,14 @@
 package org.jboss.errai.otec;
 
 import static org.junit.Assert.assertEquals;
-
 import junit.framework.Assert;
+
 import org.jboss.errai.otec.client.OTEngine;
 import org.jboss.errai.otec.client.OTEntity;
 import org.jboss.errai.otec.client.OTPeer;
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OTOperationsFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -465,9 +464,8 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
     assertAllLogsConsistent(expected, initialState);
   }
 
-  //TODO: See note in Transformer.java
-  @Test @Ignore
-  public void testVeryLongHistoryDivergence2() {
+  @Test
+  public void testVeryLongHistoryDivergenceWithInitialState() {
     final String initialState = "...";
     setupEngines(initialState);
 
@@ -488,7 +486,6 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
         .add(MutationType.Insert, 3, "D")
         .build();
 
-
     final OTOperationsFactory opFactoryClientB = clientEngineB.getOperationsFactory();
     OTOperation x = opFactoryClientB.createOperation(clientBEntity)
         .add(MutationType.Insert, 3, "X")
@@ -497,7 +494,7 @@ public class ThreeEngineInterleavedScenarioTest extends AbstractThreeEngineOtecT
         .add(MutationType.Insert, 4, "Y")
         .build();
     OTOperation z = opFactoryClientB.createOperation(clientBEntity)
-        .add(MutationType.Insert, 5, "Z")
+        .add(MutationType.Insert, 9, "Z")
         .build();
 
     /** ClientA apply: "ABCD" **/

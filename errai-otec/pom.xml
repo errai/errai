@@ -62,4 +62,23 @@
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>integration-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>false</skipTests>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <properties>
+        <argLine>-Xmx1024m</argLine>
+      </properties>
+    </profile>
+  </profiles>
+
 </project>

@@ -20,18 +20,18 @@ import static java.util.Collections.singletonList;
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createLocalOnlyOperation;
 import static org.jboss.errai.otec.client.operation.OTOperationImpl.createOperation;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jboss.errai.otec.client.mutation.CharacterMutation;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.mutation.MutationType;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OpPair;
 import org.jboss.errai.otec.client.util.OTLogUtil;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -106,8 +106,6 @@ public class Transformer {
           "\"" + entity.getState().get() + "\"");
 
       final OTOperation firstOp = localOps.get(0);
-
-      //  if (!firstOp.getRevisionHash().equals(remoteOp.getRevisionHash())) {
       final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, firstOp);
 
       if (!previousRemoteOpsTo.isEmpty()) {
@@ -168,7 +166,6 @@ public class Transformer {
           ot.apply(entity, !changedLocally);
 
           if (changedLocally) {
-            //   localOp.getOuterPath().removeFromCanonHistory();
             localOp.removeFromCanonHistory();
             localOp.setOuterPath(ot);
           }
@@ -192,12 +189,6 @@ public class Transformer {
   private OTOperation translateFrom(final OTOperation remoteOp,
                                     final OTOperation basedOn) {
 
-
-    //TODO: for this to work correctly, a chain of the remoteOp's transformed-over local ops
-    //      must be diffed over the chain of locally transformed-over ops from basedOn.
-    //      Thus, only the ops that haven't already been applied remotely should be transformed
-    //      locally. Ran out of time to implement this.
-
     OpPair transformedFrom = basedOn.getTransformedFrom();
     if (transformedFrom == null) {
       return remoteOp;
@@ -207,7 +198,16 @@ public class Transformer {
       OTOperation last = basedOn;
       OTOperation op = basedOn;
       while ((transformedFrom = op.getTransformedFrom()) != null) {
-        translationVector.add(transformedFrom);
+        OTOperation root = transformedFrom.getLocalOp();
+        int baseRev;
+        do {
+          baseRev = root.getRevision();
+        } while (root.getTransformedFrom() != null && (root = root.getTransformedFrom().getRemoteOp()) != null);
+        
+        if (remoteOp.getTransformedFrom() == null || baseRev > remoteOp.getLastRevisionTx()) {
+          translationVector.add(transformedFrom);
+        }
+        
         op = transformedFrom.getRemoteOp();
 
         if (last.equals(op)) {
@@ -502,6 +502,7 @@ public class Transformer {
     return (idx == mutation.getPosition()) ? mutation : mutation.newBasedOn(idx);
   }
 
+  @Override
   public String toString() {
     return String.valueOf(entity.getState().get());
   }

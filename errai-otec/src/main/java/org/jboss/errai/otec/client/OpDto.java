@@ -16,13 +16,13 @@
 
 package org.jboss.errai.otec.client;
 
+import java.util.List;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
 import org.jboss.errai.otec.client.operation.OTOperationImpl;
 import org.jboss.errai.otec.client.operation.OpPair;
-
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -103,7 +103,7 @@ public class OpDto implements Comparable<OpDto> {
       opPair = this.opPairDto.toOpPair(engine);
     }
 
-    return OTOperationImpl.createOperation(engine, engine.getId(), mutations, entityId, revisionId, hash, opPair);
+    return OTOperationImpl.createOperation(engine, engine.getId(), mutations, entityId, revisionId, hash, opPair, lastRevisionTx);
   }
 
   @Override
@@ -111,6 +111,7 @@ public class OpDto implements Comparable<OpDto> {
     return revisionId - o.revisionId;
   }
 
+  @Override
   public String toString() {
     return "[rev=" + revisionId + ";lastRevTx=" + lastRevisionTx + ";hash=" + hash + ";mutations=" + mutations.toString() + "]";
   }
