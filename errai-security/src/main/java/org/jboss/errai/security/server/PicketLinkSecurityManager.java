@@ -2,6 +2,7 @@ package org.jboss.errai.security.server;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.LoggedInEvent;
+import org.jboss.errai.security.shared.LoggedOutEvent;
 import org.jboss.errai.security.shared.SecurityManager;
 import org.jboss.errai.security.shared.User;
 import org.picketlink.Identity;
@@ -24,6 +25,9 @@ public class PicketLinkSecurityManager implements SecurityManager {
 
   @Inject
   private Event<LoggedInEvent> loggedInEventSource;
+
+  @Inject
+  private Event<LoggedOutEvent> loggedOutEventSource;
 
   @Inject
   private DefaultLoginCredentials credentials;
@@ -61,6 +65,7 @@ public class PicketLinkSecurityManager implements SecurityManager {
   @Override
   public void logout() {
     identity.logout();
+    loggedOutEventSource.fire(new LoggedOutEvent());
   }
 
   @Override
