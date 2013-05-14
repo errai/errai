@@ -7,7 +7,6 @@ import javax.enterprise.inject.Produces;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.demo.grocery.client.shared.User;
-import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 
 @ApplicationScoped
 public class UserProducer {

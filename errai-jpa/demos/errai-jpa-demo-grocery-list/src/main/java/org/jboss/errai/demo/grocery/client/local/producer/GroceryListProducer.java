@@ -9,7 +9,6 @@ import javax.persistence.TypedQuery;
 
 import org.jboss.errai.demo.grocery.client.shared.GroceryList;
 import org.jboss.errai.demo.grocery.client.shared.User;
-import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 
 @ApplicationScoped
 public class GroceryListProducer {
