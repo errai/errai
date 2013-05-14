@@ -63,4 +63,9 @@ public class PicketLinkSecurityManager implements SecurityManager {
   public void logout() {
     identity.logout();
   }
+
+  @Override
+  public User getUser() {
+    return createUser(identity.getUser());
+  }
 }
