@@ -264,7 +264,6 @@ public class AsyncTypeInjector extends AbstractAsyncInjector {
             .appendAll(proxyStmts)
             .append(loadVariable("callback")
                 .invoke("callback", injector.isProxied() ? Refs.get(injector.getProxyInstanceVarName()) : beanRef));
-
       }
       else {
         beanRef = Cast.to(injector.type, loadVariable("async").invoke("getConstructedObject"));

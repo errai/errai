@@ -31,7 +31,7 @@ import java.util.EmptyStackException;
 /**
  * @author Mike Brock
  */
-@CustomMapping
+@CustomMapping(Throwable.class)
 @InheritedMappings(
         {ArithmeticException.class, IOException.class, IllegalArgumentException.class,
                  EmptyStackException.class, ArrayStoreException.class,

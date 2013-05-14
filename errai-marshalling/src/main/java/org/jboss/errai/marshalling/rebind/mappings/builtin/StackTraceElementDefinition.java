@@ -24,7 +24,7 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMappin
 /**
  * @author Mike Brock
  */
-@CustomMapping
+@CustomMapping(StackTraceElement.class)
 public class StackTraceElementDefinition extends MappingDefinition {
   public StackTraceElementDefinition() {
     super(StackTraceElement.class);

@@ -22,15 +22,11 @@ import static org.jboss.errai.common.client.util.LogUtil.log;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
-import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.jboss.errai.ioc.client.container.IOCEnvironment;
 import org.jboss.errai.ioc.client.container.SimpleCreationalContext;
 import org.jboss.errai.ioc.client.container.async.AsyncCreationalContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -63,7 +59,8 @@ public class Container implements EntryPoint {
         log("bean manager initialized in async mode.");
       }
 
-      injectionContext = ((Bootstrapper) GWT.create(Bootstrapper.class)).bootstrapContainer();
+      final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
+      injectionContext = bootstrapper.bootstrapContainer();
 
       final CreationalContext rootContext = injectionContext.getRootContext();
 

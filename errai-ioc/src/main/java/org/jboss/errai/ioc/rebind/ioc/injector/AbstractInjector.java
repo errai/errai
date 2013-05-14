@@ -43,8 +43,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractInjector implements Injector {
   protected QualifyingMetadata qualifyingMetadata;
@@ -468,6 +470,9 @@ public abstract class AbstractInjector implements Injector {
     return createProxyDeclaration(context, Refs.get(getInstanceVarName()));
   }
 
+  static final String RENDERED_PROXIES = "^RenderedProxies";
+
+
   public List<Statement> createProxyDeclaration(InjectionContext context, Statement beanRef) {
     if (isProxied()) {
       final BuildMetaClass type = ProxyMaker.makeProxy(
@@ -477,10 +482,18 @@ public abstract class AbstractInjector implements Injector {
           getWeavingStatementsMap()
       );
 
+      if (!context.hasAttribute(RENDERED_PROXIES)) {
+        context.setAttribute(RENDERED_PROXIES, new HashSet<String>());
+
+      }
+      final Set<String> proxies = (Set<String>) context.getAttribute(RENDERED_PROXIES);
+      if (!proxies.contains(type.getCanonicalName())) {
+        context.getProcessingContext().getBootstrapClass()
+            .addInnerClass(new InnerClass(type));
+        proxies.add(type.getCanonicalName());
+      }
 
       final List<Statement> proxyCloseStmts = new ArrayList<Statement>();
-      context.getProcessingContext().getBootstrapClass()
-          .addInnerClass(new InnerClass(type));
 
       proxyCloseStmts.add(Stmt.declareFinalVariable(
           getProxyInstanceVarName(),
