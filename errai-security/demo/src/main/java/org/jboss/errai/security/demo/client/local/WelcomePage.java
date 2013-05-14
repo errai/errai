@@ -22,7 +22,7 @@ import javax.inject.Inject;
 @Page(startingPage = true)
 public class WelcomePage extends Composite {
 
-  private static final String ANONYMOUS = "anonymous";
+  static final String ANONYMOUS = "anonymous";
 
   @Inject
   public

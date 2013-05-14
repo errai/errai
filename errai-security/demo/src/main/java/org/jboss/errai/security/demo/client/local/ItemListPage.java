@@ -22,7 +22,6 @@ import javax.inject.Inject;
 @Dependent
 @Templated("#main")
 @Page
-//@RequireAuthentication
 public class ItemListPage extends Composite {
   @Inject
   private Identity identity;
@@ -43,6 +42,10 @@ public class ItemListPage extends Composite {
     identity.getUser(new AsyncCallback<User>() {
       @Override
       public void onSuccess(User result) {
+        //if the user is null that means we are not logged in, but calling this method anyway will
+        //invoke the SecurityInterceptor that will redirect us to the login page.
+        final String name = result != null ? result.getFullName() : WelcomePage.ANONYMOUS;
+
         messageServiceCaller.call(new RemoteCallback<String>() {
                                     @Override
                                     public void callback(String o) {
@@ -55,7 +58,7 @@ public class ItemListPage extends Composite {
                                       return false;
                                     }
                                   }
-        ).hello(result.getFullName());
+        ).hello(name);
       }
 
       @Override
