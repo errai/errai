@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -217,4 +218,9 @@ public class TestModel {
   public <M> M simpleGenericMethod(M m) {
     return null;
   }
+  
+  // This guards against regressions of https://issues.jboss.org/browse/ERRAI-551
+  public void methodWithParameterizedType(List<String> list) {
+    
+  }  
 }
