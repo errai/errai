@@ -340,7 +340,13 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     };
     System.out.println("Overrode DataSyncService in ClientSyncManager");
 
-    csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String,Object>emptyMap());
+    csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String,Object>emptyMap(),
+            new RemoteCallback<List<SyncResponse<SimpleEntity>>>() {
+              @Override
+              public void callback(List<SyncResponse<SimpleEntity>> response) {
+                System.out.println("Got sync callback");
+              }
+    });
   }
 
   private static <X> void assertSyncRequestsEqual(

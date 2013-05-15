@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.TypedQuery;
 
@@ -41,8 +40,6 @@ public class ClientSyncManager {
    * Temporarily public so we can override the caller from within the tests. Will find a better way in the future!
    */
   public @Inject Caller<DataSyncService> dataSyncService;
-
-  @Inject Event<DataSyncCompleteEvent<?>> completeEvent;
 
   /**
    * This is the entity manager that client code interacts with. From a data
@@ -78,7 +75,8 @@ public class ClientSyncManager {
     entityComparator = new EntityComparator(desiredStateEm.getMetamodel(), attributeAccessor);
   }
 
-  public <E> void coldSync(String queryName, Class<E> queryResultType, Map<String, Object> queryParams) {
+  public <E> void coldSync(String queryName, Class<E> queryResultType, Map<String, Object> queryParams,
+          final RemoteCallback<List<SyncResponse<E>>> onCompletion) {
     final TypedQuery<E> query = desiredStateEm.createNamedQuery(queryName, queryResultType);
     final TypedQuery<E> expectedQuery = expectedStateEm.createNamedQuery(queryName, queryResultType);
     for (Map.Entry<String, Object> param : queryParams.entrySet()) {
@@ -120,7 +118,7 @@ public class ClientSyncManager {
       @Override
       public void callback(List<SyncResponse<E>> syncResponse) {
         applyResults(syncResponse);
-        completeEvent.fire(new DataSyncCompleteEvent<E>(true, syncResponse));
+        onCompletion.callback(syncResponse);
       }
     }).coldSync(syncSet, syncRequests);
   }
