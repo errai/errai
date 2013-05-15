@@ -1,6 +1,7 @@
 package org.jboss.errai.demo.todo.client.local;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +15,7 @@ import org.jboss.errai.demo.todo.shared.RegistrationException;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
+import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.Bound;
@@ -63,11 +65,16 @@ public class SignupPage extends Composite {
     try {
       signupService.call(new RemoteCallback<User>() {
         @Override
-        public void callback(User response) {
+        public void callback(final User response) {
           Map<String, Object> params = new HashMap<String, Object>();
           params.put("userId", response.getId());
-          syncManager.coldSync("userById", User.class, params);
-          todoListPageLink.go(ImmutableMultimap.<String, String>of("user", response.getId().toString()));
+          syncManager.coldSync("userById", User.class, params,
+                  new RemoteCallback<List<SyncResponse<User>>>() {
+                    @Override
+                    public void callback(List<SyncResponse<User>> syncOps) {
+                      todoListPageLink.go(ImmutableMultimap.<String, String>of("userId", response.getId().toString()));
+                    }
+                  });
         }
       },
       new BusErrorCallback() {
@@ -77,7 +84,7 @@ public class SignupPage extends Composite {
           overallErrorMessage.setVisible(true);
           return false;
         }
-      }).register(user);
+      }).register(user, password1.getText());
     } catch (RegistrationException e1) {
       // won't happen for async remote call
     }

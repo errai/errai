@@ -5,6 +5,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
@@ -18,9 +19,17 @@ public class SignupServiceImpl implements SignupService {
 
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
-  public User register(User newUserObject) throws RegistrationException {
+  public User register(User newUserObject, String password) throws RegistrationException {
+    newUserObject.setEmail(newUserObject.getEmail().toLowerCase());
     em.persist(newUserObject);
     em.flush();
+
+    Query query = em.createNativeQuery(
+            "UPDATE todolist_user SET password=:password WHERE id=:userId");
+    query.setParameter("userId", newUserObject.getId());
+    query.setParameter("password", LoginServiceImpl.toPasswordHash(newUserObject.getEmail(), password));
+    query.executeUpdate();
+
     System.out.println("Saved new user " + newUserObject + " (id=" + newUserObject.getId() + ")");
     return newUserObject;
   }

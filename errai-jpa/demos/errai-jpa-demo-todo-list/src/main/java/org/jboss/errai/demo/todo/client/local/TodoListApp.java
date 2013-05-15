@@ -1,6 +1,7 @@
 package org.jboss.errai.demo.todo.client.local;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.event.Observes;
@@ -8,15 +9,17 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
-import org.jboss.errai.jpa.sync.client.local.DataSyncCompleteEvent;
+import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -24,8 +27,10 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Templated("#main")
@@ -40,12 +45,21 @@ public class TodoListApp extends Composite {
 
   @Inject private @DataField TextBox newItemBox;
   @Inject private @DataField ListWidget<TodoItem, TodoItemWidget> itemContainer;
+
   @Inject private @DataField Button archiveButton;
   @Inject private @DataField Button syncButton;
 
+  @Inject private @DataField InlineLabel username;
+  @Inject private @DataField TransitionAnchor<LoginPage> logoutLink;
+
   @PageShowing
   private void onPageShowing() {
+    if (userId == null) {
+      Window.alert("No user id specified. Please sign in again.");
+      logoutLink.click();
+    }
     user = em.find(User.class, userId);
+    username.setText(user.getFullName());
     refreshItems();
   }
 
@@ -92,12 +106,14 @@ public class TodoListApp extends Composite {
   void sync(ClickEvent event) {
     Map<String,Object> params = new HashMap<String, Object>();
     params.put("user", user);
-    syncManager.coldSync("allItemsForUser", TodoItem.class, params);
+    syncManager.coldSync("allItemsForUser", TodoItem.class, params,
+            new RemoteCallback<List<SyncResponse<TodoItem>>>() {
+              @Override
+              public void callback(List<SyncResponse<TodoItem>> response) {
+                System.out.println("Got data sync complete event!");
+                refreshItems();
+              }
+            });
     System.out.println("Initiated cold sync");
-  }
-
-  void onSyncComplete(@Observes DataSyncCompleteEvent<?> event) {
-    System.out.println("Got data sync complete event!");
-    refreshItems();
   }
 }

@@ -1,8 +1,10 @@
 package org.jboss.errai.demo.todo.shared;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
@@ -15,7 +17,10 @@ import org.jboss.errai.databinding.client.api.Bindable;
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 @Portable @Bindable @Entity @Table(name="todolist_user")
-@NamedQuery(name="userById", query="SELECT u FROM User u WHERE u.id = :userId")
+@NamedQueries({
+  @NamedQuery(name="userById", query="SELECT u FROM User u WHERE u.id = :userId"),
+  @NamedQuery(name="userByEmail", query="SELECT u FROM User u WHERE u.email = :email")
+})
 public class User {
 
   @Id @GeneratedValue
@@ -34,6 +39,7 @@ public class User {
   /**
    * The user's email address.
    */
+  @Column(nullable=false, unique=true)
   private String email;
 
   public Long getId() {
