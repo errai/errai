@@ -1,14 +1,6 @@
 package org.jboss.errai.ui.nav.client.local;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.gwt.user.client.Cookies;
-import org.jboss.errai.ioc.client.container.async.CreationalCallback;
-import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
-import org.jboss.errai.ui.nav.client.local.spi.PageNode;
-
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -16,6 +8,13 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
+import org.jboss.errai.ui.nav.client.local.spi.PageNode;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import java.util.Collection;
 
 /**
  * Central control point for navigating between pages of the application.
@@ -27,7 +26,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 @ApplicationScoped
 public class Navigation {
-  public static final String CURRENT_PAGE_COOKIE = "currentPage";
 
   private final SimplePanel contentPanel = new SimplePanel();
 
@@ -78,6 +76,27 @@ public class Navigation {
     navigate(toPageInstance, state);
   }
 
+  /**
+   * Looks up the PageNode instance of the page that has the unique role set and
+   * makes the widget visible in the content area.
+   *
+   * @param role The unique role of the page that needs to be displayed.
+   */
+  public void goToWithRole(Class<? extends UniquePageRole> role) {
+    PageNode<?> toPageInstance = navGraph.getPageByRole(role);
+    navigate(toPageInstance);
+  }
+
+  /**
+   * Return all PageNode instances that have specified pageRole.
+   *
+   * @param pageRole the role to find PageNodes by
+   * @return All the pageNodes of the pages that have the specific pageRole.
+   */
+  public Collection<PageNode<? extends Widget>> getPagesByRole(Class<? extends PageRole> pageRole) {
+    return navGraph.getPagesByRole(pageRole);
+  }
+
   private <W extends Widget> void navigate(PageNode<W> toPageInstance) {
     navigate(toPageInstance, ImmutableListMultimap.<String, String>of());
   }
@@ -86,17 +105,6 @@ public class Navigation {
     HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
     show(toPageInstance, token);
     History.newItem(token.toString(), false);
-  }
-
-  public void goTo(String page) {
-    final PageNode<Widget> toPageInstance = navGraph.getPage(page);
-    navigate(toPageInstance);
-  }
-
-  public void goToLogin() {
-    Cookies.setCookie(CURRENT_PAGE_COOKIE, currentPage.name());
-    PageNode toPageInstance = navGraph.getPage("loginPage");
-    navigate(toPageInstance);
   }
 
   /**
