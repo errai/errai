@@ -263,4 +263,15 @@ public class ClientSyncManager {
   public ErraiEntityManager getDesiredStateEm() {
     return desiredStateEm;
   }
+
+  /**
+   * Clears all expected state and actual state data (essentially wiping out all
+   * localStorage data that Errai cares about). This operation will destroy any
+   * local data that has not been synced to the server, including data that the
+   * sync manager was never told about.
+   */
+  public void clear() {
+    desiredStateEm.removeAll();
+    expectedStateEm.removeAll();
+  }
 }

@@ -1,5 +1,7 @@
 package org.jboss.errai.demo.todo.shared;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,7 +23,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
   @NamedQuery(name="userById", query="SELECT u FROM User u WHERE u.id = :userId"),
   @NamedQuery(name="userByEmail", query="SELECT u FROM User u WHERE u.email = :email")
 })
-public class User {
+public class User implements Serializable {
 
   @Id @GeneratedValue
   private Long id;

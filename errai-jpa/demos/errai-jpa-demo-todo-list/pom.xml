@@ -103,7 +103,7 @@
           <runTarget>http://localhost:8080/errai-jpa-demo-todo-list/</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:MaxPermSize=256m -XX:CompileThreshold=1000</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
-          <logLevel>DEBUG</logLevel>
+          <logLevel>INFO</logLevel>
         </configuration>
         <executions>
           <execution>

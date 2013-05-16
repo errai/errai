@@ -20,8 +20,11 @@ public class LoginServiceImpl implements LoginService, Serializable {
 
   @Inject EntityManager em;
 
-  @Produces
   private User currentUser;
+
+  public LoginServiceImpl() {
+    System.out.println("New LoginServiceImpl created: " + System.identityHashCode(this));
+  }
 
   @Override
   public User logIn(String email, String password) throws AuthenticationException {
@@ -34,11 +37,13 @@ public class LoginServiceImpl implements LoginService, Serializable {
       throw new AuthenticationException();
     }
     currentUser = (User) resultList.get(0);
+    System.out.println("LoginServiceImpl@" + System.identityHashCode(this) + " setting current user " + currentUser);
     return currentUser;
   }
 
-  @Override
+  @Override @Produces @SessionScoped @LoggedIn
   public User whoAmI() {
+    System.out.println("LoginServiceImpl@" + System.identityHashCode(this) + " returning current user " + currentUser);
     return currentUser;
   }
 

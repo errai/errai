@@ -1,5 +1,6 @@
 package org.jboss.errai.jpa.sync.client.shared;
 
+import java.util.Collections;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -35,7 +36,7 @@ public class SyncableDataSet<E> {
           @MapsTo("params") Map<String, Object> params) {
     this.queryName = Assert.notNull(queryName);
     this.resultTypeFqcn = resultTypeFqcn;
-    this.params = Assert.notNull(params);
+    this.params = Collections.unmodifiableMap(params);
   }
 
   public TypedQuery<E> createQuery(EntityManager em) {
@@ -55,5 +56,25 @@ public class SyncableDataSet<E> {
       }
     }
     throw new IllegalStateException("Result type " + resultTypeFqcn + " is not known to the EntityManager.");
+  }
+
+  /**
+   * Returns the name of the JPA named query this syncable data set is tied to.
+   *
+   * @return the query name. Never null.
+   */
+  public String getQueryName() {
+    return queryName;
+  }
+
+  /**
+   * Returns a read-only view of this syncable data set's parameters. These
+   * should correspond with the named parameters of the JPA named query this
+   * syncable data set is tied to.
+   *
+   * @return a read-only map of the parameters in use with the query. Never null.
+   */
+  public Map<String, Object> getParameters() {
+    return params;
   }
 }

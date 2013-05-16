@@ -9,7 +9,9 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.demo.todo.shared.LoginService;
 import org.jboss.errai.demo.todo.shared.TodoItem;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.ioc.client.container.ClientBeanManager;
@@ -19,7 +21,7 @@ import org.jboss.errai.ui.client.widget.ListWidget;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShowing;
 import org.jboss.errai.ui.nav.client.local.PageState;
-import org.jboss.errai.ui.nav.client.local.TransitionAnchor;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -28,6 +30,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -50,13 +53,16 @@ public class TodoListApp extends Composite {
   @Inject private @DataField Button syncButton;
 
   @Inject private @DataField InlineLabel username;
-  @Inject private @DataField TransitionAnchor<LoginPage> logoutLink;
+
+  @Inject private TransitionTo<LoginPage> logoutTransition;
+  @Inject private @DataField Anchor logoutLink;
+  @Inject private Caller<LoginService> loginService;
 
   @PageShowing
   private void onPageShowing() {
     if (userId == null) {
       Window.alert("No user id specified. Please sign in again.");
-      logoutLink.click();
+      logout(null);
     }
     user = em.find(User.class, userId);
     username.setText(user.getFullName());
@@ -115,5 +121,12 @@ public class TodoListApp extends Composite {
               }
             });
     System.out.println("Initiated cold sync");
+  }
+
+  @EventHandler("logoutLink")
+  void logout(ClickEvent event) {
+    syncManager.clear();
+    loginService.call().logOut();
+    logoutTransition.go();
   }
 }
