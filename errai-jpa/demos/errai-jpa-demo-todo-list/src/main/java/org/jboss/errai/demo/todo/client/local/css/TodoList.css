@@ -118,6 +118,11 @@ div.loginForm p {
 	color: #f00;
 }
 
+a {
+	color: #00f;
+	text-decoration: underline;
+}
+
 /* Don't forget the phones! */
 @media only screen and (max-width: 600px) , only screen and (max-device-width: 600px) {
 	body {

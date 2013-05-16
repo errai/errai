@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.demo.todo.shared.LoginService;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.jpa.sync.client.shared.DataSyncService;
 import org.jboss.errai.jpa.sync.client.shared.SyncRequestOperation;
@@ -16,10 +17,11 @@ import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
 public class DataSyncServiceImpl implements DataSyncService {
 
   @Inject private DataSyncEjb dataSyncEjb;
-  @Inject private @LoggedIn User currentUser;
+  @Inject private LoginService loginService;
 
   @Override
   public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> remoteResults) {
+    User currentUser = loginService.whoAmI();
     System.out.println("DataSyncServiceImpl.currentUser is " + currentUser);
     if (currentUser == null) {
       throw new IllegalStateException("Nobody is logged in!");

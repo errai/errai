@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import java.util.List;
 
 import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -41,7 +40,7 @@ public class LoginServiceImpl implements LoginService, Serializable {
     return currentUser;
   }
 
-  @Override @Produces @SessionScoped @LoggedIn
+  @Override
   public User whoAmI() {
     System.out.println("LoginServiceImpl@" + System.identityHashCode(this) + " returning current user " + currentUser);
     return currentUser;
