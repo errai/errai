@@ -153,7 +153,7 @@
                            <value>${project.build.directory}</value>
                         </property>
 
-                        <!-- Do not accidently package server test marshallers 
+                        <!-- Do not accidently package server test marshallers
                            when building Errai -->
                         <property>
                            <name>errai.marshalling.server.classOutput.enabled</name>
@@ -161,7 +161,7 @@
                         </property>
 
 
-                        <!-- Must disable long polling for automated tests 
+                        <!-- Must disable long polling for automated tests
                            to succeed -->
                         <property>
                            <name>org.jboss.errai.bus.do_long_poll</name>
@@ -179,11 +179,33 @@
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
                      </includes>
+                     <excludes>
+                       <exclude>**/rebind/**</exclude>
+                     </excludes>
                   </configuration>
                </plugin>
             </plugins>
          </build>
       </profile>
+     <profile>
+       <id>unit-test</id>
+       <activation>
+         <activeByDefault>true</activeByDefault>
+       </activation>
+       <build>
+         <plugins>
+           <plugin>
+             <artifactId>maven-surefire-plugin</artifactId>
+             <configuration>
+               <skipTests>false</skipTests>
+               <includes>
+                 <include>**/rebind/**</include>
+               </includes>
+             </configuration>
+           </plugin>
+         </plugins>
+       </build>
+     </profile>
    </profiles>
 
 </project>
