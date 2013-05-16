@@ -6,7 +6,8 @@ import org.jboss.errai.bus.server.annotations.Remote;
 public interface SignupService {
 
   /**
-   * Attempts to register a new user in the system.
+   * Attempts to register a new user in the system. If successful, the newly
+   * registered user will be logged in on the server-side session.
    *
    * @param newUserObject
    *          The data about the user to register.

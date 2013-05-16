@@ -6,7 +6,8 @@ import org.jboss.errai.bus.server.annotations.Remote;
 public interface LoginService {
 
   /**
-   * Attempts to register a new user in the system.
+   * Attempts to sign in as an existing user in the system. If successful, the
+   * given user will be signed in for the current HTTP session.
    *
    * @param userId
    *          The unique username to authenticate as

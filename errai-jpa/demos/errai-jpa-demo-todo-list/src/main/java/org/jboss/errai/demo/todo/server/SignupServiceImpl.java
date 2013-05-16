@@ -8,6 +8,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.demo.todo.shared.AuthenticationException;
+import org.jboss.errai.demo.todo.shared.LoginService;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
 import org.jboss.errai.demo.todo.shared.SignupService;
 import org.jboss.errai.demo.todo.shared.User;
@@ -16,6 +18,7 @@ import org.jboss.errai.demo.todo.shared.User;
 public class SignupServiceImpl implements SignupService {
 
   @Inject EntityManager em;
+  @Inject LoginService loginService;
 
   @TransactionAttribute(TransactionAttributeType.REQUIRED)
   @Override
@@ -29,8 +32,14 @@ public class SignupServiceImpl implements SignupService {
     query.setParameter("userId", newUserObject.getId());
     query.setParameter("password", LoginServiceImpl.toPasswordHash(newUserObject.getEmail(), password));
     query.executeUpdate();
+    em.detach(newUserObject);
 
     System.out.println("Saved new user " + newUserObject + " (id=" + newUserObject.getId() + ")");
+    try {
+      loginService.logIn(newUserObject.getEmail(), password);
+    } catch (AuthenticationException e) {
+      throw new AssertionError(); // we just set the password to this inside the current transaction!
+    }
     return newUserObject;
   }
 
