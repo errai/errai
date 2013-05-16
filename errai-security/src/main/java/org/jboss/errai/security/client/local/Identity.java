@@ -9,10 +9,11 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.shared.SecurityManager;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Navigation;
-import static org.jboss.errai.ui.nav.client.local.Navigation.CURRENT_PAGE_COOKIE;
 
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
+
+import static org.jboss.errai.security.shared.LoginPage.CURRENT_PAGE_COOKIE;
 
 /**
  * @author edewit@redhat.com

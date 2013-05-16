@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.security.client.local.Identity;
+import org.jboss.errai.security.shared.LoginPage;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Page;
 import org.jboss.errai.ui.nav.client.local.PageShown;
@@ -19,7 +20,7 @@ import org.jboss.errai.ui.shared.api.annotations.*;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-@Page(loginPage = true)
+@Page(role = LoginPage.class)
 @Templated("#root")
 @Dependent
 public class LoginForm extends Composite {

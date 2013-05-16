@@ -77,6 +77,16 @@ public class Navigation {
   }
 
   /**
+   * Same as {@link #goTo(Class, com.google.common.collect.Multimap)} but then with the page name.
+   *
+   * @param toPage the name of the page node to lookup and display.
+   */
+  public void goTo(String toPage) {
+    PageNode<? extends Widget> toPageInstance = navGraph.getPage(toPage);
+    navigate(toPageInstance);
+  }
+
+  /**
    * Looks up the PageNode instance of the page that has the unique role set and
    * makes the widget visible in the content area.
    *
@@ -105,6 +115,14 @@ public class Navigation {
     HistoryToken token = HistoryToken.of(toPageInstance.name(), state);
     show(toPageInstance, token);
     History.newItem(token.toString(), false);
+  }
+
+  /**
+   * Return the current page that is being displayed.
+   * @return the current page
+   */
+  public PageNode<Widget> getCurrentPage() {
+    return currentPage;
   }
 
   /**
