@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -81,8 +83,8 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
     // accumulation of (name, pageclass) mappings for dupe detection and dot file generation
     BiMap<String, MetaClass> pageNames = HashBiMap.create();
 
-    // accumulation of pages with startingPage=true (for ensuring there is exactly one default page)
-    List<MetaClass> defaultPages = new ArrayList<MetaClass>();
+    // accumulation UniquePageRoles for ensuring there is exactly one.
+    Multimap<Class<?>, MetaClass> pageRoles = ArrayListMultimap.create();
 
     ConstructorBlockBuilder<?> ctor = classBuilder.publicConstructor();
     final Collection<MetaClass> pages = ClassScanner.getTypesAnnotatedWith(Page.class);
@@ -94,6 +96,7 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
       }
       Page annotation = pageClass.getAnnotation(Page.class);
       String pageName = annotation.path().equals("") ? pageClass.getName() : annotation.path();
+      List<Class<? extends PageRole>> annotatedPageRoles = Arrays.asList(annotation.role());
 
       MetaClass prevPageWithThisName = pageNames.put(pageName, pageClass);
       if (prevPageWithThisName != null) {
@@ -102,8 +105,11 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
                 " are both named [" + pageName + "]");
       }
       Statement pageImplStmt = generateNewInstanceOfPageImpl(pageClass, pageName);
-      if (annotation.startingPage() == true) {
-        defaultPages.add(pageClass);
+      if (annotation.startingPage() || annotatedPageRoles.contains(DefaultPage.class)) {
+        if (annotation.startingPage()) {
+          pageRoles.put(DefaultPage.class, pageClass);
+          logger.log(TreeLogger.Type.WARN, "You are using the deprecated statingPage place change to role = DefaultPage.class");
+        }
 
         // need to assign the page impl to a variable and add it to the map twice
         ctor.append(Stmt.declareFinalVariable("defaultPage", PageNode.class, pageImplStmt));
@@ -111,34 +117,35 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
         ctor.append(
             Stmt.nestedCall(Refs.get("pagesByName"))
                 .invoke("put", "", pageImplStmt));
+        ctor.append(
+                Stmt.nestedCall(Refs.get("pagesByRole"))
+                        .invoke("put", DefaultPage.class, pageImplStmt));
       }
       else if (pageName.equals("")) {
         throw new GenerationException(
             "Page " + pageClass.getFullyQualifiedName() + " has an empty path. Only the" +
                 " page with startingPage=true is permitted to have an empty path.");
       }
+
+      final String fieldName = StringUtils.uncapitalize(pageClass.getName());
+      ctor.append(Stmt.declareFinalVariable(fieldName, PageNode.class, pageImplStmt));
       ctor.append(
           Stmt.nestedCall(Refs.get("pagesByName"))
-              .invoke("put", pageName, pageImplStmt));
+              .invoke("put", pageName, Refs.get(fieldName)));
+
+      for (Class<? extends PageRole> annotatedPageRole : annotatedPageRoles) {
+        pageRoles.put(annotatedPageRole, pageClass);
+        ctor.append(
+          Stmt.nestedCall(Refs.get("pagesByRole"))
+              .invoke("put", annotatedPageRole, Refs.get(fieldName)));
+      }
     }
     ctor.finish();
 
     renderNavigationToDotFile(pageNames);
 
-    if (pages.size() > 0 && defaultPages.size() == 0) {
-      throw new GenerationException(
-          "No @Page classes have startingPage=true. Exactly one @Page class" +
-              " must be designated as the starting page.");
-    }
-    if (defaultPages.size() > 1) {
-      StringBuilder defaultPageList = new StringBuilder();
-      for (MetaClass mc : defaultPages) {
-        defaultPageList.append("\n  ").append(mc.getFullyQualifiedName());
-      }
-      throw new GenerationException(
-          "Found more than one @Page with startingPage=true: " + defaultPageList +
-              "\nExactly one @Page class must be designated as the starting page.");
-    }
+    validateDefaultPagePresent(pages, pageRoles);
+    validateUnique(pageRoles);
 
     String out = classBuilder.toJavaString();
 
@@ -150,6 +157,35 @@ public class NavigationGraphGenerator extends AbstractAsyncGenerator {
 
     return out;
   }
+
+  private void validateDefaultPagePresent(Collection<MetaClass> pages, Multimap<Class<?>, MetaClass> pageRoles) {
+    Collection<MetaClass> defaultPages = pageRoles.get(DefaultPage.class);
+    if (!pages.isEmpty() && defaultPages.isEmpty()) {
+      throw new GenerationException(
+              "No @Page classes have role = DefaultPage. Exactly one @Page class" +
+                      " must be designated as the default starting page.");
+    }
+  }
+
+  private void validateUnique(Multimap<Class<?>, MetaClass> pageRoles) {
+    for (Class<?> pageRole : pageRoles.keys()) {
+      final Collection<MetaClass> pages = pageRoles.get(pageRole);
+      if (UniquePageRole.class.isAssignableFrom(pageRole) && pages.size() > 1) {
+        createValidationError(pages, pageRole);
+      }
+    }
+  }
+
+  private void createValidationError(Collection<MetaClass> pages, Class<?> role) {
+    StringBuilder builder = new StringBuilder();
+    for (MetaClass mc : pages) {
+      builder.append("\n  ").append(mc.getFullyQualifiedName());
+    }
+    throw new GenerationException(
+            "Found more than one @Page with role = '" + role + "': " + builder +
+                    "\nExactly one @Page class must be designated with this unique role.");
+  }
+
   /**
    * Generates a new instance of an anonymous inner class that implements the PageNode interface.
    * 

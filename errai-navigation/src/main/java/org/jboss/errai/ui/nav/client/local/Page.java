@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
  *
  * @see TransitionTo
  * @see PageState
+ * @see PageRole
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Target(ElementType.TYPE)
@@ -35,6 +36,17 @@ public @interface Page {
    * In an Errai application that uses the navigation system, exactly one
    * {@code @Page}-annotated class must have {@code startingPage} set to
    * {@code true}. It is a compile-time error otherwise.
+   *
+   * @deprecated use role = DefaultPage.class instead
    */
   boolean startingPage() default false;
+
+  /**
+   * Defines the roles of the page. You can group pages together by defining roles
+   * that extend either {@link PageRole} or {@link UniquePageRole} a example of this is
+   * the {@link DefaultPage} indicating that this page is the {@link #startingPage()}
+   *
+   * @return the roles that this page belongs to
+   */
+  Class<? extends PageRole>[] role() default {};
 }

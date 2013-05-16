@@ -1,21 +1,21 @@
 package org.jboss.errai.ui.nav.client.local;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.gwt.user.client.Window;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
 import org.jboss.errai.ui.nav.client.local.spi.NavigationGraph;
 import org.jboss.errai.ui.nav.client.local.spi.PageNode;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef1;
 import org.jboss.errai.ui.nav.client.local.testpages.CircularRef2;
 import org.jboss.errai.ui.nav.client.local.testpages.PageWithExtraState;
+import org.jboss.errai.ui.nav.client.local.testpages.PageWithRole;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.gwt.user.client.Window;
+import java.util.Collection;
 
 public class NavigationTest extends AbstractErraiCDITest {
 
-  private SyncBeanManager beanManager;
   private Navigation navigation;
   private NavigationGraph navGraph;
 
@@ -28,8 +28,7 @@ public class NavigationTest extends AbstractErraiCDITest {
   protected void gwtSetUp() throws Exception {
     disableBus = true;
     super.gwtSetUp();
-    beanManager = IOC.getBeanManager();
-    navigation = beanManager.lookupBean(Navigation.class).getInstance();
+    navigation = IOC.getBeanManager().lookupBean(Navigation.class).getInstance();
     navGraph = navigation.getNavGraph();
   }
 
@@ -77,5 +76,27 @@ public class NavigationTest extends AbstractErraiCDITest {
   public void testUrlUpdatesWithPageChange() throws Exception {
     navigation.goTo(PageWithExtraState.class, ImmutableMultimap.of("intThing", "42"));
     assertEquals("#PageWithExtraState;intThing=42", Window.Location.getHash());
+  }
+
+  public void testUrlUpdateWithPageChangeByRole() {
+    navigation.goToWithRole(DefaultPage.class);
+    assertEquals("#PageA", Window.Location.getHash());
+  }
+
+  public void testGetPageByRole() throws Exception {
+    final Collection<PageNode<?>> pageByRole = navGraph.getPagesByRole(PageWithRole.AdminPage.class);
+    assertNotNull(pageByRole);
+    assertFalse(pageByRole.isEmpty());
+
+    assertTrue(pageByRole.size() == 2);
+    for (PageNode<?> pageNode : pageByRole) {
+      assertTrue(pageNode.name() + " is not a page annotated with the admin role", pageNode.name().matches("Page.?WithRole"));
+    }
+  }
+
+  public void testGetPageWithDefaultRole() {
+    final PageNode pageByRole = navGraph.getPageByRole(DefaultPage.class);
+    assertNotNull(pageByRole);
+    assertEquals("PageA", pageByRole.name());
   }
 }

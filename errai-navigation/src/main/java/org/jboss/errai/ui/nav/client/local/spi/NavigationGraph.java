@@ -1,15 +1,19 @@
 package org.jboss.errai.ui.nav.client.local.spi;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.async.AsyncBeanManager;
 import org.jboss.errai.ioc.client.container.async.CreationalCallback;
+import org.jboss.errai.ui.nav.client.local.PageRole;
 import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.nav.client.local.UniquePageRole;
 
-import com.google.gwt.user.client.ui.Widget;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * The NavigationGraph is responsible for creating or retrieving instances of
@@ -33,6 +37,8 @@ public abstract class NavigationGraph {
    * constructor is responsible for populating this map.
    */
   protected final Map<String, PageNode<? extends Widget>> pagesByName = new HashMap<String, PageNode<? extends Widget>>();
+  protected final Multimap<Class<? extends PageRole>, PageNode<? extends Widget>> pagesByRole = ArrayListMultimap.create();
+
 
   /**
    * Returns an instance of the given page type. If the page is an
@@ -65,12 +71,31 @@ public abstract class NavigationGraph {
     // TODO this could be made more efficient if we had a pagesByWidgetType map
     for (Entry<String, PageNode<? extends Widget>> e : pagesByName.entrySet()) {
       if (e.getValue().contentType().equals(type)) {
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
         PageNode<W> page = (PageNode<W>) e.getValue();
         return page;
       }
     }
     throw new IllegalArgumentException("No page with a widget type of " + type.getName() + " exists");
+  }
+
+  /**
+   * Returns all pages that have the specified role. In the add page annotation one can specify multiple roles
+   * for a page. {@link #getPage(Class)} {@link PageRole}
+   *
+   * @param role the role used to lookup the pages
+   * @return all pages that have the role set.
+   */
+  public Collection<PageNode<? extends Widget>> getPagesByRole(Class<? extends PageRole> role) {
+    return pagesByRole.get(role);
+  }
+
+  public PageNode getPageByRole(Class<? extends UniquePageRole> role) {
+    final Collection<PageNode<? extends Widget>> pageNodes = pagesByRole.get(role);
+    if (pageNodes.size() > 1) {
+      throw new IllegalArgumentException("Role '" + role + "' is not unique multiple pages: " + pageNodes + " found");
+    }
+    return pageNodes.iterator().next();
   }
 
   /**
@@ -80,6 +105,7 @@ public abstract class NavigationGraph {
     return pagesByName.isEmpty();
   }
 
+  @SuppressWarnings("UnusedDeclaration")
   protected static final class PageNodeCreationalCallback<W extends Widget> implements CreationalCallback<PageNode<W>> {
 
     @Override
