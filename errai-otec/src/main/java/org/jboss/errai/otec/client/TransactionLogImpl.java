@@ -16,19 +16,10 @@
 
 package org.jboss.errai.otec.client;
 
+import java.util.*;
+
 import org.jboss.errai.otec.client.mutation.Mutation;
 import org.jboss.errai.otec.client.operation.OTOperation;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -164,16 +155,14 @@ public class TransactionLogImpl implements TransactionLog {
   }
 
   @Override
-  public List<OTOperation> getPreviousRemoteOpsTo(final OTOperation remoteOp, final OTOperation localOp) {
-    final String agentId = remoteOp.getAgentId();
-    final int minRev = localOp.getRevision();
+  public List<OTOperation> getRemoteOpsSinceRevision(final String agentId, final int rev) {
     synchronized (lock) {
       final ListIterator<OTOperation> iter = transactionLog.listIterator(transactionLog.size());
 
       final List<OTOperation> collect = new LinkedList<OTOperation>();
       while (iter.hasPrevious()) {
         final OTOperation previous = iter.previous();
-        if (previous.getRevision() < minRev) {
+        if (previous.getRevision() < rev) {
           break;
         }
         if (agentId.equals(previous.getAgentId())) {

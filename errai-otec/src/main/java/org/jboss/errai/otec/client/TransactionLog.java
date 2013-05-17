@@ -16,9 +16,9 @@
 
 package org.jboss.errai.otec.client;
 
-import org.jboss.errai.otec.client.operation.OTOperation;
-
 import java.util.List;
+
+import org.jboss.errai.otec.client.operation.OTOperation;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -49,5 +49,5 @@ public interface TransactionLog {
 
   void cleanLog();
 
-  List<OTOperation> getPreviousRemoteOpsTo(OTOperation remoteOp, OTOperation localOp);
+  List<OTOperation> getRemoteOpsSinceRevision(final String agentId, final int rev);
 }

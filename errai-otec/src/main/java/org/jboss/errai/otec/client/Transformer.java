@@ -106,25 +106,20 @@ public class Transformer {
           "\"" + entity.getState().get() + "\"");
 
       final OTOperation firstOp = localOps.get(0);
-      final List<OTOperation> previousRemoteOpsTo = transactionLog.getPreviousRemoteOpsTo(applyOver, firstOp);
-
-      if (!previousRemoteOpsTo.isEmpty()) {
-
-        OTOperation firstPrevRemotePp = previousRemoteOpsTo.get(0);
-        while (firstPrevRemotePp.getTransformedFrom() != null) {
-          firstPrevRemotePp = firstPrevRemotePp.getTransformedFrom().getRemoteOp();
+      final List<OTOperation> remoteOps = transactionLog.getRemoteOpsSinceRevision(applyOver.getAgentId(), firstOp.getRevision());
+      if (!remoteOps.isEmpty()) {
+        OTOperation firstPrevRemoteOp = remoteOps.get(0);
+        while (firstPrevRemoteOp.getTransformedFrom() != null) {
+          firstPrevRemoteOp = firstPrevRemoteOp.getTransformedFrom().getRemoteOp();
         }
 
-        final OTOperation lastPrevRemoteOp = previousRemoteOpsTo.get(previousRemoteOpsTo.size() - 1);
-        final LogQuery query2 = transactionLog.getEffectiveStateForRevision(firstPrevRemotePp.getRevision() + 1);
-
+        final LogQuery query2 = transactionLog.getEffectiveStateForRevision(firstPrevRemoteOp.getRevision() + 1);
         entity.getState().syncStateFrom(query2.getEffectiveState());
-
         for (final OTOperation operation : query2.getLocalOpsNeedsMerge()) {
           operation.apply(entity, true);
         }
 
-        applyOver = translateFrom(remoteOp, lastPrevRemoteOp);
+        applyOver = translateFrom(remoteOp, remoteOps.get(remoteOps.size() - 1));
 
         OTLogUtil.log("CTRNSFRM", "FOR: " + remoteOp + "->" + applyOver,
             "-", engine.getName(), remoteOp.getRevision() + 1, "\"" + entity.getState().get() + "\"");
@@ -215,12 +210,10 @@ public class Transformer {
         }
 
         op.unmarkAsResolvedConflict();
-
         last = op;
       }
 
       Collections.reverse(translationVector);
-
       OTOperation applyOver = remoteOp;
       for (final OpPair o : translationVector) {
         OTLogUtil.log("***");
