@@ -13,10 +13,6 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <properties>
-    <hsqldb.version>1.8.0.7</hsqldb.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -27,7 +23,6 @@
     <dependency>
       <groupId>hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
-      <version>${hsqldb.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.servlet</groupId>

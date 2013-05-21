@@ -55,7 +55,6 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
-      <version>${resteasy.version}</version>
     </dependency>
 
     <dependency>
@@ -115,14 +114,12 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>1.6.1</version>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
-          <version>1.6.1</version>
           <scope>provided</scope>
         </dependency>
 
@@ -151,7 +148,6 @@
         <dependency>
           <groupId>org.jboss.resteasy</groupId>
           <artifactId>resteasy-jaxrs</artifactId>
-          <version>${resteasy.version}</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>
@@ -184,7 +180,6 @@
 
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
@@ -202,7 +197,6 @@
         dependencies. Run mvn with -Pintegration-test to enable testing. -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
         <configuration>
           <skipTests>true</skipTests>
         </configuration>
@@ -217,34 +211,6 @@
       </plugin>
     </plugins>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
-                    <goals>
-                      <goal>resources</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute />
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
 </project>

@@ -33,12 +33,6 @@
   <properties>
     <aerogear.version>1.0.0</aerogear.version>
     <javaee6.spec.version>3.0.0.Beta1</javaee6.spec.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <weld.version>1.1.6.Final</weld.version>
-    <mvel.version>2.1.Beta8</mvel.version>
-    <jetty.version>6.1.25</jetty.version>
-    <slf4j.version>1.6.1</slf4j.version>
-    <uel.impl.version>2.1.2-b04</uel.impl.version>
   </properties>
 
   <repositories>
@@ -63,6 +57,25 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <dependency>
+          <groupId>org.jboss.aerogear</groupId>
+          <artifactId>aerogear-controller</artifactId>
+          <version>${aerogear.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.aerogear</groupId>
+          <artifactId>aerogear-security</artifactId>
+          <version>${aerogear.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.aerogear</groupId>
+          <artifactId>aerogear-security-picketlink</artifactId>
+          <version>${aerogear.version}</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -88,7 +101,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-incubator</artifactId>
-      <version>2.0.1</version>
     </dependency>
 
     <dependency>
@@ -100,7 +112,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
       <groupId>org.jboss.ejb3</groupId>
       <artifactId>jboss-ejb3-api</artifactId>
       <scope>provided</scope>
-      <version>3.1.0</version>
     </dependency>
 
     <dependency>
@@ -185,14 +196,12 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
     <dependency>
       <groupId>org.jboss.aerogear</groupId>
       <artifactId>aerogear-security</artifactId>
-      <version>${aerogear.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.aerogear</groupId>
       <artifactId>aerogear-security-picketlink</artifactId>
-      <version>${aerogear.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -216,7 +225,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.2.0.Final</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -229,14 +237,12 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-annotations</artifactId>
-      <version>3.4.0.GA</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.aerogear</groupId>
       <artifactId>aerogear-controller</artifactId>
-      <version>${aerogear.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -245,13 +251,11 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
     <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
-      <version>${weld.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.weld.servlet</groupId>
       <artifactId>weld-servlet-core</artifactId>
-      <version>${weld.version}</version>
     </dependency>
 
     <!-- GWT and GWT Extensions -->
@@ -264,7 +268,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
     <dependency>
       <groupId>net.auroris</groupId>
       <artifactId>gwt-colorpicker</artifactId>
-      <version>2.1</version>
     </dependency>
 
     <!-- Runtime / Container dependencies -->
@@ -286,7 +289,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
         <executions>
           <execution>
             <id>css-resources</id>
@@ -310,7 +312,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
         <executions>
           <execution>
             <goals>
@@ -351,7 +352,6 @@ read this as the JBoss stack of the Java EE 6 APIs) -->
       </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
         <configuration>
           <filesets>
             <fileset>

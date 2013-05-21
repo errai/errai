@@ -23,6 +23,7 @@
     <artifactId>errai-parent</artifactId>
     <groupId>org.jboss.errai</groupId>
     <version>3.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <description>Adds support for deployments on JBoss Application Server</description>
 
@@ -38,7 +39,6 @@
     <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-vfs</artifactId>
-      <version>3.0.1.GA</version>
       <scope>provided</scope>
     </dependency>
 

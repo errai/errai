@@ -18,19 +18,19 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-bus</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-marshalling</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-codegen</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -53,7 +53,6 @@ dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
         <dependency>
             <groupId>org.timepedia.exporter</groupId>
             <artifactId>gwtexporter</artifactId>
-            <version>2.3.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
