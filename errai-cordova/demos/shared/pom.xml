@@ -19,12 +19,6 @@
   </parent>
 
   <properties>
-    <!-- Explicitly declaring the source encoding eliminates the following 
-      message: -->
-    <!-- [WARNING] Using platform encoding (UTF-8 actually) to copy filtered 
-      resources, i.e. build is platform dependent! -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
     <!-- Define the version of JBoss' Java EE 6 APIs we want to import. Any 
       dependencies from org.jboss.spec will have their version defined by this 
       BOM -->
@@ -35,9 +29,6 @@
       work with JBoss EAP 6. It requires you have access to the JBoss EAP 6 maven 
       repository. -->
     <!-- <version.org.jboss.spec.jboss.javaee6>3.0.0.Final-redhat-1</version.org.jboss.spec.jboss.javaee6> -->
-    <version.org.jboss.errai>3.0-SNAPSHOT</version.org.jboss.errai>
-    <version.com.google.gwt>2.5.1</version.com.google.gwt>
-    <version.org.codehaus.mojo.gwt.maven.plugin>${version.com.google.gwt}</version.org.codehaus.mojo.gwt.maven.plugin>
   </properties>
 
   <dependencyManagement>
@@ -69,7 +60,7 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-bus</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
         <exclusions>
           <exclusion>
             <groupId>javax.inject</groupId>
@@ -84,7 +75,7 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-ioc</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
         <exclusions>
           <exclusion>
             <groupId>javax.inject</groupId>
@@ -99,19 +90,19 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-tools</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-ui</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-data-binding</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
@@ -124,60 +115,40 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-jaxrs-client</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-jaxrs-provider</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <!-- Errai CDI Integration Modules -->
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-cdi-client</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-javax-enterprise</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-weld-integration</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-cordova</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-user</artifactId>
-        <version>${version.com.google.gwt}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-dev</artifactId>
-        <version>${version.com.google.gwt}</version>
-      </dependency>
-
-      <!-- Test dependencies -->
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.10</version>
-        <type>jar</type>
-        <scope>test</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -247,7 +218,6 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.2.0.Final</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -262,7 +232,6 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.2.0.Final</version>
       <scope>provided</scope>
       <classifier>sources</classifier>
       <exclusions>
@@ -278,7 +247,6 @@
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
-      <version>1.0.0.GA</version>
       <classifier>sources</classifier>
     </dependency>
 
@@ -364,7 +332,7 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-cordova</artifactId>
-      <version>${version.org.jboss.errai}</version>
+      <version>${project.version}</version>
     </dependency>
 
     <!-- gwt-user is required at runtime because we use some of the client/server 
@@ -390,7 +358,6 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-jpamodelgen</artifactId>
-      <version>1.1.1.Final</version>
       <scope>provided</scope>
     </dependency>
 
@@ -409,7 +376,6 @@
         annotation processors -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -417,7 +383,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
 
@@ -443,7 +408,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${version.org.codehaus.mojo.gwt.maven.plugin}</version>
         <configuration>
           <inplace>true</inplace>
           <logLevel>INFO</logLevel>
@@ -477,7 +441,6 @@
       <plugin>
         <groupId>org.jboss.as.plugins</groupId>
         <artifactId>jboss-as-maven-plugin</artifactId>
-        <version>7.1.0.Final</version>
         <configuration>
           <filename>${project.artifactId}.${project.packaging}</filename>
         </configuration>
@@ -486,8 +449,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
-
         <configuration>
           <filesets>
             <fileset>
@@ -516,37 +477,6 @@
         </configuration>
       </plugin>
     </plugins>
-
-    <pluginManagement>
-      <plugins>
-
-        <!-- m2e (Maven integration for Eclipse) requires the following configuration -->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
-                    <goals>
-                      <goal>resources</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute/>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
   <profiles>
@@ -563,7 +493,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.4.3</version>
             <configuration>
               <skip>true</skip>
             </configuration>
@@ -585,7 +514,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.1.1</version>
             <configuration>
               <outputDirectory>deployments</outputDirectory>
               <warName>ROOT</warName>

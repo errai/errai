@@ -138,10 +138,282 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Errai Dependencies -->
+      <!-- Project Dependencies -->
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-bus</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-ioc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-marshalling</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-tools</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.errai.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- Third Party -->
+      <dependency>
+        <groupId>ch.qos.cal10n</groupId>
+        <artifactId>cal10n-api</artifactId>
+        <version>0.7.4</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.github.branflake2267</groupId>
+          <artifactId>gwt-maps-api</artifactId>
+          <version>3.9.0-build-16</version>
+      </dependency>
+
+
+      <dependency>
+          <groupId>com.googlecode.gwtphonegap</groupId>
+          <artifactId>gwtphonegap</artifactId>
+          <version>2.0.0.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-api-1.0-sdk</artifactId>
+        <version>${appengine.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-api-labs</artifactId>
+        <version>${appengine.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+          <version>1.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>3.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava-gwt</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+
+      <!-- Guava and Reflections both depend on JSR 305 from the findbugs
+        project, but they specify different versions. This pins to the newer of the
+        two. -->
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>1.3.9</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.google.gwt</groupId>
+          <artifactId>gwt-incubator</artifactId>
+          <version>2.0.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-user</artifactId>
+        <version>${gwt.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-dev</artifactId>
+        <version>${gwt.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.google.gwt.google-apis</groupId>
+          <artifactId>gwt-ajaxloader</artifactId>
+          <version>1.1.0</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+          <version>1.3.168</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.sun.grizzly</groupId>
+          <artifactId>grizzly-comet</artifactId>
+          <version>1.9.19-beta2</version>
+      </dependency>
+
+      <dependency>
+          <groupId>com.sun.grizzly</groupId>
+          <artifactId>grizzly-nio-framework</artifactId>
+          <version>1.9.19-beta2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <dependency>
+          <groupId>commons-configuration</groupId>
+          <artifactId>commons-configuration</artifactId>
+          <version>1.9</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.1.1</version>
+      </dependency>
+
+      <dependency>
+          <groupId>dom4j</groupId>
+          <artifactId>dom4j</artifactId>
+          <version>1.6.1</version>
+      </dependency>
+
+      <dependency>
+          <groupId>hsqldb</groupId>
+          <artifactId>hsqldb</artifactId>
+          <version>1.8.0.7</version>
+      </dependency>
+
+      <dependency>
+          <groupId>javax</groupId>
+          <artifactId>javaee-api</artifactId>
+          <version>6.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.enterprise</groupId>
+        <artifactId>cdi-api</artifactId>
+        <version>1.0-SP4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.el</groupId>
+        <artifactId>el-api</artifactId>
+        <version>2.2</version>
+      </dependency>
+
+      <dependency>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+          <version>1</version>
+      </dependency>
+
+      <dependency>
+          <groupId>javax.annotation</groupId>
+          <artifactId>jsr250-api</artifactId>
+          <version>1.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.persistence</groupId>
+        <artifactId>persistence-api</artifactId>
+        <version>1.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.10</version>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.16</version>
+      </dependency>
+
+      <dependency>
+          <groupId>net.auroris</groupId>
+          <artifactId>gwt-colorpicker</artifactId>
+          <version>2.1</version>
+      </dependency>
+
+      <dependency>
+          <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
+          <artifactId>ostermiller-syntax</artifactId>
+          <version>1.1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.sf.jtidy</groupId>
+        <artifactId>jtidy</artifactId>
+        <version>r938</version>
+      </dependency>
+
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-model</artifactId>
         <version>3.0.5</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.maven</groupId> 
+          <artifactId>maven-project</artifactId> 
+          <version>2.0.7</version>
       </dependency>
 
       <dependency>
@@ -169,6 +441,36 @@
       </dependency>
 
       <dependency>
+          <groupId>org.apache.tomcat</groupId>
+          <artifactId>catalina</artifactId>
+          <version>6.0.20</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.codehaus.gmaven</groupId>
+          <artifactId>gmaven-mojo</artifactId>
+          <version>1.5</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.codehaus.gmaven</groupId>
+          <artifactId>gmaven-mojo-support</artifactId>
+          <version>1.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.12</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-interpolation</artifactId>
         <version>1.14</version>
@@ -178,6 +480,12 @@
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-component-annotations</artifactId>
         <version>1.5.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-container-default</artifactId>
+        <version>1.0.0</version>
       </dependency>
 
       <dependency>
@@ -192,75 +500,131 @@
         <version>2.4</version>
       </dependency>
 
-
       <dependency>
-        <groupId>org.sonatype.sisu</groupId>
-        <artifactId>sisu-inject-plexus</artifactId>
-        <version>2.3.0</version>
+          <groupId>org.glassfish.web</groupId>
+          <artifactId>el-impl</artifactId>
+          <version>2.1.2-b04</version>
       </dependency>
 
       <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-user</artifactId>
-        <version>${gwt.version}</version>
+          <groupId>org.gwtopenmaps.openlayers</groupId>
+          <artifactId>gwt-openlayers-client</artifactId>
+          <version>0.8</version>
       </dependency>
 
       <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-dev</artifactId>
-        <version>${gwt.version}</version>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>3.15.0-GA</version>
       </dependency>
 
       <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${validation.api.version}</version>
+          <groupId>org.jboss.ejb3</groupId>
+          <artifactId>jboss-ejb3-api</artifactId>
+          <version>3.1.0</version>
       </dependency>
 
       <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${validation.api.version}</version>
-        <classifier>sources</classifier>
+          <groupId>org.jboss.spec.javax.ejb</groupId>
+          <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+          <version>1.0.2.Final</version>
       </dependency>
 
       <dependency>
-        <groupId>com.google.inject</groupId>
-        <artifactId>guice</artifactId>
-        <version>3.0</version>
-
-        <exclusions>
-          <exclusion>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-          </exclusion>
-        </exclusions>
-
+        <groupId>org.jboss.spec.javax.servlet</groupId>
+        <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+        <version>1.0.0.Final</version>
       </dependency>
 
       <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-websockets</artifactId>
+          <version>0.2.Alpha1</version>
       </dependency>
 
       <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava-gwt</artifactId>
-        <version>${guava.version}</version>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-common-core</artifactId>
+          <version>2.2.14.GA</version>
       </dependency>
 
-      <!-- Guava and Reflections both depend on JSR 305 from the findbugs 
-        project, but they specify different versions. This pins to the newer of the 
-        two. -->
       <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>jsr305</artifactId>
-        <version>1.3.9</version>
+          <groupId>org.jboss.errai.io.netty</groupId>
+          <artifactId>netty</artifactId>
+          <version>4.0.0.Alpha1.errai.r1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>3.1.0.GA</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.netty</groupId>
+          <artifactId>netty</artifactId>
+          <version>3.2.7.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>jaxrs-api</artifactId>
+        <version>2.3.5.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jaxrs</artifactId>
+        <version>2.3.5.Final</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.shrinkwrap</groupId>
+          <artifactId>shrinkwrap-api</artifactId>
+          <version>1.0.0-beta-5</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.shrinkwrap</groupId>
+          <artifactId>shrinkwrap-impl-base</artifactId>
+          <version>1.0.0-beta-5</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.jboss.weld.se</groupId>
+         <artifactId>weld-se-core</artifactId>
+	 <version>1.1.6.Final</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.weld.servlet</groupId>
+          <artifactId>weld-servlet</artifactId>
+          <version>1.1.6.Final</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.weld.servlet</groupId>
+          <artifactId>weld-servlet</artifactId>
+          <classifier>sources</classifier>
+          <version>1.1.6.Final</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss.weld.servlet</groupId>
+          <artifactId>weld-servlet-core</artifactId>
+          <version>1.1.6.Final</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jboss</groupId>
+          <artifactId>jboss-vfs</artifactId>
+          <version>3.0.1.GA</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.jgroups</groupId>
+          <artifactId>jgroups</artifactId>
+          <version>3.2.0.Final</version>
       </dependency>
 
       <dependency>
@@ -268,30 +632,19 @@
         <artifactId>mvel2</artifactId>
         <version>${mvel.version}</version>
       </dependency>
+
       <dependency>
-        <groupId>javax.persistence</groupId>
-        <artifactId>persistence-api</artifactId>
-        <version>1.0</version>
+          <groupId>org.powermock</groupId>
+          <artifactId>powermock-module-junit4</artifactId>
+          <version>1.5</version>
+          <scope>test</scope>
       </dependency>
 
       <dependency>
-        <groupId>com.google.appengine</groupId>
-        <artifactId>appengine-api-1.0-sdk</artifactId>
-        <version>${appengine.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.appengine</groupId>
-        <artifactId>appengine-api-labs</artifactId>
-        <version>${appengine.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.errai.reflections</groupId>
-        <artifactId>reflections</artifactId>
-        <version>${project.version}</version>
+          <groupId>org.powermock</groupId>
+          <artifactId>powermock-api-mockito</artifactId>
+          <version>1.5</version>
+          <scope>test</scope>
       </dependency>
 
       <dependency>
@@ -302,82 +655,112 @@
 
       <dependency>
         <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-ext</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>commons-logging</groupId>
-        <artifactId>commons-logging</artifactId>
-        <version>1.1.1</version>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+          <version>${slf4j.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.jboss.logging</groupId>
-        <artifactId>jboss-logging</artifactId>
-        <version>3.1.0.GA</version>
+        <groupId>org.sonatype.sisu</groupId>
+        <artifactId>sisu-inject-plexus</artifactId>
+        <version>2.3.0</version>
       </dependency>
 
       <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>1.4</version>
+          <groupId>org.timepedia.exporter</groupId>
+          <artifactId>gwtexporter</artifactId>
+          <version>2.3.0</version>
       </dependency>
 
       <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.4</version>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-annotations</artifactId>
+          <version>3.4.0.GA</version>
       </dependency>
 
       <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>1.2.16</version>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-entitymanager</artifactId>
+          <version>4.2.0.Final</version>
       </dependency>
 
       <dependency>
-        <groupId>org.javassist</groupId>
-        <artifactId>javassist</artifactId>
-        <version>3.15.0-GA</version>
+          <groupId>org.hibernate.javax.persistence</groupId>
+          <artifactId>hibernate-jpa-2.0-api</artifactId>
+          <version>1.0.1.Final</version>
       </dependency>
 
       <dependency>
-        <groupId>org.jboss.spec.javax.servlet</groupId>
-        <artifactId>jboss-servlet-api_3.0_spec</artifactId>
-        <version>1.0.0.Final</version>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-jpamodelgen</artifactId>
+          <version>1.1.1.Final</version>
       </dependency>
 
       <dependency>
-        <groupId>org.jboss.spec.javax.ejb</groupId>
-        <artifactId>jboss-ejb-api_3.1_spec</artifactId>
-        <version>1.0.2.Final</version>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-validator</artifactId>
+          <version>4.2.0.Final</version>
       </dependency>
 
       <dependency>
-        <groupId>javax.enterprise</groupId>
-        <artifactId>cdi-api</artifactId>
-        <version>1.0-SP4</version>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-validator</artifactId>
+          <version>4.2.0.Final</version>
+          <classifier>sources</classifier>
       </dependency>
 
       <dependency>
-        <groupId>javax.el</groupId>
-        <artifactId>el-api</artifactId>
-        <version>2.2</version>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+          <version>6.1.25</version>
       </dependency>
 
       <dependency>
-        <groupId>ch.qos.cal10n</groupId>
-        <artifactId>cal10n-api</artifactId>
-        <version>0.7.4</version>
+          <groupId>org.objenesis</groupId>
+          <artifactId>objenesis</artifactId>
+          <version>1.0</version>
       </dependency>
 
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.8.1</version>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-plus</artifactId>
+          <version>6.1.25</version>
       </dependency>
 
+      <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-naming</artifactId>
+          <version>6.1.25</version>
+      </dependency>
+
+      <dependency>
+    	  <groupId>org.quartz-scheduler</groupId>
+    	  <artifactId>quartz</artifactId>
+    	  <version>2.1.6</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.twdata.maven</groupId>
+          <artifactId>mojo-executor</artifactId>
+          <version>2.0</version>
+      </dependency>
+
+      <dependency>
+          <groupId>xmlunit</groupId>
+          <artifactId>xmlunit</artifactId>
+          <version>1.3</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -418,7 +801,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.5</version>
@@ -511,6 +894,16 @@
       <plugins>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.2.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.gmaven</groupId>
+          <artifactId>gmaven-plugin</artifactId>
+          <version>1.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
           <artifactId>gwt-maven-plugin</artifactId>
           <version>${gwt.maven.version}</version>
           <executions>
@@ -531,22 +924,42 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.7</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.2-beta-3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-plugin-plugin</artifactId>
+          <artifactId>maven-deploy-plugin</artifactId>
           <version>2.7</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>3.0</version>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.8.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
+          <artifactId>maven-plugin-plugin</artifactId>
           <version>2.7</version>
         </plugin>
         <plugin>
@@ -556,13 +969,48 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.4</version>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.1.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.10</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
           <version>2.3</version>
+        </plugin>
+        <plugin>
+            <groupId>org.jboss.as.plugins</groupId>
+            <artifactId>jboss-as-maven-plugin</artifactId>
+            <version>7.1.0.Final</version>
+        </plugin>
+        <plugin>
+            <groupId>org.jboss.maven.plugins</groupId>
+            <artifactId>maven-jdocbook-plugin</artifactId>
+            <version>2.3.5</version>
+            <extensions>true</extensions>
+            <dependencies>
+                <dependency>
+                    <groupId>org.jboss.pressgang</groupId>
+                    <artifactId>pressgang-jdocbook-style</artifactId>
+                    <type>jdocbook-style</type>
+                    <version>2.0.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.pressgang</groupId>
+                    <!--Non-namespaced version for DocBook 4.5 compatibility. For XSD namespaced version, use pressgang-xslt-ns-->
+                    <artifactId>pressgang-xslt</artifactId>
+                    <version>2.0.0</version>
+                </dependency>
+            </dependencies>
         </plugin>
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -571,6 +1019,32 @@
           <configuration>
             <lifecycleMappingMetadata>
               <pluginExecutions>
+                <pluginExecution>
+                    <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <versionRange>[1.3,)</versionRange>
+                        <goals>
+                            <goal>run</goal>
+                            </goals>
+                    </pluginExecutionFilter>
+                    <action>
+                        <ignore></ignore>
+                    </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <versionRange>[1.2.1,)</versionRange>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                      <ignore/>
+                  </action>
+                </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
@@ -583,6 +1057,19 @@
                   <action>
                     <execute />
                   </action>
+                </pluginExecution>
+                <pluginExecution>
+                    <pluginExecutionFilter>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>xml-maven-plugin</artifactId>
+                        <versionRange>[1.0,)</versionRange>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                          <ignore></ignore>
+                      </action>
                 </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
@@ -609,6 +1096,20 @@
                   <action>
                     <ignore />
                   </action>
+                </pluginExecution>
+                <pluginExecution>
+                    <pluginExecutionFilter>
+                        <groupId>org.jboss.maven.plugins</groupId>
+                        <artifactId>maven-jdocbook-plugin</artifactId>
+                        <versionRange>[2.3.5,)</versionRange>
+                        <goals>
+                            <goal>generate</goal>
+                            <goal>resources</goal>
+                        </goals>
+                    </pluginExecutionFilter>
+                    <action>
+                        <ignore></ignore>
+                    </action>
                 </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
@@ -643,6 +1144,11 @@
             </lifecycleMappingMetadata>
           </configuration>
         </plugin>
+        <plugin>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>jacoco-gwt-maven-plugin</artifactId>
+            <version>0.5.4.201202141554</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -654,7 +1160,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
+        <version>2.8.1</version>
         <configuration>
           <aggregate>true</aggregate>
           <show>public</show>
@@ -737,7 +1243,7 @@
         </snapshotRepository>
       </distributionManagement>
     </profile>
-    
+
     <profile>
       <id>withDemos</id>
       <modules>
@@ -753,6 +1259,48 @@
         <module>quickstart</module>
         <module>dist</module>
       </modules>
+    </profile>
+
+    <profile>
+        <id>updateDocs</id>
+        <!-- the download will fail unless jboss-credentials.properties contains jboss.username and jboss.password entries -->
+        <activation>
+            <file>
+                <exists>jboss-credentials.properties</exists>
+            </file>
+        </activation>
+        <dependencyManagement>
+            <dependencies>
+                <dependency>
+                    <groupId>net.sf.saxon</groupId>
+                    <artifactId>Saxon-HE</artifactId>
+                    <version>9.4.0.6</version>
+                </dependency>
+            </dependencies>
+        </dependencyManagement>
+    </profile>
+
+    <profile>
+        <id>jboss7</id>
+        <dependencyManagement>
+            <dependencies>
+                <dependency>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                    <version>1.0.b2</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-api</artifactId>
+                    <version>1.1.Final</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-spi</artifactId>
+                    <version>1.1.Final</version>
+                </dependency>
+            </dependencies>
+        </dependencyManagement>
     </profile>
   </profiles>
 

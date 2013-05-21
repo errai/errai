@@ -107,14 +107,12 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
-      <version>${resteasy.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -158,7 +156,6 @@
           <plugin>
             <groupId>org.jboss.errai</groupId>
             <artifactId>jacoco-gwt-maven-plugin</artifactId>
-            <version>0.5.4.201202141554</version>
             <executions>
               <execution>
                 <id>jacoco-initialize</id>

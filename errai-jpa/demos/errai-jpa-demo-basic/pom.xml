@@ -6,21 +6,12 @@
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-jpa-parent</artifactId>
     <version>3.0-SNAPSHOT</version>
-    <relativePath>../..</relativePath>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <name>Errai::JPA::Demos::Basic</name>
   <artifactId>errai-jpa-demo-basic</artifactId>
   <packaging>war</packaging>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <weld.version>1.1.6.Final</weld.version>
-    <mvel.version>2.1.Beta8</mvel.version>
-    <jetty.version>6.1.25</jetty.version>
-    <slf4j.version>1.6.1</slf4j.version>
-    <uel.impl.version>2.1.2-b04</uel.impl.version>
-  </properties>
 
   <dependencies>
 
@@ -137,32 +128,27 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>${jetty.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-plus</artifactId>
-      <version>${jetty.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-naming</artifactId>
-      <version>${jetty.version}</version>
     </dependency>
 
     <!-- Weld Modules -->
     <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
-      <version>${weld.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.weld.servlet</groupId>
       <artifactId>weld-servlet-core</artifactId>
-      <version>${weld.version}</version>
     </dependency>
 
     <!-- GWT and GWT Extensions -->
@@ -203,7 +189,6 @@
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-naming</artifactId>
-          <version>${jetty.version}</version>
           <scope>compile</scope>
         </dependency>
       </dependencies>
@@ -241,7 +226,6 @@
         <dependency>
           <groupId>xml-apis</groupId>
           <artifactId>xml-apis</artifactId>
-          <version>1.0.b2</version>
           <scope>provided</scope>
         </dependency>
 
@@ -268,21 +252,18 @@
         <dependency>
             <groupId>org.jboss.weld</groupId>
             <artifactId>weld-api</artifactId>
-            <version>1.1.Final</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.jboss.weld</groupId>
             <artifactId>weld-spi</artifactId>
-            <version>1.1.Final</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -297,14 +278,12 @@
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet-core</artifactId>
-          <version>${weld.version}</version>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.weld</groupId>
           <artifactId>weld-core</artifactId>
-          <version>${weld.version}</version>
           <scope>provided</scope>
         </dependency>
 
@@ -312,14 +291,12 @@
           <groupId>org.jboss.weld.se</groupId>
           <artifactId>weld-se-core</artifactId>
           <scope>provided</scope>
-          <version>${weld.version}</version>
         </dependency>
 
         <!-- Jetty is used for testing only -->
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty</artifactId>
-          <version>${jetty.version}</version>
           <scope>provided</scope>
         </dependency>
 
@@ -327,14 +304,12 @@
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-plus</artifactId>
           <scope>provided</scope>
-          <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-naming</artifactId>
           <scope>provided</scope>
-          <version>${jetty.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -351,7 +326,6 @@
           <groupId>javax.enterprise</groupId>
           <artifactId>cdi-api</artifactId>
           <scope>compile</scope>
-          <version>1.0-SP4</version>
         </dependency>
 
         <dependency>
@@ -363,28 +337,24 @@
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty</artifactId>
-          <version>${jetty.version}</version>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-plus</artifactId>
-          <version>${jetty.version}</version>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-naming</artifactId>
-          <version>${jetty.version}</version>
           <scope>provided</scope>
         </dependency>
 
         <dependency>
           <groupId>org.jboss.weld.se</groupId>
           <artifactId>weld-se-core</artifactId>
-          <version>${weld.version}</version>
           <scope>compile</scope>
           <exclusions>
             <exclusion>
@@ -417,7 +387,6 @@
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.5</version>
             <configuration>
               <skipTests>false</skipTests>
               <additionalClasspathElements>
@@ -458,7 +427,6 @@
         <dependency>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
-          <version>1.2.16</version>
         </dependency>
 
         <!-- Errai Core -->
@@ -498,7 +466,6 @@
         <dependency>
           <groupId>org.mvel</groupId>
           <artifactId>mvel2</artifactId>
-          <version>${mvel.version}</version>
         </dependency>
 
         <dependency>
@@ -512,19 +479,16 @@
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty</artifactId>
-          <version>${jetty.version}</version>
           <scope>compile</scope>
         </dependency>
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-plus</artifactId>
-          <version>${jetty.version}</version>
           <scope>compile</scope>
         </dependency>
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty-naming</artifactId>
-          <version>${jetty.version}</version>
           <scope>compile</scope>
         </dependency>
 
@@ -532,48 +496,41 @@
         <dependency>
           <groupId>org.jboss.weld.se</groupId>
           <artifactId>weld-se-core</artifactId>
-          <version>${weld.version}</version>
           <scope>compile</scope>
         </dependency>
         <dependency>
           <groupId>org.jboss.weld.servlet</groupId>
           <artifactId>weld-servlet</artifactId>
-          <version>${weld.version}</version>
           <scope>compile</scope>
         </dependency>
         <dependency>
           <groupId>org.glassfish.web</groupId>
           <artifactId>el-impl</artifactId>
           <scope>runtime</scope>
-          <version>2.1.2-b04</version>
         </dependency>
 
         <!-- GWT and GWT Extensions -->
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-user</artifactId>
-          <version>${gwt.version}</version>
           <scope>compile</scope>
         </dependency>
 
         <dependency>
           <groupId>com.google.gwt</groupId>
           <artifactId>gwt-dev</artifactId>
-          <version>${gwt.version}</version>
           <scope>compile</scope>
         </dependency>
 
         <dependency>
           <groupId>javax.validation</groupId>
           <artifactId>validation-api</artifactId>
-          <version>1.0.0.GA</version>
           <scope>compile</scope>
         </dependency>
 
         <dependency>
           <groupId>javax.validation</groupId>
           <artifactId>validation-api</artifactId>
-          <version>1.0.0.GA</version>
           <classifier>sources</classifier>
           <scope>compile</scope>
         </dependency>
@@ -582,13 +539,11 @@
         <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
-          <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.jboss</groupId>
           <artifactId>jboss-common-core</artifactId>
-          <version>2.2.14.GA</version>
         </dependency>
 
         <dependency>
@@ -654,7 +609,6 @@
         -Pintegration-test to enable testing. -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
         <configuration>
           <skipTests>true</skipTests>
         </configuration>
@@ -663,8 +617,6 @@
       <plugin>
         <groupId>org.jboss.errai</groupId>
         <artifactId>jacoco-gwt-maven-plugin</artifactId>
-        <version>0.5.4.201202141554</version>
-
         <executions>
           <execution>
             <id>jacoco-gwt-prepare-agent</id>
@@ -685,7 +637,6 @@
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
         <configuration>
           <filesets>
             <fileset>
@@ -707,47 +658,6 @@
       </plugin>
     </plugins>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,)</versionRange>
-                    <goals>
-                      <goal>resources</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <execute />
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.jboss.errai</groupId>
-                    <artifactId>jacoco-gwt-maven-plugin</artifactId>
-                    <versionRange>[0.0,)</versionRange>
-                    <goals>
-                      <goal>prepare-agent</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
 </project>
