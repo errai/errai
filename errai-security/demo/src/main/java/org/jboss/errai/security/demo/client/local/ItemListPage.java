@@ -37,7 +37,11 @@ public class ItemListPage extends Composite {
   @DataField
   private Button hello;
 
-  @EventHandler
+  @Inject
+  @DataField
+  private Button ping;
+
+  @EventHandler("hello")
   private void onHelloClicked(ClickEvent event) {
     identity.getUser(new AsyncCallback<User>() {
       @Override
@@ -61,5 +65,15 @@ public class ItemListPage extends Composite {
       public void onFailure(Throwable caught) {
       }
     });
+  }
+
+  @EventHandler("ping")
+  private void onPingClicked(ClickEvent event) {
+    messageServiceCaller.call(new RemoteCallback<String>() {
+      @Override
+      public void callback(String o) {
+        label.setText(o);
+      }
+    }).ping();
   }
 }

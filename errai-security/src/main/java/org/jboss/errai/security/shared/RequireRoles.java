@@ -18,6 +18,8 @@ package org.jboss.errai.security.shared;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.api.annotations.Alias;
+import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
+import org.jboss.errai.security.client.local.SecurityRoleInterceptor;
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 
 import java.lang.annotation.ElementType;
@@ -37,6 +39,7 @@ import java.lang.annotation.Target;
 @Alias
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
+@InterceptedCall(SecurityRoleInterceptor.class)
 @StyleBinding
 public @interface RequireRoles {
 

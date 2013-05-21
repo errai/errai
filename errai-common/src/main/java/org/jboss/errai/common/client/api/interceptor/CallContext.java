@@ -19,6 +19,8 @@ package org.jboss.errai.common.client.api.interceptor;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.Assert;
 
+import java.lang.annotation.Annotation;
+
 /**
  * Represents the context of an intercepted method call.
  * 
@@ -53,6 +55,13 @@ abstract class CallContext {
    * @return the name of the method for which the interceptor was invoked.
    */
   public abstract String getMethodName();
+
+  /**
+   * Returns the annotations of the intercepted method.
+   *
+   * @return the annotations of the method of which the interceptor was invoked.
+   */
+  public abstract Annotation[] getAnnotations();
 
   /**
    * Proceeds to the next interceptor in the chain or with the execution of the intercepted method if all

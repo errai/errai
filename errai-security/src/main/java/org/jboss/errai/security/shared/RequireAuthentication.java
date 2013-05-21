@@ -21,7 +21,7 @@ import java.lang.annotation.*;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.api.annotations.Alias;
 import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.security.client.local.SecurityInterceptor;
+import org.jboss.errai.security.client.local.SecurityUserInterceptor;
 
 import javax.interceptor.InterceptorBinding;
 
@@ -39,6 +39,6 @@ import javax.interceptor.InterceptorBinding;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @InterceptorBinding
-@InterceptedCall(SecurityInterceptor.class)
+@InterceptedCall(SecurityUserInterceptor.class)
 public @interface RequireAuthentication {
 }
