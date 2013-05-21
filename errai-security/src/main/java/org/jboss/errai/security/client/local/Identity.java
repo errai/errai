@@ -6,12 +6,15 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.SecurityManager;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Navigation;
+import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
 
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
+import java.util.List;
 
 import static org.jboss.errai.security.shared.LoginPage.CURRENT_PAGE_COOKIE;
 
@@ -26,6 +29,7 @@ public class Identity implements Serializable {
 
   public void login() {
     MessageBuilder.createCall(new VoidRemoteCallback(), SecurityManager.class).login(username, password);
+    StyleBindingsRegistry.get().updateStyles();
     final String page = Cookies.getCookie(CURRENT_PAGE_COOKIE);
     if (page != null) {
       Cookies.removeCookie(CURRENT_PAGE_COOKIE);
@@ -35,6 +39,7 @@ public class Identity implements Serializable {
 
   public void logout() {
     MessageBuilder.createCall(new VoidRemoteCallback(), SecurityManager.class).logout();
+    StyleBindingsRegistry.get().updateStyles();
   }
 
   public void getUser(final AsyncCallback<User> callback) {
@@ -46,9 +51,20 @@ public class Identity implements Serializable {
     }, SecurityManager.class).getUser();
   }
 
-  public boolean hasPermission(Object resource, String operation) {
-    //TODO add role management
-    return false;
+  public void hasPermission(final AsyncCallback<Boolean> callback, final String... roleNames) {
+    MessageBuilder.createCall(new RemoteCallback<List<Role>>() {
+      @Override
+      public void callback(List<Role> roles) {
+        for (String roleName : roleNames) {
+          final Role role = new Role(roleName);
+          if (!roles.contains(role)) {
+            callback.onSuccess(false);
+            return;
+          }
+        }
+        callback.onSuccess(true);
+      }
+    }, SecurityManager.class).getRoles();
   }
 
   public String getUsername() {

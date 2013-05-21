@@ -102,7 +102,7 @@ public class StyleBindingCodeDecorator extends IOCDecoratorExtension<StyleBindin
 
     stmts.add(Stmt.invokeStatic(StyleBindingsRegistry.class, "get")
         .invoke("addElementBinding", Refs.get(ctx.getInjector().getInstanceVarName()),
-            ctx.getRawAnnotation().annotationType(),
+            ctx.getRawAnnotation(),
             Stmt.nestedCall(valueAccessor).invoke("getElement")));
 
     if (!ctx.getInjector().hasAttribute(StyleBindingCodeDecorator.class.getName())) {

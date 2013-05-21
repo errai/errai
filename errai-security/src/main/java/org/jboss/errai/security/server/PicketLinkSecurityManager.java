@@ -1,17 +1,19 @@
 package org.jboss.errai.security.server;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.security.shared.LoggedInEvent;
-import org.jboss.errai.security.shared.LoggedOutEvent;
+import org.jboss.errai.security.shared.*;
 import org.jboss.errai.security.shared.SecurityManager;
-import org.jboss.errai.security.shared.User;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
+import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.credential.Password;
+import org.picketlink.idm.query.IdentityQuery;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author edewit@redhat.com
@@ -22,6 +24,9 @@ public class PicketLinkSecurityManager implements SecurityManager {
 
   @Inject
   private Identity identity;
+
+  @Inject
+  private IdentityManager identityManager;
 
   @Inject
   private Event<LoggedInEvent> loggedInEventSource;
@@ -74,5 +79,21 @@ public class PicketLinkSecurityManager implements SecurityManager {
       return createUser(identity.getUser());
     }
     return null;
+  }
+
+  @Override
+  public List<Role> getRoles() {
+    List<Role> roles = new ArrayList<Role>();
+
+    if (identity.isLoggedIn()) {
+      IdentityQuery<org.picketlink.idm.model.Role> query =
+              identityManager.createIdentityQuery(org.picketlink.idm.model.Role.class);
+      query.setParameter(org.picketlink.idm.model.Role.ROLE_OF, identity.getUser());
+      for (org.picketlink.idm.model.Role role : query.getResultList()) {
+        roles.add(new Role(role.getName()));
+      }
+    }
+
+    return roles;
   }
 }

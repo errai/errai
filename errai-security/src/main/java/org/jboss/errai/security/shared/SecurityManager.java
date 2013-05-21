@@ -2,6 +2,8 @@ package org.jboss.errai.security.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 
+import java.util.List;
+
 /**
  * @author edewit@redhat.com
  */
@@ -15,4 +17,6 @@ public interface SecurityManager {
   void logout();
 
   User getUser();
+
+  List<Role> getRoles();
 }

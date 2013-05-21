@@ -16,12 +16,14 @@
 
 package org.jboss.errai.security.shared;
 
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.common.client.api.annotations.Alias;
+import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.jboss.errai.bus.server.annotations.Service;
 
 /**
  * Indicates that the service can only be accessed by logged-in users who belong
@@ -32,8 +34,10 @@ import org.jboss.errai.bus.server.annotations.Service;
  *
  * @see Service
  */
+@Alias
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
+@StyleBinding
 public @interface RequireRoles {
 
   /**
