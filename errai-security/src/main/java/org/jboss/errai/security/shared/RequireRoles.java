@@ -22,6 +22,8 @@ import org.jboss.errai.common.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.security.client.local.SecurityRoleInterceptor;
 import org.jboss.errai.ui.shared.api.annotations.style.StyleBinding;
 
+import javax.enterprise.util.Nonbinding;
+import javax.interceptor.InterceptorBinding;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,11 +43,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
 @InterceptedCall(SecurityRoleInterceptor.class)
 @StyleBinding
+@InterceptorBinding
 public @interface RequireRoles {
 
   /**
    * The set of roles that the calling user must belong to in order to invoke
    * the target service.
    */
+  @Nonbinding
   String[] value();
 }

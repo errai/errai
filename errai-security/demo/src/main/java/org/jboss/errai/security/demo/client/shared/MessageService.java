@@ -11,6 +11,7 @@ import org.jboss.errai.security.shared.RequireRoles;
 public interface MessageService {
   @RequireAuthentication
   String hello();
+
   @RequireRoles("admin")
   String ping();
 }

@@ -13,7 +13,7 @@ import javax.interceptor.InvocationContext;
  */
 @RequireAuthentication
 @Interceptor
-public class SecurityInterceptor {
+public class SecurityUserInterceptor {
 
   @Inject
   private Identity identity;

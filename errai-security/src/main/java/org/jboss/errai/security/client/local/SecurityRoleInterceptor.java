@@ -3,7 +3,6 @@ package org.jboss.errai.security.client.local;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
-import org.jboss.errai.common.client.api.interceptor.RemoteCallInterceptor;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.Role;
 import org.jboss.errai.security.shared.SecurityManager;
@@ -21,22 +20,29 @@ public class SecurityRoleInterceptor extends SecurityInterceptor{
       @Override
       public void callback(final List<Role> roles) {
         final RequireRoles annotation = getRequiredRoleAnnotation(context.getAnnotations());
-        final String[] roleNames = annotation.value();
-        for (String roleName : roleNames) {
-          final Role role = new Role(roleName);
-          if (!roles.contains(role)) {
-            navigateToLoginPage();
-            return;
-          }
+        if (hasAllRoles(roles, annotation.value())) {
+          proceed(context);
+        } else {
+          navigateToLoginPage();
         }
-        proceed(context);
       }
     }, SecurityManager.class);
 
     securityManager.getRoles();
   }
 
-  private RequireRoles getRequiredRoleAnnotation(Annotation[] annotations) {
+  protected boolean hasAllRoles(List<Role> roles, String[] roleNames) {
+    for (String roleName : roleNames) {
+      final Role role = new Role(roleName);
+      if (!roles.contains(role)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  protected RequireRoles getRequiredRoleAnnotation(Annotation[] annotations) {
     for (Annotation annotation : annotations) {
       if (annotation instanceof RequireRoles) {
         return (RequireRoles) annotation;
