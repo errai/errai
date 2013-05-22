@@ -49,6 +49,7 @@ public class StyleBindingsRegistry {
       elementBindings.put(annotation, elementsList = new ArrayList<ElementBinding>());
     }
     elementsList.add(element);
+    mapping.put(annotation.annotationType(), annotation);
     recordHouskeepingData(beanInst, element);
   }
 
@@ -78,9 +79,6 @@ public class StyleBindingsRegistry {
 
   public void updateStyles() {
     for (final Map.Entry<Class<? extends Annotation>, List<StyleBindingExecutor>> entry : styleBindings.entrySet()) {
-      if (mapping.isEmpty()) {
-        generateMapping();
-      }
       final List<ElementBinding> elementList = elementBindings.get(mapping.get(entry.getKey()));
       if (elementList != null) {
         for (final ElementBinding element : elementList) {
@@ -92,12 +90,6 @@ public class StyleBindingsRegistry {
           }
         }
       }
-    }
-  }
-
-  private void generateMapping() {
-    for (Map.Entry<Annotation, List<ElementBinding>> entry : elementBindings.entrySet()) {
-      mapping.put(entry.getKey().annotationType(), entry.getKey());
     }
   }
 
