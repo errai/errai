@@ -18,8 +18,12 @@ import java.util.List;
 @Interceptor
 public class SecurityRoleInterceptor extends org.jboss.errai.security.client.local.SecurityRoleInterceptor {
 
+  private final SecurityManager securityManager;
+
   @Inject
-  private SecurityManager securityManager;
+  public SecurityRoleInterceptor(SecurityManager securityManager) {
+    this.securityManager = securityManager;
+  }
 
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {

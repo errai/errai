@@ -1,7 +1,7 @@
 package org.jboss.errai.security.server;
 
-import org.jboss.errai.security.shared.RequireAuthentication;
-import org.picketlink.Identity;
+import org.jboss.errai.security.shared.*;
+import org.jboss.errai.security.shared.SecurityManager;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -15,12 +15,16 @@ import javax.interceptor.InvocationContext;
 @Interceptor
 public class SecurityUserInterceptor {
 
+  private final SecurityManager securityManager;
+
   @Inject
-  private Identity identity;
+  public SecurityUserInterceptor(SecurityManager securityManager) {
+    this.securityManager = securityManager;
+  }
 
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
-    if (identity.isLoggedIn()) {
+    if (securityManager.isLoggedIn()) {
       return context.proceed();
     } else {
       throw new SecurityException("unauthorised access");
