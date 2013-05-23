@@ -8,7 +8,7 @@ import java.util.List;
  * @author edewit@redhat.com
  */
 @Remote
-public interface SecurityManager {
+public interface AuthenticationService {
 
   void login(String username, String password);
 

@@ -7,7 +7,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.SecurityManager;
+import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.User;
 import org.jboss.errai.ui.nav.client.local.Navigation;
 import org.jboss.errai.ui.shared.api.style.StyleBindingsRegistry;
@@ -28,7 +28,7 @@ public class Identity implements Serializable {
   private String password;
 
   public void login() {
-    MessageBuilder.createCall(new VoidRemoteCallback(), SecurityManager.class).login(username, password);
+    MessageBuilder.createCall(new VoidRemoteCallback(), AuthenticationService.class).login(username, password);
     StyleBindingsRegistry.get().updateStyles();
     final String page = Cookies.getCookie(CURRENT_PAGE_COOKIE);
     if (page != null) {
@@ -38,7 +38,7 @@ public class Identity implements Serializable {
   }
 
   public void logout() {
-    MessageBuilder.createCall(new VoidRemoteCallback(), SecurityManager.class).logout();
+    MessageBuilder.createCall(new VoidRemoteCallback(), AuthenticationService.class).logout();
     StyleBindingsRegistry.get().updateStyles();
   }
 
@@ -48,7 +48,7 @@ public class Identity implements Serializable {
       public void callback(User response) {
         callback.onSuccess(response);
       }
-    }, SecurityManager.class).getUser();
+    }, AuthenticationService.class).getUser();
   }
 
   public void hasPermission(final AsyncCallback<Boolean> callback, final String... roleNames) {
@@ -64,7 +64,7 @@ public class Identity implements Serializable {
         }
         callback.onSuccess(true);
       }
-    }, SecurityManager.class).getRoles();
+    }, AuthenticationService.class).getRoles();
   }
 
   public String getUsername() {

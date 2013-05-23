@@ -4,7 +4,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.demo.client.shared.MessageService;
 import org.jboss.errai.security.shared.RequireAuthentication;
 import org.jboss.errai.security.shared.RequireRoles;
-import org.jboss.errai.security.shared.SecurityManager;
+import org.jboss.errai.security.shared.AuthenticationService;
 
 import javax.inject.Inject;
 
@@ -14,13 +14,13 @@ import javax.inject.Inject;
 @Service
 public class MessageServiceImpl implements MessageService {
   @Inject
-  SecurityManager securityManager;
+  AuthenticationService authenticationService;
 
   @Override
   @RequireAuthentication
   public String hello() {
     //User cannot be null because authentication is required for this method
-    String name = securityManager.getUser().getFullName();
+    String name = authenticationService.getUser().getFullName();
     return "Hello " + name + " how are you";
   }
 

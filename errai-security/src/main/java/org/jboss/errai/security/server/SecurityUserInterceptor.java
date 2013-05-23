@@ -1,7 +1,7 @@
 package org.jboss.errai.security.server;
 
 import org.jboss.errai.security.shared.*;
-import org.jboss.errai.security.shared.SecurityManager;
+import org.jboss.errai.security.shared.AuthenticationService;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -15,16 +15,16 @@ import javax.interceptor.InvocationContext;
 @Interceptor
 public class SecurityUserInterceptor {
 
-  private final SecurityManager securityManager;
+  private final AuthenticationService authenticationService;
 
   @Inject
-  public SecurityUserInterceptor(SecurityManager securityManager) {
-    this.securityManager = securityManager;
+  public SecurityUserInterceptor(AuthenticationService authenticationService) {
+    this.authenticationService = authenticationService;
   }
 
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
-    if (securityManager.isLoggedIn()) {
+    if (authenticationService.isLoggedIn()) {
       return context.proceed();
     } else {
       throw new SecurityException("unauthorised access");

@@ -3,7 +3,7 @@ package org.jboss.errai.security;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.security.server.SecurityUserInterceptor;
-import org.jboss.errai.security.shared.SecurityManager;
+import org.jboss.errai.security.shared.AuthenticationService;
 import org.junit.Test;
 
 import javax.interceptor.InvocationContext;
@@ -19,13 +19,13 @@ public class SecurityUserInterceptorTest {
   @Test
   public void shouldValidateIfUserIsLoggedIn() throws Exception {
     // given
-    SecurityManager securityManager = mock(SecurityManager.class);
-    SecurityUserInterceptor interceptor = new SecurityUserInterceptor(securityManager);
+    AuthenticationService authenticationService = mock(AuthenticationService.class);
+    SecurityUserInterceptor interceptor = new SecurityUserInterceptor(authenticationService);
     InvocationContext context = mock(InvocationContext.class);
 
 
     // when
-    when(securityManager.isLoggedIn()).thenReturn(true);
+    when(authenticationService.isLoggedIn()).thenReturn(true);
     interceptor.aroundInvoke(context);
 
     // then
@@ -43,10 +43,10 @@ public class SecurityUserInterceptorTest {
         redirectToLoginPage[0] = Boolean.TRUE;
       }
     };
-    RemoteServiceProxyFactory.addRemoteProxy(SecurityManager.class, new ProxyProvider() {
+    RemoteServiceProxyFactory.addRemoteProxy(AuthenticationService.class, new ProxyProvider() {
       @Override
       public Object getProxy() {
-        return new SecurityRoleInterceptorTest.MockSecurityManager();
+        return new SecurityRoleInterceptorTest.MockAuthenticationService();
       }
     });
 

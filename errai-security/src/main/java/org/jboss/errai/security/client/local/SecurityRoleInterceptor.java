@@ -3,9 +3,9 @@ package org.jboss.errai.security.client.local;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.SecurityManager;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 public class SecurityRoleInterceptor extends SecurityInterceptor{
   @Override
   public void aroundInvoke(final RemoteCallContext context) {
-    final SecurityManager securityManager = MessageBuilder.createCall(new RemoteCallback<List<Role>>() {
+    final AuthenticationService authenticationService = MessageBuilder.createCall(new RemoteCallback<List<Role>>() {
       @Override
       public void callback(final List<Role> roles) {
         final RequireRoles annotation = getRequiredRoleAnnotation(context.getAnnotations());
@@ -26,9 +26,9 @@ public class SecurityRoleInterceptor extends SecurityInterceptor{
           navigateToLoginPage();
         }
       }
-    }, SecurityManager.class);
+    }, AuthenticationService.class);
 
-    securityManager.getRoles();
+    authenticationService.getRoles();
   }
 
   protected boolean hasAllRoles(List<Role> roles, String[] roleNames) {

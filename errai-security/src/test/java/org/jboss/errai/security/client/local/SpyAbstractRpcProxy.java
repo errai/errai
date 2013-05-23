@@ -10,7 +10,7 @@ import java.util.List;
 /**
 * @author edewit@redhat.com
 */
-class SpyAbstractRpcProxy extends AbstractRpcProxy implements org.jboss.errai.security.shared.SecurityManager {
+class SpyAbstractRpcProxy extends AbstractRpcProxy implements AuthenticationService {
   private Multiset<String> calls = HashMultiset.create();
 
   @Override

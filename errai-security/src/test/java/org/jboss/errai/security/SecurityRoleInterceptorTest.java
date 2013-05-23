@@ -5,7 +5,7 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.common.client.framework.ProxyProvider;
 import org.jboss.errai.common.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.security.server.SecurityRoleInterceptor;
-import org.jboss.errai.security.shared.SecurityManager;
+import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,13 +24,13 @@ import static org.mockito.Mockito.*;
  * @author edewit@redhat.com
  */
 public class SecurityRoleInterceptorTest {
-  private SecurityManager securityManager;
+  private AuthenticationService authenticationService;
   private SecurityRoleInterceptor interceptor;
 
   @Before
   public void setUp() throws Exception {
-    securityManager = mock(SecurityManager.class);
-    interceptor = new SecurityRoleInterceptor(securityManager);
+    authenticationService = mock(AuthenticationService.class);
+    interceptor = new SecurityRoleInterceptor(authenticationService);
   }
 
   @Test
@@ -40,7 +40,7 @@ public class SecurityRoleInterceptorTest {
 
     // when
     when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
-    when(securityManager.getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
+    when(authenticationService.getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
     interceptor.aroundInvoke(context);
 
     // then
@@ -54,7 +54,7 @@ public class SecurityRoleInterceptorTest {
 
     // when
     when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
-    when(securityManager.getRoles()).thenReturn(new ArrayList<Role>());
+    when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
     interceptor.aroundInvoke(context);
 
     // then
@@ -65,15 +65,15 @@ public class SecurityRoleInterceptorTest {
   public void shouldVerifyUserInRoleClientSide() throws Exception {
     //given
     RemoteCallContext context = mock(RemoteCallContext.class);
-    RemoteServiceProxyFactory.addRemoteProxy(SecurityManager.class, new ProxyProvider() {
+    RemoteServiceProxyFactory.addRemoteProxy(AuthenticationService.class, new ProxyProvider() {
       @Override
       public Object getProxy() {
-        return new MockSecurityManager(Arrays.asList(new Role("user")));
+        return new MockAuthenticationService(Arrays.asList(new Role("user")));
       }
     });
 
     final Boolean[] redirectToLoginPage = {Boolean.FALSE};
-    interceptor = new SecurityRoleInterceptor(securityManager) {
+    interceptor = new SecurityRoleInterceptor(authenticationService) {
       @Override
       protected void navigateToLoginPage() {
         redirectToLoginPage[0] = Boolean.TRUE;
@@ -94,13 +94,13 @@ public class SecurityRoleInterceptorTest {
   public void annotatedServiceMethod() {}
 
   @SuppressWarnings("unchecked")
-  public static class MockSecurityManager extends AbstractRpcProxy implements SecurityManager {
+  public static class MockAuthenticationService extends AbstractRpcProxy implements AuthenticationService {
     List<Role> roleList;
 
-    public MockSecurityManager() {
+    public MockAuthenticationService() {
     }
 
-    public MockSecurityManager(List<Role> roleList) {
+    public MockAuthenticationService(List<Role> roleList) {
       this.roleList = roleList;
     }
 

@@ -1,8 +1,8 @@
 package org.jboss.errai.security.server;
 
+import org.jboss.errai.security.shared.AuthenticationService;
 import org.jboss.errai.security.shared.RequireRoles;
 import org.jboss.errai.security.shared.Role;
-import org.jboss.errai.security.shared.SecurityManager;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -18,16 +18,16 @@ import java.util.List;
 @Interceptor
 public class SecurityRoleInterceptor extends org.jboss.errai.security.client.local.SecurityRoleInterceptor {
 
-  private final SecurityManager securityManager;
+  private final AuthenticationService authenticationService;
 
   @Inject
-  public SecurityRoleInterceptor(SecurityManager securityManager) {
-    this.securityManager = securityManager;
+  public SecurityRoleInterceptor(AuthenticationService authenticationService) {
+    this.authenticationService = authenticationService;
   }
 
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
-    final List<Role> roles = securityManager.getRoles();
+    final List<Role> roles = authenticationService.getRoles();
     final RequireRoles annotation = getRequiredRoleAnnotation(context.getMethod().getAnnotations());
     if (hasAllRoles(roles, annotation.value())) {
       return context.proceed();

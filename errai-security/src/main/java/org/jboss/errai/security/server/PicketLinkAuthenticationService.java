@@ -2,7 +2,7 @@ package org.jboss.errai.security.server;
 
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.security.shared.*;
-import org.jboss.errai.security.shared.SecurityManager;
+import org.jboss.errai.security.shared.AuthenticationService;
 import org.picketlink.Identity;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.IdentityManager;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Service
 @ApplicationScoped
-public class PicketLinkSecurityManager implements SecurityManager {
+public class PicketLinkAuthenticationService implements AuthenticationService {
 
   @Inject
   private Identity identity;
