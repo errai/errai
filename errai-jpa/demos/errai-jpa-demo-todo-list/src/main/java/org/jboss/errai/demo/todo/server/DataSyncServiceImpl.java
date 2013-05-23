@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.demo.todo.shared.AccessDeniedException;
 import org.jboss.errai.demo.todo.shared.LoginService;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.jpa.sync.client.shared.DataSyncService;
@@ -29,13 +30,13 @@ public class DataSyncServiceImpl implements DataSyncService {
     if (dataSet.getQueryName().equals("userById")) {
       Object requestedUserId = dataSet.getParameters().get("userId");
       if (!currentUser.getId().equals(requestedUserId)) {
-        throw new IllegalArgumentException("You don't have permission to sync user " + requestedUserId);
+        throw new AccessDeniedException("You don't have permission to sync user " + requestedUserId);
       }
     }
     else if (dataSet.getQueryName().equals("allItemsForUser")) {
       User requestedUser = (User) dataSet.getParameters().get("user");
       if (!currentUser.getId().equals(requestedUser.getId())) {
-        throw new IllegalArgumentException("You don't have permission to sync user " + requestedUser.getId());
+        throw new AccessDeniedException("You don't have permission to sync user " + requestedUser.getId());
       }
     }
     else {

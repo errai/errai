@@ -6,7 +6,6 @@ import org.jboss.errai.bus.client.api.BusErrorCallback;
 import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.demo.todo.shared.AuthenticationException;
 import org.jboss.errai.demo.todo.shared.LoginService;
 import org.jboss.errai.demo.todo.shared.User;
 import org.jboss.errai.jpa.sync.client.local.ClientSyncManager;
@@ -56,8 +55,7 @@ public class LoginPage extends Composite {
 
   @EventHandler("loginButton")
   private void login(ClickEvent e) {
-    try {
-      loginService.call(new RemoteCallback<User>() {
+    loginService.call(new RemoteCallback<User>() {
         @Override
         public void callback(final User user) {
           syncManager.getDesiredStateEm().merge(user);
@@ -72,8 +70,5 @@ public class LoginPage extends Composite {
           return false;
         }
       }).logIn(username.getText(), password.getText());
-    } catch (AuthenticationException e1) {
-      // can't happen on a remote call
-    }
   }
 }

@@ -74,6 +74,14 @@ public class SignupPage extends Composite {
                     public void callback(List<SyncResponse<User>> syncOps) {
                       todoListPageLink.go(ImmutableMultimap.<String, String>of("userId", response.getId().toString()));
                     }
+                  },
+                  new BusErrorCallback() {
+                    @Override
+                    public boolean error(Message message, Throwable throwable) {
+                      overallErrorMessage.setText(throwable.getMessage());
+                      overallErrorMessage.setVisible(true);
+                      return false;
+                    }
                   });
         }
       },

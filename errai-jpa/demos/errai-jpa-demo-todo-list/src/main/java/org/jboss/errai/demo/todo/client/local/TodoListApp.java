@@ -69,8 +69,15 @@ public class TodoListApp extends Composite {
       Window.alert("No user id specified. Please sign in again.");
       logout(null);
     }
+
     user = em.find(User.class, userId);
+    if (user == null) {
+      Window.alert("Please sign in again.");
+      logout(null);
+    }
+
     username.setText(user.getFullName());
+    errorLabel.setVisible(false);
     refreshItems();
   }
 

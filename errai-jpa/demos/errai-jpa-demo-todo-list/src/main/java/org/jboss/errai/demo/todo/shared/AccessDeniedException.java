@@ -3,13 +3,20 @@ package org.jboss.errai.demo.todo.shared;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
- * Thrown to indicate an authentication attempt has failed.
+ * Thrown when the user attempts to perform an action that is not permitted.
  * <p>
  * TODO delete this and use the javax.security or org.picketlink type.
  *
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 @Portable
-public class AuthenticationException extends RuntimeException {
+public class AccessDeniedException extends RuntimeException {
 
+  public AccessDeniedException() {
+
+  }
+
+  public AccessDeniedException(String message) {
+    super(message);
+  }
 }

@@ -8,7 +8,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.demo.todo.shared.AuthenticationException;
 import org.jboss.errai.demo.todo.shared.LoginService;
 import org.jboss.errai.demo.todo.shared.RegistrationException;
 import org.jboss.errai.demo.todo.shared.SignupService;
@@ -35,11 +34,7 @@ public class SignupServiceImpl implements SignupService {
     em.detach(newUserObject);
 
     System.out.println("Saved new user " + newUserObject + " (id=" + newUserObject.getId() + ")");
-    try {
-      loginService.logIn(newUserObject.getEmail(), password);
-    } catch (AuthenticationException e) {
-      throw new AssertionError(); // we just set the password to this inside the current transaction!
-    }
+    loginService.logIn(newUserObject.getEmail(), password);
     return newUserObject;
   }
 
