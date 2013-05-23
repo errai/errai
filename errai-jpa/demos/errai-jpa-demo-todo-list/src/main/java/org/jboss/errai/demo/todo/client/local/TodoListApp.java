@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.demo.todo.shared.LoginService;
@@ -34,6 +36,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 @Templated("#main")
@@ -51,6 +54,8 @@ public class TodoListApp extends Composite {
 
   @Inject private @DataField Button archiveButton;
   @Inject private @DataField Button syncButton;
+
+  @Inject private @DataField Label errorLabel;
 
   @Inject private @DataField InlineLabel username;
 
@@ -118,6 +123,14 @@ public class TodoListApp extends Composite {
               public void callback(List<SyncResponse<TodoItem>> response) {
                 System.out.println("Got data sync complete event!");
                 refreshItems();
+              }
+            },
+            new BusErrorCallback() {
+              @Override
+              public boolean error(Message message, Throwable throwable) {
+                errorLabel.setText("Sync failed: " + throwable);
+                errorLabel.setVisible(true);
+                return false;
               }
             });
     System.out.println("Initiated cold sync");

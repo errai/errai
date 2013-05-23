@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.persistence.TypedQuery;
 
 import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
@@ -33,6 +34,12 @@ import org.jboss.errai.jpa.sync.client.shared.SyncResponse;
 import org.jboss.errai.jpa.sync.client.shared.SyncableDataSet;
 import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 
+/**
+ * The main contact point for applications that want to initiate data sync
+ * operations from the client side of an Errai application.
+ *
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ */
 @ApplicationScoped
 public class ClientSyncManager {
 
@@ -55,8 +62,16 @@ public class ClientSyncManager {
    */
   private ErraiEntityManager expectedStateEm;
 
+  /**
+   * The entity comparator that detects differences between desired state and expected state.
+   */
   private EntityComparator entityComparator;
 
+  /**
+   * The attribute accessor for reading and writing attribute values in JPA
+   * entities. Since this is a client-side class, this is always an
+   * ErraiAttributeAccessor.
+   */
   private final JpaAttributeAccessor attributeAccessor = new ErraiAttributeAccessor();
 
   /**
@@ -75,8 +90,39 @@ public class ClientSyncManager {
     entityComparator = new EntityComparator(desiredStateEm.getMetamodel(), attributeAccessor);
   }
 
-  public <E> void coldSync(String queryName, Class<E> queryResultType, Map<String, Object> queryParams,
-          final RemoteCallback<List<SyncResponse<E>>> onCompletion) {
+  /**
+   * Performs a "cold" synchronization on the results of the given query with
+   * the given parameters. After a successful synchronization, both the expected
+   * state and desired state entity managers will yield the same results as the
+   * server-side entity manager does for the given query with the given set of
+   * parameters.
+   *
+   * @param queryName
+   *          The name of a JPA named query. This query must be defined in a
+   *          {@link NamedQuery} annotation that is visible to both the client
+   *          and server applications. This usually means it is defined on an
+   *          entity in the <code>shared</code> package.
+   * @param queryResultType
+   *          The result type returned by the query. Must be a JPA entity type
+   *          known to both the client and server applications.
+   * @param queryParams
+   *          The name-value pairs to use for filling in the named parameters in
+   *          the query.
+   * @param onCompletion
+   *          Called when the data sync response has been received from the
+   *          server, and the sync response operations have been applied to the
+   *          expected state and desired state entity managers. Must not be
+   *          null.
+   * @param onError
+   *          Called when the data sync fails: either because the remote service
+   *          threw an exception, or because of a communication error. Can be
+   *          null, in which case the default error handling for the
+   *          {@code Caller<DataSyncService>} will apply.
+   */
+  public <E> void coldSync(
+          String queryName, Class<E> queryResultType, Map<String, Object> queryParams,
+          final RemoteCallback<List<SyncResponse<E>>> onCompletion,
+          final ErrorCallback<?> onError) {
     final TypedQuery<E> query = desiredStateEm.createNamedQuery(queryName, queryResultType);
     final TypedQuery<E> expectedQuery = expectedStateEm.createNamedQuery(queryName, queryResultType);
     for (Map.Entry<String, Object> param : queryParams.entrySet()) {
@@ -114,13 +160,20 @@ public class ClientSyncManager {
     }
 
     final SyncableDataSet<E> syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
-    dataSyncService.call(new RemoteCallback<List<SyncResponse<E>>>() {
+    RemoteCallback<List<SyncResponse<E>>> onSuccess = new RemoteCallback<List<SyncResponse<E>>>() {
       @Override
       public void callback(List<SyncResponse<E>> syncResponse) {
         applyResults(syncResponse);
         onCompletion.callback(syncResponse);
       }
-    }).coldSync(syncSet, syncRequests);
+    };
+
+    if (onError != null) {
+      dataSyncService.call(onSuccess, onError).coldSync(syncSet, syncRequests);
+    }
+    else {
+      dataSyncService.call(onSuccess).coldSync(syncSet, syncRequests);
+    }
   }
 
   /**

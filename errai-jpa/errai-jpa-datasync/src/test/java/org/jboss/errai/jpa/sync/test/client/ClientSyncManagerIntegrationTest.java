@@ -346,7 +346,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
               public void callback(List<SyncResponse<SimpleEntity>> response) {
                 System.out.println("Got sync callback");
               }
-    });
+    }, null);
   }
 
   private static <X> void assertSyncRequestsEqual(
