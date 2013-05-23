@@ -85,8 +85,9 @@ public class StyleBindingsRegistry {
           for (final StyleBindingExecutor executor : entry.getValue()) {
             if (executor instanceof AnnotationStyleBindingExecutor) {
               ((AnnotationStyleBindingExecutor) executor).invokeBinding(element.getElement(), mapping.get(entry.getKey()));
+            } else {
+              executor.invokeBinding(element.getElement());
             }
-            executor.invokeBinding(element.getElement());
           }
         }
       }
