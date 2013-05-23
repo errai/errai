@@ -22,7 +22,7 @@ import javax.inject.Inject;
 @Dependent
 @Templated("#main")
 @Page
-public class ItemListPage extends Composite {
+public class Messages extends Composite {
   @Inject
   private Identity identity;
 
@@ -43,6 +43,7 @@ public class ItemListPage extends Composite {
 
   @EventHandler("hello")
   private void onHelloClicked(ClickEvent event) {
+    System.out.println("Messages.onHelloClicked");
     identity.getUser(new AsyncCallback<User>() {
       @Override
       public void onSuccess(User result) {

@@ -40,7 +40,7 @@ public class WelcomePage extends Composite {
   private Identity identity;
 
   @Inject
-  TransitionTo<ItemListPage> startButtonClicked;
+  TransitionTo<Messages> startButtonClicked;
 
   @EventHandler("startButton")
   public void onStartButtonPress(ClickEvent e) {
