@@ -6,6 +6,8 @@ import org.jboss.errai.common.client.api.interceptor.RemoteCallContext;
 import org.jboss.errai.security.shared.AuthenticationService;
 
 /**
+ * SecurityUserInterceptor will intercept calls annotated with {@link org.jboss.errai.security.shared.RequireAuthentication}
+ * and 'redirect' users to the '{@link org.jboss.errai.security.shared.LoginPage}' if not logged-in
  * @author edewit@redhat.com
  */
 public class SecurityUserInterceptor extends SecurityInterceptor {

@@ -29,10 +29,7 @@ import javax.interceptor.InterceptorBinding;
  * Indicates that the service can only be accessed by logged-in users. No
  * additional security permissions are required.
  * <p>
- * This annotation can appear anywhere the {@link Service} annotation can
- * appear.
- *
- * @see Service
+ * This annotation can be on a method or an entire class
  */
 @Alias
 @Retention(RetentionPolicy.RUNTIME)

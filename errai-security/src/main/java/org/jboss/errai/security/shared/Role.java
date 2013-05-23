@@ -4,6 +4,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
+ * Role represents the role a user has.
  * @author edewit@redhat.com
  */
 @Portable

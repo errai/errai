@@ -9,6 +9,10 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 /**
+ * SecurityUserInterceptor server side implementation of the
+ * {@link org.jboss.errai.security.client.local.SecurityUserInterceptor} does the same but throws an exception
+ * instead of 'redirecting' the user.
+ *
  * @author edewit@redhat.com
  */
 @RequireAuthentication

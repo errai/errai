@@ -5,6 +5,7 @@ import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
+ * A user.
  * @author edewit@redhat.com
  */
 @Portable

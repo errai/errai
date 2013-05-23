@@ -12,6 +12,9 @@ import java.util.List;
 
 
 /**
+ * SecurityRoleInterceptor server side implementation of the SecurityRoleInterceptor does the same, but throws an exception
+ * instead of 'redirecting' the user.
+ *
  * @author edewit@redhat.com
  */
 @RequireRoles("")

@@ -19,6 +19,8 @@ import java.util.List;
 import static org.jboss.errai.security.shared.LoginPage.CURRENT_PAGE_COOKIE;
 
 /**
+ * Identity holds the username and password and performs the authentication tasks.
+ *
  * @author edewit@redhat.com
  */
 @Bindable

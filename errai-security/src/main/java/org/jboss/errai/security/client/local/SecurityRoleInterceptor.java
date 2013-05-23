@@ -11,6 +11,11 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
+ * Will 'redirect' users that try to make use of services annotated with {@link RequireRoles} that are not logged in
+ * or do not have specified role go to the {@link org.jboss.errai.security.shared.LoginPage}. In other cases the
+ * service call will proceed
+ *
+ * @see org.jboss.errai.security.shared.LoginPage
  * @author edewit@redhat.com
  */
 public class SecurityRoleInterceptor extends SecurityInterceptor{

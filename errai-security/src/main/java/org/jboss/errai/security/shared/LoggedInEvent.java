@@ -4,6 +4,8 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
+ * LoggedInEvent fired when a user logs-in.
+ *
  * @author edewit@redhat.com
  */
 @Portable

@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * PicketLink version of the AuthenticationService and default implementation.
+ * To change implementations put a alternatives into your beans.xml
+ *
  * @author edewit@redhat.com
  */
 @Service

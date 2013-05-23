@@ -30,13 +30,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the service can only be accessed by logged-in users who belong
+ * Indicates that the service or element can only be accessed / shown by logged-in users who belong
  * to all of the given security roles.
  * <p>
  * This annotation can appear anywhere the {@link Service} annotation can
- * appear.
+ * appear or where {@link org.jboss.errai.ui.shared.api.annotations.DataField}
  *
  * @see Service
+ * @see org.jboss.errai.ui.shared.api.annotations.DataField
  */
 @Alias
 @Retention(RetentionPolicy.RUNTIME)

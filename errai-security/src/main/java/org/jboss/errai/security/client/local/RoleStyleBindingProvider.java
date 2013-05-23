@@ -13,6 +13,10 @@ import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
 /**
+ * RoleStyleBindingProvider makes sure that client elements annotated by {@link RequireRoles} are made invisible for
+ * users that do not have the role or roles specified.
+ *
+ * @see RequireRoles
  * @author edewit@redhat.com
  */
 @Singleton

@@ -11,6 +11,7 @@ import org.jboss.errai.ui.nav.client.local.Navigation;
 import static org.jboss.errai.security.shared.LoginPage.CURRENT_PAGE_COOKIE;
 
 /**
+ * Base class for the client side security interceptors
  * @author edewit@redhat.com
  */
 public abstract class SecurityInterceptor implements RemoteCallInterceptor<RemoteCallContext> {

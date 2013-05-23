@@ -5,6 +5,8 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import java.util.List;
 
 /**
+ * AuthenticationService service for authenticating users and get there roles.
+ *
  * @author edewit@redhat.com
  */
 @Remote
