@@ -23,11 +23,12 @@ import org.jboss.errai.bus.client.api.laundry.LaundryList;
 import org.jboss.errai.bus.client.api.laundry.LaundryReclaim;
 import org.jboss.errai.common.client.api.Assert;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ServerLaundryList implements LaundryList {
+public class ServerLaundryList implements LaundryList, Serializable {
   private Queue<Laundry> listOfLaundry;
 
   public static ServerLaundryList get(QueueSession session) {
@@ -67,7 +68,7 @@ public class ServerLaundryList implements LaundryList {
   public boolean remove(final Laundry laundry) {
     return listOfLaundry.remove(laundry);
   }
-  
+
   @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
   private static ServerLaundryList setup(final LocalContext ctx) {
     ServerLaundryList list;
