@@ -17,7 +17,6 @@ public class MessageServiceImpl implements MessageService {
   AuthenticationService authenticationService;
 
   @Override
-  @RequireAuthentication
   public String hello() {
     //User cannot be null because authentication is required for this method
     String name = authenticationService.getUser().getFullName();
@@ -25,7 +24,6 @@ public class MessageServiceImpl implements MessageService {
   }
 
   @Override
-  @RequireRoles("admin")
   public String ping() {
     return "pong";
   }

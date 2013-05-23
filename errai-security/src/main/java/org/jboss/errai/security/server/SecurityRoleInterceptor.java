@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
+import java.lang.reflect.Method;
 import java.util.List;
 
 
@@ -31,11 +32,24 @@ public class SecurityRoleInterceptor extends org.jboss.errai.security.client.loc
   @AroundInvoke
   public Object aroundInvoke(InvocationContext context) throws Exception {
     final List<Role> roles = authenticationService.getRoles();
-    final RequireRoles annotation = getRequiredRoleAnnotation(context.getMethod().getAnnotations());
+    final Class<?>[] interfaces = context.getTarget().getClass().getInterfaces();
+    final RequireRoles annotation = getRequiredRoleAnnotation(interfaces, context.getMethod().getName());
     if (hasAllRoles(roles, annotation.value())) {
       return context.proceed();
     } else {
       throw new SecurityException("unauthorised access");
     }
+  }
+
+  private RequireRoles getRequiredRoleAnnotation(Class<?>[] interfaces, String methodName) {
+    for (Class<?> anInterface : interfaces) {
+      for (Method method : anInterface.getMethods()) {
+        if (methodName.equals(method.getName())) {
+          return getRequiredRoleAnnotation(method.getAnnotations());
+        }
+      }
+    }
+
+    throw new IllegalArgumentException("could not find method that was intercepted!");
   }
 }
