@@ -7,6 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
@@ -27,7 +29,10 @@ public class TodoItem {
   @ManyToOne(cascade=CascadeType.MERGE)
   private User user;
 
+  @NotNull
+  @Size(min=1)
   private String text;
+
   private Boolean done = Boolean.FALSE;
   private Boolean archived = Boolean.FALSE;
 

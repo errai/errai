@@ -9,9 +9,12 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.validation.client.shared.GwtCompatibleEmail;
 
 /**
  * Represents a user of the To-do List application.
@@ -31,17 +34,23 @@ public class User implements Serializable {
   /**
    * The name the user wants us to call them, both to themselves and other users.
    */
+  @NotNull
+  @Size(min=1, max=60)
   private String shortName;
 
   /**
    * The user's full name.
    */
+  @NotNull
+  @Size(min=1, max=60, message="Is that really your name? I'd like to meet your parents.")
   private String fullName;
 
   /**
    * The user's email address.
    */
   @Column(nullable=false, unique=true)
+  @NotNull
+  @GwtCompatibleEmail
   private String email;
 
   public Long getId() {

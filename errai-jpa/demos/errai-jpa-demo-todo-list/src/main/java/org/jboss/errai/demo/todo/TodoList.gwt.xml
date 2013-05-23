@@ -3,9 +3,17 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.5/distro-source/core/src/gwt-module.dtd">
 <module rename-to="TodoList">
     <inherits name="org.jboss.errai.enterprise.All"/>
+
+    <!-- The following two items will eventually be merged into the above supermodule -->
     <inherits name="org.jboss.errai.jpa.sync.DataSync"/>
+    <inherits name="org.jboss.errai.validation.Validation" />
+    <inherits name="org.hibernate.validator.HibernateValidator" />
 
     <source path="client"/>
     <source path="shared"/>
 
+    <!-- TODO Errai-validation will generate this one way or another -->
+    <replace-with class="org.jboss.errai.demo.todo.client.local.MyModelValidatorFactory">
+      <when-type-is class="javax.validation.ValidatorFactory"/>
+    </replace-with>
 </module>

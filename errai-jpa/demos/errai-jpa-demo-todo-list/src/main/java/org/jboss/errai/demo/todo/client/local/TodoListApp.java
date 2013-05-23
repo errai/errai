@@ -45,6 +45,7 @@ public class TodoListApp extends Composite {
 
   @Inject private EntityManager em;
   @Inject private ClientBeanManager bm;
+  @Inject private ClientSyncManager syncManager;
 
   private @PageState Long userId;
   private User user; // filled in by @PageShowing method by lookup on userId
@@ -95,7 +96,7 @@ public class TodoListApp extends Composite {
 
   @EventHandler("newItemBox")
   void onNewItem(KeyDownEvent event) {
-    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER && !newItemBox.getText().equals("")) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER && !newItemBox.getText().trim().equals("")) {
       TodoItem item = new TodoItem();
       item.setUser(user);
       item.setText(newItemBox.getText());
@@ -119,7 +120,6 @@ public class TodoListApp extends Composite {
     refreshItems();
   }
 
-  @Inject ClientSyncManager syncManager;
   @EventHandler("syncButton")
   void sync(ClickEvent event) {
     Map<String,Object> params = new HashMap<String, Object>();

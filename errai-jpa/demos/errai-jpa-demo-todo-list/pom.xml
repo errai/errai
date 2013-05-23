@@ -34,6 +34,34 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-validation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <classifier>sources</classifier>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>4.2.0.Final</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>4.2.0.Final</version>
+      <scope>provided</scope>
+      <classifier>sources</classifier>
+    </dependency>
+
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
@@ -99,7 +127,7 @@
         <configuration>
           <inplace>true</inplace>
           <noServer>true</noServer>
-          <strict>true</strict>
+          <strict>false</strict> <!-- EEK. The HibernateValidator module contains non-translatable code. Need to disable strict compile. -->
           <runTarget>http://localhost:8080/errai-jpa-demo-todo-list/</runTarget>
           <extraJvmArgs>${argLine} -Xmx1g -Xms756m -XX:MaxPermSize=256m -XX:CompileThreshold=1000</extraJvmArgs>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
