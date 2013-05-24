@@ -104,7 +104,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testInteger() {
     runAfterInit(new Runnable() {
       @Override
@@ -173,7 +172,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testFloat() {
     runAfterInit(new Runnable() {
       @Override
@@ -190,7 +189,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testFloatNegInf() {
     runAfterInit(new Runnable() {
       @Override
@@ -278,15 +277,14 @@ public class SerializationTests extends AbstractErraiTest {
   }
 
   /**
-   * Formats a failure message of the form
-   * "expected: <i>expect</i>; but was: <i>got</i>". Does not cause a test
-   * failure. You still have to call Assert.fail() if you want that.
-   *
+   * Formats a failure message of the form "expected: <i>expect</i>; but was: <i>got</i>". Does not
+   * cause a test failure. You still have to call Assert.fail() if you want that.
+   * 
    * @param expect
-   *     The expected value.
+   *          The expected value.
    * @param got
-   *     The actual value.
-   *
+   *          The actual value.
+   * 
    * @return A new String as described above.
    */
   private static String failMessage(Object expect, Object got) {
@@ -427,7 +425,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final String[] expected = {"This is a test string", "And so is this"};
+        final String[] expected = { "This is a test string", "And so is this" };
 
         MessageBuilder.createCall(new RemoteCallback<String[]>() {
           @Override
@@ -444,7 +442,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final int[] expected = {Integer.MIN_VALUE, Integer.MAX_VALUE};
+        final int[] expected = { Integer.MIN_VALUE, Integer.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<int[]>() {
           @Override
@@ -461,7 +459,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final long[] expected = {Long.MIN_VALUE, Long.MAX_VALUE};
+        final long[] expected = { Long.MIN_VALUE, Long.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<long[]>() {
           @Override
@@ -478,7 +476,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final double[] expected = {Double.MAX_VALUE, Double.MAX_VALUE};
+        final double[] expected = { Double.MAX_VALUE, Double.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<double[]>() {
           @Override
@@ -495,7 +493,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final float[] expected = {Float.MIN_VALUE, Float.MAX_VALUE};
+        final float[] expected = { Float.MIN_VALUE, Float.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<float[]>() {
           @Override
@@ -512,7 +510,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final short[] expected = {Short.MIN_VALUE, Short.MAX_VALUE};
+        final short[] expected = { Short.MIN_VALUE, Short.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<short[]>() {
           @Override
@@ -529,7 +527,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final boolean[] expected = {Boolean.FALSE, Boolean.TRUE};
+        final boolean[] expected = { Boolean.FALSE, Boolean.TRUE };
 
         MessageBuilder.createCall(new RemoteCallback<boolean[]>() {
           @Override
@@ -546,7 +544,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final char[] expected = {'a', 'z'};
+        final char[] expected = { 'a', 'z' };
 
         MessageBuilder.createCall(new RemoteCallback<char[]>() {
           @Override
@@ -563,7 +561,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final byte[] expected = {(byte) -100, (byte) 100};
+        final byte[] expected = { (byte) -100, (byte) 100 };
 
         MessageBuilder.createCall(new RemoteCallback<byte[]>() {
           @Override
@@ -577,14 +575,14 @@ public class SerializationTests extends AbstractErraiTest {
   }
 
   /**
-   * This test is disabled because it demonstrates a known limitation of Errai Marshalling.
-   * See ERRAI-339 and ERRAI-341 for details.
+   * This test is disabled because it demonstrates a known limitation of Errai Marshalling. See
+   * ERRAI-339 and ERRAI-341 for details.
    */
   public void testPortableArray() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final NeverDeclareAnArrayOfThisType[] expected = {new NeverDeclareAnArrayOfThisType()};
+        final NeverDeclareAnArrayOfThisType[] expected = { new NeverDeclareAnArrayOfThisType() };
 
         MessageBuilder.createCall(new RemoteCallback<NeverDeclareAnArrayOfThisType[]>() {
           @Override
@@ -686,14 +684,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<List<Float>>() {
           @Override
           public void callback(List<Float> response) {
-            try {
-              assertEquals(list, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(list, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).listOfFloat(list);
       }
@@ -715,14 +707,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<List<Float>>() {
           @Override
           public void callback(List<Float> response) {
-            try {
-              assertEquals(list, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(list, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).listOfShort(list);
       }
@@ -744,14 +730,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<List<Byte>>() {
           @Override
           public void callback(List<Byte> response) {
-            try {
-              assertEquals(list, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(list, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).listOfByte(list);
       }
@@ -773,20 +753,13 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<List<Float>>() {
           @Override
           public void callback(List<Float> response) {
-            try {
-              assertEquals(list, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(list, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).listOfBoolean(list);
       }
     });
   }
-
 
   public void testSet() {
     runAfterInit(new Runnable() {
@@ -802,20 +775,13 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Set<String>>() {
           @Override
           public void callback(Set<String> response) {
-            try {
-              assertEquals(set, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(set, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).setOfStrings(set);
       }
     });
   }
-
 
   public void testCharacterInCollection() {
     runAfterInit(new Runnable() {
@@ -832,14 +798,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<List<Character>>() {
           @Override
           public void callback(List<Character> response) {
-            try {
-              assertEquals(list, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(list, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).listOfCharacters(list);
       }
@@ -860,14 +820,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Map<Long, String>>() {
           @Override
           public void callback(Map<Long, String> response) {
-            try {
-              assertEquals(map, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(map, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).mapOfLongToString(map);
       }
@@ -894,14 +848,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Map<Long, List<String>>>() {
           @Override
           public void callback(Map<Long, List<String>> response) {
-            try {
-              assertEquals(map, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(map, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).mapOfLongToListOfStrings(map);
       }
@@ -921,14 +869,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Map<String, Float>>() {
           @Override
           public void callback(Map<String, Float> response) {
-            try {
-              assertEquals(map, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(map, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).mapOfStringToFloat(map);
       }
@@ -955,14 +897,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Map<String, List<Double>>>() {
           @Override
           public void callback(Map<String, List<Double>> response) {
-            try {
-              assertEquals(map, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(map, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).mapOfStringToListOfDoubles(map);
       }
@@ -981,14 +917,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Map<Group, Group>>() {
           @Override
           public void callback(Map<Group, Group> response) {
-            try {
-              assertEquals(map, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(map, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).mapOfCustomTypes(map);
       }
@@ -1015,14 +945,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Map<List<String>, Group>>() {
           @Override
           public void callback(Map<List<String>, Group> response) {
-            try {
-              assertEquals(map, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(map, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).mapOfListOfStringsToCustomType(map);
       }
@@ -1093,14 +1017,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<ClassWithNestedClass>() {
           @Override
           public void callback(ClassWithNestedClass response) {
-            try {
-              assertEquals(clazz, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(clazz, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).nestedClass(clazz);
       }
@@ -1129,14 +1047,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithGenericCollections>() {
           @Override
           public void callback(EntityWithGenericCollections response) {
-            try {
-              assertEquals(ent, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ent, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).genericCollections(ent);
       }
@@ -1152,14 +1064,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithGenericCollections>() {
           @Override
           public void callback(EntityWithGenericCollections response) {
-            try {
-              assertEquals(ent, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ent, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).genericCollections(ent);
       }
@@ -1177,14 +1083,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithStringBufferAndStringBuilder>() {
           @Override
           public void callback(EntityWithStringBufferAndStringBuilder response) {
-            try {
-              assertEquals(ent, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ent, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testStringBufferAndStringBuilder(ent);
       }
@@ -1237,14 +1137,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Throwable>() {
           @Override
           public void callback(Throwable response) {
-            try {
-              assertTrue(new EqualTester().isEqual(response));
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertTrue(new EqualTester().isEqual(response));
+            finishTest();
           }
         }, TestSerializationRPCService.class).testSerializeThrowable(t);
       }
@@ -1296,14 +1190,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<AssertionError>() {
           @Override
           public void callback(AssertionError response) {
-            try {
-              assertTrue(new EqualTester().isEqual(response));
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertTrue(new EqualTester().isEqual(response));
+            finishTest();
           }
         }, TestSerializationRPCService.class).testSerializeAssertionError(t);
       }
@@ -1328,14 +1216,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<FactoryEntity>() {
           @Override
           public void callback(FactoryEntity response) {
-            try {
-              assertTrue(new EqualTester().isEqual(response));
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertTrue(new EqualTester().isEqual(response));
+            finishTest();
           }
         }, TestSerializationRPCService.class).testFactorySerialization(entity);
       }
@@ -1352,14 +1234,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<BuilderEntity>() {
           @Override
           public void callback(BuilderEntity response) {
-            try {
-              assertEquals("Failed to serialize entity with private constructor", entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals("Failed to serialize entity with private constructor", entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testBuilderSerializationWithPrivateConstructor(entity);
       }
@@ -1376,14 +1252,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<java.util.Date>() {
           @Override
           public void callback(java.util.Date response) {
-            try {
-              assertEquals(d, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(d, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testJavaUtilDate(d);
       }
@@ -1400,14 +1270,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<java.sql.Date>() {
           @Override
           public void callback(java.sql.Date response) {
-            try {
-              assertEquals(d, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(d, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testJavaSqlDate(d);
       }
@@ -1424,14 +1288,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Timestamp>() {
           @Override
           public void callback(Timestamp response) {
-            try {
-              assertEquals(ts, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ts, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testTimestampSerialization(ts);
       }
@@ -1448,14 +1306,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Time>() {
           @Override
           public void callback(Time response) {
-            try {
-              assertEquals(ts, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ts, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testTimeSerialization(ts);
       }
@@ -1472,14 +1324,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<BigDecimal>() {
           @Override
           public void callback(BigDecimal response) {
-            try {
-              assertEquals(bd, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(bd, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testBigDecimalSerialization(bd);
       }
@@ -1496,14 +1342,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<BigInteger>() {
           @Override
           public void callback(BigInteger response) {
-            try {
-              assertEquals(bi, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(bi, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testBigIntegerSerialization(bi);
       }
@@ -1523,14 +1363,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Queue<String>>() {
           @Override
           public void callback(Queue<String> response) {
-            try {
-              assertEquals(queue, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(queue, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testQueueSerialization(queue);
       }
@@ -1568,14 +1402,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Queue<String>>() {
           @Override
           public void callback(Queue<String> response) {
-            try {
-              assertTrue(new EqualTester().isEqual(response));
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertTrue(new EqualTester().isEqual(response));
+            finishTest();
           }
         }, TestSerializationRPCService.class).testQueueSerialization(queue);
       }
@@ -1615,14 +1443,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<SortedMap<String, String>>() {
           @Override
           public void callback(SortedMap<String, String> response) {
-            try {
-              assertTrue(new EqualTester().isEqual(response));
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertTrue(new EqualTester().isEqual(response));
+            finishTest();
           }
         }, TestSerializationRPCService.class).testSortedMapSerialization(map);
       }
@@ -1643,14 +1465,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<SortedSet<String>>() {
           @Override
           public void callback(SortedSet<String> response) {
-            try {
-              assertEquals(set, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(set, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testSortedSetSerialization(set);
       }
@@ -1672,14 +1488,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<List>() {
           @Override
           public void callback(List response) {
-            try {
-              assertEquals(customList, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(customList, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testInheritedDefinitionFromExistingParent(customList);
       }
@@ -1717,14 +1527,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<TestEnumA>() {
           @Override
           public void callback(TestEnumA response) {
-            try {
-              assertEquals(e, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(e, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testNakedEnum(e);
       }
@@ -1741,14 +1545,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<ImplicitEnum>() {
           @Override
           public void callback(ImplicitEnum response) {
-            try {
-              assertEquals(e, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(e, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testImplicitEnum(e);
       }
@@ -1765,14 +1563,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Boron.Bean>() {
           @Override
           public void callback(Boron.Bean response) {
-            try {
-              assertEquals(boron, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(boron, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testPortableInnerClass(boron);
       }
@@ -1788,17 +1580,11 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<Koron>() {
           @Override
           public void callback(Koron response) {
-            try {
-              assertEquals(koron, response);
-              assertSame("someList is different from sameList", response.getSomeList(), response.getSameList());
-              assertNotSame("otherList is not different from someList", response.getSomeList(), response.getOtherList());
+            assertEquals(koron, response);
+            assertSame("someList is different from sameList", response.getSomeList(), response.getSameList());
+            assertNotSame("otherList is not different from someList", response.getSomeList(), response.getOtherList());
 
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            finishTest();
           }
         }, TestSerializationRPCService.class).testKoron(koron);
       }
@@ -1814,14 +1600,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<TestingTickCache>() {
           @Override
           public void callback(TestingTickCache response) {
-            try {
-              assertEquals(moron, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(moron, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testMoron(moron);
       }
@@ -1840,14 +1620,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithUnqualifiedFields>() {
           @Override
           public void callback(EntityWithUnqualifiedFields response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithUnqualifiedFieldTypes(entity);
       }
@@ -1861,29 +1635,26 @@ public class SerializationTests extends AbstractErraiTest {
 
         final EntityWithGoodParts entity = new EntityWithGoodParts();
         entity.setDoubleField(Double.NaN);
-        entity.setBadDoubles(new Double[]{1234d, Double.NEGATIVE_INFINITY, 12345d, null, Double.POSITIVE_INFINITY, Double.NaN});
-        entity.setBadPrimitiveDoubles(new double[]{1234d, Double.NEGATIVE_INFINITY, 12345d, Double.POSITIVE_INFINITY, Double.NaN});
-        
+        entity.setBadDoubles(new Double[] { 1234d, Double.NEGATIVE_INFINITY, 12345d, null, Double.POSITIVE_INFINITY,
+            Double.NaN });
+        entity.setBadPrimitiveDoubles(new double[] { 1234d, Double.NEGATIVE_INFINITY, 12345d, Double.POSITIVE_INFINITY,
+            Double.NaN });
+
         entity.setFloatField(Float.NaN);
-        entity.setBadFloats(new Float[]{1234.0f, Float.NEGATIVE_INFINITY, 12345.123f, null, Float.POSITIVE_INFINITY, Float.NaN});
+        entity.setBadFloats(new Float[] { 1234.0f, Float.NEGATIVE_INFINITY, 12345.123f, null, Float.POSITIVE_INFINITY,
+            Float.NaN });
 
         MessageBuilder.createCall(new RemoteCallback<EntityWithGoodParts>() {
           @Override
           public void callback(EntityWithGoodParts response) {
-            try {
-              assertEquals(entity.toString(), response.toString());
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity.toString(), response.toString());
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithGoodParts(entity);
       }
     });
   }
-  
+
   public void testGenericEntity() {
     runAfterInit(new Runnable() {
       @Override
@@ -1899,20 +1670,37 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<GenericEntity<String>>() {
           @Override
           public void callback(GenericEntity<String> response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testGenericEntity(entity);
       }
     });
   }
-  
+
+  public void testGenericEntityWithConstructorMapping() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        List<String> data = new ArrayList<String>();
+        data.add("bar");
+        data.add("baz");
+
+        final GenericEntityWithConstructorMapping<String> entity =
+            new GenericEntityWithConstructorMapping<String>(1l, data);
+
+        MessageBuilder.createCall(new RemoteCallback<GenericEntityWithConstructorMapping<String>>() {
+          @Override
+          public void callback(GenericEntityWithConstructorMapping<String> response) {
+            assertEquals(entity, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testGenericEntityWithConstructorMapping(entity);
+      }
+    });
+  }
+
   public void testGenericEntitySubtypeInteger() {
     runAfterInit(new Runnable() {
       @Override
@@ -1920,25 +1708,19 @@ public class SerializationTests extends AbstractErraiTest {
 
         final GenericEntitySubtypeInteger entity = new GenericEntitySubtypeInteger();
         entity.setField(12);
-        entity.setList(Arrays.asList(1,2,3,4));
+        entity.setList(Arrays.asList(1, 2, 3, 4));
 
         MessageBuilder.createCall(new RemoteCallback<GenericEntitySubtypeInteger>() {
           @Override
           public void callback(GenericEntitySubtypeInteger response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testGenericEntitySubtypeInteger(entity);
       }
     });
   }
-  
+
   public void testGenericEntitySubtypeString() {
     runAfterInit(new Runnable() {
       @Override
@@ -1946,19 +1728,13 @@ public class SerializationTests extends AbstractErraiTest {
 
         final GenericEntitySubtypeString entity = new GenericEntitySubtypeString();
         entity.setField("12");
-        entity.setList(Arrays.asList("1","2","3","4"));
+        entity.setList(Arrays.asList("1", "2", "3", "4"));
 
         MessageBuilder.createCall(new RemoteCallback<GenericEntitySubtypeString>() {
           @Override
           public void callback(GenericEntitySubtypeString response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testGenericEntitySubtypeString(entity);
       }
@@ -1979,14 +1755,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<GenericEntity<List<Group>>>() {
           @Override
           public void callback(GenericEntity<List<Group>> response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testGenericEntity(entity);
       }
@@ -2007,14 +1777,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<GenericEntity<Set<Group>>>() {
           @Override
           public void callback(GenericEntity<Set<Group>> response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testGenericEntity(entity);
       }
@@ -2035,14 +1799,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<GenericEntity<Set<Group>>>() {
           @Override
           public void callback(GenericEntity<Set<Group>> response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testGenericEntity(entity);
       }
@@ -2080,21 +1838,15 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<User>() {
           @Override
           public void callback(User response) {
-            try {
-              assertEquals(u, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(u, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithNullField(u);
       }
     });
   }
 
-  //Serves as regression test for ERRAI-389
+  // Serves as regression test for ERRAI-389
   public void testEntityWithPublicSuperTypeField() {
     runAfterInit(new Runnable() {
       @Override
@@ -2105,14 +1857,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<User>() {
           @Override
           public void callback(User response) {
-            try {
-              assertEquals(u.publicSuperField, "publicSuperField");
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(u.publicSuperField, "publicSuperField");
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithNullField(u);
       }
@@ -2129,14 +1875,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<ImmutableEnumContainer>() {
           @Override
           public void callback(ImmutableEnumContainer response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testImmutableEntityWithEnum(entity);
       }
@@ -2153,14 +1893,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<ImmutableEnumContainer>() {
           @Override
           public void callback(ImmutableEnumContainer response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testImmutableEntityWithEnum(entity);
       }
@@ -2178,7 +1912,6 @@ public class SerializationTests extends AbstractErraiTest {
         ec.setStatefulEnum1(EnumWithState.THING1);
         ec.setStatefulEnum2(EnumWithState.THING1);
 
-
         // this is the object we'll be transmitting. it contains "ec"
         final EnumContainerContainer ecc = new EnumContainerContainer();
         ecc.setEnumA(TestEnumA.Jonathan);
@@ -2188,21 +1921,15 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EnumContainerContainer>() {
           @Override
           public void callback(EnumContainerContainer response) {
-            try {
-              assertEquals(ecc.toString(), response.toString());
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ecc.toString(), response.toString());
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithEnumContainerContainer(ecc);
       }
     });
   }
 
-  //Serves as regression test for ERRAI-403
+  // Serves as regression test for ERRAI-403
   public void testEntityWithMapUsingAbstractValueType() {
     runAfterInit(new Runnable() {
       @Override
@@ -2218,21 +1945,15 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingAbstractValueType>() {
           @Override
           public void callback(EntityWithMapUsingAbstractValueType response) {
-            try {
-              assertEquals(e, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(e, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithMapUsingAbstractValueType(e);
       }
     });
   }
 
-  //Serves as regression test for ERRAI-403
+  // Serves as regression test for ERRAI-403
   public void testEntityWithMapUsingAbstractKeyType() {
     runAfterInit(new Runnable() {
       @Override
@@ -2248,14 +1969,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingAbstractKeyType>() {
           @Override
           public void callback(EntityWithMapUsingAbstractKeyType response) {
-            try {
-              assertEquals(e, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(e, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithMapUsingAbstractKeyType(e);
       }
@@ -2276,14 +1991,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithMapUsingSubtypeValues>() {
           @Override
           public void callback(EntityWithMapUsingSubtypeValues response) {
-            try {
-              assertEquals(e, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(e, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithMapUsingSubtypeValues(e);
       }
@@ -2320,14 +2029,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithTypesUsingNestedParameterizedTypes>() {
           @Override
           public void callback(EntityWithTypesUsingNestedParameterizedTypes response) {
-            try {
-              assertEquals(e, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(e, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithTypesUsingNestedParamTypes(e);
       }
@@ -2344,14 +2047,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithInterfaceField>() {
           @Override
           public void callback(EntityWithInterfaceField response) {
-            try {
-              assertEquals(ent, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ent, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithInterfaceField(ent);
       }
@@ -2363,19 +2060,13 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
         final EntityWithInterfaceArrayField ent = new EntityWithInterfaceArrayField();
-        ent.setArrayField(new SubInterface[]{new SubInterfaceImpl("value0"), null, new SubInterfaceImpl("value2")});
+        ent.setArrayField(new SubInterface[] { new SubInterfaceImpl("value0"), null, new SubInterfaceImpl("value2") });
 
         MessageBuilder.createCall(new RemoteCallback<EntityWithInterfaceArrayField>() {
           @Override
           public void callback(EntityWithInterfaceArrayField response) {
-            try {
-              assertEquals(ent, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(ent, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithInterfaceArrayField(ent);
       }
@@ -2387,19 +2078,13 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final ImmutableArrayContainer entity = new ImmutableArrayContainer(new String[]{"1", "2"});
+        final ImmutableArrayContainer entity = new ImmutableArrayContainer(new String[] { "1", "2" });
 
         MessageBuilder.createCall(new RemoteCallback<ImmutableArrayContainer>() {
           @Override
           public void callback(ImmutableArrayContainer response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testImmutableEntityWithArray(entity);
       }
@@ -2417,14 +2102,8 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<EntityWithInheritedTypeVariable<String>>() {
           @Override
           public void callback(EntityWithInheritedTypeVariable<String> response) {
-            try {
-              assertEquals(entity, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
+            assertEquals(entity, response);
+            finishTest();
           }
         }, TestSerializationRPCService.class).testEntityWithInheritedTypeVariable(entity);
       }

@@ -21,7 +21,7 @@
         <code>MessageCallback</code>
         interface.
       </para>
-      <para>But before we dive into the details, let look at some use cases first.</para>
+      <para>But before we dive into the details, let's look at some use cases first.</para>
       <section id="sid-5931280_MessagingAPIBasics-SendingMessageswiththeClientBus">
          <title>Sending Messages with the Client Bus</title>
          <para>
@@ -87,7 +87,7 @@ public class HelloWorld implements EntryPoint {
                </para>
             </listitem>
          </orderedlist>
-         <note>
+         <important>
             <para>
             An astute observer will note that access to the
             <code>RequestDispatcher</code>
@@ -101,7 +101,8 @@ public class HelloWorld implements EntryPoint {
             <code>ErraiBus.getDispatcher()</code>
             methods. The server-side code, conversely, runs inside a dependency container for managing components. See the section on Errai IOC and Errai CDI for using ErraiBus from a client-side container.
           </para>
-         </note>
+            <para>When using Errai IOC or CDI, you can also use the Sender&lt;T&gt; interface to send messages.</para>
+         </important>
       </section>
       <section id="sid-5931280_MessagingAPIBasics-RecievingMessagesontheServerBus%2FServerServices">
          <title>Recieving Messages on the Server Bus / Server Services</title>

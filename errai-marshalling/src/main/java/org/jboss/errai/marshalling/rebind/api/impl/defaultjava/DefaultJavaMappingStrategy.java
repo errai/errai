@@ -335,7 +335,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
 
     if (varName != null) {
-      blockBuilder.append(Stmt.declareFinalVariable(varName, mapping.getType(), statement));
+      blockBuilder.append(Stmt.declareFinalVariable(varName, mapping.getTargetType(), statement));
     }
     else {
       blockBuilder.append(statement);

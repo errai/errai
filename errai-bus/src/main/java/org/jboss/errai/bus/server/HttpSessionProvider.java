@@ -36,19 +36,27 @@ import java.util.Map;
  * The SessionProvider for HTTP-based queue sessions.
  */
 public class HttpSessionProvider implements SessionProvider<HttpSession> {
-  public static final String HTTP_SESS = "org.jboss.errai.QueueSessions";
 
+  private static final Map<String, SessionsContainer> activeHttpSessions = new HashMap<String, SessionsContainer>();
+  
   @Override
   public QueueSession createOrGetSession(final HttpSession externSessRef, final String remoteQueueID) {
-    SessionsContainer sc = (SessionsContainer) externSessRef.getAttribute(HTTP_SESS);
+    SessionsContainer sc = (SessionsContainer) activeHttpSessions.get(externSessRef.getId());
     if (sc == null) {
-      externSessRef.setAttribute(HTTP_SESS, sc = new SessionsContainer());
+      sc = new SessionsContainer();
+      activeHttpSessions.put(externSessRef.getId(), sc);
     }
 
     QueueSession qs = sc.getSession(remoteQueueID);
     if (qs == null) {
       qs = sc.createSession(externSessRef.getId(), remoteQueueID);
       qs.setAttribute(HttpSession.class.getName(), externSessRef);
+      qs.addSessionEndListener(new SessionEndListener() {
+        @Override
+        public void onSessionEnd(SessionEndEvent event) {
+          activeHttpSessions.remove(externSessRef.getId());
+        }
+      });
     }
 
     return qs;
