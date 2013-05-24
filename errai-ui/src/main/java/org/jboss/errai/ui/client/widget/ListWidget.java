@@ -189,6 +189,19 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
     return (W) panel.getWidget(index);
   }
 
+  /**
+   * Returns the widget currently displaying the provided model.
+   * 
+   * @param model
+   *          the model displayed by the widget
+   * 
+   * @return the widget displaying the provided model instance, null if no widget was found for the model.
+   */
+  public W getWidget(M model) {
+    int index = items.indexOf(model);
+    return getWidget(index);
+  }
+  
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<M>> handler) {
     if (!valueChangeHandlerInitialized) {
