@@ -47,12 +47,6 @@ public class NavigationTest extends AbstractErraiCDITest {
     assertEquals("PageA", pageA.name());
   }
 
-  public void testLoginPage() throws Exception {
-    PageNode<?> loginPage = navGraph.getPage("loginPage");
-    assertNotNull(loginPage);
-    assertEquals("PageThatIsTheLoginPage", loginPage.name());
-  }
-
   public void testPageWithProvidedName() throws Exception {
     PageNode<?> pageB = navGraph.getPage("page_b");
     assertNotNull(pageB);
