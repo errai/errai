@@ -422,7 +422,7 @@ public class MyLocalService implements MessageCallback {
             <title>Caller&lt;?&gt;</title>
             <para>
             The type
-            <code>org.jboss.errai.ioc.client.api.Caller&lt;?&gt;</code>
+            <code>org.jboss.errai.common.client.api.Caller&lt;?&gt;</code>
             is a globally injectable RPC proxy. RPC proxies may be provided by various components. For example, JAX-RS or Errai RPC. The proxy itself is agnostic to the underlying RPC mechanism and is qualified by it's type parameterization.
           </para>
             <para>For example:</para>
@@ -435,10 +435,11 @@ public void MyClientBean {
  
   // ... ///
   
-  @UiHandler("button")
+  @EventHandler("button")
   public void onButtonClick(ClickHandler handler) { 
     rpcCaller.call(new RemoteCallback&lt;Void&gt;() {
       public void callback(Void void) {
+        // put code here that should execute after RPC response arrives
       }
     ).callSomeMethod();
   }
@@ -451,6 +452,108 @@ public void MyClientBean {
             . For more information on defining RPC proxies see
             <xref linkend="sid-5931313"/>
             and Creating Requests in Errai JAX-RS.
+          </para>
+         </section>
+         <section id="sid-20938800_ClientComponents-Sender%3C%3F%3E">
+            <title>Sender&lt;?&gt;</title>
+            <para>
+            The
+            <code>org.jboss.errai.ioc.support.bus.client.Sender&lt;?&gt;</code>
+            interface is the lower-level counterpart to the
+            <code>Caller&lt;?&gt;</code>
+            interface described above. You can inject a
+            <code>Sender</code>
+            to send low-level ErraiBus messages directly to subscribers on any subject.
+          </para>
+            <para>For example:</para>
+            <informalexample>
+               <programlisting language="java">
+  @Inject
+  @ToSubject("ListCapitializationService")
+  Sender&lt;List&lt;String&gt;&gt; listSender;
+
+  // ... ///
+
+  @EventHandler("button")
+  public void onButtonClick(ClickHandler handler) {
+    List&lt;String&gt; myListOfStrings = getSelectedCitiesFromForm();
+    listSender.send(myListOfStrings, new MessageCallback() {
+      public void callback(Message reply) {
+        // do stuff with reply
+      }
+    );
+  }
+</programlisting>
+            </informalexample>
+            <para>
+            The
+            <code>Sender.send()</code>
+            method is overloaded. The variant demonstrated above takes a value and a MessageCallback to reply receive a reply (assuming the subscriber sends a conversational reply). The following variants are available:
+          </para>
+            <itemizedlist>
+               <listitem>
+                  <para>
+                     <code>send(T)</code>
+                  </para>
+               </listitem>
+               <listitem>
+                  <para>
+                     <code>send(T, ErrorCallback)</code>
+                  </para>
+               </listitem>
+               <listitem>
+                  <para>
+                     <code>send(T, MessageCallback)</code>
+                  </para>
+               </listitem>
+               <listitem>
+                  <para>
+                     <code>send(T, MessageCallback, ErrorCallback)</code>
+                  </para>
+               </listitem>
+            </itemizedlist>
+            <para>
+            The reply-to service can also be specified declaratively using the
+            <code>@ReplyTo</code>
+            annotation. This allows the app to receive conversational replies even when using the
+            <code>send()</code>
+            variants that do not take a
+            <code>MessageCallback</code>
+            :
+          </para>
+            <informalexample>
+               <programlisting language="java">
+  @Inject
+  @ToSubject("ListCapitializationService")
+  @ReplyTo("ClientListService")
+  Sender&lt;List&lt;String&gt;&gt; listSender;
+
+  // ... ///
+
+  @EventHandler("button")
+  public void onButtonClick(ClickHandler handler) {
+    List&lt;String&gt; myListOfStrings = getSelectedCitiesFromForm();
+    listSender.send(myListOfStrings);
+  }
+
+  @Singleton
+  @Service
+  public static class ClientListService implements MessageCallback {
+    @Override
+    public void callback(Message message) {
+      // do stuff with message
+    }
+  }
+</programlisting>
+            </informalexample>
+            <para>
+            These
+            <code>Sender&lt;?&gt;</code>
+            features are just convenient wrappers around the full-featured programmatic ErraiBus API. See
+            <xref linkend="sid-5931280"/>
+            and
+            <xref linkend="sid-24674472"/>
+            for full information about low-level ErraiBus communication.
           </para>
          </section>
       </section>

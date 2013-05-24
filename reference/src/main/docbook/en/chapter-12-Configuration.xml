@@ -358,17 +358,75 @@ bus. Set this
         <code>org.jboss.errai.bus.server.servlet</code>
         .
       </para>
+      <note>
+         <title>One is Enough!</title>
+         <para>You should use just one of the options below. Configuring multiple ErraiServlet implementations in the same application will lead to unpredictable behaviour!</para>
+         <para>Remember that all Errai demos and archetypes are preconfigured with DefaultBlockingServlet as a servlet. You will need to remove this default setup if you choose to use a different ErraiServlet implementation in your app.</para>
+      </note>
       <section id="sid-5931364_ServletImplementations-DefaultBlockingServlet">
          <title>DefaultBlockingServlet</title>
-         <para>This is a universal, completely servlet spec (2.0) compliant, Servlet implementation. It provides purely synchronous request handling and should work in virtually any servlet container, unless there are restrictions on putting threads into sleep states.</para>
+         <para>This ErraiServlet implementation should work in virtually any servlet container that supports Java Servlets 2.0 or higher. It provides purely synchronous request handling. The one scenario where this servlet will not work is in servers that put restrictions on putting threads into sleep states.</para>
+         <para>The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.</para>
+         <para>
+          As its name suggests, DefaultBlockingServlet is normally configured as an HTTP Servlet in the
+          <code>web.xml</code>
+          file:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;servlet&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
+                                                                                                     
+&lt;servlet-mapping&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+</programlisting>
+         </informalexample>
       </section>
-      <section id="sid-5931364_ServletImplementations-JBossCometServlet">
-         <title>JBossCometServlet</title>
-         <para>The JBoss Comet support utilizes the JBoss Web AIO APIs (AS 5.0 and AS 6.0) to improve scalability and reduce thread usage. The HTTP, NIO, and AJP connectors are not supported. Use of this implementation requires use of the APR (Apache Portable Runtime).</para>
+      <section id="sid-5931364_ServletImplementations-DefaultBlockingServletconfiguredasFilter">
+         <title>DefaultBlockingServlet configured as Filter</title>
+         <para>
+          Alternatively, the DefaultBlockingServlet can be deployed as a Servlet Filter. This may be necessary in cases where an existing filter is configured in the web application, and that filter interferes with the Errai Bus
+          
+          requests. In this case, configuring DefaultBlockingServlet to handle
+          <code>*.erraiBus</code>
+          requests ahead of other filters in web.xml will solve the problem:
+        </para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;filter&gt;
+  &lt;filter-name&gt;ErraiServlet&lt;/filter-name&gt;
+  &lt;filter-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/filter-class&gt;
+&lt;/filter&gt;
+
+&lt;filter-mapping&gt;
+  &lt;filter-name&gt;ErraiServlet&lt;/filter-name&gt;
+  &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
+&lt;/filter-mapping&gt;
+</programlisting>
+         </informalexample>
       </section>
       <section id="sid-5931364_ServletImplementations-JettyContinuationsServlet">
          <title>JettyContinuationsServlet</title>
          <para>The Jetty implementation leverages Jetty's continuations support, which allows for threadless pausing of port connections. This servlet implementation should work without any special configuration of Jetty.</para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;servlet&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.JettyContinuationsServlet&lt;/servlet-class&gt;
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
+                                                                                                     
+&lt;servlet-mapping&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+</programlisting>
+         </informalexample>
       </section>
       <section id="sid-5931364_ServletImplementations-StandardAsyncServlet">
          <title>StandardAsyncServlet</title>
@@ -379,6 +437,21 @@ bus. Set this
           <code>web.xml</code>
           .
         </para>
+         <informalexample>
+            <programlisting language="xml">
+&lt;servlet&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.StandardAsyncServlet&lt;/servlet-class&gt;
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;async-supported&gt;true&lt;/async-supported&gt;
+&lt;/servlet&gt;
+                                                                                                     
+&lt;servlet-mapping&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+</programlisting>
+         </informalexample>
       </section>
    </section>
 </chapter>
