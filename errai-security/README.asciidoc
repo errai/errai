@@ -1,0 +1,95 @@
+Erria-Security
+==============
+
+Introduction
+------------
+This module provides integration with different security platforms. For now the only one supported
+is http://www.jboss.org/picketlink[PicketLink] others can be introduced and selected at runtime 
+by adding alternatives in the +beans.xml+
+
+Installation
+------------
+This module is focused on client side integration all you need to do to get started is have a LoginPage 
+here is an example of one
+
+[source,java]
+.LoginForm.java
+----
+@Page(role = LoginPage.class)
+@Templated("#root")
+@Dependent
+public class LoginForm extends Composite {
+ 
+  @Inject
+  @Model
+  Identity identity;
+ 
+  @Inject
+  @Bound
+  @DataField
+  private TextBox username;
+ 
+  @Inject
+  @Bound
+  @DataField
+  private PasswordTextBox password;
+ 
+  @Inject
+  @DataField
+  private Anchor login;
+ 
+  @EventHandler("login")
+  private void loginClicked(ClickEvent event) {
+    identity.login();
+  }
+}
+----
+
+Now you can annotate the methods on your service interface like this:
+
+[source,java]
+.Service.java
+----
+@Remote
+public interface MessageService {
+	@RequireAuthentication			<1>
+	String hello();
+
+	@RequireRoles("admin")			<2>
+	String ping();
+
+----
+<1> Will ensure that this method can only be called if a user is logged in
+<2> A user needs to be logged in and have all roles specified, in this case only the 'admin' role
+
+On the server there are cdi interceptors that will also check the authentication so that in an event
+that the user bypasses the client side security the server side is still secure. To make sure that
+these interceptors work you'll need to add the following into your +beans.xml+
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+      http://java.sun.com/xml/ns/javaee/beans_1_0.xsd">
+  <interceptors>
+    <class>org.jboss.errai.security.server.SecurityUserInterceptor</class>
+    <class>org.jboss.errai.security.server.SecurityRoleInterceptor</class>
+  </interceptors>
+</beans>
+----
+
+When users are not logged in or do not have all roles they are 'redirected' to the LoginPage. 
+Another feature is to hide certain elements when the user doesn't have the rights by annotation
+the element with the +@RequireRoles+ anntotation. For example in this +NavBar+ the admin anchor
+will not be shown if the user does not have the admin role.
+
+[source,java]
+----
+@Templated
+public class NavBar extends Composite {
+ 
+  @Inject @DataField Anchor messages;
+  @Inject @DataField Anchor login;
+  @Inject @DataField @RequireRoles("admin") Anchor admin;
+----
