@@ -41,44 +41,53 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public boolean add(M element) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     boolean b = list.add(element);
     for (BindableListChangeHandler<M> handler : handlers) {
-      handler.onItemAdded(element);
+      handler.onItemAdded(oldValue, element);
     }
     return b;
   }
 
   @Override
   public void add(int index, M element) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     list.add(index, element);
     for (BindableListChangeHandler<M> handler : handlers) {
-      handler.onItemAddedAt(index, element);
+      handler.onItemAddedAt(oldValue, index, element);
     }
   }
 
   @Override
   public boolean addAll(Collection<? extends M> c) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     boolean b = list.addAll(c);
     for (BindableListChangeHandler<M> handler : handlers) {
-      handler.onItemsAdded(c);
+      handler.onItemsAdded(oldValue, c);
     }
     return b;
   }
 
   @Override
   public boolean addAll(int index, Collection<? extends M> c) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     boolean b = list.addAll(index, c);
     for (BindableListChangeHandler<M> handler : handlers) {
-      handler.onItemsAddedAt(index,c);
+      handler.onItemsAddedAt(oldValue, index,c);
     }
     return b;
   }
 
   @Override
   public void clear() {
+    final List<M> oldValue = new ArrayList<M>(list);
     list.clear();
     for (BindableListChangeHandler<M> handler : handlers) {
-      handler.onItemsCleared();
+      handler.onItemsCleared(oldValue);
     }
   }
 
@@ -129,11 +138,13 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public boolean remove(Object o) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     int index = list.indexOf(o);
     boolean b = list.remove(o);
     if (b) {
       for (BindableListChangeHandler<M> handler : handlers) {
-        handler.onItemRemovedAt(index);
+        handler.onItemRemovedAt(oldValue, index);
       }
     }
     return b;
@@ -141,15 +152,19 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public M remove(int index) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     M m = list.remove(index);
     for (BindableListChangeHandler<M> handler : handlers) {
-      handler.onItemRemovedAt(index);
+      handler.onItemRemovedAt(oldValue, index);
     }
     return m;
   }
 
   @Override
   public boolean removeAll(Collection<?> c) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     List<Integer> indexes = new ArrayList<Integer>();
     for (Object m : c) {
       Integer index = list.indexOf(m);
@@ -162,7 +177,7 @@ public class BindableListWrapper<M> implements List<M> {
     boolean b = list.removeAll(c);
     if (b) {
       for (BindableListChangeHandler<M> handler : handlers) {
-        handler.onItemsRemovedAt(indexes);
+        handler.onItemsRemovedAt(oldValue, indexes);
       }
     }
     return b;
@@ -175,9 +190,11 @@ public class BindableListWrapper<M> implements List<M> {
 
   @Override
   public M set(int index, M element) {
+    final List<M> oldValue = new ArrayList<M>(list);
+    
     M m = list.set(index, element);
     for (BindableListChangeHandler<M> handler : handlers) {
-      handler.onItemChanged(index, element);
+      handler.onItemChanged(oldValue, index, element);
     }
     return m;
   }

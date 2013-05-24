@@ -25,19 +25,19 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BindableListChangeHandler<M> {
-  public void onItemAdded(M item);
+  public void onItemAdded(List<M> source, M item);
 
-  public void onItemAddedAt(int index, M item);
+  public void onItemAddedAt(List<M> source, int index, M item);
 
-  public void onItemsAdded(Collection<? extends M> items);
+  public void onItemsAdded(List<M> source, Collection<? extends M> items);
 
-  public void onItemsAddedAt(int index, Collection<? extends M> items);
+  public void onItemsAddedAt(List<M> source, int index, Collection<? extends M> items);
 
-  public void onItemsCleared();
+  public void onItemsCleared(List<M> source);
 
-  public void onItemRemovedAt(int index);
+  public void onItemRemovedAt(List<M> source, int index);
 
-  public void onItemsRemovedAt(List<Integer> indexes);
+  public void onItemsRemovedAt(List<M> source, List<Integer> indexes);
   
-  public void onItemChanged(int index, M item);
+  public void onItemChanged(List<M> source, int index, M item);
 }

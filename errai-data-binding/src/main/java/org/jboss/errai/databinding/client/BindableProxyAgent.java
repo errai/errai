@@ -17,6 +17,7 @@
 package org.jboss.errai.databinding.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -442,27 +443,71 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @return a new the wrapped (proxied) list or the provided list if already proxied
    */
   private List ensureBoundListIsProxied(String property) {
-    return ensureBoundListIsProxied(property, (List) proxy.get(property));
+    List newList = ensureBoundListIsProxied(property, (List) proxy.get(property));
+    updateWidgetsAndFireEvent(property, proxy.get(property), newList);
+    return newList;
   }
 
   /**
    * Ensures that the given list property is wrapped in a {@link BindableListWrapper}, so changes to
-   * the list become observable. .
+   * the list become observable.
    * 
    * @param property
    *          the name of the list property
-   * 
    * @param list
    *          the list that needs to be proxied
    * 
    * @return a new the wrapped (proxied) list or the provided list if already proxied
    */
-  List ensureBoundListIsProxied(String property, List list) {
-    if (!(list instanceof BindableListWrapper) && bindings.containsKey(property)) {
-      List newList = new BindableListWrapper(list);
-      updateWidgetsAndFireEvent(property, proxy.get(property), newList);
+  List ensureBoundListIsProxied(final String property, final List list) {
+    if (!(list instanceof BindableListWrapper) && bindings.containsKey(property) && list != null) {
+      final BindableListWrapper newList = new BindableListWrapper(list);
+      newList.addChangeHandler(new BindableListChangeHandler() {
+
+        @Override
+        public void onItemAdded(List oldList, Object item) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+
+        @Override
+        public void onItemAddedAt(List oldList, int index, Object item) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+
+        @Override
+        public void onItemsAdded(List oldList, Collection items) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+
+        @Override
+        public void onItemsAddedAt(List oldList, int index, Collection items) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+
+        @Override
+        public void onItemsCleared(List oldList) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+
+        @Override
+        public void onItemRemovedAt(List oldList, int index) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+
+        @Override
+        public void onItemsRemovedAt(List oldList, List indexes) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+
+        @Override
+        public void onItemChanged(List oldList, int index, Object item) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+      });
+   
       return newList;
     }
+    
     return list;
   }
 

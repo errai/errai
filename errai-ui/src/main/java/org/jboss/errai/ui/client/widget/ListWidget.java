@@ -270,50 +270,50 @@ public abstract class ListWidget<M, W extends HasModel<M> & IsWidget> extends Co
   }
 
   @Override
-  public void onItemAdded(M item) {
+  public void onItemAdded(List<M> oldList, M item) {
     addWidget(item);
   }
 
   @Override
-  public void onItemAddedAt(int index, M item) {
+  public void onItemAddedAt(List<M> oldList, int index, M item) {
     for (int i = index; i < items.size(); i++) {
       addAndReplaceWidget(index, i);
     }
   }
 
   @Override
-  public void onItemsAdded(Collection<? extends M> items) {
+  public void onItemsAdded(List<M> oldList, Collection<? extends M> items) {
     for (M m : items) {
       addWidget(m);
     }
   }
 
   @Override
-  public void onItemsAddedAt(int index, Collection<? extends M> item) {
+  public void onItemsAddedAt(List<M> oldList, int index, Collection<? extends M> item) {
     for (int i = index; i < items.size(); i++) {
       addAndReplaceWidget(index, i);
     }
   }
 
   @Override
-  public void onItemsCleared() {
+  public void onItemsCleared(List<M> oldList) {
     panel.clear();
   }
 
   @Override
-  public void onItemRemovedAt(int index) {
+  public void onItemRemovedAt(List<M> oldList, int index) {
     panel.remove(index);
   }
 
   @Override
-  public void onItemsRemovedAt(List<Integer> indexes) {
+  public void onItemsRemovedAt(List<M> oldList, List<Integer> indexes) {
     for (Integer index : indexes) {
       panel.remove(index);
     }
   }
 
   @Override
-  public void onItemChanged(int index, M item) {
+  public void onItemChanged(List<M> oldList, int index, M item) {
     for (int i = index; i < items.size(); i++) {
       addAndReplaceWidget(index, i);
     }
