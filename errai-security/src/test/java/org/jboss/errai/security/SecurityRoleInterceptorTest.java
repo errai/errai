@@ -39,6 +39,7 @@ public class SecurityRoleInterceptorTest {
     InvocationContext context = mock(InvocationContext.class);
 
     // when
+    when(context.getTarget()).thenReturn(this);
     when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
     when(authenticationService.getRoles()).thenReturn(Arrays.asList(new Role("admin"), new Role("user")));
     interceptor.aroundInvoke(context);
@@ -53,6 +54,7 @@ public class SecurityRoleInterceptorTest {
     InvocationContext context = mock(InvocationContext.class);
 
     // when
+    when(context.getTarget()).thenReturn(this);
     when(context.getMethod()).thenReturn(getClass().getMethod("annotatedServiceMethod"));
     when(authenticationService.getRoles()).thenReturn(new ArrayList<Role>());
     interceptor.aroundInvoke(context);
