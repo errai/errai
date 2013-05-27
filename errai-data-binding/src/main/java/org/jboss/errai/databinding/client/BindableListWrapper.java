@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jboss.errai.common.client.api.Assert;
+
 /**
  * Wraps a List<M> to notify change handlers of all operations that mutate the underlying list.
  * 
@@ -36,6 +38,7 @@ public class BindableListWrapper<M> implements List<M> {
   private final List<BindableListChangeHandler<M>> handlers = new ArrayList<BindableListChangeHandler<M>>();
 
   public BindableListWrapper(List<M> list) {
+    Assert.notNull(list);
     this.list = list;
   }
 
@@ -220,6 +223,7 @@ public class BindableListWrapper<M> implements List<M> {
   }
 
   public void addChangeHandler(BindableListChangeHandler<M> handler) {
+    Assert.notNull(handler);
     handlers.add(handler);
   }
   
