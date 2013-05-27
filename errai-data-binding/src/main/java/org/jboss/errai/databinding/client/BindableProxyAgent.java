@@ -17,7 +17,6 @@
 package org.jboss.errai.databinding.client;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -462,45 +461,9 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
   List ensureBoundListIsProxied(final String property, final List list) {
     if (!(list instanceof BindableListWrapper) && bindings.containsKey(property) && list != null) {
       final BindableListWrapper newList = new BindableListWrapper(list);
-      newList.addChangeHandler(new BindableListChangeHandler() {
-
+      newList.addChangeHandler(new UnspecificListChangeHandler() {
         @Override
-        public void onItemAdded(List oldList, Object item) {
-          firePropertyChangeEvent(property, oldList, newList);
-        }
-
-        @Override
-        public void onItemAddedAt(List oldList, int index, Object item) {
-          firePropertyChangeEvent(property, oldList, newList);
-        }
-
-        @Override
-        public void onItemsAdded(List oldList, Collection items) {
-          firePropertyChangeEvent(property, oldList, newList);
-        }
-
-        @Override
-        public void onItemsAddedAt(List oldList, int index, Collection items) {
-          firePropertyChangeEvent(property, oldList, newList);
-        }
-
-        @Override
-        public void onItemsCleared(List oldList) {
-          firePropertyChangeEvent(property, oldList, newList);
-        }
-
-        @Override
-        public void onItemRemovedAt(List oldList, int index) {
-          firePropertyChangeEvent(property, oldList, newList);
-        }
-
-        @Override
-        public void onItemsRemovedAt(List oldList, List indexes) {
-          firePropertyChangeEvent(property, oldList, newList);
-        }
-
-        @Override
-        public void onItemChanged(List oldList, int index, Object item) {
+        void onListChanged(List oldList) {
           firePropertyChangeEvent(property, oldList, newList);
         }
       });
