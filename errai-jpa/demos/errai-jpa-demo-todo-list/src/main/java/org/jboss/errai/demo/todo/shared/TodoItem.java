@@ -7,15 +7,13 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 @Portable @Bindable @Entity
 @NamedQueries({
-  @NamedQuery(name="currentItems", query="SELECT i FROM TodoItem i WHERE i.archived=false ORDER BY i.text"),
+  @NamedQuery(name="currentItemsForUser", query="SELECT i FROM TodoItem i WHERE i.user = :user AND i.archived=false ORDER BY i.text"),
   @NamedQuery(name="allItemsForUser", query="SELECT i FROM TodoItem i WHERE i.user = :user ORDER BY i.text")
 })
 public class TodoItem {
@@ -29,8 +27,6 @@ public class TodoItem {
   @ManyToOne(cascade=CascadeType.MERGE)
   private User user;
 
-  @NotNull
-  @Size(min=1)
   private String text;
 
   private Boolean done = Boolean.FALSE;

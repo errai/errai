@@ -84,7 +84,7 @@ public class TodoListApp extends Composite {
 
   private void refreshItems() {
     System.out.println("Todo List Demo: refreshItems()");
-    TypedQuery<TodoItem> query = em.createNamedQuery("allItemsForUser", TodoItem.class);
+    TypedQuery<TodoItem> query = em.createNamedQuery("currentItemsForUser", TodoItem.class);
     query.setParameter("user", user);
     itemContainer.setItems(query.getResultList());
   }
@@ -109,7 +109,7 @@ public class TodoListApp extends Composite {
 
   @EventHandler("archiveButton")
   void archive(ClickEvent event) {
-    TypedQuery<TodoItem> query = em.createNamedQuery("allItemsForUser", TodoItem.class);
+    TypedQuery<TodoItem> query = em.createNamedQuery("currentItemsForUser", TodoItem.class);
     query.setParameter("user", user);
     for (TodoItem item : query.getResultList()) {
       if (item.isDone()) {
