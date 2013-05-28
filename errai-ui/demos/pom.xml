@@ -149,7 +149,7 @@
           <webResources>
             <resource>
               <!-- this is relative to the pom.xml directory -->
-              <directory>src/${webDescriptor}</directory>
+              <directory>src/main/${webDescriptor}</directory>
             </resource>
           </webResources>
         </configuration>
