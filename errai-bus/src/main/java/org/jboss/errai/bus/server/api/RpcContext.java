@@ -15,12 +15,12 @@
  */
 package org.jboss.errai.bus.server.api;
 
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.messaging.Message;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.QueueSession;
 
 /**
  * This utility provides access to {@link Message} resources otherwise not visible to RPC endpoints. It can be used to
@@ -48,11 +48,15 @@ public class RpcContext {
     threadLocalMessage.remove();
   }
 
+  public static Message getMessage() {
+    return threadLocalMessage.get();
+  }
+
   /**
    * @return the QueueSession associated with this {@link Thread}
    */
   public static QueueSession getQueueSession() {
-    return threadLocalMessage.get().getResource(QueueSession.class, "Session");
+    return getMessage().getResource(QueueSession.class, "Session");
   }
 
   /**
@@ -66,6 +70,6 @@ public class RpcContext {
    * @return the servlet request instance associated with this {@link Thread}
    */
   public static ServletRequest getServletRequest() {
-    return threadLocalMessage.get().getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
+    return getMessage().getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
   }
 }

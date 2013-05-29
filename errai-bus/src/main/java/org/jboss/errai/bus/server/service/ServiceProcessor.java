@@ -15,27 +15,22 @@
  */
 package org.jboss.errai.bus.server.service;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.jboss.errai.bus.client.api.Local;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.common.client.framework.ProxyFactory;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
-import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
-import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
+import org.jboss.errai.bus.server.io.RPCEndpointFactory;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
@@ -45,14 +40,18 @@ import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.framework.ProxyFactory;
 import org.jboss.errai.common.metadata.MetaDataProcessor;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.config.rebind.ProxyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -214,16 +213,18 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
     final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
+    final ServiceInstanceProvider genericSvc = new ServiceInstanceProvider() {
+        @Override
+        public Object get(Message message) {
+          return svc;
+        }
+      };
     // beware of classloading issues. better reflect on the actual instance
     for (Class<?> intf : svc.getClass().getInterfaces()) {
       for (final Method method : intf.getMethods()) {
         if (ProxyUtil.isMethodInInterface(remoteIface, method)) {
-          epts.put(ProxyUtil.createCallSignature(intf, method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
-            @Override
-            public Object get(Message message) {
-              return svc;
-            }
-          }, method, context.getBus()));
+          epts.put(ProxyUtil.createCallSignature(intf, method),
+              RPCEndpointFactory.createEndpointFor(genericSvc, method, context.getBus()));
         }
       }
     }
