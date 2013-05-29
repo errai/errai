@@ -3,9 +3,9 @@ package org.jboss.errai.ui.rebind.less;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.util.collect.Lists;
 import com.google.gwt.dom.client.StyleInjector;
-import com.sun.tools.internal.ws.processor.generator.GeneratorException;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
@@ -39,7 +39,7 @@ public class StyleGeneratorCodeDecorator extends IOCDecoratorExtension<Templated
       try {
         sb.append(output(baseClass, style));
       } catch (Exception e) {
-        throw new GeneratorException("could not generate css from less file", e);
+        throw new GenerationException("could not generate css from less file", e);
       }
     }
 
