@@ -38,7 +38,7 @@ public class LoginPage extends Composite {
   @Inject private @DataField Button loginButton;
   @Inject private @DataField TransitionAnchor<SignupPage> signupLink;
 
-  @Inject private TransitionTo<TodoListApp> toListPage;
+  @Inject private TransitionTo<TodoListPage> toListPage;
 
   @Inject private Caller<LoginService> loginService;
   @Inject private ClientSyncManager syncManager;

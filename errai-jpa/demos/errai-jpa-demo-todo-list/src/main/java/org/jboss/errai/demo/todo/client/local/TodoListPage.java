@@ -41,7 +41,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 @Templated("#main")
 @Page(path="list")
-public class TodoListApp extends Composite {
+public class TodoListPage extends Composite {
 
   @Inject private EntityManager em;
   @Inject private ClientBeanManager bm;

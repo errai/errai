@@ -53,7 +53,7 @@ public class SignupPage extends Composite {
 
   @Inject private Caller<SignupService> signupService;
 
-  @Inject private TransitionTo<TodoListApp> todoListPageLink;
+  @Inject private TransitionTo<TodoListPage> todoListPageLink;
 
   @Inject private ClientSyncManager syncManager;
 
