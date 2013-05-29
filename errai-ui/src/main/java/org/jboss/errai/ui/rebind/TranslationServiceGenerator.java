@@ -62,12 +62,12 @@ import org.jboss.errai.reflections.util.FilterBuilder;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.MessageBundle;
 import org.jboss.errai.ui.shared.TemplateUtil;
+import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.shared.DomVisit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.tidy.Tidy;
 
 import com.google.gwt.core.client.GWT;
@@ -406,144 +406,9 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * @param i18nPrefix
    */
   private static Map<String, String> getTemplateI18nValues(Element templateRoot, final String i18nPrefix) {
-    final Map<String, String> i18nValues = new HashMap<String, String>();
-    travisit(templateRoot, new DomVisitor() {
-
-      // MAINTAINER WARNING: there is parallel logic in TranslateUtil.translateTemplate() that must be kept in sync with this
-
-      @Override
-      public boolean visit(Element element) {
-        // Developers can mark entire sections of the template as "do not translate"
-        if ("dummy".equals(element.getAttribute("data-role"))) {
-          System.out.println("Skipping...");
-          return false;
-        }
-        // If the element either explicitly enables i18n (via an i18n key) or is a text-only
-        // node, record it.
-        if (hasAttribute(element, "data-i18n-key") || isTextOnly(element)) {
-          recordElement(i18nPrefix, element, i18nValues);
-          return false;
-        }
-
-        if (hasAttribute(element, "title")) {
-          recordAttribute(i18nPrefix, element, "title", i18nValues);
-        }
-        if (hasAttribute(element, "placeholder")) {
-          recordAttribute(i18nPrefix, element, "placeholder", i18nValues);
-        }
-        return true;
-      }
-
-      /**
-       * Records the translation key/value for an element.
-       * @param i18nKeyPrefix
-       * @param element
-       * @param i18nValues
-       */
-      private void recordElement(String i18nKeyPrefix, Element element, Map<String, String> i18nValues) {
-        String translationKey = i18nKeyPrefix + getTranslationKey(element);
-        String translationValue = getTextContent(element);
-        i18nValues.put(translationKey, translationValue);
-      }
-
-      /**
-       * Records the translation key/value for an attribute.
-       * @param i18nKeyPrefix
-       * @param element
-       * @param attributeName
-       * @param i18nValues
-       */
-      private void recordAttribute(String i18nKeyPrefix, Element element, String attributeName,
-              Map<String, String> i18nValues) {
-        String elementKey = null;
-        if (hasAttribute(element, "data-field")) {
-          elementKey = element.getAttribute("data-field");
-        } else if (hasAttribute(element, "id")) {
-          elementKey = element.getAttribute("id");
-        } else if (hasAttribute(element, "name")) {
-          elementKey = element.getAttribute("name");
-        } else {
-          elementKey = getTranslationKey(element);
-        }
-        // If we couldn't figure out a key for this thing, then just bail.
-        if (elementKey == null || elementKey.trim().length() == 0) {
-          return;
-        }
-        String translationKey = i18nKeyPrefix + elementKey;
-        translationKey += "-" + attributeName;
-        String translationValue = element.getAttribute(attributeName);
-        i18nValues.put(translationKey, translationValue);
-      }
-
-      /**
-       * Gets a translation key associated with the given element.
-       * @param element
-       */
-      protected String getTranslationKey(Element element) {
-        String translationKey = null;
-        String currentText = getTextContent(element);
-        if (hasAttribute(element, "data-i18n-key")) {
-          translationKey = element.getAttribute("data-i18n-key");
-        } else {
-          translationKey = currentText.replaceAll("[:\\s'\"]", "_");
-          if (translationKey.length() > 128) {
-            translationKey = translationKey.substring(0, 128) + translationKey.hashCode();
-          }
-        }
-        return translationKey;
-      }
-
-      /**
-       * Returns true if the given element has some text and no element children.
-       * @param element
-       */
-      private boolean isTextOnly(Element element) {
-        NodeList childNodes = element.getChildNodes();
-        for (int idx = 0; idx < childNodes.getLength(); idx++) {
-          Node item = childNodes.item(idx);
-          // As soon as we hit an element, we can return false
-          if (item.getNodeType() == Node.ELEMENT_NODE) {
-            return false;
-          }
-        }
-        String textContent = getTextContent(element);
-        return (textContent != null) && (textContent.trim().length() > 0);
-      }
-
-      /**
-       * Called to determine if an element has an attribute defined.
-       * @param element
-       * @param attributeName
-       */
-      private boolean hasAttribute(Element element, String attributeName) {
-        String attribute = element.getAttribute(attributeName);
-        return (attribute != null && attribute.trim().length() > 0);
-      }
-
-      /**
-       * Gets the text content for the given element.
-       * @param element
-       */
-      private String getTextContent(Element element) {
-        StringBuilder text = new StringBuilder();
-        NodeList childNodes = element.getChildNodes();
-        boolean first = true;
-        for (int idx = 0; idx < childNodes.getLength(); idx++) {
-          Node item = childNodes.item(idx);
-          if (item.getNodeType() == Node.TEXT_NODE) {
-            if (first) {
-              first = false;
-            } else {
-              text.append(" ");
-            }
-            text.append(item.getNodeValue());
-          }
-        }
-        return text.toString();
-      }
-
-    });
-    return i18nValues;
+    final TemplateVisitor visitor = new TemplateVisitor(i18nPrefix);
+    DomVisit.visit(templateRoot, visitor);
+    return visitor.getI18nValues();
   }
 
   /**
@@ -572,35 +437,6 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * Called to traverse and visit the tree of {@link Element}s.
-   * @param element
-   * @param visitor
-   */
-  private static void travisit(Element element, DomVisitor visitor) {
-    if (!visitor.visit(element))
-      return;
-    NodeList childNodes = element.getChildNodes();
-    for (int idx = 0; idx < childNodes.getLength(); idx++) {
-      Node childNode = childNodes.item(idx);
-      if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-        travisit((Element) childNode, visitor);
-      }
-    }
-  }
-
-  /**
-   * A simple dom visitor interface.
-   */
-  private static interface DomVisitor {
-    /**
-     * Visits an element in the dom, returns true if the visitor should
-     * continue visiting down the dom.
-     * @param element
-     */
-    boolean visit(Element element);
   }
 
   /**

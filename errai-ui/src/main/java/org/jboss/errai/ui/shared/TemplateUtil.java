@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ui.shared.wrapper.ElementWrapper;
 
 /**
  * Errai UI Runtime Utility for handling {@link Template} composition.
@@ -158,108 +159,27 @@ public final class TemplateUtil {
 
     logger.fine("Translating template: " + templateFile);
     final String i18nKeyPrefix = getI18nPrefix(templateFile);
-    Visit.depthFirst(templateRoot, new Visitor<Object>() {
-
-      // MAINTAINER WARNING: there is parallel logic in TranslationServiceGenerator.getTemplateI18nValues() that must be kept in sync with this
-
+    DomVisit.visit(new ElementWrapper(templateRoot), new TemplateVisitor(i18nKeyPrefix) {
       @Override
-      public boolean visit(VisitContextMutable<Object> context, Element element) {
-        // Developers can mark entire sections of the template as "do not translate"
-        if ("dummy".equals(element.getAttribute("data-role"))) {
-          return false;
-        }
-        // If the element either explicitly enables i18n (via an i18n key) or is a text-only
-        // node, translate it.
-        if (element.hasAttribute("data-i18n-key") || isTextOnly(element)) {
-          translateElement(i18nKeyPrefix, element);
-          return false;
-        }
-
-        if (element.hasAttribute("title")) {
-          translateAttribute(i18nKeyPrefix, element, "title");
-        }
-        if (element.hasAttribute("placeholder")) {
-          translateAttribute(i18nKeyPrefix, element, "placeholder");
-        }
-        return true;
-      }
-
-      /**
-       * Translates the given element.
-       * @param i18nKeyPrefix
-       * @param element
-       */
-      private void translateElement(String i18nKeyPrefix, Element element) {
+      protected void visitElement(String i18nKeyPrefix, org.w3c.dom.Element element) {
         String translationKey = i18nKeyPrefix + getTranslationKey(element);
         String translationValue = getI18nValue(translationKey);
         if (translationValue != null)
-          element.setInnerHTML(translationValue);
+          ((ElementWrapper) element).getElement().setInnerHTML(translationValue);
       }
 
-      /**
-       * Translates an attribute of the given element.
-       * @param i18nKeyPrefix
-       * @param element
-       * @param attributeName
-       */
-      private void translateAttribute(String i18nKeyPrefix, Element element, String attributeName) {
-        String elementKey = null;
-        if (element.hasAttribute("data-field")) {
-          elementKey = element.getAttribute("data-field");
-        } else if (element.hasAttribute("id")) {
-          elementKey = element.getAttribute("id");
-        } else if (element.hasAttribute("name")) {
-          elementKey = element.getAttribute("name");
-        } else {
-          elementKey = getTranslationKey(element);
-        }
-        // If we couldn't figure out a key for this thing, then just bail.
-        if (elementKey == null || elementKey.trim().length() == 0) {
-          return;
-        }
-        String translationKey = i18nKeyPrefix + elementKey;
+      @Override
+      protected void visitAttribute(String i18nKeyPrefix, org.w3c.dom.Element element, String attributeName) {
+        String translationKey = i18nKeyPrefix + getElementKey(element);
         translationKey += "-" + attributeName;
         String translationValue = getI18nValue(translationKey);
         if (translationValue != null)
           element.setAttribute(attributeName, translationValue);
       }
 
-      /**
-       * Gets a translation key associated with the given element.
-       * @param element
-       */
-      protected String getTranslationKey(Element element) {
-        String translationKey = null;
-        String currentText = element.getInnerText();
-        if (element.hasAttribute("data-i18n-key")) {
-          translationKey = element.getAttribute("data-i18n-key");
-        } else {
-          translationKey = currentText.replaceAll("[:\\s'\"]", "_");
-          if (translationKey.length() > 128) {
-            translationKey = translationKey.substring(0, 128) + translationKey.hashCode();
-          }
-        }
-        return translationKey;
-      }
-
-      /**
-       * Returns true if the given element has some text and no element children.
-       * @param element
-       */
-      private boolean isTextOnly(Element element) {
-        String text = element.getInnerText();
-        return (element.getFirstChildElement() == null) && text != null && text.trim().length() > 0;
-      }
-
-      /**
-       * Looks up the proper value for the given translation key.  Uses the
-       * TranslationService to lookup the proper value for the current locale.
-       * @param translationKey
-       */
       private String getI18nValue(String translationKey) {
         return getTranslationService().getTranslation(translationKey);
       }
-
     });
   }
 
