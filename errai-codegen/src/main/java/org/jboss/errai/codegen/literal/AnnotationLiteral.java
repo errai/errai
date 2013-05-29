@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -61,29 +63,17 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
 
     String lastMethodRendered = "";
     String lastValueRendered;
+    Set<String> enumTypes = new HashSet<String>();
 
     for (final Method method : sortedMethods) {
       if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
               && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
-        try {
-          method.setAccessible(true);
-          lastMethodRendered = method.getName();
-          final Object methodValue = method.invoke(getValue());
-
-          if (method.getReturnType().isArray() && Array.getLength(methodValue) == 1) {
-            lastValueRendered = LiteralFactory.getLiteral(Array.get(methodValue, 0)).getCanonicalString(context);
-          }
-          else {
-            lastValueRendered = LiteralFactory.getLiteral(method.invoke(getValue())).getCanonicalString(context);
-          }
-
-          elements.add(lastMethodRendered + " = " + lastValueRendered);
-        }
-        catch (IllegalAccessException e) {
-          throw new RuntimeException("error generation annotation wrapper", e);
-        }
-        catch (InvocationTargetException e) {
-          throw new RuntimeException("error generation annotation wrapper", e);
+        method.setAccessible(true);
+        lastMethodRendered = method.getName();
+        lastValueRendered = getLiteral(context, method);
+        elements.add(lastMethodRendered + " = " + lastValueRendered);
+        if (method.getReturnType().isEnum()) {
+          enumTypes.add(method.getReturnType().getSimpleName());
         }
       }
     }
@@ -98,12 +88,59 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
       else builder.append(")");
     }
 
-    String toReturn = builder.toString().replaceAll("new (String|int|float|double|boolean|byte|short)\\[\\]", "");
+    String toReturn = builder.toString().replaceAll("new (String|int|long|float|double|boolean|byte|short|char|Class)\\[\\]", "");
+    for (String enumType : enumTypes) {
+      toReturn = toReturn.replaceAll("new " + enumType + "\\[\\]", "");
+    }
 
     if (elements.size() == 1 && "value".endsWith(lastMethodRendered)) {
       toReturn = toReturn.replaceFirst("(\\s)*value =(\\s)+", "");
     }
 
     return toReturn;
+  }
+
+  private String getLiteral(Context context, Method method) {
+    try {
+      Class<?> methodType = method.getReturnType();
+      Object methodValue = method.invoke(getValue());
+
+      if (method.getReturnType().isArray()) {
+        return getArrayLiteral(context, methodType, methodValue);
+      } else {
+        return getNonArrayLiteral(context, methodType, methodValue);
+      }
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException("error generation annotation wrapper", e);
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException("error generation annotation wrapper", e);
+    }
+  }
+
+  private String getArrayLiteral(Context context, Class<?> type, Object obj) {
+    if (Array.getLength(obj) == 1) {
+      return getNonArrayLiteral(context, type.getComponentType(), Array.get(obj, 0));
+    } else if (type.getComponentType().isAnnotation()) {
+      String result = "{ ";
+      Annotation[] annotations = (Annotation[]) obj;
+      for (int i = 0; i < annotations.length; i++) {
+        result += getNonArrayLiteral(context, type.getComponentType(), annotations[i]);
+        if ((i + 1) != annotations.length) {
+          result += ", ";
+        }
+      }
+      result += " }";
+      return result;
+    } else {
+      return LiteralFactory.getLiteral(obj).getCanonicalString(context);
+    }
+  }
+
+  private String getNonArrayLiteral(Context context, Class<?> type, Object obj) {
+    if (type.isAnnotation()) {
+      return new AnnotationLiteral((Annotation) obj).getCanonicalString(context);
+    } else {
+      return LiteralFactory.getLiteral(obj).getCanonicalString(context);
+    }
   }
 }

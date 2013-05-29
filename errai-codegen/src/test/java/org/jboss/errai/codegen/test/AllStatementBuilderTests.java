@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
   AnnotationEncoderTest.class, 
+  AnnotationTest.class,
   AnonymousClassStructureBuilderTest.class,
   ArithmeticTest.class,
   ContextBuilderTest.class, 
