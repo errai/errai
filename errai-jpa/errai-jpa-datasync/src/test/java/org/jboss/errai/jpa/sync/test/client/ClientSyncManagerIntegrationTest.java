@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import junit.framework.AssertionFailedError;
+
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -65,6 +67,8 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
+    assertFalse("ClientSyncManager 'sync in progress' flag got stuck on true", csm.isSyncInProgress());
+
     InitVotes.reset();
     setRemoteCommunicationEnabled(true);
     super.gwtTearDown();
@@ -304,9 +308,123 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
     assertNull(dsem.find(SimpleEntity.class, entity.getId()));
   }
 
-  public <Y> void performColdSync(
+  public void testConcurrentSyncRequestsRejected() {
+    SimpleEntity entity = new SimpleEntity();
+    entity.setString("the string value");
+    entity.setDate(new Timestamp(1234567L));
+    entity.setInteger(9999);
+
+    ErraiEntityManager esem = csm.getExpectedStateEm();
+    ErraiEntityManager dsem = csm.getDesiredStateEm();
+
+    // first persist the desired state
+    SimpleEntity clientEntity = dsem.merge(entity);
+    dsem.flush();
+    dsem.clear();
+
+    Long originalId = clientEntity.getId();
+    List<SyncRequestOperation<SimpleEntity>> expectedClientRequests = new ArrayList<SyncRequestOperation<SimpleEntity>>();
+    expectedClientRequests.add(SyncRequestOperation.created(clientEntity));
+
+    // the server creates the entity with a different ID and notifies us of the change
+    List<SyncResponse<SimpleEntity>> fakeServerResponses = new ArrayList<SyncResponse<SimpleEntity>>();
+    SimpleEntity.setId(entity, 1010L);
+    fakeServerResponses.add(new IdChangeResponse<SimpleEntity>(originalId, entity));
+
+    Runnable doDuringSync = new Runnable() {
+
+      boolean alreadyRunning = false;
+
+      @Override
+      public void run() {
+        if (alreadyRunning) {
+          fail("Detected recursive call to coldSync()");
+        }
+        alreadyRunning = true;
+
+        // at this point, ClientSyncManager is in the middle of a coldSync call. for safety, it is required to fail.
+        try {
+          csm.coldSync("allSimpleEntities", SimpleEntity.class, Collections.<String, Object>emptyMap(),
+                  new RemoteCallback<List<SyncResponse<SimpleEntity>>>() {
+            @Override
+            public void callback(List<SyncResponse<SimpleEntity>> response) {
+              fail("this recursive call to coldSync must not succeed");
+            }
+          },
+          new ErrorCallback<List<SyncResponse<SimpleEntity>>>() {
+            @Override
+            public boolean error(List<SyncResponse<SimpleEntity>> message, Throwable throwable) {
+              fail("this recursive call to coldSync should have failed synchronously");
+              throw new AssertionError();
+            }
+          });
+          fail("recursive call to coldSync() failed to throw an exception");
+        }
+        catch (IllegalStateException ex) {
+          System.out.println("Got expected IllegalStateException. Returning normally so client state assertions can run.");
+          // expected
+        }
+      }
+    };
+
+    performColdSync(expectedClientRequests, fakeServerResponses, doDuringSync);
+
+    // now ensure the results of the original sync request were not harmed
+    assertFalse(csm.isSyncInProgress());
+    assertEquals(esem.find(SimpleEntity.class, entity.getId()).toString(), entity.toString());
+    assertEquals(dsem.find(SimpleEntity.class, entity.getId()).toString(), entity.toString());
+    assertNull(esem.find(SimpleEntity.class, originalId));
+    assertNull(dsem.find(SimpleEntity.class, originalId));
+  }
+
+  /**
+   * Calls ClientSyncManager.coldSync() in a way that no actual server
+   * communication happens. The given "fake" server response is returned
+   * immediately to the ClientSyncManager's callback function.
+   *
+   * @param expectedClientRequests
+   *          The list of requests that the ClientSyncManager is expected to
+   *          produce, based on the current state of its Expected State
+   *          EntityManager and its Desired State EntityManager. If the contents
+   *          of this list do not match the list produced by the
+   *          ClientSyncManager, this method will throw an
+   *          {@link AssertionFailedError}.
+   * @param fakeServerResponses
+   *          The list of SyncResponse operations to feed back to
+   *          ClientSyncManager. The ClientSyncManager will process this list as
+   *          if it was returned by the server.
+   */
+  private <Y> void performColdSync(
           final List<SyncRequestOperation<Y>> expectedClientRequests,
           final List<SyncResponse<Y>> fakeServerResponses) {
+    performColdSync(expectedClientRequests, fakeServerResponses, null);
+  }
+
+    /**
+   * Calls ClientSyncManager.coldSync() in a way that no actual server
+   * communication happens. The given "fake" server response is returned
+   * immediately to the ClientSyncManager's callback function.
+   *
+   * @param expectedClientRequests
+   *          The list of requests that the ClientSyncManager is expected to
+   *          produce, based on the current state of its Expected State
+   *          EntityManager and its Desired State EntityManager. If the contents
+   *          of this list do not match the list produced by the
+   *          ClientSyncManager, this method will throw an
+   *          {@link AssertionFailedError}.
+   * @param fakeServerResponses
+   *          The list of SyncResponse operations to feed back to
+   *          ClientSyncManager. The ClientSyncManager will process this list as
+   *          if it was returned by the server.
+   * @param doDuringSync
+   *          If non-null, this runnable is executed after the sync request ops
+   *          are checked against the expected ones, but before the fake
+   *          responses are delivered to the client sync manager.
+   */
+    private <Y> void performColdSync(
+            final List<SyncRequestOperation<Y>> expectedClientRequests,
+            final List<SyncResponse<Y>> fakeServerResponses,
+            final Runnable doDuringSync) {
 
     csm.dataSyncService = new Caller<DataSyncService>() {
 
@@ -319,6 +437,11 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
           public <X> List<SyncResponse<X>> coldSync(SyncableDataSet<X> dataSet, List<SyncRequestOperation<X>> actualClientRequests) {
             List erasedExpectedClientRequests = expectedClientRequests;
             assertSyncRequestsEqual(erasedExpectedClientRequests, actualClientRequests);
+
+            if (doDuringSync != null) {
+              doDuringSync.run();
+            }
+
             RemoteCallback erasedCallback = callback;
             erasedCallback.callback(fakeServerResponses);
             return null;
@@ -328,8 +451,7 @@ public class ClientSyncManagerIntegrationTest extends GWTTestCase {
 
       @Override
       public DataSyncService call(final RemoteCallback<?> callback, final ErrorCallback<?> errorCallback) {
-        fail("Unexpected use of callback");
-        return null; // NOTREACHED
+        return call(callback);
       }
 
       @Override

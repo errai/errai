@@ -74,10 +74,15 @@ public class ClientSyncManager {
    */
   private final JpaAttributeAccessor attributeAccessor = new ErraiAttributeAccessor();
 
-  /**
-   * These are all the data sets we're currently keeping in sync.
-   */
+  ///**
+  // * These are all the data sets we're currently keeping in sync.
+  // */
   //private final List<SyncableDataSet<?>> activeSyncSets = new ArrayList<SyncableDataSet<?>>();
+
+  /**
+   * If true, there is a pending sync request sent to the server.
+   */
+  private boolean syncInProgress;
 
   @PostConstruct
   private void setup() {
@@ -123,6 +128,10 @@ public class ClientSyncManager {
           String queryName, Class<E> queryResultType, Map<String, Object> queryParams,
           final RemoteCallback<List<SyncResponse<E>>> onCompletion,
           final ErrorCallback<?> onError) {
+    if (syncInProgress) {
+      throw new IllegalStateException("A data sync operation is already in progress");
+    }
+    syncInProgress = true;
     final TypedQuery<E> query = desiredStateEm.createNamedQuery(queryName, queryResultType);
     final TypedQuery<E> expectedQuery = expectedStateEm.createNamedQuery(queryName, queryResultType);
     for (Map.Entry<String, Object> param : queryParams.entrySet()) {
@@ -160,20 +169,42 @@ public class ClientSyncManager {
     }
 
     final SyncableDataSet<E> syncSet = SyncableDataSet.from(queryName, queryResultType, queryParams);
+
     RemoteCallback<List<SyncResponse<E>>> onSuccess = new RemoteCallback<List<SyncResponse<E>>>() {
       @Override
       public void callback(List<SyncResponse<E>> syncResponse) {
-        applyResults(syncResponse);
+        try {
+          applyResults(syncResponse);
+        }
+        finally {
+          syncInProgress = false;
+        }
         onCompletion.callback(syncResponse);
       }
     };
 
-    if (onError != null) {
-      dataSyncService.call(onSuccess, onError).coldSync(syncSet, syncRequests);
-    }
-    else {
-      dataSyncService.call(onSuccess).coldSync(syncSet, syncRequests);
-    }
+    @SuppressWarnings("rawtypes")
+    ErrorCallback errorCallback = new ErrorCallback() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public boolean error(Object message, Throwable throwable) {
+        syncInProgress = false;
+        ErrorCallback rawOnError = onError;
+        return rawOnError.error(message, throwable);
+      }
+    };
+    dataSyncService.call(onSuccess, errorCallback).coldSync(syncSet, syncRequests);
+  }
+
+  /**
+   * Returns true if a sync request has been sent to the server for which no
+   * response or error has yet been received; false if no sync operation is
+   * currently pending. If this method returns true, a call to
+   * {@link #coldSync(String, Class, Map, RemoteCallback, ErrorCallback)} will
+   * fail immediately with an IllegalStateException.
+   */
+  public boolean isSyncInProgress() {
+    return syncInProgress;
   }
 
   /**
