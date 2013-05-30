@@ -11,13 +11,10 @@
   <inherits name="org.jboss.errai.enterprise.CDI"/>
   <inherits name="org.jboss.errai.ui.UI"/>
   <inherits name="org.jboss.errai.ui.Cordova"/>
+  <inherits name="org.jboss.errai.validation.Validation"/>
+  <inherits name="org.jboss.errai.databinding.DataBinding"/>
 
   <inherits name="org.hibernate.validator.HibernateValidator"/>
-  <inherits name="org.jboss.errai.databinding.DataBinding"/>
-  <replace-with
-          class="org.jboss.errai.example.client.local.KitchenSinkValidatorFactory">
-    <when-type-is class="javax.validation.ValidatorFactory"/>
-  </replace-with>
 
   <replace-with class="org.jboss.errai.example.client.local.Config">
     <when-type-is class="org.jboss.errai.bus.client.framework.Configuration"/>

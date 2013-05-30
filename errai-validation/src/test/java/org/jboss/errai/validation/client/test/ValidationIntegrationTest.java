@@ -20,11 +20,13 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.validation.client.ModuleWithInjectedValidator;
+import org.jboss.errai.validation.client.TestGroup;
 import org.jboss.errai.validation.client.TestModel;
 import org.jboss.errai.validation.client.api.BeanValidator;
 
@@ -32,6 +34,7 @@ import org.jboss.errai.validation.client.api.BeanValidator;
  * Integration test for injected {@link BeanValidator}s.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Johannes Barop <jb@barop.de>
  */
 public class ValidationIntegrationTest extends AbstractErraiIOCTest {
 
@@ -63,4 +66,16 @@ public class ValidationIntegrationTest extends AbstractErraiIOCTest {
     Set<ConstraintViolation<TestModel>> violations = validator.validate(model);
     assertEquals("Expected two constraint violations", 2, violations.size());
   }
+
+  public void testValidationWithGroup() {
+    Validator validator =  new BeanValidator();
+
+    TestModel model = DataBinder.forModel(new TestModel()).getModel();
+    Set<ConstraintViolation<TestModel>> violations = validator.validate(model, TestGroup.class);
+    assertEquals("Expected one constraint violations", 1, violations.size());
+
+    violations = validator.validate(model, Default.class, TestGroup.class);
+    assertEquals("Expected three constraint violations", 3, violations.size());
+  }
+
 }
