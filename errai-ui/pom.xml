@@ -94,9 +94,9 @@
       </dependency>
 
       <dependency>
-        <groupId>net.sf.jtidy</groupId>
-        <artifactId>jtidy</artifactId>
-        <version>r938</version>
+        <groupId>net.sourceforge.nekohtml</groupId>
+        <artifactId>nekohtml</artifactId>
+        <version>1.9.18</version>
       </dependency>
 
      <dependency>
@@ -108,6 +108,9 @@
 
   <build>
     <resources>
+      <resource>
+        <directory>target/generated-sources</directory>
+      </resource>
       <resource>
         <directory>src/main/resources</directory>
       </resource>
@@ -142,7 +145,7 @@
                   <version>1.4.01</version>
                   <classifier>sources</classifier>
                   <overWrite>false</overWrite>
-                  <outputDirectory>target/generated-sources</outputDirectory>
+                  <outputDirectory>target/generated-sources/org/w3c/dom/super</outputDirectory>
                 </artifactItem>
               </artifactItems>
             </configuration>
