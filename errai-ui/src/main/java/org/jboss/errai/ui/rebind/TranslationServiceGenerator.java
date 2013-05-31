@@ -18,6 +18,7 @@ package org.jboss.errai.ui.rebind;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
+import org.cyberneko.html.parsers.DOMParser;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
@@ -66,9 +68,10 @@ import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.api.annotations.Bundle;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.DomVisit;
+import org.jboss.errai.ui.rebind.chain.TemplateChain;
+import org.jboss.errai.ui.rebind.chain.TranslateCommand;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.tidy.Tidy;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -77,6 +80,9 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
+import org.xml.sax.InputSource;
+
+import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.VALUES;
 
 /**
  * Generates a concrete subclass of {@link TranslationService}. This class is
@@ -248,8 +254,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   /**
    * Create an inner interface for the given {@link MessageBundle} class and its
    * corresponding JSON resource.
-   * @param ctx
-   * @param bundlePath
+   * @param bundlePath path to the message bundle
    */
   private BuildMetaClass generateMessageBundleResourceInterface(final String bundlePath) {
     final ClassStructureBuilder<?> componentMessageBundleResource = ClassBuilder
@@ -262,9 +267,10 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
               public Class<? extends Annotation> annotationType() {
                 return Source.class;
               }
+
               @Override
               public String[] value() {
-                return new String[] { bundlePath };
+                return new String[]{bundlePath};
               }
             }).finish();
     return componentMessageBundleResource.getClassDefinition();
@@ -274,7 +280,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
    * Gets the locale information from the given bundle path.  For example,
    * if the bundle path is "org/example/myBundle_en_US.json" then this method will
    * return "en_US".
-   * @param bundlePath
+   * @param bundlePath path to the message bundle
    */
   public static String getLocaleFromBundlePath(String bundlePath) {
     Matcher matcher = LOCALE_IN_FILENAME_PATTERN.matcher(bundlePath);
@@ -308,13 +314,13 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
       String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
       String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
-      Document templateNode = parseTemplate(templateFileName);
-      if (templateNode == null) // TODO log that the template failed to parse
-        continue;
-      Element templateRoot = getTemplateRootNode(templateNode, templateFragment);
-      if (templateRoot == null) // TODO log that the template root couldn't be found
-        continue;
-      Map<String, String> i18nValues = getTemplateI18nValues(templateRoot, i18nPrefix);
+
+      final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
+      final TemplateChain chain = TemplateChain.getInstance();
+      chain.visitTemplate(resource, TranslateCommand.buildContext(templateFragment, i18nPrefix));
+
+      Map<String, String> i18nValues = chain.getLastResult(VALUES, Map.class);
+
       allI18nValues.putAll(i18nValues);
       Map<String, String> templateI18nValues = indexedI18nValues.get(templateBundleName);
       if (templateI18nValues == null) {
@@ -369,12 +375,12 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
   protected static Document parseTemplate(String templateFileName) {
     InputStream inputStream = TranslationServiceGenerator.class.getClassLoader().getResourceAsStream(templateFileName);
     try {
-      if (inputStream != null) {
-        Tidy tidy = new Tidy();
-        return tidy.parseDOM(inputStream, System.out);
-      } else {
-        return null;
-      }
+      final DOMParser parser = new DOMParser();
+      parser.parse(new InputSource(inputStream));
+      return parser.getDocument();
+    } catch (Exception e) {
+      //throw new IllegalArgumentException("could not read template " + templateFileName);
+      return null;
     } finally {
       IOUtils.closeQuietly(inputStream);
     }
@@ -390,7 +396,7 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       XPath xpath = XPathFactory.newInstance().newXPath();
       Element documentElement = templateNode.getDocumentElement();
       if (templateFragment == null || templateFragment.trim().length() == 0) {
-        return (Element) xpath.evaluate("//body", documentElement, XPathConstants.NODE);
+        return (Element) xpath.evaluate("//BODY", documentElement, XPathConstants.NODE);
       } else {
         return (Element) xpath.evaluate("//*[@data-field='"+templateFragment+"']", documentElement, XPathConstants.NODE);
       }

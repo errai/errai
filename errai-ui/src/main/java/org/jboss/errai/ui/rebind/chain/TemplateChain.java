@@ -1,0 +1,32 @@
+package org.jboss.errai.ui.rebind.chain;
+
+import org.jboss.errai.ui.shared.chain.Context;
+
+import java.net.URL;
+
+import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.createTemplateCatalog;
+
+/**
+ * @author edewit@redhat.com
+ */
+public class TemplateChain {
+  private static final TemplateChain INSTANCE = new TemplateChain();
+  private static final TemplateCatalog catalog = createTemplateCatalog(new TranslateCommand());
+
+  private URL template;
+
+  public static TemplateChain getInstance() {
+    return INSTANCE;
+  }
+
+  public void visitTemplate(URL template, Context context) {
+    this.template = template;
+    catalog.visitTemplate(template, context);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T getLastResult(String key, Class<T> type) {
+    final Object result = catalog.getResult(template, key);
+    return (T) result;
+  }
+}

@@ -1,10 +1,9 @@
-package org.jboss.errai.ui.rebind;
+package org.jboss.errai.ui.rebind.chain;
 
 import org.apache.commons.io.IOUtils;
 import org.cyberneko.html.parsers.DOMParser;
 import org.jboss.errai.ui.shared.DomVisit;
 import org.jboss.errai.ui.shared.DomVisitor;
-import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.chain.Chain;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
@@ -12,10 +11,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -26,26 +21,15 @@ import java.util.Map;
  */
 public class TemplateCatalog {
   public static final String ELEMENT = "CURRENT_ELEMENT";
-  private static TemplateCatalog INSTANCE;
   private Map<URL, Context> contextMap = new HashMap<URL, Context>();
   private Chain chain = new Chain();
 
-  protected TemplateCatalog() {}
-
-  protected static TemplateCatalog createTemplateCatalog(Command... commands) {
+  public static TemplateCatalog createTemplateCatalog(Command... commands) {
     TemplateCatalog catalog = new TemplateCatalog();
     for (Command command : commands) {
       catalog.chain.addCommand(command);
     }
     return catalog;
-  }
-
-  public static TemplateCatalog getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = createTemplateCatalog(new TemplateVisitor());
-    }
-
-    return INSTANCE;
   }
 
   public void visitTemplate(URL template) {
@@ -55,12 +39,12 @@ public class TemplateCatalog {
   public void visitTemplate(URL template, Context context) {
     if (!contextMap.containsKey(template)) {
       final Document document = parseTemplate(template);
-      visitTemplate(getRootNode(document), template, context);
+      visitTemplate((Element) document.getFirstChild(), template, context);
     }
   }
 
   /**
-   * Parses the template into a jtidy node.
+   * Parses the template into a document.
    * @param template the location of the template to parse
    */
   private Document parseTemplate(URL template) {
@@ -74,15 +58,6 @@ public class TemplateCatalog {
       throw new IllegalArgumentException("could not read template " + template);
     } finally {
       IOUtils.closeQuietly(inputStream);
-    }
-  }
-
-  private Element getRootNode(Document document) {
-    XPath xpath = XPathFactory.newInstance().newXPath();
-    try {
-      return (Element) xpath.evaluate("//BODY", document, XPathConstants.NODE);
-    } catch (XPathExpressionException e) {
-      throw new RuntimeException("could not find root node", e);
     }
   }
 

@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.rebind;
+package org.jboss.errai.ui.rebind.chain;
 
 import org.jboss.errai.ui.shared.chain.Chain;
 import org.jboss.errai.ui.shared.chain.Command;

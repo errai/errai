@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
-* @author edewit@redhat.com
+ * Visits the dom and finds elements that need translating.
 */
 public class TemplateVisitor implements DomVisitor {
-  private final String i18nPrefix;
+  private String i18nPrefix;
   private final Map<String, String> i18nValues = new HashMap<String, String>();
 
   public TemplateVisitor(String i18nPrefix) {
@@ -149,6 +149,10 @@ public class TemplateVisitor implements DomVisitor {
       }
     }
     return text.toString();
+  }
+
+  public void setI18nPrefix(String i18nPrefix) {
+    this.i18nPrefix = i18nPrefix;
   }
 
   public Map<String, String> getI18nValues() {
