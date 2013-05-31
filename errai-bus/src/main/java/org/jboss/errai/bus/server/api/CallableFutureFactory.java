@@ -1,6 +1,4 @@
-package org.jboss.errai.bus.client.api;
-
-import org.jboss.errai.bus.server.api.ServerCallableFuture;
+package org.jboss.errai.bus.server.api;
 
 /**
  * Used for obtaining instances of {@link CallableFuture} for use in asynchronous RPC methods.

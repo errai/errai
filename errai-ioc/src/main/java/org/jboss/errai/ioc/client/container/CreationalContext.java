@@ -12,7 +12,6 @@ import java.util.Set;
  * The context is used for regulating lifecycle activities as well as managing proxies generated in the creation
  * of the beans.
  *
- *
  * @author Mike Brock
  */
 public interface CreationalContext {

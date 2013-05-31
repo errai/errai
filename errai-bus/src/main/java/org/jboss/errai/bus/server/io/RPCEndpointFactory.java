@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.CallableFuture;
+import org.jboss.errai.bus.server.api.CallableFuture;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
 import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 

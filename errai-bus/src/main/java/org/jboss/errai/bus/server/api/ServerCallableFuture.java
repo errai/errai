@@ -2,7 +2,6 @@ package org.jboss.errai.bus.server.api;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 
-import org.jboss.errai.bus.client.api.CallableFuture;
 import org.jboss.errai.bus.client.api.messaging.Message;
 
 /**

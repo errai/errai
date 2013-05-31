@@ -134,7 +134,7 @@ public class SimpleCreationalContext extends AbstractCreationalContext {
    * IOC bootstrapping code.
    * <p/>
    * In the event that bean is not available within the {@link org.jboss.errai.ioc.client.SimpleInjectionContext}, the specified
-   * {@link BeanProvider} is invoked at the bean is added to the {@link org.jboss.errai.ioc.client.SimpleInjectionContext}. This
+   * {@link BeanProvider} is invoked and the bean is added to the {@link org.jboss.errai.ioc.client.SimpleInjectionContext}. This
    * functionality primarily enables proper behavior for singleton producers.
    *
    * @param injectionContext

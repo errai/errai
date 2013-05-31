@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.server.api;
 
 /**
  * A <tt>CallableFuture</tt> is something that can be used to reply to an RPC call asynchronously. Particularly for
