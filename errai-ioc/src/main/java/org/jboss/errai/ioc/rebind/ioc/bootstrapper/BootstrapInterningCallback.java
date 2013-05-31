@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * The interning callback for handling the interning of qualifier annotations and arrays of qualifier annotations.
+ *
  * @author Mike Brock
  */
 public class BootstrapInterningCallback implements InterningCallback {

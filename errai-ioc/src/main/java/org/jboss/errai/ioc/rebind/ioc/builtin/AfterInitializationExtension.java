@@ -25,7 +25,6 @@ import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ioc.util.RunAsyncWrapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +48,7 @@ public class AfterInitializationExtension extends IOCDecoratorExtension<AfterIni
       instance.ensureMemberExposed();
     }
 
-    Statement callbackStmt = Stmt.newObject(Runnable.class).extend()
+    final Statement callbackStmt = Stmt.newObject(Runnable.class).extend()
             .publicOverridesMethod("run")
             .append(instance.callOrBind())
             .finish()

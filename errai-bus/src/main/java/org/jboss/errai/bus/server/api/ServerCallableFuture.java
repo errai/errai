@@ -1,9 +1,9 @@
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.server.api;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 
+import org.jboss.errai.bus.client.api.CallableFuture;
 import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.server.api.RpcContext;
 
 /**
  * @author Mike Brock

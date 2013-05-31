@@ -418,7 +418,6 @@ public abstract class AbstractInjector implements Injector {
     return weavingStatements;
   }
 
-  @Override
   public Map<MetaMethod, Map<WeaveType, Collection<Statement>>> getWeavingStatementsMap() {
     if (weavingStatements == null) {
       return Collections.emptyMap();

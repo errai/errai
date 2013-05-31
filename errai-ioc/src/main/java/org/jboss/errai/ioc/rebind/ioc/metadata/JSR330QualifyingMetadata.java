@@ -146,7 +146,6 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
     }
 
     if (qualifiers.isEmpty() && (qualifiers.size() == 1 && hasNamed)) {
-//      qualifiers.add(BuiltInQualifiers.DEFAULT_INSTANCE);
       return createDefaultQualifyingMetaData();
     }
 

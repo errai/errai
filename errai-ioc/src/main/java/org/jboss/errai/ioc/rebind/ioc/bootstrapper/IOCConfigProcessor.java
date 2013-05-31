@@ -71,6 +71,10 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+/**
+ * The main IOC configuration processor. This class is responsible for scanning the classpath, finding beans,
+ * reading configuration, and then configuring the IOC code generator to emit the bootstrapper code.
+ */
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCConfigProcessor {
   private final Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
