@@ -10,13 +10,19 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
+import org.jboss.errai.ui.rebind.chain.SelectorReplacer;
+import org.jboss.errai.ui.rebind.chain.TemplateChain;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.shared.chain.Context;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Finds all less files and compiles minifies and injects them.
@@ -25,6 +31,7 @@ import java.util.List;
 @CodeDecorator
 @SuppressWarnings("UnusedDeclaration")
 public class StyleGeneratorCodeDecorator extends IOCDecoratorExtension<Templated> {
+  private Map<String, String> styleMapping = new HashMap<String, String>();
 
   public StyleGeneratorCodeDecorator(Class<Templated> decoratesWith) {
     super(decoratesWith);
@@ -44,6 +51,13 @@ public class StyleGeneratorCodeDecorator extends IOCDecoratorExtension<Templated
     }
 
     final ContextualStatementBuilder inject = Stmt.create().invokeStatic(StyleInjector.class, "inject", sb.toString());
+    String templateFileName = TemplatedCodeDecorator.getTemplateFileName(ctx.getElementType());
+    Context context = new Context();
+    context.put(SelectorReplacer.MAPPING, styleMapping);
+    TemplateChain.getInstance().visitTemplate(getClass().getClassLoader().getResource(templateFileName), context);
+
+    //TODO output the changed template...
+
     return Lists.create(inject);
   }
 
@@ -51,7 +65,9 @@ public class StyleGeneratorCodeDecorator extends IOCDecoratorExtension<Templated
     final URL resource = baseClass.getResource("/" + sheet);
     final File cssFile = new LessConverter().convert(resource);
 
-    return new StylesheetOptimizer(cssFile).output();
+    final StylesheetOptimizer stylesheetOptimizer = new StylesheetOptimizer(cssFile);
+    styleMapping.putAll(stylesheetOptimizer.getConvertedSelectors());
+    return stylesheetOptimizer.output();
   }
 
   private String getCssResourceName(final String cssFilePath) {
