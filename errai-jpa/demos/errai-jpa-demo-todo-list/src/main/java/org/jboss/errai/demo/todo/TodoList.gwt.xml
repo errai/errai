@@ -10,10 +10,5 @@
     <inherits name="org.hibernate.validator.HibernateValidator" />
 
     <source path="client"/>
-    <source path="shared"/>
-
-    <!-- TODO Errai-validation will generate this one way or another -->
-    <replace-with class="org.jboss.errai.demo.todo.client.local.MyModelValidatorFactory">
-      <when-type-is class="javax.validation.ValidatorFactory"/>
-    </replace-with>
+    <source path="shared"/>    
 </module>
