@@ -35,14 +35,14 @@ public class StylesheetOptimizerTest {
     visitor.accept(optimized);
     final Collection<String> classNames = visitor.getSelectors();
 
-    assertEquals(new HashSet<String>(asList(".test", ".merge", ".something")), classNames);
+    assertEquals(new HashSet<String>(asList(".E17l0oxA", ".E17l0oxC", ".E17l0oxB")), classNames);
 
     assertEquals(
-            ".test {\n" +
+            ".E17l0oxA {\n" +
                     "  background : greenyellow;\n" +
                     "  margin-top : 3px;\n" +
                     "}\n" +
-                    ", .something, .merge {\n" +
+                    ", .E17l0oxB, .E17l0oxC {\n" +
                     "  background : greenyellow;\n" +
                     "}\n"
             , stylesheetOptimizer.output());
