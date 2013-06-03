@@ -1,7 +1,9 @@
 package org.jboss.errai.bus.server.api;
 
+import org.jboss.errai.bus.client.api.CallableFuture;
+
 /**
- * Used for obtaining instances of {@link CallableFuture} for use in asynchronous RPC methods.
+ * Used for obtaining instances of {@link org.jboss.errai.bus.client.api.CallableFuture} for use in asynchronous RPC methods.
  *
  * @author Mike Brock
  */
@@ -20,12 +22,11 @@ public class CallableFutureFactory {
    * Creates a new {@code CallableFuture} that can be returned for an asynchronous RPC method and used
    * for providing a value back to the client when a long-running process is done.
    *
-   * @param returnType The type of value to be returned.
    * @param <T> The type of value to be returned.
    * @return
-   *          and instance of the {@link CallableFuture}.
+   *          and instance of the {@link org.jboss.errai.bus.client.api.CallableFuture}.
    */
-  public <T> CallableFuture<T> createFuture(final Class<T> returnType) {
+  public <T> CallableFuture<T> createFuture() {
     return new ServerCallableFuture<T>();
   }
 }
