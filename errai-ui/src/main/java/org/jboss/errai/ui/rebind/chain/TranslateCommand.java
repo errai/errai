@@ -4,6 +4,7 @@ import org.jboss.errai.ui.shared.TemplateVisitor;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.*;
 
@@ -17,10 +18,11 @@ public class TranslateCommand extends TemplateVisitor implements Command {
     public static final String PREFIX ="i18nPrefix";
     public static final String VALUES = "i18nValues";
     public static final String FRAGMENT = "templateFragment";
+    public static final String DONE = "done";
   }
 
   private String templateFragment;
-  private Boolean foundTemplateFragment;
+  private boolean foundTemplateFragment;
 
   public TranslateCommand() {
     super("");
@@ -28,11 +30,15 @@ public class TranslateCommand extends TemplateVisitor implements Command {
 
   @Override
   public boolean visit(Element element) {
-    if (templateFragment != null && !foundTemplateFragment && templateFragment.equals(element.getAttribute("data-field"))) {
-      foundTemplateFragment = true;
+    if (templateFragment != null && !foundTemplateFragment) {
+      foundTemplateFragment = templateFragment.equals(element.getAttribute("data-field"));
+      return true;
+    }
+    if (foundTemplateFragment) {
+      return super.visit(element);
+    } else {
       return super.visit(element);
     }
-    return true;
   }
 
   public static Context buildContext(String templateFragment, String i18nPrefix) {
@@ -46,10 +52,20 @@ public class TranslateCommand extends TemplateVisitor implements Command {
 
   @Override
   public void execute(Context context) {
+    Node parent = (Node) context.get(DONE);
     Element element = (Element) context.get(TemplateCatalog.ELEMENT);
+    if (parent != null) {
+      if (element.getParentNode().isEqualNode(parent)) {
+        return;
+      } else {
+        context.remove(DONE);
+      }
+    }
     setI18nPrefix((String) context.get(PREFIX));
     context.put(VALUES, getI18nValues());
     templateFragment = (String) context.get(FRAGMENT);
-    visit(element);
+    if (!visit(element)) {
+      context.put(DONE, element);
+    }
   }
 }

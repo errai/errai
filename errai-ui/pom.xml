@@ -94,10 +94,26 @@
       </dependency>
 
       <dependency>
-        <groupId>net.sourceforge.nekohtml</groupId>
-        <artifactId>nekohtml</artifactId>
-        <version>1.9.18</version>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.7.1</version>
       </dependency>
+
+     <dependency>
+       <groupId>org.apache.stanbol</groupId>
+       <artifactId>org.apache.stanbol.enhancer.engines.htmlextractor</artifactId>
+       <version>0.10.0</version>
+       <exclusions>
+         <exclusion>
+           <groupId>com.ibm.icu</groupId>
+           <artifactId>icu4j</artifactId>
+         </exclusion>
+         <exclusion>
+           <groupId>org.apache.felix</groupId>
+           <artifactId>org.apache.felix.scr.annotations</artifactId>
+         </exclusion>
+       </exclusions>
+     </dependency>
 
      <dependency>
        <groupId>org.lesscss</groupId>

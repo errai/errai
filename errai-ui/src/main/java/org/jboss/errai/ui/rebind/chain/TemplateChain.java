@@ -11,7 +11,7 @@ import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.createTemplateCata
  */
 public class TemplateChain {
   private static final TemplateChain INSTANCE = new TemplateChain();
-  private static final TemplateCatalog catalog = createTemplateCatalog(new TranslateCommand());
+  private static final TemplateCatalog catalog = createTemplateCatalog(new TranslateCommand(), new SelectorReplacer());
 
   private URL template;
 
@@ -25,7 +25,7 @@ public class TemplateChain {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T getLastResult(String key, Class<T> type) {
+  public <T> T getLastResult(String key) {
     final Object result = catalog.getResult(template, key);
     return (T) result;
   }

@@ -1,15 +1,16 @@
 package org.jboss.errai.ui.rebind.chain;
 
 import org.apache.commons.io.IOUtils;
-import org.cyberneko.html.parsers.DOMParser;
+import org.apache.stanbol.enhancer.engines.htmlextractor.impl.DOMBuilder;
 import org.jboss.errai.ui.shared.DomVisit;
 import org.jboss.errai.ui.shared.DomVisitor;
 import org.jboss.errai.ui.shared.chain.Chain;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
+import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
+import org.w3c.dom.Node;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -39,7 +40,12 @@ public class TemplateCatalog {
   public void visitTemplate(URL template, Context context) {
     if (!contextMap.containsKey(template)) {
       final Document document = parseTemplate(template);
-      visitTemplate((Element) document.getFirstChild(), template, context);
+      for (int i = 0; i < document.getChildNodes().getLength(); i++) {
+        final Node node = document.getChildNodes().item(i);
+        if (node instanceof Element) {
+          visitTemplate((Element) node, template, context);
+        }
+      }
     }
   }
 
@@ -47,15 +53,13 @@ public class TemplateCatalog {
    * Parses the template into a document.
    * @param template the location of the template to parse
    */
-  private Document parseTemplate(URL template) {
+  protected Document parseTemplate(URL template) {
     InputStream inputStream = null;
     try {
       inputStream = template.openStream();
-      final DOMParser parser = new DOMParser();
-      parser.parse(new InputSource(inputStream));
-      return parser.getDocument();
+      return DOMBuilder.jsoup2DOM(Jsoup.parse(inputStream, "UTF-8", ""));
     } catch (Exception e) {
-      throw new IllegalArgumentException("could not read template " + template);
+      throw new IllegalArgumentException("could not read template " + template, e);
     } finally {
       IOUtils.closeQuietly(inputStream);
     }

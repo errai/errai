@@ -28,7 +28,7 @@ public class TemplateCatalogTest {
     // then
     final Chain chain = catalog.getChain();
     assertEquals(1, chain.getCommands().size());
-    assertEquals(2, command.getCounter());
+    assertEquals(5, command.getCounter());
     assertNotNull(catalog.getResult(template, "dummy"));
   }
 
