@@ -23,13 +23,17 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * Portable type used to test marshalling of types using nested parameterized types.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Portable
 public class EntityWithTypesUsingNestedParameterizedTypes {
 
   private Map<String, Map<String, String>> map = null;
+
+  // regression test for ERRAI-565
+  private Map<Long, Map<Object, String>> mapWithDifferentTypes = null;
+
   private List<List<Integer>> list = null;
 
   public Map<String, Map<String, String>> getMap() {
@@ -38,6 +42,14 @@ public class EntityWithTypesUsingNestedParameterizedTypes {
 
   public void setMap(Map<String, Map<String, String>> data) {
     this.map = data;
+  }
+
+  public Map<Long, Map<Object, String>> getMapWithDifferentTypes() {
+    return mapWithDifferentTypes;
+  }
+
+  public void setMapWithDifferentTypes(Map<Long, Map<Object, String>> mapWithDifferentTypes) {
+    this.mapWithDifferentTypes = mapWithDifferentTypes;
   }
 
   public List<List<Integer>> getList() {
@@ -54,6 +66,7 @@ public class EntityWithTypesUsingNestedParameterizedTypes {
     int result = 1;
     result = prime * result + ((list == null) ? 0 : list.hashCode());
     result = prime * result + ((map == null) ? 0 : map.hashCode());
+    result = prime * result + ((mapWithDifferentTypes == null) ? 0 : mapWithDifferentTypes.hashCode());
     return result;
   }
 
@@ -78,12 +91,18 @@ public class EntityWithTypesUsingNestedParameterizedTypes {
     }
     else if (!map.equals(other.map))
       return false;
+    if (mapWithDifferentTypes == null) {
+      if (other.mapWithDifferentTypes != null)
+        return false;
+    }
+    else if (!mapWithDifferentTypes.equals(other.mapWithDifferentTypes))
+      return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "EntityWithTypesUsingNestedParamTypes [map=" + map + ", list=" + list + "]";
+    return "EntityWithTypesUsingNestedParameterizedTypes [map=" + map + ", mapWithDifferentTypes="
+            + mapWithDifferentTypes + ", list=" + list + "]";
   }
-
 }
