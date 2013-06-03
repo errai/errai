@@ -58,7 +58,8 @@ public class StoreWidget extends Composite implements HasModel<Store> {
 
   @EventHandler("deleteButton")
   private void deleteThisStore(ClickEvent e) {
-    em.remove(getModel());
+    //e.stopPropagation();
+    em.remove(em.merge(getModel()));
     em.flush();
   }
 }

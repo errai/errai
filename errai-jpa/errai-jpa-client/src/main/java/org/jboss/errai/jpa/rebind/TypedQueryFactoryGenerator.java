@@ -49,6 +49,7 @@ import org.jboss.errai.codegen.util.Implementations.StringBuilderBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.jpa.client.local.ErraiAttribute;
+import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.ErraiParameter;
 import org.jboss.errai.jpa.client.local.ErraiTypedQuery;
@@ -126,7 +127,7 @@ public class TypedQueryFactoryGenerator {
   /**
    * Returns a statement that evaluates to a new instance of the TypedQueryFactory implementation.
    */
-  public Statement generate(Statement entityManager, Context context) {
+  public Statement generate(Context context) {
     // anonQueryClassBuilder comes out as a statement that looks like this:
     // new ErraiTypedQuery(entityManager, actualResultType, parameters) {
     //   public void matches(JSONObject object) { ... }
@@ -140,12 +141,13 @@ public class TypedQueryFactoryGenerator {
     appendComparatorMethod(anonQueryClassBuilder, context);
 
     AnonymousClassStructureBuilder factoryBuilder = ObjectBuilder.newInstanceOf(TypedQueryFactory.class, context).extend(
-            entityManager,
             Stmt.loadLiteral(resultType),
             Stmt.newArray(ErraiParameter.class).initialize((Object[]) generateQueryParamArray()));
 
     BlockBuilder<AnonymousClassStructureBuilder> createQueryMethod =
-            factoryBuilder.protectedMethod(TypedQuery.class, "createQuery").body();
+            factoryBuilder.protectedMethod(
+                    TypedQuery.class, "createQuery", Parameter.finalOf(ErraiEntityManager.class, "entityManager"))
+            .body();
     createQueryMethod.append(Stmt.nestedCall(anonQueryClassBuilder.finish()).returnValue());
     createQueryMethod.finish();
 
@@ -615,7 +617,7 @@ public class TypedQueryFactoryGenerator {
       }
       else if (dataType.isEntityType()) {
         // generate this:
-        // entityManager.find(Key.fromJson(GeneratedErraiEntityManager.this, candidate.get(${propertyPath}).isObject(), false), NO_SIDE_EFFECTS);
+        // entityManager.find(Key.fromJson(entityManager, candidate.get(${propertyPath}).isObject(), false), NO_SIDE_EFFECTS);
 
         // FIXME running a query that uses this in a where clause will be an O(N^2) operation on the number of entities. :-(
         return new TernaryStatement(
@@ -703,7 +705,7 @@ public class TypedQueryFactoryGenerator {
         containingClass.privateField(attrVarName, ErraiAttribute.class)
           .modifiers(Modifier.Final)
           .initializesWith(
-                  Stmt.nestedCall(new StringStatement("getMetamodel()", MetaClassFactory.get(ErraiMetamodel.class)))
+                  Stmt.nestedCall(new StringStatement("entityManager.getMetamodel()", MetaClassFactory.get(ErraiMetamodel.class)))
                   .invoke("entity", Stmt.loadLiteral(lhsType))
                   .invoke("getAttribute", dotNode.getPropertyPath()))
           .finish();

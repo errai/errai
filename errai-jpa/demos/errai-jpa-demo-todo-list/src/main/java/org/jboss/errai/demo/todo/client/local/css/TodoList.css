@@ -63,6 +63,66 @@ div.mainContentArea button {
 	margin-bottom: 10px;
 }
 
+div.signupForm, div.loginForm {
+	margin: auto;
+	border: 20px solid #fff;
+	box-shadow: 5px 5px 7px #333;
+	border-radius: 15px;
+	background-color: #fff;
+	width: 600px;
+	text-align: left;
+}
+
+div.signupForm label {
+	display: block;
+	padding-top: 1em;
+	color: #333;
+}
+
+div.signupForm input {
+	margin-left: 50px;
+	margin-top: 9px;
+	width: 400px;
+	font-size: 20px;
+}
+
+div.signupForm button {
+	display: block;
+	margin: auto;
+	margin-top: 1em;
+	margin-bottom: .5em;
+	font-size: 20px;
+}
+
+div.loginForm button {
+	display: block;
+	margin: auto;
+	margin-top: 1.5em;
+	margin-bottom: 1.5em;
+	font-size: 20px;
+}
+
+div.loginForm input {
+	display: block;
+	margin: auto;
+	margin-top: 15px;
+	width: 500px;
+	font-size: 20px;
+}
+
+div.loginForm p {
+	text-align: center;
+}
+
+.error {
+	color: #f00;
+}
+
+a {
+	color: #00f;
+	text-decoration: underline;
+}
+
 /* Don't forget the phones! */
 @media only screen and (max-width: 600px) , only screen and (max-device-width: 600px) {
 	body {
@@ -73,12 +133,16 @@ div.mainContentArea button {
 		font-size: 80px;
 		margin-left: 10px;
 	}
-	div.mainContentArea {
+	div.mainContentArea, div.signupForm, div.loginForm {
 		width: 100%;
 		border: none;
 		box-shadow: none;
 		border-radius: 0px;
-	}
+		padding-left: 5px;
+		padding-right: 5px;
+		padding-top: 5px;
+		padding-bottom: 20px;
+}
 	div.mainContentArea>input {
 		font-size: 80px;
 		margin-bottom: 15px;

@@ -1,6 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,23 +22,19 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.jboss.errai.common.client.api.Assert;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
-import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
+import org.jboss.errai.jpa.client.local.backend.StorageBackendFactory;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 /**
- * The Errai specialization of the JPA 2.0 EntityManager interface, together
- * with an implementation of much of the logic. When the end-user project is
- * compiled, a concrete subclass of this class is generated. The subclass
- * populates the metamodel with the type and attribute information required for
- * enumerating and creating entity instances, and enumerating, reading, and
- * writing their fields.
+ * The Errai implementation and specialization of the JPA 2.0 EntityManager interface.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public abstract class ErraiEntityManager implements EntityManager {
+public class ErraiEntityManager implements EntityManager {
 
   /**
    * Hint that can be used with {@link #find(Class, Object, Map)} to specify
@@ -55,12 +52,17 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * The metamodel. Gets populated on first call to {@link #getMetamodel()}.
    */
-  final ErraiMetamodel metamodel = new ErraiMetamodel();
+  final ErraiMetamodel metamodel;
 
   /**
    * All persistent instances known to this entity manager.
    */
   final Map<Key<?, ?>, Object> persistenceContext = new HashMap<Key<?, ?>, Object>();
+
+  /**
+   * All removed instances known to this entity manager.
+   */
+  final Map<Key<?, ?>, Object> removedEntities = new HashMap<Key<?, ?>, Object>();
 
   /**
    * All of the entities that are partly constructed but are still getting their
@@ -72,46 +74,43 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * The actual storage backend.
    */
-  private final StorageBackend backend = new WebStorageBackend(this); // XXX publishing reference to partially constructed object
+  private final StorageBackend backend;
 
   /**
    * All the named queries. Populated by a generated method in the
    * GeneratedErraiEntityManager subclass.
    */
-  final Map<String, TypedQueryFactory> namedQueries = new HashMap<String, TypedQueryFactory>();
+  final Map<String, TypedQueryFactory> namedQueries;
 
   /**
-   * Constructor for subclasses.
+   * Constructor for building custom-purpose EntityManager instances. For common
+   * usecases, simply use {@code @Inject EntityManager em} and let the
+   * {@link ErraiEntityManagerProvider} handle the prerequisites for you.
    */
-  protected ErraiEntityManager() {
+  public ErraiEntityManager(
+          ErraiMetamodel metamodel,
+          Map<String, TypedQueryFactory> namedQueries,
+          StorageBackendFactory storageBackendFactory) {
+    this.metamodel = Assert.notNull(metamodel);
+    this.namedQueries = Assert.notNull(namedQueries);
+
+    // Caution: we're handing out a reference to this partially constructed instance!
+    this.backend = storageBackendFactory.createInstanceFor(this);
   }
 
   /**
-   * Populates the metamodel of this EntityManager. Called by getMetamodel() one
-   * time only.
-   * <p>
-   * The implementation of this method must populate the metamodel with all
-   * known entity types, managed types, and so on. The implementation must
-   * freeze the metamodel before returning. The first call to
-   * {@link #getMetamodel()} throws RuntimeException if
-   * {@code this.metamodel.isFrozen() == false} after this method returns.
-   * <p>
-   * Note that this method is normally implemented by a generated subclass, but
-   * handwritten subclasses may also be useful for testing purposes.
+   * Creates an EntityManager that knows about all the same managed types and
+   * named queries as the given entity manager, but works from a different
+   * storage backend. When combined with the namespacing support of a storage
+   * backend, this allows you to work with several independent entity managers
+   * at the same time.
+   *
+   * @param delegateEntityManager
+   * @param namespacedStorageBackend
    */
-  protected abstract void populateMetamodel();
-
-  /**
-   * Populates the collection of named queries in this EntityManager. Called by
-   * {@link #createNamedQuery(String, Class)} if the namedQueries map is empty.
-   * <p>
-   * The implementation of this method must add factories for all known named
-   * queries to the {@link #namedQueries} map.
-   * <p>
-   * Note that this method is normally implemented by a generated subclass, but
-   * handwritten subclasses may also be useful for testing purposes.
-   */
-  protected abstract void populateNamedQueries();
+  public ErraiEntityManager(ErraiEntityManager delegateEntityManager, StorageBackendFactory namespacedStorageBackend) {
+    this(delegateEntityManager.getMetamodel(), delegateEntityManager.namedQueries, namespacedStorageBackend);
+  }
 
   /**
    * This method performs the unchecked (but safe) cast of
@@ -165,33 +164,38 @@ public abstract class ErraiEntityManager implements EntityManager {
    *         instance.
    */
   private <X, T> T generateAndSetLocalId(X entityInstance, ErraiSingularAttribute<X, T> attr) {
-    T nextId = attr.getValueGenerator().next();
+    T nextId = attr.getValueGenerator().next(this);
     attr.set(entityInstance, nextId);
     return nextId;
   }
 
   /**
    * As they say in television, "this is where the magic happens." This method
-   * attempts to resolve the given object as an entity and put that entity into
-   * the given state, taking into account its existing state and performing the
+   * attempts to resolve the given object as an entity and apply the operation
+   * to the entity, taking into account its existing state and performing the
    * required side effects during the state transition.
    */
-  private <X> void changeEntityState(X entity, EntityState newState) {
+  private <X> X applyCascadingOperation(X entity, CascadeType newState) {
     ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
 
     final Key<X, ?> key = keyFor(entityType, entity);
-    final EntityState oldState = getState(key);
+    final EntityState oldState = getState(key, entity);
+
+    System.out.println("+++ Performing " + newState + " operation on " + oldState + " entity: " + entity);
+    X entityToReturn = entity;
 
     switch (newState) {
-    case MANAGED:
+    case PERSIST:
       switch (oldState) {
-      case NEW:
       case REMOVED:
+        removedEntities.remove(key);
+        // FALLTHROUGH
+      case NEW:
         entityType.deliverPrePersist(entity);
         persistenceContext.put(key, entity);
         backend.put(key, entity);
         entityType.deliverPostPersist(entity);
-        // FALLTHROUGH
+        break;
       case MANAGED:
         // no-op, but cascade to relatives
         break;
@@ -199,24 +203,64 @@ public abstract class ErraiEntityManager implements EntityManager {
         throw new EntityExistsException();
       }
       break;
-    case DETACHED:
+    case MERGE:
+      switch (oldState) {
+      case NEW:
+      case DETACHED:
+        boolean sendUpdateEvent = true; // if false, send persist event
+        X mergeTarget = find(key, Collections.<String,Object>emptyMap());
+        if (mergeTarget == null) {
+          sendUpdateEvent = false;
+          mergeTarget = entityType.newInstance();
+        }
+        entityType.mergeState(this, mergeTarget, entity);
+        entityToReturn = mergeTarget;
+
+        if (sendUpdateEvent) {
+          entityType.deliverPreUpdate(mergeTarget);
+        }
+        else {
+          entityType.deliverPrePersist(mergeTarget);
+        }
+
+        persistenceContext.put(key, mergeTarget);
+        backend.put(key, mergeTarget);
+
+        if (sendUpdateEvent) {
+          entityType.deliverPostUpdate(mergeTarget);
+        }
+        else {
+          entityType.deliverPostPersist(mergeTarget);
+        }
+        break;
+      case MANAGED:
+        // no-op, but cascade to relatives
+        break;
+      case REMOVED:
+        throw new IllegalArgumentException("Cannot merge removed entity " + entity);
+      }
+      break;
+    case DETACH:
       switch (oldState) {
       case NEW:
       case DETACHED:
         // ignore
         break;
       case MANAGED:
-      case REMOVED:
         persistenceContext.remove(key);
+        break;
+      case REMOVED:
+        removedEntities.remove(key);
         break;
       }
       break;
-    case REMOVED:
+    case REMOVE:
       switch (oldState) {
       case NEW:
       case MANAGED:
         entityType.deliverPreRemove(entity);
         persistenceContext.remove(key);
+        removedEntities.put(key, entity);
         backend.remove(key);
         entityType.deliverPostRemove(entity);
         break;
@@ -227,27 +271,28 @@ public abstract class ErraiEntityManager implements EntityManager {
         break;
       }
       break;
-    case NEW:
-      throw new IllegalArgumentException("Entities can't transition from " + oldState + " to " + newState);
+    default:
+      throw new IllegalArgumentException("Operation not implemented yet: " + newState);
     }
 
     // Tell the BindableProxy that we changed the entity
     // (we haven't _necessarily_ changed anything.. if this becomes a performance problem,
     // we can set a flag in the above state change logic make this call depend on that flag)
-    if (entity instanceof BindableProxy) {
-      ((BindableProxy<?>) entity).updateWidgets();
+    if (entityToReturn instanceof BindableProxy) {
+      ((BindableProxy<?>) entityToReturn).updateWidgets();
     }
 
     // now cascade the operation
     for (SingularAttribute<? super X, ?> a : entityType.getSingularAttributes()) {
       ErraiSingularAttribute<? super X, ?> attrib = (ErraiSingularAttribute<? super X, ?>) a;
-      cascadeStateChange(attrib, entity, newState);
+      cascadeStateChange(attrib, entityToReturn, entity, newState);
     }
     for (PluralAttribute<? super X, ?, ?> a : entityType.getPluralAttributes()) {
       ErraiPluralAttribute<? super X, ?, ?> attrib = (ErraiPluralAttribute<? super X, ?, ?>) a;
-      cascadeStateChange(attrib, entity, newState);
+      cascadeStateChange(attrib, entityToReturn, entity, newState);
     }
 
+    return entityToReturn;
   }
 
   /**
@@ -306,13 +351,23 @@ public abstract class ErraiEntityManager implements EntityManager {
    *
    * @param key
    *          The entity key
+   * @param instance
+   *          The entity instance whose state to check
    * @return The current state of the given entity according to this entity
    *         manager.
    */
-  private <T> EntityState getState(Key<T, ?> key) {
+  private <T> EntityState getState(Key<T, ?> key, T instance) {
     final EntityState oldState;
-    if (persistenceContext.get(key) != null) {
+    final Object inPersistenceContext = persistenceContext.get(key);
+    if (inPersistenceContext == instance) {
       oldState = EntityState.MANAGED;
+    }
+    else if (inPersistenceContext != null) {
+      // we already have a different instance of this type of entity with the same ID
+      oldState = EntityState.DETACHED;
+    }
+    else if (removedEntities.containsKey(key)) {
+      oldState = EntityState.REMOVED;
     }
     else if (backend.contains(key)) {
       oldState = EntityState.DETACHED;
@@ -320,53 +375,71 @@ public abstract class ErraiEntityManager implements EntityManager {
     else {
       oldState = EntityState.NEW;
     }
-    // TODO handle REMOVED state
     return oldState;
   }
 
   /**
-   * Subroutine of {@link #changeEntityState(Object, EntityState)}. Cascades the
+   * Subroutine of {@link #applyCascadingOperation(Object, CascadeType)}. Cascades the
    * given change of state onto all of the related entities whose cascade rules
-   * are appropriate to the new state. It is assumed that the given entity is
-   * already in the given state.
+   * are appropriate to the new state. It is assumed that the cascading operation has
+   * already been applied to the owning entity.
    *
    * @param <X> the type of the owning entity we are cascading from
    * @param <R> the type of the related entity we are cascading to
    */
-  private <X, R> void cascadeStateChange(ErraiAttribute<X, R> cascadeAcross, X owningEntity, EntityState newState) {
+  private <X, R> void cascadeStateChange(ErraiAttribute<X, R> cascadeAcross, X targetEntity, X sourceEntity, CascadeType cascadeType) {
     if (!cascadeAcross.isAssociation()) return;
 
-    CascadeType cascadeType;
-    switch (newState) {
-    case DETACHED: cascadeType = CascadeType.DETACH; break;
-    case MANAGED: cascadeType = CascadeType.PERSIST; break; // XXX could be a MERGE once that's implemented
-    case REMOVED: cascadeType = CascadeType.REMOVE; break;
-    case NEW: throw new IllegalArgumentException();
-    default: throw new AssertionError("Unknown entity state " + newState);
+    if (cascadeType == CascadeType.REFRESH) {
+      throw new IllegalArgumentException("Refresh not yet supported");
     }
-    R relatedEntity = cascadeAcross.get(owningEntity);
-    System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + relatedEntity + "?");
-    if (relatedEntity == null) {
+
+    R sourceRelatedEntity = cascadeAcross.get(sourceEntity);
+    System.out.println("*** Cascade " + cascadeType + " across " + cascadeAcross.getName() + " to " + sourceRelatedEntity + "?");
+
+    if (sourceRelatedEntity == null) {
       System.out.println("    No (because it's null)");
     }
     else if (cascadeAcross.cascades(cascadeType)) {
       System.out.println("    Yes");
       if (cascadeAcross.isCollection()) {
-        for (Object element : (Iterable<?>) relatedEntity) {
-          changeEntityState(element, newState);
+        R collectionOfMergeTargets = ((ErraiPluralAttribute<X, R, ?>) cascadeAcross).createEmptyCollection();
+        for (Object element : (Iterable<?>) sourceRelatedEntity) {
+          ((Collection) collectionOfMergeTargets).add(applyCascadingOperation(element, cascadeType));
+        }
+
+        if (cascadeType == CascadeType.MERGE) {
+          cascadeAcross.set(targetEntity, collectionOfMergeTargets);
         }
       }
       else {
-        changeEntityState(relatedEntity, newState);
+        R resolvedTarget = applyCascadingOperation(sourceRelatedEntity, cascadeType);
+
+        // check if we need to reference the newly merged thing (only matters when cascadeType == MERGE)
+        R originalTargetRelatedEntity = cascadeAcross.get(targetEntity);
+        if (resolvedTarget != originalTargetRelatedEntity) {
+          cascadeAcross.set(targetEntity, resolvedTarget);
+        }
       }
     }
     else {
       System.out.println("    No");
-      if (cascadeType == CascadeType.PERSIST && !contains(relatedEntity)) {
+      R resolvedTargetRelatedEntity = cascadeAcross.get(targetEntity);
+      boolean relatedEntitiesAreManaged = true;
+      if (cascadeAcross.isCollection()) {
+        Collection<?> children = (Collection<?>) resolvedTargetRelatedEntity;
+        for (Object child : children) {
+          relatedEntitiesAreManaged &= contains(child);
+        }
+      }
+      else {
+        relatedEntitiesAreManaged = contains(resolvedTargetRelatedEntity);
+      }
+      if ((cascadeType == CascadeType.PERSIST || cascadeType == CascadeType.MERGE) && !relatedEntitiesAreManaged) {
         throw new IllegalStateException(
-                "Entity " + owningEntity + " references an unsaved entity via relationship attribute [" +
+                "Entity " + targetEntity + " references an unsaved entity via relationship attribute [" +
                 cascadeAcross.getName() + "]. Save related attribute before flushing or change" +
-                " cascade rule to include PERSIST.");
+                " cascade rule to include " + cascadeType);
       }
     }
   }
@@ -456,17 +529,14 @@ public abstract class ErraiEntityManager implements EntityManager {
   @Override
   public ErraiMetamodel getMetamodel() {
     if (!metamodel.isFrozen()) {
-      populateMetamodel();
-      if (!metamodel.isFrozen()) {
-        throw new RuntimeException("The populateMetamodel() method didn't call metamodel.freeze()!");
-      }
+      throw new RuntimeException("The metamodel isn't frozen!");
     }
     return metamodel;
   }
 
   @Override
   public void persist(Object entity) {
-    changeEntityState(entity, EntityState.MANAGED);
+    applyCascadingOperation(entity, CascadeType.PERSIST);
   }
 
   @Override
@@ -482,11 +552,12 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void detach(Object entity) {
-    changeEntityState(entity, EntityState.DETACHED);
+    applyCascadingOperation(entity, CascadeType.DETACH);
   }
 
   @Override
   public void clear() {
+    removedEntities.clear();
     List<?> entities = new ArrayList<Object>(persistenceContext.values());
     for (Object entity : entities) {
       detach(entity);
@@ -527,7 +598,7 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void remove(Object entity) {
-    changeEntityState(entity, EntityState.REMOVED);
+    applyCascadingOperation(entity, CascadeType.REMOVE);
   }
 
   /**
@@ -545,17 +616,14 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public <T> TypedQuery<T> createNamedQuery(String name, Class<T> resultClass) {
-    if (namedQueries.isEmpty()) {
-      populateNamedQueries();
-    }
     TypedQueryFactory factory = namedQueries.get(name);
     if (factory == null) throw new IllegalArgumentException("No named query \"" + name + "\"");
-    return factory.createIfCompatible(resultClass);
+    return factory.createIfCompatible(resultClass, this);
   }
 
   @Override
   public <T> T merge(T entity) {
-    throw new UnsupportedOperationException("Not implemented");
+    return applyCascadingOperation(entity, CascadeType.MERGE);
   }
 
   @Override
@@ -619,7 +687,8 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public boolean contains(Object entity) {
-    return persistenceContext.containsValue(entity);
+    Object found = persistenceContext.get(keyFor(entity));
+    return found == entity;
   }
 
   @Override

@@ -1,8 +1,6 @@
 package org.jboss.errai.demo.todo.client.local;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
@@ -23,7 +21,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.InlineLabel;
 
-@Templated("TodoListApp.html#item")
+@Templated("TodoListPage.html#item")
 public class TodoItemWidget extends Composite implements HasModel<TodoItem> {
 
   @Inject Event<TodoItem> itemChangedEvent;

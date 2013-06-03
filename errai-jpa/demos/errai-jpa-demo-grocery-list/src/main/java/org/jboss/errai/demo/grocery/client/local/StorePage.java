@@ -1,18 +1,19 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.gen2.picker.client.SliderBar;
-import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.base.LatLngBounds;
-import com.google.gwt.maps.client.events.place.PlaceChangeMapEvent;
-import com.google.gwt.maps.client.events.place.PlaceChangeMapHandler;
-import com.google.gwt.maps.client.placeslib.*;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import org.gwtopenmaps.openlayers.client.*;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.gwtopenmaps.openlayers.client.Bounds;
+import org.gwtopenmaps.openlayers.client.Icon;
+import org.gwtopenmaps.openlayers.client.LonLat;
+import org.gwtopenmaps.openlayers.client.Map;
+import org.gwtopenmaps.openlayers.client.MapOptions;
+import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.Marker;
+import org.gwtopenmaps.openlayers.client.Pixel;
+import org.gwtopenmaps.openlayers.client.Projection;
+import org.gwtopenmaps.openlayers.client.Size;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.OverviewMap;
@@ -32,18 +33,43 @@ import org.jboss.errai.databinding.client.api.PropertyChangeEvent;
 import org.jboss.errai.databinding.client.api.PropertyChangeHandler;
 import org.jboss.errai.demo.grocery.client.local.map.GoogleMapBootstrapper;
 import org.jboss.errai.demo.grocery.client.local.map.LocationProvider;
+import org.jboss.errai.demo.grocery.client.local.map.LocationProvider.LocationCallback;
 import org.jboss.errai.demo.grocery.client.shared.Department;
 import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.cordova.geofencing.GeoFencingProvider;
 import org.jboss.errai.ui.cordova.geofencing.Region;
-import org.jboss.errai.ui.nav.client.local.*;
-import org.jboss.errai.ui.shared.api.annotations.*;
+import org.jboss.errai.ui.nav.client.local.Page;
+import org.jboss.errai.ui.nav.client.local.PageHidden;
+import org.jboss.errai.ui.nav.client.local.PageShown;
+import org.jboss.errai.ui.nav.client.local.PageState;
+import org.jboss.errai.ui.nav.client.local.TransitionTo;
+import org.jboss.errai.ui.shared.api.annotations.AutoBound;
+import org.jboss.errai.ui.shared.api.annotations.Bound;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
-import static org.jboss.errai.demo.grocery.client.local.map.LocationProvider.LocationCallback;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.gen2.picker.client.SliderBar;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.base.LatLngBounds;
+import com.google.gwt.maps.client.events.place.PlaceChangeMapEvent;
+import com.google.gwt.maps.client.events.place.PlaceChangeMapHandler;
+import com.google.gwt.maps.client.placeslib.Autocomplete;
+import com.google.gwt.maps.client.placeslib.AutocompleteOptions;
+import com.google.gwt.maps.client.placeslib.AutocompleteType;
+import com.google.gwt.maps.client.placeslib.PlaceGeometry;
+import com.google.gwt.maps.client.placeslib.PlaceResult;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextBox;
 
 @Dependent
 @Templated("#main") @Page
@@ -96,7 +122,7 @@ public class StorePage extends Composite {
     for (Department d : em.createNamedQuery("allDepartments", Department.class).getResultList()) {
       dso.add(d.getName());
     }
-    addDepartment.getTextBox().addKeyPressHandler(new KeyPressHandler() {
+    addDepartment.getValueBox().addKeyPressHandler(new KeyPressHandler() {
       @Override
       public void onKeyPress(KeyPressEvent event) {
         if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
@@ -205,7 +231,7 @@ public class StorePage extends Composite {
   @EventHandler("saveButton")
   private void save(ClickEvent e) {
     Store store = storeBinder.getModel();
-    em.persist(store);
+    em.merge(store);
     em.flush();
 
     Region region = new Region((int) store.getId(), store.getLatitude(), store.getLongitude(), (int) store.getRadius());

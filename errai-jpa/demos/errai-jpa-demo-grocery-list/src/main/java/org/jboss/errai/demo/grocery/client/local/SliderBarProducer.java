@@ -1,10 +1,9 @@
 package org.jboss.errai.demo.grocery.client.local;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.gen2.picker.client.SliderBar;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
+
+import com.google.gwt.gen2.picker.client.SliderBar;
 
 /**
  * @author edewit@redhat.com

@@ -347,6 +347,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.jboss.spec.javax.ejb</groupId>
+        <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+        <version>1.0.2.Final</version>
+      </dependency>
+
+      <dependency>
         <groupId>javax.enterprise</groupId>
         <artifactId>cdi-api</artifactId>
         <version>1.0-SP4</version>
@@ -397,6 +403,9 @@
             <goals>
               <goal>prepare-agent</goal>
             </goals>
+            <configuration>
+              <propertyName>jacocoArgs</propertyName>
+            </configuration>
           </execution>
           <execution>
             <id>jacoco-site</id>
