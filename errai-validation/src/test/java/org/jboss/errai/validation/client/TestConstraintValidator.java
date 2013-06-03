@@ -3,9 +3,12 @@ package org.jboss.errai.validation.client;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.junit.Ignore;
+
 /**
  * @author Johannes Barop <jb@barop.de>
  */
+@Ignore
 public class TestConstraintValidator implements ConstraintValidator<TestConstraint, String> {
 
   @Override
