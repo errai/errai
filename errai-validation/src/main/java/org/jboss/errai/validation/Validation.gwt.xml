@@ -19,4 +19,9 @@
 <module>
     <inherits name='com.google.gwt.user.User'/>
     <inherits name='org.jboss.errai.databinding.DataBinding'/>
+
+    <generate-with class="org.jboss.errai.validation.rebind.ValidatorFactoryGenerator">
+        <when-type-assignable
+                class="javax.validation.ValidatorFactory"/>
+    </generate-with>
 </module>
