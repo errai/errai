@@ -128,6 +128,7 @@ public class TodoListPage extends Composite {
             new RemoteCallback<List<SyncResponse<TodoItem>>>() {
               @Override
               public void callback(List<SyncResponse<TodoItem>> response) {
+                syncButton.setEnabled(true);
                 System.out.println("Got data sync complete event!");
                 refreshItems();
               }
@@ -135,11 +136,13 @@ public class TodoListPage extends Composite {
             new BusErrorCallback() {
               @Override
               public boolean error(Message message, Throwable throwable) {
+                syncButton.setEnabled(true);
                 errorLabel.setText("Sync failed: " + throwable);
                 errorLabel.setVisible(true);
                 return false;
               }
             });
+    syncButton.setEnabled(false);
     System.out.println("Initiated cold sync");
   }
 
