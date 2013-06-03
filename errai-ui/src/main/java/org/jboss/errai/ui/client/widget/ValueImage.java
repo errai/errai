@@ -1,21 +1,14 @@
-package org.jboss.errai.example.client.local;
+package org.jboss.errai.ui.client.widget;
 
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 
 /**
- *
+ * @author edewit@redhat.com
  */
 public class ValueImage extends Image implements HasValue<String> {
   @Override
