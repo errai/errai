@@ -23,7 +23,7 @@ import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.*;
  * @author edewit@redhat.com
  */
 public class TranslateCommand extends TemplateVisitor implements Command {
-  private Map<URL, Context> contexts = new HashMap<URL, Context>();
+  protected Map<URL, Context> contexts = new HashMap<URL, Context>();
 
   public class Constants {
     public static final String PREFIX ="i18nPrefix";
@@ -79,7 +79,7 @@ public class TranslateCommand extends TemplateVisitor implements Command {
     Node parent = (Node) context.get(DONE);
     Element element = (Element) context.get(TemplateCatalog.ELEMENT);
     if (parent != null) {
-      if (element.getParentNode().isEqualNode(parent)) {
+      if (isElementParentOf(parent, element)) {
         return;
       } else {
         context.remove(DONE);
@@ -96,5 +96,17 @@ public class TranslateCommand extends TemplateVisitor implements Command {
     if (!visit(element)) {
       context.put(DONE, element);
     }
+  }
+
+  private boolean isElementParentOf(Node parent, Element element) {
+    Node elementParent = element.getParentNode();
+    while (elementParent != null) {
+      if (elementParent.isEqualNode(parent)) {
+        return true;
+      }
+      elementParent = elementParent.getParentNode();
+    }
+
+    return false;
   }
 }
