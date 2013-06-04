@@ -28,14 +28,31 @@ public class SelectorMinifyVisitor extends CssModVisitor {
   public boolean visit(CssRule cssRule, Context context) {
     final List<CssSelector> cssRuleSelectors = cssRule.getSelectors();
     for (CssSelector selector : cssRuleSelectors) {
-      if (selector.getSelector().startsWith(".")) {
-        final String selectorName = selector.getSelector().substring(1);
-        final String minified = minify(selectorName);
-        convertedSelectors.put(selectorName, minified);
-        selector.setSelector(minified);
+      if (selector.getSelector().contains(".")) {
+        selector.setSelector(obfuscate(selector.getSelector()));
       }
     }
     return false;
+  }
+
+  private String obfuscate(String selector) {
+    final int index = selector.indexOf(".");
+    final String prefix = selector.substring(0, index);
+
+    StringBuilder sb = new StringBuilder(prefix);
+    final String[] selectors = selector.substring(index + 1).split("\\s*\\.");
+    for (String className : selectors) {
+      final String minified;
+      if (convertedSelectors.containsKey(className)) {
+        minified = convertedSelectors.get(className);
+      } else {
+        minified = minify(className);
+        convertedSelectors.put(className, minified);
+      }
+      sb.append(".").append(minified);
+    }
+
+    return sb.toString();
   }
 
   private String minify(String selectorName) {
@@ -46,7 +63,7 @@ public class SelectorMinifyVisitor extends CssModVisitor {
     if (classPrefix == null) {
       Adler32 checksum = new Adler32();
       checksum.update(Util.getBytes(selectorName));
-      classPrefix = ".E" + Long.toString(checksum.getValue(), Character.MAX_RADIX);
+      classPrefix = "E" + Long.toString(checksum.getValue(), Character.MAX_RADIX);
     }
     return classPrefix;
   }

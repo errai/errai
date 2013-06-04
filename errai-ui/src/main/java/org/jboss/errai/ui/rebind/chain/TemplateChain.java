@@ -1,7 +1,5 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import org.jboss.errai.ui.shared.chain.Context;
-
 import java.net.URL;
 
 import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.createTemplateCatalog;
@@ -19,9 +17,9 @@ public class TemplateChain {
     return INSTANCE;
   }
 
-  public void visitTemplate(URL template, Context context) {
+  public void visitTemplate(URL template) {
     this.template = template;
-    catalog.visitTemplate(template, context);
+    catalog.visitTemplate(template);
   }
 
   @SuppressWarnings("unchecked")

@@ -34,11 +34,17 @@ public class TemplateCatalogTest {
 
   public static class DummyCommand implements Command {
     private int counter;
+
     @Override
     public void execute(Context context) {
       assertNotNull(context.get(TemplateCatalog.ELEMENT));
       context.put("dummy", new Object());
       counter++;
+    }
+
+    @Override
+    public Context createInitialContext() {
+      return new Context();
     }
 
     public int getCounter() {

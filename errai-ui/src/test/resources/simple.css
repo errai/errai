@@ -9,3 +9,15 @@
 .merge {
     background: greenyellow;
 }
+
+div.title {
+    text-decoration: #000;
+}
+
+div.store .name {
+    text-emphasis: #000;
+}
+
+div.item.active {
+    background: #fafafa;
+}

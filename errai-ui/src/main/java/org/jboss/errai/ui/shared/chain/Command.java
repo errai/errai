@@ -6,4 +6,6 @@ package org.jboss.errai.ui.shared.chain;
 public interface Command {
 
   void execute(Context context);
+
+  Context createInitialContext();
 }

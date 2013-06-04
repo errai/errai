@@ -8,8 +8,6 @@ import org.jboss.errai.reflections.util.FilterBuilder;
 
 import java.util.Collection;
 
-import static java.util.Arrays.asList;
-
 /**
  * Find all less stylesheets based of the baseClasses classpath.
  * @author edewit@redhat.com
@@ -18,20 +16,20 @@ public class LessStylesheetScanner {
 
   private final LessReflections reflections;
 
-  public LessStylesheetScanner(Class<?> baseClass) {
-    reflections = new LessReflections(baseClass);
+  public LessStylesheetScanner() {
+    reflections = new LessReflections();
   }
 
-  protected Collection<String> getLessResources() {
+  public Collection<String> getLessResources() {
     return reflections.getStore().get(LessResourceScanner.class).values();
   }
 
   private static class LessReflections extends Reflections {
-    private LessReflections(final Class<?> baseClass) {
+    private LessReflections() {
       super(new ConfigurationBuilder()
               .filterInputsBy(new FilterBuilder().include(".*\\.less"))
               .setScanners(new LessResourceScanner())
-              .setUrls(asList(ClasspathHelper.forClass(baseClass))));
+              .setUrls(ClasspathHelper.forClassLoader()));
       scan();
     }
   }

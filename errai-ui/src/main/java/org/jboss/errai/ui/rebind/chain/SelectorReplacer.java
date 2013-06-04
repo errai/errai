@@ -1,10 +1,13 @@
 package org.jboss.errai.ui.rebind.chain;
 
+import org.jboss.errai.ui.rebind.less.StyleGeneratorCodeDecorator;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * @author edewit@redhat.com
@@ -12,6 +15,7 @@ import java.util.Map;
 public class SelectorReplacer implements Command {
 
   public static final String MAPPING = "mapping";
+  public static final String RESULT = "result";
 
   @Override
   @SuppressWarnings("unchecked")
@@ -19,7 +23,7 @@ public class SelectorReplacer implements Command {
     Map<String, String> selectorMap = (Map<String, String>) context.get(MAPPING);
     Element element = (Element) context.get(TemplateCatalog.ELEMENT);
     String selector = element.getAttribute("class");
-    if (selector != null && selectorMap != null) {
+    if (isNotEmpty(selector)) {
       final String[] classSelectors = selector.split(" ");
       for (String classSelector : classSelectors) {
         final String obfuscatedSelector = selectorMap.get(classSelector);
@@ -29,5 +33,15 @@ public class SelectorReplacer implements Command {
       }
       element.setAttribute("class", selector);
     }
+
+    context.put(RESULT, element.getOwnerDocument());
+  }
+
+  @Override
+  public Context createInitialContext() {
+    Context context = new Context();
+    context.put(SelectorReplacer.MAPPING, StyleGeneratorCodeDecorator.getStyleMapping());
+
+    return context;
   }
 }

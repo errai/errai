@@ -21,6 +21,15 @@ public class Chain implements Command {
     }
   }
 
+  @Override
+  public Context createInitialContext() {
+    Context context = new Context();
+    for (Command command : commands) {
+      context.putAll(command.createInitialContext());
+    }
+    return context;
+  }
+
   public List<Command> getCommands() {
     return new ArrayList<Command>(commands);
   }

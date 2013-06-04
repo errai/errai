@@ -312,12 +312,10 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
     for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
       String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
-      String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
-      String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
 
       final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
       final TemplateChain chain = TemplateChain.getInstance();
-      chain.visitTemplate(resource, TranslateCommand.buildContext(templateFragment, i18nPrefix));
+      chain.visitTemplate(resource);
 
       Map<String, String> i18nValues = chain.getLastResult(VALUES);
 

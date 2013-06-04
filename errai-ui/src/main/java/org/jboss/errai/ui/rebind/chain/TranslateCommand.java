@@ -1,10 +1,20 @@
 package org.jboss.errai.ui.rebind.chain;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
+import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.TemplateVisitor;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.*;
 
@@ -13,6 +23,7 @@ import static org.jboss.errai.ui.rebind.chain.TranslateCommand.Constants.*;
  * @author edewit@redhat.com
  */
 public class TranslateCommand extends TemplateVisitor implements Command {
+  private Map<URL, Context> contexts = new HashMap<URL, Context>();
 
   public class Constants {
     public static final String PREFIX ="i18nPrefix";
@@ -41,16 +52,29 @@ public class TranslateCommand extends TemplateVisitor implements Command {
     }
   }
 
-  public static Context buildContext(String templateFragment, String i18nPrefix) {
-    final Context context = new Context();
-    context.put(PREFIX, i18nPrefix);
-    if (templateFragment != null && templateFragment.trim().length() > 0) {
-      context.put(FRAGMENT, templateFragment);
+  @Override
+  public Context createInitialContext() {
+    final Collection<MetaClass> templatedAnnotatedClasses = ClassScanner.getTypesAnnotatedWith(Templated.class);
+    for (MetaClass templatedAnnotatedClass : templatedAnnotatedClasses) {
+      String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
+      String templateFragment = TemplatedCodeDecorator.getTemplateFragmentName(templatedAnnotatedClass);
+      String i18nPrefix = TemplateUtil.getI18nPrefix(templateFileName);
+
+      Context subContext = new Context();
+      subContext.put(PREFIX, i18nPrefix);
+      if (templateFragment != null && templateFragment.trim().length() > 0) {
+        subContext.put(FRAGMENT, templateFragment);
+      }
+
+      final URL resource = getClass().getClassLoader().getResource(templateFileName);
+      contexts.put(resource, subContext);
     }
-    return context;
+
+    return new Context();
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute(Context context) {
     Node parent = (Node) context.get(DONE);
     Element element = (Element) context.get(TemplateCatalog.ELEMENT);
@@ -61,6 +85,11 @@ public class TranslateCommand extends TemplateVisitor implements Command {
         context.remove(DONE);
       }
     }
+
+    final URL fileName = (URL) context.get(TemplateCatalog.FILENAME);
+    Context subContext = contexts.get(fileName);
+    context.putAll(subContext);
+
     setI18nPrefix((String) context.get(PREFIX));
     context.put(VALUES, getI18nValues());
     templateFragment = (String) context.get(FRAGMENT);

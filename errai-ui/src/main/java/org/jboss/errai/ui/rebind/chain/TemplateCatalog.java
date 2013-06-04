@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public class TemplateCatalog {
   public static final String ELEMENT = "CURRENT_ELEMENT";
+  public static final String FILENAME = "CURRENT_FILE";
+
   private Map<URL, Context> contextMap = new HashMap<URL, Context>();
   private Chain chain = new Chain();
 
@@ -34,16 +36,12 @@ public class TemplateCatalog {
   }
 
   public void visitTemplate(URL template) {
-    visitTemplate(template, new Context());
-  }
-
-  public void visitTemplate(URL template, Context context) {
     if (!contextMap.containsKey(template)) {
       final Document document = parseTemplate(template);
       for (int i = 0; i < document.getChildNodes().getLength(); i++) {
         final Node node = document.getChildNodes().item(i);
         if (node instanceof Element) {
-          visitTemplate((Element) node, template, context);
+          visitTemplate((Element) node, template);
         }
       }
     }
@@ -65,8 +63,10 @@ public class TemplateCatalog {
     }
   }
 
-  private void visitTemplate(Element element, URL templateFileName, Context context) {
+  private void visitTemplate(Element element, URL templateFileName) {
+    Context context = chain.createInitialContext();
     contextMap.put(templateFileName, context);
+    context.put(FILENAME, templateFileName);
     DomVisit.visit(element, new TemplateDomVisitor(templateFileName));
   }
 

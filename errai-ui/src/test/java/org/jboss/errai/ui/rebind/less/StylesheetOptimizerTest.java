@@ -8,6 +8,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
@@ -33,19 +34,10 @@ public class StylesheetOptimizerTest {
 
     final Visitor visitor = new Visitor();
     visitor.accept(optimized);
-    final Collection<String> classNames = visitor.getSelectors();
 
-    assertEquals(new HashSet<String>(asList(".E17l0oxA", ".E17l0oxC", ".E17l0oxB")), classNames);
-
-    assertEquals(
-            ".E17l0oxA {\n" +
-                    "  background : greenyellow;\n" +
-                    "  margin-top : 3px;\n" +
-                    "}\n" +
-                    ", .E17l0oxB, .E17l0oxC {\n" +
-                    "  background : greenyellow;\n" +
-                    "}\n"
-            , stylesheetOptimizer.output());
+    final List<String> selectors =
+            asList("div.E17l0oxD", "div.E17l0oxE.E17l0oxF", ".E17l0oxA", ".E17l0oxC", ".E17l0oxB", "div.E17l0oxG.E17l0oxH");
+    assertEquals(new HashSet<String>(selectors), visitor.getSelectors());
   }
 
   public static class Visitor extends CssVisitor {

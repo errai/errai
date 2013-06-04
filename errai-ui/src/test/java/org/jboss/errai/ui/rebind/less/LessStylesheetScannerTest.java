@@ -14,7 +14,7 @@ public class LessStylesheetScannerTest {
   @Test
   public void shouldFindLessStylesheets() {
     // given
-    LessStylesheetScanner scanner = new LessStylesheetScanner(LessStylesheetScannerTest.class);
+    LessStylesheetScanner scanner = new LessStylesheetScanner();
 
     // when
     Collection<String> resources = scanner.getLessResources();
