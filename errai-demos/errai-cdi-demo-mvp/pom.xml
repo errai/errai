@@ -98,13 +98,27 @@
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-javax-enterprise</artifactId>
         </dependency>
-        
+
+	    <dependency>
+	      <groupId>org.jboss.errai</groupId>
+	      <artifactId>errai-weld-integration</artifactId>
+	    </dependency>
+	
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <scope>provided</scope>
         </dependency>
         
+		<dependency>
+	      <groupId>log4j</groupId>
+	      <artifactId>log4j</artifactId>
+	    </dependency>       
+	    
+	    <dependency>
+	      <groupId>org.mvel</groupId>
+	      <artifactId>mvel2</artifactId>
+       </dependency>
         
 		<!-- Scoped -->
         <dependency>
@@ -146,14 +160,38 @@
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se-core</artifactId>
-            <scope>${weld-se-core.scope}</scope>
+            <scope>${weld.scope}</scope>
         </dependency>
+        
+	    <!-- dependency>
+	      <groupId>org.jboss.weld.servlet</groupId>
+	      <artifactId>weld-servlet-core</artifactId>
+            <scope>${weld.scope}</scope>
+	    </dependency-->        
         
 		<dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-ext</artifactId>
           <scope>${slf4j-ext.scope}</scope>
-        </dependency>        
+        </dependency>   
+        
+        <!-- Runtime / Container dependencies -->
+	    <dependency>
+	      <groupId>org.slf4j</groupId>
+	      <artifactId>slf4j-api</artifactId>
+	    </dependency>
+	
+	
+	    <dependency>
+	      <groupId>org.jboss.logging</groupId>
+	      <artifactId>jboss-logging</artifactId>
+	    </dependency>
+	
+	    <dependency>
+	      <groupId>org.jboss.spec.javax.servlet</groupId>
+	      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+	      <scope>provided</scope>
+	    </dependency>
     </dependencies>
 
     <profiles>
@@ -170,7 +208,7 @@
 	            <jetty.scope>provided</jetty.scope>
 	            <jetty-plus.scope>provided</jetty-plus.scope>
 	            <jetty-naming.scope>compile</jetty-naming.scope>
-	            <weld-se-core.scope>provided</weld-se-core.scope>
+	            <weld.scope>compile</weld.scope>
 	            <slf4j-ext.scope>compile</slf4j-ext.scope>
             </properties>
         </profile>
@@ -185,7 +223,7 @@
 	            <jetty.scope>provided</jetty.scope>
 	            <jetty-plus.scope>provided</jetty-plus.scope>
 	            <jetty-naming.scope>provided</jetty-naming.scope>
-	            <weld-se-core.scope>provided</weld-se-core.scope>
+	            <weld.scope>provided</weld.scope>
 	            <slf4j-ext.scope>provided</slf4j-ext.scope>
             </properties>
         </profile>

@@ -133,50 +133,6 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>jetty</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <webDescriptor>jetty</webDescriptor>
-            </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.jboss.errai</groupId>
-                    <artifactId>errai-cdi-jetty</artifactId>
-                </dependency>
-            </dependencies>
-
-        </profile>
-
-        <profile>
-            <id>jboss7</id>
-            <properties>
-                <webDescriptor>jboss7</webDescriptor>
-            </properties>
-        </profile>
-
-        <!-- Tomcat 6 and 7 support -->
-        <profile>
-            <id>tomcat</id>
-            <properties>
-                <webDescriptor>tomcat</webDescriptor>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>javax.enterprise</groupId>
-                    <artifactId>cdi-api</artifactId>
-                    <scope>compile</scope>
-                    <version>1.0-SP4</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-    </profiles>
-
     <build>
         <outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
 
@@ -336,5 +292,49 @@
             </plugins>
         </pluginManagement>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>jetty</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <webDescriptor>jetty</webDescriptor>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-cdi-jetty</artifactId>
+                </dependency>
+            </dependencies>
 
+        </profile>
+
+        <profile>
+            <id>jboss7</id>
+            <properties>
+                <webDescriptor>jboss7</webDescriptor>
+            </properties>
+        </profile>
+
+        <!-- Tomcat 6 and 7 support -->
+        <profile>
+            <id>tomcat</id>
+            <properties>
+                <webDescriptor>tomcat</webDescriptor>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>javax.enterprise</groupId>
+                    <artifactId>cdi-api</artifactId>
+                    <scope>compile</scope>
+                    <version>1.0-SP4</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+    </profiles>
+    
 </project>

@@ -45,6 +45,7 @@
     <javax.persitence.api.version>1.0</javax.persitence.api.version>
     <jboss.logging.version>3.1.0.GA</jboss.logging.version>
     <jboss.servlet.api.spec30.version>1.0.0.Final</jboss.servlet.api.spec30.version>
+    <jetty.version>6.1.25</jetty.version>
     <jsr305.version>1.3.9</jsr305.version>
     <junit.version>4.8.1</junit.version>
     <log4.version>1.2.16</log4.version>
@@ -58,6 +59,7 @@
     <plexus.utils.version>1.5.5</plexus.utils.version>
     <slf4j.version>1.6.1</slf4j.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
+    <weld.version>1.1.13.Final</weld.version>
   </properties>
 
 
@@ -295,6 +297,43 @@
         <artifactId>javax.inject</artifactId>
         <version>${javax.inject.version}</version>
       </dependency>
+      
+      <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+   		  <version>${jetty.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-plus</artifactId>
+   		  <version>${jetty.version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-naming</artifactId>
+   		  <version>${jetty.version}</version>
+      </dependency>
+        
+      <dependency>
+          <groupId>org.jboss.weld.se</groupId>
+          <artifactId>weld-se-core</artifactId>
+   		  <version>${weld.version}</version>
+      </dependency>
+      
+  	  <dependency>
+	     <groupId>org.jboss.weld.servlet</groupId>
+	     <artifactId>weld-servlet-core</artifactId>
+	     <version>${weld.version}</version>
+	  </dependency>        
+      
+        
+	  <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-ext</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>        
       
     </dependencies>
   </dependencyManagement>

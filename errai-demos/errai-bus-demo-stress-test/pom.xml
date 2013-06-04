@@ -235,30 +235,23 @@
             </activation>
             <properties>
                 <webDescriptor>jetty</webDescriptor>
+                <errai-jboss-as-support.scope>provided</errai-jboss-as-support.scope>
             </properties>
         </profile>
 
         <profile>
             <id>jboss7</id>
-
             <properties>
                 <webDescriptor>jboss7</webDescriptor>
+                <errai-jboss-as-support.scope>compile</errai-jboss-as-support.scope>
             </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.jboss.errai</groupId>
-                    <artifactId>errai-jboss-as-support</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-            </dependencies>
         </profile>
 
         <profile>
             <id>tomcat</id>
-
             <properties>
                 <webDescriptor>tomcat</webDescriptor>
+                <errai-jboss-as-support.scope>provided</errai-jboss-as-support.scope>
             </properties>
         </profile>
     </profiles>
