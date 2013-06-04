@@ -16,6 +16,10 @@
 
 package org.jboss.errai.marshalling.client;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -25,10 +29,6 @@ import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A collection of static methods for accomplishing common tasks with the Errai marshalling API.
@@ -62,13 +62,15 @@ public abstract class Marshalling {
    *          permitted.
    * @return The JSON representation of the given object and all nested properties reachable from it.
    */
-  public static String toJSON(final Object obj) {
+  public static String toJSON(Object obj) {
     if (obj == null) {
       return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"java.lang.Object\",\""
               + SerializationParts.QUALIFIED_VALUE + "\":null}";
     }
 
     final MarshallingSession session = MarshallingSessionProviderFactory.getEncoding();
+    
+    obj = MarshallUtil.maybeUnwrap(obj);
 
     if (needsQualification(obj)) {
       return NumbersUtils.qualifiedNumericEncoding(obj);
