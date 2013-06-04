@@ -217,11 +217,6 @@ public class MarshallersGenerator extends AbstractAsyncGenerator {
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
       throws UnableToCompleteException {
-
-    if (GWT.isProdMode()) {
-      log.info("compiling in production mode.");
-    }
-
     logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
     return startAsyncGeneratorsAndWaitFor(MarshallerFactory.class, context, logger, packageName, className);
   }
