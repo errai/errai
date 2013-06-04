@@ -33,6 +33,11 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   }
 
   @Override
+  public long getWithPathParamRegex(long id) {
+    return id;
+  }
+  
+  @Override
   public String getWithStringPathParam(String id) {
     return id;
   }
