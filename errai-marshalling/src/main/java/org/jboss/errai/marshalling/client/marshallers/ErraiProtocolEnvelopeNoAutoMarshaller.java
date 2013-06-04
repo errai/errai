@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
@@ -104,8 +105,11 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
             valueMarshaller = StringMarshaller.INSTANCE;
           }
           else {
-            valueMarshaller = MarshallUtil.getMarshaller(val, ctx);
+            valueMarshaller = MarshallUtil.getMarshaller(MarshallUtil.maybeUnwrap(val), ctx);
           }
+        }
+        if (val instanceof WrappedPortable) {
+          val = ((WrappedPortable) val).unwrap();
         }
         buf.append(valueMarshaller.marshall(val, ctx));
       }

@@ -175,8 +175,9 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
           keyMarshaller = MarshallUtil.getMarshaller(entry.getKey(), ctx);
         }
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-                .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(entry.getKey(), ctx)))
-                .append("\"");
+            .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(
+                MarshallUtil.maybeUnwrap(entry.getKey()), ctx)))
+            .append("\"");
       }
 
       buf.append(":");
@@ -193,7 +194,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         else {
           valueMarshaller = MarshallUtil.getMarshaller(entry.getValue(), ctx);
         }
-        buf.append(valueMarshaller.marshall(entry.getValue(), ctx));
+        buf.append(valueMarshaller.marshall(MarshallUtil.maybeUnwrap(entry.getValue()), ctx));
       }
     }
 

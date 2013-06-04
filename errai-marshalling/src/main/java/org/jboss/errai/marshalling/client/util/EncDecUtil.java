@@ -50,7 +50,7 @@ public class EncDecUtil {
           marshaller = MarshallUtil.getMarshaller(elem, ctx);
         }
   
-        buf.append(marshaller.marshall(elem, ctx));
+        buf.append(marshaller.marshall(MarshallUtil.maybeUnwrap(elem), ctx));
       } 
       else {
         buf.append("null");

@@ -16,6 +16,9 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -24,9 +27,6 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Mike Brock
@@ -96,7 +96,8 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
         else {
           valueMarshaller = MarshallUtil.getMarshaller(val, ctx);
         }
-        buf.append(valueMarshaller.marshall(val, ctx));
+        
+        buf.append(valueMarshaller.marshall(MarshallUtil.maybeUnwrap(val), ctx));
       }
     }
 

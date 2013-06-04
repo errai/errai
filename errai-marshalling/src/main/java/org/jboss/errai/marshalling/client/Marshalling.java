@@ -62,13 +62,15 @@ public abstract class Marshalling {
    *          permitted.
    * @return The JSON representation of the given object and all nested properties reachable from it.
    */
-  public static String toJSON(final Object obj) {
+  public static String toJSON(Object obj) {
     if (obj == null) {
       return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"java.lang.Object\",\""
               + SerializationParts.QUALIFIED_VALUE + "\":null}";
     }
 
     final MarshallingSession session = MarshallingSessionProviderFactory.getEncoding();
+    
+    obj = MarshallUtil.maybeUnwrap(obj);
 
     if (needsQualification(obj)) {
       return NumbersUtils.qualifiedNumericEncoding(obj);
