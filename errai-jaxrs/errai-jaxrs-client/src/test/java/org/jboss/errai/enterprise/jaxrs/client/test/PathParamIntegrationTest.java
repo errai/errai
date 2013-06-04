@@ -42,6 +42,12 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
     call(PathParamTestService.class,
         new AssertionCallback<Long>("@GET with @PathParam failed", 1l)).getWithPathParam(1l);
   }
+  
+  @Test
+  public void testGetWithPathParamRegex() {
+    call(PathParamTestService.class,
+        new AssertionCallback<Long>("@GET with @PathParam using regex failed", 2l)).getWithPathParamRegex(2l);
+  }
 
   @Test
   public void testGetWithEncodedPathParam() {

@@ -236,9 +236,10 @@ public class JaxrsResourceMethodParameters {
     Matcher matcher = PATH_PARAM_PATTERN.matcher(path);
 
     while (matcher.find()) {
-      String pathName = matcher.group(2);
-      if (pathName != null)
-        pathParamNames.add(pathName);
+      String id = matcher.group(2);
+      String regex = matcher.group(3);
+      if (id != null)
+        pathParamNames.add(id + ((regex != null) ? regex : ""));
     }
 
     return pathParamNames;
