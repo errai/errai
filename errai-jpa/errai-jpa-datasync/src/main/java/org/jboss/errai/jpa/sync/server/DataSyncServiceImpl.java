@@ -81,8 +81,7 @@ public class DataSyncServiceImpl implements DataSyncService {
           syncResponse.add(new ConflictResponse<E>(remoteExpectedState, localState, remoteNewState));
         }
         else {
-          em.merge(remoteNewState);
-          syncResponse.add(new UpdateResponse<E>(remoteNewState));
+          syncResponse.add(new UpdateResponse<E>(em.merge(remoteNewState)));
         }
         break;
 

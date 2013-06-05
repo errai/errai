@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.Version;
 
 @Entity
 @NamedQueries(
@@ -16,6 +17,9 @@ public class SimpleEntity implements Cloneable {
 
   @Id @GeneratedValue
   private Long id;
+
+  @Version
+  private int version;
 
   private String string;
   private Integer integer;
@@ -34,6 +38,9 @@ public class SimpleEntity implements Cloneable {
 
   public Long getId() {
     return id;
+  }
+  public int getVersion() {
+    return version;
   }
   public String getString() {
     return string;
@@ -70,6 +77,7 @@ public class SimpleEntity implements Cloneable {
   @Override
   public String toString() {
     // Warning: tests rely on this toString() fully representing the state of the object
+    // version should not be included here because it changes asymmetrically
     return "SimpleEntity [id=" + id + ", string=" + string + ", integer=" + integer + ", date=" + (date == null ? null : date.toString()) + "]";
   }
 

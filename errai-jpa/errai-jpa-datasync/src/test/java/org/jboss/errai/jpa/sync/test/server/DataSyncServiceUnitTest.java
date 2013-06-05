@@ -202,6 +202,7 @@ public class DataSyncServiceUnitTest extends AbstractServerSideDataSyncTest {
     assertEquals("Got unexpected response: " + syncResponse, 1, syncResponse.size());
     UpdateResponse<SimpleEntity> updateResponse = (UpdateResponse<SimpleEntity>) syncResponse.get(0);
     assertEquals(localEntityNewState.toString(), updateResponse.getEntity().toString());
+    assertEquals(localEntityExpectedState.getVersion() + 1, updateResponse.getEntity().getVersion());
   }
 
   @Test
