@@ -21,9 +21,6 @@ public class LessIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull(template.getBox());
     final String expected = "Eoxl56A";
-//    assertEquals("The class name should have been obfuscated", expected, template.getBox().getClassName());
     assertEquals(expected, lessStyle.get("box"));
-
-//    assertEquals("#fe33ac;", template.getBox().getStyle().getBackgroundColor());
   }
 }
