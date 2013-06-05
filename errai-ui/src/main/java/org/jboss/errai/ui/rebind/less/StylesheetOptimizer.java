@@ -77,13 +77,8 @@ public class StylesheetOptimizer {
 
     @Override
     public boolean visit(CssRule x, Context ctx) {
-      if (x.getProperties().isEmpty()) {
-        // Don't print empty rule blocks
-        return false;
-      }
-
       needsOpenBrace = true;
-      return true;
+      return super.visit(x, ctx);
     }
 
     @Override
