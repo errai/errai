@@ -18,6 +18,7 @@ package org.jboss.errai.jpa.sync.test.client;
 
 
 import org.jboss.errai.jpa.sync.test.server.DataSyncServiceUnitTest;
+import org.jboss.errai.jpa.sync.test.server.EntityComparatorTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -30,6 +31,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
   DataSyncServiceUnitTest.class,
+  EntityComparatorTest.class,
   ErraiJpaAttributeAccessorTest.class,
   JavaReflectionAttributeAccessorTest.class,
   ClientSyncManagerIntegrationTest.class})

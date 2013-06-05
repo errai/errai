@@ -7,13 +7,9 @@ import static org.junit.Assert.assertTrue;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
 import org.jboss.errai.jpa.sync.client.shared.ConflictResponse;
@@ -27,40 +23,19 @@ import org.jboss.errai.jpa.sync.client.shared.UpdateResponse;
 import org.jboss.errai.jpa.sync.server.DataSyncServiceImpl;
 import org.jboss.errai.jpa.sync.server.JavaReflectionAttributeAccessor;
 import org.jboss.errai.jpa.sync.test.client.entity.SimpleEntity;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class DataSyncServiceUnitTest {
+public class DataSyncServiceUnitTest extends AbstractServerSideDataSyncTest {
 
   private final Map<String, Object> NO_PARAMS = Collections.emptyMap();
 
-  private EntityManager em;
   private DataSyncServiceImpl dss;
 
   @Before
-  public void setup() {
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("hibernate.connection.driver_class", "org.h2.Driver");
-    properties.put("hibernate.connection.url", "jdbc:h2:mem:temporary");
-    properties.put("hibernate.connection.username", "sa");
-    properties.put("hibernate.connection.password", "");
-    properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-    properties.put("hibernate.hbm2ddl.auto", "update");
-    properties.put("javax.persistence.validation.mode", "none");
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiDataSyncTests", properties);
-    em = emf.createEntityManager();
-    em.getTransaction().begin();
-
+  public void setupDss() {
     dss = new DataSyncServiceImpl(em, new JavaReflectionAttributeAccessor());
-  }
-
-  @After
-  public void tearDown() {
-    if (em.getTransaction().isActive()) {
-      em.getTransaction().rollback();
-    }
   }
 
   @Test

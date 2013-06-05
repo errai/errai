@@ -12,8 +12,8 @@ import org.jboss.errai.common.client.api.Assert;
 
 public class EntityComparator {
 
-  private Metamodel metamodel;
-  private JpaAttributeAccessor attributeAccessor;
+  private final Metamodel metamodel;
+  private final JpaAttributeAccessor attributeAccessor;
 
   public EntityComparator(Metamodel metamodel, JpaAttributeAccessor attributeAccessor) {
     this.metamodel = Assert.notNull(metamodel);
@@ -60,7 +60,7 @@ public class EntityComparator {
       Object lhsVal = attributeAccessor.get(attr, lhs);
       Object rhsVal = attributeAccessor.get(attr, rhs);
 
-      if (lhsVal == null && rhsVal == null) return false;
+      if (lhsVal == null && rhsVal == null) continue;
       if (lhsVal == null || rhsVal == null) return true;
 
       assert (lhsVal != null);
@@ -80,8 +80,8 @@ public class EntityComparator {
 
       case MANY_TO_MANY:
       case ONE_TO_MANY:
-        Collection<?> lhsCollection = (Collection<?>) lhs;
-        Collection<?> rhsCollection = (Collection<?>) rhs;
+        Collection<?> lhsCollection = (Collection<?>) lhsVal;
+        Collection<?> rhsCollection = (Collection<?>) rhsVal;
         if (lhsCollection.size() != rhsCollection.size()) return true;
         Iterator<?> lhsIt = lhsCollection.iterator();
         Iterator<?> rhsIt = rhsCollection.iterator();
