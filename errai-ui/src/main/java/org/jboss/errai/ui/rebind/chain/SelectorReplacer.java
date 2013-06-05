@@ -1,6 +1,6 @@
 package org.jboss.errai.ui.rebind.chain;
 
-import org.jboss.errai.ui.rebind.less.StyleGeneratorCodeDecorator;
+import org.jboss.errai.ui.rebind.less.LessStyleGenerator;
 import org.jboss.errai.ui.shared.chain.Command;
 import org.jboss.errai.ui.shared.chain.Context;
 import org.w3c.dom.Element;
@@ -40,7 +40,7 @@ public class SelectorReplacer implements Command {
   @Override
   public Context createInitialContext() {
     Context context = new Context();
-    context.put(SelectorReplacer.MAPPING, StyleGeneratorCodeDecorator.getStyleMapping());
+    context.put(SelectorReplacer.MAPPING, LessStyleGenerator.getStyleMapping());
 
     return context;
   }

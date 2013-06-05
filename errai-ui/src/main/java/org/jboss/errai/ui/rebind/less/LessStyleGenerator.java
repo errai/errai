@@ -1,17 +1,22 @@
 package org.jboss.errai.ui.rebind.less;
 
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.dev.util.collect.Lists;
 import com.google.gwt.dom.client.StyleInjector;
 import org.apache.commons.io.IOUtils;
-import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.EnvUtil;
-import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.config.rebind.GenerateAsync;
+import org.jboss.errai.config.util.ClassScanner;
+import org.jboss.errai.ui.client.local.spi.LessStyleMapping;
 import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
 import org.jboss.errai.ui.rebind.chain.TemplateChain;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -36,9 +41,9 @@ import static org.jboss.errai.ui.rebind.chain.SelectorReplacer.RESULT;
  *
  * @author edewit@redhat.com
  */
-@CodeDecorator
-@SuppressWarnings("UnusedDeclaration")
-public class StyleGeneratorCodeDecorator extends IOCDecoratorExtension<Templated> {
+@GenerateAsync(LessStyleMapping.class)
+public class LessStyleGenerator extends AbstractAsyncGenerator {
+  private static final String GENERATED_CLASS_NAME = "LessStyleMappingGenerated";
   private static Set<StylesheetOptimizer> optimizedStylesheets = new HashSet<StylesheetOptimizer>();
 
   static {
@@ -49,23 +54,37 @@ public class StyleGeneratorCodeDecorator extends IOCDecoratorExtension<Templated
     }
   }
 
-  public StyleGeneratorCodeDecorator(Class<Templated> decoratesWith) {
-    super(decoratesWith);
+  @Override
+  public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+    return startAsyncGeneratorsAndWaitFor(LessStyleMapping.class, context, logger,
+            LessStyleMapping.class.getPackage().getName(), GENERATED_CLASS_NAME);
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(InjectableInstance<Templated> ctx) {
-    final ContextualStatementBuilder inject = Stmt.create().invokeStatic(StyleInjector.class, "inject", createStyleSheet());
-    String templateFileName = TemplatedCodeDecorator.getTemplateFileName(ctx.getElementType());
-    final TemplateChain chain = TemplateChain.getInstance();
-    chain.visitTemplate(getClass().getClassLoader().getResource(templateFileName));
-
-    final Document document = chain.getLastResult(RESULT);
-    if (!EnvUtil.isJUnitTest()) {
-      writeDocumentToFile(document, templateFileName);
+  protected String generate(TreeLogger logger, GeneratorContext context) {
+    final ClassStructureBuilder<?> classBuilder = Implementations.extend(LessStyleMapping.class, GENERATED_CLASS_NAME);
+    ConstructorBlockBuilder<?> constructor = classBuilder.publicConstructor();
+    for (Map.Entry<String, String> entry : getStyleMapping().entrySet()) {
+      constructor.append(Stmt.nestedCall(Refs.get("styleNameMapping")).invoke("put", entry.getKey(), entry.getValue()));
     }
 
-    return Lists.create(inject);
+    final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class);
+
+    for (MetaClass metaClass : templated) {
+      String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
+      final TemplateChain chain = TemplateChain.getInstance();
+      chain.visitTemplate(getClass().getClassLoader().getResource(templateFileName));
+
+      final Document document = chain.getLastResult(RESULT);
+      if (!EnvUtil.isJUnitTest()) {
+        writeDocumentToFile(document, templateFileName);
+      }
+    }
+
+    constructor.append(Stmt.create().invokeStatic(StyleInjector.class, "inject", createStyleSheet()));
+    constructor.finish();
+
+    return classBuilder.toJavaString();
   }
 
   private void writeDocumentToFile(Document document, String templateFileName) {
@@ -97,16 +116,12 @@ public class StyleGeneratorCodeDecorator extends IOCDecoratorExtension<Templated
   private static void init() throws IOException, UnableToCompleteException {
     final Collection<String> lessStyles = new LessStylesheetScanner().getLessResources();
     for (String sheet : lessStyles) {
-      final URL resource = StyleGeneratorCodeDecorator.class.getResource("/" + sheet);
+      final URL resource = LessStyleGenerator.class.getResource("/" + sheet);
       final File cssFile = new LessConverter().convert(resource);
 
       final StylesheetOptimizer stylesheetOptimizer = new StylesheetOptimizer(cssFile);
       optimizedStylesheets.add(stylesheetOptimizer);
     }
-  }
-
-  private String getCssResourceName(final String cssFilePath) {
-    return cssFilePath;
   }
 
   public static Map<String, String> getStyleMapping() {
