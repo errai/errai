@@ -34,7 +34,8 @@ public class SelectorMinifyVisitorTest {
 
     // then
     assertNotNull(convertedSelectors);
-    assertEquals(new HashSet<String>(asList("title", "store", "name", "test", "item", "active", "merge", "something")),
+    assertEquals(new HashSet<String>(
+            asList("title", "store", "test", "item", "name", "merge", "active", "something", "comment")),
             convertedSelectors.keySet());
   }
 

@@ -21,3 +21,15 @@ div.store .name {
 div.item.active {
     background: #fafafa;
 }
+
+div.item div.comment {
+    color: #999;
+}
+
+div.item .name, div.store .name {
+    color: blue;
+}
+
+div h1 {
+    border-left: 1px;
+}

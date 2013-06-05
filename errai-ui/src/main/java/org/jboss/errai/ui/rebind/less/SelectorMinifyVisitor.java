@@ -15,7 +15,7 @@ import java.util.zip.Adler32;
  * @author edewit@redhat.com
  */
 public class SelectorMinifyVisitor extends CssModVisitor {
-  private static final char[] BASE32_CHARS = new char[] {
+  private static final char[] BASE32_CHARS = new char[]{
           'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
           'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '-', '0',
           '1', '2', '3', '4'};
@@ -36,22 +36,28 @@ public class SelectorMinifyVisitor extends CssModVisitor {
   }
 
   private String obfuscate(String selector) {
-    final int index = selector.indexOf(".");
-    final String prefix = selector.substring(0, index);
-
-    StringBuilder sb = new StringBuilder(prefix);
-    final String[] selectors = selector.substring(index + 1).split("\\s*\\.");
-    for (String className : selectors) {
-      final String minified;
-      if (convertedSelectors.containsKey(className)) {
-        minified = convertedSelectors.get(className);
+    StringBuilder sb = new StringBuilder();
+    final String[] descendants = selector.split(" ");
+    for (String descendant : descendants) {
+      final int index = descendant.indexOf(".");
+      if (index != -1) {
+        final String prefix = descendant.substring(0, index);
+        sb.append(prefix);
+        final String[] selectors = descendant.substring(index + 1).split("\\.");
+        for (String className : selectors) {
+          final String minified;
+          if (convertedSelectors.containsKey(className)) {
+            minified = convertedSelectors.get(className);
+          } else {
+            minified = minify(className);
+            convertedSelectors.put(className, minified);
+          }
+          sb.append(".").append(minified).append(" ");
+        }
       } else {
-        minified = minify(className);
-        convertedSelectors.put(className, minified);
+        sb.append(descendant).append(" ");
       }
-      sb.append(".").append(minified);
     }
-
     return sb.toString();
   }
 
