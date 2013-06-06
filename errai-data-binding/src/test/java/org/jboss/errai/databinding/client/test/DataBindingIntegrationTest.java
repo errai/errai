@@ -453,7 +453,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindableProxyMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
-
+    model.setName("test");
+    
     String marshalledModel = Marshalling.toJSON(model);
     assertEquals(model, Marshalling.fromJSON(marshalledModel, TestModel.class));
   }
@@ -461,7 +462,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindableProxyListMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
-
+    model.setName("test");
+    
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(model);
     String marshalledModelList = Marshalling.toJSON(modelList);
@@ -471,7 +473,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindableProxyMapMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
-
+    model.setName("test");
+    
     Map<TestModel, TestModel> modelMap = new HashMap<TestModel, TestModel>();
     modelMap.put(model, model);
     String marshalledModelMap = Marshalling.toJSON(modelMap);
