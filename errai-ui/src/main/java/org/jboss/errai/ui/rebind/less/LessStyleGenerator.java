@@ -37,7 +37,9 @@ import java.util.*;
 import static org.jboss.errai.ui.rebind.chain.SelectorReplacer.RESULT;
 
 /**
- * Finds all less files and compiles minifies and injects them.
+ * This generator will create the LessStyleMapping that contains the mapping between the original selector name and
+ * the obfuscated one. It will also make sure that the generated css file gets injected with a call
+ * to {@link StyleInjector}. And last but not least this generator will change the templates that use these styles.
  *
  * @author edewit@redhat.com
  */
@@ -108,6 +110,9 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     }
   }
 
+  /*
+   * There could be a better way to see if this template was a html fragment
+   */
   private boolean isTemplateFragment(String templateFileName) throws IOException {
     final String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(templateFileName));
     return !template.contains("body");

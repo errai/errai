@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.zip.Adler32;
 
 /**
+ * A CssModVisitor that will change the minifiy the class selectors, the code here is 'borrowed' from
+ * {@link com.google.gwt.resources.rg.CssResourceGenerator}
+ *
  * @author edewit@redhat.com
  */
 public class SelectorMinifyVisitor extends CssModVisitor {

@@ -9,7 +9,7 @@ import org.jboss.errai.reflections.util.FilterBuilder;
 import java.util.Collection;
 
 /**
- * Find all less stylesheets based of the baseClasses classpath.
+ * Find all less stylesheets on the classpath.
  * @author edewit@redhat.com
  */
 public class LessStylesheetScanner {

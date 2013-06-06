@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
 /**
+ * Helper to get an obfuscated less style.
  * @author edewit@redhat.com
  */
 @ApplicationScoped
