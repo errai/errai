@@ -15,11 +15,10 @@
  */
 package org.jboss.errai.ui.client.local.spi;
 
-import org.jboss.errai.ui.shared.JSONMap;
-
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
+
+import org.jboss.errai.ui.shared.JSONMap;
 
 /**
  * A base class for a generated translation service that includes all
@@ -40,6 +39,10 @@ public abstract class TranslationService {
     return !dictionary.getSupportedLocals().isEmpty();
   }
 
+  public Collection<String> getSupportedLocales() {
+    return dictionary.getSupportedLocals();
+  }
+  
   /**
    * Registers the bundle with the translation service.
    * @param jsonData
@@ -73,31 +76,27 @@ public abstract class TranslationService {
    * @param translationKey
    */
   public String getTranslation(String translationKey) {
-    String localeName = currentLocale();
+    String localeName = getActiveLocale();
     logger.fine("Translating key: " + translationKey + "  into locale: " + localeName);
     Map<String, String> translationData = dictionary.get(localeName);
-    // Try the most specific version first (e.g. en_US)
     if (translationData.containsKey(translationKey)) {
       logger.fine("Translation found in locale map: " + localeName);
       return translationData.get(translationKey);
     }
-    // Now try the lang-only version (e.g. en)
-    if (localeName != null && localeName.contains("_")) {
-      localeName = localeName.substring(0, localeName.indexOf('_'));
-      translationData = dictionary.get(localeName);
-      if (translationData.containsKey(translationKey)) {
-        logger.fine("Translation found in locale map: " + localeName);
-        return translationData.get(translationKey);
-      }
-    }
-    translationData = dictionary.get(null);
-    // Fall back to the root
-    if (translationData.containsKey(translationKey)) {
-      logger.fine("Translation found in *default* locale mapl.");
-      return translationData.get(translationKey);
-    }
     // Nothing?  Then return null.
     logger.fine("Translation not found in any locale map, leaving unchanged.");
+    return null;
+  }
+
+  public String getActiveLocale() {
+    String localeName = currentLocale();
+    if (!dictionary.get(localeName).isEmpty()) {
+      return localeName;
+    }
+    if (localeName != null && localeName.contains("_")
+            && !dictionary.get(localeName.substring(0, localeName.indexOf('_'))).isEmpty()) {
+      return localeName.substring(0, localeName.indexOf('_'));
+    }
     return null;
   }
 
