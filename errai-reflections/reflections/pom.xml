@@ -35,17 +35,12 @@
         <dependency>
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
-            <!--<scope>runtime</scope>-->
-            <!--<optional>true</optional>-->
         </dependency>
 
         <!-- effectively needed when JsonSerializer is used -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>1.4</version>
-            <!--<scope>runtime</scope>-->
             <optional>true</optional>
         </dependency>
 
@@ -53,8 +48,6 @@
         <dependency>
             <groupId>org.jboss</groupId>
             <artifactId>jboss-vfs</artifactId>
-            <version>3.0.1.GA</version>
-            <!--<scope>runtime</scope>-->
             <optional>true</optional>
         </dependency>
 
@@ -70,7 +63,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
             <optional>true</optional>
         </dependency>
 
@@ -80,7 +72,6 @@
             <scope>test</scope>
             <optional>true</optional>
         </dependency>
-
     </dependencies>
 
 </project>
