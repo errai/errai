@@ -16,15 +16,6 @@
 
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.SessionEndEvent;
-import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
-import org.jboss.errai.bus.client.api.SessionEndListener;
-import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.util.SecureHashUtil;
-import org.jboss.errai.bus.server.util.ServerLaundryList;
-
-import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,29 +23,46 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.SessionEndEvent;
+import org.jboss.errai.bus.client.api.SessionEndListener;
+import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
+import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
+import org.jboss.errai.bus.server.util.ServerLaundryList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The SessionProvider for HTTP-based queue sessions.
  */
 public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
-  private static final Map<String, SessionsContainer> activeHttpSessions = new HashMap<String, SessionsContainer>();
-  
+  private static final Logger log = LoggerFactory.getLogger(HttpSessionProvider.class);
+
   @Override
   public QueueSession createOrGetSession(final HttpSession externSessRef, final String remoteQueueID) {
-    SessionsContainer sc = (SessionsContainer) activeHttpSessions.get(externSessRef.getId());
-    if (sc == null) {
+    final SessionsContainer sc;
+    if (externSessRef.getAttribute(SessionsContainer.class.getName()) != null) {
+      sc = (SessionsContainer) externSessRef.getAttribute(SessionsContainer.class.getName());
+    }
+    else {
       sc = new SessionsContainer();
-      activeHttpSessions.put(externSessRef.getId(), sc);
+      externSessRef.setAttribute(SessionsContainer.class.getName(), sc);
     }
 
     QueueSession qs = sc.getSession(remoteQueueID);
     if (qs == null) {
+      log.debug("queue session " + remoteQueueID + " started");
       qs = sc.createSession(externSessRef.getId(), remoteQueueID);
       qs.setAttribute(HttpSession.class.getName(), externSessRef);
       qs.addSessionEndListener(new SessionEndListener() {
         @Override
         public void onSessionEnd(SessionEndEvent event) {
-          activeHttpSessions.remove(externSessRef.getId());
+          log.debug("queue session " + remoteQueueID + " ended");
+          sc.removeSession(remoteQueueID);
         }
       });
     }
@@ -81,7 +89,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     }
   }
 
-  public static class HttpSessionWrapper implements QueueSession, Serializable {
+  private static class HttpSessionWrapper implements QueueSession, Serializable {
     private final SessionsContainer container;
     private final String parentSessionId;
     private final String sessionId;

@@ -18,8 +18,12 @@ package org.jboss.errai.bus.server;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.io.BufferDeliveryHandler;
@@ -33,10 +37,6 @@ import org.jboss.errai.bus.server.io.buffers.Buffer;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.slf4j.Logger;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
@@ -114,6 +114,7 @@ public class MessageQueueImpl implements MessageQueue {
    *
    * @return true if insertion was successful
    */
+  @Override
   public boolean offer(final Message message) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
@@ -153,12 +154,14 @@ public class MessageQueueImpl implements MessageQueue {
    * @param activationCallback
    *     - new activation callback function
    */
+  @Override
   public void setActivationCallback(final QueueActivationCallback activationCallback) {
     synchronized (activationLock) {
       this.activationCallback = activationCallback;
     }
   }
 
+  @Override
   public void fireActivationCallback() {
     synchronized (activationLock) {
       if (activationCallback != null) {
@@ -172,11 +175,13 @@ public class MessageQueueImpl implements MessageQueue {
    *
    * @return the current activation callback function
    */
+  @Override
   public QueueActivationCallback getActivationCallback() {
     return activationCallback;
   }
 
 
+  @Override
   public QueueSession getSession() {
     return session;
   }
@@ -186,17 +191,21 @@ public class MessageQueueImpl implements MessageQueue {
    *
    * @return true if the queue is stale
    */
+  @Override
   public boolean isStale() {
     if (!queueRunning) {
       return true;
     }
-    else return !isDirectChannelOpen() && (((System.currentTimeMillis() - lastTransmission) > timeout));
+    else {
+      return !isDirectChannelOpen() && (((System.currentTimeMillis() - lastTransmission) > timeout));
+    }
   }
 
   private boolean isDirectChannelOpen() {
     return deliveryHandler instanceof DirectChannel && ((DirectChannel) deliveryHandler).isConnected();
   }
 
+  @Override
   public boolean isInitialized() {
     return !initLock;
   }
@@ -209,10 +218,12 @@ public class MessageQueueImpl implements MessageQueue {
   /**
    * Fakes a transmission, shows life with a heartbeat
    */
+  @Override
   public void heartBeat() {
     lastTransmission = System.currentTimeMillis();
   }
 
+  @Override
   public void finishInit() {
     initLock = false;
   }
@@ -222,6 +233,7 @@ public class MessageQueueImpl implements MessageQueue {
     return pagedOut;
   }
 
+  @Override
   public void setPaged(final boolean pagedOut) {
     this.pagedOut = pagedOut;
   }
@@ -237,6 +249,7 @@ public class MessageQueueImpl implements MessageQueue {
   /**
    * Stops the queue, closes it on the bus and clears it completely
    */
+  @Override
   public void stopQueue() {
     try {
       queueRunning = false;

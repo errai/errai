@@ -15,14 +15,66 @@
  */
 package org.jboss.errai.demo.busstress.server;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import javax.inject.Inject;
+
+import org.jboss.errai.bus.client.api.BusErrorCallback;
+import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageBus;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.TimeUnit;
 
 @Service
 public class StressTestService implements MessageCallback {
+
+  private volatile int nextBroadcastId;
+  private volatile AsyncTask broadcastTask;
+
+  @Inject
+  public StressTestService(final RequestDispatcher dispatcher, MessageBus bus) {
+    bus.addSubscribeListener(new SubscribeListener() {
+
+      @Override
+      public void onSubscribe(SubscriptionEvent event) {
+        synchronized (StressTestService.class) {
+          if (event.getCount() > 0 && (broadcastTask == null || broadcastTask.isCancelled())) {
+            System.out.println("Starting broadcast task");
+            broadcastTask = MessageBuilder.createMessage("broadcasts")
+                    .withProvided(MessageParts.Value, new ResourceProvider<Integer>() {
+                      @Override
+                      public Integer get() {
+                        return nextBroadcastId++;
+                      }
+                    })
+                    .errorsHandledBy(new BusErrorCallback() {
+                      @Override
+                      public boolean error(Message message, Throwable throwable) {
+                        System.out.println("Failed to send message: " + message);
+                        throwable.printStackTrace(System.out);
+                        return true;
+                      }
+                    })
+                    .sendRepeatingWith(dispatcher, TimeUnit.SECONDS, 1);
+
+            broadcastTask.setExitHandler(new Runnable() {
+              @Override
+              public void run() {
+                System.out.println("Broadcast task ended");
+                broadcastTask = null;
+              }
+            });
+          }
+        }
+      }
+    });
+  }
 
   @Override
   public void callback(Message message) {
@@ -31,4 +83,6 @@ public class StressTestService implements MessageCallback {
       .withValue(message.get(String.class, MessageParts.Value))
       .done().reply();
   }
+
+
 }
