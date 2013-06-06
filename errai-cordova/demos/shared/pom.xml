@@ -108,7 +108,7 @@
       <dependency>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-validation</artifactId>
-        <version>${version.org.jboss.errai}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <!-- Errai JAX-RS -->
