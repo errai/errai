@@ -3,11 +3,11 @@ package org.jboss.errai.demo.busstress.client.local;
 import javax.annotation.PostConstruct;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
+import org.jboss.errai.bus.client.api.ClientMessageBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
-import org.jboss.errai.bus.client.api.ClientMessageBus;
+import org.jboss.errai.bus.client.api.messaging.Message;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.demo.busstress.client.shared.Stats;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
@@ -39,8 +39,10 @@ public class StressTestClient extends Composite {
 
   @UiField IntegerBox messageMultiplier;
 
-
   @UiField Button startButton;
+
+  @UiField Label lastBroadcastMessageId;
+  @UiField Label missedBroadcastMessageCount;
 
   @UiHandler("startButton")
   public void onStartButtonClick(ClickEvent click) {
@@ -77,6 +79,24 @@ public class StressTestClient extends Composite {
     BusStatusWidget busStatusWidget = new BusStatusWidget();
     bus.addLifecycleListener(busStatusWidget);
     statusPanel.add(busStatusWidget);
+
+    bus.subscribe("broadcasts", new MessageCallback() {
+
+      private Integer lastMsgId;
+      private int missedCount;
+
+      @Override
+      public void callback(Message message) {
+        int msgId = message.getValue(Integer.class);
+        if (lastMsgId != null) {
+          int diff = msgId - lastMsgId;
+          missedCount += (diff - 1);
+        }
+        lastMsgId = msgId;
+        missedBroadcastMessageCount.setText(String.valueOf(missedCount));
+        lastBroadcastMessageId.setText(String.valueOf(lastMsgId));
+      }
+    });
 
     RootPanel.get().add(this);
   }

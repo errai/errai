@@ -11,6 +11,8 @@
   <properties>
 	<skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
     <gwt.version>2.5.1</gwt.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <junit.version>4.10</junit.version>
@@ -108,6 +110,12 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc-bus-support</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.5</version>
     </dependency>
   </dependencies>
 
@@ -210,7 +218,7 @@
                   <pluginExecutionFilter>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.3.0,2.4.0,2.5.0]</versionRange>
+                    <versionRange>[2.3.0,)</versionRange>
                     <goals>
                       <goal>resources</goal>
                     </goals>
