@@ -15,12 +15,11 @@
  */
 package org.jboss.errai.ui.client.local.spi;
 
-import java.util.HashMap;
+import org.jboss.errai.ui.shared.JSONMap;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import org.jboss.errai.ui.shared.JSONMap;
 
 /**
  * A base class for a generated translation service that includes all
@@ -33,26 +32,12 @@ public abstract class TranslationService {
   private static final Logger logger = Logger.getLogger(TranslationService.class.getName());
   private static String currentLocale = null;
 
-  private Map<String, Map<String, String>> translations = new HashMap<String, Map<String, String>>();
-
+  private Dictionary dictionary = new Dictionary();
   /**
    * @return true if the translation service is enabled/should be used
    */
   public boolean isEnabled() {
-    return translations.size() > 0;
-  }
-
-  /**
-   * Gets a translation map for the given locale name (e.g. en_US).
-   * @param localeName
-   */
-  protected Map<String, String> get(String localeName) {
-    Map<String, String> rval = translations.get(localeName);
-    if (rval == null) {
-      rval = new HashMap<String, String>();
-      translations.put(localeName, rval);
-    }
-    return rval;
+    return !dictionary.getSupportedLocals().isEmpty();
   }
 
   /**
@@ -75,11 +60,10 @@ public abstract class TranslationService {
       locale = locale.toLowerCase();
     }
     logger.fine("Registering translation data for locale: " + locale);
-    Map<String, String> translation = get(locale);
     Set<String> keys = data.keys();
     for (String key : keys) {
       String value = data.get(key);
-      translation.put(key, value);
+      dictionary.put(locale, key, value);
     }
     logger.fine("Registered " + keys.size() + " translation keys.");
   }
@@ -91,7 +75,7 @@ public abstract class TranslationService {
   public String getTranslation(String translationKey) {
     String localeName = currentLocale();
     logger.fine("Translating key: " + translationKey + "  into locale: " + localeName);
-    Map<String, String> translationData = get(localeName);
+    Map<String, String> translationData = dictionary.get(localeName);
     // Try the most specific version first (e.g. en_US)
     if (translationData.containsKey(translationKey)) {
       logger.fine("Translation found in locale map: " + localeName);
@@ -100,13 +84,13 @@ public abstract class TranslationService {
     // Now try the lang-only version (e.g. en)
     if (localeName != null && localeName.contains("_")) {
       localeName = localeName.substring(0, localeName.indexOf('_'));
-      translationData = get(localeName);
+      translationData = dictionary.get(localeName);
       if (translationData.containsKey(translationKey)) {
         logger.fine("Translation found in locale map: " + localeName);
         return translationData.get(translationKey);
       }
     }
-    translationData = get(null);
+    translationData = dictionary.get(null);
     // Fall back to the root
     if (translationData.containsKey(translationKey)) {
       logger.fine("Translation found in *default* locale mapl.");
