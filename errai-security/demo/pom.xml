@@ -83,12 +83,12 @@
 
   </dependencies>
 
-  <repositories>
+  <!-- repositories>
     <repository>
       <id>JBOSS_NEXUS</id>
       <url>http://repository.jboss.org/nexus/content/groups/public</url>
     </repository>
-  </repositories>
+  </repositories-->
 
   <build>
     <finalName>${project.artifactId}-${project.version}</finalName>

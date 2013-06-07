@@ -35,12 +35,12 @@
     <javaee6.spec.version>3.0.0.Beta1</javaee6.spec.version>
   </properties>
 
-  <repositories>
+  <!-- repositories>
     <repository>
       <id>plugins</id>
       <url>http://gwtquery-plugins.googlecode.com/svn/mavenrepo</url>
     </repository>
-  </repositories>
+  </repositories-->
 
   <dependencyManagement>
 

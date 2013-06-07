@@ -58,11 +58,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <repositories>
+    <!-- repositories>
         <repository>
             <id>jfrog-plugins</id>
             <name>jfrog-plugins-dist</name>
             <url>http://repo.jfrog.org/artifactory/plugins-releases</url>
         </repository>
-    </repositories>
+    </repositories-->
 </project>

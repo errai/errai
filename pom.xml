@@ -1235,7 +1235,7 @@
           <name>!wfk</name>
         </property>
       </activation>
-      <distributionManagement>
+      <!-- distributionManagement>
         <repository>
           <id>jboss-releases-repository</id>
           <name>JBoss Releases Repository</name>
@@ -1247,7 +1247,7 @@
           <name>JBoss Snapshots Repository</name>
           <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
-      </distributionManagement>
+      </distributionManagement-->
     </profile>
 
     <profile>
