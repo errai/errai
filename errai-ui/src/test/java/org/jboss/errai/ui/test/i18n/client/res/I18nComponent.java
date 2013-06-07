@@ -3,6 +3,7 @@ package org.jboss.errai.ui.test.i18n.client.res;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.jboss.errai.ui.client.widget.LocaleListBox;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
@@ -36,6 +37,9 @@ public class I18nComponent extends Composite {
   private InlineLabel passwordLabel;
   @Inject @DataField
   private TextBox password;
+
+  @Inject
+  private LocaleListBox listBox;
 
   @DataField
   private UListElement variableLengthList = Document.get().createULElement();
@@ -113,4 +117,7 @@ public class I18nComponent extends Composite {
     return variableLengthList;
   }
 
+  public LocaleListBox getListBox() {
+    return listBox;
+  }
 }

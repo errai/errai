@@ -5,6 +5,7 @@ import org.jboss.errai.ui.shared.TemplateUtil;
 import org.jboss.errai.ui.shared.api.Locale;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.Set;
 /**
  * @author edewit@redhat.com
  */
-@ApplicationScoped
+@Singleton
 public class LocaleSelector {
 
   public static final String DEFAULT = "default";

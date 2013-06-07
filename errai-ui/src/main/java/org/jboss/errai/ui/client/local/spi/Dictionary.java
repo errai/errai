@@ -12,7 +12,7 @@ public class Dictionary {
   public Map<String, String> get(String locale) {
     final Map<String, String> translation = translations.get(locale);
     if (translation != null) {
-      return translation;
+      return new HashMap<String, String>(translation);
     }
     return Collections.emptyMap();
   }

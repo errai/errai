@@ -12,6 +12,7 @@ import org.jboss.errai.ui.shared.api.Locale;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * @author edewit@redhat.com
@@ -26,7 +27,7 @@ public class LocaleListBox extends ValueListBox<Locale> {
   }
 
   @AfterInitialization
-  private void init() {
+  public void init() {
     setAcceptableValues(selector.getSupportedLocales());
     addValueChangeHandler(new ValueChangeHandler<Locale>() {
       @Override
