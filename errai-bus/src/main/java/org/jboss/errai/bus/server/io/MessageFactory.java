@@ -101,6 +101,9 @@ public class MessageFactory {
       }
       return messages;
     }
+    else if (value.isNull()) {
+      return Collections.<Message>emptyList();
+    }
     else {
       throw new RuntimeException("bad payload");
     }
