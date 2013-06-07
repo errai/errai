@@ -6,6 +6,7 @@
   <inherits name="com.google.common.collect.Collect" />
   <inherits name="org.jboss.errai.common.ErraiCommon" />
   <inherits name="org.jboss.errai.marshalling.ErraiMarshalling" />
+  <inherits name="javax.ws.rs.Annotations"/>
 
   <entry-point class='org.jboss.errai.enterprise.client.jaxrs.JaxrsModule' />
 
