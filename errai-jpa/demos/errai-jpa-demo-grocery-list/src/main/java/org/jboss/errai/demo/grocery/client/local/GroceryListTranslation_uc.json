@@ -54,5 +54,8 @@
   "WelcomePage.more_than" : "MORE THAN",
   "WelcomePage.Sync_portions_of_your_database_across_the_wire_by_writing_JPQL_queries." : "SYNC PORTIONS OF YOUR DATABASE ACROSS THE WIRE BY WRITING JPQL QUERIES.",
   "WelcomePage.Sync_your_entity_state_to_your_UI_with_Errai_Data_Binding." : "SYNC YOUR ENTITY STATE TO YOUR UI WITH ERRAI DATA BINDING.",
-  "WelcomePage.Use_your_pre-existing_JPA_entity_code_in_the_browser." : "USE YOUR PRE-EXISTING JPA ENTITY CODE IN THE BROWSER."
+  "WelcomePage.Use_your_pre-existing_JPA_entity_code_in_the_browser." : "USE YOUR PRE-EXISTING JPA ENTITY CODE IN THE BROWSER.",
+  "WelcomePage._As_you_move_toward_a_more_and_more_declarative_style,_you_allow_the_compiler_and_the_framework_to_catch_more_mistakes_up_front.-1049504116" : "\n        AS YOU MOVE TOWARD A MORE AND MORE DECLARATIVE STYLE, YOU ALLOW THE COMPILER AND THE FRAMEWORK\n        TO CATCH MORE MISTAKES UP FRONT. BROKEN LINKS? A THING OF THE PAST!\n      ",
+  "WelcomePage._The_problems_you_re_actually_trying_to_solve_are_complex_enough_as_it_is._Don_t_make_the_novel_code_that_solves_your_specific_p975927268" : "\n        THE PROBLEMS YOU'RE ACTUALLY TRYING TO SOLVE ARE COMPLEX ENOUGH AS IT IS. DON'T MAKE THE NOVEL\n        CODE THAT SOLVES YOUR SPECIFIC PROBLEMS INTO THE NEEDLE IN A HAYSTACK OF CONFIGURATION, REPETITIVE\n        MEANINGLESS DRIVEL, AND ORNATE CONSTRUCTIONS THAT WORK AROUND THE FRAMEWORK.\n      ",
+  "WelcomePage.enough!_As_compelling_________as_the_autonomous_AJAX_based_client_architecture_is,_when_your_client_code_is_in_JavaScript_and_yo506283832" : "ENOUGH! AS COMPELLING\n        AS THE AUTONOMOUS AJAX BASED CLIENT ARCHITECTURE IS, WHEN YOUR CLIENT CODE IS IN JAVASCRIPT AND YOUR\n        SERVER CODE ISN'T, YOU'RE NOW COMMITTED MAINTAINING TWO APPS IN PARALLEL, AND KEEPING THEM UP-TO-DATE\n        IN LOCK STEP."
 }

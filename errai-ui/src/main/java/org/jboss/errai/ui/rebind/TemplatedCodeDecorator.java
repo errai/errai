@@ -628,7 +628,7 @@ public class TemplatedCodeDecorator extends IOCDecoratorExtension<Templated> {
    * Get the name of the {@link Template} HTML fragment (Element subtree) to be used as the template root of the given
    * {@link MetaClass} component type
    */
-  protected static String getTemplateFragmentName(final MetaClass type) {
+  public static String getTemplateFragmentName(final MetaClass type) {
     String fragment = "";
 
     if (type.isAnnotationPresent(Templated.class)) {

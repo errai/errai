@@ -13,6 +13,7 @@ import com.google.gwt.resources.css.ast.CssStylesheet;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * Parses the css stylesheet and performs optimizations on it remove identical selectors and merge identical rules.
@@ -20,6 +21,7 @@ import java.net.URL;
  */
 public class StylesheetOptimizer {
 
+  private final SelectorMinifyVisitor selectorMinifyVisitor = new SelectorMinifyVisitor();
   private final CssStylesheet stylesheet;
 
   public StylesheetOptimizer(File stylesheet) throws UnableToCompleteException {
@@ -42,10 +44,15 @@ public class StylesheetOptimizer {
     (new SplitRulesVisitor()).accept(stylesheet);
     (new MergeIdenticalSelectorsVisitor()).accept(stylesheet);
     (new MergeRulesByContentVisitor()).accept(stylesheet);
+    selectorMinifyVisitor.accept(stylesheet);
   }
 
   protected CssStylesheet getStylesheet() {
     return stylesheet;
+  }
+
+  public Map<String, String> getConvertedSelectors() {
+    return selectorMinifyVisitor.getConvertedSelectors();
   }
 
   public String output() {
@@ -71,12 +78,11 @@ public class StylesheetOptimizer {
     @Override
     public boolean visit(CssRule x, Context ctx) {
       if (x.getProperties().isEmpty()) {
-        // Don't print empty rule blocks
         return false;
       }
 
       needsOpenBrace = true;
-      return true;
+      return super.visit(x, ctx);
     }
 
     @Override

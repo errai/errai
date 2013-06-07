@@ -1,16 +1,12 @@
 package org.jboss.errai.ui.rebind.less;
 
 import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.resources.css.ast.*;
+import com.google.gwt.resources.css.ast.CssStylesheet;
 import org.junit.Test;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
-import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -31,36 +27,32 @@ public class StylesheetOptimizerTest {
     // then
     assertNotNull(optimized);
 
-    final Visitor visitor = new Visitor();
-    visitor.accept(optimized);
-    final Collection<String> classNames = visitor.getSelectors();
-
-    assertEquals(new HashSet<String>(asList(".test", ".merge", ".something")), classNames);
-
     assertEquals(
-            ".test {\n" +
+            ".E17l0oxA  {\n" +
                     "  background : greenyellow;\n" +
                     "  margin-top : 3px;\n" +
                     "}\n" +
-                    ", .something, .merge {\n" +
+                    ".E17l0oxB , .E17l0oxC  {\n" +
                     "  background : greenyellow;\n" +
+                    "}\n" +
+                    "div.E17l0oxD  {\n" +
+                    "  text-decoration : #000;\n" +
+                    "}\n" +
+                    "div.E17l0oxE .E17l0oxF  {\n" +
+                    "  text-emphasis : #000;\n" +
+                    "}\n" +
+                    "div.E17l0oxG .E17l0oxH  {\n" +
+                    "  background : #fafafa;\n" +
+                    "}\n" +
+                    "div.E17l0oxG div.E17l0oxI  {\n" +
+                    "  color : #999;\n" +
+                    "}\n" +
+                    "div.E17l0oxG .E17l0oxF , div.E17l0oxE .E17l0oxF  {\n" +
+                    "  color : blue;\n" +
+                    "}\n" +
+                    "div h1 {\n" +
+                    "  border-left : 1px;\n" +
                     "}\n"
             , stylesheetOptimizer.output());
-  }
-
-  public static class Visitor extends CssVisitor {
-    Set<String> selectors = new HashSet<String>();
-
-    @Override
-    public boolean visit(CssRule x, Context ctx) {
-      for (CssSelector selector : x.getSelectors()) {
-        selectors.add(selector.getSelector());
-      }
-      return super.visit(x, ctx);
-    }
-
-    public Set<String> getSelectors() {
-      return selectors;
-    }
   }
 }
