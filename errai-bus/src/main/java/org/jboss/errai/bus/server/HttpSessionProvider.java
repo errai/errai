@@ -71,8 +71,8 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
   }
 
   public static class SessionsContainer implements Serializable {
-    private final Map<String, Object> sharedAttributes = new HashMap<String, Object>();
-    private final Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
+    private transient final Map<String, Object> sharedAttributes = new HashMap<String, Object>();
+    private transient final Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
 
     public QueueSession createSession(final String httpSessionId, final String remoteQueueId) {
       final QueueSession qs = new HttpSessionWrapper(this, httpSessionId, remoteQueueId);
