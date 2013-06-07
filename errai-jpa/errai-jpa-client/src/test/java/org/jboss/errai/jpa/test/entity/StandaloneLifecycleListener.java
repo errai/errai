@@ -50,7 +50,7 @@ public class StandaloneLifecycleListener {
   }
 
   // private access is for testing that code generator works with private methods
-  @PreUpdate @SuppressWarnings("unused")
+  @PreUpdate
   private void albumPreUpdate(Album a) {
     eventSubject = a;
     Album.CALLBACK_LOG.add(new CallbackLogEntry(this, PreUpdate.class));

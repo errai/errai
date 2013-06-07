@@ -2,7 +2,13 @@ package org.jboss.errai.example.client.shared;
 
 import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -12,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.validation.client.shared.GwtCompatibleEmail;
 
 /**
  * This is the main business entity of the Kitchen Sink demo. It has lots of
@@ -54,7 +61,7 @@ public class Member implements Serializable, Comparable<Member> {
 
   @NotNull
   @NotEmpty
-  @Email
+  @GwtCompatibleEmail
   private String email;
 
   @NotNull

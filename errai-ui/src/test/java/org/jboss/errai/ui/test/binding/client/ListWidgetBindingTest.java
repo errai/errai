@@ -70,8 +70,10 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
   @Test
   public void testManualListBinding() {
     List<TestModel> modelList = new ArrayList<TestModel>();
-    modelList.add(new TestModel());
-    modelList.add(new TestModel());
+    TestModel model0 = new TestModel();
+    TestModel model1 = new TestModel();
+    modelList.add(model0);
+    modelList.add(model1);
 
     BindingTemplateTestApp app = IOC.getBeanManager().lookupBean(BindingTemplateTestApp.class).getInstance();
     BindingListWidget listWidget = app.getListWidget();
@@ -84,7 +86,10 @@ public class ListWidgetBindingTest extends AbstractErraiCDITest {
     assertEquals("onItemsRendered should be called exactly one time", 1, listWidget.getItemsRenderedCalled());
 
     BindingItemWidget itemWidget0 = listWidget.getWidget(0);
+    assertEquals(itemWidget0, listWidget.getWidget(model0));
     BindingItemWidget itemWidget1 = listWidget.getWidget(1);
+    assertEquals(itemWidget1, listWidget.getWidget(model1));
+    
     itemWidget0.getModel().setName("0");
     itemWidget1.getModel().setName("1");
     assertEquals("First item widget was not updated!", "0", itemWidget0.getTextBox().getText());

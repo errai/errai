@@ -234,22 +234,7 @@ public class AsyncInjectUtil {
     do {
       for (final MetaField field : visit.getDeclaredFields()) {
         if (InjectUtil.isInjectionPoint(ctx, field)) {
-//          if (!field.isPublic()) {
-//            final MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
-//                field.getType());
-//
-//            if (meth == null) {
-//              final AsyncInjectionTask task = new AsyncInjectionTask(injector, field);
-//              accumulator.add(task);
-//            }
-//            else {
-//              final AsyncInjectionTask task = new AsyncInjectionTask(injector, meth);
-//              accumulator.add(task);
-//            }
-//          }
-//          else {
-            accumulator.add(new AsyncInjectionTask(injector, field));
-//          }
+          accumulator.add(new AsyncInjectionTask(injector, field));
         }
 
         ElementType[] elTypes;
@@ -636,7 +621,7 @@ public class AsyncInjectUtil {
   }
 
   public static Statement generateCallback(final MetaClass type,
-                                final Statement... fieldAccessStmt) {
+                                           final Statement... fieldAccessStmt) {
 
     final MetaClass callbackClass = MetaClassFactory.parameterizedAs(CreationalCallback.class,
         MetaClassFactory.typeParametersOf(type));

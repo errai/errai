@@ -5,6 +5,13 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
+ * The <tt>CreationalContext</tt> is as its name implies, the context used in the creation of beans. There is a
+ * one-to-one relationship between a <tt>CreationalContext</tt> and a scope. The creation of new dependent scope beans
+ * and forced new-instance creation of normal-scoped beans are contained in their own <tt>CreationalContext</tt>.
+ * <p>
+ * The context is used for regulating lifecycle activities as well as managing proxies generated in the creation
+ * of the beans.
+ *
  * @author Mike Brock
  */
 public interface CreationalContext {
@@ -80,13 +87,6 @@ public interface CreationalContext {
    */
   void addBean(BeanRef ref, Object instance);
 
-//  /**
-//   * Registers a bean provider within the creational
-//   *
-//   * @param ref
-//   * @param provider
-//   */
-//  void addBeanProvider(BeanRef ref, BeanProvider provider);
 
   /**
    * Returns a list of all created beans within this creational context.
@@ -99,20 +99,7 @@ public interface CreationalContext {
    * Returns a list of the instances of every created bean within this creational context.
    *
    * @return An unmodifiable collection of every bean instance within the creational context.
-   *///  /**
-   //   * Obtains an instance of the bean within the creational context based on the specified bean type and qualifiers.
-   //   *
-   //   * @param beanType
-   //   *     the type of the bean
-   //   * @param qualifiers
-   //   *     the qualifiers fo the bean
-   //   * @param <T>
-   //   *     the type of the bean
-   //   *
-   //   * @return the actual instance of the bean
-   //   */
-   //  @SuppressWarnings("unchecked")
-   //  <T> T getBeanInstance(Class<T> beanType, Annotation[] qualifiers);
+   */
 
   Collection<Object> getAllCreatedBeanInstances();
 

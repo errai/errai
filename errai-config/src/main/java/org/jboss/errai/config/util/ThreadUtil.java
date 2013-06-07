@@ -50,12 +50,12 @@ public class ThreadUtil {
   public static class SynchronousCallableFuture<V> implements Future<V> {
     private final Callable<V> runnable;
 
-    public SynchronousCallableFuture(Callable<V> runnable) {
+    public SynchronousCallableFuture(final Callable<V> runnable) {
       this.runnable = runnable;
     }
 
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public boolean cancel(final boolean mayInterruptIfRunning) {
       return false;
     }
 
@@ -80,7 +80,7 @@ public class ThreadUtil {
     }
 
     @Override
-    public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
       try {
         return runnable.call();
       }
@@ -95,12 +95,12 @@ public class ThreadUtil {
   public static class SynchronousRunnableeFuture<V> implements Future<V> {
     private final Runnable runnable;
 
-    public SynchronousRunnableeFuture(Runnable runnable) {
+    public SynchronousRunnableeFuture(final Runnable runnable) {
       this.runnable = runnable;
     }
 
     @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    public boolean cancel(final boolean mayInterruptIfRunning) {
       return false;
     }
 
@@ -127,7 +127,7 @@ public class ThreadUtil {
     }
 
     @Override
-    public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
       try {
         runnable.run();
         return null;

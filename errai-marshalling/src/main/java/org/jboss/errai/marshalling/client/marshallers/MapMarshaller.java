@@ -16,6 +16,13 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -27,13 +34,6 @@ import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.AbstractMap;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -64,13 +64,20 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
     Object demarshalledKey;
     final String assumedKeyType = ctx.getAssumedMapKeyType();
     final String assumedValueType = ctx.getAssumedMapValueType();
+
+    // the assumed map k/v types can only be used once since they are not set for nested maps.
+    ctx.setAssumedMapKeyType(null);
+    ctx.setAssumedMapValueType(null);
+
     for (final String key : o.isObject().keySet()) {
       final EJValue ejValue = o.isObject().get(key);
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
         final EJValue ejKey = ParserFactory.get().parse(key.substring(SerializationParts.EMBEDDED_JSON.length()));
         demarshalledKey = ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejKey)).demarshall(ejKey, ctx);
+
+        final String valueType = ctx.determineTypeFor(null, ejValue);
         impl.put(demarshalledKey,
-            ctx.getMarshallerInstance(ctx.determineTypeFor(null, ejValue)).demarshall(ejValue, ctx));
+            ctx.getMarshallerInstance(valueType).demarshall(ejValue, ctx));
       }
       else {
         if (key.equals(SerializationParts.OBJECT_ID)) {
@@ -87,9 +94,6 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
           else {
             valueType = assumedValueType;
           }
-          // the assumed map k/v types can only be used once since they are not set for nested maps. 
-          ctx.setAssumedMapKeyType(null);
-          ctx.setAssumedMapValueType(null);
           final Object demarshalledValue = ctx.getMarshallerInstance(valueType).demarshall(ejValue, ctx);
           impl.put(demarshalledKey, demarshalledValue);
         }
@@ -170,7 +174,8 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         }
 
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-            .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(entry.getKey(), ctx)))
+            .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(
+                MarshallUtil.maybeUnwrap(entry.getKey()), ctx)))
             .append("\"");
       }
 
@@ -188,7 +193,7 @@ public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<
         else {
           valueMarshaller = MarshallUtil.getMarshaller(entry.getValue(), ctx);
         }
-        buf.append(valueMarshaller.marshall(entry.getValue(), ctx));
+        buf.append(valueMarshaller.marshall(MarshallUtil.maybeUnwrap(entry.getValue()), ctx));
       }
     }
 

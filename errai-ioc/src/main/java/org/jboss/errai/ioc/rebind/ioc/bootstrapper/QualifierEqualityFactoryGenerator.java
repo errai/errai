@@ -147,7 +147,8 @@ public class QualifierEqualityFactoryGenerator extends Generator {
             .finish()
             .else_()
             ._(Stmt.load(false).returnValue())
-            .finish()).finish();
+            .finish())
+        .finish();
 
 
     builder.publicMethod(int.class, "hashCodeOf", Parameter.of(Annotation.class, "a1"))

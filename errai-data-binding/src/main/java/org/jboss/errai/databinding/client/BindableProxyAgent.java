@@ -442,27 +442,35 @@ public final class BindableProxyAgent<T> implements HasPropertyChangeHandlers {
    * @return a new the wrapped (proxied) list or the provided list if already proxied
    */
   private List ensureBoundListIsProxied(String property) {
-    return ensureBoundListIsProxied(property, (List) proxy.get(property));
+    List newList = ensureBoundListIsProxied(property, (List) proxy.get(property));
+    updateWidgetsAndFireEvent(property, proxy.get(property), newList);
+    return newList;
   }
 
   /**
    * Ensures that the given list property is wrapped in a {@link BindableListWrapper}, so changes to
-   * the list become observable. .
+   * the list become observable.
    * 
    * @param property
    *          the name of the list property
-   * 
    * @param list
    *          the list that needs to be proxied
    * 
    * @return a new the wrapped (proxied) list or the provided list if already proxied
    */
-  List ensureBoundListIsProxied(String property, List list) {
-    if (!(list instanceof BindableListWrapper) && bindings.containsKey(property)) {
-      List newList = new BindableListWrapper(list);
-      updateWidgetsAndFireEvent(property, proxy.get(property), newList);
+  List ensureBoundListIsProxied(final String property, final List list) {
+    if (!(list instanceof BindableListWrapper) && bindings.containsKey(property) && list != null) {
+      final BindableListWrapper newList = new BindableListWrapper(list);
+      newList.addChangeHandler(new UnspecificListChangeHandler() {
+        @Override
+        void onListChanged(List oldList) {
+          firePropertyChangeEvent(property, oldList, newList);
+        }
+      });
+   
       return newList;
     }
+    
     return list;
   }
 

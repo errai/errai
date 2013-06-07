@@ -197,18 +197,17 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     }
   }
 
-  public JSONValue toJson(EntityManager em, X targetEntity) {
+  public JSONValue toJson(EntityManager em, X sourceEntity) {
     final ErraiEntityManager eem = (ErraiEntityManager) em;
     JSONObject jsonValue = new JSONObject();
 
-    // TODO get all attributes, not just singular ones
     for (Attribute<? super X, ?> a : getAttributes()) {
       ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
       switch (attr.getPersistentAttributeType()) {
       case ELEMENT_COLLECTION:
       case EMBEDDED:
       case BASIC:
-        jsonValue.put(attr.getName(), makeInlineJson(targetEntity, attr, eem));
+        jsonValue.put(attr.getName(), makeInlineJson(sourceEntity, attr, eem));
       break;
 
       case MANY_TO_MANY:
@@ -217,10 +216,10 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       case ONE_TO_ONE:
         JSONValue attributeValue;
         if (attr instanceof ErraiSingularAttribute) {
-          attributeValue = makeJsonReference(targetEntity, (ErraiSingularAttribute<? super X, ?>) attr, eem);
+          attributeValue = makeJsonReference(sourceEntity, (ErraiSingularAttribute<? super X, ?>) attr, eem);
         }
         else if (attr instanceof ErraiPluralAttribute) {
-          attributeValue = makeJsonReference(targetEntity, (ErraiPluralAttribute<? super X, ?, ?>) attr, eem);
+          attributeValue = makeJsonReference(sourceEntity, (ErraiPluralAttribute<? super X, ?, ?>) attr, eem);
         }
         else {
           throw new PersistenceException("Unknown attribute type " + attr);
@@ -230,6 +229,96 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     }
 
     return jsonValue;
+  }
+
+  /**
+   * Copies the state of the attributes in sourceEntity into targetEntity.
+   * Related entities are resolved from the given entity manager before the
+   * state is copied.
+   *
+   * @param em
+   *          The entity manager that sourceEntity and targetEntity exist in.
+   * @param targetEntity
+   *          The entity whose attributes' state will be written to. Not null.
+   * @param sourceEntity
+   *          The entity whose attributes' state will be read from. Not null.
+   */
+  public void mergeState(ErraiEntityManager em, X targetEntity, X sourceEntity) {
+    for (Attribute<? super X, ?> a : getAttributes()) {
+      ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
+      switch (attr.getPersistentAttributeType()) {
+      case ELEMENT_COLLECTION:
+      case EMBEDDED:
+      case BASIC:
+        copyAttribute(attr, targetEntity, sourceEntity);
+        break;
+
+      case MANY_TO_MANY:
+      case ONE_TO_MANY:
+        copyPluralAssociation(em, ((ErraiPluralAttribute<X, ?, ?>) attr), targetEntity, sourceEntity);
+        break;
+
+      case MANY_TO_ONE:
+      case ONE_TO_ONE:
+        copySingularAssociation(em, attr, targetEntity, sourceEntity);
+        break;
+      default:
+        throw new IllegalArgumentException("Attribute has unknown type: " + attr);
+      }
+    }
+  }
+
+  private static <X, Y> void copyAttribute(ErraiAttribute<X, Y> attr, X targetEntity, X sourceEntity) {
+    attr.set(targetEntity, attr.get(sourceEntity));
+  }
+
+  private static <X, Y> void copySingularAssociation(
+          ErraiEntityManager em,
+          ErraiAttribute<X, Y> attr,
+          X targetEntity,
+          X sourceEntity) {
+    ErraiEntityType<Y> relatedEntityType = em.getMetamodel().entity(attr.getJavaType());
+    Y oldRelatedEntity = attr.get(sourceEntity);
+    Y resolvedEntity;
+    if (oldRelatedEntity == null) {
+      resolvedEntity = null;
+    }
+    else {
+      Key<Y, ?> key = em.keyFor(oldRelatedEntity);
+      resolvedEntity = em.find(key, Collections.<String,Object>emptyMap());
+      if (resolvedEntity == null) {
+        resolvedEntity = relatedEntityType.newInstance();
+      }
+    }
+    attr.set(targetEntity, resolvedEntity);
+  }
+
+  private static <X, C, E> void copyPluralAssociation(
+          ErraiEntityManager em,
+          ErraiPluralAttribute<X, C, E> attr,
+          X targetEntity,
+          X sourceEntity) {
+    C oldCollection = attr.get(sourceEntity);
+
+    C newCollection;
+    if (oldCollection == null) {
+      newCollection = null;
+    }
+    else {
+      newCollection = attr.createEmptyCollection();
+      ErraiEntityType<E> elemType = em.getMetamodel().entity(attr.getElementType().getJavaType());
+
+      // TODO support map-valued plural attributes
+      for (Object oldEntry : (Collection<?>) oldCollection) {
+        Key<Object, ?> key = em.keyFor(oldEntry);
+        Object resolvedEntry = em.find(key, Collections.<String,Object>emptyMap());
+        if (resolvedEntry == null) {
+          resolvedEntry = elemType.newInstance();
+        }
+        ((Collection) newCollection).add(resolvedEntry);
+      }
+    }
+    attr.set(targetEntity, newCollection);
   }
 
   /**
@@ -474,11 +563,20 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     throw new RuntimeException("Not implemented");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <Y> ErraiSingularAttribute<? super X, Y> getSingularAttribute(String name,
       Class<Y> type) {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+    for (Attribute<? super X, ?> attr : singularAttributes) {
+      if (attr.getName().equals(name)) {
+        if (attr.getJavaType() != type) {
+          throw new ClassCastException("Attribute \"" + name + "\" of entity " + getJavaType() +
+                  " is not of the requested type " + type);
+        }
+        return (ErraiSingularAttribute<? super X, Y>) attr;
+      }
+    }
+    return null;
   }
 
   @Override

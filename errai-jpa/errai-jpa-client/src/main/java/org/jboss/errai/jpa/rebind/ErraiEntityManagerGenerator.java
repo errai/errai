@@ -8,10 +8,37 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
@@ -54,14 +81,18 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
 import org.jboss.errai.config.rebind.GenerateAsync;
-
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiEntityManagerFactory;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiIdGenerator;
+import org.jboss.errai.jpa.client.local.ErraiMetamodel;
 import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
 import org.jboss.errai.jpa.client.local.IntIdGenerator;
 import org.jboss.errai.jpa.client.local.LongIdGenerator;
+import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
+import org.jboss.errai.jpa.client.shared.GlobalEntityListener;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -70,7 +101,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 @GenerateAsync(ErraiEntityManager.class)
 public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   private final static String GENERATED_PACKAGE = ErraiEntityManager.class.getPackage().getName();
-  private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManager";
+  private final static String GENERATED_CLASS_NAME = "GeneratedErraiEntityManagerFactory";
   private static final List<Class<? extends Annotation>> LIFECYCLE_EVENT_TYPES;
 
   static {
@@ -97,25 +128,35 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
   protected String generate(final TreeLogger logger, final GeneratorContext context) {
     EntityManagerFactory emf = createHibernateEntityManagerFactory(logger, context);
     try {
-      return generateEntityManagerClass(logger, context, emf);
+      return generateEntityManagerFactoryClass(logger, context, emf);
     }
     finally {
       emf.close();
     }
   }
 
-  private String generateEntityManagerClass(
+  private String generateEntityManagerFactoryClass(
       TreeLogger logger, GeneratorContext context, EntityManagerFactory emf) {
     EntityManager em = emf.createEntityManager();
     Metamodel mm = em.getMetamodel();
 
     final ClassStructureBuilder<?> classBuilder =
-        Implementations.extend(ErraiEntityManager.class, GENERATED_CLASS_NAME);
+        Implementations.implement(ErraiEntityManagerFactory.class, GENERATED_CLASS_NAME);
 
-    generatePopulateMetamodelMethod(classBuilder, mm);
+    classBuilder.publicMethod(ErraiEntityManager.class, "createEntityManager")
+      .append(
+          Stmt.nestedCall(Stmt.newObject(ErraiEntityManager.class,
+              Stmt.loadVariable("this").invoke("createMetamodel"),
+              Stmt.loadVariable("this").invoke("createNamedQueries"),
+              Stmt.loadStatic(WebStorageBackend.class, "FACTORY")))
+          .returnValue())
+      .finish();
 
-    // pnqm = populate named queries method
-    MethodCommentBuilder<?> pnqm = classBuilder.protectedMethod(void.class, "populateNamedQueries");
+    generateCreateMetamodelMethod(classBuilder, mm);
+
+    // cnqm = create named queries method
+    MethodCommentBuilder<?> cnqm = classBuilder.protectedMethod(Map.class, "createNamedQueries");
+    cnqm.append(Stmt.declareFinalVariable("namedQueries", Map.class, Stmt.newObject(HashMap.class)));
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     List<NamedQuery> namedQueries = new ArrayList<NamedQuery>();
@@ -135,14 +176,14 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     // now generate all the query factories
     for (NamedQuery namedQuery : namedQueries) {
       try {
-        pnqm._(Stmt.codeComment("**"));
-        pnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
-        pnqm._(Stmt.codeComment("** " + namedQuery.query()));
-        pnqm._(Stmt.codeComment("**"));
+        cnqm._(Stmt.codeComment("**"));
+        cnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
+        cnqm._(Stmt.codeComment("** " + namedQuery.query()));
+        cnqm._(Stmt.codeComment("**"));
         TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, namedQuery);
         Statement generatedFactory =
-            generator.generate(Stmt.loadVariable("this"), classBuilder.getClassDefinition().getContext());
-        pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
+            generator.generate(classBuilder.getClassDefinition().getContext());
+        cnqm._(Stmt.loadVariable("namedQueries")
             .invoke("put",
                 Stmt.loadLiteral(namedQuery.name()),
                 generatedFactory));
@@ -158,7 +199,8 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         throw wrapperException;
       }
     }
-    pnqm.finish();
+    cnqm.append(Stmt.loadVariable("namedQueries").returnValue());
+    cnqm.finish();
 
     String out = classBuilder.toJavaString();
     final File fileCacheDir = RebindUtils.getErraiCacheDir();
@@ -176,44 +218,50 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
     return out;
   }
 
-  private void generatePopulateMetamodelMethod(
+  private void generateCreateMetamodelMethod(
       final ClassStructureBuilder<?> classBuilder, Metamodel mm) {
-    // pmm = "populate metamodel method"
-    MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
+    // cmm = "create metamodel method"
+    MethodBlockBuilder<?> cmm = classBuilder.privateMethod(ErraiMetamodel.class, "createMetamodel");
+    cmm.append(Stmt.declareVariable("metamodel", Stmt.newObject(ErraiMetamodel.class)));
+
+    List<MetaClass> globalEntityListeners = new ArrayList<MetaClass>();
+    for (Class<?> globalListener : ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(GlobalEntityListener.class)) {
+      globalEntityListeners.add(MetaClassFactory.get(globalListener));
+    }
 
     for (final EntityType<?> et : mm.getEntities()) {
 
       // first, create a variable for the EntityType
-      String entityTypeVarName = generateErraiEntityType(et, pmm);
+      String entityTypeVarName = generateErraiEntityType(et, cmm, globalEntityListeners);
 
       MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
 
       // now, snapshot all the EntityType's attributes, adding them as we go
-      List<Statement> attributes = new ArrayList<Statement>();
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
             attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
-        pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
+        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
       for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
             attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
-        pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
+        cmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
 
       // XXX using StringStatement because this gives OutOfScopeException for metamodel:
       // pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType",
       // Variable.get(entityTypeVarName)));
-      pmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
+      cmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
     }
 
     // XXX using StringStatement because this gives OutOfScopeException for metamodel:
     // pmm.append(Stmt.loadClassMember("metamodel").invoke("freeze"));
-    pmm.append(new StringStatement("metamodel.freeze()"));
+    cmm.append(new StringStatement("metamodel.freeze()"));
 
-    pmm.finish();
+    cmm.append(Stmt.loadVariable("metamodel").returnValue());
+    cmm.finish();
   }
 
   public static EntityManagerFactory createHibernateEntityManagerFactory(TreeLogger logger, GeneratorContext context) {
@@ -231,12 +279,12 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         new ErraiPersistenceUnitInfo(managedTypeNames), properties);
   }
 
-  private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm) {
+  private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm, List<MetaClass> globalListeners) {
     MetaClass met = MetaClassFactory.get(et.getJavaType());
     pmm.append(Stmt.codeComment(
         "**\n" +
-            "** EntityType for " + et.getJavaType().getName() + "\n" +
-            "**"));
+        "** EntityType for " + et.getJavaType().getName() + "\n" +
+        "**"));
     String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
 
     AnonymousClassStructureBuilder entityTypeSubclass =
@@ -247,7 +295,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
         .finish();
 
-    generateLifecycleEventDeliveryMethods(met, entityTypeSubclass);
+    generateLifecycleEventDeliveryMethods(met, entityTypeSubclass, globalListeners);
 
     pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
         .named(entityTypeVarName)
@@ -259,14 +307,17 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
    * Generates the event delivery methods for the given JPA Entity type.
    *
    * @param entityType
-   *     The metaclass representing the entity type.
+   *          The metaclass representing the entity type.
    * @param classBuilder
    *     The target builder to receive the generated methods. For the generated code to be
    *     valid, this should be a builder of a subclass of {@link ErraiEntityType}.
+   * @param globalEntityListeners
+   *          A list of the global entity listeners
    */
   protected void generateLifecycleEventDeliveryMethods(
       MetaClass entityType,
-      AnonymousClassStructureBuilder classBuilder) {
+      AnonymousClassStructureBuilder classBuilder,
+      List<MetaClass> globalEntityListeners) {
 
     for (Class<? extends Annotation> eventType : LIFECYCLE_EVENT_TYPES) {
       BlockBuilder<AnonymousClassStructureBuilder> methodBuilder =
@@ -275,32 +326,37 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
               "deliver" + eventType.getSimpleName(),
               Parameter.of(entityType, "targetEntity"));
 
-      // standalone entity listeners
+      // standalone and global entity listeners
+      List<MetaClass> listenerClasses = new ArrayList<MetaClass>();
+      listenerClasses.addAll(globalEntityListeners);
+
       EntityListeners entityListeners = entityType.getAnnotation(EntityListeners.class);
       if (entityListeners != null) {
         for (Class<?> listenerClass : entityListeners.value()) {
-          MetaClass listenerMetaClass = MetaClassFactory.get(listenerClass);
-          for (MetaMethod callback : listenerMetaClass.getMethodsAnnotatedWith(eventType)) {
-            if (callback.getParameters().length != 1) {
-              throw new GenerationException("JPA lifecycle listener method " + callback.getName() + " has " +
-                  callback.getParameters().length + " parameters (expected 1)");
-            }
-            if (!callback.getParameters()[0].getType().isAssignableFrom(entityType)) {
-              throw new GenerationException("JPA lifecycle listener method " + callback.getName() + " parameter type " +
-                  callback.getParameters()[0].getType().getName() + " is incompatible with the entity type " +
-                  entityType.getName());
-            }
-            if (!callback.isPublic()) {
-              PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[]{});
-              methodBuilder.append(
-                  Stmt.loadVariable("this")
-                      .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.newObject(listenerClass),
-                          Stmt.loadVariable("targetEntity")));
-            }
-            else {
-              methodBuilder.append(Stmt.nestedCall(Stmt.newObject(listenerClass))
-                  .invoke(callback, Stmt.loadVariable("targetEntity")));
-            }
+          listenerClasses.add(MetaClassFactory.get(listenerClass));
+        }
+      }
+
+      for (MetaClass listenerMetaClass : listenerClasses) {
+        for (MetaMethod callback : listenerMetaClass.getMethodsAnnotatedWith(eventType)) {
+          if (callback.getParameters().length != 1) {
+            throw new GenerationException("JPA lifecycle listener method " + listenerMetaClass.getName() +
+                    "." + callback.getName() + " has " + callback.getParameters().length + " parameters (expected 1)");
+          }
+          if (!callback.getParameters()[0].getType().isAssignableFrom(entityType)) {
+            throw new GenerationException("JPA lifecycle listener method " + listenerMetaClass.getName() +
+                    "." + callback.getName() + " parameter type " + callback.getParameters()[0].getType().getName() +
+                    " is incompatible with the entity type " + entityType.getName());
+          }
+          if (!callback.isPublic()) {
+            PrivateAccessUtil.addPrivateAccessStubs("jsni", classBuilder, callback, new Modifier[]{});
+            methodBuilder.append(
+                    Stmt.loadVariable("this")
+                    .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.newObject(listenerMetaClass), Stmt.loadVariable("targetEntity")));
+          }
+          else {
+            methodBuilder.append(Stmt.nestedCall(Stmt.newObject(listenerMetaClass))
+                    .invoke(callback, Stmt.loadVariable("targetEntity")));
           }
         }
       }
@@ -453,7 +509,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
         return Stmt.loadLiteral(isGeneratedValue(getJavaMember(attr))).returnValue();
       }
 
-      // provide generated value iterator
+      // provide value generator
       if (sourceObject instanceof SingularAttribute && method.getName().equals("getValueGenerator")) {
         return generateGetValueGenerator(sourceObject, containingClassBuilder);
       }
@@ -551,20 +607,20 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       if (isGeneratedValue(getJavaMember(attr))) {
 
         MetaClass generatorDeclaredType;
-        Class<? extends Iterator<?>> generatorType;
+        Class<? extends ErraiIdGenerator<?>> generatorType;
 
         if (attr.getJavaType() == Long.class || attr.getJavaType() == long.class) {
-          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<ErraiIdGenerator<Long>>() {
           });
           generatorType = LongIdGenerator.class;
         }
         else if (attr.getJavaType() == Integer.class || attr.getJavaType() == int.class) {
-          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Integer>>() {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<ErraiIdGenerator<Integer>>() {
           });
           generatorType = IntIdGenerator.class;
         }
         else if (attr.getJavaType() == BigInteger.class) {
-          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<BigInteger>>() {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<ErraiIdGenerator<BigInteger>>() {
           });
           generatorType = BigIntegerIdGenerator.class;
         }
@@ -575,8 +631,7 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
 
         containingClassBuilder
             .privateField("valueGenerator", generatorDeclaredType)
-            .initializesWith(Stmt.newObject(generatorType)
-                .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
+            .initializesWith(Stmt.newObject(generatorType).withParameters(Variable.get("this")))
             .finish();
 
         // StringStatement is a workaround: codegen says valueGenerator is out of scope when we do
@@ -622,8 +677,21 @@ public class ErraiEntityManagerGenerator extends AbstractAsyncGenerator {
       }
       else if (getJavaMember(attr) instanceof Method) {
 
+        String memberName = getJavaMember(attr).getName();
+
         // hack "getFoo" to "setFoo" by replacing first letter with s
-        String setterMethodName = "s" + getJavaMember(attr).getName().substring(1);
+        String setterMethodName;
+        if (memberName.startsWith("get")) {
+          setterMethodName = "set" + memberName.substring(3);
+        }
+        else if (memberName.startsWith("is")) {
+          setterMethodName = "set" + memberName.substring(2);
+        }
+        else {
+          throw new RuntimeException(
+                  "I don't know how to convert method " + getJavaMember(attr) + " on entity type " +
+                          attr.getDeclaringType().getJavaType().getName() + " into a setter");
+        }
 
         return Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam))
             .invoke(setterMethodName,

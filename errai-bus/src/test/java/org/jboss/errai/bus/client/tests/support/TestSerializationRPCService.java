@@ -198,4 +198,6 @@ public interface TestSerializationRPCService {
   public ImmutableArrayContainer testImmutableEntityWithArray(ImmutableArrayContainer e);
 
   public EntityWithInheritedTypeVariable<String> testEntityWithInheritedTypeVariable(EntityWithInheritedTypeVariable<String> entity);
+
+  public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(GenericEntityWithConstructorMapping<String> entity);
 }

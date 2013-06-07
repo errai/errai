@@ -453,7 +453,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindableProxyMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
-
+    model.setName("test");
+    
     String marshalledModel = Marshalling.toJSON(model);
     assertEquals(model, Marshalling.fromJSON(marshalledModel, TestModel.class));
   }
@@ -461,7 +462,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindableProxyListMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
-
+    model.setName("test");
+    
     List<TestModel> modelList = new ArrayList<TestModel>();
     modelList.add(model);
     String marshalledModelList = Marshalling.toJSON(modelList);
@@ -471,7 +473,8 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testBindableProxyMapMarshalling() {
     TestModel model = DataBinder.forType(TestModel.class).bind(new TextBox(), "value").getModel();
-
+    model.setName("test");
+    
     Map<TestModel, TestModel> modelMap = new HashMap<TestModel, TestModel>();
     modelMap.put(model, model);
     String marshalledModelMap = Marshalling.toJSON(modelMap);
@@ -537,6 +540,47 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     assertEquals("Wrong property value in event", "model change", handler.getEvents().get(1).getNewValue());
     assertEquals("Wrong previous value in event", null, handler.getEvents().get(1).getOldValue());
     assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
+  }
+  
+  @Test
+  public void testPropertyChangeHandlingOfBoundList() {
+    MockHandler handler = new MockHandler();
+
+    TestModelWithListWidget widget = new TestModelWithListWidget();
+    DataBinder<TestModelWithList> binder = DataBinder.forType(TestModelWithList.class).bind(widget, "list");
+    binder.addPropertyChangeHandler(handler);
+
+    List<String> list = new ArrayList<String>();
+    widget.setValue(list, true);
+    assertEquals("Model not properly updated", list, binder.getModel().getList());
+    assertEquals("Should have received exactly one property change event", 1, handler.getEvents().size());
+    assertEquals("Wrong property name in event", "list", handler.getEvents().get(0).getPropertyName());
+    assertEquals("Wrong property value in event", list, handler.getEvents().get(0).getNewValue());
+    assertNull("Previous value should have been null", handler.getEvents().get(0).getOldValue());
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(0).getSource());
+
+    list = new ArrayList<String>(Arrays.asList("1"));
+    binder.getModel().setList(list);
+    assertEquals("Widget not properly updated", list, widget.getValue());
+    assertEquals("Should have received exactly two property change event", 2, handler.getEvents().size());
+    assertEquals("Wrong property name in event", "list", handler.getEvents().get(1).getPropertyName());
+    assertEquals("Wrong property value in event", Arrays.asList("1"), handler.getEvents().get(1).getNewValue());
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(1).getSource());
+    
+    list = binder.getModel().getList();
+    list.add("2");
+    assertEquals("Should have received exactly three property change event", 3, handler.getEvents().size());
+    assertEquals("Wrong property name in event", "list", handler.getEvents().get(2).getPropertyName());
+    assertEquals("Wrong old property value in event", Arrays.asList("1"), handler.getEvents().get(2).getOldValue());
+    assertEquals("Wrong property value in event", Arrays.asList("1", "2"), handler.getEvents().get(2).getNewValue());
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(2).getSource());
+    
+    list.remove(1);
+    assertEquals("Should have received exactly four property change event", 4, handler.getEvents().size());
+    assertEquals("Wrong property name in event", "list", handler.getEvents().get(3).getPropertyName());
+    assertEquals("Wrong old property value in event", Arrays.asList("1", "2"), handler.getEvents().get(3).getOldValue());
+    assertEquals("Wrong property value in event", Arrays.asList("1"), handler.getEvents().get(3).getNewValue());
+    assertEquals("Wrong event source", binder.getModel(), handler.getEvents().get(3).getSource());
   }
 
   @Test

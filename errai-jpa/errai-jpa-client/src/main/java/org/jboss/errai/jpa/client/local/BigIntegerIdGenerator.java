@@ -1,11 +1,9 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.math.BigInteger;
-import java.util.Iterator;
 
-public class BigIntegerIdGenerator implements Iterator<BigInteger> {
+public class BigIntegerIdGenerator implements ErraiIdGenerator<BigInteger> {
 
-  private final ErraiEntityManager entityManager;
   private final ErraiSingularAttribute<?, BigInteger> attr;
 
   /**
@@ -21,8 +19,7 @@ public class BigIntegerIdGenerator implements Iterator<BigInteger> {
    */
   private final double probeJumpSize = 1000;
 
-  public BigIntegerIdGenerator(ErraiEntityManager entityManager, ErraiSingularAttribute<?, BigInteger> attr) {
-    this.entityManager = entityManager;
+  public BigIntegerIdGenerator(ErraiSingularAttribute<?, BigInteger> attr) {
     this.attr = attr;
   }
 
@@ -32,13 +29,13 @@ public class BigIntegerIdGenerator implements Iterator<BigInteger> {
    * @return true
    */
   @Override
-  public boolean hasNext() {
+  public boolean hasNext(ErraiEntityManager entityManager) {
     return true;
   }
 
 
   @Override
-  public BigInteger next() {
+  public BigInteger next(ErraiEntityManager entityManager) {
     BigInteger nextAvailableId = nextCandidateId;
     while (entityManager.find(attr.getDeclaringType().getJavaType(), nextAvailableId,
             LongIdGenerator.NO_SIDE_EFFECTS_OPTION) != null) {
@@ -46,16 +43,6 @@ public class BigIntegerIdGenerator implements Iterator<BigInteger> {
     }
     nextCandidateId = nextAvailableId.add(BigInteger.ONE);
     return nextAvailableId;
-  }
-
-  /**
-   * Not a supported operation.
-   *
-   * @throws {@link UnsupportedOperationException} on every invocation.
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 
 }

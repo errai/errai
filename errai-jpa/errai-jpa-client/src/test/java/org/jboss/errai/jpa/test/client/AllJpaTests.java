@@ -31,10 +31,12 @@ import org.junit.runners.Suite;
   HibernateJpaTest.class,
   QueryTest.class,
   HibernateQueryTest.class,
+  GlobalEntityListenerTest.class,
   IdGeneratorTest.class,
   ErraiCascadeTest.class,
   HibernateCascadeTest.class,
-  JsonUtilTest.class})
+  JsonUtilTest.class,
+  NamespacedEntityManagerTest.class})
 public class AllJpaTests {
 
 }

@@ -42,7 +42,6 @@ import org.jboss.errai.jpa.test.entity.Zentity;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -266,9 +265,6 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNotSame(artist, fetchedArtist);
   }
 
-  /**
-   * Tests the persistence of two unrelated entities of different types.
-   */
   public void testRemoveOneEntity() {
 
     // make Album
@@ -290,6 +286,7 @@ public class ErraiJpaTest extends GWTTestCase {
 
     // make sure it's gone
     assertNotNull(album.getId());
+    assertFalse(em.contains(album));
     assertNull(em.find(Album.class, album.getId()));
   }
 
@@ -588,6 +585,104 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
   }
 
+  public void testMergeIntoManagedEntityLifecycle() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+
+    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+
+    // create a detached version of the same album, and merge the change
+    Album mergeMe = new Album();
+    mergeMe.setId(album.getId());  // same ID
+    mergeMe.setArtist(null);
+    mergeMe.setName("Cowabunga");  // new name
+    mergeMe.setReleaseDate(new Date(-8366400000L));
+    em.merge(mergeMe);
+    em.flush();
+
+    // all the events should be delivered to album (the managed instance) -- NOT mergeMe, which remains detached
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PreUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PreUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostUpdate.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+  }
+
+  public void testMergeDetachedEntityLifecycle() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store & detach it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+    em.clear();
+
+    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(album), PostPersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(album, PostPersist.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+
+    // create a detached version of the same album, and merge the change
+    album.setName("Cowabunga");
+    em.merge(album);
+    em.flush();
+
+    // events should be delivered to the merge target (the newly loaded managed instance) -- NOT album, which remains detached
+    Album mergeTarget = em.find(Album.class, album.getId());
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PostLoad.class));
+    expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PostLoad.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PreUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PreUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PostUpdate.class));
+    expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PostUpdate.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+  }
+
+  public void testMergeNewEntityLifecycle() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // merge it right away (state=NEW -> state=MANAGED)
+    EntityManager em = getEntityManager();
+    Album mergeTarget = em.merge(album);
+    em.flush();
+
+    List<CallbackLogEntry> expectedLifecycle = new ArrayList<CallbackLogEntry>();
+
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PrePersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(StandaloneLifecycleListener.instanceFor(mergeTarget), PostPersist.class));
+    expectedLifecycle.add(new CallbackLogEntry(mergeTarget, PostPersist.class));
+    assertEquals(expectedLifecycle, Album.CALLBACK_LOG);
+  }
+
   public void testStoreAndFetchOneWithEverythingUsingFieldAccess() throws Exception {
     Timestamp timestamp = new Timestamp(1234L);
     timestamp.setNanos(4321);
@@ -694,11 +789,11 @@ public class ErraiJpaTest extends GWTTestCase {
     JSONObject jsonEntity = JSONParser.parseStrict(originalZentityJson).isObject();
     assertTrue("Sanity check failed: didn't find primitiveInt stored in backend entry: " + originalZentityJson,
             jsonEntity.containsKey("primitiveInt"));
-    
+
     // this actually removes the key from the object
     jsonEntity.put("primitiveInt", null);
     assertFalse(jsonEntity.containsKey("primitiveInt"));
-    
+
     LocalStorage.put(key.toJson(), jsonEntity.toString());
 
     // now try and retrieve this "old version" of Zentity

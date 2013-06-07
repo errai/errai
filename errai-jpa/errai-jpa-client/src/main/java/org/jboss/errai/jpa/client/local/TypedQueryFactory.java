@@ -14,16 +14,13 @@ import com.google.common.collect.ImmutableBiMap;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public abstract class TypedQueryFactory {
-  protected final ErraiEntityManager entityManager;
   protected final Class<?> actualResultType;
   protected final ImmutableBiMap<String, Parameter<?>> parameters;
 
 
   public TypedQueryFactory(
-          ErraiEntityManager entityManager,
           Class<?> actualResultType,
           ErraiParameter<?>[] parameters) {
-    this.entityManager = Assert.notNull(entityManager);
     this.actualResultType = Assert.notNull(actualResultType);
 
     ImmutableBiMap.Builder<String, Parameter<?>> pb = ImmutableBiMap.builder();
@@ -39,6 +36,8 @@ public abstract class TypedQueryFactory {
    *
    * @param resultType
    *          The expected result type
+   * @param the
+   *          EntityManager the query will be executed in. Must not be null.
    * @param <T>
    *          The result type of the queries produced by this factory
    * @return A new instance of TypedQuery, whose result type is assignable to
@@ -46,12 +45,12 @@ public abstract class TypedQueryFactory {
    * @throws IllegalArgumentException
    *           if the query's result type is not assignable to the given type.
    */
-  public <T> TypedQuery<T> createIfCompatible(Class<T> resultType) {
+  public <T> TypedQuery<T> createIfCompatible(Class<T> resultType, ErraiEntityManager entityManager) {
     // FIXME this test for exact type should be replaced by a more correct assignability test once we figure out how :)
     if (resultType != actualResultType) {
       throw new IllegalArgumentException("Expected return type " + resultType + " is not assignable from actual return type " + actualResultType);
     }
-    return createQuery();
+    return createQuery(entityManager);
   }
 
   /**
@@ -59,8 +58,10 @@ public abstract class TypedQueryFactory {
    * ErraiTypedQuery that implements the query logic for the JPA query handled
    * by this factory.
    *
+   * @param the
+   *          EntityManager the query will be executed in. Must not be null.
    * @return a new instance of ErraiTypedQuery.
    */
-  protected abstract <T> TypedQuery<T> createQuery();
+  protected abstract <T> TypedQuery<T> createQuery(ErraiEntityManager entityManager);
 
 }

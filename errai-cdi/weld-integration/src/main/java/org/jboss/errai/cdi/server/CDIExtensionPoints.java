@@ -19,23 +19,20 @@ package org.jboss.errai.cdi.server;
 import static java.util.ResourceBundle.getBundle;
 import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
 
-import org.jboss.errai.bus.client.api.messaging.Message;
-import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
+import org.jboss.errai.bus.client.api.messaging.Message;
 import org.jboss.errai.bus.client.api.messaging.MessageBus;
-import org.jboss.errai.common.client.framework.ProxyFactory;
+import org.jboss.errai.bus.client.api.messaging.MessageCallback;
 import org.jboss.errai.bus.client.api.messaging.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
-import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.bus.server.AsyncDispatcher;
-import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
-import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
+import org.jboss.errai.bus.server.io.RPCEndpointFactory;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
@@ -46,7 +43,10 @@ import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventRoutingTable;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.api.Assert;
+import org.jboss.errai.common.client.framework.ProxyFactory;
+import org.jboss.errai.common.server.api.ErraiBootstrapFailure;
 import org.jboss.errai.config.rebind.EnvUtil;
+import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -482,29 +482,30 @@ public class CDIExtensionPoints implements Extension {
   private void createRPCScaffolding(final Class remoteIface, final MessageBus bus, final BeanManager beanManager) {
     final Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
+
+    final ServiceInstanceProvider genericSvc = new ServiceInstanceProvider() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public Object get(final Message message) {
+        if (message.hasPart(CDIProtocol.Qualifiers)) {
+          final List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
+          final Annotation[] qualAnnos = new Annotation[quals.size()];
+          for (int i = 0; i < quals.size(); i++) {
+            qualAnnos[i] = beanQualifiers.get(quals.get(i));
+          }
+          return lookupRPCBean(beanManager, remoteIface, qualAnnos);
+        }
+        else {
+          return lookupRPCBean(beanManager, remoteIface, null);
+        }
+      }
+    };
     // beware of classloading issues. better reflect on the actual instance
     for (final Method method : remoteIface.getMethods()) {
       if (ProxyUtil.isMethodInInterface(remoteIface, method)) {
 
-        epts.put(ProxyUtil.createCallSignature(remoteIface, method), new ConversationalEndpointCallback(
-            new ServiceInstanceProvider() {
-              @SuppressWarnings("unchecked")
-              @Override
-              public Object get(final Message message) {
-                if (message.hasPart(CDIProtocol.Qualifiers)) {
-                  final List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
-                  final Annotation[] qualAnnos = new Annotation[quals.size()];
-                  for (int i = 0; i < quals.size(); i++) {
-                    qualAnnos[i] = beanQualifiers.get(quals.get(i));
-                  }
-                  return lookupRPCBean(beanManager, remoteIface, qualAnnos);
-                }
-                else {
-                  return lookupRPCBean(beanManager, remoteIface, null);
-                }
-              }
-
-            }, method, bus));
+        epts.put(ProxyUtil.createCallSignature(remoteIface, method),
+            RPCEndpointFactory.createEndpointFor(genericSvc, method, bus));
       }
     }
 

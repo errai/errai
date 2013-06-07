@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.client.container;
 
 import org.jboss.errai.common.client.util.LogUtil;
-import sun.rmi.runtime.Log;
 
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
@@ -203,6 +202,21 @@ public abstract class AbstractCreationalContext implements CreationalContext {
     }
   }
 
+  /**
+   * Return a wired instance within the current creational context, or in the absence of an existing context,
+   * invoke the specified provider to create the instance. This is should only called by generated code. A
+   * wired instance is an instance which exists within this creational context specifically. For instance, a
+   * dependent scoped bean.
+   *
+   * @param ref
+   *      the bean reference
+   * @param provider
+   *      the provider to create the instance if it does not already exist.
+   * @param <T>
+   *      the bean type
+   * @return
+   *      the instance
+   */
   public <T> T getWiredOrNew(final BeanRef ref, final Provider<T> provider) {
     final T t = (T) wired.get(ref);
     if (t == null) {

@@ -13,7 +13,6 @@
   <name>Errai::Security</name>
 
   <properties>
-    <junit.version>4.8.1</junit.version>
     <weld.version>1.1.6.Final</weld.version>
     <picketlink.version>3.0.0.Beta1</picketlink.version>
   </properties>
@@ -137,7 +136,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 

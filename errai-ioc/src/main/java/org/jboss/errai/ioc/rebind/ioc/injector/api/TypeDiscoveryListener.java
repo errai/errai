@@ -20,6 +20,11 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 
 /**
+ * A <tt>TypeDiscoveryListener</tt> is used for observing the discovery of new bean types in the container during
+ * generation of the bootstrapping code. Some rare situations, particularly the cyclical relationship of producer
+ * methods with their member classes can lead to recursive situations in the algorithm where the outer-type has
+ * not yet been discovered, while the provided type has.
+ *
  * @author Mike Brock
  */
 public interface TypeDiscoveryListener {

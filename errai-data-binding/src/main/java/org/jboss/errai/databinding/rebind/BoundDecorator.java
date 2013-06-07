@@ -98,26 +98,27 @@ public class BoundDecorator extends IOCDecoratorExtension<Bound> {
 
       Statement widget = ctx.getValueStatement();
       // Ensure the @Bound field or method provides a widget or DOM element
-      if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Widget.class)) {
+      MetaClass widgetType = ctx.getElementTypeOrMethodReturnType();
+      if (widgetType.isAssignableTo(Widget.class)) {
         // Ensure @Bound widget field is initialized
-        if (!ctx.isAnnotationPresent(Inject.class) && ctx.getField() != null) {
+        if (!ctx.isAnnotationPresent(Inject.class) && ctx.getField() != null && widgetType.isDefaultInstantiable()) {
           Statement widgetInit = Stmt.invokeStatic(
               ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
               PrivateAccessUtil.getPrivateFieldInjectorName(ctx.getField()),
               Refs.get(ctx.getInjector().getInstanceVarName()),
-              ObjectBuilder.newInstanceOf(ctx.getElementTypeOrMethodReturnType()));
+              ObjectBuilder.newInstanceOf(widgetType));
 
           statements.add(If.isNull(widget).append(widgetInit).finish());
         }
       }
-      else if (ctx.getElementTypeOrMethodReturnType().isAssignableTo(Element.class)) {
+      else if (widgetType.isAssignableTo(Element.class)) {
         widget = Stmt.invokeStatic(ElementWrapperWidget.class, "getWidget", widget);
       }
       else {
         throw new GenerationException("@Bound field or method " + ctx.getMemberName()
             + " in class " + ctx.getInjector().getInjectedType()
             + " must provide a widget or DOM element type but provides: "
-            + ctx.getElementTypeOrMethodReturnType().getFullyQualifiedName());
+            + widgetType.getFullyQualifiedName());
       }
 
       // Generate the binding

@@ -23,8 +23,4 @@
     <inherits name="org.jboss.errai.databinding.DataBinding"/>
     
     <inherits name="org.hibernate.validator.HibernateValidator"/>
-    
-    <replace-with class="org.jboss.errai.validation.client.TestModelValidatorFactory">
-        <when-type-is class="javax.validation.ValidatorFactory"/>
-    </replace-with>
 </module>

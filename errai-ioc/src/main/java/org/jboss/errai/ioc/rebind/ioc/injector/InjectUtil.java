@@ -170,11 +170,11 @@ public class InjectUtil {
    * Render the post construct InitializationCallback
    *
    * @param ctx
-   *     -
+   *     the injection context
    * @param injector
-   *     -
+   *     the injector instance
    * @param postConstructTasks
-   *     -
+   *     list of post-construct tasks associated with this type
    */
   static boolean doPostConstruct(final InjectionContext ctx,
                                  final Injector injector,
@@ -210,11 +210,11 @@ public class InjectUtil {
    * Render the pre destroy DestructionCallback
    *
    * @param ctx
-   *     -
+   *     the injection context
    * @param injector
-   *     -
+   *     the injector instance
    * @param preDestroyTasks
-   *     -
+   *     list of pre-destroy tasks associated with this type
    */
   static boolean doPreDestroy(final InjectionContext ctx,
                               final Injector injector,
@@ -295,22 +295,7 @@ public class InjectUtil {
     do {
       for (final MetaField field : visit.getDeclaredFields()) {
         if (isInjectionPoint(ctx, field)) {
-//          if (!field.isPublic()) {
-//            final MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
-//                field.getType());
-//
-//            if (meth == null) {
-//              final InjectionTask task = new InjectionTask(injector, field);
-//              accumulator.add(task);
-//            }
-//            else {
-//              final InjectionTask task = new InjectionTask(injector, meth);
-//              accumulator.add(task);
-//            }
-//          }
-//          else {
             accumulator.add(new InjectionTask(injector, field));
-//          }
         }
 
         ElementType[] elTypes;
@@ -718,7 +703,6 @@ public class InjectUtil {
         return getVarNameFromType(clazz);
     }
   }
-
 
   public static List<Annotation> extractQualifiers(final InjectableInstance<? extends Annotation> injectableInstance) {
     switch (injectableInstance.getTaskType()) {

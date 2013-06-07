@@ -20,6 +20,9 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -59,9 +62,6 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -164,7 +164,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                       .demarshall(type, extractJSONObjectProperty(mapping.getKey(), EJObject.class)));
                 }
                 else {
-                  throw new MarshallingException("no marshaller for type: " + toMap);
+                  throw new MarshallingException("Encountered non-marshallable type " + toMap +
+                          " while building a marshaller for " + mappingDefinition.getMappingClass());
                 }
               }
               else {
@@ -177,7 +178,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                   constructorParameters.add(s);
                 }
                 else {
-                  throw new MarshallingException("no marshaller for type: " + type);
+                  throw new MarshallingException("Encountered non-marshallable type " + type +
+                          " while building a marshaller for " + mappingDefinition.getMappingClass());
                 }
               }
             }
@@ -335,7 +337,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
 
     if (varName != null) {
-      blockBuilder.append(Stmt.declareFinalVariable(varName, mapping.getType(), statement));
+      blockBuilder.append(Stmt.declareFinalVariable(varName, mapping.getTargetType(), statement));
     }
     else {
       blockBuilder.append(statement);

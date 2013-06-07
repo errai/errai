@@ -27,6 +27,7 @@ import org.junit.Ignore;
  * Simple bindable model for testing purposes.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Johannes Barop <jb@barop.de>
  */
 @Bindable
 @Portable
@@ -38,6 +39,9 @@ public class TestModel {
 
   @NotNull
   private String stringVal;
+
+  @TestConstraint(groups = TestGroup.class)
+  private String testConstraint;
 
   public int getNumVal() {
     return numVal;
@@ -53,6 +57,14 @@ public class TestModel {
 
   public void setStringVal(String stringVal) {
     this.stringVal = stringVal;
+  }
+
+  public String getTestConstraint() {
+    return testConstraint;
+  }
+
+  public void setTestConstraint(String lowerCase) {
+    this.testConstraint = testConstraint;
   }
 
 }

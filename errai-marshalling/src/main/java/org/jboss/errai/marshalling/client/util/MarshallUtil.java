@@ -166,4 +166,11 @@ public class MarshallUtil {
 
     return fqcn;
   }
+  
+  public static Object maybeUnwrap(Object obj) {
+    if (obj instanceof WrappedPortable) {
+      obj = ((WrappedPortable) obj).unwrap();
+    }
+    return obj;
+  }
 }

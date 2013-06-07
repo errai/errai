@@ -103,9 +103,8 @@ public class ItemForm extends Composite {
     name.setFocus(true);
   }
 
-  // TODO (after ERRAI-366): make this method package-private
   @EventHandler("saveButton")
-  public void onSaveButtonClicked(ClickEvent event) {
+  void onSaveButtonClicked(ClickEvent event) {
     Department resolvedDepartment = Department.resolve(em, department.getText());
     Item item = itemBinder.getModel();
     item.setDepartment(resolvedDepartment);

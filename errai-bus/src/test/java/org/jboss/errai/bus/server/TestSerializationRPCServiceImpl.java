@@ -432,4 +432,9 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public EntityWithGoodParts testEntityWithGoodParts(EntityWithGoodParts e) {
     return e;
   }
+
+  @Override
+  public GenericEntityWithConstructorMapping<String> testGenericEntityWithConstructorMapping(GenericEntityWithConstructorMapping<String> entity) {
+    return entity;
+  }
 }

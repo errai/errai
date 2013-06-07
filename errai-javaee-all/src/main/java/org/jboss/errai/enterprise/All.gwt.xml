@@ -12,5 +12,6 @@
    <inherits name="org.jboss.errai.enterprise.CDI" />
    <inherits name="org.jboss.errai.enterprise.Jaxrs" />
    <inherits name="org.jboss.errai.jpa.JPA" />
+   <inherits name="org.jboss.errai.jpa.sync.DataSync" />
 
 </module>

@@ -1,9 +1,14 @@
 package org.jboss.errai.jpa.test.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 /**
@@ -39,6 +44,33 @@ public class CascadeFrom {
   @OneToOne
   private CascadeTo none;
 
+  @OneToMany(cascade=CascadeType.ALL)
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> allCollection = new ArrayList<CascadeTo>();
+
+  @OneToMany(cascade=CascadeType.DETACH)
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> detachCollection = new ArrayList<CascadeTo>();
+
+  @OneToMany(cascade=CascadeType.MERGE)
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> mergeCollection = new ArrayList<CascadeTo>();
+
+  @OneToMany(cascade=CascadeType.PERSIST)
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> persistCollection = new ArrayList<CascadeTo>();
+
+  @OneToMany(cascade=CascadeType.REFRESH)
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> refreshCollection = new ArrayList<CascadeTo>();
+
+  @OneToMany(cascade=CascadeType.REMOVE)
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> removeCollection = new ArrayList<CascadeTo>();
+
+  @OneToMany
+  @JoinColumn(nullable=true)
+  private List<CascadeTo> noneCollection = new ArrayList<CascadeTo>();
 
   public long getId() {
     return id;
@@ -102,6 +134,62 @@ public class CascadeFrom {
 
   public void setNone(CascadeTo none) {
     this.none = none;
+  }
+
+  public List<CascadeTo> getAllCollection() {
+    return allCollection;
+  }
+
+  public void setAllCollection(List<CascadeTo> allCollection) {
+    this.allCollection = allCollection;
+  }
+
+  public List<CascadeTo> getDetachCollection() {
+    return detachCollection;
+  }
+
+  public void setDetachCollection(List<CascadeTo> detachCollection) {
+    this.detachCollection = detachCollection;
+  }
+
+  public List<CascadeTo> getMergeCollection() {
+    return mergeCollection;
+  }
+
+  public void setMergeCollection(List<CascadeTo> mergeCollection) {
+    this.mergeCollection = mergeCollection;
+  }
+
+  public List<CascadeTo> getPersistCollection() {
+    return persistCollection;
+  }
+
+  public void setPersistCollection(List<CascadeTo> persistCollection) {
+    this.persistCollection = persistCollection;
+  }
+
+  public List<CascadeTo> getRefreshCollection() {
+    return refreshCollection;
+  }
+
+  public void setRefreshCollection(List<CascadeTo> refreshCollection) {
+    this.refreshCollection = refreshCollection;
+  }
+
+  public List<CascadeTo> getRemoveCollection() {
+    return removeCollection;
+  }
+
+  public void setRemoveCollection(List<CascadeTo> removeCollection) {
+    this.removeCollection = removeCollection;
+  }
+
+  public List<CascadeTo> getNoneCollection() {
+    return noneCollection;
+  }
+
+  public void setNoneCollection(List<CascadeTo> noneCollection) {
+    this.noneCollection = noneCollection;
   }
 
   @Override

@@ -1,10 +1,8 @@
 package org.jboss.errai.jpa.client.local;
 
-import java.util.Iterator;
 
-public class IntIdGenerator implements Iterator<Integer> {
+public class IntIdGenerator implements ErraiIdGenerator<Integer> {
 
-  private final ErraiEntityManager entityManager;
   private final ErraiSingularAttribute<?, Integer> attr;
 
   /**
@@ -20,8 +18,7 @@ public class IntIdGenerator implements Iterator<Integer> {
    */
   private final double probeJumpSize = 1000;
 
-  public IntIdGenerator(ErraiEntityManager entityManager, ErraiSingularAttribute<?, Integer> attr) {
-    this.entityManager = entityManager;
+  public IntIdGenerator(ErraiSingularAttribute<?, Integer> attr) {
     this.attr = attr;
   }
 
@@ -31,13 +28,13 @@ public class IntIdGenerator implements Iterator<Integer> {
    * @return true
    */
   @Override
-  public boolean hasNext() {
+  public boolean hasNext(ErraiEntityManager entityManager) {
     return true;
   }
 
 
   @Override
-  public Integer next() {
+  public Integer next(ErraiEntityManager entityManager) {
     while (entityManager.find(attr.getDeclaringType().getJavaType(), nextCandidateId,
             LongIdGenerator.NO_SIDE_EFFECTS_OPTION) != null) {
       nextCandidateId += (int) (Math.random() * probeJumpSize);
@@ -49,16 +46,6 @@ public class IntIdGenerator implements Iterator<Integer> {
     }
 
     return nextCandidateId++;
-  }
-
-  /**
-   * Not a supported operation.
-   *
-   * @throws {@link UnsupportedOperationException} on every invocation.
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 
 }

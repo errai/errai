@@ -19,9 +19,9 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Cookies;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.BlockStatement;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
@@ -42,8 +42,9 @@ import org.jboss.errai.config.rebind.ProxyUtil;
 import org.jboss.errai.enterprise.client.jaxrs.ResponseDemarshallingCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Cookies;
 
 /**
  * Generates a JAX-RS remote proxy method.
@@ -109,8 +110,12 @@ public class JaxrsProxyMethodGenerator {
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
 
     for (String pathParamName : JaxrsResourceMethodParameters.getPathParameterNames(path)) {
-      Statement pathParam = marshal(params.getPathParameter(pathParamName));
-      if (params.needsEncoding(pathParamName)) {
+      String pathParamId = pathParamName;
+      if (pathParamName.contains(":")) {
+        pathParamId = pathParamName.split(":")[0]; 
+      }
+      Statement pathParam = marshal(params.getPathParameter(pathParamId));
+      if (params.needsEncoding(pathParamId)) {
         pathParam = encodePath(pathParam);
       }
       pathValue = pathValue.invoke("replace", "{" + pathParamName + "}", pathParam);
