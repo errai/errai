@@ -1,4 +1,7 @@
 {
+  "default": "ENGLISH",
+  "uc": "UPPERCASE",
+  "nl": "DUTCH",
   "GroceryItemWidget.3_Days_Ago" : "3 DAYS AGO",
   "GroceryItemWidget.Added" : "ADDED",
   "GroceryItemWidget.Department" : "DEPARTMENT",

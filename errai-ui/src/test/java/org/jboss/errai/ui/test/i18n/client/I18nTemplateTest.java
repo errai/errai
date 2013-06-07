@@ -2,11 +2,17 @@ package org.jboss.errai.ui.test.i18n.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.jboss.errai.ui.client.widget.LocaleListBox;
+import org.jboss.errai.ui.client.widget.LocaleSelector;
+import org.jboss.errai.ui.shared.api.Locale;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.UListElement;
 
 public class I18nTemplateTest extends AbstractErraiCDITest {
+
+  private I18nTemplateTestApp app;
 
   /**
    * @see com.google.gwt.junit.client.GWTTestCase#getModuleName()
@@ -16,12 +22,18 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
     return getClass().getName().replaceAll("client.*$", "Test");
   }
 
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    app = IOC.getBeanManager().lookupBean(I18nTemplateTestApp.class).getInstance();
+
+  }
+
   /**
    * Tests that the bundle is created and is accessible.
    */
   @Test
   public void testBundleAccess() {
-    I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(org.jboss.errai.ui.test.i18n.client.I18nTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
     assertEquals("Welcome to the errai-ui i18n demo.", app.getComponent().getWelcome_p().getInnerText());
     assertEquals("Label 1:", app.getComponent().getLabel1().getText());
@@ -38,7 +50,6 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
 
   @Test
   public void testChildrenOfDummyElementAreIgnored() {
-    I18nTemplateTestApp app = IOC.getBeanManager().lookupBean(org.jboss.errai.ui.test.i18n.client.I18nTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
 
     UListElement variableLengthList = app.getComponent().getVariableLengthList();
@@ -48,5 +59,22 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
     //       then the following code will fail with NPEs. In that case, this whole test method can be deleted.
     assertEquals("Example Item 1", variableLengthList.getFirstChildElement().getInnerText());
     assertEquals("Second Example Item", variableLengthList.getFirstChildElement().getNextSiblingElement().getInnerText());
+  }
+
+  @Test
+  public void testShouldCreateLocaleListBoxContainingAllLanguageOptions() {
+    // given
+    LocaleSelector selector = IOC.getBeanManager().lookupBean(LocaleSelector.class).getInstance();
+    LocaleListBox localeListBox = app.getComponent().getListBox();
+    localeListBox.init();
+
+    // when - then
+    assertNull(localeListBox.getValue());
+    assertEquals(3, selector.getSupportedLocales().size());
+
+    localeListBox.setValue(new Locale("da", "Danish"), true);
+
+    assertEquals("da", TranslationService.currentLocale());
+    assertNotNull(localeListBox.getValue());
   }
 }

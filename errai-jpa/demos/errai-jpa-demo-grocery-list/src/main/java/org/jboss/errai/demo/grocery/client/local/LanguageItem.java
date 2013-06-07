@@ -5,45 +5,48 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.demo.grocery.client.shared.Store;
 import org.jboss.errai.ui.client.widget.HasModel;
+import org.jboss.errai.ui.client.widget.LocaleSelector;
+import org.jboss.errai.ui.nav.client.local.Navigation;
+import org.jboss.errai.ui.shared.api.Locale;
 import org.jboss.errai.ui.shared.api.annotations.AutoBound;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 /**
- * @author edewit@redhat.com
- */
-@Dependent
+* @author edewit@redhat.com
+*/
 @Templated("ListItem.html")
-public class StoreListItem extends Composite implements HasModel<Store> {
+public class LanguageItem extends Composite implements HasModel<Locale> {
+  @Inject
+  Navigation navigation;
 
   @AutoBound
   @Inject
-  private DataBinder<Store> storeBinder;
+  private DataBinder<Locale> localeDataBinder;
 
   @Inject
-  GroceryListWidget groceryListWidget;
+  private LocaleSelector selector;
 
   @Inject
   @DataField
-  Anchor link;
+  private Anchor link;
 
   @Override
-  public Store getModel() {
-    return storeBinder.getModel();
+  public Locale getModel() {
+    return localeDataBinder.getModel();
   }
 
   @Override
-  public void setModel(final Store model) {
-    link.setText(model.getName());
+  public void setModel(final Locale model) {
+    link.setText(model.getLabel());
     link.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        groceryListWidget.filterOn(model);
+        selector.select(model.getLocale());
+        navigation.goTo(navigation.getCurrentPage().name());
       }
     });
   }
