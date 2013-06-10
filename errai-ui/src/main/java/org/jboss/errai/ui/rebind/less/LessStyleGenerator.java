@@ -4,6 +4,7 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dom.client.StyleInjector;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
@@ -13,7 +14,6 @@ import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.config.rebind.AbstractAsyncGenerator;
-import org.jboss.errai.config.rebind.EnvUtil;
 import org.jboss.errai.config.rebind.GenerateAsync;
 import org.jboss.errai.config.util.ClassScanner;
 import org.jboss.errai.ui.client.local.spi.LessStyleMapping;
@@ -30,7 +30,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
@@ -66,20 +65,22 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
   protected String generate(TreeLogger logger, GeneratorContext context) {
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(LessStyleMapping.class, GENERATED_CLASS_NAME);
     ConstructorBlockBuilder<?> constructor = classBuilder.publicConstructor();
-    for (Map.Entry<String, String> entry : getStyleMapping().entrySet()) {
+    final Map<String, String> styleMapping = getStyleMapping();
+    for (Map.Entry<String, String> entry : styleMapping.entrySet()) {
       constructor.append(Stmt.nestedCall(Refs.get("styleNameMapping")).invoke("put", entry.getKey(), entry.getValue()));
     }
 
-    final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class);
+    if (!styleMapping.isEmpty()) {
+      final Collection<MetaClass> templated = ClassScanner.getTypesAnnotatedWith(Templated.class);
 
-    for (MetaClass metaClass : templated) {
-      String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
-      final TemplateChain chain = TemplateChain.getInstance();
-      chain.visitTemplate(getClass().getClassLoader().getResource(templateFileName));
+      for (MetaClass metaClass : templated) {
+        String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
 
-      final Document document = chain.getLastResult(RESULT);
-      if (!EnvUtil.isJUnitTest()) {
-        writeDocumentToFile(document, templateFileName);
+        final TemplateChain chain = TemplateChain.getInstance();
+        chain.visitTemplate(getClass().getClassLoader().getResource(templateFileName));
+
+        final Document document = chain.getLastResult(RESULT);
+        writeDocumentToFile(document, getTargetFilename(templateFileName), isTemplateFragment(templateFileName));
       }
     }
 
@@ -89,21 +90,33 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     return classBuilder.toJavaString();
   }
 
-  private void writeDocumentToFile(Document document, String templateFileName) {
+  private URL getTargetFilename(String fileName) {
+    final String property = System.getProperty("errai.template.output.directory", "target" + File.separator + "generated-resources");
+    final String basePath = property.endsWith(File.separator) ? property : property + File.separator;
+    File dest = new File(basePath + fileName);
+    try {
+      new File(FilenameUtils.getPath(dest.getPath())).mkdirs();
+      dest.createNewFile();
+      return dest.toURI().toURL();
+    } catch (IOException e) {
+      throw new GenerationException("could not output generated template", e);
+    }
+  }
+
+  private void writeDocumentToFile(Document document, URL fileName, boolean isFragement) {
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     Transformer transformer;
     try {
       transformer = transformerFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.METHOD, "html");
       final Node root;
-      if (isTemplateFragment(templateFileName)) {
+      if (isFragement) {
         root = document.getElementsByTagName("body").item(0).getFirstChild();
       } else {
         root = document;
       }
       DOMSource source = new DOMSource(root);
-      final URI uri = getClass().getClassLoader().getResource(templateFileName).toURI();
-      StreamResult result = new StreamResult(new File(uri));
+      StreamResult result = new StreamResult(new File(fileName.toURI()));
       transformer.transform(source, result);
     } catch (Exception e) {
       throw new GenerationException("could not write document to file", e);
@@ -113,8 +126,13 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
   /*
    * There could be a better way to see if this template was a html fragment
    */
-  private boolean isTemplateFragment(String templateFileName) throws IOException {
-    final String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(templateFileName));
+  private boolean isTemplateFragment(String templateFileName) {
+    final String template;
+    try {
+      template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(templateFileName));
+    } catch (IOException e) {
+      throw new GenerationException("could not read template file", e);
+    }
     return !template.contains("body");
   }
 
