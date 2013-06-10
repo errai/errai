@@ -7,7 +7,8 @@ cordova platform add android
 
 #cordova plugin add ~/workspace/PhoneGap-Geofencing/
 #remove samples from plugin directories
-#rm -rf `find . -name Sample`
+rm -rf `find . -name Sample`
+rm -rf `find . -name local.properties`
 
 #remove everything except config.xml from www directory
 rm -rf www/css/ www/spec* www/js/ www/index.html www/img/
