@@ -43,6 +43,7 @@
     <javassist.version>3.15.0-GA</javassist.version>
     <javax.inject.version>1</javax.inject.version>
     <javax.persitence.api.version>1.0</javax.persitence.api.version>
+    <jboss.common.core.version>2.2.14.GA</jboss.common.core.version>
     <jboss.logging.version>3.1.0.GA</jboss.logging.version>
     <jboss.servlet.api.spec30.version>1.0.0.Final</jboss.servlet.api.spec30.version>
     <jetty.version>6.1.25</jetty.version>
@@ -238,6 +239,12 @@
         <version>${commons.logging.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-common-core</artifactId>
+        <version>${jboss.common.core.version}</version>
+      </dependency>
+      
       <dependency>
         <groupId>org.jboss.logging</groupId>
         <artifactId>jboss-logging</artifactId>

@@ -91,7 +91,7 @@
   </properties>
 
   <modules>
-  	<module>errai-version-master</module>
+    <module>errai-version-master</module>
     <module>errai-common</module>
     <module>errai-javax-enterprise</module>
     <module>errai-ioc</module>

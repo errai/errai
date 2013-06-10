@@ -418,53 +418,36 @@
                 <dependency>
                     <groupId>log4j</groupId>
                     <artifactId>log4j</artifactId>
-                    <version>1.2.16</version>
                 </dependency>
 
                 <!-- Errai Core -->
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-bus</artifactId>
-                    <version>${project.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-ioc</artifactId>
-                    <version>${project.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>javax.inject</groupId>
-                            <artifactId>javax.inject</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>javax.annotation</groupId>
-                            <artifactId>jsr250-api</artifactId>
-                        </exclusion>
-                    </exclusions>
                 </dependency>
 
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-client</artifactId>
-                    <version>${project.version}</version>
                     <scope>compile</scope>
                 </dependency>
 
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-tools</artifactId>
-                    <version>${project.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.mvel</groupId>
                     <artifactId>mvel2</artifactId>
-                    <version>${mvel.version}</version>
                 </dependency>
 
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-jetty</artifactId>
-                    <version>${project.version}</version>
                 </dependency>
 
                 <!-- CDI Development Utils -->
@@ -472,19 +455,16 @@
                 <dependency>
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>jetty</artifactId>
-                    <version>${jetty.version}</version>
                     <scope>compile</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>jetty-plus</artifactId>
-                    <version>${jetty.version}</version>
                     <scope>compile</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>jetty-naming</artifactId>
-                    <version>${jetty.version}</version>
                     <scope>compile</scope>
                 </dependency>
 
@@ -492,13 +472,11 @@
                 <dependency>
                     <groupId>org.jboss.weld.se</groupId>
                     <artifactId>weld-se-core</artifactId>
-                    <version>${weld.version}</version>
                     <scope>compile</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>
-                    <artifactId>weld-servlet</artifactId>
-                    <version>${weld.version}</version>
+                    <artifactId>weld-servlet-core</artifactId>
                     <scope>compile</scope>
                 </dependency>
                 <dependency>
@@ -512,28 +490,24 @@
                 <dependency>
                     <groupId>com.google.gwt</groupId>
                     <artifactId>gwt-user</artifactId>
-                    <version>${gwt.version}</version>
                     <scope>compile</scope>
                 </dependency>
 
                 <dependency>
                     <groupId>com.google.gwt</groupId>
                     <artifactId>gwt-dev</artifactId>
-                    <version>${gwt.version}</version>
                     <scope>compile</scope>
                 </dependency>
 
                 <dependency>
                     <groupId>javax.validation</groupId>
                     <artifactId>validation-api</artifactId>
-                    <version>1.0.0.GA</version>
                     <scope>compile</scope>
                 </dependency>
 
                 <dependency>
                     <groupId>javax.validation</groupId>
                     <artifactId>validation-api</artifactId>
-                    <version>1.0.0.GA</version>
                     <classifier>sources</classifier>
                     <scope>compile</scope>
                 </dependency>
@@ -542,19 +516,16 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
-                    <version>${slf4j.version}</version>
                 </dependency>
 
                 <dependency>
                     <groupId>org.jboss</groupId>
                     <artifactId>jboss-common-core</artifactId>
-                    <version>2.2.14.GA</version>
                 </dependency>
 
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-javax-enterprise</artifactId>
-                    <version>${project.version}</version>
                     <scope>provided</scope>
                 </dependency>
 
