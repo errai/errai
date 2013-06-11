@@ -15,21 +15,6 @@
  */
 package org.jboss.errai.common.metadata;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import org.jboss.errai.common.rebind.CacheStore;
-import org.jboss.errai.common.rebind.CacheUtil;
-import org.jboss.errai.reflections.Configuration;
-import org.jboss.errai.reflections.Reflections;
-import org.jboss.errai.reflections.ReflectionsException;
-import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
-import org.jboss.errai.reflections.scanners.MethodAnnotationsScanner;
-import org.jboss.errai.reflections.util.ConfigurationBuilder;
-import org.jboss.errai.reflections.vfs.Vfs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -56,6 +41,22 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
+
+import org.jboss.errai.common.rebind.CacheStore;
+import org.jboss.errai.common.rebind.CacheUtil;
+import org.jboss.errai.reflections.Configuration;
+import org.jboss.errai.reflections.Reflections;
+import org.jboss.errai.reflections.ReflectionsException;
+import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.MethodAnnotationsScanner;
+import org.jboss.errai.reflections.util.ConfigurationBuilder;
+import org.jboss.errai.reflections.vfs.Vfs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
 /**
  * Scans component meta data. The scanner creates a {@link DeploymentContext} that identifies nested subdeployments
@@ -87,6 +88,7 @@ public class MetaDataScanner extends Reflections {
 
   private static final ErraiPropertyScanner propScanner = new ErraiPropertyScanner(
       new Predicate<String>() {
+        @Override
         public boolean apply(final String file) {
           return file.endsWith(".properties");
         }
@@ -235,6 +237,7 @@ public class MetaDataScanner extends Reflections {
   private static void registerDefaultHandlers() {
     final List<Vfs.UrlType> urlTypes = Vfs.getDefaultUrlTypes();
     urlTypes.add(new WarUrlType());
+    urlTypes.add(new LeafUrlType(".jnilib"));
     // thread safe?
     Vfs.setDefaultURLTypes(urlTypes);
   }
@@ -361,7 +364,7 @@ public class MetaDataScanner extends Reflections {
         String urlString = url.toExternalForm();
         urlString = urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME));
         // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
-        // a HTML form encoded String, which is why we escape the plus symbols here. 
+        // a HTML form encoded String, which is why we escape the plus symbols here.
         // Otherwise, they would be decoded into space characters.
         // The pound character still must not appear anywhere in the path!
         urls.add(new URL(URLDecoder.decode(urlString.replaceAll("\\+", "%2b"), "UTF-8")));
