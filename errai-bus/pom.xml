@@ -20,8 +20,7 @@
   <name>Errai::Bus</name>
   <artifactId>errai-bus</artifactId>
   <description>Errai Bus</description>
-  <packaging>pom</packaging>
-  <url>http://www.jboss.org/errai/erraibus</url>
+  <url>http://www.jboss.org/errai</url>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
