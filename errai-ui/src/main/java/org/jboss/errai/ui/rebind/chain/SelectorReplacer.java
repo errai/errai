@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.RESULT;
 
 /**
  * @author edewit@redhat.com
@@ -27,12 +28,11 @@ public class SelectorReplacer implements Command {
       for (String classSelector : classSelectors) {
         final String obfuscatedSelector = selectorMap.get(classSelector);
         if (obfuscatedSelector != null) {
-          selector = selector.replaceAll(classSelector, obfuscatedSelector);
+          element.setAttribute("class", selector.replaceAll(classSelector, obfuscatedSelector));
+          context.put(RESULT, element.getOwnerDocument());
         }
       }
-      element.setAttribute("class", selector);
     }
-    context.put("result", element.getOwnerDocument());
   }
 
   @Override

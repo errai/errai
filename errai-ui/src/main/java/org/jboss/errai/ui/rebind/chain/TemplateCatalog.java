@@ -23,6 +23,7 @@ import java.util.Map;
 public class TemplateCatalog {
   public static final String ELEMENT = "CURRENT_ELEMENT";
   public static final String FILENAME = "CURRENT_FILE";
+  public static final String RESULT = "result";
 
   private Map<URL, Context> contextMap = new HashMap<URL, Context>();
   private Chain chain = new Chain();

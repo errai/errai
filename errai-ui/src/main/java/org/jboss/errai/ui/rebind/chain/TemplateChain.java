@@ -17,16 +17,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.RESULT;
 import static org.jboss.errai.ui.rebind.chain.TemplateCatalog.createTemplateCatalog;
 
 /**
  * @author edewit@redhat.com
  */
 public class TemplateChain {
-  public static final String RESULT = "result";
 
   private static final TemplateChain INSTANCE = new TemplateChain();
-  private static final TemplateCatalog catalog = createTemplateCatalog(new TranslateCommand(), new SelectorReplacer());
+  private static final TemplateCatalog catalog = createTemplateCatalog(
+          new TranslateCommand(), new SelectorReplacer(), new DummyRemover());
 
   private URL template;
 

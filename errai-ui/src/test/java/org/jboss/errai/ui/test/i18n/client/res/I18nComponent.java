@@ -41,9 +41,6 @@ public class I18nComponent extends Composite {
   @Inject
   private LocaleListBox listBox;
 
-  @DataField
-  private UListElement variableLengthList = Document.get().createULElement();
-
   /**
    * Constructor.
    */
@@ -111,10 +108,6 @@ public class I18nComponent extends Composite {
    */
   public TextBox getPassword() {
     return password;
-  }
-
-  public UListElement getVariableLengthList() {
-    return variableLengthList;
   }
 
   public LocaleListBox getListBox() {

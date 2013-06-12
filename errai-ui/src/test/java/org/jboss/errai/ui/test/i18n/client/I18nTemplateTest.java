@@ -49,19 +49,6 @@ public class I18nTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testChildrenOfDummyElementAreIgnored() {
-    assertNotNull(app.getComponent());
-
-    UListElement variableLengthList = app.getComponent().getVariableLengthList();
-    assertNotNull(variableLengthList);
-
-    // NOTE: if ErraiUI is enhanced in the future to completely snip out the children of data-role=dummy elements,
-    //       then the following code will fail with NPEs. In that case, this whole test method can be deleted.
-    assertEquals("Example Item 1", variableLengthList.getFirstChildElement().getInnerText());
-    assertEquals("Second Example Item", variableLengthList.getFirstChildElement().getNextSiblingElement().getInnerText());
-  }
-
-  @Test
   public void testShouldCreateLocaleListBoxContainingAllLanguageOptions() {
     // given
     LocaleSelector selector = IOC.getBeanManager().lookupBean(LocaleSelector.class).getInstance();
