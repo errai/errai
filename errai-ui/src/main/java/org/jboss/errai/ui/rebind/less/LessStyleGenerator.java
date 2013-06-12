@@ -34,15 +34,6 @@ import java.util.*;
 @GenerateAsync(LessStyleMapping.class)
 public class LessStyleGenerator extends AbstractAsyncGenerator {
   private static final String GENERATED_CLASS_NAME = "LessStyleMappingGenerated";
-  private static Set<StylesheetOptimizer> optimizedStylesheets = new HashSet<StylesheetOptimizer>();
-
-  static {
-    try {
-      init();
-    } catch (Exception e) {
-      throw new GenerationException("could not generate css from less file", e);
-    }
-  }
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
@@ -76,20 +67,9 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     return classBuilder.toJavaString();
   }
 
-  private static void init() throws IOException, UnableToCompleteException {
-    final Collection<String> lessStyles = new LessStylesheetScanner().getLessResources();
-    for (String sheet : lessStyles) {
-      final URL resource = LessStyleGenerator.class.getResource("/" + sheet);
-      final File cssFile = new LessConverter().convert(resource);
-
-      final StylesheetOptimizer stylesheetOptimizer = new StylesheetOptimizer(cssFile);
-      optimizedStylesheets.add(stylesheetOptimizer);
-    }
-  }
-
   public static Map<String, String> getStyleMapping() {
     Map<String, String> styleMapping = new HashMap<String, String>();
-    for (StylesheetOptimizer stylesheet : optimizedStylesheets) {
+    for (StylesheetOptimizer stylesheet : LessStylesheetContext.getInstance().getOptimizedStylesheets()) {
       styleMapping.putAll(stylesheet.getConvertedSelectors());
     }
     return styleMapping;
@@ -97,7 +77,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
 
   private static String createStyleSheet() {
     StringBuilder sb = new StringBuilder();
-    for (StylesheetOptimizer stylesheet : optimizedStylesheets) {
+    for (StylesheetOptimizer stylesheet : LessStylesheetContext.getInstance().getOptimizedStylesheets()) {
       sb.append(stylesheet.output());
     }
     return sb.toString();
