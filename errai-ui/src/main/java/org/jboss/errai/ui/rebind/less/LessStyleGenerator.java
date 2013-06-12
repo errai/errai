@@ -4,10 +4,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dom.client.StyleInjector;
-import com.google.gwt.resources.ext.ResourceGeneratorUtil;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -22,25 +18,16 @@ import org.jboss.errai.ui.client.local.spi.LessStyleMapping;
 import org.jboss.errai.ui.rebind.TemplatedCodeDecorator;
 import org.jboss.errai.ui.rebind.chain.TemplateChain;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import static org.jboss.errai.ui.rebind.chain.SelectorReplacer.RESULT;
-
 /**
  * This generator will create the LessStyleMapping that contains the mapping between the original selector name and
  * the obfuscated one. It will also make sure that the generated css file gets injected with a call
- * to {@link StyleInjector}. And last but not least this generator will change the templates that use these styles.
+ * to {@link StyleInjector}.
  *
  * @author edewit@redhat.com
  */
@@ -79,10 +66,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
         String templateFileName = TemplatedCodeDecorator.getTemplateFileName(metaClass);
 
         final TemplateChain chain = TemplateChain.getInstance();
-        chain.visitTemplate(getClass().getClassLoader().getResource(templateFileName));
-
-        final Document document = chain.getLastResult(RESULT);
-        writeDocumentToFile(document, templateFileName);
+        chain.visitTemplate(templateFileName);
       }
     }
 
@@ -90,44 +74,6 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     constructor.finish();
 
     return classBuilder.toJavaString();
-  }
-
-  private void writeDocumentToFile(Document document, String templateFileName) {
-    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-    Transformer transformer;
-    try {
-      transformer = transformerFactory.newTransformer();
-      transformer.setOutputProperty(OutputKeys.METHOD, "html");
-      final Node root;
-      if (isTemplateFragment(templateFileName)) {
-        root = document.getElementsByTagName("body").item(0).getFirstChild();
-      } else {
-        root = document;
-      }
-      DOMSource source = new DOMSource(root);
-      final String baseName = StringUtils.rightPad(FilenameUtils.getBaseName(templateFileName), 4, 'a');
-      final File tempFile = File.createTempFile(baseName, ".html");
-      StreamResult result = new StreamResult(tempFile);
-      transformer.transform(source, result);
-
-      //make sure GWT finds the altered template file instead of the original one
-      ResourceGeneratorUtil.addNamedFile(templateFileName, tempFile);
-    } catch (Exception e) {
-      throw new GenerationException("could not write document to file", e);
-    }
-  }
-
-  /*
-   * There could be a better way to see if this template was a html fragment
-   */
-  private boolean isTemplateFragment(String templateFileName) {
-    final String template;
-    try {
-      template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(templateFileName));
-    } catch (IOException e) {
-      throw new GenerationException("could not read template file", e);
-    }
-    return !template.contains("body");
   }
 
   private static void init() throws IOException, UnableToCompleteException {

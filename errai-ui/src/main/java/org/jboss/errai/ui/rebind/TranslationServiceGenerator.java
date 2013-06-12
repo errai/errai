@@ -53,7 +53,6 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -289,9 +288,8 @@ public class TranslationServiceGenerator extends AbstractAsyncGenerator {
       String templateFileName = TemplatedCodeDecorator.getTemplateFileName(templatedAnnotatedClass);
       String templateBundleName = templateFileName.replaceAll(".html", ".json").replace('/', '_');
 
-      final URL resource = TranslationServiceGenerator.class.getClassLoader().getResource(templateFileName);
       final TemplateChain chain = TemplateChain.getInstance();
-      chain.visitTemplate(resource);
+      chain.visitTemplate(templateFileName);
 
       Map<String, String> i18nValues = chain.getLastResult(VALUES);
 

@@ -14,8 +14,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class SelectorReplacer implements Command {
 
-  public static final String MAPPING = "mapping";
-  public static final String RESULT = "result";
+  static final String MAPPING = "mapping";
 
   @Override
   @SuppressWarnings("unchecked")
@@ -33,8 +32,7 @@ public class SelectorReplacer implements Command {
       }
       element.setAttribute("class", selector);
     }
-
-    context.put(RESULT, element.getOwnerDocument());
+    context.put("result", element.getOwnerDocument());
   }
 
   @Override
