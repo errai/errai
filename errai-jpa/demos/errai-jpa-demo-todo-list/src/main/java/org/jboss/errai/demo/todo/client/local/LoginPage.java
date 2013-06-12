@@ -20,6 +20,8 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -70,5 +72,15 @@ public class LoginPage extends Composite {
           return false;
         }
       }).logIn(username.getText(), password.getText());
+  }
+
+  @EventHandler({"username", "password"})
+  private void onKeyDown(KeyDownEvent event) {
+    // auto-submit login form when user presses enter
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER &&
+            !username.getText().trim().equals("") &&
+            !password.getText().trim().equals("")) {
+      login(null);
+    }
   }
 }
