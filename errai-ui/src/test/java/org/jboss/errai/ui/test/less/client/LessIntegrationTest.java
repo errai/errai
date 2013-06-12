@@ -22,5 +22,6 @@ public class LessIntegrationTest extends AbstractErraiCDITest {
     assertNotNull(template.getBox());
     final String expected = "Eoxl56A";
     assertEquals(expected, lessStyle.get("box"));
+    assertEquals(expected, template.getBox().getClassName());
   }
 }

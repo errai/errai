@@ -4,8 +4,10 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dom.client.StyleInjector;
+import com.google.gwt.resources.ext.ResourceGeneratorUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -80,7 +82,7 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
         chain.visitTemplate(getClass().getClassLoader().getResource(templateFileName));
 
         final Document document = chain.getLastResult(RESULT);
-        writeDocumentToFile(document, getTargetFilename(templateFileName), isTemplateFragment(templateFileName));
+        writeDocumentToFile(document, templateFileName);
       }
     }
 
@@ -90,34 +92,26 @@ public class LessStyleGenerator extends AbstractAsyncGenerator {
     return classBuilder.toJavaString();
   }
 
-  private URL getTargetFilename(String fileName) {
-    final String property = System.getProperty("errai.template.output.directory", "target" + File.separator + "generated-resources");
-    final String basePath = property.endsWith(File.separator) ? property : property + File.separator;
-    File dest = new File(basePath + fileName);
-    try {
-      new File(FilenameUtils.getPath(dest.getPath())).mkdirs();
-      dest.createNewFile();
-      return dest.toURI().toURL();
-    } catch (IOException e) {
-      throw new GenerationException("could not output generated template", e);
-    }
-  }
-
-  private void writeDocumentToFile(Document document, URL fileName, boolean isFragement) {
+  private void writeDocumentToFile(Document document, String templateFileName) {
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     Transformer transformer;
     try {
       transformer = transformerFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.METHOD, "html");
       final Node root;
-      if (isFragement) {
+      if (isTemplateFragment(templateFileName)) {
         root = document.getElementsByTagName("body").item(0).getFirstChild();
       } else {
         root = document;
       }
       DOMSource source = new DOMSource(root);
-      StreamResult result = new StreamResult(new File(fileName.toURI()));
+      final String baseName = StringUtils.rightPad(FilenameUtils.getBaseName(templateFileName), 4, 'a');
+      final File tempFile = File.createTempFile(baseName, ".html");
+      StreamResult result = new StreamResult(tempFile);
       transformer.transform(source, result);
+
+      //make sure GWT finds the altered template file instead of the original one
+      ResourceGeneratorUtil.addNamedFile(templateFileName, tempFile);
     } catch (Exception e) {
       throw new GenerationException("could not write document to file", e);
     }
